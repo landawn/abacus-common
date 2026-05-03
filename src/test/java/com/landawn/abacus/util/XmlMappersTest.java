@@ -370,7 +370,7 @@ public class XmlMappersTest extends TestBase {
 
     @Test
     public void test_fromXml_bytes_typeReference() {
-        List<String> list = CommonUtil.toList("apple", "banana", "cherry");
+        List<String> list = N.toList("apple", "banana", "cherry");
         String xml = XmlMappers.toXml(list);
         byte[] bytes = xml.getBytes();
         List<String> result = XmlMappers.fromXml(bytes, new TypeReference<List<String>>() {
@@ -380,7 +380,7 @@ public class XmlMappersTest extends TestBase {
 
     @Test
     public void test_fromXml_bytes_offset_len_typeReference() {
-        List<String> list = CommonUtil.toList("dog", "cat", "bird");
+        List<String> list = N.toList("dog", "cat", "bird");
         String xml = XmlMappers.toXml(list);
         byte[] bytes = xml.getBytes();
         List<String> result = XmlMappers.fromXml(bytes, 0, bytes.length, new TypeReference<List<String>>() {
@@ -390,7 +390,7 @@ public class XmlMappersTest extends TestBase {
 
     @Test
     public void test_fromXml_string_typeReference_config() {
-        List<Integer> list = CommonUtil.toList(10, 20, 30);
+        List<Integer> list = N.toList(10, 20, 30);
         String xml = XmlMappers.toXml(list);
         DeserializationConfig config = XmlMappers.createDeserializationConfig();
         List<Integer> result = XmlMappers.fromXml(xml, new TypeReference<List<Integer>>() {
@@ -420,7 +420,7 @@ public class XmlMappersTest extends TestBase {
 
     @Test
     public void test_fromXml_string_typeReference_features() {
-        List<String> list = CommonUtil.toList("red", "green", "blue");
+        List<String> list = N.toList("red", "green", "blue");
         String xml = XmlMappers.toXml(list);
         List<String> result = XmlMappers.fromXml(xml, new TypeReference<List<String>>() {
         }, DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
@@ -638,7 +638,7 @@ public class XmlMappersTest extends TestBase {
 
     @Test
     public void test_fromXml_file_typeReference() throws IOException {
-        List<String> list = CommonUtil.toList("alpha", "beta", "gamma");
+        List<String> list = N.toList("alpha", "beta", "gamma");
         File file = new File(tempDir, "test_typeRef.xml");
         XmlMappers.toXml(list, file);
         List<String> result = XmlMappers.fromXml(file, new TypeReference<List<String>>() {
@@ -648,7 +648,7 @@ public class XmlMappersTest extends TestBase {
 
     @Test
     public void test_fromXml_file_typeReference_config() throws IOException {
-        List<String> list = CommonUtil.toList("x", "y", "z");
+        List<String> list = N.toList("x", "y", "z");
         File file = new File(tempDir, "test_typeRef_config.xml");
         XmlMappers.toXml(list, file);
         DeserializationConfig config = XmlMappers.createDeserializationConfig();
@@ -659,7 +659,7 @@ public class XmlMappersTest extends TestBase {
 
     @Test
     public void test_fromXml_inputStream_typeReference() throws IOException {
-        List<String> list = CommonUtil.toList("sun", "moon", "stars");
+        List<String> list = N.toList("sun", "moon", "stars");
         String xml = XmlMappers.toXml(list);
         ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
         List<String> result = XmlMappers.fromXml(bais, new TypeReference<List<String>>() {
@@ -669,7 +669,7 @@ public class XmlMappersTest extends TestBase {
 
     @Test
     public void test_fromXml_inputStream_typeReference_config() throws IOException {
-        List<String> list = CommonUtil.toList("earth", "mars", "venus");
+        List<String> list = N.toList("earth", "mars", "venus");
         String xml = XmlMappers.toXml(list);
         ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
         DeserializationConfig config = XmlMappers.createDeserializationConfig();
@@ -680,7 +680,7 @@ public class XmlMappersTest extends TestBase {
 
     @Test
     public void test_fromXml_reader_typeReference() throws IOException {
-        List<String> list = CommonUtil.toList("north", "south", "east", "west");
+        List<String> list = N.toList("north", "south", "east", "west");
         String xml = XmlMappers.toXml(list);
         StringReader reader = new StringReader(xml);
         List<String> result = XmlMappers.fromXml(reader, new TypeReference<List<String>>() {
@@ -690,7 +690,7 @@ public class XmlMappersTest extends TestBase {
 
     @Test
     public void test_fromXml_reader_typeReference_config() throws IOException {
-        List<String> list = CommonUtil.toList("spring", "summer", "fall", "winter");
+        List<String> list = N.toList("spring", "summer", "fall", "winter");
         String xml = XmlMappers.toXml(list);
         StringReader reader = new StringReader(xml);
         DeserializationConfig config = XmlMappers.createDeserializationConfig();
@@ -701,7 +701,7 @@ public class XmlMappersTest extends TestBase {
 
     @Test
     public void test_fromXml_url_typeReference() throws IOException {
-        List<String> list = CommonUtil.toList("url", "test", "data");
+        List<String> list = N.toList("url", "test", "data");
         File file = new File(tempDir, "test_url_typeref.xml");
         XmlMappers.toXml(list, file);
         URL url = file.toURI().toURL();
@@ -712,7 +712,7 @@ public class XmlMappersTest extends TestBase {
 
     @Test
     public void test_fromXml_url_typeReference_config() throws IOException {
-        List<String> list = CommonUtil.toList("url", "config", "test");
+        List<String> list = N.toList("url", "config", "test");
         File file = new File(tempDir, "test_url_typeref_config.xml");
         XmlMappers.toXml(list, file);
         URL url = file.toURI().toURL();
@@ -724,7 +724,7 @@ public class XmlMappersTest extends TestBase {
 
     @Test
     public void test_fromXml_dataInput_typeReference() throws IOException {
-        List<String> list = CommonUtil.toList("monday", "tuesday", "wednesday");
+        List<String> list = N.toList("monday", "tuesday", "wednesday");
         String xml = XmlMappers.toXml(list);
         ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
         DataInput dis = new DataInputStream(bais);
@@ -734,7 +734,7 @@ public class XmlMappersTest extends TestBase {
 
     @Test
     public void test_fromXml_dataInput_typeReference_config() throws IOException {
-        List<String> list = CommonUtil.toList("january", "february", "march");
+        List<String> list = N.toList("january", "february", "march");
         String xml = XmlMappers.toXml(list);
         ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
         DataInput dis = new DataInputStream(bais);
@@ -1021,7 +1021,7 @@ public class XmlMappersTest extends TestBase {
     public void test_One_fromXml_bytes_typeReference() {
         XmlMapper mapper = new XmlMapper();
         XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        List<String> list = CommonUtil.toList("a", "b", "c");
+        List<String> list = N.toList("a", "b", "c");
         String xml = wrapper.toXml(list);
         byte[] bytes = xml.getBytes();
         List<String> result = wrapper.fromXml(bytes, new TypeReference<List<String>>() {
@@ -1033,7 +1033,7 @@ public class XmlMappersTest extends TestBase {
     public void test_One_fromXml_bytes_offset_len_typeReference() {
         XmlMapper mapper = new XmlMapper();
         XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        List<String> list = CommonUtil.toList("d", "e", "f");
+        List<String> list = N.toList("d", "e", "f");
         String xml = wrapper.toXml(list);
         byte[] bytes = xml.getBytes();
         List<String> result = wrapper.fromXml(bytes, 0, bytes.length, new TypeReference<List<String>>() {
@@ -1045,7 +1045,7 @@ public class XmlMappersTest extends TestBase {
     public void test_One_fromXml_string_typeReference() {
         XmlMapper mapper = new XmlMapper();
         XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        List<String> list = CommonUtil.toList("g", "h", "i");
+        List<String> list = N.toList("g", "h", "i");
         String xml = wrapper.toXml(list);
         List<String> result = wrapper.fromXml(xml, new TypeReference<List<String>>() {
         });
@@ -1298,7 +1298,7 @@ public class XmlMappersTest extends TestBase {
     public void test_One_fromXml_file_typeReference() throws IOException {
         XmlMapper mapper = new XmlMapper();
         XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        List<String> list = CommonUtil.toList("j", "k", "l");
+        List<String> list = N.toList("j", "k", "l");
         File file = new File(tempDir, "test_One_typeRef.xml");
         wrapper.toXml(list, file);
         List<String> result = wrapper.fromXml(file, new TypeReference<List<String>>() {
@@ -1310,7 +1310,7 @@ public class XmlMappersTest extends TestBase {
     public void test_One_fromXml_inputStream_typeReference() throws IOException {
         XmlMapper mapper = new XmlMapper();
         XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        List<String> list = CommonUtil.toList("m", "n", "o");
+        List<String> list = N.toList("m", "n", "o");
         String xml = wrapper.toXml(list);
         ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
         List<String> result = wrapper.fromXml(bais, new TypeReference<List<String>>() {
@@ -1322,7 +1322,7 @@ public class XmlMappersTest extends TestBase {
     public void test_One_fromXml_reader_typeReference() throws IOException {
         XmlMapper mapper = new XmlMapper();
         XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        List<String> list = CommonUtil.toList("p", "q", "r");
+        List<String> list = N.toList("p", "q", "r");
         String xml = wrapper.toXml(list);
         StringReader reader = new StringReader(xml);
         List<String> result = wrapper.fromXml(reader, new TypeReference<List<String>>() {
@@ -1334,7 +1334,7 @@ public class XmlMappersTest extends TestBase {
     public void test_One_fromXml_url_typeReference() throws IOException {
         XmlMapper mapper = new XmlMapper();
         XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        List<String> list = CommonUtil.toList("one", "url", "test");
+        List<String> list = N.toList("one", "url", "test");
         File file = new File(tempDir, "test_One_url_typeref.xml");
         wrapper.toXml(list, file);
         URL url = file.toURI().toURL();
@@ -1347,7 +1347,7 @@ public class XmlMappersTest extends TestBase {
     public void test_One_fromXml_dataInput_typeReference() throws IOException {
         XmlMapper mapper = new XmlMapper();
         XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        List<String> list = CommonUtil.toList("s", "t", "u");
+        List<String> list = N.toList("s", "t", "u");
         String xml = wrapper.toXml(list);
         ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
         DataInput dis = new DataInputStream(bais);

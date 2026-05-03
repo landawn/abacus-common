@@ -18,25 +18,37 @@ import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for Class objects.
- * This class provides serialization and deserialization for Java Class instances.
- * It handles the conversion between Class objects and their canonical string names.
- * Note: Uses raw types for compatibility with generic Class handling.
+ * Type handler for parameterized {@link Class} references (e.g., {@code Clazz<Integer>}).
+ * This class provides serialization and deserialization for Java {@link Class} instances.
+ *
+ * <p>Class objects are serialized using their canonical class name (as returned by
+ * {@link com.landawn.abacus.util.ClassUtil#getCanonicalClassName(Class)}) and deserialized
+ * using {@link com.landawn.abacus.util.ClassUtil#forName(String)}, which handles primitive
+ * type names and array notations.</p>
+ *
+ * <p>This class uses raw {@link Class} types due to the inherent erasure of generic type
+ * parameters at runtime.</p>
+ *
+ * @see AbstractType
  */
 @SuppressWarnings({ "rawtypes", "java:S2160" })
 public class ClazzType extends AbstractType<Class> {
 
-    /** The type name constant for Clazz type identification. */
+    /**
+     * The base type name for this type handler, equal to {@code "Clazz"}.
+     * The full type name (e.g., {@code "Clazz<java.lang.Integer>"}) is constructed in the constructor.
+     */
     public static final String CLAZZ = "Clazz"; //NOSONAR
 
-    /** The specific Class this type handler represents. */
+    /** The parameter class wrapped by this {@code Clazz<T>} type (the resolved type argument). */
     private final Class clazz; //NOSONAR
 
     /**
-     * Constructs a ClazzType with the specified type parameter name.
-     * The resulting type name will be "Clazz&lt;typeName&gt;".
+     * Constructs a {@code ClazzType} for the class identified by {@code typeName}.
+     * The resulting full type name is {@code "Clazz<" + typeName + ">"}.
      *
-     * @param typeName the fully qualified class name of the type parameter
+     * @param typeName the fully qualified (or canonical) name of the type parameter class,
+     *                 e.g., {@code "java.lang.Integer"} or {@code "int"}
      */
     protected ClazzType(final String typeName) {
         super("Clazz<" + typeName + ">");
@@ -45,20 +57,32 @@ public class ClazzType extends AbstractType<Class> {
     }
 
     /**
-     * Returns the Class object representing the type parameter of this Clazz type.
+     * Returns the Class object representing the Java type handled by this Type, which is
+     * always {@link Class}. Use {@link #getElementType()}-style accessors on parameterized
+     * Type subclasses to inspect the parameter class.
      *
-     * @return the Class object for the specific type parameter
+     * @return {@link Class}{@code .class}
      */
     @Override
     public Class<Class> javaType() {
+        return Class.class;
+    }
+
+    /**
+     * Returns the parameter class wrapped by this {@code Clazz<T>} type
+     * (e.g. {@code Integer.class} for {@code Clazz<Integer>}).
+     *
+     * @return the parameter class
+     */
+    public Class getParameterClass() {
         return clazz;
     }
 
     /**
      * Indicates whether instances of this type are immutable.
-     * Class objects are immutable in Java.
+     * {@link Class} objects are effectively immutable in Java.
      *
-     * @return {@code true}, indicating Class objects are immutable
+     * @return {@code true}, always, because {@link Class} objects are immutable
      */
     @Override
     public boolean isImmutable() {
@@ -66,11 +90,11 @@ public class ClazzType extends AbstractType<Class> {
     }
 
     /**
-     * Converts a Class object to its string representation.
-     * Uses the canonical class name for serialization.
+     * Converts a {@link Class} object to its canonical string name.
+     * Uses {@link com.landawn.abacus.util.ClassUtil#getCanonicalClassName(Class)} for serialization.
      *
-     * @param x the Class object to convert. Can be {@code null}.
-     * @return The canonical name of the class, or {@code null} if input is null
+     * @param x the {@link Class} to convert; may be {@code null}
+     * @return the canonical class name, or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final Class x) {
@@ -78,13 +102,12 @@ public class ClazzType extends AbstractType<Class> {
     }
 
     /**
-     * Converts a string representation back to a Class object.
-     * The string should be a fully qualified class name.
-     * Uses ClassUtil.forClass to load the class, which handles primitive types
-     * and array notations appropriately.
+     * Converts a fully qualified (or canonical) class name to the corresponding {@link Class} object.
+     * Delegates to {@link com.landawn.abacus.util.ClassUtil#forName(String)}, which supports
+     * primitive type names (e.g., {@code "int"}) and array notations.
      *
-     * @param str the fully qualified class name. Can be {@code null} or empty.
-     * @return The Class object for the specified name, or {@code null} if input is null/empty
+     * @param str the class name to resolve; may be {@code null} or empty
+     * @return the resolved {@link Class} object, or {@code null} if {@code str} is {@code null} or empty
      * @throws RuntimeException if the class cannot be found or loaded
      */
     @Override

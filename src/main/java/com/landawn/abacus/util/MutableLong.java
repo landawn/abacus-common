@@ -20,24 +20,24 @@ import java.io.Serial;
 
 /**
  * A mutable wrapper for a {@code long} value, providing methods to modify the wrapped value.
- * 
+ *
  * <p>This class is useful in scenarios where you need to pass a long by reference,
  * accumulate values in lambda expressions, or store frequently changing long values
  * in collections without creating new Long objects.</p>
- * 
+ *
  * <p><strong>Note: This class is NOT thread-safe.</strong> If multiple threads access a
  * MutableLong instance concurrently, and at least one thread modifies it, external
  * synchronization is required.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * MutableLong sum = MutableLong.of(0L);
  * list.forEach(item -> sum.add(item.getValue()));
  * System.out.println("Total: " + sum.value());
  * }</pre>
- * 
+ *
  * <p>Note: This class is adapted from Apache Commons Lang.</p>
- * 
+ *
  * @version $Id: MutableLong.java 1669791 2015-03-28 15:22:59Z britter $
  * @see Long
  * @see Number
@@ -56,7 +56,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
 
     /**
      * Constructs a new MutableLong with the default value of zero.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = new MutableLong();   // value is 0L
@@ -67,12 +67,12 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
 
     /**
      * Constructs a new MutableLong with the specified initial value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = new MutableLong(1000000L);   // value is 1000000L
      * }</pre>
-     * 
+     *
      * @param value the initial value to store
      */
     MutableLong(final long value) {
@@ -82,12 +82,12 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     /**
      * Creates a new MutableLong instance with the specified value.
      * This is a factory method that provides a more fluent way to create instances.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong timestamp = MutableLong.of(System.currentTimeMillis());
      * }</pre>
-     * 
+     *
      * @param value the initial value
      * @return a new MutableLong instance containing the specified value
      */
@@ -97,13 +97,13 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
 
     /**
      * Returns the current long value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = MutableLong.of(42L);
      * long val = num.value();   // returns 42L
      * }</pre>
-     * 
+     *
      * @return the current long value
      */
     public long value() {
@@ -126,13 +126,13 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
 
     /**
      * Sets the value to the specified long.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = MutableLong.of(10L);
      * num.setValue(20L);   // value is now 20L
      * }</pre>
-     * 
+     *
      * @param newValue the value to set
      */
     public void setValue(final long newValue) {
@@ -141,7 +141,9 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
 
     /**
      * Returns the current value and then sets it to the new value.
-     * This operation is not atomic and is for single-threaded use only.
+     *
+     * <p><b>Note:</b> This operation is not atomic. External synchronization is required
+     * for safe concurrent use; see the class-level thread-safety note.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -206,7 +208,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
 
     /**
      * Increments the value by one.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = MutableLong.of(10L);
@@ -219,7 +221,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
 
     /**
      * Decrements the value by one.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = MutableLong.of(10L);
@@ -264,13 +266,13 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
 
     /**
      * Returns the current value and then increments it by one.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = MutableLong.of(10L);
      * long old = num.getAndIncrement();   // returns 10L, value is now 11L
      * }</pre>
-     * 
+     *
      * @return the value before incrementing
      */
     public long getAndIncrement() {
@@ -279,13 +281,13 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
 
     /**
      * Returns the current value and then decrements it by one.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = MutableLong.of(10L);
      * long old = num.getAndDecrement();   // returns 10L, value is now 9L
      * }</pre>
-     * 
+     *
      * @return the value before decrementing
      */
     public long getAndDecrement() {
@@ -294,13 +296,13 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
 
     /**
      * Increments the value by one and then returns it.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = MutableLong.of(10L);
      * long newVal = num.incrementAndGet();   // returns 11L, value is now 11L
      * }</pre>
-     * 
+     *
      * @return the value after incrementing
      */
     public long incrementAndGet() {
@@ -309,13 +311,13 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
 
     /**
      * Decrements the value by one and then returns it.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = MutableLong.of(10L);
      * long newVal = num.decrementAndGet();   // returns 9L, value is now 9L
      * }</pre>
-     * 
+     *
      * @return the value after decrementing
      */
     public long decrementAndGet() {

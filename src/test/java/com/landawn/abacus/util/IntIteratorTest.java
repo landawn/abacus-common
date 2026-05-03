@@ -18,7 +18,6 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.stream.IntStream;
 
 public class IntIteratorTest extends TestBase {

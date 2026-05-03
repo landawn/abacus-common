@@ -321,7 +321,7 @@ public class CodeGenerationUtilTest extends TestBase {
     //                 .className("s")
     //                 .generateFunctionPropName(true)
     //                 .functionClassName("funcs")
-    //                 .propFunctions(CommonUtil.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC))
+    //                 .propFunctions(N.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC))
     //                 .build();
     //
     //         final String code = CodeGenerationUtil.generatePropNameTableClasses(config);

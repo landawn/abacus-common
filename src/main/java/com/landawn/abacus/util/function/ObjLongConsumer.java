@@ -85,9 +85,10 @@ public interface ObjLongConsumer<T> extends Throwables.ObjLongConsumer<T, Runtim
      * logBoth.accept("Event", System.currentTimeMillis());
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation
      * @return a composed {@code ObjLongConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     default ObjLongConsumer<T> andThen(final ObjLongConsumer<? super T> after) {
         return (t, u) -> {

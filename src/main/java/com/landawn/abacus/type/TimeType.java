@@ -22,7 +22,6 @@ import java.sql.Time;
 
 import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Strings;
 
 /**
  * Type handler for {@link java.sql.Time} objects. This class provides serialization,
@@ -107,7 +106,7 @@ public class TimeType extends AbstractDateType<Time> {
      */
     @Override
     public Time valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : (isSysTime(str) ? Dates.currentTime() : Dates.parseTime(str));
+        return isNullDateTime(str) ? null : (isSysTime(str) ? Dates.currentTime() : Dates.parseTime(str));
     }
 
     /**

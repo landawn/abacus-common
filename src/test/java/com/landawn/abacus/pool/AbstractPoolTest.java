@@ -369,7 +369,7 @@ public class AbstractPoolTest extends TestBase {
 
     @Test
     public void testDefaultEvictDelay() {
-        assertEquals(3000, AbstractPool.DEFAULT_EVICT_DELAY);
+        assertEquals(3000, AbstractPool.DEFAULT_EVICT_DELAY_IN_MILLIS);
     }
 
     @Test
@@ -392,7 +392,7 @@ public class AbstractPoolTest extends TestBase {
     @Test
     public void testConstructorWithZeroEvictDelay() {
         TestAbstractPool noEvictPool = new TestAbstractPool(10, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f, 0);
-        assertEquals(0, noEvictPool.evictDelay);
+        assertEquals(0, noEvictPool.evictDelayInMillis);
         noEvictPool.close();
     }
 

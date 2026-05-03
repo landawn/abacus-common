@@ -24,10 +24,15 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 /**
- * Type handler for Boolean values represented as integers.
- * This class maps Boolean values to 1 (true) and 0 (false) integers,
- * providing compatibility with database systems that store boolean flags
- * as numeric fields.
+ * Type handler for {@link Boolean} values that are stored as integers ({@code 1}/{@code 0})
+ * in the database.
+ * Maps {@code Boolean.TRUE} to {@code 1} and {@code Boolean.FALSE} / {@code null} to {@code 0},
+ * providing compatibility with database schemas that represent boolean flags as integer columns.
+ *
+ * <p>JDBC mapping: values are stored via {@link java.sql.PreparedStatement#setInt} and
+ * retrieved via {@link java.sql.ResultSet#getInt}. Any positive integer value is treated as
+ * {@code true}; zero or negative values are {@code false}. SQL NULL maps to {@code null} on read
+ * and is stored as SQL NULL ({@link java.sql.Types#INTEGER}) on write.</p>
  */
 @SuppressWarnings("java:S2160")
 public final class BooleanIntType extends AbstractType<Boolean> {
@@ -37,25 +42,17 @@ public final class BooleanIntType extends AbstractType<Boolean> {
     private static final String _1 = "1";
 
     /**
-     * Package-private constructor for BooleanIntType.
-     * This constructor is called by the TypeFactory to create BooleanInt type instances.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * // Obtained via TypeFactory
-     * Type<Boolean> type = TypeFactory.getType("BooleanInt");
-     * Boolean value = type.valueOf("1");     // Boolean.TRUE
-     * String result = type.stringOf(true);   // "1"
-     * }</pre>
+     * Package-private constructor for {@code BooleanIntType}.
+     * Instances are created by {@link TypeFactory}; do not instantiate directly.
      */
     BooleanIntType() {
         super(typeName);
     }
 
     /**
-     * Returns the Class object representing the Boolean class.
+     * Returns the Java class represented by this type handler.
      *
-     * @return the Class object for Boolean.class
+     * @return {@code Boolean.class}
      */
     @Override
     public Class<Boolean> javaType() {
@@ -63,10 +60,9 @@ public final class BooleanIntType extends AbstractType<Boolean> {
     }
 
     /**
-     * Returns the default value for the BooleanInt type.
-     * The default Boolean value is {@code false}.
+     * Returns the default value for the {@code BooleanInt} type.
      *
-     * @return Boolean.FALSE as the default value
+     * @return {@link Boolean#FALSE}
      */
     @Override
     public Boolean defaultValue() {
@@ -74,10 +70,10 @@ public final class BooleanIntType extends AbstractType<Boolean> {
     }
 
     /**
-     * Indicates whether values of this type require quoting in CSV format.
-     * Boolean integer values ({@code 0}/{@code 1}) are numeric and do not require quotes.
+     * Indicates whether values of this type require quoting in CSV output.
+     * Integer {@code 0}/{@code 1} values are numeric and do not require quoting.
      *
-     * @return {@code false}, as boolean integer values do not require quoting in CSV format
+     * @return {@code false} always
      */
     @Override
     public boolean isCsvQuoteRequired() {
@@ -85,19 +81,11 @@ public final class BooleanIntType extends AbstractType<Boolean> {
     }
 
     /**
-     * Converts a Boolean value to its integer string representation.
-     * Maps {@code true} to "1" and false/null to "0".
+     * Converts a {@link Boolean} to its integer string representation.
+     * Maps {@code true} to {@code "1"} and {@code false} / {@code null} to {@code "0"}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Boolean> type = TypeFactory.getType("BooleanInt");
-     * String result1 = type.stringOf(Boolean.TRUE);    // "1"
-     * String result2 = type.stringOf(Boolean.FALSE);   // "0"
-     * String result3 = type.stringOf(null);            // "0"
-     * }</pre>
-     *
-     * @param b the Boolean value to convert
-     * @return "1" if b is {@code true}, "0" if b is {@code false} or null
+     * @param b the {@code Boolean} value to convert; may be {@code null}
+     * @return {@code "1"} if {@code b} is {@link Boolean#TRUE}, {@code "0"} otherwise
      */
     @Override
     public String stringOf(final Boolean b) {
@@ -105,20 +93,13 @@ public final class BooleanIntType extends AbstractType<Boolean> {
     }
 
     /**
-     * Converts a string representation to a Boolean value.
-     * Parses "1" as {@code true}, all other values as {@code false}.
+     * Parses a string to a {@link Boolean} using the {@code 1}/{@code 0} convention.
+     * Only the exact string {@code "1"} yields {@code true}; any other value (including
+     * {@code null}) yields {@code false}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Boolean> type = TypeFactory.getType("BooleanInt");
-     * Boolean result1 = type.valueOf("1");     // Boolean.TRUE
-     * Boolean result2 = type.valueOf("0");     // Boolean.FALSE
-     * Boolean result3 = type.valueOf("xyz");   // Boolean.FALSE
-     * Boolean result4 = type.valueOf(null);    // Boolean.FALSE
-     * }</pre>
-     *
-     * @param str the string to parse (typically "0" or "1")
-     * @return Boolean.TRUE if str equals "1", Boolean.FALSE otherwise
+     * @param str the string to parse (typically {@code "0"} or {@code "1"}); may be {@code null}
+     * @return {@link Boolean#TRUE} if {@code str} equals {@code "1"},
+     *         {@link Boolean#FALSE} otherwise
      */
     @Override
     public Boolean valueOf(final String str) {
@@ -126,13 +107,16 @@ public final class BooleanIntType extends AbstractType<Boolean> {
     }
 
     /**
-     * Converts a character array subset to a Boolean value.
-     * Checks if the single character is '1' for {@code true}.
+     * Parses a character array sub-sequence to a {@link Boolean}.
+     * Returns {@link Boolean#TRUE} only if {@code len} is {@code 1} and the character at
+     * {@code cbuf[offset]} is {@code '1'}; returns {@link Boolean#FALSE} otherwise,
+     * including when {@code cbuf} is {@code null} or {@code len} is {@code 0}.
      *
-     * @param cbuf the character array containing the character
-     * @param offset the starting position in the character array
-     * @param len the number of characters to examine (should be 1)
-     * @return Boolean.TRUE if the single character is '1', Boolean.FALSE otherwise
+     * @param cbuf the character array; may be {@code null}
+     * @param offset the 0-based start position within {@code cbuf}
+     * @param len the number of characters to examine
+     * @return {@link Boolean#TRUE} if the single character is {@code '1'},
+     *         {@link Boolean#FALSE} otherwise
      */
     @Override
     public Boolean valueOf(final char[] cbuf, final int offset, final int len) {
@@ -140,13 +124,16 @@ public final class BooleanIntType extends AbstractType<Boolean> {
     }
 
     /**
-     * Retrieves a Boolean value from a ResultSet at the specified column index.
-     * Reads an integer value and converts it to Boolean (positive values are true).
+     * Retrieves a {@link Boolean} from a {@link java.sql.ResultSet} at the specified column index.
+     * The column value is read as a SQL {@code INTEGER}. Any positive value maps to {@code true};
+     * zero or negative values map to {@code false}. SQL NULL maps to {@code null}.
      *
-     * @param rs the ResultSet to retrieve the value from
-     * @param columnIndex the column index (1-based) of the integer value
-     * @return Boolean.TRUE if the integer value is greater than 0, Boolean.FALSE otherwise
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnIndex the 1-based index of the column containing the integer value
+     * @return {@link Boolean#TRUE} if the integer is {@code > 0},
+     *         {@link Boolean#FALSE} if it is {@code <= 0},
+     *         or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
      */
     @Override
     public Boolean get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -156,15 +143,16 @@ public final class BooleanIntType extends AbstractType<Boolean> {
     }
 
     /**
-     * Retrieves a Boolean value from a ResultSet using the specified column label.
-     * Reads an integer value and converts it to Boolean (positive values are true).
-     * Returns {@code null} for SQL NULL values.
+     * Retrieves a {@link Boolean} from a {@link java.sql.ResultSet} using the specified column label.
+     * The column value is read as a SQL {@code INTEGER}. Any positive value maps to {@code true};
+     * zero or negative values map to {@code false}. SQL NULL maps to {@code null}.
      *
-     * @param rs the ResultSet to retrieve the value from
-     * @param columnName the label for the column specified with the SQL AS clause,
-     *                    or the column name if no AS clause was specified
-     * @return Boolean.TRUE if the integer value is greater than 0, Boolean.FALSE if 0 or negative, or {@code null} for SQL NULL
-     * @throws SQLException if a database access error occurs or the columnName is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnName the column label as specified in the SQL AS clause, or the column name if no AS clause was used
+     * @return {@link Boolean#TRUE} if the integer is {@code > 0},
+     *         {@link Boolean#FALSE} if it is {@code <= 0},
+     *         or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
     @Override
     public Boolean get(final ResultSet rs, final String columnName) throws SQLException {
@@ -174,14 +162,14 @@ public final class BooleanIntType extends AbstractType<Boolean> {
     }
 
     /**
-     * Sets a Boolean parameter in a PreparedStatement at the specified position.
-     * Converts the Boolean to 1 (true) or 0 (false) before setting as an integer.
-     * Null values are set as SQL NULL with INTEGER type.
+     * Sets a {@link Boolean} parameter on a {@link java.sql.PreparedStatement} at the specified position.
+     * Converts {@code true} to the integer {@code 1} and {@code false} to {@code 0}.
+     * A {@code null} value is stored as SQL NULL ({@link java.sql.Types#INTEGER}).
      *
-     * @param stmt the PreparedStatement to set the parameter on
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the Boolean value to set, may be null
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param stmt the {@code PreparedStatement} on which to set the parameter
+     * @param columnIndex the 1-based parameter index to set
+     * @param x the {@code Boolean} value to set; {@code null} is stored as SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Boolean x) throws SQLException {
@@ -193,14 +181,14 @@ public final class BooleanIntType extends AbstractType<Boolean> {
     }
 
     /**
-     * Sets a named Boolean parameter in a CallableStatement.
-     * Converts the Boolean to 1 (true) or 0 (false) before setting as an integer.
-     * Null values are set as SQL NULL with INTEGER type.
+     * Sets a named {@link Boolean} parameter on a {@link java.sql.CallableStatement}.
+     * Converts {@code true} to the integer {@code 1} and {@code false} to {@code 0}.
+     * A {@code null} value is stored as SQL NULL ({@link java.sql.Types#INTEGER}).
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param stmt the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the Boolean value to set, may be null
-     * @throws SQLException if a database access error occurs or the parameter name is invalid
+     * @param x the {@code Boolean} value to set; {@code null} is stored as SQL NULL
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Boolean x) throws SQLException {
@@ -212,20 +200,13 @@ public final class BooleanIntType extends AbstractType<Boolean> {
     }
 
     /**
-     * Appends a Boolean value to an Appendable object as a 0/1 character.
+     * Appends a {@link Boolean} value to an {@link Appendable} as a 0/1 string.
+     * Appends {@code "1"} if {@code x} is {@code true}; appends {@code "0"} otherwise
+     * (including when {@code x} is {@code null}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Boolean> type = TypeFactory.getType("BooleanInt");
-     * StringBuilder sb = new StringBuilder();
-     * type.appendTo(sb, Boolean.TRUE);    // appends "1"
-     * type.appendTo(sb, Boolean.FALSE);   // appends "0"
-     * // sb.toString() == "10"
-     * }</pre>
-     *
-     * @param appendable the Appendable object to append to
-     * @param x the Boolean value to append
-     * @throws IOException if an I/O error occurs during the append operation
+     * @param appendable the target {@code Appendable}
+     * @param x the {@code Boolean} value to append; may be {@code null}
+     * @throws IOException if an I/O error occurs during appending
      */
     @Override
     public void appendTo(final Appendable appendable, final Boolean x) throws IOException {
@@ -233,13 +214,16 @@ public final class BooleanIntType extends AbstractType<Boolean> {
     }
 
     /**
-     * Writes a Boolean value to a CharacterWriter as a 0/1 character.
-     * Applies optional character quotation based on the configuration.
+     * Writes a {@link Boolean} value to a {@link CharacterWriter} as a {@code 0}/{@code 1} string.
+     * If {@code config} specifies a non-zero character quotation character, the value is wrapped
+     * in that quotation character; otherwise the raw {@code "1"} or {@code "0"} string is written.
      *
-     * @param writer the CharacterWriter to write to
-     * @param x the Boolean value to write
-     * @param config the serialization configuration that may specify character quotation
-     * @throws IOException if an I/O error occurs during the write operation
+     * @param writer the {@code CharacterWriter} to write to
+     * @param x the {@code Boolean} value to write; may be {@code null}
+     * @param config the serialization configuration; if non-{@code null} and its
+     *               {@link com.landawn.abacus.parser.JsonXmlSerConfig#getCharQuotation()} is non-zero,
+     *               the value is wrapped in that character; may be {@code null}
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final Boolean x, final JsonXmlSerConfig<?> config) throws IOException {

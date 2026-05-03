@@ -21,6 +21,9 @@ import com.landawn.abacus.util.Throwables;
  * an {@code int}-valued result. This is a primitive specialization of {@link java.util.function.BiFunction}
  * for the case where the first argument and the result are of {@code int} type.
  *
+ * <p>The parameter order follows the {@code IntObj*} convention: the {@code int} argument comes
+ * first, followed by the object argument. The result is always an {@code int} value.
+ *
  * <p>This is a functional interface whose functional method is {@link #applyAsInt(int, Object)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -42,8 +45,8 @@ public interface IntObjOperator<T> extends Throwables.IntObjOperator<T, RuntimeE
      * }</pre>
      *
      * @param operand the {@code int} operand
-     * @param obj the object operand
-     * @return the operator result
+     * @param obj the object operand of type {@code T}
+     * @return the {@code int}-valued result of applying this operator to the given operands
      */
     // @ai-ignore IntObj*/ObjInt* argument order convention - intentional: class name prefix determines parameter order. IntObj* has int first; ObjInt* has object first. Do not suggest reordering.
     @Override

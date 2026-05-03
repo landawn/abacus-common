@@ -28,14 +28,14 @@ import com.landawn.abacus.logging.LoggerFactory;
  * Utility class for managing database resources including connections, statements, and result sets.
  * This class provides methods for properly closing JDBC resources and handling Spring-managed connections
  * when Spring is available in the classpath.
- * 
+ *
  * <p>The class automatically detects if Spring Framework is present and uses Spring's
  * DataSourceUtils for connection management when available. This ensures proper transaction
  * participation and connection pooling in Spring environments.</p>
- * 
+ *
  * <p>All close methods in this class follow the pattern of closing resources in reverse order
  * of their creation (ResultSet -&gt; Statement -&gt; Connection) to ensure proper cleanup.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Connection conn = null;
@@ -50,7 +50,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  *     DataSourceUtil.closeQuietly(rs, stmt, conn);
  * }
  * }</pre>
- * 
+ *
  * @see java.sql.Connection
  * @see java.sql.Statement
  * @see java.sql.ResultSet
@@ -81,9 +81,11 @@ public final class DataSourceUtil {
 
     /**
      * Releases a Connection, returning it to the connection pool if applicable.
-     * When Spring is present in the classpath, delegates to Spring's DataSourceUtils
-     * to ensure proper transaction synchronization. Otherwise, simply closes the connection.
-     * 
+     * When Spring is present in the classpath and a non-{@code null} DataSource is supplied,
+     * delegates to {@code org.springframework.jdbc.datasource.DataSourceUtils.releaseConnection}
+     * to ensure proper transaction synchronization. Otherwise, the connection is closed quietly
+     * (any {@link SQLException} thrown by {@code close()} is logged and swallowed).
+     *
      * <p>This method should be used instead of directly calling {@code Connection.close()}
      * when working with Spring-managed data sources to ensure proper transaction handling.</p>
      *
@@ -430,7 +432,6 @@ public final class DataSourceUtil {
      *
      * @param rs the ResultSet to close, may be null
      * @param closeStatement if {@code true}, also closes the Statement that created the ResultSet
-     * @throws UncheckedSQLException if unable to retrieve the Statement from ResultSet
      */
     public static void closeQuietly(final ResultSet rs, final boolean closeStatement) throws UncheckedSQLException {
         closeQuietly(rs, closeStatement, false);

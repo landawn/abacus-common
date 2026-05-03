@@ -23,7 +23,12 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 
+import javax.xml.parsers.SAXParser;
+import javax.xml.transform.sax.SAXSource;
+
 import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
@@ -40,11 +45,11 @@ import jakarta.xml.bind.Unmarshaller;
 
 /**
  * XML parser implementation using JAXB (Jakarta XML Binding) for serialization and deserialization.
- * 
+ *
  * <p>This class provides XML parsing capabilities using the JAXB framework, which maps Java objects
  * to XML representations and vice versa. It extends {@link AbstractXmlParser} and implements
  * all the required serialization and deserialization methods.</p>
- * 
+ *
  * <p>Key features:</p>
  * <ul>
  *   <li>Annotation-based XML binding using JAXB annotations</li>
@@ -52,22 +57,22 @@ import jakarta.xml.bind.Unmarshaller;
  *   <li>Automatic marshalling and unmarshalling</li>
  *   <li>Integration with standard JAXB marshallers and unmarshallers</li>
  * </ul>
- * 
+ *
  * <p>Note: This parser requires classes to be properly annotated with JAXB annotations
  * such as {@code @XmlRootElement}, {@code @XmlElement}, etc.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * JaxbParser parser = new JaxbParser();
- * 
+ *
  * // Serialization
  * Person person = new Person("John", 30);
  * String xml = parser.serialize(person, null);
- * 
+ *
  * // Deserialization
  * Person restored = parser.deserialize(xml, null, Person.class);
  * }</pre>
- * 
+ *
  * @see AbstractXmlParser
  * @see jakarta.xml.bind.JAXB
  */
@@ -75,7 +80,7 @@ final class JaxbParser extends AbstractXmlParser {
 
     /**
      * Constructs a new JaxbParser with default configuration.
-     * 
+     *
      * <p>This constructor creates a parser instance with default XML serialization
      * and deserialization configurations.</p>
      */
@@ -84,7 +89,7 @@ final class JaxbParser extends AbstractXmlParser {
 
     /**
      * Constructs a new JaxbParser with specified configurations.
-     * 
+     *
      * <p>This constructor allows customization of the parser behavior through
      * XML serialization and deserialization configuration objects.</p>
      *
@@ -250,7 +255,7 @@ final class JaxbParser extends AbstractXmlParser {
 
     /**
      * Internal method to write an object as XML to a writer.
-     * 
+     *
      * <p>This method handles the actual JAXB marshalling process. It creates a
      * JAXB marshaller for the object's class and uses it to convert the object
      * to XML.</p>
@@ -290,12 +295,16 @@ final class JaxbParser extends AbstractXmlParser {
     }
 
     /**
-     * {@inheritDoc}
+     * Deserializes an XML string to an object of the specified type using JAXB unmarshalling.
+     * Delegates to {@link #deserialize(String, XmlDeserConfig, Class)} via {@code targetType.javaType()}.
      *
-     * @param source {@inheritDoc}
-     * @param config {@inheritDoc}
-     * @param targetType {@inheritDoc}
-     * @return {@inheritDoc}
+     * @param <T> the type of the target object
+     * @param source the XML string to deserialize; if empty, returns the default value for the target type
+     * @param config the deserialization configuration (may be {@code null} for default behavior);
+     *        note that {@code ignoredPropNames} is not supported by JAXB
+     * @param targetType the {@link Type} descriptor of the object to create
+     * @return the deserialized object instance
+     * @throws ParsingException if JAXB unmarshalling fails
      */
     @Override
     public <T> T deserialize(final String source, final XmlDeserConfig config, final Type<? extends T> targetType) {
@@ -303,12 +312,17 @@ final class JaxbParser extends AbstractXmlParser {
     }
 
     /**
-     * {@inheritDoc}
+     * Deserializes an XML string to an object of the specified class using JAXB unmarshalling.
+     * Returns the default value for {@code targetClass} if {@code source} is empty.
      *
-     * @param source {@inheritDoc}
-     * @param config {@inheritDoc}
-     * @param targetClass {@inheritDoc}
-     * @return {@inheritDoc}
+     * @param <T> the type of the target object
+     * @param source the XML string to deserialize; if empty, returns the default value for the target class
+     * @param config the deserialization configuration (may be {@code null} for default behavior);
+     *        note that {@code ignoredPropNames} is not supported by JAXB
+     * @param targetClass the class of the object to create; must be properly annotated with JAXB annotations
+     * @return the deserialized object instance, or the default value for {@code targetClass} if {@code source} is empty
+     * @throws ParsingException if {@code ignoredPropNames} is specified in {@code config},
+     *         or if JAXB unmarshalling fails
      */
     @Override
     public <T> T deserialize(final String source, final XmlDeserConfig config, final Class<? extends T> targetClass) {
@@ -326,12 +340,16 @@ final class JaxbParser extends AbstractXmlParser {
     }
 
     /**
-     * {@inheritDoc}
+     * Deserializes XML content from a file to an object of the specified type using JAXB unmarshalling.
+     * Delegates to {@link #deserialize(File, XmlDeserConfig, Class)} via {@code targetType.javaType()}.
      *
-     * @param source {@inheritDoc}
-     * @param config {@inheritDoc}
-     * @param targetType {@inheritDoc}
-     * @return {@inheritDoc}
+     * @param <T> the type of the target object
+     * @param source the file containing XML data to deserialize (must not be {@code null} and must exist)
+     * @param config the deserialization configuration (may be {@code null} for default behavior)
+     * @param targetType the {@link Type} descriptor of the object to create
+     * @return the deserialized object instance
+     * @throws UncheckedIOException if the file cannot be read
+     * @throws ParsingException if JAXB unmarshalling fails
      */
     @Override
     public <T> T deserialize(final File source, final XmlDeserConfig config, final Type<? extends T> targetType) {
@@ -339,12 +357,15 @@ final class JaxbParser extends AbstractXmlParser {
     }
 
     /**
-     * {@inheritDoc}
+     * Deserializes XML content from a file to an object of the specified class using JAXB unmarshalling.
      *
-     * @param source {@inheritDoc}
-     * @param config {@inheritDoc}
-     * @param targetClass {@inheritDoc}
-     * @return {@inheritDoc}
+     * @param <T> the type of the target object
+     * @param source the file containing XML data to deserialize (must not be {@code null} and must exist)
+     * @param config the deserialization configuration (may be {@code null} for default behavior)
+     * @param targetClass the class of the object to create; must be properly annotated with JAXB annotations
+     * @return the deserialized object instance
+     * @throws UncheckedIOException if the file cannot be read
+     * @throws ParsingException if JAXB unmarshalling fails
      */
     @Override
     public <T> T deserialize(final File source, final XmlDeserConfig config, final Class<? extends T> targetClass) {
@@ -360,12 +381,15 @@ final class JaxbParser extends AbstractXmlParser {
     }
 
     /**
-     * {@inheritDoc}
+     * Deserializes XML content from an input stream to an object of the specified type using JAXB unmarshalling.
+     * Delegates to {@link #deserialize(InputStream, XmlDeserConfig, Class)} via {@code targetType.javaType()}.
      *
-     * @param source {@inheritDoc}
-     * @param config {@inheritDoc}
-     * @param targetType {@inheritDoc}
-     * @return {@inheritDoc}
+     * @param <T> the type of the target object
+     * @param source the input stream containing XML data (must not be {@code null}); not closed after reading
+     * @param config the deserialization configuration (may be {@code null} for default behavior)
+     * @param targetType the {@link Type} descriptor of the object to create
+     * @return the deserialized object instance
+     * @throws ParsingException if JAXB unmarshalling fails
      */
     @Override
     public <T> T deserialize(final InputStream source, final XmlDeserConfig config, final Type<? extends T> targetType) {
@@ -373,12 +397,16 @@ final class JaxbParser extends AbstractXmlParser {
     }
 
     /**
-     * {@inheritDoc}
+     * Deserializes XML content from an input stream to an object of the specified class using JAXB unmarshalling.
      *
-     * @param source {@inheritDoc}
-     * @param config {@inheritDoc}
-     * @param targetClass {@inheritDoc}
-     * @return {@inheritDoc}
+     * @param <T> the type of the target object
+     * @param source the input stream containing XML data (must not be {@code null}); not closed after reading
+     * @param config the deserialization configuration (may be {@code null} for default behavior);
+     *        note that {@code ignoredPropNames} is not supported by JAXB
+     * @param targetClass the class of the object to create; must be properly annotated with JAXB annotations
+     * @return the deserialized object instance
+     * @throws ParsingException if {@code ignoredPropNames} is specified in {@code config},
+     *         or if JAXB unmarshalling fails
      */
     @Override
     public <T> T deserialize(final InputStream source, final XmlDeserConfig config, final Class<? extends T> targetClass) {
@@ -386,12 +414,15 @@ final class JaxbParser extends AbstractXmlParser {
     }
 
     /**
-     * {@inheritDoc}
+     * Deserializes XML content from a reader to an object of the specified type using JAXB unmarshalling.
+     * Delegates to {@link #deserialize(Reader, XmlDeserConfig, Class)} via {@code targetType.javaType()}.
      *
-     * @param source {@inheritDoc}
-     * @param config {@inheritDoc}
-     * @param targetType {@inheritDoc}
-     * @return {@inheritDoc}
+     * @param <T> the type of the target object
+     * @param source the reader containing XML data (must not be {@code null}); not closed after reading
+     * @param config the deserialization configuration (may be {@code null} for default behavior)
+     * @param targetType the {@link Type} descriptor of the object to create
+     * @return the deserialized object instance
+     * @throws ParsingException if JAXB unmarshalling fails
      */
     @Override
     public <T> T deserialize(final Reader source, final XmlDeserConfig config, final Type<? extends T> targetType) {
@@ -399,12 +430,16 @@ final class JaxbParser extends AbstractXmlParser {
     }
 
     /**
-     * {@inheritDoc}
+     * Deserializes XML content from a reader to an object of the specified class using JAXB unmarshalling.
      *
-     * @param source {@inheritDoc}
-     * @param config {@inheritDoc}
-     * @param targetClass {@inheritDoc}
-     * @return {@inheritDoc}
+     * @param <T> the type of the target object
+     * @param source the reader containing XML data (must not be {@code null}); not closed after reading
+     * @param config the deserialization configuration (may be {@code null} for default behavior);
+     *        note that {@code ignoredPropNames} is not supported by JAXB
+     * @param targetClass the class of the object to create; must be properly annotated with JAXB annotations
+     * @return the deserialized object instance
+     * @throws ParsingException if {@code ignoredPropNames} is specified in {@code config},
+     *         or if JAXB unmarshalling fails
      */
     @Override
     public <T> T deserialize(final Reader source, final XmlDeserConfig config, final Class<? extends T> targetClass) {
@@ -412,12 +447,13 @@ final class JaxbParser extends AbstractXmlParser {
     }
 
     /**
-     * {@inheritDoc}
+     * Deserialization from a DOM {@link Node} is not supported by this JAXB-based parser.
      *
-     * @param source {@inheritDoc}
-     * @param config {@inheritDoc}
-     * @param targetType {@inheritDoc}
-     * @return {@inheritDoc}
+     * @param <T> the type of the target object
+     * @param source the DOM node (not used)
+     * @param config the deserialization configuration (not used)
+     * @param targetType the target type (not used)
+     * @return never returns normally
      * @throws UnsupportedOperationException always
      */
     @Override
@@ -426,12 +462,13 @@ final class JaxbParser extends AbstractXmlParser {
     }
 
     /**
-     * {@inheritDoc}
+     * Deserialization from a DOM {@link Node} is not supported by this JAXB-based parser.
      *
-     * @param source {@inheritDoc}
-     * @param config {@inheritDoc}
-     * @param targetClass {@inheritDoc}
-     * @return {@inheritDoc}
+     * @param <T> the type of the target object
+     * @param source the DOM node (not used)
+     * @param config the deserialization configuration (not used)
+     * @param targetClass the target class (not used)
+     * @return never returns normally
      * @throws UnsupportedOperationException always
      */
     @Override
@@ -465,7 +502,11 @@ final class JaxbParser extends AbstractXmlParser {
         final Unmarshaller unmarshaller = XmlUtil.createUnmarshaller(targetClass);
 
         try {
-            return (T) unmarshaller.unmarshal(source);
+            // Wrap in a SAXSource backed by the hardened SAXParser so JAXB doesn't fall back to
+            // its OWN internal SAX factory (which has DTDs and external entities ENABLED by
+            // default). Without this wrap, attacker-controlled XML can read local files, do SSRF,
+            // or trigger billion-laughs DoS via JAXB's default unmarshal path.
+            return (T) unmarshaller.unmarshal(toHardenedSAXSource(new InputSource(source)));
         } catch (final JAXBException e) {
             throw new ParsingException(e);
         }
@@ -497,9 +538,30 @@ final class JaxbParser extends AbstractXmlParser {
         final Unmarshaller unmarshaller = XmlUtil.createUnmarshaller(targetClass);
 
         try {
-            return (T) unmarshaller.unmarshal(source);
+            // See InputStream overload above for XXE rationale.
+            return (T) unmarshaller.unmarshal(toHardenedSAXSource(new InputSource(source)));
         } catch (final JAXBException e) {
             throw new ParsingException(e);
+        }
+    }
+
+    /**
+     * Wraps the given InputSource in a SAXSource whose XMLReader is obtained from the
+     * already-hardened {@code SAXParserFactory} held by {@link XmlUtil} (FEATURE_SECURE_PROCESSING,
+     * disallow-doctype-decl, external-general/parameter-entities=false, no-load-external-dtd).
+     * JAXB unmarshal(SAXSource) will use this XMLReader instead of constructing its own
+     * unhardened parser, closing the XXE hole.
+     */
+    private static SAXSource toHardenedSAXSource(final InputSource is) {
+        try {
+            // NOTE: do NOT recycle this SAXParser back to XmlUtil's pool. JAXB will use the
+            // XMLReader synchronously inside unmarshal(), but we'd have to thread a try/finally
+            // around the unmarshal call to recycle safely; for now we trade the ~one-allocation
+            // overhead per unmarshal for code that's obviously correct.
+            final SAXParser sp = XmlUtil.createSAXParser();
+            return new SAXSource(sp.getXMLReader(), is);
+        } catch (final SAXException e) {
+            throw new ParsingException("Failed to obtain hardened XMLReader for JAXB unmarshalling", e);
         }
     }
 }

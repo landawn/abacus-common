@@ -24,13 +24,18 @@ import com.landawn.abacus.annotation.Internal;
 /**
  * Utility class providing access to Android-specific executors or fallback executors
  * for non-Android environments.
- * 
- * <p>This class automatically detects whether it's running on Android and provides
- * access to Android's AsyncTask executors if available. On non-Android platforms,
- * it provides equivalent fallback executors using standard Java concurrency utilities.</p>
- * 
- * <p>The class is marked as {@code @Internal} and is intended for framework use only.</p>
- * 
+ *
+ * <p>This class automatically detects whether it is running on Android and provides
+ * access to Android's {@code AsyncTask} executors if available. On non-Android platforms,
+ * it provides equivalent fallback executors using standard Java concurrency utilities:
+ * a single-threaded executor for serial execution and a fixed-size thread pool
+ * (sized to {@link IOUtil#CPU_CORES}) for parallel execution.</p>
+ *
+ * <p>On non-Android platforms a JVM shutdown hook is registered to gracefully
+ * terminate the created executors on JVM exit.</p>
+ *
+ * <p>This class is marked {@link Internal} and is intended for framework use only.
+ * It cannot be instantiated.</p>
  */
 @Internal
 public final class AndroidUtil {
@@ -91,13 +96,13 @@ public final class AndroidUtil {
 
     /**
      * Returns a serial executor that executes tasks one at a time in serial order.
-     * 
+     *
      * <p>On Android platforms, this returns {@code AsyncTask.SERIAL_EXECUTOR}.
      * On non-Android platforms, this returns a single-threaded executor.</p>
-     * 
+     *
      * <p>This executor is useful when tasks must be executed sequentially and
      * thread safety is a concern.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Executor serialExecutor = AndroidUtil.getSerialExecutor();
@@ -115,14 +120,14 @@ public final class AndroidUtil {
 
     /**
      * Returns a thread pool executor suitable for parallel task execution.
-     * 
+     *
      * <p>On Android platforms, this returns {@code AsyncTask.THREAD_POOL_EXECUTOR}.
      * On non-Android platforms, this returns a fixed thread pool with size equal
      * to the number of available CPU cores.</p>
-     * 
+     *
      * <p>This executor is suitable for CPU-bound parallel tasks that can benefit
      * from multi-core execution.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Executor threadPool = AndroidUtil.getThreadPoolExecutor();

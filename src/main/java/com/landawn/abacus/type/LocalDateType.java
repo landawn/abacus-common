@@ -39,6 +39,10 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
 
     public static final String LOCAL_DATE = LocalDate.class.getSimpleName();
 
+    /**
+     * Package-private constructor for LocalDateType.
+     * This constructor is called by the TypeFactory to create LocalDate type instances.
+     */
     LocalDateType() {
         super(LOCAL_DATE);
     }
@@ -60,8 +64,8 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
     }
 
     /**
-     * Converts a LocalDate object to its string representation.
-     * The string format follows the ISO-8601 standard (yyyy-MM-dd).
+     * Converts a LocalDate object to its ISO-8601 string representation ({@code yyyy-MM-dd}).
+     * Uses {@code LocalDate.toString()}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -70,8 +74,8 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * String str = type.stringOf(date);   // "2021-01-01"
      * }</pre>
      *
-     * @param x The LocalDate object to convert
-     * @return The string representation of the LocalDate, or {@code null} if the input is null
+     * @param x the LocalDate object to convert; may be {@code null}
+     * @return the ISO-8601 date string (e.g., {@code "2021-01-01"}), or {@code null} if the input is {@code null}
      */
     @Override
     public String stringOf(final LocalDate x) {

@@ -37,14 +37,18 @@ public class JdkDurationType extends AbstractType<Duration> {
 
     public static final String DURATION = "JdkDuration";
 
+    /**
+     * Package-private constructor for JdkDurationType.
+     * This constructor is called by the TypeFactory to create Duration type instances.
+     */
     JdkDurationType() {
         super(DURATION);
     }
 
     /**
-     * Returns the Class object representing the Duration type.
+     * Returns the Java class represented by this type handler.
      *
-     * @return Duration.class
+     * @return {@code Duration.class}
      */
     @Override
     public Class<Duration> javaType() {
@@ -88,12 +92,12 @@ public class JdkDurationType extends AbstractType<Duration> {
 
     /**
      * Retrieves a Duration value from the specified column in a ResultSet.
-     * The method reads a long value from the database representing milliseconds
-     * and converts it to a Duration.
+     * The column value is read as a {@code long} representing milliseconds and converted to
+     * a {@link Duration}.
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the index of the column to read (1-based)
-     * @return the Duration value created from the milliseconds in the column
+     * @return the Duration created from the milliseconds stored in the column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
@@ -105,12 +109,12 @@ public class JdkDurationType extends AbstractType<Duration> {
 
     /**
      * Retrieves a Duration value from the specified column in a ResultSet using the column label.
-     * The method reads a long value from the database representing milliseconds
-     * and converts it to a Duration.
+     * The column value is read as a {@code long} representing milliseconds and converted to
+     * a {@link Duration}.
      *
      * @param rs the ResultSet to read from
      * @param columnName the label of the column to read
-     * @return the Duration value created from the milliseconds in the column
+     * @return the Duration created from the milliseconds stored in the column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnName is not found
      */
     @Override

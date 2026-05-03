@@ -23,7 +23,7 @@ public class LogMessageTest extends AbstractTest {
         logger.error("Hi {}.", Array.of(1f, 2f));
         logger.error("Hi {}.", Array.of(1d, 2d));
         logger.error("Hi {}.", "123", "abc");
-        Object obj = CommonUtil.asArray("123", "abc");
+        Object obj = N.asArray("123", "abc");
         logger.error("Hi {}.", obj);
         assertNotNull(obj);
     }

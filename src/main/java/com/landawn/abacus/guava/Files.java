@@ -535,7 +535,7 @@ public abstract class Files { //NOSONAR
      * // Overwrite file
      * CharSink sink = Files.asCharSink(new File("output.txt"), StandardCharsets.UTF_8);
      * sink.write("Hello, World!");
-     * 
+     *
      * // Append to file
      * CharSink appendSink = Files.asCharSink(new File("log.txt"), StandardCharsets.UTF_8, FileWriteMode.APPEND);
      * appendSink.writeLines(Arrays.asList("Line 1", "Line 2"));
@@ -564,7 +564,7 @@ public abstract class Files { //NOSONAR
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Path path = Paths.get("output.txt");
-     * CharSink sink = Files.asCharSink(path, StandardCharsets.UTF_8, 
+     * CharSink sink = Files.asCharSink(path, StandardCharsets.UTF_8,
      *     StandardOpenOption.CREATE, StandardOpenOption.APPEND);
      * sink.write("Appended text");
      * }</pre>
@@ -882,7 +882,7 @@ public abstract class Files { //NOSONAR
      * <pre>{@code
      * // Rename a file
      * Files.move(new File("old_name.txt"), new File("new_name.txt"));
-     * 
+     *
      * // Move to different directory
      * Files.move(new File("file.txt"), new File("archive/file.txt"));
      * }</pre>
@@ -1052,7 +1052,7 @@ public abstract class Files { //NOSONAR
      * <pre>{@code
      * String name = Files.getNameWithoutExtension("/home/user/document.pdf");
      * // Returns: "document"
-     * 
+     *
      * String name2 = Files.getNameWithoutExtension("archive.tar.gz");
      * // Returns: "archive.tar"
      * }</pre>
@@ -1102,10 +1102,10 @@ public abstract class Files { //NOSONAR
      * <pre>{@code
      * String ext1 = Files.getFileExtension("document.pdf");
      * // Returns: "pdf"
-     * 
+     *
      * String ext2 = Files.getFileExtension("archive.tar.gz");
      * // Returns: "gz"
-     * 
+     *
      * String ext3 = Files.getFileExtension("README");
      * // Returns: ""
      * }</pre>
@@ -1267,7 +1267,7 @@ public abstract class Files { //NOSONAR
      * <pre>{@code
      * // Safe recursive delete
      * Files.deleteRecursively(Paths.get("/tmp/old_data"));
-     * 
+     *
      * // Force recursive delete even on insecure file systems
      * Files.deleteRecursively(Paths.get("/tmp/old_data"), RecursiveDeleteOption.ALLOW_INSECURE);
      * }</pre>
@@ -1340,7 +1340,7 @@ public abstract class Files { //NOSONAR
      * List<Path> directories = paths.stream()
      *     .filter(Files.isDirectory())
      *     .collect(Collectors.toList());
-     * 
+     *
      * // Don't follow symbolic links
      * Predicate<Path> isRealDir = Files.isDirectory(LinkOption.NOFOLLOW_LINKS);
      * }</pre>
@@ -1362,7 +1362,7 @@ public abstract class Files { //NOSONAR
      * List<Path> regularFiles = paths.stream()
      *     .filter(Files.isRegularFile())
      *     .collect(Collectors.toList());
-     * 
+     *
      * // Don't follow symbolic links
      * Predicate<Path> isRealFile = Files.isRegularFile(LinkOption.NOFOLLOW_LINKS);
      * }</pre>

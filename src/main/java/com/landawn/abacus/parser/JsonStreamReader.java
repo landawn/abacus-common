@@ -81,7 +81,7 @@ class JsonStreamReader extends JsonStringReader {
      * Reads and returns the next token identifier from the JSON input.
      * This method advances the reader position and identifies the next
      * structural token or value in the JSON stream.
-     * 
+     *
      * <p>The method handles:</p>
      * <ul>
      *   <li>Quoted strings (double and single quotes)</li>
@@ -271,7 +271,9 @@ class JsonStreamReader extends JsonStringReader {
 
                     ch = saveChar(ch);
 
-                    if (nextEvent > 0 && typeFlag == 0 && (ch == 'l' || ch == 'L' || ch == 'f' || ch == 'F' || ch == 'd' || ch == 'D')) {
+                    // See JsonStringReader.readNumber: charEvents has no entry for L/D, so the
+                    // nextEvent>0 guard previously made the type-flag branch dead for `123L` etc.
+                    if (typeFlag == 0 && (ch == 'l' || ch == 'L' || ch == 'f' || ch == 'F' || ch == 'd' || ch == 'D')) {
                         typeFlag = ch;
                     } else if (ch > 32) { // ignore <= 32 whitespace chars.
                         digitCount = -1; // TODO can't parse here. leave it Numbers.createNumber(...).
@@ -347,7 +349,7 @@ class JsonStreamReader extends JsonStringReader {
 
     /**
      * Reads the next character from the input source, refilling the buffer if necessary.
-     * 
+     *
      * @return the next character, or -1 if the end of the input is reached
      */
     protected int nextChar() {
@@ -431,7 +433,7 @@ class JsonStreamReader extends JsonStringReader {
 
     /**
      * Refills the internal read buffer from the underlying reader.
-     * 
+     *
      * @throws UncheckedIOException if an I/O error occurs
      */
     protected void refill() {
@@ -440,8 +442,15 @@ class JsonStreamReader extends JsonStringReader {
                 endIndexForText = strBeginIndex;
 
                 if (endIndexForText > startIndexForText) {
-                    N.copy(strValue, startIndexForText, cbuf, 0, endIndexForText - startIndexForText);
-                    nextChar = endIndexForText - startIndexForText;
+                    final int copyLen = endIndexForText - startIndexForText;
+
+                    // Grow cbuf if the prefix is longer than the current buffer capacity
+                    while (copyLen > cbufLen) {
+                        enlargeCharBuffer();
+                    }
+
+                    N.copy(strValue, startIndexForText, cbuf, 0, copyLen);
+                    nextChar = copyLen;
                 } else {
                     startIndexForText = 0;
                 }

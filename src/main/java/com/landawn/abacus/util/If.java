@@ -91,7 +91,7 @@ import com.landawn.abacus.annotation.Beta;
  *
  * // Null safety with conditional processing
  * If.notNull(user.getProfile())
- *   .then(profile -> updateProfile(profile))
+ *   .then(user.getProfile(), profile -> updateProfile(profile))
  *   .orElse(() -> createDefaultProfile(user));
  *
  * // Collection emptiness checking
@@ -527,7 +527,7 @@ public final class If {
 
     /**
      * Creates an If instance that checks if the given object array is {@code null} or empty.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.isEmpty(args)
@@ -543,7 +543,7 @@ public final class If {
 
     /**
      * Creates an If instance that checks if the given Collection is {@code null} or empty.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.isEmpty(resultList)
@@ -560,7 +560,7 @@ public final class If {
 
     /**
      * Creates an If instance that checks if the given Map is {@code null} or empty.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.isEmpty(configMap)
@@ -658,11 +658,11 @@ public final class If {
 
     /**
      * Creates an If instance that checks if the given object is not {@code null}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.notNull(user)
-     *   .then(u -> System.out.println("User: " + u.getName()))
+     *   .then(() -> System.out.println("User: " + user.getName()))
      *   .orElse(() -> System.out.println("User not found"));
      * }</pre>
      *
@@ -675,7 +675,7 @@ public final class If {
 
     /**
      * Creates an If instance that checks if the given CharSequence is not {@code null} and not empty.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.notEmpty(searchQuery)
@@ -827,7 +827,7 @@ public final class If {
 
     /**
      * Creates an If instance that checks if the given object array is not {@code null} and not empty.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.notEmpty(files)
@@ -843,7 +843,7 @@ public final class If {
 
     /**
      * Creates an If instance that checks if the given Collection is not {@code null} and not empty.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.notEmpty(selectedItems)
@@ -860,7 +860,7 @@ public final class If {
 
     /**
      * Creates an If instance that checks if the given Map is not {@code null} and not empty.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.notEmpty(properties)
@@ -952,7 +952,7 @@ public final class If {
      * @return an If instance that is {@code true} if the CharSequence is not {@code null}, not empty, and contains non-whitespace characters
      */
     public static If notBlank(final CharSequence s) {
-        // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu. 
+        // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
         return is(Strings.isNotBlank(s));
     }
 
@@ -1195,18 +1195,12 @@ public final class If {
         }
 
         /**
-         * Executes no action in the else case.
+         * Package-private no-op placeholder representing an empty else branch.
          *
          * <p>This method completes the conditional chain without performing any action
-         * when the initial condition is {@code false}. It's implicitly called when no {@code orElse}
-         * method is chained.</p>
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * If.is(condition)
-         *   .then(() -> doSomething())
-         *   .orElseDoNothing();  // Explicit no-op (optional, as it's the default behavior)
-         * }</pre>
+         * when the initial condition is {@code false}. It is implicitly the default
+         * behavior when no {@code orElse} method is chained, and is not part of the
+         * public API.</p>
          */
         void orElseDoNothing() {
             // Do nothing.
@@ -1272,7 +1266,7 @@ public final class If {
          * // Example 2: Context-based fallback
          * ProcessingContext context = new ProcessingContext();
          * If.notEmpty(dataList)
-         *   .then(context, (ctx, list) -> processData(ctx, list))
+         *   .then(context, ctx -> processData(ctx, dataList))
          *   .orElse(context, ctx -> setDefaultProcessingMode(ctx));
          * }</pre>
          *

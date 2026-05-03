@@ -40,9 +40,9 @@ public class MultimapTypeTest extends TestBase {
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = listMultimapType.parameterTypes();
+        List<Type<?>> paramTypes = listMultimapType.parameterTypes();
         Assertions.assertNotNull(paramTypes);
-        Assertions.assertTrue(paramTypes.length >= 2);
+        Assertions.assertTrue(paramTypes.size() >= 2);
     }
 
     @Test

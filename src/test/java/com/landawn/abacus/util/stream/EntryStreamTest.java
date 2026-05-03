@@ -245,7 +245,7 @@ public class EntryStreamTest extends TestBase {
         mixedMap.put("str", 1);
         mixedMap.put(42, 2);
         @SuppressWarnings("unchecked")
-        List<Map.Entry<String, Object>> result = ((EntryStream<Object, Object>) EntryStream.of(mixedMap)).parallel().selectByKey(String.class).toList();
+        List<Map.Entry<String, Object>> result = EntryStream.of(mixedMap).parallel().selectByKey(String.class).toList();
         assertEquals(1, result.size());
         assertEquals("str", result.get(0).getKey());
     }
@@ -280,7 +280,7 @@ public class EntryStreamTest extends TestBase {
         mixedValMap.put("a", 1);
         mixedValMap.put("b", "text");
         @SuppressWarnings("unchecked")
-        List<Map.Entry<String, Integer>> result = ((EntryStream<String, Object>) EntryStream.of(mixedValMap)).parallel().selectByValue(Integer.class).toList();
+        List<Map.Entry<String, Integer>> result = EntryStream.of(mixedValMap).parallel().selectByValue(Integer.class).toList();
         assertEquals(1, result.size());
         assertEquals(1, (int) result.get(0).getValue());
     }

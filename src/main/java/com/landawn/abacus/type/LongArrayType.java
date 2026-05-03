@@ -19,14 +19,20 @@ import java.io.IOException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Strings;
 
 /**
  * Type handler for {@code Long[]} arrays, providing serialization and deserialization support.
+ * Arrays are represented as bracket-enclosed, comma-separated lists (e.g., {@code [1, 2, 3]}).
+ * Null elements within the array are serialized as the literal string {@code "null"}.
  */
 public final class LongArrayType extends ObjectArrayType<Long> {
 
+    /**
+     * Package-private constructor for LongArrayType.
+     * This constructor is called by the TypeFactory to create Long[] type instances.
+     */
     LongArrayType() {
         super(Long[].class);
     }

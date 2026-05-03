@@ -27,14 +27,18 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
 
     public static final String OPTIONAL_LONG = "JdkOptionalLong";
 
+    /**
+     * Package-private constructor for JdkOptionalLongType.
+     * This constructor is called by the TypeFactory to create OptionalLong type instances.
+     */
     protected JdkOptionalLongType() {
         super(OPTIONAL_LONG);
     }
 
     /**
-     * Returns the Class object representing the OptionalLong type.
+     * Returns the Java class represented by this type handler.
      *
-     * @return OptionalLong.class
+     * @return {@code OptionalLong.class}
      */
     @Override
     public Class<OptionalLong> javaType() {

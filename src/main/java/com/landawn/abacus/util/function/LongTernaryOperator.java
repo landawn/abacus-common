@@ -16,8 +16,13 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Represents an operation on three long-valued operands that produces a long-valued result.
- * This is the three-arity primitive specialization of {@code Function} for long values.
+ * Represents an operation on three {@code long}-valued operands that produces a {@code long}-valued result.
+ * This is the three-arity primitive specialization of {@link java.util.function.LongBinaryOperator} for {@code long}.
+ *
+ * <p>Note: arithmetic operations on {@code long} values are subject to overflow
+ * (silently wraps around). {@code long} values range from {@link Long#MIN_VALUE} to
+ * {@link Long#MAX_VALUE}. Use {@link Math#addExact(long, long)} or similar methods
+ * when overflow detection is required.
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsLong(long, long, long)}.
  *
@@ -76,10 +81,10 @@ public interface LongTernaryOperator extends Throwables.LongTernaryOperator<Runt
      * long mid = median.applyAsLong(5L, 15L, 10L);   // returns 10L
      * }</pre>
      *
-     * @param a the first operand
-     * @param b the second operand
-     * @param c the third operand
-     * @return the operator result as a long value
+     * @param a the first {@code long} operand
+     * @param b the second {@code long} operand
+     * @param c the third {@code long} operand
+     * @return the {@code long}-valued result of applying this operator to the three operands
      */
     @Override
     long applyAsLong(long a, long b, long c);

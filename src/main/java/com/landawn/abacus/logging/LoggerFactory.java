@@ -58,7 +58,7 @@ public final class LoggerFactory {
     private static final boolean IS_ANDROID_PLATFORM = (JAVA_VENDOR != null && JAVA_VENDOR.toUpperCase().contains("ANDROID"))
             || (JAVA_VM_VENDOR != null && JAVA_VM_VENDOR.toUpperCase().contains("ANDROID"));
 
-    private static final Logger jdkLogger = new JDKLogger(LoggerFactory.class.getName());
+    private static final Logger jdkLogger = new JdkLogger(LoggerFactory.class.getName());
 
     private static final Map<String, Logger> namedLoggers = new ConcurrentHashMap<>();
 
@@ -187,7 +187,7 @@ public final class LoggerFactory {
                 case 3:
                 default:
                     if (logger == null) {
-                        logger = new JDKLogger(name);
+                        logger = new JdkLogger(name);
 
                         if (!initialized) {
                             jdkLogger.info("Initialized with JDK Logger");

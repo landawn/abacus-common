@@ -44,7 +44,7 @@ import java.lang.annotation.Target;
  *   <li>Returning empty collections instead of {@code null}.</li>
  *   <li>Using default values when {@code null} is provided.</li>
  *   <li>Gracefully skipping operations on {@code null} inputs.</li>
- *   <li>Implementing the Null Object pattern.</li>
+ *   <li>Implementing the Null Object pattern to represent absent values.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>

@@ -27,14 +27,14 @@ import com.landawn.abacus.util.N;
  * Package-private implementation of {@link Hasher} that wraps a Google Guava
  * {@link com.google.common.hash.Hasher}. This class serves as an adapter between
  * the abacus-common hashing API and the underlying Guava implementation.
- * 
+ *
  * <p>This class is stateful and not thread-safe, following the same contract as
  * the {@link Hasher} interface. Each instance should be used by only one thread
  * and for only one hash computation.
- * 
+ *
  * <p><b>Implementation Note:</b> This class is not intended for direct use by clients.
  * Hasher instances should be obtained from {@link HashFunction#newHasher()} methods.
- * 
+ *
  * @see Hasher
  * @see HashFunction
  */
@@ -48,10 +48,12 @@ final class GuavaHasher implements Hasher {
 
     /**
      * Constructs a new GuavaHasher wrapping the specified Guava hasher.
-     * 
-     * @param gHasher the Guava hasher to wrap
+     *
+     * @param gHasher the Guava hasher to wrap, must not be {@code null}
+     * @throws NullPointerException if {@code gHasher} is {@code null}
      */
     GuavaHasher(final com.google.common.hash.Hasher gHasher) {
+        N.requireNonNull(gHasher, "gHasher");
         this.gHasher = gHasher;
     }
 
@@ -82,7 +84,7 @@ final class GuavaHasher implements Hasher {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>Adds a byte by delegating to the wrapped Guava hasher's {@code putByte()} method.
      *
      * @param b the byte to add to the hash state
@@ -96,7 +98,7 @@ final class GuavaHasher implements Hasher {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>Adds a byte array by delegating to the wrapped Guava hasher's {@code putBytes()} method.
      *
      * @param bytes the bytes to add to the hash state
@@ -110,7 +112,7 @@ final class GuavaHasher implements Hasher {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>Adds a portion of a byte array by delegating to the wrapped Guava hasher's
      * {@code putBytes(byte[], int, int)} method.
      *
@@ -127,7 +129,7 @@ final class GuavaHasher implements Hasher {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>Adds bytes from a ByteBuffer by delegating to the wrapped Guava hasher's
      * {@code putBytes(ByteBuffer)} method.
      *
@@ -142,7 +144,7 @@ final class GuavaHasher implements Hasher {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>Adds a short value by delegating to the wrapped Guava hasher's {@code putShort()} method.
      *
      * @param s the short value to add
@@ -156,7 +158,7 @@ final class GuavaHasher implements Hasher {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>Adds an integer value by delegating to the wrapped Guava hasher's {@code putInt()} method.
      *
      * @param i the integer value to add
@@ -170,7 +172,7 @@ final class GuavaHasher implements Hasher {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>Adds a long value by delegating to the wrapped Guava hasher's {@code putLong()} method.
      *
      * @param l the long value to add
@@ -184,7 +186,7 @@ final class GuavaHasher implements Hasher {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>Adds a float value by delegating to the wrapped Guava hasher's {@code putFloat()} method.
      *
      * @param f the float value to add
@@ -198,7 +200,7 @@ final class GuavaHasher implements Hasher {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>Adds a double value by delegating to the wrapped Guava hasher's {@code putDouble()} method.
      *
      * @param d the double value to add
@@ -212,7 +214,7 @@ final class GuavaHasher implements Hasher {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>Adds a boolean value by delegating to the wrapped Guava hasher's {@code putBoolean()} method.
      *
      * @param b the boolean value to add
@@ -226,7 +228,7 @@ final class GuavaHasher implements Hasher {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>Adds a character value by delegating to the wrapped Guava hasher's {@code putChar()} method.
      *
      * @param c the character value to add
@@ -240,7 +242,7 @@ final class GuavaHasher implements Hasher {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>Adds all characters from an array. This implementation processes the entire array
      * by calling {@link #put(char[], int, int)} with appropriate parameters.
      *
@@ -254,11 +256,11 @@ final class GuavaHasher implements Hasher {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>Adds a portion of a character array. Since Guava's Hasher doesn't have a direct
      * method for character arrays, this implementation adds each character individually
      * using {@link #put(char)}.
-     * 
+     *
      * <p><b>Implementation Note:</b> This method validates the array bounds using
      * {@link N#checkFromIndexSize} before processing the characters.
      *
@@ -281,7 +283,7 @@ final class GuavaHasher implements Hasher {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>Adds a character sequence without encoding by delegating to the wrapped Guava
      * hasher's {@code putUnencodedChars()} method.
      *
@@ -296,7 +298,7 @@ final class GuavaHasher implements Hasher {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>Adds an encoded character sequence by delegating to the wrapped Guava hasher's
      * {@code putString()} method.
      *
@@ -312,7 +314,7 @@ final class GuavaHasher implements Hasher {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>Adds an object using a funnel by delegating to the wrapped Guava hasher's
      * {@code putObject()} method.
      *
@@ -329,7 +331,7 @@ final class GuavaHasher implements Hasher {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>Computes the final hash code by delegating to the wrapped Guava hasher's
      * {@code hash()} method. After this method is called, the hasher instance should
      * not be used again.

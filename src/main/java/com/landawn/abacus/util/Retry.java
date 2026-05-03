@@ -22,12 +22,29 @@ import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 
 /**
- * This class provides a mechanism to retry operations in case of exceptions.
- * It allows specifying the number of retry attempts, the interval between retries, and conditions for retry.
- * The conditions can be specified as predicates that test the exceptions thrown.
- * The class is parameterized by the type {@code T} which is the type of the result of the operation to be retried.
+ * Provides a mechanism to retry operations when exceptions are thrown or when returned results
+ * are unsatisfactory. The number of retry attempts, the delay between retries, and the conditions
+ * under which a retry is triggered are all configurable.
  *
- * @param <T> The type of the result of the operation to be retried.
+ * <p>Use the {@link #withFixedDelay(int, long, Predicate)} factory method for void operations or
+ * the {@link #withFixedDelay(int, long, BiPredicate)} overload for operations that return a value.</p>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Retry a void operation up to 3 times on IOException
+ * Retry<Void> retry = Retry.withFixedDelay(3, 1000, e -> e instanceof IOException);
+ * retry.run(() -> sendNetworkRequest());
+ *
+ * // Retry a value-returning operation if result is null or a timeout occurs
+ * Retry<String> retry2 = Retry.withFixedDelay(3, 500,
+ *     (result, ex) -> result == null || ex instanceof TimeoutException);
+ * String data = retry2.call(() -> fetchDataFromServer());
+ * }</pre>
+ *
+ * @param <T> the type of the result returned by the operation to be retried;
+ *            use {@code Void} for operations that do not return a value
+ * @see Predicate
+ * @see BiPredicate
  */
 @SuppressWarnings("java:S1192")
 public final class Retry<T> {

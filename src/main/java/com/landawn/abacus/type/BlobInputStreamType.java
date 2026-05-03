@@ -22,33 +22,43 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Type handler for BLOB (Binary Large Object) InputStream operations.
- * This class specializes in converting between SQL Blob objects and InputStreams,
- * providing seamless integration between database BLOB data and Java I/O streams.
+ * Type handler for {@link java.sql.Blob} columns exposed as {@link java.io.InputStream} values.
+ * Retrieval operations convert a SQL {@link java.sql.Blob} to an {@code InputStream} via
+ * {@link java.sql.Blob#getBinaryStream()}, while storage operations delegate to the JDBC
+ * {@code setBlob} methods.
+ *
+ * <p>When reading, the returned stream reads directly from the underlying BLOB object.
+ * Callers are responsible for closing the stream after use.</p>
+ *
+ * @see InputStreamType
+ * @see java.sql.Blob
  */
 public class BlobInputStreamType extends InputStreamType {
 
     /**
-     * The type name constant for BLOB InputStream type identification.
+     * The type name constant used to identify this type within the type system
+     * (value: {@code "BlobInputStream"}).
      */
     public static final String BLOB_INPUT_STREAM = "BlobInputStream";
 
     /**
-     * Package-private constructor for BlobInputStreamType.
-     * This constructor is intended to be called only by the TypeFactory.
+     * Package-private constructor for {@code BlobInputStreamType}.
+     * Instances are created by {@link TypeFactory}; do not instantiate directly.
      */
     BlobInputStreamType() {
         super(BLOB_INPUT_STREAM);
     }
 
     /**
-     * Retrieves a BLOB as an InputStream from a ResultSet at the specified column index.
-     * Converts the SQL Blob to an InputStream for reading binary data.
+     * Retrieves a BLOB column as an {@link java.io.InputStream} from a {@link java.sql.ResultSet}
+     * at the specified column index.
+     * Reads the column as a {@link java.sql.Blob} and returns its binary stream.
      *
-     * @param rs the ResultSet to retrieve the BLOB from
-     * @param columnIndex the column index (1-based) of the BLOB value
-     * @return an InputStream for reading the BLOB data, or {@code null} if the value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnIndex the 1-based index of the BLOB column
+     * @return an {@code InputStream} for reading the BLOB's binary content,
+     *         or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
      */
     @Override
     public InputStream get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -57,14 +67,15 @@ public class BlobInputStreamType extends InputStreamType {
     }
 
     /**
-     * Retrieves a BLOB as an InputStream from a ResultSet using the specified column label.
-     * Converts the SQL Blob to an InputStream for reading binary data.
+     * Retrieves a BLOB column as an {@link java.io.InputStream} from a {@link java.sql.ResultSet}
+     * using the specified column label.
+     * Reads the column as a {@link java.sql.Blob} and returns its binary stream.
      *
-     * @param rs the ResultSet to retrieve the BLOB from
-     * @param columnName the label for the column specified with the SQL AS clause,
-     *                    or the column name if no AS clause was specified
-     * @return an InputStream for reading the BLOB data, or {@code null} if the value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnName is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnName the column label as specified in the SQL AS clause, or the column name if no AS clause was used
+     * @return an {@code InputStream} for reading the BLOB's binary content,
+     *         or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
     @Override
     public InputStream get(final ResultSet rs, final String columnName) throws SQLException {
@@ -72,13 +83,15 @@ public class BlobInputStreamType extends InputStreamType {
     }
 
     /**
-     * Sets an InputStream as a BLOB parameter in a PreparedStatement at the specified position.
-     * The JDBC driver will read from the stream to populate the BLOB.
+     * Sets an {@link java.io.InputStream} as a BLOB parameter on a {@link java.sql.PreparedStatement}
+     * at the specified position.
+     * The JDBC driver reads data from the stream as needed to populate the BLOB.
+     * Delegates to {@link java.sql.PreparedStatement#setBlob(int, java.io.InputStream)}.
      *
-     * @param stmt the PreparedStatement to set the parameter on
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the InputStream containing the binary data for the BLOB, may be null
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param stmt the {@code PreparedStatement} on which to set the parameter
+     * @param columnIndex the 1-based parameter index to set
+     * @param x the {@code InputStream} containing binary BLOB data; may be {@code null}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x) throws SQLException {
@@ -86,13 +99,14 @@ public class BlobInputStreamType extends InputStreamType {
     }
 
     /**
-     * Sets a named InputStream as a BLOB parameter in a CallableStatement.
-     * The JDBC driver will read from the stream to populate the BLOB.
+     * Sets a named {@link java.io.InputStream} as a BLOB parameter on a {@link java.sql.CallableStatement}.
+     * The JDBC driver reads data from the stream as needed to populate the BLOB.
+     * Delegates to {@link java.sql.CallableStatement#setBlob(String, java.io.InputStream)}.
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param stmt the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the InputStream containing the binary data for the BLOB, may be null
-     * @throws SQLException if a database access error occurs or the parameter name is invalid
+     * @param x the {@code InputStream} containing binary BLOB data; may be {@code null}
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final InputStream x) throws SQLException {
@@ -100,14 +114,15 @@ public class BlobInputStreamType extends InputStreamType {
     }
 
     /**
-     * Sets an InputStream as a BLOB parameter in a PreparedStatement with a specified length.
-     * This method allows specification of the stream length for optimization.
+     * Sets an {@link java.io.InputStream} as a BLOB parameter on a {@link java.sql.PreparedStatement}
+     * at the specified position, with an explicit byte-length hint for the JDBC driver.
+     * Delegates to {@link java.sql.PreparedStatement#setBlob(int, java.io.InputStream, long)}.
      *
-     * @param stmt the PreparedStatement to set the parameter on
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the InputStream containing the binary data for the BLOB, may be null
+     * @param stmt the {@code PreparedStatement} on which to set the parameter
+     * @param columnIndex the 1-based parameter index to set
+     * @param x the {@code InputStream} containing binary BLOB data; may be {@code null}
      * @param sqlTypeOrLength the number of bytes in the stream
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x, final int sqlTypeOrLength) throws SQLException {
@@ -115,14 +130,15 @@ public class BlobInputStreamType extends InputStreamType {
     }
 
     /**
-     * Sets a named InputStream as a BLOB parameter in a CallableStatement with a specified length.
-     * This method allows specification of the stream length for optimization.
+     * Sets a named {@link java.io.InputStream} as a BLOB parameter on a {@link java.sql.CallableStatement},
+     * with an explicit byte-length hint for the JDBC driver.
+     * Delegates to {@link java.sql.CallableStatement#setBlob(String, java.io.InputStream, long)}.
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param stmt the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the InputStream containing the binary data for the BLOB, may be null
+     * @param x the {@code InputStream} containing binary BLOB data; may be {@code null}
      * @param sqlTypeOrLength the number of bytes in the stream
-     * @throws SQLException if a database access error occurs or the parameter name is invalid
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final InputStream x, final int sqlTypeOrLength) throws SQLException {
@@ -130,23 +146,14 @@ public class BlobInputStreamType extends InputStreamType {
     }
 
     /**
-     * Converts a SQL Blob object to an InputStream for reading its binary content.
-     * This static utility method extracts the binary stream from the Blob.
+     * Converts a {@link java.sql.Blob} to an {@link java.io.InputStream} for reading its binary content.
+     * Returns {@code null} if {@code blob} is {@code null}; otherwise delegates to
+     * {@link java.sql.Blob#getBinaryStream()}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * // In a DAO method
-     * ResultSet rs = stmt.executeQuery("SELECT document FROM files WHERE id = ?");
-     * if (rs.next()) {
-     *     Blob blob = rs.getBlob("document");
-     *     InputStream stream = BlobInputStreamType.blobToInputStream(blob);
-     *     // Read from stream...
-     * }
-     * }</pre>
-     *
-     * @param blob the SQL Blob to convert
-     * @return an InputStream for reading the Blob's content, or {@code null} if the blob is null
-     * @throws SQLException if there is an error accessing the BLOB value
+     * @param blob the SQL {@code Blob} to convert; may be {@code null}
+     * @return an {@code InputStream} for reading the BLOB's binary content,
+     *         or {@code null} if {@code blob} is {@code null}
+     * @throws SQLException if a database access error occurs while opening the BLOB stream
      */
     static InputStream blobToInputStream(final Blob blob) throws SQLException {
         if (blob != null) {

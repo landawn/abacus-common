@@ -26,16 +26,15 @@ import java.security.SecureRandom;
  * WS-Security utility methods for cryptographic operations commonly used in web service security.
  * This class provides thread-safe implementations for generating cryptographically secure nonces,
  * computing SHA-1 digests, and creating password digests according to WS-Security standards.
- * 
- * <p>The class uses cached instances of SecureRandom and MessageDigest for improved performance
- * while maintaining thread safety through synchronization. All methods are synchronized on the
- * class level to ensure safe concurrent access.</p>
- * 
+ *
+ * <p>The class uses a cached, thread-safe {@link SecureRandom} instance for nonce generation,
+ * and allocates a fresh {@link MessageDigest} per call for digest operations to avoid contention.
+ * All public methods are thread-safe and may be invoked concurrently.</p>
+ *
  * <p>Key features:</p>
  * <ul>
  *   <li>Cryptographically secure nonce generation using SHA1PRNG</li>
- *   <li>SHA-1 digest computation with cached MessageDigest instance</li>
- *   <li>Configurable digest algorithm via overloaded methods (e.g. SHA-256)</li>
+ *   <li>SHA-1 digest computation (default) and configurable algorithms via overloads (e.g. SHA-256)</li>
  *   <li>WS-Security compliant password digest creation</li>
  *   <li>Thread-safe implementation for concurrent environments</li>
  * </ul>
@@ -45,19 +44,19 @@ import java.security.SecureRandom;
  * backward compatibility with the WS-Security UsernameToken Profile 1.0 specification.
  * For new applications or when the WS-Security peer supports it, prefer the overloaded
  * methods that accept an algorithm parameter (e.g. {@code "SHA-256"}).</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Generate a nonce
  * byte[] nonce = WSSecurityUtil.generateNonce(16);
- * 
+ *
  * // Create WS-Security password digest
  * String timestamp = getCurrentTimestamp();
  * String passwordDigest = WSSecurityUtil.computePasswordDigest(
  *     nonce, timestamp.getBytes(), password.getBytes()
  * );
  * }</pre>
- * 
+ *
  * <p>Note: This class is adapted from Apache WSS4J developed at The Apache Software Foundation
  * under the Apache License 2.0. The methods may have been modified from their original implementation.</p>
  *
@@ -83,28 +82,20 @@ public final class WSSecurityUtil {
         }
     }
 
-    /** A cached MessageDigest object. */
-    private static final MessageDigest digest;
-
-    static {
-        try {
-            digest = MessageDigest.getInstance(HASH_ALGORITHM);
-        } catch (final NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     private WSSecurityUtil() {
         // Complete
     }
+
+    /** Cap to prevent a hostile-length call from holding the class lock through GC of a giant array. */
+    private static final int MAX_NONCE_LENGTH = 1024;
 
     /**
      * Generates a cryptographically secure nonce (number used once) of the specified length
      * using the SHA1PRNG algorithm. The nonce is suitable for use in security protocols where
      * unpredictable random values are required, such as WS-Security authentication headers.
      *
-     * <p>This method is thread-safe through class-level synchronization. The SecureRandom instance
-     * is cached for improved performance across multiple calls while maintaining cryptographic strength.</p>
+     * <p>This method relies on the thread-safety of the cached {@link SecureRandom} instance
+     * (which is cached for improved performance across multiple calls while maintaining cryptographic strength).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -113,38 +104,39 @@ public final class WSSecurityUtil {
      * String base64Nonce = Base64.getEncoder().encodeToString(nonce);
      * }</pre>
      *
-     * @param length the length of the nonce to be generated in bytes, must be positive
+     * @param length the length of the nonce to be generated in bytes, must be non-negative
+     *               and not exceed {@code 1024}
      * @return a byte array containing cryptographically secure random bytes of the specified length
-     * @throws IllegalArgumentException if length is negative
+     * @throws IllegalArgumentException if {@code length} is negative or exceeds {@code 1024}
      * @throws RuntimeException if an error occurs during the nonce generation
      */
     public static byte[] generateNonce(final int length) {
         if (length < 0) {
             throw new IllegalArgumentException("Nonce length cannot be negative: " + length);
         }
+        if (length > MAX_NONCE_LENGTH) {
+            throw new IllegalArgumentException("Nonce length exceeds maximum of " + MAX_NONCE_LENGTH + ": " + length);
+        }
 
-        synchronized (WSSecurityUtil.class) {
-            try {
-                final byte[] temp = new byte[length];
-                random.nextBytes(temp);
-
-                return temp;
-            } catch (final Exception ex) {
-                throw new RuntimeException("Error in generating nonce of length " + length, ex);
-            }
+        try {
+            final byte[] temp = new byte[length];
+            random.nextBytes(temp);
+            return temp;
+        } catch (final Exception ex) {
+            throw new RuntimeException("Error in generating nonce of length " + length, ex);
         }
     }
 
     /**
-     * Generates a SHA-1 digest (hash) of the input bytes. This method provides a thread-safe
-     * way to compute SHA-1 hashes using a cached MessageDigest instance, which improves
-     * performance by avoiding repeated MessageDigest instantiation.
+     * Generates a SHA-1 digest (hash) of the input bytes. This method allocates a fresh
+     * {@link MessageDigest} instance per call to avoid lock contention; the JCE provider's
+     * own implementation cache makes {@code MessageDigest.getInstance} cheap.
      *
      * <p>The SHA-1 algorithm produces a 160-bit (20-byte) hash value. While SHA-1 is considered
      * cryptographically weak for collision resistance in some contexts (such as digital signatures),
      * it remains in use for backward compatibility in many protocols including WS-Security.</p>
      *
-     * <p>This method is thread-safe through class-level synchronization.</p>
+     * <p>This method is thread-safe.</p>
      *
      * <p><b>Security Note:</b> This method uses SHA-1, which is cryptographically broken for
      * collision resistance. For new applications, prefer {@link #generateDigest(byte[], String)}
@@ -168,13 +160,14 @@ public final class WSSecurityUtil {
             throw new IllegalArgumentException("Input bytes cannot be null");
         }
 
-        synchronized (WSSecurityUtil.class) {
-            try {
-                digest.reset();
-                return digest.digest(inputBytes);
-            } catch (final Exception e) {
-                throw new RuntimeException("Error in generating digest", e);
-            }
+        try {
+            // Allocate a fresh MessageDigest per call. The cached instance + class-wide lock
+            // serialized every hashing call across the process and made generateNonce a DoS
+            // amplifier. SunJCE's MessageDigest implementation cache makes getInstance cheap.
+            final MessageDigest md = MessageDigest.getInstance(HASH_ALGORITHM);
+            return md.digest(inputBytes);
+        } catch (final NoSuchAlgorithmException e) {
+            throw new RuntimeException("Error in generating digest", e);
         }
     }
 
@@ -349,24 +342,17 @@ public final class WSSecurityUtil {
 
     /**
      * Creates a WS-Security compliant password digest using string inputs. This is a convenience
-     * method that converts the string parameters to bytes using the default charset before
-     * processing them with the WS-Security password digest algorithm.
+     * method that converts the string parameters to bytes using UTF-8 before processing them
+     * with the WS-Security password digest algorithm.
      *
      * <p>This method internally calls {@link #computePasswordDigest(byte[], byte[], byte[])} after
-     * converting all string parameters to byte arrays using the default charset. The resulting
-     * digest follows the WS-Security UsernameToken specification.</p>
+     * converting all string parameters to byte arrays using UTF-8 (as mandated by the WS-Security
+     * UsernameToken Profile). The resulting digest follows the WS-Security UsernameToken specification.</p>
      *
      * <p><b>Security Note:</b> This method uses SHA-1, which is cryptographically broken for
      * collision resistance. For new applications or when the WS-Security peer supports it,
      * prefer {@link #computePasswordDigest(String, String, String, String)} with a stronger
      * algorithm such as {@code "SHA-256"}.</p>
-     *
-     * <p><b>Important:</b> This method uses the default charset (Charsets.DEFAULT) for string-to-byte
-     * conversion. The choice of charset affects the resulting digest, as different charsets produce
-     * different byte representations of the same string. For maximum interoperability, especially with
-     * non-ASCII characters, consider using UTF-8 explicitly by calling the byte array version of this
-     * method with string.getBytes(StandardCharsets.UTF_8). Both parties (client and server) must use
-     * the same charset for the digest to match.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -406,17 +392,16 @@ public final class WSSecurityUtil {
             throw new IllegalArgumentException("Password cannot be null");
         }
 
-        return computePasswordDigest(nonce.getBytes(Charsets.DEFAULT), created.getBytes(Charsets.DEFAULT), password.getBytes(Charsets.DEFAULT));
+        // WS-Security UsernameToken Profile mandates UTF-8. Charsets.DEFAULT is the JVM platform
+        // charset (e.g. cp1252 on Windows) and produced different digests on different OSes for
+        // identical credentials containing non-ASCII characters.
+        return computePasswordDigest(nonce.getBytes(Charsets.UTF_8), created.getBytes(Charsets.UTF_8), password.getBytes(Charsets.UTF_8));
     }
 
     /**
      * Creates a password digest using string inputs and the specified algorithm. This is a
-     * convenience method that converts the string parameters to bytes using the default charset
-     * before computing the digest.
-     *
-     * <p><b>Important:</b> This method uses the default charset (Charsets.DEFAULT) for string-to-byte
-     * conversion. For maximum interoperability, especially with non-ASCII characters, consider using
-     * the byte array version with {@code string.getBytes(StandardCharsets.UTF_8)}.</p>
+     * convenience method that converts the string parameters to bytes using UTF-8 before
+     * computing the digest.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -451,6 +436,7 @@ public final class WSSecurityUtil {
             throw new IllegalArgumentException("Algorithm cannot be null");
         }
 
-        return computePasswordDigest(nonce.getBytes(Charsets.DEFAULT), created.getBytes(Charsets.DEFAULT), password.getBytes(Charsets.DEFAULT), algorithm);
+        // See note on the SHA-1 overload: standardize on UTF-8 for cross-platform interop.
+        return computePasswordDigest(nonce.getBytes(Charsets.UTF_8), created.getBytes(Charsets.UTF_8), password.getBytes(Charsets.UTF_8), algorithm);
     }
 }

@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.type;
 
+import java.util.List;
 import java.util.Map;
 
 import com.landawn.abacus.parser.JsonDeserConfig;
@@ -37,7 +38,7 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
 
     private static final Class<?> typeClass = Multiset.class;
 
-    private final Type<E>[] parameterTypes;
+    private final List<Type<?>> parameterTypes;
 
     private final Type<E> elementType;
 
@@ -48,24 +49,18 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
         super(getTypeName(typeClass, parameterTypeName, false));
 
         declaringName = getTypeName(typeClass, parameterTypeName, true);
-        parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
-        elementType = parameterTypes[0];
+        elementType = TypeFactory.getType(parameterTypeName);
+        parameterTypes = List.of(elementType);
 
         jdc = JsonDeserConfig.create().setMapKeyType(elementType).setMapValueType(Integer.class);
     }
 
     /**
-     * Returns the declaring name of this Multiset type.
-     * The declaring name includes the fully qualified class name of the element type.
+     * Returns the declaring name of this {@link Multiset} type.
+     * The declaring name uses the simple (non-fully-qualified) class names for the
+     * multiset class and its element type parameter.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Multiset<String>> type = TypeFactory.getType("Multiset<String>");
-     * String name = type.declaringName();
-     * // Returns: "Multiset<String>"
-     * }</pre>
-     *
-     * @return The declaring name in format "Multiset&lt;ElementDeclaringName&gt;"
+     * @return the declaring name, e.g. {@code "Multiset<String>"}
      */
     @Override
     public String declaringName() {
@@ -73,16 +68,9 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
     }
 
     /**
-     * Returns the Class object representing the Multiset type.
+     * Returns the {@link Class} object representing the {@link Multiset} type.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Multiset<String>> type = TypeFactory.getType("Multiset<String>");
-     * Class<Multiset<String>> clazz = type.javaType();
-     * // Returns: Multiset.class
-     * }</pre>
-     *
-     * @return The Class object for Multiset
+     * @return {@code Multiset.class}
      */
     @Override
     public Class<Multiset<E>> javaType() {
@@ -90,16 +78,9 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
     }
 
     /**
-     * Returns the type handler for the elements contained in this multiset.
+     * Returns the type handler for the elements contained in this {@link Multiset}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Multiset<String>> type = TypeFactory.getType("Multiset<String>");
-     * Type<String> elemType = type.elementType();
-     * // Returns: StringType instance
-     * }</pre>
-     *
-     * @return the Type instance representing the element type of this multiset
+     * @return the {@code Type} instance representing the element type
      */
     @Override
     public Type<E> elementType() {
@@ -107,29 +88,21 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
     }
 
     /**
-     * Gets the parameter types for this generic Multiset type.
-     * The array contains a single element: the element type.
+     * Returns the parameter types for this generic {@link Multiset} type.
+     * The list always contains a single element: the element type.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Multiset<String>> type = TypeFactory.getType("Multiset<String>");
-     * Type<?>[] paramTypes = type.parameterTypes();
-     * // Returns: [StringType]
-     * // paramTypes[0] is the element type (String)
-     * }</pre>
-     *
-     * @return An array containing the element type
+     * @return an immutable single-element list containing the element type
      */
     @Override
-    public Type<E>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 
     /**
-     * Indicates whether this is a generic type.
-     * For MultisetType, this always returns {@code true} since Multiset is parameterized with an element type.
+     * Indicates whether this is a parameterized type.
+     * Always returns {@code true} because {@link Multiset} is parameterized with an element type.
      *
-     * @return {@code true}, indicating that Multiset is a generic type
+     * @return {@code true}
      */
     @Override
     public boolean isParameterizedType() {
@@ -137,10 +110,10 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
     }
 
     /**
-     * Indicates whether instances of this type can be serialized.
-     * Multiset objects can be serialized through this type handler.
+     * Indicates whether instances of this type support serialization.
+     * {@link Multiset} objects are serialized to and deserialized from JSON through this type handler.
      *
-     * @return {@code true}, indicating that Multiset is serializable through this type
+     * @return {@code true}
      */
     @Override
     public boolean isSerializable() {
@@ -148,27 +121,13 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
     }
 
     /**
-     * Converts a Multiset object to its JSON string representation.
-     * The Multiset is first converted to a Map where each element maps to its count,
-     * then serialized as JSON.
+     * Converts a {@link Multiset} object to its JSON string representation.
+     * The {@code Multiset} is first converted to a {@link java.util.Map} via {@link Multiset#toMap()}
+     * where each element maps to its occurrence count, and the resulting map is then serialized as JSON.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Multiset<String>> type = TypeFactory.getType("Multiset<String>");
-     * Multiset<String> multiset = N.newMultiset();
-     * multiset.add("apple", 3);
-     * multiset.add("orange", 2);
-     * multiset.add("banana", 1);
-     *
-     * String json = type.stringOf(multiset);
-     * // Returns: {"apple":3,"orange":2,"banana":1}
-     *
-     * json = type.stringOf(null);
-     * // Returns: null
-     * }</pre>
-     *
-     * @param x The Multiset object to convert
-     * @return The JSON string representation of the Multiset as a map of element to count, or {@code null} if the input is null
+     * @param x the {@code Multiset} object to convert, may be {@code null}
+     * @return the JSON string representation of the {@code Multiset} as an element-to-count map
+     *         (e.g., {@code {"apple":3,"orange":2}}), or {@code null} if the input is {@code null}
      */
     @Override
     public String stringOf(final Multiset<E> x) {
@@ -176,26 +135,12 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
     }
 
     /**
-     * Parses a JSON string to create a Multiset object.
-     * The string should represent a JSON object where each key is an element and the value is its count.
+     * Parses a JSON string to create a {@link Multiset} object.
+     * The JSON must be an object where each key is an element and its value is the occurrence count,
+     * e.g. {@code {"apple":3,"orange":2,"banana":1}}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Multiset<String>> type = TypeFactory.getType("Multiset<String>");
-     *
-     * Multiset<String> multiset = type.valueOf("{\"apple\":3,\"orange\":2,\"banana\":1}");
-     * // Returns: Multiset with "apple" having count 3, "orange" count 2, "banana" count 1
-     * // multiset.count("apple") returns 3
-     *
-     * multiset = type.valueOf(null);
-     * // Returns: null
-     *
-     * multiset = type.valueOf("{}");
-     * // Returns: empty Multiset
-     * }</pre>
-     *
-     * @param str The JSON string to parse
-     * @return The parsed Multiset object, or {@code null} if the input is {@code null} or empty
+     * @param str the JSON string to parse; may be {@code null} or blank
+     * @return the parsed {@code Multiset} object, or {@code null} if the input is {@code null} or blank
      */
     @Override
     public Multiset<E> valueOf(final String str) {
@@ -222,10 +167,10 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      * Generates the type name for a Multiset with the specified element type.
      * This is an internal method used by the type system.
      *
-     * @param typeClass The Multiset class
-     * @param parameterTypeName The name of the element type
-     * @param isDeclaringName Whether to use declaring names (true) or regular names (false)
-     * @return The formatted type name string
+     * @param typeClass the Multiset class
+     * @param parameterTypeName the name of the element type
+     * @param isDeclaringName {@code true} to use declaring (simple) names; {@code false} for canonical names
+     * @return the formatted type name string
      */
     @SuppressWarnings("hiding")
     protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {

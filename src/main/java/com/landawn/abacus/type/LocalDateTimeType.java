@@ -26,24 +26,25 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 
 /**
- * Type handler for {@link LocalDateTime} values. Provides serialization, deserialization,
- * and JDBC integration for Java's {@code LocalDateTime} type, supporting conversions
- * to and from strings, milliseconds, and SQL timestamps.
+ * Type handler for {@link java.time.LocalDateTime} values.
+ * Provides serialization, deserialization, and JDBC integration for Java's {@code LocalDateTime} type,
+ * supporting conversions to and from strings, milliseconds since the epoch, and SQL timestamps.
  *
- * <p><b>Usage Examples:</b></p>
- * <pre>{@code
- * Type<LocalDateTime> type = Type.ofLocalDateTime();
- * LocalDateTime dt = type.valueOf("2024-03-15T10:30:00");
- * String str = type.stringOf(dt);
- * }</pre>
+ * <p>String representations follow the ISO-8601 standard (e.g., {@code "2024-03-15T10:30:00"}).
+ * Database columns are read and written using JDBC's native {@code LocalDateTime} support with a
+ * {@link java.sql.Timestamp} fallback for older drivers.</p>
  *
  * @see AbstractTemporalType
- * @see LocalDateTime
+ * @see java.time.LocalDateTime
  */
 public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
 
     public static final String LOCAL_DATE_TIME = LocalDateTime.class.getSimpleName();
 
+    /**
+     * Package-private constructor for LocalDateTimeType.
+     * This constructor is called by the TypeFactory to create LocalDateTime type instances.
+     */
     LocalDateTimeType() {
         super(LOCAL_DATE_TIME);
     }
@@ -68,7 +69,9 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
 
     /**
      * Converts a LocalDateTime object to its string representation.
-     * The string format follows the ISO-8601 standard (yyyy-MM-ddTHH:mm:ss).
+     * Uses {@code LocalDateTime.toString()}, which produces an ISO-8601 compatible string
+     * (e.g., {@code "2021-01-01T10:30:00"} or {@code "2021-01-01T10:30:00.123456789"} when
+     * sub-second precision is present).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -78,8 +81,8 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * System.out.println(str);   // Outputs: 2021-01-01T10:30:00
      * }</pre>
      *
-     * @param x The LocalDateTime object to convert
-     * @return The string representation of the LocalDateTime, or {@code null} if the input is null
+     * @param x the LocalDateTime object to convert; may be {@code null}
+     * @return the ISO-8601 string representation of the LocalDateTime, or {@code null} if the input is {@code null}
      */
     @Override
     public String stringOf(final LocalDateTime x) {

@@ -19,30 +19,35 @@ import org.bson.types.ObjectId;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for BSON ObjectId operations.
- * This class provides conversion between org.bson.types.ObjectId instances
- * and their hexadecimal string representations, enabling storage and
- * transmission of MongoDB ObjectIds in text formats.
+ * Type handler for BSON {@link org.bson.types.ObjectId} values used with MongoDB.
+ * Converts between {@code ObjectId} instances and their 24-character hexadecimal string
+ * representations, enabling storage and transmission of MongoDB ObjectIds in text-based formats.
+ *
+ * <p>String representation: a 24-character lowercase hexadecimal string produced by
+ * {@link org.bson.types.ObjectId#toHexString()}.</p>
+ *
+ * @see org.bson.types.ObjectId
  */
 public class BSONObjectIdType extends AbstractType<ObjectId> {
 
     /**
-     * The type name constant for BSON ObjectId type identification.
+     * The type name constant used to identify this type within the type system
+     * (value: {@code "BSONObjectId"}).
      */
     public static final String BSON_OBJECT_ID = "BSONObjectId";
 
     /**
-     * Package-private constructor for BSONObjectIdType.
-     * This constructor is called by the TypeFactory to create BSONObjectId type instances.
+     * Package-private constructor for {@code BSONObjectIdType}.
+     * Instances are created by {@link TypeFactory}; do not instantiate directly.
      */
     BSONObjectIdType() {
         super(BSON_OBJECT_ID);
     }
 
     /**
-     * Returns the Class object representing the ObjectId class.
+     * Returns the Java class represented by this type handler.
      *
-     * @return the Class object for org.bson.types.ObjectId
+     * @return {@code ObjectId.class}
      */
     @Override
     public Class<ObjectId> javaType() {
@@ -50,13 +55,12 @@ public class BSONObjectIdType extends AbstractType<ObjectId> {
     }
 
     /**
-     * Converts an ObjectId to its hexadecimal string representation.
-     * The resulting string is a 24-character hexadecimal representation
-     * of the 12-byte ObjectId value.
+     * Converts an {@link org.bson.types.ObjectId} to its 24-character hexadecimal string representation.
+     * Delegates to {@link org.bson.types.ObjectId#toHexString()}.
      *
-     * @param x the ObjectId to convert
-     * @return the 24-character hexadecimal string representation of the ObjectId,
-     *         or {@code null} if the input is null
+     * @param x the {@code ObjectId} to convert; may be {@code null}
+     * @return the 24-character lowercase hexadecimal string representing the 12-byte ObjectId,
+     *         or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final ObjectId x) {
@@ -64,13 +68,13 @@ public class BSONObjectIdType extends AbstractType<ObjectId> {
     }
 
     /**
-     * Converts a hexadecimal string representation to an ObjectId.
-     * Parses a 24-character hexadecimal string to create a new ObjectId instance.
+     * Parses a 24-character hexadecimal string and returns a new {@link org.bson.types.ObjectId}.
+     * Leading and trailing whitespace is trimmed before parsing.
      *
-     * @param str the hexadecimal string to parse (must be 24 characters)
-     * @return a new ObjectId created from the hexadecimal string,
-     *         or {@code null} if str is {@code null} or empty
-     * @throws IllegalArgumentException if the string is not a valid 24-character hex string
+     * @param str the 24-character hexadecimal string to parse; may be {@code null} or blank
+     * @return a new {@code ObjectId} created from the hexadecimal string,
+     *         or {@code null} if {@code str} is {@code null}, empty, or blank
+     * @throws IllegalArgumentException if {@code str} is not a valid 24-character hexadecimal string
      */
     @Override
     public ObjectId valueOf(final String str) {

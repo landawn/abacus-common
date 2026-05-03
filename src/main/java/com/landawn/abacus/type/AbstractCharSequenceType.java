@@ -16,12 +16,16 @@ package com.landawn.abacus.type;
 
 /**
  * The abstract base class for {@code CharSequence} types in the type system.
+ * <p>
  * This class provides common functionality for handling {@code CharSequence} implementations
- * such as {@code String}, {@code StringBuilder}, {@code StringBuffer}, and other custom {@code CharSequence} types.
- * {@code CharSequence} types are treated as primary types that can be directly serialized
- * and compared.
+ * such as {@link String}, {@link StringBuilder}, {@link StringBuffer}, and other custom
+ * {@code CharSequence} types.
+ * {@code CharSequence} types are treated as primary types that are immutable, comparable,
+ * and can be directly serialized and deserialized.
+ * </p>
  *
  * @param <T> the specific {@code CharSequence} type (e.g., {@code String}, {@code StringBuilder}, {@code StringBuffer})
+ * @see AbstractStringType
  */
 public abstract class AbstractCharSequenceType<T extends CharSequence> extends AbstractPrimaryType<T> {
 

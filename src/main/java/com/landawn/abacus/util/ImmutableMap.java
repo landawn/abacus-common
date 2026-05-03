@@ -24,7 +24,7 @@ import com.landawn.abacus.annotation.Beta;
  * An immutable, thread-safe implementation of the Map interface.
  * Once created, the contents of an ImmutableMap cannot be modified.
  * All mutating operations (put, remove, clear, etc.) will throw UnsupportedOperationException.
- * 
+ *
  * <p>This class provides several static factory methods for creating instances:
  * <ul>
  * <li>{@link #empty()} - returns an empty immutable map</li>
@@ -33,10 +33,10 @@ import com.landawn.abacus.annotation.Beta;
  * <li>{@link #wrap(Map)} - wraps an existing map (changes to the underlying map will be reflected)</li>
  * <li>{@link #builder()} - provides a builder for constructing immutable maps</li>
  * </ul>
- * 
+ *
  * <p>The implementation preserves the iteration order of entries when created from a LinkedHashMap
  * or SortedMap, otherwise no specific iteration order is guaranteed.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create an immutable map with specific entries
@@ -45,7 +45,7 @@ import com.landawn.abacus.annotation.Beta;
  *     "two", 2,
  *     "three", 3
  * );
- * 
+ *
  * // Create from a builder
  * ImmutableMap<String, String> built = ImmutableMap.<String, String>builder()
  *     .put("key1", "value1")
@@ -76,7 +76,7 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
     /**
      * Returns an empty ImmutableMap. This method always returns the same cached instance,
      * making it memory efficient for representing empty maps.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> emptyMap = ImmutableMap.empty();
@@ -442,7 +442,7 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      * If the map is {@code null} or empty, an empty ImmutableMap is returned.
      * Otherwise, a new ImmutableMap is created with a defensive copy of the map's entries.
      * The iteration order is preserved if the source map is a LinkedHashMap or SortedMap.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> mutable = new HashMap<>();
@@ -507,7 +507,7 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
     //     * Returns the value to which the specified key is mapped, or the defaultValue if this map
     //     * contains no mapping for the key. This method distinguishes between a key that is mapped
     //     * to {@code null} and a key that is not present in the map.
-    //     * 
+    //     *
     //     * <p><b>Usage Examples:</b></p>
     //     * <pre>{@code
     //     * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
@@ -532,7 +532,7 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      * The builder allows adding key-value pairs one by one and then creating an immutable map.
      * This is useful when the number of entries is not known at compile time.
      * The builder uses a HashMap internally for efficient entry addition.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.<String, Integer>builder()
@@ -581,10 +581,10 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      * A builder for creating ImmutableMap instances.
      * The builder pattern allows for flexible construction of immutable maps,
      * especially useful when entries are added conditionally or in loops.
-     * 
+     *
      * <p>The builder is not thread-safe and should not be used concurrently
      * from multiple threads without external synchronization.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.<String, Integer>builder()

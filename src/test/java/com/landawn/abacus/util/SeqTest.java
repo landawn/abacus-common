@@ -343,15 +343,15 @@ public class SeqTest extends AbstractTest {
                 Seq.of("a").cycled().limit(10).println();
                 Seq.of("a", "b").cycled().limit(10).println();
                 Stream.of("a").cycled().limit(10).println();
-                Stream.of(CommonUtil.toList("a").iterator()).cycled().limit(9).println();
-                Stream.of(CommonUtil.toList("a", "b").iterator()).cycled().limit(9).println();
+                Stream.of(N.toList("a").iterator()).cycled().limit(9).println();
+                Stream.of(N.toList("a", "b").iterator()).cycled().limit(9).println();
             }
             {
                 Seq.of("a").cycled(10).limit(10).println();
                 Seq.of("a", "b").cycled(10).limit(10).println();
                 Stream.of("a").cycled(10).limit(10).println();
-                Stream.of(CommonUtil.toList("a").iterator()).cycled(10).limit(9).println();
-                Stream.of(CommonUtil.toList("a", "b").iterator()).cycled(10).limit(9).println();
+                Stream.of(N.toList("a").iterator()).cycled(10).limit(9).println();
+                Stream.of(N.toList("a", "b").iterator()).cycled(10).limit(9).println();
             }
         });
     }
@@ -2563,7 +2563,7 @@ public class SeqTest extends AbstractTest {
         String[] a2 = { "c", "d" };
         Seq<String, Exception> seq = Seq.concat(a1, a2);
         assertEquals(Arrays.asList("a", "b", "c", "d"), drainWithException(seq));
-        assertTrue(drainWithException(Seq.concat(CommonUtil.EMPTY_STRING_ARRAY)).isEmpty());
+        assertTrue(drainWithException(Seq.concat(N.EMPTY_STRING_ARRAY)).isEmpty());
     }
 
     @Test
@@ -3317,7 +3317,7 @@ public class SeqTest extends AbstractTest {
 
         Seq<Integer, Exception> seqActual = Seq.of(1, 2, 3, 2, 1).dropWhile(x -> x < 3, dropped::add);
         assertEquals(Arrays.asList(3, 2, 1), drainWithException(seqActual));
-        assertEquals(CommonUtil.toList(1, 2), dropped,
+        assertEquals(N.toList(1, 2), dropped,
                 "Action should be called on the first element not satisfying the drop condition, based on current impl.");
     }
 
@@ -9452,8 +9452,8 @@ public class SeqTest extends AbstractTest {
     @Test
     public void test_index() {
         assertDoesNotThrow(() -> {
-            Iterables.indexOf(CommonUtil.toList(1, 2, 5, 1), 1).boxed().ifPresent(Fn.println());
-            Iterables.lastIndexOf(CommonUtil.toLinkedHashSet(1, 2, 5, 3), 3).boxed().ifPresent(Fn.println());
+            Iterables.indexOf(N.toList(1, 2, 5, 1), 1).boxed().ifPresent(Fn.println());
+            Iterables.lastIndexOf(N.toLinkedHashSet(1, 2, 5, 3), 3).boxed().ifPresent(Fn.println());
         });
     }
 
@@ -10047,7 +10047,7 @@ public class SeqTest extends AbstractTest {
 
     @Test
     public void test_toDataset() throws Exception {
-        List<Map<String, Object>> data = Arrays.asList(CommonUtil.asMap("id", 1, "name", "Alice"), CommonUtil.asMap("id", 2, "name", "Bob"));
+        List<Map<String, Object>> data = Arrays.asList(N.asMap("id", 1, "name", "Alice"), N.asMap("id", 2, "name", "Bob"));
         Dataset dataset = Seq.of(data).toDataset();
         assertEquals(2, dataset.size());
         assertTrue(dataset.columnNames().containsAll(Arrays.asList("id", "name")));
@@ -10543,7 +10543,7 @@ public class SeqTest extends AbstractTest {
     public void test_cast() {
         assertDoesNotThrow(() -> {
             Seq.<String, SQLException> of("a", "b").transform(s -> s.map(String::length));
-            Seq.of(CommonUtil.toList("a", "b"), SQLException.class)
+            Seq.of(N.toList("a", "b"), SQLException.class)
                     .cast()
                     .peek(it -> IOUtils.readLines(new FileInputStream(new File("./test.txt")), Charsets.DEFAULT));
         });
@@ -10879,8 +10879,8 @@ public class SeqTest extends AbstractTest {
     public void testTransformB_ComplexTransformation() throws Exception {
         Seq<String, Exception> seq = Seq.of("hello", "world", "java");
 
-        Seq<Character, Exception> result = seq.transformB(stream -> stream.filter(s -> s.length() > 4).flatmapToChar(s -> s.toCharArray()).mapToObj(c -> c),
-                false);
+        Seq<Character, Exception> result = seq
+                .transformB(stream -> stream.filter(s -> s.length() > 4).flatMapArrayToChar(s -> s.toCharArray()).mapToObj(c -> c), false);
 
         List<Character> list = result.toList();
         assertEquals(Arrays.asList('h', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd'), list);

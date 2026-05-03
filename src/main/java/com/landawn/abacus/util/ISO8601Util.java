@@ -26,22 +26,24 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 
 /**
  * Utility class for parsing and formatting dates in ISO8601 format.
- * 
+ *
  * <p>This class provides fast and GC-friendly methods for handling ISO8601 date/time strings,
  * making it much more efficient than using SimpleDateFormat, especially when processing
  * large numbers of date objects.</p>
- * 
- * <p>Supported parse format: {@code [yyyy-MM-dd|yyyyMMdd][T(hh:mm[:ss[.sss]]|hhmm[ss[.sss]])]?[Z|[+-]hh[:]mm]}</p>
- * 
+ *
+ * <p>Supported parse format: {@code [yyyy-MM-dd|yyyyMMdd][T(HH:mm[:ss[.sss]]|HHmm[ss[.sss]])]?[Z|[+-]HH[:]mm]}
+ * (24-hour clock; the historical {@code hh} form in some ISO-8601 references is a 24-hour hour-of-day,
+ * NOT the {@code SimpleDateFormat} 12-hour {@code hh}).</p>
+ *
  * <p>Note: This class is adapted from Jackson's date utilities.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Formatting
  * Date date = new Date();
  * String iso = ISO8601Util.format(date);   // "2023-12-25T10:30:45Z"
  * String isoWithMillis = ISO8601Util.format(date, true);   // "2023-12-25T10:30:45.123Z"
- * 
+ *
  * // Parsing
  * Date parsed = ISO8601Util.parse("2023-12-25T10:30:45.123Z");
  * Date parsed2 = ISO8601Util.parse("20231225T103045Z");
@@ -52,7 +54,10 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 final class ISO8601Util {
 
     /**
-     * The default length of an ISO8601 formatted string with milliseconds and timezone.
+     * The default length of an ISO8601 formatted string with milliseconds and timezone offset.
+     * Layout: {@code yyyy-MM-ddTHH:mm:ss.SSS+00:00} (29 characters, 24-hour clock).
+     * Note: The template string uses lowercase {@code hh} only as a length reference; the actual
+     * formatted output always uses 24-hour {@code HH} notation.
      */
     static final int DEF_8601_LEN = "yyyy-MM-ddThh:mm:ss.SSS+00:00".length();
 
@@ -71,9 +76,9 @@ final class ISO8601Util {
 
     /**
      * Formats a date into ISO8601 format using default settings.
-     * 
-     * <p>The output format is {@code yyyy-MM-ddThh:mm:ssZ} (no millisecond precision, UTC timezone).</p>
-     * 
+     *
+     * <p>The output format is {@code yyyy-MM-ddTHH:mm:ssZ} (no millisecond precision, UTC timezone, 24-hour clock).</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Date date = new Date();
@@ -89,9 +94,9 @@ final class ISO8601Util {
 
     /**
      * Formats a date into ISO8601 format with optional millisecond precision.
-     * 
-     * <p>The output format is {@code yyyy-MM-ddThh:mm:ss[.sss]Z} (UTC timezone).</p>
-     * 
+     *
+     * <p>The output format is {@code yyyy-MM-ddTHH:mm:ss[.SSS]Z} (UTC timezone, 24-hour clock).</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Date date = new Date();
@@ -108,12 +113,12 @@ final class ISO8601Util {
     }
 
     /**
-     * Formats a date into ISO8601 format with specified timezone.
-     * 
+     * Formats a date into ISO8601 format with the specified timezone using the US locale.
+     *
      * @param date the date to format
-     * @param millis {@code true} to include milliseconds
-     * @param tz the timezone to use
-     * @return the formatted date string
+     * @param millis {@code true} to include milliseconds, {@code false} otherwise
+     * @param tz the timezone to use for formatting
+     * @return the formatted date string in ISO8601 format
      * @deprecated Use {@link #format(Date, boolean, TimeZone, Locale)} instead
      */
     @Deprecated // since 2.9
@@ -123,9 +128,9 @@ final class ISO8601Util {
 
     /**
      * Formats a date into ISO8601 format with full control over formatting options.
-     * 
-     * <p>The output format is {@code yyyy-MM-ddThh:mm:ss[.sss][Z|[+-]hh:mm]}</p>
-     * 
+     *
+     * <p>The output format is {@code yyyy-MM-ddTHH:mm:ss[.SSS][Z|[+-]HH:mm]} (24-hour clock).</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Date date = new Date();
@@ -168,18 +173,18 @@ final class ISO8601Util {
 
     /**
      * Parses a date from an ISO8601 formatted string.
-     * 
-     * <p>Supported formats include:</p>
+     *
+     * <p>Supported formats include (24-hour clock):</p>
      * <ul>
      * <li>{@code yyyy-MM-dd}</li>
      * <li>{@code yyyyMMdd}</li>
-     * <li>{@code yyyy-MM-ddThh:mm:ss}</li>
-     * <li>{@code yyyy-MM-ddThh:mm:ss.sss}</li>
-     * <li>{@code yyyy-MM-ddThh:mm:ssZ}</li>
-     * <li>{@code yyyy-MM-ddThh:mm:ss+hh:mm}</li>
-     * <li>{@code yyyy-MM-ddThh:mm:ss-hh:mm}</li>
+     * <li>{@code yyyy-MM-ddTHH:mm:ss}</li>
+     * <li>{@code yyyy-MM-ddTHH:mm:ss.SSS}</li>
+     * <li>{@code yyyy-MM-ddTHH:mm:ssZ}</li>
+     * <li>{@code yyyy-MM-ddTHH:mm:ss+HH:mm}</li>
+     * <li>{@code yyyy-MM-ddTHH:mm:ss-HH:mm}</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Date date1 = ISO8601Util.parse("2023-12-25");
@@ -198,17 +203,17 @@ final class ISO8601Util {
 
     /**
      * Parses a date from an ISO8601 formatted string with parse position tracking.
-     * 
+     *
      * <p>This method allows partial parsing of a string by tracking the parse position.
      * The position will be updated to indicate where parsing stopped.</p>
-     * 
-     * <p>Supported formats include:</p>
+     *
+     * <p>Supported formats include (24-hour clock):</p>
      * <ul>
      * <li>{@code [yyyy-MM-dd|yyyyMMdd]}</li>
-     * <li>{@code [yyyy-MM-dd|yyyyMMdd]T[hh:mm[:ss[.sss]]|hhmm[ss[.sss]]]}
-     * <li>{@code [yyyy-MM-dd|yyyyMMdd]T[hh:mm[:ss[.sss]]|hhmm[ss[.sss]]][Z|[+-]hh:mm]}</li>
+     * <li>{@code [yyyy-MM-dd|yyyyMMdd]T[HH:mm[:ss[.SSS]]|HHmm[ss[.SSS]]]}
+     * <li>{@code [yyyy-MM-dd|yyyyMMdd]T[HH:mm[:ss[.SSS]]|HHmm[ss[.SSS]]][Z|[+-]HH:mm]}</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ParsePosition pos = new ParsePosition(0);
@@ -391,6 +396,15 @@ final class ISO8601Util {
         return (offset < value.length()) && (value.charAt(offset) == expected);
     }
 
+    /**
+     * Parses a non-negative integer from the specified substring.
+     *
+     * @param value the string containing the digits to parse
+     * @param beginIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the parsed non-negative integer value
+     * @throws NumberFormatException if the substring does not represent a valid non-negative integer
+     */
     private static int parseInt(final String value, final int beginIndex, final int toIndex) throws NumberFormatException {
         if (beginIndex < 0 || toIndex > value.length() || beginIndex > toIndex) {
             throw new NumberFormatException(value);

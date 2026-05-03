@@ -379,13 +379,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     private static final BiConsumer<ByteList, Byte> ByteList_Accumulator = ByteList::add;
 
     private static final BinaryOperator<ByteList> ByteList_Combiner = (a, b) -> {
-        if (a.size() >= b.size()) {
-            a.addAll(b);
-            return a;
-        } else {
-            b.addAll(a);
-            return b;
-        }
+        a.addAll(b);
+        return a;
     };
 
     @SuppressWarnings("deprecation")
@@ -394,13 +389,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     private static final BiConsumer<ShortList, Short> ShortList_Accumulator = ShortList::add;
 
     private static final BinaryOperator<ShortList> ShortList_Combiner = (a, b) -> {
-        if (a.size() >= b.size()) {
-            a.addAll(b);
-            return a;
-        } else {
-            b.addAll(a);
-            return b;
-        }
+        a.addAll(b);
+        return a;
     };
 
     @SuppressWarnings("deprecation")
@@ -409,13 +399,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     private static final BiConsumer<IntList, Integer> IntList_Accumulator = IntList::add;
 
     private static final BinaryOperator<IntList> IntList_Combiner = (a, b) -> {
-        if (a.size() >= b.size()) {
-            a.addAll(b);
-            return a;
-        } else {
-            b.addAll(a);
-            return b;
-        }
+        a.addAll(b);
+        return a;
     };
 
     @SuppressWarnings("deprecation")
@@ -424,13 +409,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     private static final BiConsumer<LongList, Long> LongList_Accumulator = LongList::add;
 
     private static final BinaryOperator<LongList> LongList_Combiner = (a, b) -> {
-        if (a.size() >= b.size()) {
-            a.addAll(b);
-            return a;
-        } else {
-            b.addAll(a);
-            return b;
-        }
+        a.addAll(b);
+        return a;
     };
 
     @SuppressWarnings("deprecation")
@@ -439,13 +419,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     private static final BiConsumer<FloatList, Float> FloatList_Accumulator = FloatList::add;
 
     private static final BinaryOperator<FloatList> FloatList_Combiner = (a, b) -> {
-        if (a.size() >= b.size()) {
-            a.addAll(b);
-            return a;
-        } else {
-            b.addAll(a);
-            return b;
-        }
+        a.addAll(b);
+        return a;
     };
 
     @SuppressWarnings("deprecation")
@@ -454,13 +429,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     private static final BiConsumer<DoubleList, Double> DoubleList_Accumulator = DoubleList::add;
 
     private static final BinaryOperator<DoubleList> DoubleList_Combiner = (a, b) -> {
-        if (a.size() >= b.size()) {
-            a.addAll(b);
-            return a;
-        } else {
-            b.addAll(a);
-            return b;
-        }
+        a.addAll(b);
+        return a;
     };
 
     @SuppressWarnings("deprecation")
@@ -469,15 +439,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     private static final BiConsumer<Joiner, Object> Joiner_Accumulator = Joiner::append;
 
     private static final BinaryOperator<Joiner> Joiner_Combiner = (a, b) -> {
-        if (a.length() > b.length()) {
-            a.merge(b);
-            b.close();
-            return a;
-        } else {
-            b.merge(a);
-            a.close();
-            return b;
-        }
+        a.merge(b);
+        b.close();
+        return a;
     };
 
     private static final Function<Joiner, String> Joiner_Finisher = Joiner::toString;
@@ -1333,18 +1297,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return toCollection(supplier, accumulator, combiner, CH_ID);
     }
 
-    /*     
+    /**
      * Returns a {@code Collector} that accumulates the input elements into a new collection,
      * created by the provided factory function, using custom accumulator and combiner functions,
      * along with specified characteristics.
-     * 
+     *
      * <p>This collector provides full control over how elements are accumulated into the
      * collection and how partial collections are combined in parallel processing, while also
      * allowing you to specify characteristics like CONCURRENT or UNORDERED.</p>
-     * 
+     *
      * @param <T> the type of input elements
      * @param <C> the type of the resulting collection
-     * @param supplier a supplier providing a new empty collection into which 
+     * @param supplier a supplier providing a new empty collection into which
      *                 the results will be inserted
      * @param accumulator a function for incorporating a new element into a collection
      * @param combiner a function for combining two collections into one
@@ -1471,11 +1435,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates the input elements into an unmodifiable {@code List}.
-     * 
+     *
      * <p>This collector produces a list that cannot be modified after creation. Any attempt
      * to modify the returned list, either directly or through its iterator, will result
      * in an {@code UnsupportedOperationException}.</p>
-     * 
+     *
      * <p>This method delegates to the JDK's {@code Collectors.toUnmodifiableList()} method
      * and provides the same guarantees. Elements are preserved in encounter order.</p>
      *
@@ -1544,14 +1508,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates the input elements into a new {@code LinkedHashSet}.
-     * 
+     *
      * <p>This collector accumulates elements into a {@code LinkedHashSet}, which maintains
      * insertion order while removing duplicates. This is useful when you need both the
      * uniqueness guarantee of a set and predictable iteration order.</p>
-     * 
+     *
      * <p>Elements are compared using their {@code equals} method for uniqueness, and the
      * iteration order matches the order in which elements were first encountered in the stream.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect unique elements preserving order
@@ -1568,20 +1532,21 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BiConsumer<Set<T>, T> accumulator = BiConsumers.ofAdd();
         final BinaryOperator<Set<T>> combiner = BinaryOperators.ofAddAllToBigger();
 
-        return create(supplier, accumulator, combiner, CH_UNORDERED_ID);
+        // LinkedHashSet's defining contract is insertion order — must NOT be UNORDERED.
+        return create(supplier, accumulator, combiner, CH_ID);
 
     }
 
     /**
      * Returns a {@code Collector} that accumulates the input elements into an {@code ImmutableSet}.
-     * 
+     *
      * <p>This collector first collects all unique elements into a regular set, then converts
      * it to an immutable set. The returned set cannot be modified after creation - any
      * attempt to modify it will result in an {@code UnsupportedOperationException}.</p>
-     * 
+     *
      * <p>Duplicate elements are removed based on their {@code equals} method. The iteration
      * order of the resulting set is not specified.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create an immutable set from stream elements
@@ -1604,12 +1569,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates the input elements into an unmodifiable {@code Set}.
-     * 
+     *
      * <p>This collector produces a set that cannot be modified after creation. Any attempt
      * to modify the returned set, either directly or through its iterator, will result
      * in an {@code UnsupportedOperationException}. Duplicates are removed based on the
      * {@code equals} method.</p>
-     * 
+     *
      * <p>This method delegates to the JDK's {@code Collectors.toUnmodifiableSet()} method
      * and provides the same guarantees.</p>
      *
@@ -1638,11 +1603,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates the input elements into a new {@code Queue}.
-     * 
+     *
      * <p>This collector accumulates elements into a {@code Queue} implementation. The specific
      * implementation of {@code Queue} returned is not specified. Elements are added to the
      * queue in encounter order, making this suitable for FIFO (First-In-First-Out) processing.</p>
-     * 
+     *
      * <p>The returned queue supports all optional {@code Queue} operations. There are no
      * guarantees on the thread-safety of the {@code Queue} returned.</p>
      *
@@ -1671,11 +1636,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates the input elements into a new {@code Deque}.
-     * 
+     *
      * <p>This collector accumulates elements into a {@code Deque} (double-ended queue)
      * implementation. Elements can be efficiently added or removed from both ends of the
      * deque. The specific implementation of {@code Deque} returned is not specified.</p>
-     * 
+     *
      * <p>Elements are added to the deque in encounter order. The deque can be used for
      * both FIFO and LIFO (Last-In-First-Out) operations.</p>
      *
@@ -1705,14 +1670,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that accumulates the input elements into a new {@code List},
      * limiting the list to at most the specified number of elements.
-     * 
+     *
      * <p>This collector is useful when you want to collect only a limited number of elements
      * into a list. Once the list reaches the specified size limit, subsequent elements are
      * ignored. This is more efficient than collecting all elements and then truncating.</p>
-     * 
+     *
      * <p>The initial capacity of the list is optimized based on the {@code atMostSize}
      * parameter to avoid unnecessary resizing. Elements are collected in encounter order.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect at most 5 elements from a potentially large stream
@@ -1736,14 +1701,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that accumulates the input elements into a new {@code Set},
      * limiting the set to at most the specified number of elements.
-     * 
+     *
      * <p>This collector is useful when you want to collect only a limited number of unique
      * elements into a set. Once the set reaches the specified size limit, subsequent elements
      * are ignored. Duplicates are automatically handled by the set semantics.</p>
-     * 
+     *
      * <p>Note that due to the nature of sets removing duplicates, the final size may be
      * less than {@code atMostSize} if the stream contains duplicate elements.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect at most 3 unique elements
@@ -1765,14 +1730,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates the input elements into a new {@code Multiset}.
-     * 
+     *
      * <p>A {@code Multiset} is a collection that allows duplicate elements and keeps track
      * of the count of each element. Unlike a regular set, the same element can appear
      * multiple times, and the multiset maintains the count of occurrences.</p>
-     * 
+     *
      * <p>This collector is useful for frequency counting and when you need to know not just
      * which elements are present, but how many times each appears.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Count frequency of elements
@@ -1795,13 +1760,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that accumulates the input elements into a {@code Multiset}
      * created by the provided factory function.
-     * 
+     *
      * <p>This collector allows you to specify the exact type of {@code Multiset} implementation
      * to use. The multiset will maintain counts of duplicate elements as they are collected.</p>
-     * 
+     *
      * <p>The collector handles merging of multisets correctly in parallel operations,
      * combining the counts of elements from different segments of the stream.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Use a custom Multiset implementation
@@ -1825,14 +1790,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates the input elements into a new {@code Object} array.
-     * 
+     *
      * <p>This collector collects all stream elements into an {@code Object[]} array. Elements
      * are stored in encounter order. This is useful when you need the result as an array
      * rather than a collection.</p>
-     * 
+     *
      * <p>The collector first accumulates elements into a list for efficiency, then converts
      * to an array as the final step.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect stream elements to an Object array
@@ -1852,15 +1817,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that accumulates the input elements into an array
      * created by the provided array supplier.
-     * 
+     *
      * <p>This collector allows you to specify the exact type of array to create. The array
      * supplier should provide an array of the desired type and size. If the supplied array
      * is large enough to hold all elements, it will be used; otherwise, a new array of the
      * same type will be created.</p>
-     * 
+     *
      * <p>Elements are collected in encounter order. This method uses reflection to create
      * arrays of the appropriate type when necessary.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect to a String array
@@ -1895,15 +1860,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that accumulates the input elements into an array
      * created by the provided array factory function.
-     * 
+     *
      * <p>This collector allows you to create an array of the exact size needed. The
      * {@code IntFunction} receives the size of the collection and should return an
      * array of that size. This is more efficient than the supplier version as it
      * creates an array of the exact size needed.</p>
-     * 
+     *
      * <p>Elements are collected in encounter order. This is the preferred method when
      * you know the component type of the array at compile time.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect to an Integer array with exact sizing
@@ -1930,14 +1895,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates {@code Boolean} elements into a {@code BooleanList}.
-     * 
+     *
      * <p>This collector is optimized for primitive boolean values, storing them in a
      * specialized list implementation that avoids boxing overhead. The {@code BooleanList}
      * provides efficient storage and access for boolean values.</p>
-     * 
+     *
      * <p>Elements are collected in encounter order. The collector handles both combining
      * partial results in parallel streams and converting to the final {@code BooleanList}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect boolean values efficiently
@@ -1959,14 +1924,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates {@code Boolean} elements into a primitive {@code boolean} array.
-     * 
+     *
      * <p>This collector efficiently converts a stream of {@code Boolean} objects into a
      * primitive {@code boolean[]} array, avoiding boxing overhead in the final result.
      * Elements are collected in encounter order.</p>
-     * 
+     *
      * <p>The collector internally uses a {@code BooleanList} for accumulation, then converts
      * to an array as the final step, ensuring efficient memory usage throughout the process.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert Boolean stream to primitive array
@@ -1989,14 +1954,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates {@code Character} elements into a {@code CharList}.
-     * 
+     *
      * <p>This collector is optimized for primitive char values, storing them in a
      * specialized list implementation that avoids boxing overhead. The {@code CharList}
      * provides efficient storage and access for character values.</p>
-     * 
+     *
      * <p>Elements are collected in encounter order. This is particularly useful when
      * working with character data that needs to be processed as a list.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect characters efficiently
@@ -2018,14 +1983,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates {@code Character} elements into a primitive {@code char} array.
-     * 
+     *
      * <p>This collector efficiently converts a stream of {@code Character} objects into a
      * primitive {@code char[]} array, avoiding boxing overhead in the final result.
      * This is useful for text processing operations that need character data as an array.</p>
-     * 
+     *
      * <p>Elements are collected in encounter order. The collector internally uses a
      * {@code CharList} for efficient accumulation.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert Character stream to primitive array
@@ -2048,14 +2013,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates {@code Byte} elements into a {@code ByteList}.
-     * 
+     *
      * <p>This collector is optimized for primitive byte values, storing them in a
      * specialized list implementation that avoids boxing overhead. The {@code ByteList}
      * provides efficient storage and access for byte values.</p>
-     * 
+     *
      * <p>Elements are collected in encounter order. This is particularly useful when
      * working with binary data or byte-oriented operations.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect bytes efficiently
@@ -2077,14 +2042,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates {@code Byte} elements into a primitive {@code byte} array.
-     * 
+     *
      * <p>This collector efficiently converts a stream of {@code Byte} objects into a
      * primitive {@code byte[]} array, avoiding boxing overhead in the final result.
      * This is essential for binary data processing and I/O operations.</p>
-     * 
+     *
      * <p>Elements are collected in encounter order. The collector internally uses a
      * {@code ByteList} for efficient accumulation.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert Byte stream to primitive array
@@ -2107,14 +2072,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates {@code Short} elements into a {@code ShortList}.
-     * 
+     *
      * <p>This collector is optimized for primitive short values, storing them in a
      * specialized list implementation that avoids boxing overhead. The {@code ShortList}
      * provides efficient storage and access for short values.</p>
-     * 
+     *
      * <p>Elements are collected in encounter order. This is useful when working with
      * numeric data that fits within the short range (-32,768 to 32,767).</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect shorts efficiently
@@ -2136,14 +2101,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates {@code Short} elements into a primitive {@code short} array.
-     * 
+     *
      * <p>This collector efficiently converts a stream of {@code Short} objects into a
      * primitive {@code short[]} array, avoiding boxing overhead in the final result.
      * Elements are collected in encounter order.</p>
-     * 
+     *
      * <p>The collector internally uses a {@code ShortList} for efficient accumulation
      * before converting to the final array format.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert Short stream to primitive array
@@ -2166,14 +2131,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates {@code Integer} elements into an {@code IntList}.
-     * 
+     *
      * <p>This collector is optimized for primitive int values, storing them in a
      * specialized list implementation that avoids boxing overhead. The {@code IntList}
      * provides efficient storage and access for integer values.</p>
-     * 
+     *
      * <p>Elements are collected in encounter order. This is one of the most commonly
      * used primitive collectors for numeric operations.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect integers efficiently
@@ -2195,14 +2160,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates {@code Integer} elements into a primitive {@code int} array.
-     * 
+     *
      * <p>This collector efficiently converts a stream of {@code Integer} objects into a
      * primitive {@code int[]} array, avoiding boxing overhead in the final result.
      * This is essential for performance-critical numeric computations.</p>
-     * 
+     *
      * <p>Elements are collected in encounter order. The collector internally uses an
      * {@code IntList} for efficient accumulation.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert Integer stream to primitive array
@@ -2225,14 +2190,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates {@code Long} elements into a {@code LongList}.
-     * 
+     *
      * <p>This collector is optimized for primitive long values, storing them in a
      * specialized list implementation that avoids boxing overhead. The {@code LongList}
      * provides efficient storage and access for long values.</p>
-     * 
+     *
      * <p>Elements are collected in encounter order. This is useful for working with
      * large numeric values or timestamps.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect longs efficiently
@@ -2254,14 +2219,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates {@code Long} elements into a primitive {@code long} array.
-     * 
+     *
      * <p>This collector efficiently converts a stream of {@code Long} objects into a
      * primitive {@code long[]} array, avoiding boxing overhead in the final result.
      * This is important for memory efficiency when working with large datasets.</p>
-     * 
+     *
      * <p>Elements are collected in encounter order. The collector internally uses a
      * {@code LongList} for efficient accumulation.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert Long stream to primitive array
@@ -2284,14 +2249,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates {@code Float} elements into a {@code FloatList}.
-     * 
+     *
      * <p>This collector is optimized for primitive float values, storing them in a
      * specialized list implementation that avoids boxing overhead. The {@code FloatList}
      * provides efficient storage and access for floating-point values.</p>
-     * 
+     *
      * <p>Elements are collected in encounter order. This is useful for scientific
      * calculations and graphics programming where float precision is sufficient.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect floats efficiently
@@ -2313,14 +2278,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates {@code Float} elements into a primitive {@code float} array.
-     * 
+     *
      * <p>This collector efficiently converts a stream of {@code Float} objects into a
      * primitive {@code float[]} array, avoiding boxing overhead in the final result.
      * This is essential for performance in graphics and scientific applications.</p>
-     * 
+     *
      * <p>Elements are collected in encounter order. The collector internally uses a
      * {@code FloatList} for efficient accumulation.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert Float stream to primitive array
@@ -2343,14 +2308,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates {@code Double} elements into a {@code DoubleList}.
-     * 
+     *
      * <p>This collector is optimized for primitive double values, storing them in a
      * specialized list implementation that avoids boxing overhead. The {@code DoubleList}
      * provides efficient storage and access for double-precision floating-point values.</p>
-     * 
+     *
      * <p>Elements are collected in encounter order. This is useful for high-precision
      * numeric calculations where double precision is required.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect doubles efficiently
@@ -2372,14 +2337,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates {@code Double} elements into a primitive {@code double} array.
-     * 
+     *
      * <p>This collector efficiently converts a stream of {@code Double} objects into a
      * primitive {@code double[]} array, avoiding boxing overhead in the final result.
      * This is essential for performance in scientific and financial calculations.</p>
-     * 
+     *
      * <p>Elements are collected in encounter order. The collector internally uses a
      * {@code DoubleList} for efficient accumulation.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert Double stream to primitive array
@@ -2423,14 +2388,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that expects exactly one element and returns it wrapped
      * in an {@code Optional}.
-     * 
+     *
      * <p>This collector throws a {@code TooManyElementsException} if more than one element
      * is encountered in the stream. It returns an empty {@code Optional} if the stream
      * is empty. This is useful for operations where you expect at most one result.</p>
-     * 
+     *
      * <p>This collector enforces uniqueness and is suitable for queries that should return
      * a single result or no result at all.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find the only element matching a condition
@@ -2457,15 +2422,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that expects exactly one element matching the given
      * predicate and returns it wrapped in an {@code Optional}.
-     * 
+     *
      * <p>This collector filters elements using the provided predicate, then expects
      * exactly one element to pass the filter. It throws a {@code TooManyElementsException}
      * if more than one element matches the predicate. It returns an empty {@code Optional}
      * if no elements match.</p>
-     * 
+     *
      * <p>This is a combination of filtering and the onlyOne collector, useful for
      * finding a unique element matching specific criteria.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find the only even number in a specific range
@@ -2508,15 +2473,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that collects the first element of a sequential stream
      * into an {@code Optional}.
-     * 
+     *
      * <p>This collector captures the first element encountered in the stream. If the stream
      * is empty, it returns an empty {@code Optional}. This collector is designed for
      * sequential streams only and will throw an {@code UnsupportedOperationException}
      * if used with parallel streams.</p>
-     * 
+     *
      * <p>Note that this is different from {@code findFirst()} as it's implemented as a
      * collector and can be combined with other collectors.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get the first element as a collector
@@ -2542,15 +2507,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that collects the last element of a sequential stream
      * into an {@code Optional}.
-     * 
+     *
      * <p>This collector captures the last element encountered in the stream. If the stream
      * is empty, it returns an empty {@code Optional}. This collector is designed for
      * sequential streams only and will throw an {@code UnsupportedOperationException}
      * if used with parallel streams.</p>
-     * 
+     *
      * <p>Each element encountered replaces the previous one, so the final result is
      * the last element in encounter order.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get the last element as a collector
@@ -2576,15 +2541,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that collects the first n elements of a sequential stream
      * into a {@code List}.
-     * 
+     *
      * <p>This collector captures up to the first n elements encountered in the stream.
      * If the stream contains fewer than n elements, all elements are collected. This
      * collector is designed for sequential streams only and will throw an
      * {@code UnsupportedOperationException} if used with parallel streams.</p>
-     * 
+     *
      * <p>The collector stops accumulating once n elements have been collected, making
      * it efficient for large streams when you only need the first few elements.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get the first 3 elements
@@ -2624,15 +2589,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that collects the last n elements of a sequential stream
      * into a {@code List}.
-     * 
+     *
      * <p>This collector maintains a sliding window of the last n elements encountered.
      * It uses a {@code Deque} internally for efficient addition and removal of elements.
-     * For small values of n (â‰¤ 1024), an {@code ArrayDeque} is used; otherwise, a
+     * For small values of n (&le; 1024), an {@code ArrayDeque} is used; otherwise, a
      * {@code LinkedList} is used.</p>
-     * 
+     *
      * <p>This collector is designed for sequential streams only and will throw an
      * {@code UnsupportedOperationException} if used with parallel streams.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get the last 3 elements
@@ -2681,13 +2646,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that concatenates the input elements into a {@code String}.
-     * 
+     *
      * <p>This collector concatenates all elements directly without any delimiter between them.
      * It's equivalent to calling {@code joining("", "", "")}. The elements are converted
      * to strings using their {@code toString()} method.</p>
-     * 
+     *
      * <p>This is useful for simple string concatenation where no formatting is needed.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Concatenate characters into a string
@@ -2705,14 +2670,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that concatenates the input elements, separated by
      * the specified delimiter, into a {@code String}.
-     * 
+     *
      * <p>This collector joins elements with the specified delimiter between each element.
      * No prefix or suffix is added to the result. The elements are converted to strings
      * using their {@code toString()} method.</p>
-     * 
+     *
      * <p>This is one of the most commonly used string collectors for creating
      * comma-separated values, space-separated words, etc.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create comma-separated values
@@ -2732,15 +2697,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that concatenates the input elements, separated by the
      * specified delimiter, with the specified prefix and suffix, into a {@code String}.
-     * 
+     *
      * <p>This collector provides full control over the string joining process. Elements
      * are joined with the delimiter between each element, and the entire result is
      * wrapped with the specified prefix and suffix.</p>
-     * 
+     *
      * <p>The collector uses an efficient {@code Joiner} implementation that reuses
      * internal buffers for better performance. Elements are converted to strings using
      * their {@code toString()} method.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a formatted list
@@ -2770,15 +2735,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} which passes only those elements to the specified
      * downstream collector which match the given predicate.
-     * 
+     *
      * <p>This collector acts as a filter in the collection process. Only elements that
      * satisfy the predicate are passed to the downstream collector. This is useful for
      * conditional collection and can be more efficient than filtering the stream first.</p>
-     * 
+     *
      * <p>If the downstream collector is short-circuiting, this method returns a
      * short-circuiting collector as well. This is similar to the JDK 9+ filtering
      * collector but with short-circuiting support.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect only even numbers to a list
@@ -2811,14 +2776,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} which filters input elements by the supplied predicate,
      * collecting them to a {@code List}.
-     * 
+     *
      * <p>This is a convenience method that combines filtering with collecting to a list.
      * It behaves like {@code filtering(predicate, Collectors.toList())}. Only elements
      * that satisfy the predicate are included in the resulting list.</p>
-     * 
+     *
      * <p>There are no guarantees on the type, mutability, serializability, or
      * thread-safety of the {@code List} returned.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Filter and collect positive numbers
@@ -2843,14 +2808,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that applies a mapping function to each input element
      * before accumulation by the downstream collector.
-     * 
+     *
      * <p>This collector transforms each element using the provided mapper function before
      * passing it to the downstream collector. This is useful for transforming elements
      * during the collection process without modifying the original stream.</p>
-     * 
+     *
      * <p>The mapping is done lazily during accumulation, which can be more efficient
      * than mapping the entire stream first.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect string lengths to a list
@@ -2879,14 +2844,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that applies a mapping function to each input element
      * and collects the results to a {@code List}.
-     * 
+     *
      * <p>This is a convenience method that combines mapping with collecting to a list.
      * It behaves like {@code mapping(mapper, Collectors.toList())}. Each element is
      * transformed by the mapper function and the results are collected into a list.</p>
-     * 
+     *
      * <p>There are no guarantees on the type, mutability, serializability, or
      * thread-safety of the {@code List} returned.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Extract and collect first characters
@@ -2909,14 +2874,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that applies a flat mapping function to each input
      * element and accumulates the elements of the resulting streams.
-     * 
+     *
      * <p>This collector is similar to {@code flatMap} but operates during the collection
      * phase. The mapper function returns a {@code Stream} for each input element, and
      * all elements from these streams are accumulated by the downstream collector.</p>
-     * 
+     *
      * <p>The streams returned by the mapper function are automatically closed after
      * their elements have been consumed. This ensures proper resource management.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Flatten nested lists during collection
@@ -2955,12 +2920,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that applies a flat mapping function to each input
      * element and collects all resulting elements to a {@code List}.
-     * 
+     *
      * <p>This is a convenience method that combines flat mapping with collecting to a list.
      * It behaves like {@code flatMapping(mapper, Collectors.toList())}. Each element is
      * transformed into a stream by the mapper function, and all elements from all streams
      * are collected into a single list.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Split strings into characters and collect
@@ -2985,14 +2950,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that applies a flat mapping function returning collections
      * to each input element and accumulates all elements from the resulting collections.
-     * 
+     *
      * <p>This collector is similar to {@code flatMapping} but works with {@code Collection}
      * instead of {@code Stream}. This can be more efficient when the mapper function
      * already returns collections, avoiding the overhead of stream creation.</p>
-     * 
+     *
      * <p>Empty collections returned by the mapper are handled efficiently and don't
      * contribute any elements to the downstream collector.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Flatten a map's values
@@ -3035,11 +3000,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that applies a flat mapping function returning collections
      * and collects all resulting elements to a {@code List}.
-     * 
+     *
      * <p>This is a convenience method that combines flat mapping of collections with
      * collecting to a list. Each element is transformed into a collection by the mapper
      * function, and all elements from all collections are collected into a single list.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect all tags from multiple posts
@@ -3064,15 +3029,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that performs an additional finishing transformation
      * on the results of another collector.
-     * 
+     *
      * <p>This collector adapts a downstream collector to perform an additional finishing
      * transformation. After the downstream collector finishes its operation, the finisher
      * function is applied to transform the result. This is useful for post-processing
      * collected data.</p>
-     * 
+     *
      * <p>The characteristics of the returned collector are derived from the downstream
      * collector, with {@code IDENTITY_FINISH} removed if present.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect to a list then get its size
@@ -3120,19 +3085,19 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that wraps the result in an {@code Optional}, returning
      * an empty {@code Optional} if no elements were collected.
-     * 
+     *
      * <p>This collector tracks whether any elements were accumulated and returns an
      * empty {@code Optional} if the stream was empty, or an {@code Optional} containing
      * the collected result otherwise. This is useful when you want to distinguish between
      * an empty collection result and no elements being processed.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Returns Optional.empty() for empty stream
      * Optional<List<String>> result = Stream.<String>empty()
      *     .collect(Collectors.collectingOrEmpty(Collectors.toList()));
      * // Result: Optional.empty()
-     * 
+     *
      * // Returns Optional.empty() when no elements reach the collector
      * Optional<List<String>> filtered = Stream.of("a", "b", "c")
      *     .filter(s -> s.length() > 5)
@@ -3186,11 +3151,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that uses a default value when no elements are collected.
-     * 
+     *
      * <p>This collector tracks whether any elements were accumulated. If no elements
      * were collected, it returns the specified default value instead of the collector's
      * normal empty result. This is useful for providing fallback values.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Returns default list when stream is empty
@@ -3217,12 +3182,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that uses a supplier to provide a default value when
      * no elements are collected.
-     * 
+     *
      * <p>This collector tracks whether any elements were accumulated. If no elements
      * were collected, it calls the supplier to get a default value instead of the
      * collector's normal empty result. The supplier is only called if needed, allowing
      * for lazy evaluation of the default.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Compute default only if needed
@@ -3282,11 +3247,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that throws {@code NoSuchElementException} when no
      * elements are collected.
-     * 
+     *
      * <p>This collector tracks whether any elements were accumulated. If no elements
      * were collected, it throws a {@code NoSuchElementException}. This is useful when
      * an empty result is an error condition.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Throws if no elements match
@@ -3313,11 +3278,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that throws a custom exception when no elements are collected.
-     * 
+     *
      * <p>This collector tracks whether any elements were accumulated. If no elements
      * were collected, it throws the exception provided by the supplier. This allows
      * for custom error handling when empty results are not acceptable.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Throws custom exception if no valid data found
@@ -3347,15 +3312,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} which collects distinct elements into a {@code List}
      * based on a key extraction function.
-     * 
+     *
      * <p>This collector maintains the first occurrence of each distinct key. Elements
      * are considered distinct if their extracted keys are equal according to
      * {@code Object.equals()}. For ordered streams, the first element with each distinct
      * key is preserved.</p>
-     * 
+     *
      * <p>This operation is equivalent to {@code stream.distinct(keyMapper).toList()},
      * but may work faster as it's implemented as a single collector.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Keep first person of each age
@@ -3375,14 +3340,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} which collects distinct elements into a collection
      * based on a key extraction function.
-     * 
+     *
      * <p>This collector maintains the first occurrence of each distinct key. Elements
      * are added to the supplied collection type. The collector uses a {@code LinkedHashMap}
      * internally to maintain insertion order while checking for duplicates.</p>
-     * 
+     *
      * <p>For ordered streams, this preserves the encounter order of the first occurrence
      * of each distinct element.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect distinct strings by length to a TreeSet
@@ -3433,15 +3398,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} which counts the number of distinct values produced
      * by the mapper function.
-     * 
+     *
      * <p>This collector counts unique values based on the keys extracted by the mapper
      * function. Elements with equal keys (according to {@code Object.equals()}) are
      * counted only once. This is useful for counting unique properties without collecting
      * the actual elements.</p>
-     * 
+     *
      * <p>The operation is equivalent to {@code stream.map(mapper).distinct().count()},
      * but is implemented as a single collector which can be more efficient.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Count unique departments
@@ -3469,19 +3434,19 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that counts the number of input elements.
-     * 
+     *
      * <p>This collector counts all elements in the stream, returning the count as a
      * {@code Long}. This is equivalent to {@code stream.count()} but can be used
      * as a downstream collector in more complex collection operations.</p>
-     * 
+     *
      * <p>The implementation optimizes by incrementing a counter rather than storing
      * elements, making it memory efficient for large streams.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Count total elements
      * Long count = stream.collect(Collectors.counting());
-     * 
+     *
      * // Use as downstream collector
      * Map<String, Long> counts = stream
      *     .collect(Collectors.groupingBy(
@@ -3498,19 +3463,19 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that counts the number of input elements as an {@code Integer}.
-     * 
+     *
      * <p>This collector counts all elements in the stream, returning the count as an
      * {@code Integer}. This is useful when you know the count will fit in an integer
      * range and want to avoid the overhead of {@code Long}.</p>
-     * 
+     *
      * <p>Be aware that this collector may overflow for streams with more than
      * {@code Integer.MAX_VALUE} elements.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Count elements as int
      * Integer count = stream.collect(Collectors.countingToInt());
-     * 
+     *
      * // Use in grouping
      * Map<Category, Integer> categoryCounts = products.stream()
      *     .collect(Collectors.groupingBy(
@@ -3528,14 +3493,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that finds the minimum element according to the
      * natural ordering.
-     * 
+     *
      * <p>This collector finds the minimum element, treating {@code null} as the largest
      * value (using {@code nullsLast} comparison). The result is wrapped in an
      * {@code Optional} which is empty if the stream is empty.</p>
-     * 
+     *
      * <p>Elements must implement {@code Comparable}. For custom comparison logic,
      * use {@link #min(Comparator)} instead.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find minimum value
@@ -3555,12 +3520,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that finds the minimum element according to a given
      * {@code Comparator}.
-     * 
+     *
      * <p>This collector finds the minimum element using the provided comparator.
      * The result is wrapped in an {@code Optional} which is empty if the stream is empty.
      * The comparator is used for all comparisons, including handling of {@code null} values
      * if present.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find shortest string
@@ -3586,11 +3551,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that finds the minimum element with a default value
      * for empty streams.
-     * 
+     *
      * <p>This collector finds the minimum element according to natural ordering.
      * If the stream is empty, it returns the specified default value instead of
      * an empty {@code Optional}. This is useful when you always need a value.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find minimum with default
@@ -3611,11 +3576,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that finds the minimum element according to a comparator,
      * with a default value for empty streams.
-     * 
+     *
      * <p>This collector finds the minimum element using the provided comparator.
      * If the stream is empty, it returns the specified default value. This combines
      * custom comparison with a fallback value.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find shortest string with default
@@ -3640,20 +3605,20 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that finds the minimum element according to the
      * natural order, or returns the value supplied by {@code supplierForEmpty} if
      * no elements are present.
-     * 
+     *
      * <p>This collector is useful when you need a default value instead of dealing
      * with an empty {@code Optional}. The elements must be {@code Comparable}.</p>
-     * 
+     *
      * <p>The returned collector handles {@code null} values by placing them last in the
      * ordering (nulls are considered greater than {@code non-null} values).</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get minimum or default value
      * Integer min = Stream.of(5, 3, 8, 2)
      *     .collect(Collectors.minOrElseGet(() -> 0));
      * // Result: 2
-     * 
+     *
      * // Empty stream returns default
      * Integer defaultMin = Stream.<Integer>empty()
      *     .collect(Collectors.minOrElseGet(() -> -1));
@@ -3672,10 +3637,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that finds the minimum element according to the
      * provided comparator, or returns the value supplied by {@code supplierForEmpty}
      * if no elements are present.
-     * 
+     *
      * <p>This collector provides more flexibility than {@code minOrElseGet(Supplier)}
      * by allowing custom comparison logic through the comparator parameter.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find minimum by string length or return default
@@ -3704,20 +3669,20 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that finds the minimum element according to the
      * natural order, throwing a {@code NoSuchElementException} if no elements are present.
-     * 
+     *
      * <p>This collector is useful when the absence of elements should be treated as
      * an exceptional condition. The elements must be {@code Comparable}.</p>
-     * 
+     *
      * <p>The returned collector handles {@code null} values by placing them last in the
      * ordering (nulls are considered greater than {@code non-null} values).</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find minimum element
      * Integer min = Stream.of(5, 3, 8, 2)
      *     .collect(Collectors.minOrElseThrow());
      * // Result: 2
-     * 
+     *
      * // Empty stream throws exception
      * Stream.<Integer>empty()
      *     .collect(Collectors.minOrElseThrow());
@@ -3734,10 +3699,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that finds the minimum element according to the
      * provided comparator, throwing a {@code NoSuchElementException} if no elements are present.
-     * 
+     *
      * <p>This collector provides more flexibility than {@code minOrElseThrow()}
      * by allowing custom comparison logic through the comparator parameter.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find minimum by string length
@@ -3758,10 +3723,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that finds the minimum element according to the
      * provided comparator, throwing a custom exception if no elements are present.
-     * 
+     *
      * <p>This collector allows you to specify both the comparison logic and the
      * exception to throw when the stream is empty, providing maximum flexibility.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find minimum with custom exception
@@ -3791,14 +3756,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that finds the minimum element by extracting a
      * {@code Comparable} key from each element, returning an {@code Optional}.
-     * 
+     *
      * <p>This collector is useful when you want to find the minimum element based
      * on a specific property. The key extractor function should return a
      * {@code Comparable} value.</p>
-     * 
+     *
      * <p>The returned collector handles {@code null} keys by placing them last in the
      * ordering (null keys are considered greater than {@code non-null} keys).</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find person with minimum age
@@ -3819,10 +3784,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that finds the minimum element by extracting a
      * {@code Comparable} key from each element, or returns the value supplied by
      * {@code supplierForEmpty} if no elements are present.
-     * 
+     *
      * <p>This collector combines the convenience of key-based comparison with
      * a default value for empty streams.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find person with minimum age or return default
@@ -3847,10 +3812,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that finds the minimum element by extracting a
      * {@code Comparable} key from each element, throwing a {@code NoSuchElementException}
      * if no elements are present.
-     * 
+     *
      * <p>This collector is useful when you need to find the minimum based on a
      * property and want to treat empty streams as exceptional cases.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find person with minimum age or throw
@@ -3871,10 +3836,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that finds the minimum element by extracting a
      * {@code Comparable} key from each element, throwing a custom exception if
      * no elements are present.
-     * 
+     *
      * <p>This collector provides maximum flexibility for key-based minimum finding
      * with custom exception handling.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find product with minimum price or throw custom exception
@@ -3898,13 +3863,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that finds the maximum element according to the
      * natural order, returning an {@code Optional}.
-     * 
+     *
      * <p>This collector is the counterpart to {@code min()} and finds the largest
      * element. The elements must be {@code Comparable}.</p>
-     * 
+     *
      * <p>The returned collector handles {@code null} values by placing them first in the
      * ordering (nulls are considered less than {@code non-null} values).</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find maximum element
@@ -3923,11 +3888,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that finds the maximum element according to the
      * provided comparator, returning an {@code Optional}.
-     * 
+     *
      * <p>This collector allows custom comparison logic for finding the maximum
      * element. If multiple elements are considered equal according to the comparator,
      * the first encountered element is returned.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find longest string
@@ -3952,17 +3917,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that finds the maximum element according to the
      * natural order, or returns the specified default value if no elements are present.
-     * 
+     *
      * <p>This collector is a convenience method that provides a default value
      * directly instead of using a supplier.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find maximum with default value
      * Integer max = Stream.of(5, 3, 8, 2)
      *     .collect(Collectors.maxOrElse(0));
      * // Result: 8
-     * 
+     *
      * // Empty stream returns default
      * Integer defaultMax = Stream.<Integer>empty()
      *     .collect(Collectors.maxOrElse(0));
@@ -3980,10 +3945,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that finds the maximum element according to the
      * provided comparator, or returns the specified default value if no elements are present.
-     * 
+     *
      * <p>This collector combines custom comparison logic with a simple default value
      * for empty streams.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find longest string with default
@@ -4007,10 +3972,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that finds the maximum element according to the
      * natural order, or returns the value supplied by {@code supplierForEmpty} if
      * no elements are present.
-     * 
+     *
      * <p>This collector is useful when you need a default value instead of dealing
      * with an empty {@code Optional}. The elements must be {@code Comparable}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find maximum or compute default
@@ -4031,10 +3996,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that finds the maximum element according to the
      * provided comparator, or returns the value supplied by {@code supplierForEmpty}
      * if no elements are present.
-     * 
+     *
      * <p>This collector provides full flexibility for finding maximum elements with
      * custom comparison and default value logic.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find person with maximum age or create default
@@ -4062,17 +4027,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that finds the maximum element according to the
      * natural order, throwing a {@code NoSuchElementException} if no elements are present.
-     * 
+     *
      * <p>This collector is useful when the absence of elements should be treated as
      * an exceptional condition. The elements must be {@code Comparable}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find maximum element
      * Integer max = Stream.of(5, 3, 8, 2)
      *     .collect(Collectors.maxOrElseThrow());
      * // Result: 8
-     * 
+     *
      * // Empty stream throws exception
      * Stream.<Integer>empty()
      *     .collect(Collectors.maxOrElseThrow());
@@ -4089,10 +4054,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that finds the maximum element according to the
      * provided comparator, throwing a {@code NoSuchElementException} if no elements are present.
-     * 
+     *
      * <p>This collector provides more flexibility than {@code maxOrElseThrow()}
      * by allowing custom comparison logic.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find longest string or throw
@@ -4113,10 +4078,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that finds the maximum element according to the
      * provided comparator, throwing a custom exception if no elements are present.
-     * 
+     *
      * <p>This collector allows you to specify both the comparison logic and the
      * exception to throw when the stream is empty.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find maximum with custom exception
@@ -4144,11 +4109,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that finds the maximum element by extracting a
      * {@code Comparable} key from each element, returning an {@code Optional}.
-     * 
+     *
      * <p>This collector is useful when you want to find the maximum element based
      * on a specific property. The key extractor function should return a
      * {@code Comparable} value.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find person with maximum age
@@ -4169,10 +4134,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that finds the maximum element by extracting a
      * {@code Comparable} key from each element, or returns the value supplied by
      * {@code supplierForEmpty} if no elements are present.
-     * 
+     *
      * <p>This collector combines the convenience of key-based comparison with
      * a default value for empty streams.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find person with maximum age or return default
@@ -4197,10 +4162,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that finds the maximum element by extracting a
      * {@code Comparable} key from each element, throwing a {@code NoSuchElementException}
      * if no elements are present.
-     * 
+     *
      * <p>This collector is useful when you need to find the maximum based on a
      * property and want to treat empty streams as exceptional cases.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find person with maximum age or throw
@@ -4221,10 +4186,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that finds the maximum element by extracting a
      * {@code Comparable} key from each element, throwing a custom exception if
      * no elements are present.
-     * 
+     *
      * <p>This collector provides maximum flexibility for key-based maximum finding
      * with custom exception handling.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find product with maximum price or throw custom exception
@@ -4312,10 +4277,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} which finds all the elements which are equal
      * to each other and smaller than any other element according to the
      * specified {@link Comparator}, collecting at most the specified number of elements.
-     * 
+     *
      * <p>This collector is useful when you want to find all minimal elements but
      * limit the result size for memory efficiency.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find at most 5 minimum values
@@ -4352,7 +4317,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Join all minimum strings
      * String joined = Stream.of("apple", "pie", "cat", "dog")
      *     .collect(Collectors.minAll(Collectors.joining(", ")));
-     * // Result: "pie, cat, dog"
+     * // Result: "apple"
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -4414,10 +4379,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * to each other and smaller than any other element according to the natural
      * order, returning an {@code Optional} containing the minimum element and the
      * result of the downstream collector.
-     * 
+     *
      * <p>This collector is useful when you need both the minimum element and
      * some aggregation of all minimum elements.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find minimum value and count of occurrences
@@ -4442,10 +4407,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * to each other and smaller than any other element according to the
      * specified {@link Comparator}, returning an {@code Optional} containing the
      * minimum element and the result of the downstream collector.
-     * 
+     *
      * <p>This collector provides both the minimum element and an aggregation
      * of all elements that are equal to the minimum.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find shortest string and concatenate all shortest strings
@@ -4472,10 +4437,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * to each other and smaller than any other element according to the
      * specified {@link Comparator}, applies a downstream collector, and then
      * applies a finisher function to the result.
-     * 
+     *
      * <p>This collector provides maximum flexibility by allowing transformation
      * of the final result.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find minimum and format result
@@ -4517,10 +4482,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *     .collect(Collectors.maxAll());
      * // Result: [5, 5, 5]
      *
-     * // Find all longest strings
-     * List<String> longest = Stream.of("apple", "pie", "banana", "cherry")
+     * // Find all lexicographically largest strings
+     * List<String> largest = Stream.of("apple", "pie", "banana", "cherry")
      *     .collect(Collectors.maxAll());
-     * // Result: ["apple", "banana", "cherry"]
+     * // Result: ["pie"]
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -4551,7 +4516,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find all strings with maximum length
      * List<String> longest = Stream.of("Apple", "pie", "banana", "cherry")
      *     .collect(Collectors.maxAll(Comparator.comparingInt(String::length)));
-     * // Result: ["Apple", "banana", "cherry"]
+     * // Result: ["banana", "cherry"]
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -4569,10 +4534,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} which finds all the elements which are equal
      * to each other and bigger than any other element according to the
      * specified {@link Comparator}, collecting at most the specified number of elements.
-     * 
+     *
      * <p>This collector is useful when you want to find all maximal elements but
      * limit the result size for memory efficiency.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find at most 3 maximum values
@@ -4663,7 +4628,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Join all maximum strings with a delimiter
      * String joined = Stream.of("apple", "pie", "banana", "cherry")
      *     .collect(Collectors.maxAll(Collectors.joining(" & ")));
-     * // Result: "apple & banana & cherry"
+     * // Result: "pie"
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -4804,10 +4769,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * to each other and bigger than any other element according to the natural
      * order, returning an {@code Optional} containing the maximum element and the
      * result of the downstream collector.
-     * 
+     *
      * <p>This collector is useful when you need both the maximum element and
      * some aggregation of all maximum elements.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find maximum value and sum of all maximums
@@ -4832,10 +4797,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * to each other and bigger than any other element according to the
      * specified {@link Comparator}, returning an {@code Optional} containing the
      * maximum element and the result of the downstream collector.
-     * 
+     *
      * <p>This collector provides both the maximum element and an aggregation
      * of all elements that are equal to the maximum.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find longest strings and join them
@@ -4862,10 +4827,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * to each other and bigger than any other element according to the
      * specified {@link Comparator}, applies a downstream collector, and then
      * applies a finisher function to the result.
-     * 
+     *
      * <p>This collector provides maximum flexibility by allowing transformation
      * of the final result.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find maximum and create custom result
@@ -4978,15 +4943,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that finds both the minimum and maximum elements from
      * a stream of {@code Comparable} elements.
-     * 
+     *
      * <p>This collector processes the stream in a single pass to find both the minimum
      * and maximum elements according to their natural ordering. If the stream is empty,
      * an empty {@code Optional} is returned.</p>
-     * 
+     *
      * <p>The collector produces a stable result for ordered streams: if several
      * minimal or maximal elements appear, the collector always selects the
      * first encountered.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find min and max from a stream of integers
@@ -5007,15 +4972,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that finds both the minimum and maximum elements from
      * a stream according to the specified comparator.
-     * 
+     *
      * <p>This collector processes the stream in a single pass to find both the minimum
      * and maximum elements according to the provided comparator. If the stream is empty,
      * an empty {@code Optional} is returned.</p>
-     * 
+     *
      * <p>The collector produces a stable result for ordered streams: if several
      * minimal or maximal elements appear, the collector always selects the
      * first encountered.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find shortest and longest strings
@@ -5038,7 +5003,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} which finds the minimal and maximal element
      * according to the supplied comparator, then applies finisher function to
      * them producing the final result.
-     * 
+     *
      * <p>This collector is useful when you need to perform a custom operation on
      * the minimum and maximum elements found. The finisher function is only called
      * if the stream contains at least one element.</p>
@@ -5050,7 +5015,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>If there are no input elements, the finisher method is not called and
      * empty {@code Optional} is returned. Otherwise, the finisher result is
      * wrapped into {@code Optional}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate the range (difference between max and min)
@@ -5077,11 +5042,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that finds both the minimum and maximum elements from
      * a stream by comparing the results of applying the given key extraction function.
-     * 
+     *
      * <p>This collector is useful when you want to find the elements with the minimum
      * and maximum values based on a specific property. The key mapper function extracts
      * a {@code Comparable} value from each element for comparison.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find the person with minimum and maximum age
@@ -5103,16 +5068,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that finds the elements with minimum and maximum keys
      * according to the provided key mapper, then applies a finisher function to produce
      * a final result.
-     * 
+     *
      * <p>This collector combines the functionality of finding min/max by a key with
      * a custom finisher operation. The finisher is only called if the stream contains
      * at least one element.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find the age difference between youngest and oldest person
      * Optional<Integer> ageDiff = people.stream()
-     *     .collect(Collectors.minMaxBy(Person::getAge, 
+     *     .collect(Collectors.minMaxBy(Person::getAge,
      *         (youngest, oldest) -> oldest.getAge() - youngest.getAge()));
      * }</pre>
      *
@@ -5133,12 +5098,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that finds both the minimum and maximum elements from
      * a stream of {@code Comparable} elements, returning a default value if the stream is empty.
-     * 
+     *
      * <p>This collector is similar to {@link #minMax()}, but instead of returning an
      * {@code Optional}, it returns the result of the supplier function when the stream
      * is empty. This is useful when you want to avoid dealing with {@code Optional}
      * and have a sensible default value.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find min and max with default values
@@ -5160,10 +5125,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that finds both the minimum and maximum elements according
      * to the specified comparator, returning a default value if the stream is empty.
-     * 
+     *
      * <p>This collector processes the stream to find both extremes in a single pass.
      * If the stream is empty, the supplier function is called to provide a default result.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find shortest and longest strings with defaults
@@ -5194,11 +5159,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that finds both the minimum and maximum elements from
      * a stream of {@code Comparable} elements, throwing an exception if the stream is empty.
-     * 
+     *
      * <p>This collector is useful when an empty stream represents an error condition
      * in your application logic. It guarantees that the result will always contain
      * valid minimum and maximum values.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // This will throw NoSuchElementException if stream is empty
@@ -5218,10 +5183,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that finds both the minimum and maximum elements according
      * to the specified comparator, throwing an exception if the stream is empty.
-     * 
+     *
      * <p>This collector processes the stream to find both extremes in a single pass.
      * If the stream is empty, a {@code NoSuchElementException} is thrown.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find shortest and longest strings (throws if empty)
@@ -5248,11 +5213,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces the sum of an integer-valued function
      * applied to the input elements.
-     * 
+     *
      * <p>This collector sums up integer values extracted from the stream elements.
      * If no elements are present, the result is 0. The sum is computed using
      * integer arithmetic, which may overflow for large values.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Sum the lengths of all strings
@@ -5274,11 +5239,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces the sum of an integer-valued function
      * applied to the input elements, with the result as a {@code Long}.
-     * 
+     *
      * <p>This collector is similar to {@link #summingInt(ToIntFunction)} but returns
      * a {@code Long} result to avoid integer overflow issues when summing large
      * numbers of elements or large values.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Sum large numbers safely
@@ -5300,11 +5265,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces the sum of a long-valued function
      * applied to the input elements.
-     * 
+     *
      * <p>This collector sums up long values extracted from the stream elements.
      * If no elements are present, the result is 0L. The sum is computed using
      * long arithmetic, which may overflow for very large values.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Sum file sizes
@@ -5350,11 +5315,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces the sum of {@code BigInteger} values
      * extracted from the input elements.
-     * 
+     *
      * <p>This collector is useful for summing very large integer values that exceed
      * the range of primitive types. If no elements are present, the result is
      * {@code BigInteger.ZERO}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Sum very large numbers
@@ -5376,11 +5341,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces the sum of {@code BigDecimal} values
      * extracted from the input elements.
-     * 
+     *
      * <p>This collector is useful for precise decimal arithmetic, especially for
      * financial calculations. If no elements are present, the result is
      * {@code BigDecimal.ZERO}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Sum monetary values precisely
@@ -6775,14 +6740,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that reduces the input elements using the provided binary operator,
      * throwing a specified exception if no elements are present.
-     * 
+     *
      * <p>This collector is useful when you need to reduce elements and want to handle the empty case
      * with a custom exception. The collector applies the binary operator sequentially to combine
      * elements into a single result.</p>
-     * 
+     *
      * <p>The returned collector is unordered, meaning the order of reduction may vary in parallel
      * streams unless the binary operator is associative and commutative.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find the maximum value, throw if empty
@@ -6821,15 +6786,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that reduces the input elements using the provided mapper function
      * and binary operator, with an identity value.
-     * 
+     *
      * <p>This collector first maps each input element using the mapper function, then reduces
      * the mapped values using the binary operator, starting with the identity value. The identity
      * value is used as the initial accumulation value and should be the identity for the binary
      * operator.</p>
-     * 
+     *
      * <p>The returned collector is unordered, meaning the order of reduction may vary in parallel
      * streams unless the binary operator is associative and commutative.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Sum the lengths of strings
@@ -6863,14 +6828,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that reduces the input elements using the provided mapper function
      * and binary operator, returning an {@code Optional} describing the result.
-     * 
+     *
      * <p>This collector first maps each input element using the mapper function, then reduces
      * the mapped values using the binary operator. If no elements are present, an empty
      * {@code Optional} is returned.</p>
-     * 
+     *
      * <p>The returned collector is unordered, meaning the order of reduction may vary in parallel
      * streams unless the binary operator is associative and commutative.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find the longest string
@@ -6948,14 +6913,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that reduces the input elements using the provided mapper function
      * and binary operator, returning a default value if no elements are present.
-     * 
+     *
      * <p>This collector first maps each input element using the mapper function, then reduces
      * the mapped values using the binary operator. If no elements are present, the value from
      * the supplier is returned.</p>
-     * 
+     *
      * <p>The returned collector is unordered, meaning the order of reduction may vary in parallel
      * streams unless the binary operator is associative and commutative.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get the product of all values, or 1 if empty
@@ -6990,14 +6955,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that reduces the input elements using the provided mapper function
      * and binary operator, throwing a specified exception if no elements are present.
-     * 
+     *
      * <p>This collector first maps each input element using the mapper function, then reduces
      * the mapped values using the binary operator. If no elements are present, the exception
      * from the supplier is thrown.</p>
-     * 
+     *
      * <p>The returned collector is unordered, meaning the order of reduction may vary in parallel
      * streams unless the binary operator is associative and commutative.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find the minimum after mapping, throw if empty
@@ -7039,14 +7004,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that reduces the input elements using the provided mapper function
      * and binary operator, throwing a {@code NoSuchElementException} if no elements are present.
-     * 
+     *
      * <p>This collector first maps each input element using the mapper function, then reduces
      * the mapped values using the binary operator. If no elements are present, a
      * {@code NoSuchElementException} is thrown.</p>
-     * 
+     *
      * <p>The returned collector is unordered, meaning the order of reduction may vary in parallel
      * streams unless the binary operator is associative and commutative.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Concatenate all strings
@@ -7072,15 +7037,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that computes the common prefix of input {@code CharSequence} objects,
      * returning the result as a {@code String}.
-     * 
+     *
      * <p>This collector finds the longest sequence of characters that appears at the beginning
      * of all input sequences. For empty input, an empty string is returned. The collector
      * handles Unicode surrogate pairs correctly, ensuring that the prefix doesn't end with
      * an incomplete surrogate pair.</p>
-     * 
+     *
      * <p>This is a short-circuiting collector: it may stop processing elements once it
      * determines that the common prefix is empty.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find common prefix
@@ -7126,15 +7091,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that computes the common suffix of input {@code CharSequence} objects,
      * returning the result as a {@code String}.
-     * 
+     *
      * <p>This collector finds the longest sequence of characters that appears at the end
      * of all input sequences. For empty input, an empty string is returned. The collector
      * handles Unicode surrogate pairs correctly, ensuring that the suffix doesn't start with
      * an incomplete surrogate pair.</p>
-     * 
+     *
      * <p>This is a short-circuiting collector: it may stop processing elements once it
      * determines that the common suffix is empty.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find common suffix
@@ -7194,11 +7159,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * preserve the encounter order of elements within each group.</p>
      *
      * <p>The returned collector is not concurrent and produces an unordered map.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Group strings by their length
-     * Map<Integer, List<String>> groupedByLength = 
+     * Map<Integer, List<String>> groupedByLength =
      *     Stream.of("apple", "pie", "banana", "cat")
      *         .collect(Collectors.groupingBy(String::length));
      * // Result: {5=[apple], 3=[pie, cat], 6=[banana]}
@@ -7219,17 +7184,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that groups input elements by a classifier function,
      * collecting the elements in each group into a {@code List} and storing them in a
      * map created by the provided factory.
-     * 
+     *
      * <p>This collector applies the classifier function to each input element to determine
      * its group key, then collects all elements with the same key into a list. The map
      * instance is created by the provided factory function.</p>
-     * 
+     *
      * <p>The returned collector is not concurrent.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Group strings by first letter into a TreeMap
-     * TreeMap<Character, List<String>> groupedByFirstLetter = 
+     * TreeMap<Character, List<String>> groupedByFirstLetter =
      *     Stream.of("apple", "apricot", "banana", "cherry")
      *         .collect(Collectors.groupingBy(
      *             s -> s.charAt(0),
@@ -7256,14 +7221,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that groups input elements by a classifier function,
      * and then performs a reduction operation on the values in each group using the
      * specified downstream collector.
-     * 
+     *
      * <p>This collector applies the classifier function to each input element to determine
      * its group key, then applies the downstream collector to all elements with the same key.
      * The results are stored in a map where keys are produced by the classifier function
      * and values are results of the downstream collector.</p>
-     * 
+     *
      * <p>The returned collector is not concurrent and produces an unordered map.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Count strings by their length
@@ -7295,17 +7260,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that groups input elements by a classifier function,
      * performs a reduction operation on the values in each group using the specified
      * downstream collector, and stores the results in a map created by the provided factory.
-     * 
+     *
      * <p>This collector applies the classifier function to each input element to determine
      * its group key, then applies the downstream collector to all elements with the same key.
      * The results are stored in a map instance created by the provided factory function.</p>
-     * 
+     *
      * <p>The returned collector is not concurrent.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Group persons by city and collect names in a TreeMap
-     * TreeMap<String, Set<String>> namesByCity = 
+     * TreeMap<String, Set<String>> namesByCity =
      *     persons.stream()
      *         .collect(Collectors.groupingBy(
      *             Person::getCity,
@@ -7335,18 +7300,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a concurrent {@code Collector} that groups input elements by a classifier function,
      * collecting the elements in each group into a {@code List}.
-     * 
+     *
      * <p>This collector is similar to {@link #groupingBy(Function)}, but the returned map
      * is concurrent and can be used safely in parallel streams. The collector applies the
      * classifier function to each input element to determine its group key, then collects
      * all elements with the same key into a list.</p>
-     * 
+     *
      * <p>The returned collector is concurrent and unordered.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Group strings by length in parallel
-     * ConcurrentMap<Integer, List<String>> groupedByLength = 
+     * ConcurrentMap<Integer, List<String>> groupedByLength =
      *     largeListOfStrings.parallelStream()
      *         .collect(Collectors.groupingByConcurrent(String::length));
      * }</pre>
@@ -7366,17 +7331,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a concurrent {@code Collector} that groups input elements by a classifier function,
      * collecting the elements in each group into a {@code List} and storing them in a
      * concurrent map created by the provided factory.
-     * 
+     *
      * <p>This collector is similar to {@link #groupingBy(Function, Supplier)}, but the returned
      * map is concurrent and can be used safely in parallel streams. The map instance is created
      * by the provided factory function.</p>
-     * 
+     *
      * <p>The returned collector is concurrent and unordered.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Group strings by first letter into a ConcurrentSkipListMap
-     * ConcurrentSkipListMap<Character, List<String>> groupedByFirstLetter = 
+     * ConcurrentSkipListMap<Character, List<String>> groupedByFirstLetter =
      *     strings.parallelStream()
      *         .collect(Collectors.groupingByConcurrent(
      *             s -> s.charAt(0),
@@ -7402,18 +7367,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a concurrent {@code Collector} that groups input elements by a classifier function,
      * and then performs a reduction operation on the values in each group using the
      * specified downstream collector.
-     * 
+     *
      * <p>This collector is similar to {@link #groupingBy(Function, Collector)}, but the returned
      * map is concurrent and can be used safely in parallel streams. The collector applies the
      * classifier function to each input element to determine its group key, then applies the
      * downstream collector to all elements with the same key.</p>
-     * 
+     *
      * <p>The returned collector is concurrent and unordered.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Count strings by length in parallel
-     * ConcurrentMap<Integer, Long> countByLength = 
+     * ConcurrentMap<Integer, Long> countByLength =
      *     largeListOfStrings.parallelStream()
      *         .collect(Collectors.groupingByConcurrent(
      *             String::length,
@@ -7440,17 +7405,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a concurrent {@code Collector} that groups input elements by a classifier function,
      * performs a reduction operation on the values in each group using the specified
      * downstream collector, and stores the results in a concurrent map created by the provided factory.
-     * 
+     *
      * <p>This collector is similar to {@link #groupingBy(Function, Collector, Supplier)}, but the
      * returned map is concurrent and can be used safely in parallel streams. The map instance
      * is created by the provided factory function.</p>
-     * 
+     *
      * <p>The returned collector is concurrent and unordered.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Group persons by department and sum salaries in parallel
-     * ConcurrentHashMap<String, Double> salaryByDept = 
+     * ConcurrentHashMap<String, Double> salaryByDept =
      *     employees.parallelStream()
      *         .collect(Collectors.groupingByConcurrent(
      *             Employee::getDepartment,
@@ -7480,18 +7445,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that partitions the input elements according to a predicate,
      * collecting the elements in each partition into a {@code List}.
-     * 
+     *
      * <p>This collector applies the predicate to each input element to determine whether it
      * belongs to the {@code true} or {@code false} partition. The returned map always contains
      * exactly two entries: one for {@code true} and one for {@code false}, each containing a
      * list of elements (which may be empty).</p>
-     * 
+     *
      * <p>The returned collector is unordered.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Partition numbers into even and odd
-     * Map<Boolean, List<Integer>> evenOddPartition = 
+     * Map<Boolean, List<Integer>> evenOddPartition =
      *     Stream.of(1, 2, 3, 4, 5, 6)
      *         .collect(Collectors.partitioningBy(n -> n % 2 == 0));
      * // Result: {false=[1, 3, 5], true=[2, 4, 6]}
@@ -7511,18 +7476,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that partitions the input elements according to a predicate,
      * and then performs a reduction operation on the values in each partition using the
      * specified downstream collector.
-     * 
+     *
      * <p>This collector applies the predicate to each input element to determine whether it
      * belongs to the {@code true} or {@code false} partition, then applies the downstream
      * collector to all elements in each partition. The returned map always contains exactly
      * two entries: one for {@code true} and one for {@code false}.</p>
-     * 
+     *
      * <p>The returned collector is unordered.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Partition strings by length and count each partition
-     * Map<Boolean, Long> lengthPartitionCount = 
+     * Map<Boolean, Long> lengthPartitionCount =
      *     Stream.of("a", "bb", "ccc", "dd", "e")
      *         .collect(Collectors.partitioningBy(
      *             s -> s.length() > 1,
@@ -7573,17 +7538,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that counts the number of input elements grouped by a
      * classifier function, storing the counts as {@code Long} values.
-     * 
+     *
      * <p>This collector applies the classifier function to each input element to determine
      * its group key, then counts the number of elements for each key. The returned map
      * contains the count for each distinct key.</p>
      *
      * <p>The returned collector is not concurrent and produces an unordered map.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Count strings by their first letter
-     * Map<Character, Long> letterCounts = 
+     * Map<Character, Long> letterCounts =
      *     Stream.of("apple", "apricot", "banana", "cherry", "apple")
      *         .collect(Collectors.countingBy(s -> s.charAt(0)));
      * // Result: {a=3, b=1, c=1}
@@ -7602,17 +7567,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that counts the number of input elements grouped by a
      * classifier function, storing the counts as {@code Long} values in a map created by
      * the provided factory.
-     * 
+     *
      * <p>This collector applies the classifier function to each input element to determine
      * its group key, then counts the number of elements for each key. The map instance is
      * created by the provided factory function.</p>
-     * 
+     *
      * <p>The returned collector is unordered.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Count strings by length into a TreeMap
-     * TreeMap<Integer, Long> lengthCounts = 
+     * TreeMap<Integer, Long> lengthCounts =
      *     Stream.of("a", "bb", "ccc", "dd", "e")
      *         .collect(Collectors.countingBy(
      *             String::length,
@@ -7638,17 +7603,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that counts the number of input elements grouped by a
      * classifier function, storing the counts as {@code Integer} values.
-     * 
+     *
      * <p>This collector is similar to {@link #countingBy(Function)}, but returns counts
      * as {@code Integer} values instead of {@code Long}. This is useful when you know
      * the counts will not exceed {@code Integer.MAX_VALUE}.</p>
      *
      * <p>The returned collector is not concurrent and produces an unordered map.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Count words by length (as integers)
-     * Map<Integer, Integer> wordLengthCounts = 
+     * Map<Integer, Integer> wordLengthCounts =
      *     Stream.of("hello", "world", "java", "code")
      *         .collect(Collectors.countingToIntBy(String::length));
      * // Result: {4=2, 5=2}
@@ -7667,17 +7632,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that counts the number of input elements grouped by a
      * classifier function, storing the counts as {@code Integer} values in a map created by
      * the provided factory.
-     * 
+     *
      * <p>This collector is similar to {@link #countingBy(Function, Supplier)}, but returns
      * counts as {@code Integer} values instead of {@code Long}. The map instance is created
      * by the provided factory function.</p>
-     * 
+     *
      * <p>The returned collector is unordered.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Count items by category into a LinkedHashMap (as integers)
-     * LinkedHashMap<String, Integer> categoryCounts = 
+     * LinkedHashMap<String, Integer> categoryCounts =
      *     items.stream()
      *         .collect(Collectors.countingToIntBy(
      *             Item::getCategory,
@@ -7773,13 +7738,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that accumulates {@code Map.Entry} elements into a {@code Map}
      * created by the provided factory.
-     * 
+     *
      * <p>This collector extracts keys and values from {@code Map.Entry} objects and
      * accumulates them into a map instance created by the provided factory function.
      * If duplicate keys are encountered, an {@code IllegalStateException} is thrown.</p>
-     * 
+     *
      * <p>The returned collector produces an unordered map.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert entries to a TreeMap
@@ -7805,13 +7770,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates {@code Map.Entry} elements into a {@code Map}
      * created by the provided factory, using the provided merge function to resolve collisions
      * between values associated with the same key.
-     * 
+     *
      * <p>This collector extracts keys and values from {@code Map.Entry} objects and
      * accumulates them into a map instance created by the provided factory function.
      * When duplicate keys are encountered, the merge function is used to combine the values.</p>
-     * 
+     *
      * <p>The returned collector produces an unordered map.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Merge entries into a LinkedHashMap, summing values for duplicate keys
@@ -8021,7 +7986,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     public static <T, K, V, M extends Map<K, V>> Collector<T, ?, M> toMap(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory) {
-        final BiConsumer<M, T> accumulator = (map, element) -> map.merge(keyMapper.apply(element), valueMapper.apply(element), mergeFunction);
+        // Use the null-safe merge() helper rather than Map.merge(...). Map.merge throws NPE on
+        // a null value, but the Javadoc on this collector explicitly says null values are
+        // supported when the underlying map permits them.
+        final BiConsumer<M, T> accumulator = (map, element) -> merge(map, keyMapper.apply(element), valueMapper.apply(element), mergeFunction);
 
         final BinaryOperator<M> combiner = mapMerger(mergeFunction);
 
@@ -8030,14 +7998,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates {@code Map.Entry} elements into an {@code ImmutableMap}.
-     * 
+     *
      * <p>This collector is designed to work with streams of {@code Map.Entry} objects,
      * using the entry's key and value directly. If duplicate keys are encountered,
      * an {@code IllegalStateException} is thrown.</p>
-     * 
+     *
      * <p>The resulting map is immutable and cannot be modified after creation.
      * Any attempt to modify the returned map will result in an {@code UnsupportedOperationException}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert a map to an immutable map
@@ -8062,14 +8030,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that accumulates {@code Map.Entry} elements into an {@code ImmutableMap}
      * with a merge function to handle duplicate keys.
-     * 
+     *
      * <p>This collector is designed to work with streams of {@code Map.Entry} objects.
      * When duplicate keys are encountered, the provided merge function is used to combine
      * the values.</p>
-     * 
+     *
      * <p>The resulting map is immutable and cannot be modified after creation.
      * Any attempt to modify the returned map will result in an {@code UnsupportedOperationException}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Merge entries with duplicate keys by summing values
@@ -8094,10 +8062,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that accumulates elements into an {@code ImmutableMap}
      * whose keys and values are the result of applying the provided mapping functions.
-     * 
+     *
      * <p>If duplicate keys are encountered, an {@code IllegalStateException} is thrown.
      * The resulting map is immutable and cannot be modified after creation.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create an immutable map from a list of strings
@@ -8129,10 +8097,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates elements into an {@code ImmutableMap}
      * whose keys and values are the result of applying the provided mapping functions,
      * with a merge function to handle duplicate keys.
-     * 
+     *
      * <p>When duplicate keys are encountered, the provided merge function is used to
      * combine the values. The resulting map is immutable and cannot be modified after creation.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create an immutable map, concatenating values for duplicate keys
@@ -8165,11 +8133,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that accumulates elements into an unmodifiable {@code Map}
      * whose keys and values are the result of applying the provided mapping functions.
-     * 
+     *
      * <p>This method delegates to the standard Java {@code Collectors.toUnmodifiableMap} method.
      * If duplicate keys are encountered, an {@code IllegalStateException} is thrown.
      * The returned map does not permit {@code null} keys or values.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create an unmodifiable map
@@ -8196,11 +8164,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates elements into an unmodifiable {@code Map}
      * whose keys and values are the result of applying the provided mapping functions,
      * with a merge function to handle duplicate keys.
-     * 
+     *
      * <p>This method delegates to the standard Java {@code Collectors.toUnmodifiableMap} method.
      * When duplicate keys are encountered, the provided merge function is used to combine values.
      * The returned map does not permit {@code null} keys or values.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create an unmodifiable map, summing values for duplicate keys
@@ -8229,13 +8197,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that accumulates elements into a {@code LinkedHashMap}
      * whose keys and values are the result of applying the provided mapping functions.
-     * 
+     *
      * <p>This collector maintains the insertion order of the elements. If duplicate keys
      * are encountered, an {@code IllegalStateException} is thrown.</p>
-     * 
+     *
      * <p>The returned map is a {@code LinkedHashMap}, which maintains a doubly-linked list
      * running through all of its entries, defining the iteration ordering.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a LinkedHashMap maintaining insertion order
@@ -8265,10 +8233,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates elements into a {@code LinkedHashMap}
      * whose keys and values are the result of applying the provided mapping functions,
      * with a merge function to handle duplicate keys.
-     * 
+     *
      * <p>This collector maintains the insertion order of the elements. When duplicate keys
      * are encountered, the provided merge function is used to combine the values.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a LinkedHashMap, keeping the last value for duplicate keys
@@ -8292,19 +8260,24 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     public static <T, K, V> Collector<T, ?, Map<K, V>> toLinkedHashMap(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction) {
+        // Build the collector inline to keep CH_ID (ordered) characteristics. Routing through
+        // toMap(...) would force CH_UNORDERED_ID and a parallel pipeline could merge bucket
+        // partitions in arbitrary order — defeating the whole point of LinkedHashMap.
         final Supplier<Map<K, V>> mapFactory = Suppliers.ofLinkedHashMap();
+        final BiConsumer<Map<K, V>, T> accumulator = (map, element) -> merge(map, keyMapper.apply(element), valueMapper.apply(element), mergeFunction);
+        final BinaryOperator<Map<K, V>> combiner = mapMerger(mergeFunction);
 
-        return toMap(keyMapper, valueMapper, mergeFunction, mapFactory);
+        return create(mapFactory, accumulator, combiner, CH_ID);
     }
 
     /**
      * Returns a {@code Collector} that accumulates elements into a {@code ConcurrentMap}
      * whose keys and values are the result of applying the provided mapping functions.
-     * 
+     *
      * <p>This collector is suitable for concurrent collection operations. If duplicate keys
      * are encountered, an {@code IllegalStateException} is thrown. The returned map is
      * thread-safe and can be safely accessed by multiple threads concurrently.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a thread-safe concurrent map
@@ -8333,10 +8306,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates elements into a {@code ConcurrentMap}
      * whose keys and values are the result of applying the provided mapping functions,
      * using the specified map factory.
-     * 
+     *
      * <p>This collector allows you to specify the exact type of {@code ConcurrentMap} to use.
      * If duplicate keys are encountered, an {@code IllegalStateException} is thrown.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a specific type of concurrent map
@@ -8368,11 +8341,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates elements into a {@code ConcurrentMap}
      * whose keys and values are the result of applying the provided mapping functions,
      * with a merge function to handle duplicate keys.
-     * 
+     *
      * <p>This collector is suitable for concurrent collection operations. When duplicate keys
      * are encountered, the provided merge function is used to combine the values. The returned
      * map is thread-safe.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a concurrent map, summing values for duplicate keys
@@ -8403,11 +8376,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates elements into a {@code ConcurrentMap}
      * whose keys and values are the result of applying the provided mapping functions,
      * with a merge function to handle duplicate keys and a specified map factory.
-     * 
+     *
      * <p>This is the most general form of concurrent map collector, allowing you to specify
      * all aspects of the collection process. The collector is suitable for parallel streams
      * and produces a thread-safe result.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a ConcurrentSkipListMap with custom merge logic
@@ -8444,11 +8417,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that accumulates elements into a {@code BiMap}
      * whose keys and values are the result of applying the provided mapping functions.
-     * 
+     *
      * <p>A {@code BiMap} is a map that preserves the uniqueness of its values as well
      * as that of its keys. If duplicate keys or values are encountered, an
      * {@code IllegalStateException} is thrown.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a bidirectional map
@@ -8478,10 +8451,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates elements into a {@code BiMap}
      * whose keys and values are the result of applying the provided mapping functions,
      * using the specified map factory.
-     * 
+     *
      * <p>This collector allows you to specify the exact type of {@code BiMap} to use.
      * If duplicate keys or values are encountered, an {@code IllegalStateException} is thrown.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a specific type of BiMap
@@ -8512,11 +8485,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates elements into a {@code BiMap}
      * whose keys and values are the result of applying the provided mapping functions,
      * with a merge function to handle duplicate keys.
-     * 
+     *
      * <p>When duplicate keys are encountered, the provided merge function is used to
      * combine the values. Note that the resulting value must still be unique across
      * the map, or an {@code IllegalStateException} will be thrown.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a BiMap, using merge function for duplicate keys
@@ -8549,10 +8522,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates elements into a {@code BiMap}
      * whose keys and values are the result of applying the provided mapping functions,
      * with a merge function to handle duplicate keys and a specified map factory.
-     * 
+     *
      * <p>This is the most general form of BiMap collector, allowing you to specify
      * all aspects of the collection process.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a custom BiMap with merge logic
@@ -8618,11 +8591,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates {@code Map.Entry} elements into a {@code ListMultimap}.
-     * 
+     *
      * <p>This collector is designed to work with streams of {@code Map.Entry} objects,
      * using the entry's key and value directly. Multiple values for the same key are
      * collected into a list in encounter order.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert entries to a multimap
@@ -8646,11 +8619,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that accumulates {@code Map.Entry} elements into a {@code Multimap}
      * using the specified map factory.
-     * 
+     *
      * <p>This collector allows you to specify the exact type of {@code Multimap} to use.
      * Multiple values for the same key are collected into the collection type specified
      * by the multimap implementation.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a specific type of multimap from entries
@@ -8679,10 +8652,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that accumulates elements into a {@code ListMultimap}
      * whose keys are the result of applying the provided mapping function to the input elements.
-     * 
+     *
      * <p>The values in the multimap are the input elements themselves. Multiple elements
      * that map to the same key are collected into a list in encounter order.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Group strings by their first character
@@ -8706,10 +8679,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates elements into a {@code Multimap}
      * whose keys are the result of applying the provided mapping function to the input elements,
      * using the specified map factory.
-     * 
+     *
      * <p>The values in the multimap are the input elements themselves. This collector
      * allows you to specify the exact type of {@code Multimap} to use.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Group strings by length into a SetMultimap
@@ -8740,10 +8713,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates elements into a {@code ListMultimap}
      * whose keys and values are the result of applying the provided mapping functions
      * to the input elements.
-     * 
+     *
      * <p>Multiple values that map to the same key are collected into a list in encounter order.
      * This is the default multimap collector that creates a {@code ListMultimap}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a multimap from person objects
@@ -8772,10 +8745,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates elements into a {@code Multimap}
      * whose keys and values are the result of applying the provided mapping functions
      * to the input elements, using the specified map factory.
-     * 
+     *
      * <p>This is the most general form of multimap collector, allowing you to specify
      * the key mapper, value mapper, and the exact type of {@code Multimap} to create.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a TreeMultimap with sorted keys
@@ -8811,11 +8784,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates elements into a {@code ListMultimap}
      * by applying a key mapping function and a flat mapping function that produces
      * multiple values for each input element.
-     * 
+     *
      * <p>This collector is useful when each input element needs to be mapped to multiple
      * values for the same key. The flat value extractor should return a {@code Stream}
      * of values for each input element.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Map each person to multiple skills
@@ -8843,11 +8816,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates elements into a {@code Multimap}
      * by applying a key mapping function and a flat mapping function that produces
      * multiple values for each input element, using the specified map factory.
-     * 
+     *
      * <p>This collector allows you to specify the exact type of {@code Multimap} to use
      * while flat mapping values. The flat value extractor should return a {@code Stream}
      * of values for each input element.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a SetMultimap with flat mapped values
@@ -8896,11 +8869,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates elements into a {@code ListMultimap}
      * by applying a key mapping function and a flat mapping function that produces
      * a collection of values for each input element.
-     * 
+     *
      * <p>This collector is similar to {@link #flatMappingValueToMultimap} but works with
      * collections instead of streams. Each input element is mapped to a collection of values
      * that are all associated with the same key.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Map each person to their list of phone numbers
@@ -8928,10 +8901,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates elements into a {@code Multimap}
      * by applying a key mapping function and a flat mapping function that produces
      * a collection of values for each input element, using the specified map factory.
-     * 
+     *
      * <p>This collector allows you to specify the exact type of {@code Multimap} to use
      * while flat mapping collections of values.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a TreeMultimap with flat mapped collections
@@ -8978,16 +8951,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that accumulates elements into a {@code ListMultimap}
      * by extracting multiple keys from each element using a flat mapping function.
-     * 
+     *
      * <p>This collector is useful when each input element can be associated with multiple
      * keys. The flat key extractor function returns a stream of keys for each element,
      * and the value mapper extracts the value to be associated with those keys. Each
      * key-value pair is added to the resulting multimap.</p>
-     * 
+     *
      * <p>For parallel streams, the sequential processing of keys ensures thread safety
      * when populating the multimap. The resulting multimap allows duplicate key-value
      * pairs and preserves the encounter order of values for each key.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Map products to multiple categories
@@ -9015,17 +8988,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that accumulates elements into a custom {@code Multimap}
      * implementation by extracting multiple keys from each element using a flat mapping function.
-     * 
+     *
      * <p>This collector provides full control over the type of multimap created by accepting
      * a custom map factory. The flat key extractor function returns a stream of keys for each
      * element, and the value mapper extracts the value to be associated with those keys.
      * Each key-value pair is added to the resulting multimap.</p>
-     * 
+     *
      * <p>For parallel streams, the sequential processing of keys ensures thread safety
      * when populating the multimap. The behavior of the resulting multimap (such as whether
      * it allows duplicate key-value pairs) depends on the implementation provided by the
      * map factory.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Map users to multiple roles using a SetMultimap
@@ -9073,16 +9046,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that accumulates elements into a {@code ListMultimap}
      * by extracting multiple keys from each element using a collection-based mapping function.
-     * 
+     *
      * <p>This collector is similar to {@link #flatMappingKeyToMultimap(Function, Function)}
      * but accepts a function that returns a collection of keys instead of a stream. This
      * can be more convenient when the keys are already available as a collection. Each
      * key from the collection is associated with the value extracted by the value mapper.</p>
-     * 
+     *
      * <p>The method handles empty key collections gracefully by not adding any entries
      * to the multimap for such elements. The resulting multimap allows duplicate key-value
      * pairs and preserves the encounter order of values for each key.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Map employees to multiple departments
@@ -9111,17 +9084,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates elements into a custom {@code Multimap}
      * implementation by extracting multiple keys from each element using a collection-based
      * mapping function.
-     * 
+     *
      * <p>This collector provides full control over the type of multimap created by accepting
      * a custom map factory. The flat key extractor function returns a collection of keys for
      * each element, and the value mapper extracts the value to be associated with those keys.
      * Each key from the collection is paired with the extracted value and added to the multimap.</p>
-     * 
+     *
      * <p>The method handles empty key collections gracefully by not adding any entries
      * to the multimap for such elements. The behavior of the resulting multimap (such as
      * whether it allows duplicate key-value pairs) depends on the implementation provided
      * by the map factory.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Map documents to multiple tags using a custom multimap
@@ -9233,15 +9206,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that performs a reduction of its input elements under
      * two specified downstream collectors, then merges their results using the provided
      * merger function.
-     * 
+     *
      * <p>This collector allows you to perform two different collection operations on the
      * same stream of elements in a single pass. Each element is processed by both downstream
      * collectors independently, and their final results are combined using the merger function.
      * This is more efficient than processing the stream twice.</p>
-     * 
+     *
      * <p>The characteristics of the returned collector are determined by the intersection
      * of characteristics from both downstream collectors, excluding IDENTITY_FINISH.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate both sum and count in one pass
@@ -9286,7 +9259,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Calculate both sum and average in one pass
+     * // Calculate sum of two integer properties in one pass
      * Tuple2<Integer, Integer> result = orders.stream()
      *     .collect(MoreCollectors.summingInt(
      *         Order::getQuantity,
@@ -9304,16 +9277,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that computes the sum of two integer-valued functions
          * applied to the input elements.
-         * 
+         *
          * <p>This collector applies two different integer mapping functions to each input
          * element and maintains separate sums for each. The result is a tuple containing
          * both sums. This is useful when you need to calculate multiple integer sums from
          * the same stream in a single pass.</p>
-         * 
+         *
          * <p>The collector handles integer overflow by wrapping around as per Java's
          * integer arithmetic rules. The computation is performed in encounter order
          * and is not affected by stream ordering.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate total price and quantity from orders
@@ -9342,16 +9315,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that computes the sum of three integer-valued functions
          * applied to the input elements.
-         * 
+         *
          * <p>This collector applies three different integer mapping functions to each input
          * element and maintains separate sums for each. The result is a tuple containing
          * all three sums. This is useful when you need to calculate multiple integer sums
          * from the same stream in a single pass.</p>
-         * 
+         *
          * <p>The collector handles integer overflow by wrapping around as per Java's
          * integer arithmetic rules. The computation is performed in encounter order
          * and is not affected by stream ordering.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate total sales, units, and returns from transactions
@@ -9383,15 +9356,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that computes the sum of two integer-valued functions
          * applied to the input elements, with the results widened to {@code long}.
-         * 
+         *
          * <p>This collector is similar to {@link #summingInt(ToIntFunction, ToIntFunction)}
          * but returns the sums as {@code long} values to avoid integer overflow issues.
          * This is particularly useful when summing values that might exceed the range
          * of {@code int}.</p>
-         * 
+         *
          * <p>The computation is performed in encounter order and is not affected by
          * stream ordering. Each integer value is widened to long before addition.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate large totals without overflow risk
@@ -9420,15 +9393,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that computes the sum of three integer-valued functions
          * applied to the input elements, with the results widened to {@code long}.
-         * 
+         *
          * <p>This collector is similar to {@link #summingInt(ToIntFunction, ToIntFunction, ToIntFunction)}
          * but returns the sums as {@code long} values to avoid integer overflow issues.
          * This is particularly useful when summing values that might exceed the range
          * of {@code int}.</p>
-         * 
+         *
          * <p>The computation is performed in encounter order and is not affected by
          * stream ordering. Each integer value is widened to long before addition.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate large metrics without overflow
@@ -9460,16 +9433,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that computes the sum of two long-valued functions
          * applied to the input elements.
-         * 
+         *
          * <p>This collector applies two different long mapping functions to each input
          * element and maintains separate sums for each. The result is a tuple containing
          * both sums. This is useful when you need to calculate multiple long sums from
          * the same stream in a single pass.</p>
-         * 
+         *
          * <p>The collector handles long overflow by wrapping around as per Java's
          * long arithmetic rules. The computation is performed in encounter order
          * and is not affected by stream ordering.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate total bytes read and written
@@ -9498,16 +9471,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that computes the sum of three long-valued functions
          * applied to the input elements.
-         * 
+         *
          * <p>This collector applies three different long mapping functions to each input
          * element and maintains separate sums for each. The result is a tuple containing
          * all three sums. This is useful when you need to calculate multiple long sums
          * from the same stream in a single pass.</p>
-         * 
+         *
          * <p>The collector handles long overflow by wrapping around as per Java's
          * long arithmetic rules. The computation is performed in encounter order
          * and is not affected by stream ordering.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate storage metrics
@@ -9548,7 +9521,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * <p>The computation is performed in encounter order and is not affected by
          * stream ordering. Special floating-point values (NaN, infinity) are handled
          * according to IEEE 754 standard.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate total revenue and tax
@@ -9586,7 +9559,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * <p>The computation is performed in encounter order and is not affected by
          * stream ordering. Special floating-point values (NaN, infinity) are handled
          * according to IEEE 754 standard.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate geometric measurements
@@ -9618,15 +9591,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that computes the sum of two {@code BigInteger}-valued
          * functions applied to the input elements.
-         * 
+         *
          * <p>This collector maintains arbitrary precision throughout the calculation,
          * making it suitable for very large integer values that exceed the range of
          * primitive types. The result is a tuple containing both sums. Null values
          * returned by the mapping functions will cause a NullPointerException.</p>
-         * 
+         *
          * <p>The computation is performed in encounter order and is not affected by
          * stream ordering. BigInteger arithmetic is exact and does not overflow.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate large cryptographic values
@@ -9655,15 +9628,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that computes the sum of three {@code BigInteger}-valued
          * functions applied to the input elements.
-         * 
+         *
          * <p>This collector maintains arbitrary precision throughout the calculation,
          * making it suitable for very large integer values that exceed the range of
          * primitive types. The result is a tuple containing all three sums. Null values
          * returned by the mapping functions will cause a NullPointerException.</p>
-         * 
+         *
          * <p>The computation is performed in encounter order and is not affected by
          * stream ordering. BigInteger arithmetic is exact and does not overflow.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate blockchain statistics
@@ -9695,15 +9668,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that computes the sum of two {@code BigDecimal}-valued
          * functions applied to the input elements.
-         * 
+         *
          * <p>This collector maintains arbitrary precision decimal arithmetic throughout
          * the calculation, making it suitable for financial and scientific calculations
          * requiring exact decimal representation. The result is a tuple containing both
          * sums. Null values returned by the mapping functions will cause a NullPointerException.</p>
-         * 
+         *
          * <p>The computation is performed in encounter order and is not affected by
          * stream ordering. BigDecimal arithmetic preserves all decimal places.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate financial totals with exact precision
@@ -9732,16 +9705,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that computes the sum of three {@code BigDecimal}-valued
          * functions applied to the input elements.
-         * 
+         *
          * <p>This collector maintains arbitrary precision decimal arithmetic throughout
          * the calculation, making it suitable for financial and scientific calculations
          * requiring exact decimal representation. The result is a tuple containing all
          * three sums. Null values returned by the mapping functions will cause a
          * NullPointerException.</p>
-         * 
+         *
          * <p>The computation is performed in encounter order and is not affected by
          * stream ordering. BigDecimal arithmetic preserves all decimal places.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate currency conversions with precision
@@ -9773,16 +9746,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that computes the arithmetic mean of two integer-valued
          * functions applied to the input elements.
-         * 
+         *
          * <p>This collector calculates the average of values extracted by two different
          * mapping functions from each element. The averages are computed using double
          * arithmetic to avoid precision loss. If no elements are collected, both averages
          * will be 0.0.</p>
-         * 
+         *
          * <p>The computation maintains running sums and counts internally, converting to
          * averages only in the final step. This approach minimizes rounding errors during
          * parallel computation.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate average age and salary
@@ -9813,16 +9786,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that computes the arithmetic mean of three integer-valued
          * functions applied to the input elements.
-         * 
+         *
          * <p>This collector calculates the average of values extracted by three different
          * mapping functions from each element. The averages are computed using double
          * arithmetic to avoid precision loss. If no elements are collected, all averages
          * will be 0.0.</p>
-         * 
+         *
          * <p>The computation maintains running sums and counts internally, converting to
          * averages only in the final step. This approach minimizes rounding errors during
          * parallel computation.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate average scores
@@ -9857,16 +9830,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that computes the arithmetic mean of two long-valued
          * functions applied to the input elements.
-         * 
+         *
          * <p>This collector calculates the average of values extracted by two different
          * mapping functions from each element. The averages are computed using double
          * arithmetic to handle the division. If no elements are collected, both averages
          * will be 0.0.</p>
-         * 
+         *
          * <p>The computation maintains running sums and counts internally, converting to
          * averages only in the final step. This approach minimizes rounding errors during
          * parallel computation and handles large long values correctly.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate average file sizes
@@ -9897,16 +9870,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that computes the arithmetic mean of three long-valued
          * functions applied to the input elements.
-         * 
+         *
          * <p>This collector calculates the average of values extracted by three different
          * mapping functions from each element. The averages are computed using double
          * arithmetic to handle the division. If no elements are collected, all averages
          * will be 0.0.</p>
-         * 
+         *
          * <p>The computation maintains running sums and counts internally, converting to
          * averages only in the final step. This approach minimizes rounding errors during
          * parallel computation and handles large long values correctly.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate average network metrics
@@ -10018,17 +9991,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that calculates the average of {@code BigInteger} values
          * extracted by two mapping functions from the input elements.
-         * 
+         *
          * <p>This collector is useful when you need to compute averages of very large integer
          * values that might exceed the range of primitive types. The collector accumulates
          * the sum of values from each mapper and counts the elements, then computes the
          * average as {@code BigDecimal} values with full precision.</p>
-         * 
+         *
          * <p>The returned collector produces a {@code Tuple2} containing the averages of
          * the values extracted by each mapper function. Each average is calculated as
          * the sum divided by the count of elements.
          * If no elements are collected, all averages will be BigDecimal.ZERO.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate average of price and quantity for large values
@@ -10060,17 +10033,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that calculates the average of {@code BigInteger} values
          * extracted by three mapping functions from the input elements.
-         * 
+         *
          * <p>This collector is useful when you need to compute averages of very large integer
          * values for multiple properties simultaneously. The collector accumulates the sum of
          * values from each mapper and counts the elements, then computes the averages as
          * {@code BigDecimal} values with full precision.</p>
-         * 
+         *
          * <p>The returned collector produces a {@code Tuple3} containing the averages of
          * the values extracted by each mapper function. Each average is calculated as
          * the sum divided by the count of elements.
          * If no elements are collected, all averages will be BigDecimal.ZERO.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate average of price, quantity, and discount for large values
@@ -10106,17 +10079,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that calculates the average of {@code BigDecimal} values
          * extracted by two mapping functions from the input elements.
-         * 
+         *
          * <p>This collector is useful when you need to compute averages of decimal values
          * with arbitrary precision. The collector accumulates the sum of values from each
          * mapper and counts the elements, then computes the averages maintaining full
          * precision throughout the calculation.</p>
-         * 
+         *
          * <p>The returned collector produces a {@code Tuple2} containing the averages of
          * the values extracted by each mapper function. Each average is calculated as
          * the sum divided by the count of elements using {@code BigDecimal} arithmetic.
          * If no elements are collected, all averages will be BigDecimal.ZERO.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate average of price and tax amount with high precision
@@ -10148,17 +10121,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that calculates the average of {@code BigDecimal} values
          * extracted by three mapping functions from the input elements.
-         * 
+         *
          * <p>This collector is useful when you need to compute averages of decimal values
          * for multiple properties simultaneously with arbitrary precision. The collector
          * accumulates the sum of values from each mapper and counts the elements, then
          * computes the averages maintaining full precision throughout the calculation.</p>
-         * 
+         *
          * <p>The returned collector produces a {@code Tuple3} containing the averages of
          * the values extracted by each mapper function. Each average is calculated as
          * the sum divided by the count of elements using {@code BigDecimal} arithmetic.
          * If no elements are collected, all averages will be BigDecimal.ZERO.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate average of price, tax, and shipping cost with high precision
@@ -10194,17 +10167,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that combines the results of two component collectors
          * into a {@code Tuple2}.
-         * 
+         *
          * <p>This collector is useful when you need to perform two different collection
          * operations on the same stream of elements in a single pass. Each element is
          * processed by both component collectors, and their final results are combined
          * into a tuple.</p>
-         * 
+         *
          * <p>The returned collector forwards elements to both component collectors and
          * combines their results using {@code Tuple.of()}. The characteristics of the
          * returned collector are the intersection of the characteristics of the two
          * component collectors.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Count elements and calculate sum in one pass
@@ -10233,17 +10206,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that combines the results of three component collectors
          * into a {@code Tuple3}.
-         * 
+         *
          * <p>This collector is useful when you need to perform three different collection
          * operations on the same stream of elements in a single pass. Each element is
          * processed by all three component collectors, and their final results are
          * combined into a tuple.</p>
-         * 
+         *
          * <p>The returned collector forwards elements to all component collectors and
          * combines their results using {@code Tuple.of()}. The characteristics of the
          * returned collector are the intersection of the characteristics of all three
          * component collectors.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Count, sum, and find max in one pass
@@ -10274,21 +10247,21 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that combines the results of four component collectors
          * into a {@code Tuple4}.
-         * 
+         *
          * <p>This collector is useful when you need to perform four different collection
          * operations on the same stream of elements in a single pass. Each element is
          * processed by all four component collectors, and their final results are
          * combined into a tuple.</p>
-         * 
+         *
          * <p>The returned collector forwards elements to all component collectors and
          * combines their results using {@code Tuple.of()}. The characteristics of the
          * returned collector are the intersection of the characteristics of all four
          * component collectors.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Multiple statistics in one pass
-         * Tuple4<Long, Integer, Optional<Integer>, Double> stats = 
+         * Tuple4<Long, Integer, Optional<Integer>, Double> stats =
          *     Stream.of(1, 2, 3, 4, 5)
          *         .collect(MoreCollectors.combine(
          *             Collectors.counting(),
@@ -10319,21 +10292,21 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that combines the results of five component collectors
          * into a {@code Tuple5}.
-         * 
+         *
          * <p>This collector is useful when you need to perform five different collection
          * operations on the same stream of elements in a single pass. Each element is
          * processed by all five component collectors, and their final results are
          * combined into a tuple.</p>
-         * 
+         *
          * <p>The returned collector forwards elements to all component collectors and
          * combines their results using {@code Tuple.of()}. The characteristics of the
          * returned collector are the intersection of the characteristics of all five
          * component collectors.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Comprehensive statistics in one pass
-         * Tuple5<Long, Integer, Optional<Integer>, Optional<Integer>, Double> stats = 
+         * Tuple5<Long, Integer, Optional<Integer>, Optional<Integer>, Double> stats =
          *     Stream.of(1, 2, 3, 4, 5)
          *         .collect(MoreCollectors.combine(
          *             Collectors.counting(),
@@ -10378,21 +10351,21 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that combines the results of six component collectors
          * into a {@code Tuple6}.
-         * 
+         *
          * <p>This collector is useful when you need to perform six different collection
          * operations on the same stream of elements in a single pass. Each element is
          * processed by all six component collectors, and their final results are
          * combined into a tuple.</p>
-         * 
+         *
          * <p>The returned collector forwards elements to all component collectors and
          * combines their results using {@code Tuple.of()}. The characteristics of the
          * returned collector are the intersection of the characteristics of all six
          * component collectors.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Multiple aggregations for product analysis
-         * Tuple6<Long, Double, Double, Optional<Product>, Optional<Product>, List<String>> result = 
+         * Tuple6<Long, Double, Double, Optional<Product>, Optional<Product>, List<String>> result =
          *     products.stream()
          *         .collect(MoreCollectors.combine(
          *             Collectors.counting(),
@@ -10442,17 +10415,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that combines the results of seven component collectors
          * into a {@code Tuple7}.
-         * 
+         *
          * <p>This collector is useful when you need to perform seven different collection
          * operations on the same stream of elements in a single pass. Each element is
          * processed by all seven component collectors, and their final results are
          * combined into a tuple.</p>
-         * 
+         *
          * <p>The returned collector forwards elements to all component collectors and
          * combines their results using {@code Tuple.of()}. The characteristics of the
          * returned collector are the intersection of the characteristics of all seven
          * component collectors.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Comprehensive order statistics
@@ -10517,17 +10490,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that combines the results of two component collectors
          * using a specified merger function.
-         * 
+         *
          * <p>This collector is useful when you need to perform two different collection
          * operations on the same stream of elements and combine their results in a custom
          * way. Each element is processed by both component collectors, and their final
          * results are combined using the provided merger function.</p>
-         * 
+         *
          * <p>The returned collector forwards elements to both component collectors and
          * combines their results using the provided merger. The characteristics of the
          * returned collector are the intersection of the characteristics of the two
          * component collectors, excluding {@code IDENTITY_FINISH}.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate count and average, returning formatted string
@@ -10588,17 +10561,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that combines the results of three component collectors
          * using a specified merger function.
-         * 
+         *
          * <p>This collector is useful when you need to perform three different collection
          * operations on the same stream of elements and combine their results in a custom
          * way. Each element is processed by all three component collectors, and their
          * final results are combined using the provided merger function.</p>
-         * 
+         *
          * <p>The returned collector forwards elements to all component collectors and
          * combines their results using the provided merger. The characteristics of the
          * returned collector are the intersection of the characteristics of all three
          * component collectors, excluding {@code IDENTITY_FINISH}.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Create custom statistics object
@@ -10660,7 +10633,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             final Function<Tuple3<Object, Object, Object>, R> finisher = t -> merger.apply(c1Finisher.apply(t._1), c2Finisher.apply(t._2),
                     c3Finisher.apply(t._3));
 
-            final List<Characteristics> common = N.intersection(downstream1.characteristics(), downstream2.characteristics());
+            final List<Characteristics> common = N
+                    .intersection(N.asList(downstream1.characteristics(), downstream2.characteristics(), downstream3.characteristics()));
             common.remove(Characteristics.IDENTITY_FINISH);
             final Set<Characteristics> characteristics = N.isEmpty(common) ? N.emptySet() : N.newHashSet(common);
 
@@ -10670,17 +10644,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that combines the results of four component collectors
          * using a specified merger function.
-         * 
+         *
          * <p>This collector is useful when you need to perform four different collection
          * operations on the same stream of elements and combine their results in a custom
          * way. Each element is processed by all four component collectors, and their
          * final results are combined using the provided merger function.</p>
-         * 
+         *
          * <p>The returned collector forwards elements to all component collectors and
          * combines their results using the provided merger. The characteristics of the
          * returned collector are the intersection of the characteristics of all four
          * component collectors, excluding {@code IDENTITY_FINISH}.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Create comprehensive product analysis
@@ -10688,10 +10662,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          *     .collect(MoreCollectors.combine(
          *         Collectors.counting(),
          *         Collectors.averagingDouble(Product::getPrice),
-         *         Collectors.mapping(Product::getCategory, 
+         *         Collectors.mapping(Product::getCategory,
          *             Collectors.groupingBy(Function.identity(), Collectors.counting())),
          *         Collectors.partitioningBy(p -> p.getRating() >= 4.0),
-         *         (count, avgPrice, categoryMap, ratingPartition) -> 
+         *         (count, avgPrice, categoryMap, ratingPartition) ->
          *             new ProductAnalysis(count, avgPrice, categoryMap, ratingPartition)
          *     ));
          * }</pre>
@@ -10730,20 +10704,20 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that combines the results of multiple component collectors
          * using a specified merger function.
-         * 
+         *
          * <p>This collector is useful when you need to perform multiple different collection
          * operations on the same stream of elements and combine their results in a custom
          * way. Each element is processed by all component collectors, and their final
          * results are combined using the provided merger function that receives an array
          * of results.</p>
-         * 
+         *
          * <p>The returned collector forwards elements to all component collectors and
          * combines their results using the provided merger. The merger function receives
          * an array containing the results from each component collector in the same order
          * as they appear in the collection. The characteristics of the returned collector
          * are the intersection of the characteristics of all component collectors,
          * excluding {@code IDENTITY_FINISH}.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Multiple collectors with dynamic combination
@@ -10753,12 +10727,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          *     Collectors.averagingDouble(Order::getAmount),
          *     Collectors.mapping(Order::getCustomer, Collectors.toSet())
          * );
-         * 
+         *
          * OrderSummary summary = orders.stream()
-         *     .collect(MoreCollectors.combine(collectors, 
+         *     .collect(MoreCollectors.combine(collectors,
          *         results -> new OrderSummary(
          *             (Long) results[0],
-         *             (Double) results[1], 
+         *             (Double) results[1],
          *             (Double) results[2],
          *             (Set<String>) results[3]
          *         )
@@ -10828,15 +10802,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         /**
          * Returns a {@code Collector} that accumulates the input elements into a new {@code Dataset}.
-         * 
+         *
          * <p>This collector is useful when you need to convert a stream of elements into a
          * {@code Dataset} structure. The collector creates a {@code Dataset} with auto-generated
          * column names based on the properties of the elements.</p>
-         * 
+         *
          * <p>The returned collector accumulates elements into a list and then creates a
          * {@code Dataset} from that list. The column names are automatically determined
          * based on the structure of the elements.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Convert stream of entities to Dataset with auto-generated column names
@@ -10858,15 +10832,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         /**
          * Returns a {@code Collector} that accumulates the input elements into a new {@code Dataset}
          * with specified column names.
-         * 
+         *
          * <p>This collector is useful when you need to convert a stream of elements into a
          * {@code Dataset} structure with explicitly specified column names. The collector
          * uses the provided column names for the resulting data structure.</p>
-         * 
+         *
          * <p>The returned collector accumulates elements into a list and then creates a
          * {@code Dataset} from that list using the specified column names. If column names
          * are not provided (null), they will be auto-generated based on the element structure.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Convert stream to Dataset with specified column names

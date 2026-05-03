@@ -19,6 +19,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.ByteList;
@@ -26,9 +27,11 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for ByteList objects.
- * Provides functionality for serialization, deserialization, and database operations
- * for ByteList instances by delegating to the underlying byte array type handler.
+ * Type handler for {@link ByteList} objects, which is a primitive-backed list of {@code byte} values.
+ * Provides serialization, deserialization, and database operations for {@link ByteList} instances
+ * by delegating to the underlying {@code byte[]} array type handler.
+ * String representations use the format {@code [1, 2, 3]} with comma-separated numeric values
+ * enclosed in square brackets.
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteList> {
@@ -38,8 +41,13 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
     private final Type<byte[]> arrayType = Type.of(byte[].class);
 
     private final Type<Byte> elementType = Type.of(byte.class);
-    private final Type<Byte>[] parameterTypes = new Type[] { elementType };
+    private final List<Type<?>> parameterTypes = List.of(elementType);
 
+    /**
+     * Constructs a new PrimitiveByteListType instance.
+     * This constructor is protected to allow subclassing while maintaining controlled instantiation
+     * through the TypeFactory.
+     */
     protected PrimitiveByteListType() {
         super(BYTE_LIST);
     }
@@ -67,11 +75,11 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
     /**
      * Returns the parameter types associated with this list type.
      *
-     * @return an array containing the Byte Type that describes the elements of this list type
+     * @return an immutable list containing the Byte Type that describes the elements of this list type
      * @see #elementType()
      */
     @Override
-    public Type<Byte>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 

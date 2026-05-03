@@ -16,11 +16,17 @@ package com.landawn.abacus.type;
 
 /**
  * The abstract base class for atomic types in the type system.
- * Atomic types are types that represent single, indivisible values that can be
- * safely used in concurrent operations without additional synchronization.
- * Examples include {@code AtomicInteger}, {@code AtomicLong}, {@code AtomicBoolean}, etc.
+ * <p>
+ * Atomic types represent thread-safe, mutable single-value containers from
+ * {@code java.util.concurrent.atomic} (e.g., {@code AtomicInteger}, {@code AtomicLong},
+ * {@code AtomicBoolean}, {@code AtomicReference}). Values are self-delimiting numeric or boolean
+ * quantities that do not require quoting in CSV format.
+ * </p>
  *
- * @param <T> the atomic type (e.g., {@code AtomicInteger}, {@code AtomicLong}, {@code AtomicBoolean})
+ * @param <T> the atomic wrapper type handled by this class
+ *            (e.g., {@link java.util.concurrent.atomic.AtomicInteger},
+ *            {@link java.util.concurrent.atomic.AtomicLong},
+ *            {@link java.util.concurrent.atomic.AtomicBoolean})
  */
 public abstract class AbstractAtomicType<T> extends AbstractType<T> {
 
@@ -34,8 +40,8 @@ public abstract class AbstractAtomicType<T> extends AbstractType<T> {
     }
 
     /**
-     * Returns {@code false} because atomic types represent numeric or boolean values that are self-delimiting
-     * and do not require quotation marks in CSV format.
+     * Returns {@code false} because atomic types hold numeric or boolean values
+     * that are self-delimiting and do not require quotation marks in CSV format.
      *
      * @return {@code false}
      */

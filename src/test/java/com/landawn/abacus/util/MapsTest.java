@@ -16,11 +16,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -943,37 +943,37 @@ public class MapsTest extends AbstractTest {
 
     @Test
     public void test_getByPath() {
-        Map map = CommonUtil.asMap("key1", "val1");
+        Map map = N.asMap("key1", "val1");
         assertEquals("val1", Maps.getByPath(map, "key1"));
 
-        map = CommonUtil.asMap("key1", CommonUtil.toList("val1"));
+        map = N.asMap("key1", N.toList("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
 
-        map = CommonUtil.asMap("key1", CommonUtil.toSet("val1"));
+        map = N.asMap("key1", N.toSet("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
 
-        map = CommonUtil.asMap("key1", CommonUtil.toList(CommonUtil.toLinkedHashSet("val1", "val2")));
+        map = N.asMap("key1", N.toList(N.toLinkedHashSet("val1", "val2")));
         assertEquals("val2", Maps.getByPath(map, "key1[0][1]"));
 
-        map = CommonUtil.asMap("key1", CommonUtil.toSet(CommonUtil.toList(CommonUtil.toSet("val1"))));
+        map = N.asMap("key1", N.toSet(N.toList(N.toSet("val1"))));
         assertEquals("val1", Maps.getByPath(map, "key1[0][0][0]"));
 
-        map = CommonUtil.asMap("key1", CommonUtil.toList(CommonUtil.toLinkedHashSet("val1", CommonUtil.asMap("key2", "val22"))));
+        map = N.asMap("key1", N.toList(N.toLinkedHashSet("val1", N.asMap("key2", "val22"))));
         assertEquals("val22", Maps.getByPath(map, "key1[0][1].key2"));
 
-        map = CommonUtil.asMap("key1",
-                CommonUtil.toList(CommonUtil.toLinkedHashSet("val1", CommonUtil.asMap("key2", CommonUtil.toList("val22", CommonUtil.asMap("key3", "val33"))))));
+        map = N.asMap("key1",
+                N.toList(N.toLinkedHashSet("val1", N.asMap("key2", N.toList("val22", N.asMap("key3", "val33"))))));
         assertEquals("val33", Maps.getByPath(map, "key1[0][1].key2[1].key3"));
 
-        map = CommonUtil.asMap("key1",
-                CommonUtil.toList(CommonUtil.toLinkedHashSet("val1", CommonUtil.asMap("key2", CommonUtil.toList("val22", CommonUtil.asMap("key3", "val33"))))));
+        map = N.asMap("key1",
+                N.toList(N.toLinkedHashSet("val1", N.asMap("key2", N.toList("val22", N.asMap("key3", "val33"))))));
         assertNull(Maps.getByPath(map, "key1[0][2].key2[1].key3"));
 
-        map = CommonUtil.asMap("key1",
-                CommonUtil.toList(CommonUtil.toLinkedHashSet("val1", CommonUtil.asMap("key2", CommonUtil.toList("val22", CommonUtil.asMap("key3", "val33"))))));
+        map = N.asMap("key1",
+                N.toList(N.toLinkedHashSet("val1", N.asMap("key2", N.toList("val22", N.asMap("key3", "val33"))))));
         assertNull(Maps.getByPath(map, "key1[0][1].key22[1].key3"));
 
-        map = CommonUtil.asMap("key1", CommonUtil.asMap("key2", null));
+        map = N.asMap("key1", N.asMap("key2", null));
         assertNull(Maps.getByPath(map, "key1.key2.key3"));
     }
 
@@ -1046,6 +1046,23 @@ public class MapsTest extends AbstractTest {
 
         assertNull(Maps.getByPath(complexMap, "list[5].prop"));
         assertNull(Maps.getByPath(complexMap, "list[1].innerList[10]"));
+    }
+
+    @Test
+    public void testGetByPath_returnsDefaultForInvalidTraversal() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("scalar", "value");
+        map.put("list", Arrays.asList("first"));
+        map.put("nestedLists", Arrays.asList(Arrays.asList("nested")));
+
+        assertNull(Maps.getByPath(map, "scalar.child"));
+        assertNull(Maps.getByPath(map, "scalar[0]"));
+        assertNull(Maps.getByPath(map, "list[-1]"));
+        assertNull(Maps.getByPath(map, "list[abc]"));
+        assertNull(Maps.getByPath(map, "list[0].child"));
+        assertNull(Maps.getByPath(map, "nestedLists[0][0][0]"));
+        assertEquals("fallback", Maps.getByPathOrDefault(map, "list[-1]", "fallback"));
+        assertFalse(Maps.getByPathIfExists(map, "scalar.child").isPresent());
     }
 
     @Test
@@ -1153,7 +1170,7 @@ public class MapsTest extends AbstractTest {
     public void testGetByPathIfExists() {
         Map<String, Object> map = new HashMap<>();
         map.put("key", "value");
-        map.put("key2", CommonUtil.asMap("kk2", "123"));
+        map.put("key2", N.asMap("kk2", "123"));
 
         Nullable<String> result = Maps.getByPathIfExists(map, "key");
         assertTrue(result.isPresent());
@@ -1195,14 +1212,14 @@ public class MapsTest extends AbstractTest {
 
     @Test
     public void test_getOrDefault() {
-        Map<String, Integer> map = CommonUtil.asMap("a", 1, "b", 2, "c", 3);
+        Map<String, Integer> map = N.asMap("a", 1, "b", 2, "c", 3);
 
         assertEquals(1, Maps.getOrDefaultIfAbsent(map, "a", 0).intValue());
         assertEquals(0, Maps.getOrDefaultIfAbsent(map, "d", 0).intValue());
 
-        assertEquals(CommonUtil.toList(1, 0), Maps.getValuesOrDefault(map, CommonUtil.toList("a", "d"), 0));
+        assertEquals(N.toList(1, 0), Maps.getValuesOrDefault(map, N.toList("a", "d"), 0));
 
-        assertEquals(CommonUtil.toList(1), Maps.getValuesIfPresent(map, CommonUtil.toList("a", "d")));
+        assertEquals(N.toList(1), Maps.getValuesIfPresent(map, N.toList("a", "d")));
     }
 
     @Test
@@ -2054,18 +2071,18 @@ public class MapsTest extends AbstractTest {
 
     @Test
     public void test_difference() {
-        Map<String, Integer> map = CommonUtil.asMap("a", 1, "b", 2, "c", 3);
-        Map<String, Integer> map2 = CommonUtil.asMap("a", 1, "b", 3);
+        Map<String, Integer> map = N.asMap("a", 1, "b", 2, "c", 3);
+        Map<String, Integer> map2 = N.asMap("a", 1, "b", 3);
 
         N.println(Maps.intersection(map, map2));
-        assertEquals(CommonUtil.asMap("a", 1), Maps.intersection(map, map2));
+        assertEquals(N.asMap("a", 1), Maps.intersection(map, map2));
 
         N.println(Maps.difference(map, map2));
-        assertEquals(CommonUtil.asMap("b", Pair.of(2, Nullable.of(3)), "c", Pair.of(3, Nullable.empty())), Maps.difference(map, map2));
+        assertEquals(N.asMap("b", Pair.of(2, Nullable.of(3)), "c", Pair.of(3, Nullable.empty())), Maps.difference(map, map2));
 
         N.println(Maps.symmetricDifference(map, map2));
 
-        assertEquals(CommonUtil.asMap("b", Pair.of(Nullable.of(2), Nullable.of(3)), "c", Pair.of(Nullable.of(3), Nullable.empty())),
+        assertEquals(N.asMap("b", Pair.of(Nullable.of(2), Nullable.of(3)), "c", Pair.of(Nullable.of(3), Nullable.empty())),
                 Maps.symmetricDifference(map, map2));
 
     }
@@ -2245,13 +2262,13 @@ public class MapsTest extends AbstractTest {
 
     @Test
     public void testContainsEntry() {
-        Map.Entry<String, String> entry = CommonUtil.newEntry("key1", "value1");
+        Map.Entry<String, String> entry = N.newEntry("key1", "value1");
         assertTrue(Maps.containsEntry(testMap, entry));
 
-        Map.Entry<String, String> wrongValue = CommonUtil.newEntry("key1", "wrongValue");
+        Map.Entry<String, String> wrongValue = N.newEntry("key1", "wrongValue");
         assertFalse(Maps.containsEntry(testMap, wrongValue));
 
-        Map.Entry<String, String> missing = CommonUtil.newEntry("missing", "value");
+        Map.Entry<String, String> missing = N.newEntry("missing", "value");
         assertFalse(Maps.containsEntry(testMap, missing));
     }
 
@@ -2273,10 +2290,10 @@ public class MapsTest extends AbstractTest {
         Map<String, Integer> map = Map.of("a", 1, "b", 2);
         map = new HashMap<>(map);
         map.put("c", null);
-        assertTrue(Maps.containsEntry(map, CommonUtil.newEntry("a", 1)));
-        assertFalse(Maps.containsEntry(map, CommonUtil.newEntry("a", 2)));
-        assertTrue(Maps.containsEntry(map, CommonUtil.newEntry("c", null)));
-        assertFalse(Maps.containsEntry(map, CommonUtil.newEntry("d", null)));
+        assertTrue(Maps.containsEntry(map, N.newEntry("a", 1)));
+        assertFalse(Maps.containsEntry(map, N.newEntry("a", 2)));
+        assertTrue(Maps.containsEntry(map, N.newEntry("c", null)));
+        assertFalse(Maps.containsEntry(map, N.newEntry("d", null)));
     }
 
     @Test
@@ -2292,12 +2309,12 @@ public class MapsTest extends AbstractTest {
 
     @Test
     public void testContainsEntry_nullMap() {
-        assertFalse(Maps.containsEntry((Map<String, String>) null, CommonUtil.newEntry("a", "b")));
+        assertFalse(Maps.containsEntry((Map<String, String>) null, N.newEntry("a", "b")));
     }
 
     @Test
     public void testContainsEntry_emptyMap() {
-        assertFalse(Maps.containsEntry(new HashMap<>(), CommonUtil.newEntry("a", "b")));
+        assertFalse(Maps.containsEntry(new HashMap<>(), N.newEntry("a", "b")));
     }
 
     @Test
@@ -2480,9 +2497,9 @@ public class MapsTest extends AbstractTest {
     @Test
     public void testRemove_entry() {
         Map<String, Integer> map = new HashMap<>(Map.of("a", 1, "b", 2));
-        assertTrue(Maps.removeEntry(map, CommonUtil.newEntry("a", 1)));
+        assertTrue(Maps.removeEntry(map, N.newEntry("a", 1)));
         assertEquals(1, map.size());
-        assertFalse(Maps.removeEntry(map, CommonUtil.newEntry("b", 3)));
+        assertFalse(Maps.removeEntry(map, N.newEntry("b", 3)));
     }
 
     @Test
@@ -2497,14 +2514,14 @@ public class MapsTest extends AbstractTest {
     public void testRemoveEntry() {
         Map<String, String> map = new HashMap<>(testMap);
 
-        Map.Entry<String, String> entry = CommonUtil.newEntry("key1", "value1");
+        Map.Entry<String, String> entry = N.newEntry("key1", "value1");
         assertTrue(Maps.removeEntry(map, entry));
         assertFalse(map.containsKey("key1"));
 
-        Map.Entry<String, String> missing = CommonUtil.newEntry("missing", "value");
+        Map.Entry<String, String> missing = N.newEntry("missing", "value");
         assertFalse(Maps.removeEntry(map, missing));
 
-        Map.Entry<String, String> wrongValue = CommonUtil.newEntry("key2", "wrongValue");
+        Map.Entry<String, String> wrongValue = N.newEntry("key2", "wrongValue");
         assertFalse(Maps.removeEntry(map, wrongValue));
         assertTrue(map.containsKey("key2"));
     }
@@ -3219,7 +3236,7 @@ public class MapsTest extends AbstractTest {
 
     @Test
     public void test_flatten() {
-        Map<String, Object> map = CommonUtil.asMap("a", CommonUtil.asMap("b", CommonUtil.asMap("c", CommonUtil.asMap("d", 4), "c2", 3), "b2", 2), "a2", 1);
+        Map<String, Object> map = N.asMap("a", N.asMap("b", N.asMap("c", N.asMap("d", 4), "c2", 3), "b2", 2), "a2", 1);
         N.println(map);
 
         Map<String, Object> result = Maps.flatten(map);
@@ -3233,7 +3250,7 @@ public class MapsTest extends AbstractTest {
     @Test
     public void testFlatten_withSupplier() {
         Map<String, Object> map = new HashMap<>();
-        map.put("a", CommonUtil.asMap("b", 1));
+        map.put("a", N.asMap("b", 1));
         LinkedHashMap<String, Object> result = Maps.flatten(map, LinkedHashMap::new);
         assertEquals(1, result.get("a.b"));
         assertTrue(result instanceof LinkedHashMap);
@@ -3541,7 +3558,7 @@ public class MapsTest extends AbstractTest {
         N.println(mapDiff.onlyOnRight());
         N.println(mapDiff.differentValues());
 
-        mapDiff = BeanDifference.of(account1, account2, CommonUtil.toList("id", "firstName", "lastName2"));
+        mapDiff = BeanDifference.of(account1, account2, N.toList("id", "firstName", "lastName2"));
 
         N.println(mapDiff);
         N.println(mapDiff.common());
@@ -3662,7 +3679,7 @@ public class MapsTest extends AbstractTest {
         assertEquals("Jane", beans.get(1).getName());
         assertEquals(25, beans.get(1).getAge());
 
-        List<TestBean> beans2 = Beans.mapToBean(maps, CommonUtil.toList("name"), TestBean.class);
+        List<TestBean> beans2 = Beans.mapToBean(maps, N.toList("name"), TestBean.class);
 
         assertEquals(2, beans2.size());
         assertEquals("John", beans2.get(0).getName());

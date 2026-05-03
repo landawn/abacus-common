@@ -175,7 +175,7 @@ public class ExceptionUtilTest extends TestBase {
         // Test with non-InterruptedException
         Thread.interrupted(); // clear
         Error error = new Error("test error");
-        result = ExceptionUtil.toRuntimeException((Throwable) error, true);
+        result = ExceptionUtil.toRuntimeException(error, true);
         Assertions.assertFalse(Thread.interrupted());
         Assertions.assertEquals(error, result.getCause());
     }

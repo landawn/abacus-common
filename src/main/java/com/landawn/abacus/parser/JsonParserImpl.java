@@ -56,6 +56,7 @@ import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.BufferedJsonWriter;
+import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.EntityId;
@@ -190,7 +191,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      *
      * // Deserialize collection with type safety
      * String jsonArray = "[{\"id\":1},{\"id\":2}]";
-     * List<Item> items = parser.parse(jsonArray, config, new TypeReference<List<Item>>() {});
+     * List<Item> items = parser.parse(jsonArray, config, Type.of(new TypeReference<List<Item>>() {}));
      * }</pre>
      *
      * @param <T> the type of the target object
@@ -488,7 +489,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * User user = new User("John", 30);
      * JsonSerConfig config = new JsonSerConfig()
      *     .setPrettyFormat(true)
-     *     .skipNullValue(true);
+     *     .setExclusion(Exclusion.NULL);
      *
      * String json = parser.serialize(user, config);
      * // Result (formatted):
@@ -733,59 +734,69 @@ final class JsonParserImpl extends AbstractJsonParser {
 
         final Type<Object> type = Type.of(obj.getClass());
 
-        switch (type.serializationType()) {
-            case SERIALIZABLE:
-                type.writeCharacter(bw, obj, config);
+        try {
+            switch (type.serializationType()) {
+                case SERIALIZABLE:
+                    type.writeCharacter(bw, obj, config);
 
-                break;
+                    break;
 
-            case ENTITY:
-                writeBean(obj, config, isFirstCall, indentation, serializedObjects, type, bw);
+                case ENTITY:
+                    writeBean(obj, config, isFirstCall, indentation, serializedObjects, type, bw);
 
-                break;
+                    break;
 
-            case MAP:
-                writeMap((Map<?, ?>) obj, config, isFirstCall, indentation, serializedObjects, type, bw);
+                case MAP:
+                    writeMap((Map<?, ?>) obj, config, isFirstCall, indentation, serializedObjects, type, bw);
 
-                break;
+                    break;
 
-            case ARRAY:
-                writeArray(obj, config, isFirstCall, indentation, serializedObjects, type, bw);
+                case ARRAY:
+                    writeArray(obj, config, isFirstCall, indentation, serializedObjects, type, bw);
 
-                break;
+                    break;
 
-            case COLLECTION:
-                writeCollection((Collection<?>) obj, config, isFirstCall, indentation, serializedObjects, type, bw);
+                case COLLECTION:
+                    writeCollection((Collection<?>) obj, config, isFirstCall, indentation, serializedObjects, type, bw);
 
-                break;
+                    break;
 
-            case MAP_ENTITY:
-                writeMapEntity((MapEntity) obj, config, isFirstCall, indentation, serializedObjects, type, bw);
+                case MAP_ENTITY:
+                    writeMapEntity((MapEntity) obj, config, isFirstCall, indentation, serializedObjects, type, bw);
 
-                break;
+                    break;
 
-            case ENTITY_ID:
-                writeEntityId((EntityId) obj, config, isFirstCall, indentation, serializedObjects, type, bw);
+                case ENTITY_ID:
+                    writeEntityId((EntityId) obj, config, isFirstCall, indentation, serializedObjects, type, bw);
 
-                break;
+                    break;
 
-            case DATA_SET:
-                writeDataset((Dataset) obj, config, isFirstCall, indentation, serializedObjects, type, bw);
+                case DATA_SET:
+                    writeDataset((Dataset) obj, config, isFirstCall, indentation, serializedObjects, type, bw);
 
-                break;
+                    break;
 
-            case SHEET:
-                writeSheet((Sheet) obj, config, isFirstCall, indentation, serializedObjects, type, bw);
+                case SHEET:
+                    writeSheet((Sheet) obj, config, isFirstCall, indentation, serializedObjects, type, bw);
 
-                break;
+                    break;
 
-            default:
-                if (config == null || config.isFailOnEmptyBean()) {
-                    throw new ParsingException("Unsupported class: " + ClassUtil.getCanonicalClassName(type.javaType())
-                            + ". Only Array/List/Map and Bean class with getter/setter methods are supported");
-                } else {
-                    bw.write("{}");
-                }
+                default:
+                    if (config == null || config.isFailOnEmptyBean()) {
+                        throw new ParsingException("Unsupported class: " + ClassUtil.getCanonicalClassName(type.javaType())
+                                + ". Only Array/List/Map and Bean class with getter/setter methods are supported");
+                    } else {
+                        bw.write("{}");
+                    }
+            }
+        } finally {
+            // Path-based cycle detection: remove this object so it's no longer "in progress"
+            // once we finish writing it. Without this, two distinct branches of the bean graph
+            // that share the same object (a DAG, not a cycle) would be misidentified as cyclic
+            // and trigger a false ParsingException.
+            if (serializedObjects != null) {
+                serializedObjects.remove(obj);
+            }
         }
     }
 
@@ -937,7 +948,10 @@ final class JsonParserImpl extends AbstractJsonParser {
                 }
 
                 if (propInfo.isJsonRawValue) {
-                    strType.writeCharacter(bw, serialize(propValue, config), config);
+                    // Raw JSON: write the serialized payload verbatim. Routing through
+                    // strType.writeCharacter() would quote and JSON-escape the result, producing
+                    // {"metadata":"{\"k\":\"v\"}"} instead of the documented {"metadata":{"k":"v"}}.
+                    bw.write(serialize(propValue, config));
                 } else if (propInfo.jsonXmlType.isSerializable()) {
                     propInfo.writePropValue(bw, propValue, config);
                 } else {
@@ -1954,7 +1968,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      *
      * // For complex collections
      * String jsonArray = "[{\"id\":1},{\"id\":2}]";
-     * List<Item> items = parser.deserialize(jsonArray, config, new TypeReference<List<Item>>() {});
+     * List<Item> items = parser.deserialize(jsonArray, config, Type.of(new TypeReference<List<Item>>() {}));
      * }</pre>
      *
      * @param <T> the type of the target object
@@ -2183,8 +2197,11 @@ final class JsonParserImpl extends AbstractJsonParser {
      */
     @Override
     public <T> T deserialize(InputStream source, JsonDeserConfig config, Type<? extends T> targetType) {
-        // No need to close the reader because the InputStream will/should be closely externally.
-        final Reader reader = IOUtil.newInputStreamReader(source); // NOSONAR
+        // RFC 8259 mandates UTF-8 for JSON over the wire. IOUtil.newInputStreamReader(InputStream)
+        // falls back to the JVM default charset, which silently corrupts non-ASCII content on
+        // Windows (cp1252) or any non-UTF-8 default-charset host.
+        // Reader is intentionally not closed here; the caller owns the InputStream lifecycle.
+        final Reader reader = IOUtil.newInputStreamReader(source, Charsets.UTF_8); // NOSONAR
 
         return deserialize(reader, config, targetType);
     }
@@ -2645,10 +2662,10 @@ final class JsonParserImpl extends AbstractJsonParser {
             final Class<? extends T> targetClass, final Type<? extends T> targetType, final Map<Object, Object> output) throws IOException {
         Type<?> keyType = defaultKeyType;
 
-        if (propType != null && propType.isMap() && !propType.parameterTypes()[0].isObject()) {
-            keyType = propType.parameterTypes()[0];
-        } else if (targetType != null && targetType.isMap() && !targetType.parameterTypes()[0].isObject()) {
-            keyType = targetType.parameterTypes()[0];
+        if (propType != null && propType.isMap() && !propType.parameterTypes().get(0).isObject()) {
+            keyType = propType.parameterTypes().get(0);
+        } else if (targetType != null && targetType.isMap() && !targetType.parameterTypes().get(0).isObject()) {
+            keyType = targetType.parameterTypes().get(0);
         } else if ((propType == null || !propType.isObject()) && (config.getMapKeyType() != null && !config.getMapKeyType().isObject())) {
             keyType = config.getMapKeyType();
         }
@@ -2657,10 +2674,10 @@ final class JsonParserImpl extends AbstractJsonParser {
 
         Type<?> valueType = defaultValueType;
 
-        if (propType != null && propType.isMap() && !propType.parameterTypes()[1].isObject()) {
-            valueType = propType.parameterTypes()[1];
-        } else if (targetType != null && targetType.isMap() && !targetType.parameterTypes()[1].isObject()) {
-            valueType = targetType.parameterTypes()[1];
+        if (propType != null && propType.isMap() && !propType.parameterTypes().get(1).isObject()) {
+            valueType = propType.parameterTypes().get(1);
+        } else if (targetType != null && targetType.isMap() && !targetType.parameterTypes().get(1).isObject()) {
+            valueType = targetType.parameterTypes().get(1);
         } else if ((propType == null || !propType.isObject()) && (config.getMapValueType() != null && !config.getMapValueType().isObject())) {
             valueType = config.getMapValueType();
         }
@@ -3880,6 +3897,10 @@ final class JsonParserImpl extends AbstractJsonParser {
                                     break;
 
                                 case START_BRACKET:
+                                    if (columnKeyList == null) {
+                                        throw new ParsingException("'columnKeySet' must appear before 'columns' in Sheet JSON");
+                                    }
+
                                     final Object parsedColumnKey;
 
                                     try {
@@ -3962,30 +3983,68 @@ final class JsonParserImpl extends AbstractJsonParser {
 
     protected Object readBracketedValue(final JsonReader jr, JsonDeserConfig config, final BiConsumer<? super Collection<Object>, ?> propHandler,
             final Type<?> type) throws IOException {
-        if (N.len(type.parameterTypes()) == 1) {
-            config = config.copy();
-            config.setElementType(type.parameterTypes()[0]);
+        enterNesting();
+        try {
+            if (type.parameterTypes().size() == 1) {
+                config = config.copy();
+                config.setElementType(type.parameterTypes().get(0));
+            }
+
+            if (type.isArray()) {
+                return readArray(jr, config, type, false, type.javaType(), type, null);
+            } else if (type.isCollection()) {
+                return readCollection(jr, config, type, propHandler, false, type.javaType(), type, null);
+            } else if (type.isDataset()) {
+                return readDataset(jr, START_BRACKET, config, false, type.javaType(), type);
+            } else {
+                final List<?> list = readCollection(jr, config, type, propHandler, false, List.class, null, null);
+                final BiFunction<List<?>, Type<?>, Object> converter = list2PairTripleConverterMap.get(type.javaType());
+
+                return converter == null ? list : converter.apply(list, type);
+            }
+        } finally {
+            exitNesting();
         }
+    }
 
-        if (type.isArray()) {
-            return readArray(jr, config, type, false, type.javaType(), type, null);
-        } else if (type.isCollection()) {
-            return readCollection(jr, config, type, propHandler, false, type.javaType(), type, null);
-        } else if (type.isDataset()) {
-            return readDataset(jr, START_BRACKET, config, false, type.javaType(), type);
-        } else {
-            final List<?> list = readCollection(jr, config, type, propHandler, false, List.class, null, null);
-            final BiFunction<List<?>, Type<?>, Object> converter = list2PairTripleConverterMap.get(type.javaType());
+    /** Maximum permitted JSON nesting depth. Defends against StackOverflowError on hostile input. */
+    private static final int MAX_NESTING_DEPTH = 1000;
 
-            return converter == null ? list : converter.apply(list, type);
+    /** Per-thread JSON nesting depth counter (used as a single-element mutable int). */
+    private static final ThreadLocal<int[]> NESTING_DEPTH = ThreadLocal.withInitial(() -> new int[1]);
+
+    private static void enterNesting() {
+        final int[] depth = NESTING_DEPTH.get();
+        if (++depth[0] > MAX_NESTING_DEPTH) {
+            // Decrement before throwing so a caught exception leaves the counter consistent
+            // for any subsequent parse on the same thread.
+            depth[0]--;
+            throw new ParsingException("JSON nesting depth exceeded " + MAX_NESTING_DEPTH + " (defends against stack-overflow DoS)");
+        }
+    }
+
+    private static void exitNesting() {
+        final int[] depth = NESTING_DEPTH.get();
+        if (--depth[0] <= 0) {
+            depth[0] = 0;
+            NESTING_DEPTH.remove();
         }
     }
 
     protected Object readBracedValue(final JsonReader jr, JsonDeserConfig config, final Type<?> type) throws IOException {
-        if (N.len(type.parameterTypes()) == 2) {
+        enterNesting();
+        try {
+            return readBracedValueBody(jr, config, type);
+        } finally {
+            exitNesting();
+        }
+    }
+
+    private Object readBracedValueBody(final JsonReader jr, JsonDeserConfig config, final Type<?> type) throws IOException {
+        if (type.parameterTypes().size() == 2) {
             config = config.copy();
-            config.setMapKeyType(type.parameterTypes()[0]);
-            config.setMapValueType(type.parameterTypes()[1]);
+            config.setMapKeyType(type.parameterTypes().get(0));
+            config.setMapValueType(type.parameterTypes().get(1));
         }
 
         if (type.isBean()) {
@@ -4160,7 +4219,8 @@ final class JsonParserImpl extends AbstractJsonParser {
     @Override
     public <T> Stream<T> stream(final InputStream source, final boolean closeInputStreamWhenStreamIsClosed, final JsonDeserConfig config,
             final Type<? extends T> elementType) {
-        final Reader reader = IOUtil.newInputStreamReader(source); // NOSONAR
+        // See deserialize(InputStream): JSON is UTF-8 per RFC 8259.
+        final Reader reader = IOUtil.newInputStreamReader(source, java.nio.charset.StandardCharsets.UTF_8); // NOSONAR
 
         return stream(reader, closeInputStreamWhenStreamIsClosed, config, elementType);
     }
@@ -4363,67 +4423,67 @@ final class JsonParserImpl extends AbstractJsonParser {
 
     static {
         list2PairTripleConverterMap.put(Pair.class, (list, eleType) -> {
-            final Type<?>[] paramTypes = eleType.parameterTypes();
-            return Pair.of(N.convert(list.get(0), paramTypes[0]), N.convert(list.get(1), paramTypes[1]));
+            final List<Type<?>> paramTypes = eleType.parameterTypes();
+            return Pair.of(N.convert(list.get(0), paramTypes.get(0)), N.convert(list.get(1), paramTypes.get(1)));
         });
 
         list2PairTripleConverterMap.put(Triple.class, (list, eleType) -> {
-            final Type<?>[] paramTypes = eleType.parameterTypes();
-            return Triple.of(N.convert(list.get(0), paramTypes[0]), N.convert(list.get(1), paramTypes[1]), N.convert(list.get(2), paramTypes[2]));
+            final List<Type<?>> paramTypes = eleType.parameterTypes();
+            return Triple.of(N.convert(list.get(0), paramTypes.get(0)), N.convert(list.get(1), paramTypes.get(1)), N.convert(list.get(2), paramTypes.get(2)));
         });
 
         list2PairTripleConverterMap.put(Tuple1.class, (list, eleType) -> {
-            final Type<?>[] paramTypes = eleType.parameterTypes();
-            return Tuple.of(N.convert(list.get(0), paramTypes[0]));
+            final List<Type<?>> paramTypes = eleType.parameterTypes();
+            return Tuple.of(N.convert(list.get(0), paramTypes.get(0)));
         });
 
         list2PairTripleConverterMap.put(Tuple2.class, (list, eleType) -> {
-            final Type<?>[] paramTypes = eleType.parameterTypes();
-            return Tuple.of(N.convert(list.get(0), paramTypes[0]), N.convert(list.get(1), paramTypes[1]));
+            final List<Type<?>> paramTypes = eleType.parameterTypes();
+            return Tuple.of(N.convert(list.get(0), paramTypes.get(0)), N.convert(list.get(1), paramTypes.get(1)));
         });
 
         list2PairTripleConverterMap.put(Tuple3.class, (list, eleType) -> {
-            final Type<?>[] paramTypes = eleType.parameterTypes();
-            return Tuple.of(N.convert(list.get(0), paramTypes[0]), N.convert(list.get(1), paramTypes[1]), N.convert(list.get(2), paramTypes[2]));
+            final List<Type<?>> paramTypes = eleType.parameterTypes();
+            return Tuple.of(N.convert(list.get(0), paramTypes.get(0)), N.convert(list.get(1), paramTypes.get(1)), N.convert(list.get(2), paramTypes.get(2)));
         });
 
         list2PairTripleConverterMap.put(Tuple4.class, (list, eleType) -> {
-            final Type<?>[] paramTypes = eleType.parameterTypes();
-            return Tuple.of(N.convert(list.get(0), paramTypes[0]), N.convert(list.get(1), paramTypes[1]), N.convert(list.get(2), paramTypes[2]),
-                    N.convert(list.get(3), paramTypes[3]));
+            final List<Type<?>> paramTypes = eleType.parameterTypes();
+            return Tuple.of(N.convert(list.get(0), paramTypes.get(0)), N.convert(list.get(1), paramTypes.get(1)), N.convert(list.get(2), paramTypes.get(2)),
+                    N.convert(list.get(3), paramTypes.get(3)));
         });
 
         list2PairTripleConverterMap.put(Tuple5.class, (list, eleType) -> {
-            final Type<?>[] paramTypes = eleType.parameterTypes();
-            return Tuple.of(N.convert(list.get(0), paramTypes[0]), N.convert(list.get(1), paramTypes[1]), N.convert(list.get(2), paramTypes[2]),
-                    N.convert(list.get(3), paramTypes[3]), N.convert(list.get(4), paramTypes[4]));
+            final List<Type<?>> paramTypes = eleType.parameterTypes();
+            return Tuple.of(N.convert(list.get(0), paramTypes.get(0)), N.convert(list.get(1), paramTypes.get(1)), N.convert(list.get(2), paramTypes.get(2)),
+                    N.convert(list.get(3), paramTypes.get(3)), N.convert(list.get(4), paramTypes.get(4)));
         });
 
         list2PairTripleConverterMap.put(Tuple6.class, (list, eleType) -> {
-            final Type<?>[] paramTypes = eleType.parameterTypes();
-            return Tuple.of(N.convert(list.get(0), paramTypes[0]), N.convert(list.get(1), paramTypes[1]), N.convert(list.get(2), paramTypes[2]),
-                    N.convert(list.get(3), paramTypes[3]), N.convert(list.get(4), paramTypes[4]), N.convert(list.get(5), paramTypes[5]));
+            final List<Type<?>> paramTypes = eleType.parameterTypes();
+            return Tuple.of(N.convert(list.get(0), paramTypes.get(0)), N.convert(list.get(1), paramTypes.get(1)), N.convert(list.get(2), paramTypes.get(2)),
+                    N.convert(list.get(3), paramTypes.get(3)), N.convert(list.get(4), paramTypes.get(4)), N.convert(list.get(5), paramTypes.get(5)));
         });
 
         list2PairTripleConverterMap.put(Tuple7.class, (list, eleType) -> {
-            final Type<?>[] paramTypes = eleType.parameterTypes();
-            return Tuple.of(N.convert(list.get(0), paramTypes[0]), N.convert(list.get(1), paramTypes[1]), N.convert(list.get(2), paramTypes[2]),
-                    N.convert(list.get(3), paramTypes[3]), N.convert(list.get(4), paramTypes[4]), N.convert(list.get(5), paramTypes[5]),
-                    N.convert(list.get(6), paramTypes[6]));
+            final List<Type<?>> paramTypes = eleType.parameterTypes();
+            return Tuple.of(N.convert(list.get(0), paramTypes.get(0)), N.convert(list.get(1), paramTypes.get(1)), N.convert(list.get(2), paramTypes.get(2)),
+                    N.convert(list.get(3), paramTypes.get(3)), N.convert(list.get(4), paramTypes.get(4)), N.convert(list.get(5), paramTypes.get(5)),
+                    N.convert(list.get(6), paramTypes.get(6)));
         });
 
         list2PairTripleConverterMap.put(Tuple8.class, (list, eleType) -> {
-            final Type<?>[] paramTypes = eleType.parameterTypes();
-            return Tuple.of(N.convert(list.get(0), paramTypes[0]), N.convert(list.get(1), paramTypes[1]), N.convert(list.get(2), paramTypes[2]),
-                    N.convert(list.get(3), paramTypes[3]), N.convert(list.get(4), paramTypes[4]), N.convert(list.get(5), paramTypes[5]),
-                    N.convert(list.get(6), paramTypes[6]), N.convert(list.get(7), paramTypes[7]));
+            final List<Type<?>> paramTypes = eleType.parameterTypes();
+            return Tuple.of(N.convert(list.get(0), paramTypes.get(0)), N.convert(list.get(1), paramTypes.get(1)), N.convert(list.get(2), paramTypes.get(2)),
+                    N.convert(list.get(3), paramTypes.get(3)), N.convert(list.get(4), paramTypes.get(4)), N.convert(list.get(5), paramTypes.get(5)),
+                    N.convert(list.get(6), paramTypes.get(6)), N.convert(list.get(7), paramTypes.get(7)));
         });
 
         list2PairTripleConverterMap.put(Tuple9.class, (list, eleType) -> {
-            final Type<?>[] paramTypes = eleType.parameterTypes();
-            return Tuple.of(N.convert(list.get(0), paramTypes[0]), N.convert(list.get(1), paramTypes[1]), N.convert(list.get(2), paramTypes[2]),
-                    N.convert(list.get(3), paramTypes[3]), N.convert(list.get(4), paramTypes[4]), N.convert(list.get(5), paramTypes[5]),
-                    N.convert(list.get(6), paramTypes[6]), N.convert(list.get(7), paramTypes[7]), N.convert(list.get(8), paramTypes[8]));
+            final List<Type<?>> paramTypes = eleType.parameterTypes();
+            return Tuple.of(N.convert(list.get(0), paramTypes.get(0)), N.convert(list.get(1), paramTypes.get(1)), N.convert(list.get(2), paramTypes.get(2)),
+                    N.convert(list.get(3), paramTypes.get(3)), N.convert(list.get(4), paramTypes.get(4)), N.convert(list.get(5), paramTypes.get(5)),
+                    N.convert(list.get(6), paramTypes.get(6)), N.convert(list.get(7), paramTypes.get(7)), N.convert(list.get(8), paramTypes.get(8)));
         });
     }
 

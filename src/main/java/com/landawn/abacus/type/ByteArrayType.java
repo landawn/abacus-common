@@ -24,43 +24,39 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for Byte array operations.
- * This class provides serialization/deserialization and database operations
- * for Byte[] arrays, including conversion between primitive byte[] and Byte[].
+ * Type handler for {@code Byte[]} (boxed byte array) values.
+ * Provides serialization, deserialization, and JDBC operations for {@code Byte[]} arrays.
+ *
+ * <p>String representation: a bracket-enclosed, comma-separated list of byte values,
+ * e.g. {@code "[1, 2, null, 127]"}. The empty array is represented as {@code "[]"}.
+ * Individual {@code null} elements are represented as the literal string {@code "null"}.</p>
+ *
+ * <p>JDBC mapping: the {@code Byte[]} is unboxed to a primitive {@code byte[]} before being
+ * stored via {@link java.sql.PreparedStatement#setBytes} and retrieved via
+ * {@link java.sql.ResultSet#getBytes}, then re-boxed to {@code Byte[]}.</p>
  */
 public final class ByteArrayType extends ObjectArrayType<Byte> {
 
     /**
-     * Package-private constructor for ByteArrayType.
-     * This constructor is called by the TypeFactory to create Byte[] type instances.
+     * Package-private constructor for {@code ByteArrayType}.
+     * Instances are created by {@link TypeFactory}; do not instantiate directly.
      */
     ByteArrayType() {
         super(Byte[].class);
     }
 
     /**
-     * Converts a Byte array to its string representation.
-     * The array is formatted with square brackets and comma-separated elements.
-     * Null elements are represented as "null" in the output.
+     * Converts a {@code Byte[]} array to its string representation.
+     * The result is a bracket-enclosed, comma-separated list of element values.
+     * {@code null} elements are rendered as the literal string {@code "null"}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Byte[]> type = TypeFactory.getType(Byte[].class);
-     * Byte[] array = {1, 2, null, 127};
-     * String result = type.stringOf(array);
-     * // result: "[1, 2, null, 127]"
-     *
-     * String empty = type.stringOf(new Byte[0]);
-     * // empty: "[]"
-     * }</pre>
-     *
-     * @param x the Byte array to convert
-     * @return a string representation like "[1, 2, null]", or {@code null} if input is {@code null},
-     *         or "[]" if the array is empty
+     * @param x the {@code Byte[]} to convert; may be {@code null}
+     * @return {@code "[1, 2, null]"} style string, {@code "[]"} for an empty array,
+     *         or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final Byte[] x) {
@@ -74,24 +70,15 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
     }
 
     /**
-     * Converts a string representation back to a Byte array.
-     * Parses a string in the format "[1, 2, null]" into a Byte array.
-     * The string "null" (case-sensitive) is parsed as a {@code null} element.
+     * Parses a string in the format {@code "[1, 2, null]"} and returns a {@code Byte[]} array.
+     * The exact 4-character string {@code "null"} (case-sensitive) is parsed as a {@code null} element.
+     * Returns {@code null} for a {@code null}, empty, or blank input string.
+     * Returns an empty array for the string {@code "[]"}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Byte[]> type = TypeFactory.getType(Byte[].class);
-     * Byte[] result = type.valueOf("[1, 2, null, 127]");
-     * // result: {1, 2, null, 127}
-     *
-     * Byte[] empty = type.valueOf("[]");
-     * // empty: {} (empty array)
-     * }</pre>
-     *
-     * @param str the string to parse, expecting format like "[1, 2, null]"
-     * @return a Byte array parsed from the string, or {@code null} if str is {@code null},
-     *         or an empty array if str is empty or equals "[]"
-     * @throws NumberFormatException if any {@code non-null} element cannot be parsed as a byte
+     * @param str the string to parse; may be {@code null}, empty, or blank
+     * @return the parsed {@code Byte[]} array, an empty array for {@code "[]"},
+     *         or {@code null} if {@code str} is {@code null}, empty, or blank
+     * @throws NumberFormatException if any non-null element cannot be parsed as a valid {@code byte}
      */
     @Override
     public Byte[] valueOf(final String str) {
@@ -119,21 +106,13 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
     }
 
     /**
-     * Retrieves a Byte array from a ResultSet at the specified column index.
-     * The primitive byte[] from the database is converted to a Byte[] object array.
+     * Retrieves a {@code Byte[]} from a {@link java.sql.ResultSet} at the specified column index.
+     * The column value is read as a primitive {@code byte[]} and boxed to {@code Byte[]}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Byte[]> type = TypeFactory.getType(Byte[].class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * Byte[] data = type.get(rs, 1);
-     * // Converts database byte[] to Byte[]
-     * }</pre>
-     *
-     * @param rs the ResultSet to retrieve the value from
-     * @param columnIndex the column index (1-based) of the byte array
-     * @return a Byte array boxed from the database byte[], or {@code null} if the value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnIndex the 1-based index of the byte-array column
+     * @return a boxed {@code Byte[]} array, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
      */
     @Override
     public Byte[] get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -141,14 +120,13 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
     }
 
     /**
-     * Retrieves a Byte array from a ResultSet using the specified column label.
-     * The primitive byte[] from the database is converted to a Byte[] object array.
+     * Retrieves a {@code Byte[]} from a {@link java.sql.ResultSet} using the specified column label.
+     * The column value is read as a primitive {@code byte[]} and boxed to {@code Byte[]}.
      *
-     * @param rs the ResultSet to retrieve the value from
-     * @param columnName the label for the column specified with the SQL AS clause,
-     *                    or the column name if no AS clause was specified
-     * @return a Byte array boxed from the database byte[], or {@code null} if the value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnName is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnName the column label as specified in the SQL AS clause, or the column name if no AS clause was used
+     * @return a boxed {@code Byte[]} array, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
     @Override
     public Byte[] get(final ResultSet rs, final String columnName) throws SQLException {
@@ -156,13 +134,13 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
     }
 
     /**
-     * Sets a Byte array parameter in a PreparedStatement at the specified position.
-     * The Byte[] object array is converted to a primitive byte[] before setting.
+     * Sets a {@code Byte[]} parameter on a {@link java.sql.PreparedStatement} at the specified position.
+     * The boxed {@code Byte[]} is unboxed to a primitive {@code byte[]} before being stored.
      *
-     * @param stmt the PreparedStatement to set the parameter on
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the Byte array to set, may be null
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param stmt the {@code PreparedStatement} on which to set the parameter
+     * @param columnIndex the 1-based parameter index to set
+     * @param x the {@code Byte[]} value to set; may be {@code null}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Byte[] x) throws SQLException {
@@ -170,13 +148,13 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
     }
 
     /**
-     * Sets a named Byte array parameter in a CallableStatement.
-     * The Byte[] object array is converted to a primitive byte[] before setting.
+     * Sets a named {@code Byte[]} parameter on a {@link java.sql.CallableStatement}.
+     * The boxed {@code Byte[]} is unboxed to a primitive {@code byte[]} before being stored.
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param stmt the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the Byte array to set, may be null
-     * @throws SQLException if a database access error occurs or the parameter name is invalid
+     * @param x the {@code Byte[]} value to set; may be {@code null}
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Byte[] x) throws SQLException {
@@ -184,14 +162,15 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
     }
 
     /**
-     * Sets a Byte array parameter in a PreparedStatement with additional SQL type information.
-     * The Byte[] object array is converted to a primitive byte[] before setting.
+     * Sets a {@code Byte[]} parameter on a {@link java.sql.PreparedStatement} at the specified position.
+     * The boxed {@code Byte[]} is unboxed to a primitive {@code byte[]} before being stored.
+     * The {@code sqlTypeOrLength} parameter is not used.
      *
-     * @param stmt the PreparedStatement to set the parameter on
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the Byte array to set, may be null
-     * @param sqlTypeOrLength the SQL type code (ignored for byte arrays)
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param stmt the {@code PreparedStatement} on which to set the parameter
+     * @param columnIndex the 1-based parameter index to set
+     * @param x the {@code Byte[]} value to set; may be {@code null}
+     * @param sqlTypeOrLength ignored for byte arrays
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Byte[] x, final int sqlTypeOrLength) throws SQLException {
@@ -199,14 +178,15 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
     }
 
     /**
-     * Sets a named Byte array parameter in a CallableStatement with additional SQL type information.
-     * The Byte[] object array is converted to a primitive byte[] before setting.
+     * Sets a named {@code Byte[]} parameter on a {@link java.sql.CallableStatement}.
+     * The boxed {@code Byte[]} is unboxed to a primitive {@code byte[]} before being stored.
+     * The {@code sqlTypeOrLength} parameter is not used.
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param stmt the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the Byte array to set, may be null
-     * @param sqlTypeOrLength the SQL type code (ignored for byte arrays)
-     * @throws SQLException if a database access error occurs or the parameter name is invalid
+     * @param x the {@code Byte[]} value to set; may be {@code null}
+     * @param sqlTypeOrLength ignored for byte arrays
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Byte[] x, final int sqlTypeOrLength) throws SQLException {
@@ -214,13 +194,14 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
     }
 
     /**
-     * Appends a Byte array to an Appendable object.
-     * Formats the array with square brackets and comma-separated elements.
-     * Null array elements are appended as "null".
+     * Appends a {@code Byte[]} array to an {@link Appendable} in bracket-enclosed format.
+     * Appends the literal {@code "null"} string if {@code x} is {@code null}.
+     * Each {@code null} element is written as {@code "null"};
+     * non-null elements are written as their decimal string values.
      *
-     * @param appendable the Appendable object to append to
-     * @param x the Byte array to append, may be null
-     * @throws IOException if an I/O error occurs during the append operation
+     * @param appendable the target {@code Appendable}
+     * @param x the {@code Byte[]} array to append; may be {@code null}
+     * @throws IOException if an I/O error occurs during appending
      */
     @Override
     public void appendTo(final Appendable appendable, final Byte[] x) throws IOException {
@@ -246,14 +227,15 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
     }
 
     /**
-     * Writes a Byte array to a CharacterWriter.
-     * Uses the writer's optimized write method for byte values.
-     * The output format matches the string representation with square brackets.
+     * Writes a {@code Byte[]} array to a {@link CharacterWriter} in bracket-enclosed format.
+     * Uses the writer's optimised byte-write method for non-null elements.
+     * The format is identical to {@link #appendTo(Appendable, Byte[])}.
+     * {@code config} is not used.
      *
-     * @param writer the CharacterWriter to write to
-     * @param x the Byte array to write, may be null
-     * @param config the serialization configuration (not used for byte arrays)
-     * @throws IOException if an I/O error occurs during the write operation
+     * @param writer the {@code CharacterWriter} to write to
+     * @param x the {@code Byte[]} array to write; may be {@code null}
+     * @param config the serialization configuration (unused for byte arrays); may be {@code null}
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final Byte[] x, final JsonXmlSerConfig<?> config) throws IOException {

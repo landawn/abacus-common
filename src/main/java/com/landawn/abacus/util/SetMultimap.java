@@ -76,7 +76,7 @@ import com.landawn.abacus.annotation.Internal;
  * List<String> words = Arrays.asList("apple", "apricot", "banana", "blueberry");
  * SetMultimap<Integer, String> byLength =
  *     SetMultimap.fromCollection(words, String::length);
- * // Result: {5: ["apple"], 7: ["apricot", "banana"], 9: ["blueberry"]}
+ * // Result: {5: ["apple"], 7: ["apricot"], 6: ["banana"], 9: ["blueberry"]}
  *
  * // Tag system example
  * SetMultimap<String, String> articleTags = N.newSetMultimap();

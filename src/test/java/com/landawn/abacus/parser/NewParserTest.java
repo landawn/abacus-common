@@ -1,12 +1,11 @@
 package com.landawn.abacus.parser;
 
-import com.landawn.abacus.TestBase;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
 import com.alibaba.fastjson2.JSON;
+import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.entity.EntityA;
 import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.Color;

@@ -18,20 +18,19 @@ import java.io.Serial;
 
 /**
  * Exception thrown when an expected object cannot be found.
- * This exception extends {@link IllegalStateException} to indicate that the application
- * is in an illegal state because a required object is absent.
+ * This is an unchecked exception that signals an illegal state: a required object was absent
+ * where its presence was assumed.
  *
  * <p>Common use cases include:</p>
  * <ul>
  *   <li>Database queries expecting to find a record but returning no results.</li>
  *   <li>Cache lookups that fail to find the requested entry.</li>
- *   <li>Resource loading operations where the resource doesn't exist.</li>
+ *   <li>Resource loading operations where the resource does not exist.</li>
  *   <li>API calls expecting an entity that has been deleted or never existed.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // In a service method
  * User user = userRepository.findById(userId);
  * if (user == null) {
  *     throw new ObjectNotFoundException("User not found with ID: " + userId);

@@ -44,7 +44,7 @@ import com.landawn.abacus.util.stream.Stream;
 
 /**
  * A comprehensive utility class providing Optional and Nullable container implementations for all primitive
- * types and objects. This final class serves as the central hub for optional value handling in functional
+ * types and objects. This utility class serves as the central hub for optional value handling in functional
  * programming contexts, offering type-safe containers that may or may not contain non-null values with
  * extensive functional programming operations, stream integration, and null-safe transformations.
  *
@@ -390,7 +390,7 @@ public class u { // NOSONAR
          * {@code NoSuchElementException}.
          *
          * @return the value described by this {@code OptionalBoolean}
-         * @throws NoSuchElementException if no value is present 
+         * @throws NoSuchElementException if no value is present
          * @see #get()
          */
         @Beta
@@ -1034,16 +1034,16 @@ public class u { // NOSONAR
     @com.landawn.abacus.annotation.Immutable
     public static final class OptionalChar implements Comparable<OptionalChar>, Immutable {
 
-        /** The Constant EMPTY. */
+        /** The singleton empty instance. */
         private static final OptionalChar EMPTY = new OptionalChar();
 
-        /** The Constant MIN_CACHED_VALUE. */
+        /** The minimum character value that is cached (inclusive), corresponding to the null character {@code '\0'}. */
         private static final char MIN_CACHED_VALUE = 0;
 
-        /** The Constant MAX_CACHED_VALUE. */
+        /** The maximum character value that is cached (inclusive), corresponding to character code {@code 128}. */
         private static final char MAX_CACHED_VALUE = 128;
 
-        /** The Constant cached. */
+        /** Pre-allocated cache of {@code OptionalChar} instances for character values 0–128 to avoid redundant allocation. */
         private static final OptionalChar[] cached = new OptionalChar[MAX_CACHED_VALUE - MIN_CACHED_VALUE + 1];
 
         static {
@@ -1770,16 +1770,16 @@ public class u { // NOSONAR
     @com.landawn.abacus.annotation.Immutable
     public static final class OptionalByte implements Comparable<OptionalByte>, Immutable {
 
-        /** The Constant EMPTY. */
+        /** The singleton empty instance. */
         private static final OptionalByte EMPTY = new OptionalByte();
 
-        /** The Constant MIN_CACHED_VALUE. */
+        /** The minimum byte value that is cached (inclusive), equal to {@link Byte#MIN_VALUE} ({@code -128}). */
         private static final byte MIN_CACHED_VALUE = Byte.MIN_VALUE;
 
-        /** The Constant MAX_CACHED_VALUE. */
+        /** The maximum byte value that is cached (inclusive), equal to {@link Byte#MAX_VALUE} ({@code 127}). */
         private static final byte MAX_CACHED_VALUE = Byte.MAX_VALUE;
 
-        /** The Constant cached. */
+        /** Pre-allocated cache of {@code OptionalByte} instances covering all possible byte values (-128 to 127). */
         private static final OptionalByte[] cached = new OptionalByte[MAX_CACHED_VALUE - MIN_CACHED_VALUE + 1];
 
         static {
@@ -2471,16 +2471,16 @@ public class u { // NOSONAR
     @com.landawn.abacus.annotation.Immutable
     public static final class OptionalShort implements Comparable<OptionalShort>, Immutable {
 
-        /** The Constant EMPTY. */
+        /** The singleton empty instance. */
         private static final OptionalShort EMPTY = new OptionalShort();
 
-        /** The Constant MIN_CACHED_VALUE. */
+        /** The minimum short value that is cached (inclusive): {@code -128}. */
         private static final short MIN_CACHED_VALUE = -128;
 
-        /** The Constant MAX_CACHED_VALUE. */
+        /** The maximum short value that is cached (inclusive): {@code 256}. */
         private static final short MAX_CACHED_VALUE = 256;
 
-        /** The Constant cached. */
+        /** Pre-allocated cache of {@code OptionalShort} instances for values in the range [{@code -128}, {@code 256}]. */
         private static final OptionalShort[] cached = new OptionalShort[MAX_CACHED_VALUE - MIN_CACHED_VALUE + 1];
 
         static {
@@ -3097,16 +3097,16 @@ public class u { // NOSONAR
     @com.landawn.abacus.annotation.Immutable
     public static final class OptionalInt implements Comparable<OptionalInt>, Immutable {
 
-        /** The Constant EMPTY. */
+        /** The singleton empty instance. */
         private static final OptionalInt EMPTY = new OptionalInt();
 
-        /** The Constant MIN_CACHED_VALUE. */
+        /** The minimum int value that is cached (inclusive): {@code -256}. */
         private static final int MIN_CACHED_VALUE = -256;
 
-        /** The Constant MAX_CACHED_VALUE. */
+        /** The maximum int value that is cached (inclusive): {@code 1024}. */
         private static final int MAX_CACHED_VALUE = 1024;
 
-        /** The Constant cached. */
+        /** Pre-allocated cache of {@code OptionalInt} instances for values in the range [{@code -256}, {@code 1024}]. */
         private static final OptionalInt[] cached = new OptionalInt[MAX_CACHED_VALUE - MIN_CACHED_VALUE + 1];
 
         static {
@@ -3186,7 +3186,7 @@ public class u { // NOSONAR
 
         /**
          * Returns an {@code OptionalInt} from the specified {@code java.util.OptionalInt}.
-         * 
+         *
          * @param optional the {@code java.util.OptionalInt} to convert
          * @return an {@code OptionalInt} with a present value if the specified
          *         {@code java.util.OptionalInt} is present, otherwise an empty {@code OptionalInt}
@@ -3843,16 +3843,16 @@ public class u { // NOSONAR
     @com.landawn.abacus.annotation.Immutable
     public static final class OptionalLong implements Comparable<OptionalLong>, Immutable {
 
-        /** The Constant EMPTY. */
+        /** The singleton empty instance. */
         private static final OptionalLong EMPTY = new OptionalLong();
 
-        /** The Constant MIN_CACHED_VALUE. */
+        /** The minimum long value that is cached (inclusive): {@code -256}. */
         private static final long MIN_CACHED_VALUE = -256;
 
-        /** The Constant MAX_CACHED_VALUE. */
+        /** The maximum long value that is cached (inclusive): {@code 1024}. */
         private static final long MAX_CACHED_VALUE = 1024;
 
-        /** The Constant cached. */
+        /** Pre-allocated cache of {@code OptionalLong} instances for values in the range [{@code -256}, {@code 1024}]. */
         private static final OptionalLong[] cached = new OptionalLong[(int) (MAX_CACHED_VALUE - MIN_CACHED_VALUE + 1)];
 
         static {
@@ -4501,9 +4501,10 @@ public class u { // NOSONAR
     @com.landawn.abacus.annotation.Immutable
     public static final class OptionalFloat implements Comparable<OptionalFloat>, Immutable {
 
-        /** The Constant EMPTY. */
+        /** The singleton empty instance. */
         private static final OptionalFloat EMPTY = new OptionalFloat();
 
+        /** Pre-allocated instance for the common value {@code 0.0f}. */
         private static final OptionalFloat ZERO = new OptionalFloat(0f);
 
         private final float value;
@@ -5104,9 +5105,10 @@ public class u { // NOSONAR
     @com.landawn.abacus.annotation.Immutable
     public static final class OptionalDouble implements Comparable<OptionalDouble>, Immutable {
 
-        /** The Constant EMPTY. */
+        /** The singleton empty instance. */
         private static final OptionalDouble EMPTY = new OptionalDouble();
 
+        /** Pre-allocated instance for the common value {@code 0.0d}. */
         private static final OptionalDouble ZERO = new OptionalDouble(0d);
 
         private final double value;
@@ -5806,9 +5808,10 @@ public class u { // NOSONAR
         /** Represents {@code Boolean.FALSE}. */
         public static final Optional<Boolean> FALSE = new Optional<>(Boolean.FALSE);
 
+        /** Pre-allocated instance for the common value of an empty {@link String}. */
         private static final Optional<String> EMPTY_STRING = new Optional<>(Strings.EMPTY);
 
-        /** The Constant EMPTY. */
+        /** The singleton empty (absent) instance. */
         private static final Optional<?> EMPTY = new Optional<>();
 
         private final T value;
@@ -6564,10 +6567,10 @@ public class u { // NOSONAR
      * <p><b>Why {@code Nullable}?</b></p>
      *
      * <p><b>Logical Meaning of {@code null}</b></p>
-     * {@code null} does not always represent “nonexistent.”  
+     * {@code null} does not always represent “nonexistent.”
      * For example, a collection may contain {@code null} elements, which does not mean the collection itself is empty.
      * Similarly, when retrieving a column value from a database record, the value may be {@code null}
-     * even though the record itself exists.  
+     * even though the record itself exists.
      * In such cases, allowing {@code null} as a valid value is both useful and necessary.
      *
      * <p><b>Limited and Optional Usage</b></p>
@@ -6576,12 +6579,12 @@ public class u { // NOSONAR
      * <p>For example:</p>
      * <ul>
      *   <li>{@code N.findFirstNonNull/N.findLastNonNull} as alternatives to {@code N.findFirst/N.findLast}</li>
-     *   <li>{@code AbstractQuery.queryForSingleNonNull/queryForUniqueNonNull} as alternatives to {@code AbstractQuery.queryForSingleResult/queryForUniqueResult}</li>
+     *   <li>{@code AbstractQuery.queryForSingleNonNull/queryForUniqueNonNull} as alternatives to {@code AbstractQuery.queryForSingleValue/queryForUniqueValue}</li>
      * </ul>
      * <p>
      * Outside of this library, whether to use {@code @Nullable} is entirely up to you — the API is flexible enough to support both preferences.
      * </p>
-     * 
+     *
      * @param <T> the type of value
      * @see com.landawn.abacus.util.u.Optional
      * @see com.landawn.abacus.util.Holder
@@ -6599,14 +6602,17 @@ public class u { // NOSONAR
         /** Represents {@code Boolean.FALSE}. */
         public static final Nullable<Boolean> FALSE = new Nullable<>(Boolean.FALSE);
 
+        /** Pre-allocated raw instance representing a present {@code null} value, shared by typed {@code null} constants. */
         @SuppressWarnings("rawtypes")
         private static final Nullable NULL_VALUE = new Nullable<>(null);
 
+        /** Pre-allocated instance representing a {@code null} {@code String} value. */
         private static final Nullable<String> NULL_STRING = NULL_VALUE;
 
+        /** Pre-allocated instance for the common value of an empty {@link String}. */
         private static final Nullable<String> EMPTY_STRING = new Nullable<>(Strings.EMPTY);
 
-        /** The Constant EMPTY. */
+        /** The singleton instance representing an absent (unset) value. */
         private static final Nullable<?> EMPTY = new Nullable<>();
 
         private final T value;
@@ -7853,8 +7859,8 @@ public class u { // NOSONAR
          * Returns an {@code ImmutableList} containing the value of this {@code Nullable} if the value is not {@code null},
          * otherwise returns an empty {@code ImmutableList}.
          * <p>
-         * This method differs from {@link #toImmutableList()} in that it returns an empty immutable list both when 
-         * the {@code Nullable} is empty and when it contains a {@code null} value. An immutable list with the value 
+         * This method differs from {@link #toImmutableList()} in that it returns an empty immutable list both when
+         * the {@code Nullable} is empty and when it contains a {@code null} value. An immutable list with the value
          * is only returned when the {@code Nullable} contains a {@code non-null} value.
          *
          * @return an {@code ImmutableList} containing the value if not {@code null}, otherwise an empty {@code ImmutableList}
@@ -7888,8 +7894,8 @@ public class u { // NOSONAR
          * Returns an {@code ImmutableSet} containing the value of this {@code Nullable} if the value is not {@code null},
          * otherwise returns an empty {@code ImmutableSet}.
          * <p>
-         * This method differs from {@link #toImmutableSet()} in that it returns an empty immutable set both when 
-         * the {@code Nullable} is empty and when it contains a {@code null} value. An immutable set with the value 
+         * This method differs from {@link #toImmutableSet()} in that it returns an empty immutable set both when
+         * the {@code Nullable} is empty and when it contains a {@code null} value. An immutable set with the value
          * is only returned when the {@code Nullable} contains a {@code non-null} value.
          *
          * @return an {@code ImmutableSet} containing the value if not {@code null}, otherwise an empty {@code ImmutableSet}

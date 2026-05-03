@@ -20,37 +20,38 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.cs;
 
 /**
- * A runtime exception that wraps checked exceptions, allowing them to be thrown without being declared.
- * This is the base class for all unchecked exception wrappers in the framework.
+ * Base class for runtime exceptions that wrap checked exceptions, allowing them to be thrown
+ * without being declared in method signatures.
  *
- * <p>This exception is designed to preserve the original checked exception's information including:</p>
+ * <p>This class preserves all information from the original checked exception, including:</p>
  * <ul>
- *   <li>The complete stack trace of the original exception.</li>
- *   <li>All suppressed exceptions from the original exception.</li>
- *   <li>The cause chain of the original exception.</li>
+ *   <li>The complete stack trace.</li>
+ *   <li>All suppressed exceptions.</li>
+ *   <li>The full cause chain.</li>
  * </ul>
  *
- * <p>This class serves as the parent for more specific unchecked wrappers like:</p>
+ * <p>Specialized subclasses are provided for commonly wrapped exception types:</p>
  * <ul>
- *   <li>{@link UncheckedIOException} for {@link java.io.IOException}</li>
- *   <li>{@link UncheckedSQLException} for {@link java.sql.SQLException}</li>
- *   <li>{@link UncheckedInterruptedException} for {@link InterruptedException}</li>
- *   <li>And other checked exception wrappers</li>
+ *   <li>{@link UncheckedIOException} for {@link java.io.IOException}.</li>
+ *   <li>{@link UncheckedSQLException} for {@link java.sql.SQLException}.</li>
+ *   <li>{@link UncheckedInterruptedException} for {@link InterruptedException}.</li>
+ *   <li>{@link UncheckedExecutionException} for {@link java.util.concurrent.ExecutionException}.</li>
+ *   <li>{@link UncheckedParseException} for {@link java.text.ParseException}.</li>
+ *   <li>{@link UncheckedReflectiveOperationException} for {@link ReflectiveOperationException}.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // Wrapping a generic checked exception
  * try {
  *     someMethodThatThrowsCheckedException();
  * } catch (SomeCheckedException e) {
  *     throw new UncheckedException(e);
  * }
  *
- * // With custom message
+ * // With additional context message
  * try {
  *     someMethodThatThrowsCheckedException();
- * } catch (CheckedException e) {
+ * } catch (SomeCheckedException e) {
  *     throw new UncheckedException("Operation failed during processing", e);
  * }
  * }</pre>
@@ -136,11 +137,10 @@ public class UncheckedException extends RuntimeException {
     }
 
     /**
-     * Validates and returns the cause for this exception.
-     * This method ensures that the provided checked exception is not {@code null} before using it as the cause.
+     * Validates that the provided throwable is not {@code null} and returns it to be used as the cause.
      *
-     * @param cause the exception to validate and use as the cause. Must not be {@code null}.
-     * @return the validated exception to be used as the cause
+     * @param cause the exception to validate; must not be {@code null}
+     * @return {@code cause}, unchanged
      * @throws IllegalArgumentException if {@code cause} is {@code null}
      */
     private static Throwable getCause(final Throwable cause) {

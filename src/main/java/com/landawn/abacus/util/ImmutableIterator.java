@@ -26,32 +26,31 @@ import com.landawn.abacus.annotation.Beta;
  * An abstract base class for immutable iterators that do not support element removal.
  * This class implements the Iterator interface but throws UnsupportedOperationException
  * for the remove() operation, ensuring {@code true} immutability.
- * 
+ *
  * <p>ImmutableIterator provides additional utility methods for converting the remaining
  * elements to various collection types, including immutable collections. It serves as
  * the base class for iterators returned by immutable collection implementations.</p>
- * 
+ *
  * <p>Subclasses must implement the hasNext() and next() methods to provide iteration
  * functionality. The remove() method is final and always throws an exception.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ImmutableIterator<String> iter = new ImmutableIterator<String>() {
  *     private int index = 0;
  *     private String[] data = {"a", "b", "c"};
- *     
+ *
  *     public boolean hasNext() {
  *         return index < data.length;
  *     }
- *     
+ *
  *     public String next() {
  *         return data[index++];
  *     }
  * };
- * 
+ *
  * ImmutableList<String> list = iter.toImmutableList();
  * }</pre>
- * </p>
  *
  * @param <T> the type of elements returned by this iterator
  * @see java.util.Iterator
@@ -77,10 +76,10 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * Collects all remaining elements from this iterator into a Set.
      * The returned set will contain all elements from the current position
      * to the end of the iteration, with duplicates removed.
-     * 
+     *
      * <p>This method consumes the iterator. After calling this method,
      * the iterator will be exhausted and hasNext() will return {@code false}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableIterator<String> iter = ImmutableList.of("a", "b", "a", "c").iterator();
@@ -97,10 +96,10 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
     /**
      * Collects all remaining elements from this iterator into a collection
      * created by the provided supplier.
-     * 
+     *
      * <p>This method consumes the iterator. After calling this method,
      * the iterator will be exhausted and hasNext() will return {@code false}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableIterator<String> iter = ImmutableList.of("a", "b", "c").iterator();
@@ -124,10 +123,10 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
 
     /**
      * Collects all remaining elements from this iterator into an ImmutableList.
-     * 
+     *
      * <p>This method consumes the iterator. After calling this method,
      * the iterator will be exhausted and hasNext() will return {@code false}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableIterator<Integer> iter = ImmutableSet.of(1, 2, 3).iterator();
@@ -144,10 +143,10 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
     /**
      * Collects all remaining elements from this iterator into an ImmutableSet.
      * Duplicate elements will be removed according to their equals() method.
-     * 
+     *
      * <p>This method consumes the iterator. After calling this method,
      * the iterator will be exhausted and hasNext() will return {@code false}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableIterator<String> iter = ImmutableList.of("a", "b", "a", "c").iterator();
@@ -164,11 +163,11 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
     /**
      * Returns the number of remaining elements in this iterator.
      * This method consumes all remaining elements to count them.
-     * 
+     *
      * <p><b>Warning:</b> This method consumes the iterator. After calling this method,
      * the iterator will be exhausted and hasNext() will return {@code false}. If you need
      * both the count and the elements, consider collecting to a list first.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableIterator<String> iter = ImmutableList.of("a", "b", "c").iterator();

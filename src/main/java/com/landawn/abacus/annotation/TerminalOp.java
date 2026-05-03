@@ -29,28 +29,28 @@ import java.lang.annotation.Target;
  * <ul>
  *   <li>Consume the entire stream or pipeline.</li>
  *   <li>Produce a final result or side effect.</li>
- *   <li>Trigger execution of lazy intermediate operations.</li>
- *   <li>Cannot be chained with other operations.</li>
+ *   <li>Trigger execution of all pending lazy intermediate operations.</li>
+ *   <li>Cannot be chained with further stream operations.</li>
  * </ul>
  *
  * <p><b>Characteristics of terminal operations:</b></p>
  * <ul>
- *   <li><b>Eager evaluation:</b> Process all elements immediately.</li>
+ *   <li><b>Eager evaluation:</b> Process all elements immediately upon invocation.</li>
  *   <li><b>Stream consumption:</b> Close and render the stream unusable after execution.</li>
- *   <li><b>Result production:</b> Return a value, collection, or perform side effects.</li>
- *   <li><b>Pipeline execution:</b> Trigger all pending intermediate operations.</li>
+ *   <li><b>Result production:</b> Return a value or collection, or perform side effects.</li>
+ *   <li><b>Pipeline execution:</b> Trigger all pending intermediate operations in the pipeline.</li>
  * </ul>
  *
  * <p><b>Common terminal operations include:</b></p>
  * <ul>
- *   <li>{@code collect()} - Accumulate elements into a collection or other container.</li>
- *   <li>{@code reduce()} - Combine elements into a single result.</li>
- *   <li>{@code forEach()} - Perform an action on each element.</li>
- *   <li>{@code findFirst()}, {@code findAny()} - Retrieve an element.</li>
- *   <li>{@code count()} - Count the number of elements.</li>
- *   <li>{@code anyMatch()}, {@code allMatch()}, {@code noneMatch()} - Test elements against a predicate.</li>
- *   <li>{@code toArray()} - Convert stream to an array.</li>
- *   <li>{@code min()}, {@code max()} - Find extreme values.</li>
+ *   <li>{@code collect()} - Accumulates elements into a collection or other container.</li>
+ *   <li>{@code reduce()} - Combines elements into a single result.</li>
+ *   <li>{@code forEach()} - Performs an action on each element.</li>
+ *   <li>{@code findFirst()}, {@code findAny()} - Retrieves the first or any matching element.</li>
+ *   <li>{@code count()} - Counts the number of elements.</li>
+ *   <li>{@code anyMatch()}, {@code allMatch()}, {@code noneMatch()} - Tests elements against a predicate.</li>
+ *   <li>{@code toArray()} - Converts the stream to an array.</li>
+ *   <li>{@code min()}, {@code max()} - Finds the minimum or maximum element.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>

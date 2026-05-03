@@ -30,7 +30,7 @@ import com.landawn.abacus.exception.UncheckedIOException;
 /**
  * A high-performance buffered writer implementation that provides efficient writing
  * capabilities with support for primitive types and common objects.
- * 
+ *
  * <p>This class extends {@link java.io.BufferedWriter} and adds methods for writing
  * primitive values, dates, and other common types directly without manual conversion
  * to strings. It can operate in two modes:</p>
@@ -38,13 +38,13 @@ import com.landawn.abacus.exception.UncheckedIOException;
  *   <li>Internal buffer mode: Content is stored in memory and can be retrieved via {@link #toString()}</li>
  *   <li>External writer mode: Content is written to an underlying Writer or OutputStream</li>
  * </ul>
- * 
+ *
  * <p>The writer provides automatic buffer management with dynamic capacity expansion
  * and efficient memory usage through object pooling.</p>
- * 
+ *
  * <p><b>Important:</b> This class is not thread-safe. If multiple threads access
  * an instance concurrently, external synchronization is required.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Writing to internal buffer
@@ -54,7 +54,7 @@ import com.landawn.abacus.exception.UncheckedIOException;
  * writer.write(", Age: ");
  * writer.writeInt(25);
  * String result = writer.toString();   // "Name: true, Age: 25"
- * 
+ *
  * // Writing to a file
  * try (BufferedWriter writer = new BufferedWriter(new FileWriter("output.txt"))) {
  *     writer.write("Temperature: ");
@@ -63,7 +63,7 @@ import com.landawn.abacus.exception.UncheckedIOException;
  *     writer.newLine();
  * }
  * }</pre>
- * 
+ *
  * @see java.io.BufferedWriter
  * @see CharacterWriter
  */
@@ -87,7 +87,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
     /**
      * Creates a BufferedWriter with an internal buffer.
      * Content is stored in memory and can be retrieved using {@link #toString()}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedWriter writer = new BufferedWriter();
@@ -104,7 +104,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
     /**
      * Creates a BufferedWriter that writes to the specified OutputStream.
      * Characters are encoded using the default character encoding.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (BufferedWriter writer = new BufferedWriter(new FileOutputStream("file.txt"))) {
@@ -120,7 +120,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * Creates a BufferedWriter that writes to the specified Writer.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (BufferedWriter writer = new BufferedWriter(new FileWriter("file.txt"))) {
@@ -138,7 +138,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * Writes a boolean value as "true" or "false".
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write(true);    // Writes "true"
@@ -154,7 +154,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * Writes a byte value as a decimal string.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write((byte) 127);   // Writes "127"
@@ -170,7 +170,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * Writes a short value as a decimal string.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write((short) 32767);   // Writes "32767"
@@ -185,7 +185,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * Writes a single character.
-     * 
+     *
      * @param ch the character to write as an int (0-65535)
      * @throws IOException if an I/O error occurs
      * @deprecated replaced by {@link #write(char)}
@@ -198,7 +198,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * Writes an integer value as a decimal string.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.writeInt(12345);   // Writes "12345"
@@ -214,7 +214,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * Writes a long value as a decimal string.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write(1234567890L);   // Writes "1234567890"
@@ -229,9 +229,9 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * Writes a float value as a decimal string.
-     * 
+     *
      * <p>The output format follows the same rules as {@link Float#toString(float)}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write(3.14f);       // Writes "3.14"
@@ -247,9 +247,9 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * Writes a double value as a decimal string.
-     * 
+     *
      * <p>The output format follows the same rules as {@link Double#toString(double)}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write(3.14159);   // Writes "3.14159"
@@ -265,7 +265,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * Writes a Date using the default date format.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write(new Date());   // Writes current date/time
@@ -280,7 +280,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * Writes a Calendar using the default date format.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Calendar cal = Calendar.getInstance();
@@ -296,7 +296,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * Writes an XMLGregorianCalendar using the default date format.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XMLGregorianCalendar xmlCal = DatatypeFactory.newInstance().newXMLGregorianCalendar();
@@ -312,7 +312,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * Writes a single character.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write('A');    // Writes "A"
@@ -346,7 +346,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * Writes a string. If the string is {@code null}, "null" is written.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write("Hello");   // Writes "Hello"
@@ -367,7 +367,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * Writes a portion of a string.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write("Hello World", 6, 5);   // Writes "World"
@@ -446,7 +446,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * Writes a character array.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = {'H', 'e', 'l', 'l', 'o'};
@@ -489,7 +489,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * Writes a portion of a character array.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = {'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd'};
@@ -538,18 +538,19 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
     }
 
     /**
-     * Writes a platform-specific line separator.
-     * 
-     * <p>The line separator string is defined by the system property
-     * {@code line.separator}, and is not necessarily a single newline character.</p>
-     * 
+     * Writes a line separator.
+     *
+     * <p>This implementation always writes the Unix line separator ({@code "\n"}),
+     * regardless of the underlying platform. This differs from
+     * {@link java.io.BufferedWriter#newLine()}, which uses the platform's
+     * {@code line.separator} system property.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write("Line 1");
      * writer.newLine();
      * writer.write("Line 2");
-     * // Output on Unix: "Line 1\nLine 2"
-     * // Output on Windows: "Line 1\r\nLine 2"
+     * // Output on every platform: "Line 1\nLine 2"
      * }</pre>
      *
      * @throws IOException if an I/O error occurs
@@ -622,7 +623,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * Flushes the stream.
-     * 
+     *
      * <p>If the stream has saved any characters from the write() methods in a buffer,
      * write them immediately to their destination. Then, if that destination is another
      * stream, flush it.</p>
@@ -657,11 +658,11 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * Closes the stream, flushing it first.
-     * 
+     *
      * <p>Once the stream has been closed, further write() or flush() invocations
      * will cause an IOException to be thrown. Closing a previously closed stream
      * has no effect.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedWriter writer = new BufferedWriter(new FileWriter("file.txt"));
@@ -692,11 +693,11 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * Returns the contents of the internal buffer as a string.
-     * 
+     *
      * <p>For writers in internal buffer mode, this returns all written content.
      * For writers with an underlying output stream or writer, this flushes
      * the buffer and returns the string representation of the underlying writer.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedWriter writer = new BufferedWriter();

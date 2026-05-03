@@ -18,20 +18,18 @@ import java.io.Serial;
 
 /**
  * Exception thrown when an operation that expects a unique result encounters duplicate results.
- * This exception extends {@link IllegalStateException} to indicate that the application
- * is in an illegal state because an operation expected a unique result but encountered
- * duplicate results.
+ * This is an unchecked exception that signals an illegal state: a uniqueness constraint was
+ * expected but was violated.
  *
  * <p>Common use cases include:</p>
  * <ul>
  *   <li>Database queries expected to return a single row but returning multiple rows.</li>
- *   <li>Collection operations where uniqueness constraint is violated.</li>
- *   <li>Stream operations expecting a single element but finding duplicates.</li>
+ *   <li>Collection operations where a uniqueness constraint is violated.</li>
+ *   <li>Stream operations expecting a single element but finding multiple matching elements.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // In a DAO method expecting unique result
  * List<User> users = query.getResultList();
  * if (users.size() > 1) {
  *     throw new DuplicateResultException("Expected unique user but found " + users.size());
@@ -39,6 +37,7 @@ import java.io.Serial;
  * }</pre>
  *
  * @see IllegalStateException
+ * @see TooManyElementsException
  */
 public class DuplicateResultException extends IllegalStateException {
 

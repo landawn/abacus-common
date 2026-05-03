@@ -14,17 +14,23 @@
 package com.landawn.abacus.util.function;
 
 /**
- * Represents an operation that accepts a long-valued argument and a LongConsumer,
- * and returns no result. This functional interface is used to implement a one-to-many
- * transformation operation, similar to flatMap. The LongConsumer parameter can be
- * invoked multiple times to pass multiple values downstream.
+ * Represents an operation that accepts a {@code long}-valued argument and a
+ * {@link java.util.function.LongConsumer}, and returns no result. This functional interface
+ * is used to implement a one-to-many (multi-mapping) transformation, similar to
+ * {@code flatMap}. The {@code LongConsumer} parameter may be invoked zero or more times
+ * to push any number of {@code long} values downstream for each input value.
+ *
+ * <p>This interface is the primitive {@code long} specialization of the
+ * {@code mapMulti} pattern introduced in Java 16. It allows implementations to
+ * conditionally emit multiple output values from a single input — or emit none at all —
+ * without creating intermediate collections or streams.
  *
  * <p>This is a functional interface whose functional method is {@link #accept(long, java.util.function.LongConsumer)}.
- *
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.stream.LongStream.LongMapMultiConsumer
+ * @see java.util.stream.LongStream#mapMulti(java.util.stream.LongStream.LongMapMultiConsumer)
  */
 @FunctionalInterface
 public interface LongMapMultiConsumer extends java.util.stream.LongStream.LongMapMultiConsumer { //NOSONAR

@@ -21,9 +21,9 @@ import com.landawn.abacus.util.Throwables;
  * A functional interface that represents a function that accepts four arguments and
  * produces a result. This is the four-arity specialization of {@link java.util.function.Function}.
  *
- * <p>This interface extends the standard Java functional interfaces to support functions
- * with four parameters, which is useful for more complex transformations that require
- * multiple inputs to compute a result.
+ * <p>This interface generalizes the standard Java functional function interfaces to support
+ * functions with four parameters, which is useful for more complex transformations that
+ * require multiple inputs to compute a result.
  *
  * <p>This is a functional interface whose functional method is {@link #apply(Object, Object, Object, Object)}.
  *
@@ -107,9 +107,10 @@ public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, 
      *
      * @param <V> the type of output of the {@code after} function, and of the
      *           composed function
-     * @param after the function to apply after this function is applied
+     * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed function that first applies this function and then
      *         applies the {@code after} function
+     * @throws NullPointerException if {@code after} is null
      */
     default <V> QuadFunction<A, B, C, D, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return (a, b, c, d) -> after.apply(apply(a, b, c, d));

@@ -145,8 +145,9 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
      * boolean result = combined.test((short) 50);   // returns true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ANDed with this predicate
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default ShortPredicate and(final ShortPredicate other) {
         return t -> test(t) && other.test(t);
@@ -168,8 +169,9 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
      * boolean result = notPositive.test((short) 0);   // returns true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ORed with this predicate
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default ShortPredicate or(final ShortPredicate other) {
         return t -> test(t) || other.test(t);

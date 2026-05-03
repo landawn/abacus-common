@@ -497,7 +497,7 @@ public class PropertiesTest extends AbstractTest {
 
         final ConfigBean bean2 = Beans.copy(bean);
         assertEquals(bean, bean2);
-        final Set<ConfigBean> set = CommonUtil.toSet(bean);
+        final Set<ConfigBean> set = N.toSet(bean);
         assertTrue(set.contains(bean2));
 
         N.println(bean);
@@ -730,7 +730,7 @@ public class PropertiesTest extends AbstractTest {
 
         N.println(resource1);
 
-        assertTrue(CommonUtil.toSet(resource1).contains(resource2));
+        assertTrue(N.toSet(resource1).contains(resource2));
 
     }
 

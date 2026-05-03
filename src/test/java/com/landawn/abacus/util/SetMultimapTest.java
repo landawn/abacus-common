@@ -182,7 +182,7 @@ public class SetMultimapTest extends TestBase {
     public void test_removeMany() {
         SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "a", 2, "a", 3);
 
-        assertTrue(map.removeValues("a", CommonUtil.toList(1, 2)));
+        assertTrue(map.removeValues("a", N.toList(1, 2)));
         assertEquals(1, map.get("a").size());
         assertTrue(map.get("a").contains(3));
     }
@@ -554,7 +554,7 @@ public class SetMultimapTest extends TestBase {
         SetMultimap<String, Integer> map = SetMultimap.of("a", 1);
         assertTrue(map.applyIfNotEmpty(m -> m.totalValueCount()).isPresent());
 
-        SetMultimap<String, Integer> empty = CommonUtil.newSetMultimap();
+        SetMultimap<String, Integer> empty = N.newSetMultimap();
         assertFalse(empty.applyIfNotEmpty(m -> m.totalValueCount()).isPresent());
     }
 
@@ -567,7 +567,7 @@ public class SetMultimapTest extends TestBase {
         assertEquals(1, counter.get());
 
         counter.set(0);
-        SetMultimap<String, Integer> empty = CommonUtil.newSetMultimap();
+        SetMultimap<String, Integer> empty = N.newSetMultimap();
         empty.acceptIfNotEmpty(m -> counter.set(99));
         assertEquals(0, counter.get());
     }
@@ -604,7 +604,7 @@ public class SetMultimapTest extends TestBase {
 
     @Test
     public void test_create_withKeyExtractor() {
-        List<String> words = CommonUtil.toList("apple", "ant", "banana", "bear");
+        List<String> words = N.toList("apple", "ant", "banana", "bear");
         SetMultimap<Character, String> map = SetMultimap.fromCollection(words, s -> s.charAt(0));
 
         assertEquals(4, map.totalValueCount());
@@ -620,7 +620,7 @@ public class SetMultimapTest extends TestBase {
 
     @Test
     public void test_create_withKeyAndValueExtractor() {
-        List<String> words = CommonUtil.toList("apple", "ant", "banana");
+        List<String> words = N.toList("apple", "ant", "banana");
         SetMultimap<Character, Integer> map = SetMultimap.fromCollection(words, s -> s.charAt(0), String::length);
 
         assertEquals(3, map.totalValueCount());
@@ -647,7 +647,7 @@ public class SetMultimapTest extends TestBase {
 
     @Test
     public void test_create_withKeyExtractor_nullExtractor() {
-        List<String> words = CommonUtil.toList("apple");
+        List<String> words = N.toList("apple");
         assertThrows(IllegalArgumentException.class, () -> {
             SetMultimap.fromCollection(words, null);
         });
@@ -655,8 +655,8 @@ public class SetMultimapTest extends TestBase {
 
     @Test
     public void test_concat_twoMaps() {
-        Map<String, Integer> map1 = CommonUtil.asMap("a", 1, "b", 2);
-        Map<String, Integer> map2 = CommonUtil.asMap("c", 3, "d", 4);
+        Map<String, Integer> map1 = N.asMap("a", 1, "b", 2);
+        Map<String, Integer> map2 = N.asMap("c", 3, "d", 4);
 
         SetMultimap<String, Integer> result = SetMultimap.merge(map1, map2);
         assertEquals(4, result.totalValueCount());
@@ -668,8 +668,8 @@ public class SetMultimapTest extends TestBase {
 
     @Test
     public void test_concat_twoMaps_overlappingKeys() {
-        Map<String, Integer> map1 = CommonUtil.asMap("a", 1);
-        Map<String, Integer> map2 = CommonUtil.asMap("a", 2);
+        Map<String, Integer> map1 = N.asMap("a", 1);
+        Map<String, Integer> map2 = N.asMap("a", 2);
 
         SetMultimap<String, Integer> result = SetMultimap.merge(map1, map2);
         assertEquals(2, result.totalValueCount());
@@ -680,9 +680,9 @@ public class SetMultimapTest extends TestBase {
 
     @Test
     public void test_concat_threeMaps() {
-        Map<String, Integer> map1 = CommonUtil.asMap("a", 1);
-        Map<String, Integer> map2 = CommonUtil.asMap("b", 2);
-        Map<String, Integer> map3 = CommonUtil.asMap("c", 3);
+        Map<String, Integer> map1 = N.asMap("a", 1);
+        Map<String, Integer> map2 = N.asMap("b", 2);
+        Map<String, Integer> map3 = N.asMap("c", 3);
 
         SetMultimap<String, Integer> result = SetMultimap.merge(map1, map2, map3);
         assertEquals(3, result.totalValueCount());
@@ -694,9 +694,9 @@ public class SetMultimapTest extends TestBase {
     @Test
     public void test_concat_collection() {
         List<Map<String, Integer>> maps = new ArrayList<>();
-        maps.add(CommonUtil.asMap("a", 1));
-        maps.add(CommonUtil.asMap("b", 2));
-        maps.add(CommonUtil.asMap("c", 3));
+        maps.add(N.asMap("a", 1));
+        maps.add(N.asMap("b", 2));
+        maps.add(N.asMap("c", 3));
 
         SetMultimap<String, Integer> result = SetMultimap.merge(maps);
         assertEquals(3, result.totalValueCount());
@@ -707,7 +707,7 @@ public class SetMultimapTest extends TestBase {
 
     @Test
     public void test_merge() {
-        SetMultimap<String, Integer> map = CommonUtil.newSetMultimap();
+        SetMultimap<String, Integer> map = N.newSetMultimap();
         map.put("a", 1);
 
         map.merge("a", 2, (v, e) -> {
@@ -724,7 +724,7 @@ public class SetMultimapTest extends TestBase {
 
     @Test
     public void testMerge_withCollection_absent() {
-        SetMultimap<String, Integer> map = CommonUtil.newSetMultimap();
+        SetMultimap<String, Integer> map = N.newSetMultimap();
         Set<Integer> elements = new HashSet<>(Arrays.asList(1, 2));
         map.merge("a", elements, (oldV, newV) -> {
             Set<Integer> merged = new HashSet<>(oldV);
@@ -748,7 +748,7 @@ public class SetMultimapTest extends TestBase {
 
     @Test
     public void test_concat_twoMaps_withNulls() {
-        Map<String, Integer> map1 = CommonUtil.asMap("a", 1);
+        Map<String, Integer> map1 = N.asMap("a", 1);
         SetMultimap<String, Integer> result = SetMultimap.merge(null, map1);
         assertEquals(1, result.totalValueCount());
 
@@ -761,7 +761,7 @@ public class SetMultimapTest extends TestBase {
 
     @Test
     public void test_concat_threeMaps_withNulls() {
-        Map<String, Integer> map1 = CommonUtil.asMap("a", 1);
+        Map<String, Integer> map1 = N.asMap("a", 1);
         SetMultimap<String, Integer> result = SetMultimap.merge(null, null, map1);
         assertEquals(1, result.totalValueCount());
 
@@ -785,8 +785,8 @@ public class SetMultimapTest extends TestBase {
     @Test
     public void test_wrap_map() {
         Map<String, Set<Integer>> map = new HashMap<>();
-        map.put("a", new HashSet<>(CommonUtil.toList(1, 2)));
-        map.put("b", new HashSet<>(CommonUtil.toList(3, 4)));
+        map.put("a", new HashSet<>(N.toList(1, 2)));
+        map.put("b", new HashSet<>(N.toList(3, 4)));
 
         SetMultimap<String, Integer> wrapped = SetMultimap.wrap(map);
         assertEquals(4, wrapped.totalValueCount());
@@ -801,7 +801,7 @@ public class SetMultimapTest extends TestBase {
     @Test
     public void test_wrap_withSupplier() {
         Map<String, TreeSet<Integer>> map = new HashMap<>();
-        map.put("a", new TreeSet<>(CommonUtil.toList(1, 2)));
+        map.put("a", new TreeSet<>(N.toList(1, 2)));
 
         SetMultimap<String, Integer> wrapped = SetMultimap.wrap(map, TreeSet::new);
         assertEquals(2, wrapped.totalValueCount());
@@ -829,7 +829,7 @@ public class SetMultimapTest extends TestBase {
     @Test
     public void test_wrap_map_withNullValue() {
         Map<String, Set<Integer>> map = new HashMap<>();
-        map.put("a", new HashSet<>(CommonUtil.toList(1, 2)));
+        map.put("a", new HashSet<>(N.toList(1, 2)));
         map.put("b", null);
 
         assertThrows(IllegalArgumentException.class, () -> {
@@ -886,14 +886,14 @@ public class SetMultimapTest extends TestBase {
 
     @Test
     public void test_inverse_emptyMap() {
-        SetMultimap<String, Integer> original = CommonUtil.newSetMultimap();
+        SetMultimap<String, Integer> original = N.newSetMultimap();
         SetMultimap<Integer, String> inverted = original.invert();
         assertEquals(0, inverted.totalValueCount());
     }
 
     @Test
     public void test_inverse_multipleValuesPerKey() {
-        SetMultimap<String, Integer> original = CommonUtil.newSetMultimap();
+        SetMultimap<String, Integer> original = N.newSetMultimap();
         original.put("a", 1);
         original.put("a", 2);
         original.put("a", 3);
@@ -932,7 +932,7 @@ public class SetMultimapTest extends TestBase {
 
     @Test
     public void test_copy_independence() {
-        SetMultimap<String, Integer> original = CommonUtil.newSetMultimap();
+        SetMultimap<String, Integer> original = N.newSetMultimap();
         original.put("a", 1);
         original.put("a", 2);
 
@@ -949,14 +949,14 @@ public class SetMultimapTest extends TestBase {
 
     @Test
     public void test_copy_emptyMap() {
-        SetMultimap<String, Integer> original = CommonUtil.newSetMultimap();
+        SetMultimap<String, Integer> original = N.newSetMultimap();
         SetMultimap<String, Integer> copy = original.copy();
         assertEquals(0, copy.totalValueCount());
     }
 
     @Test
     public void test_edgeCases_emptyMultimap() {
-        SetMultimap<String, Integer> map = CommonUtil.newSetMultimap();
+        SetMultimap<String, Integer> map = N.newSetMultimap();
 
         assertTrue(map.isEmpty());
         assertEquals(0, map.totalValueCount());
@@ -985,14 +985,14 @@ public class SetMultimapTest extends TestBase {
 
     @Test
     public void test_toImmutableMap_empty() {
-        SetMultimap<String, Integer> map = CommonUtil.newSetMultimap();
+        SetMultimap<String, Integer> map = N.newSetMultimap();
         ImmutableMap<String, ImmutableSet<Integer>> immutable = map.toImmutableMap();
         assertEquals(0, immutable.size());
     }
 
     @Test
     public void test_toImmutableMap_withSupplier_empty() {
-        SetMultimap<String, Integer> map = CommonUtil.newSetMultimap();
+        SetMultimap<String, Integer> map = N.newSetMultimap();
         ImmutableMap<String, ImmutableSet<Integer>> immutable = map.toImmutableMap(size -> new LinkedHashMap<>());
         assertEquals(0, immutable.size());
     }
@@ -1031,7 +1031,7 @@ public class SetMultimapTest extends TestBase {
 
     @Test
     public void test_multipleOperations() {
-        SetMultimap<String, Integer> map = CommonUtil.newSetMultimap();
+        SetMultimap<String, Integer> map = N.newSetMultimap();
 
         map.put("a", 1);
         map.put("a", 2);
@@ -1047,13 +1047,13 @@ public class SetMultimapTest extends TestBase {
         assertEquals(1, map.get("a").size());
         assertFalse(map.get("a").contains(1));
 
-        map.putValues("c", CommonUtil.toList(4, 5, 6));
+        map.putValues("c", N.toList(4, 5, 6));
         assertEquals(3, map.get("c").size());
     }
 
     @Test
     public void test_setSemantics() {
-        SetMultimap<String, Integer> map = CommonUtil.newSetMultimap();
+        SetMultimap<String, Integer> map = N.newSetMultimap();
 
         map.put("a", 1);
         map.put("a", 1);
@@ -1064,7 +1064,7 @@ public class SetMultimapTest extends TestBase {
 
     @Test
     public void test_nullHandling() {
-        SetMultimap<String, Integer> map = CommonUtil.newSetMultimap();
+        SetMultimap<String, Integer> map = N.newSetMultimap();
 
         map.put(null, 1);
         assertTrue(map.containsKey(null));
@@ -1076,7 +1076,7 @@ public class SetMultimapTest extends TestBase {
 
     @Test
     public void test_putIfAbsent() {
-        SetMultimap<String, Integer> map = CommonUtil.newSetMultimap();
+        SetMultimap<String, Integer> map = N.newSetMultimap();
 
         assertTrue(map.putIfValueAbsent("a", 1));
         assertEquals(1, map.get("a").size());
@@ -1090,7 +1090,7 @@ public class SetMultimapTest extends TestBase {
 
     @Test
     public void test_putIfKeyAbsent() {
-        SetMultimap<String, Integer> map = CommonUtil.newSetMultimap();
+        SetMultimap<String, Integer> map = N.newSetMultimap();
 
         assertTrue(map.putIfKeyAbsent("a", 1));
         assertEquals(1, map.get("a").size());
@@ -1103,18 +1103,18 @@ public class SetMultimapTest extends TestBase {
 
     @Test
     public void test_putManyIfKeyAbsent() {
-        SetMultimap<String, Integer> map = CommonUtil.newSetMultimap();
+        SetMultimap<String, Integer> map = N.newSetMultimap();
 
-        assertTrue(map.putValuesIfKeyAbsent("a", CommonUtil.toList(1, 2, 3)));
+        assertTrue(map.putValuesIfKeyAbsent("a", N.toList(1, 2, 3)));
         assertEquals(3, map.get("a").size());
 
-        assertFalse(map.putValuesIfKeyAbsent("a", CommonUtil.toList(4, 5)));
+        assertFalse(map.putValuesIfKeyAbsent("a", N.toList(4, 5)));
         assertEquals(3, map.get("a").size());
     }
 
     @Test
     public void test_compute() {
-        SetMultimap<String, Integer> map = CommonUtil.newSetMultimap();
+        SetMultimap<String, Integer> map = N.newSetMultimap();
 
         Set<Integer> result = map.compute("a", (k, v) -> {
             Set<Integer> newSet = new HashSet<>();
@@ -1129,10 +1129,10 @@ public class SetMultimapTest extends TestBase {
 
     @Test
     public void test_filter_complexPredicate() {
-        SetMultimap<String, Integer> map = CommonUtil.newSetMultimap();
-        map.putValues("a", CommonUtil.toList(1, 2, 3));
-        map.putValues("b", CommonUtil.toList(4));
-        map.putValues("c", CommonUtil.toList(5, 6));
+        SetMultimap<String, Integer> map = N.newSetMultimap();
+        map.putValues("a", N.toList(1, 2, 3));
+        map.putValues("b", N.toList(4));
+        map.putValues("c", N.toList(5, 6));
 
         //    SetMultimap<String, Integer> filtered = map.filter((k, v) -> k.compareTo("b") < 0 && v.size() > 2);
         //
@@ -1144,7 +1144,7 @@ public class SetMultimapTest extends TestBase {
 
     @Test
     public void test_largeNumberOfValues() {
-        SetMultimap<String, Integer> map = CommonUtil.newSetMultimap();
+        SetMultimap<String, Integer> map = N.newSetMultimap();
 
         for (int i = 0; i < 1000; i++) {
             map.put("key", i);
@@ -1159,7 +1159,7 @@ public class SetMultimapTest extends TestBase {
 
     @Test
     public void testComputeIfAbsent_absent() {
-        SetMultimap<String, Integer> map = CommonUtil.newSetMultimap();
+        SetMultimap<String, Integer> map = N.newSetMultimap();
         Set<Integer> result = map.computeIfAbsent("a", k -> new HashSet<>(Arrays.asList(1, 2)));
         assertEquals(2, result.size());
         assertTrue(map.containsKey("a"));
@@ -1167,7 +1167,7 @@ public class SetMultimapTest extends TestBase {
 
     @Test
     public void testComputeIfPresent_absent() {
-        SetMultimap<String, Integer> map = CommonUtil.newSetMultimap();
+        SetMultimap<String, Integer> map = N.newSetMultimap();
         Set<Integer> result = map.computeIfPresent("a", (k, v) -> new HashSet<>(Arrays.asList(10)));
         assertFalse(map.containsKey("a"));
     }
@@ -1176,7 +1176,7 @@ public class SetMultimapTest extends TestBase {
 
     @Test
     public void testPutAll_map() {
-        SetMultimap<String, Integer> map = CommonUtil.newSetMultimap();
+        SetMultimap<String, Integer> map = N.newSetMultimap();
         Map<String, Integer> m = new HashMap<>();
         m.put("a", 1);
         m.put("b", 2);

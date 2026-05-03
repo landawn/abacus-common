@@ -15,6 +15,7 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
+import java.util.List;
 
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
@@ -22,7 +23,11 @@ import com.landawn.abacus.util.IntList;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for {@link IntList} objects, providing serialization and deserialization support.
+ * Type handler for {@link IntList} objects, which is a primitive-backed list of {@code int} values.
+ * Provides serialization and deserialization of {@link IntList} instances by delegating to the
+ * underlying {@code int[]} array type handler.
+ * String representations use the format {@code [1, 2, 3]} with comma-separated elements
+ * enclosed in square brackets.
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntList> {
@@ -32,8 +37,13 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
     private final Type<int[]> arrayType = Type.of(int[].class);
 
     private final Type<Integer> elementType = Type.of(int.class);
-    private final Type<Integer>[] parameterTypes = new Type[] { elementType };
+    private final List<Type<?>> parameterTypes = List.of(elementType);
 
+    /**
+     * Constructs a new PrimitiveIntListType instance.
+     * This constructor is protected to allow subclassing while maintaining controlled instantiation
+     * through the TypeFactory.
+     */
     protected PrimitiveIntListType() {
         super(INT_LIST);
     }
@@ -79,15 +89,15 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<IntList> type = TypeFactory.getType(IntList.class);
-     * Type<Integer>[] paramTypes = type.parameterTypes();
-     * // paramTypes[0] represents the element type
+     * List<Type<?>> paramTypes = type.parameterTypes();
+     * // paramTypes.get(0) represents the element type
      * }</pre>
      *
-     * @return an array containing the Integer Type that describes the elements of this list type
+     * @return an immutable list containing the Integer Type that describes the elements of this list type
      * @see #elementType()
      */
     @Override
-    public Type<Integer>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 

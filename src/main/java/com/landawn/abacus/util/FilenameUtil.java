@@ -25,7 +25,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
 
 /**
  * General filename and filepath manipulation utilities.
- * 
+ *
  * <p>This class helps avoid problems when moving between Windows and Unix-based systems
  * by providing platform-independent filename operations. It's copied from Apache Commons IO
  * developed at The Apache Software Foundation under the Apache License 2.0.</p>
@@ -46,13 +46,13 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * <pre>{@code
  * // Get file extension
  * String ext = FilenameUtil.getExtension("report.pdf");   // Returns "pdf"
- * 
+ *
  * // Get base name without extension
  * String base = FilenameUtil.getBaseName("/docs/report.pdf");   // Returns "report"
- * 
+ *
  * // Normalize path
  * String normalized = FilenameUtil.normalize("/foo/../bar/./file.txt");   // Returns "/bar/file.txt"
- * 
+ *
  * // Check if file matches wildcard pattern
  * boolean matches = FilenameUtil.wildcardMatch("test.java", "*.java");   // Returns true
  * }</pre>
@@ -393,11 +393,8 @@ public final class FilenameUtil {
             throw new IllegalArgumentException("Directory must not be null");
         }
 
-        if ((canonicalChild == null) || IOCase.SYSTEM.checkEquals(canonicalParent, canonicalChild)) {
-            return false;
-        }
-
-        if (!IOCase.SYSTEM.checkStartsWith(canonicalChild, canonicalParent)) {
+        if ((canonicalChild == null) || IOCase.SYSTEM.checkEquals(canonicalParent, canonicalChild)
+                || !IOCase.SYSTEM.checkStartsWith(canonicalChild, canonicalParent)) {
             return false;
         }
 
@@ -619,7 +616,7 @@ public final class FilenameUtil {
 
     /**
      * Gets the prefix from a full filename, such as {@code C:/} or {@code ~/}.
-     * 
+     *
      * <p>This method includes the first slash in the full filename where applicable.</p>
      *
      * <p><b>Usage Examples:</b></p>

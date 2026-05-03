@@ -26,29 +26,35 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for AtomicBoolean operations.
- * This class provides serialization/deserialization and database operations
- * for java.util.concurrent.atomic.AtomicBoolean instances.
+ * Type handler for {@link java.util.concurrent.atomic.AtomicBoolean} values.
+ * Provides serialization, deserialization, and JDBC operations for {@code AtomicBoolean} instances.
+ *
+ * <p>String representation: {@code "true"} or {@code "false"} (same as {@link Boolean#toString()}).</p>
+ * <p>JDBC mapping: stored and retrieved as a SQL {@code BOOLEAN} column
+ * ({@link java.sql.Types#BOOLEAN}).</p>
+ *
+ * @see java.util.concurrent.atomic.AtomicBoolean
  */
 public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
 
     /**
-     * The type name constant for AtomicBoolean type identification.
+     * The type name constant used to identify this type within the type system
+     * (value: {@code "AtomicBoolean"}).
      */
     public static final String ATOMIC_BOOLEAN = AtomicBoolean.class.getSimpleName();
 
     /**
-     * Package-private constructor for AtomicBooleanType.
-     * This constructor is called by the TypeFactory to create AtomicBoolean type instances.
+     * Package-private constructor for {@code AtomicBooleanType}.
+     * Instances are created by {@link TypeFactory}; do not instantiate directly.
      */
     AtomicBooleanType() {
         super(ATOMIC_BOOLEAN);
     }
 
     /**
-     * Returns the Class object representing the AtomicBoolean class.
+     * Returns the Java class represented by this type handler.
      *
-     * @return the Class object for {@code AtomicBoolean}
+     * @return {@code AtomicBoolean.class}
      */
     @Override
     public Class<AtomicBoolean> javaType() {
@@ -56,29 +62,13 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
     }
 
     /**
-     * Converts an AtomicBoolean value to its string representation.
-     * The boolean value is extracted from the AtomicBoolean and converted to
-     * either "true" or "false" string.
+     * Converts an {@link java.util.concurrent.atomic.AtomicBoolean} value to its string representation.
+     * The boolean value is read via {@link java.util.concurrent.atomic.AtomicBoolean#get()} and
+     * converted to either {@code "true"} or {@code "false"}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * AtomicBooleanType type = (AtomicBooleanType) TypeFactory.getType(AtomicBoolean.class);
-     *
-     * AtomicBoolean trueValue = new AtomicBoolean(true);
-     * String str = type.stringOf(trueValue);
-     * // str: "true"
-     *
-     * AtomicBoolean falseValue = new AtomicBoolean(false);
-     * String strFalse = type.stringOf(falseValue);
-     * // strFalse: "false"
-     *
-     * String nullStr = type.stringOf(null);
-     * // nullStr: null
-     * }</pre>
-     *
-     * @param x the AtomicBoolean value to convert
-     * @return "true" if the AtomicBoolean contains {@code true}, "false" if it contains {@code false},
-     *         or {@code null} if the input is null
+     * @param x the {@code AtomicBoolean} to convert; may be {@code null}
+     * @return {@code "true"} if the contained value is {@code true}, {@code "false"} if it is {@code false},
+     *         or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final AtomicBoolean x) {
@@ -86,43 +76,28 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
     }
 
     /**
-     * Converts a string representation to an AtomicBoolean value.
-     * Parses the string using Boolean.parseBoolean() and wraps the result
-     * in a new AtomicBoolean instance.
+     * Parses a string and returns a new {@link java.util.concurrent.atomic.AtomicBoolean} containing
+     * the parsed value. Parsing is case-insensitive: {@code "true"} (in any casing) yields {@code true};
+     * any other non-blank value yields {@code false}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * AtomicBooleanType type = (AtomicBooleanType) TypeFactory.getType(AtomicBoolean.class);
-     *
-     * AtomicBoolean trueValue = type.valueOf("true");
-     * // trueValue.get(): true
-     *
-     * AtomicBoolean trueValue2 = type.valueOf("TRUE");
-     * // trueValue2.get(): true (case-insensitive)
-     *
-     * AtomicBoolean falseValue = type.valueOf("false");
-     * // falseValue.get(): false
-     *
-     * AtomicBoolean nullValue = type.valueOf(null);
-     * // nullValue: null
-     * }</pre>
-     *
-     * @param str the string to parse (case-insensitive "true" results in {@code true}, all else false)
-     * @return a new AtomicBoolean containing the parsed value, or {@code null} if str is {@code null}, empty, or blank
+     * @param str the string to parse; may be {@code null} or blank
+     * @return a new {@code AtomicBoolean} containing the parsed boolean value,
+     *         or {@code null} if {@code str} is {@code null}, empty, or blank
      */
     @Override
     public AtomicBoolean valueOf(final String str) {
-        return Strings.isBlank(str) ? null : new AtomicBoolean(Boolean.parseBoolean(str.trim()));
+        return Strings.isBlank(str) ? null : new AtomicBoolean(parseBoolean(str.trim()));
     }
 
     /**
-     * Retrieves an AtomicBoolean value from a ResultSet at the specified column index.
-     * The boolean value is read from the database and wrapped in a new AtomicBoolean instance.
+     * Retrieves an {@link java.util.concurrent.atomic.AtomicBoolean} from a {@link java.sql.ResultSet}
+     * at the specified column index.
+     * The column value is read as a SQL {@code BOOLEAN} and wrapped in a new {@code AtomicBoolean}.
      *
-     * @param rs the ResultSet to retrieve the value from
-     * @param columnIndex the column index (1-based) of the boolean value
-     * @return a new AtomicBoolean containing the retrieved value, or {@code null} if SQL NULL
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnIndex the 1-based index of the column containing the boolean value
+     * @return a new {@code AtomicBoolean} wrapping the retrieved value, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
      */
     @Override
     public AtomicBoolean get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -132,14 +107,14 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
     }
 
     /**
-     * Retrieves an AtomicBoolean value from a ResultSet using the specified column label.
-     * The boolean value is read from the database and wrapped in a new AtomicBoolean instance.
+     * Retrieves an {@link java.util.concurrent.atomic.AtomicBoolean} from a {@link java.sql.ResultSet}
+     * using the specified column label.
+     * The column value is read as a SQL {@code BOOLEAN} and wrapped in a new {@code AtomicBoolean}.
      *
-     * @param rs the ResultSet to retrieve the value from
-     * @param columnName the label for the column specified with the SQL AS clause,
-     *                    or the column name if no AS clause was specified
-     * @return a new AtomicBoolean containing the retrieved value, or {@code null} if SQL NULL
-     * @throws SQLException if a database access error occurs or the columnName is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnName the column label as specified in the SQL AS clause, or the column name if no AS clause was used
+     * @return a new {@code AtomicBoolean} wrapping the retrieved value, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
     @Override
     public AtomicBoolean get(final ResultSet rs, final String columnName) throws SQLException {
@@ -149,14 +124,15 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
     }
 
     /**
-     * Sets an AtomicBoolean parameter in a PreparedStatement at the specified position.
-     * The boolean value is extracted from the AtomicBoolean before setting.
-     * If the AtomicBoolean is {@code null}, sets the parameter to SQL NULL.
+     * Sets an {@link java.util.concurrent.atomic.AtomicBoolean} parameter on a
+     * {@link java.sql.PreparedStatement} at the specified position.
+     * If {@code x} is {@code null}, the parameter is set to SQL NULL
+     * ({@link java.sql.Types#BOOLEAN}); otherwise the contained boolean value is used.
      *
-     * @param stmt the PreparedStatement to set the parameter on
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the AtomicBoolean value to set, may be {@code null} (set as SQL NULL)
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param stmt the {@code PreparedStatement} on which to set the parameter
+     * @param columnIndex the 1-based parameter index to set
+     * @param x the {@code AtomicBoolean} value to set; {@code null} is stored as SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final AtomicBoolean x) throws SQLException {
@@ -168,14 +144,15 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
     }
 
     /**
-     * Sets a named AtomicBoolean parameter in a CallableStatement.
-     * The boolean value is extracted from the AtomicBoolean before setting.
-     * If the AtomicBoolean is {@code null}, sets the parameter to SQL NULL.
+     * Sets a named {@link java.util.concurrent.atomic.AtomicBoolean} parameter on a
+     * {@link java.sql.CallableStatement}.
+     * If {@code x} is {@code null}, the parameter is set to SQL NULL
+     * ({@link java.sql.Types#BOOLEAN}); otherwise the contained boolean value is used.
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param stmt the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the AtomicBoolean value to set, may be {@code null} (set as SQL NULL)
-     * @throws SQLException if a database access error occurs or the parameter name is invalid
+     * @param x the {@code AtomicBoolean} value to set; {@code null} is stored as SQL NULL
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final AtomicBoolean x) throws SQLException {
@@ -187,12 +164,12 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
     }
 
     /**
-     * Appends an AtomicBoolean value to an Appendable object.
-     * The boolean value is extracted and appended as either "true" or "false".
+     * Appends an {@link java.util.concurrent.atomic.AtomicBoolean} value to an {@link Appendable}.
+     * Appends {@code "null"} if {@code x} is {@code null}; otherwise appends {@code "true"} or {@code "false"}.
      *
-     * @param appendable the Appendable object to append to
-     * @param x the AtomicBoolean value to append, may be null
-     * @throws IOException if an I/O error occurs during the append operation
+     * @param appendable the target {@code Appendable}
+     * @param x the {@code AtomicBoolean} value to append; may be {@code null}
+     * @throws IOException if an I/O error occurs during appending
      */
     @Override
     public void appendTo(final Appendable appendable, final AtomicBoolean x) throws IOException {
@@ -200,13 +177,13 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
     }
 
     /**
-     * Writes an AtomicBoolean value to a CharacterWriter.
-     * This method delegates to appendTo() for the actual writing logic.
+     * Writes an {@link java.util.concurrent.atomic.AtomicBoolean} value to a {@link CharacterWriter}.
+     * Delegates to {@link #appendTo(Appendable, AtomicBoolean)}; {@code config} is not used.
      *
-     * @param writer the CharacterWriter to write to
-     * @param x the AtomicBoolean value to write, may be null
-     * @param config the serialization configuration (not used for boolean values)
-     * @throws IOException if an I/O error occurs during the write operation
+     * @param writer the {@code CharacterWriter} to write to
+     * @param x the {@code AtomicBoolean} value to write; may be {@code null}
+     * @param config the serialization configuration (unused for boolean values); may be {@code null}
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final AtomicBoolean x, final JsonXmlSerConfig<?> config) throws IOException {

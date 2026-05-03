@@ -20,8 +20,10 @@ import com.landawn.abacus.util.Throwables;
  * and returns no result. This is a three-arity specialization of {@link java.util.function.Consumer}.
  * Unlike most other functional interfaces, {@code IntBiObjConsumer} is expected to operate via side-effects.
  *
- * <p>This is a functional interface whose functional method is {@link #accept(int, Object, Object)}.
+ * <p>The parameter order follows the {@code IntBiObj*} convention: the {@code int} argument comes
+ * first, followed by two object arguments of types {@code T} and {@code U}.
  *
+ * <p>This is a functional interface whose functional method is {@link #accept(int, Object, Object)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
@@ -66,9 +68,10 @@ public interface IntBiObjConsumer<T, U> extends Throwables.IntBiObjConsumer<T, U
      * to the caller of the composed operation. If performing this operation throws an exception,
      * the {@code after} operation will not be performed.
      *
-     * @param after the operation to perform after this operation
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code IntBiObjConsumer} that performs in sequence this operation followed by
      *         the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     default IntBiObjConsumer<T, U> andThen(final IntBiObjConsumer<? super T, ? super U> after) {
         return (i, t, u) -> {

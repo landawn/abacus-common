@@ -37,9 +37,9 @@ public interface BooleanTriConsumer extends Throwables.BooleanTriConsumer<Runtim
      * logicalOps.accept(true, false, true);   // Prints: AND: false, OR: true
      * }</pre>
      *
-     * @param a the first input argument
-     * @param b the second input argument
-     * @param c the third input argument
+     * @param a the first input argument ({@code boolean} value)
+     * @param b the second input argument ({@code boolean} value)
+     * @param c the third input argument ({@code boolean} value)
      */
     @Override
     void accept(boolean a, boolean b, boolean c);
@@ -59,6 +59,7 @@ public interface BooleanTriConsumer extends Throwables.BooleanTriConsumer<Runtim
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code BooleanTriConsumer} that performs in sequence this operation followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     default BooleanTriConsumer andThen(final BooleanTriConsumer after) {
         return (a, b, c) -> {

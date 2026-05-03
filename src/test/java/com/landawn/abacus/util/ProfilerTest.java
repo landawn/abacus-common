@@ -56,7 +56,7 @@ public class ProfilerTest extends AbstractTest {
     }
 
     Object error(Object obj) {
-        throw new RuntimeException(CommonUtil.toString(obj));
+        throw new RuntimeException(N.toString(obj));
     }
 
     // ============================================================
@@ -915,7 +915,7 @@ public class ProfilerTest extends AbstractTest {
     @Test
     public void test_error() {
         Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "error", Object.class);
-        Profiler.run(this, method, CommonUtil.toList("a", "b"), 2, 2, 1).printResult();
+        Profiler.run(this, method, N.toList("a", "b"), 2, 2, 1).printResult();
         Profiler.run(this, method, null, 2, 2, 1).printResult();
         Profiler.run(this, method, null, 2, 2, 1).writeHtmlResult(System.out);
         Profiler.run(this, method, new ArrayList<>(), 2, 2, 1).writeXmlResult(System.out);
@@ -926,7 +926,7 @@ public class ProfilerTest extends AbstractTest {
     @Test
     public void testRunWithMethodReflectionAndArgs() {
         Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "error", Object.class);
-        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, CommonUtil.toList("testArg"), 1, 2, 1);
+        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, N.toList("testArg"), 1, 2, 1);
         assertNotNull(stats);
         // Method throws, so there should be failed stats
         assertTrue(stats.getAllFailedMethodStatisticsList().size() > 0);

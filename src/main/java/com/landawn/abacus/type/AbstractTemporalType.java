@@ -21,7 +21,7 @@ import java.time.temporal.Temporal;
 import com.landawn.abacus.util.Dates;
 
 /**
- * The Abstract base class for temporal type handling in the type system.
+ * The abstract base class for temporal type handling in the type system.
  * <p>
  * This class provides the foundation for date/time types that implement the {@link Temporal} interface,
  * including shared formatters and configuration for temporal serialization/deserialization.
@@ -40,39 +40,31 @@ public abstract class AbstractTemporalType<T extends Temporal> extends AbstractT
     protected static final ZoneId DEFAULT_ZONE_ID = Dates.DEFAULT_ZONE_ID;
 
     /**
-     * DateTimeFormatter for ISO 8601 date-time format with offset.
+     * {@link DateTimeFormatter} for the ISO 8601 date-time format with UTC offset.
      * <p>
-     * This formatter adheres to the ISO-8601 standard for representing date and time with
-     * an offset from UTC (e.g., "2023-04-15T14:30:45+01:00"). It's used for consistent
-     * formatting and parsing of temporal values throughout the type system.
-     * </p>
-     * <p>
-     * The formatter uses the standard {@link DateTimeFormatter#ISO_OFFSET_DATE_TIME} which
-     * formats or parses a date-time with an offset, such as <i>2011-12-03T10:15:30+01:00</i>.
-     * </p>
-     * <p>
-     * This field is protected and shared across subclasses to ensure consistent handling
-     * of temporal data in ISO format.
+     * Backed by {@link DateTimeFormatter#ISO_OFFSET_DATE_TIME}, which formats and parses
+     * date-times with an offset such as {@code 2011-12-03T10:15:30+01:00}.
+     * Used by subclasses when the {@link com.landawn.abacus.util.DateTimeFormat#ISO_8601_DATE_TIME}
+     * serialization option is selected.
      * </p>
      *
      * @see DateTimeFormatter#ISO_OFFSET_DATE_TIME
      * @see #iso8601TimestampDTF
-     * @see java.time.format.DateTimeFormatter
      */
     protected static final DateTimeFormatter iso8601DateTimeDTF = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
     /**
-     * DateTimeFormatter for ISO 8601 timestamp format with offset.
+     * {@link DateTimeFormatter} for the ISO 8601 timestamp format with UTC offset.
      * <p>
-     * This formatter is used specifically for timestamp-oriented operations, as opposed to
-     * {@link #iso8601DateTimeDTF} which is used for general date-time formatting.
-     * Both currently use {@link DateTimeFormatter#ISO_OFFSET_DATE_TIME}, but are kept
-     * separate to allow independent customization for different use cases.
+     * Backed by {@link DateTimeFormatter#ISO_OFFSET_DATE_TIME}, which formats and parses
+     * date-times with an offset such as {@code 2011-12-03T10:15:30.999+01:00}.
+     * Used by subclasses when the {@link com.landawn.abacus.util.DateTimeFormat#ISO_8601_TIMESTAMP}
+     * serialization option is selected. Kept separate from {@link #iso8601DateTimeDTF} to
+     * allow independent customization if finer granularity is needed in the future.
      * </p>
      *
      * @see DateTimeFormatter#ISO_OFFSET_DATE_TIME
      * @see #iso8601DateTimeDTF
-     * @see java.time.format.DateTimeFormatter
      */
     protected static final DateTimeFormatter iso8601TimestampDTF = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
@@ -96,5 +88,20 @@ public abstract class AbstractTemporalType<T extends Temporal> extends AbstractT
     @Override
     public boolean isCsvQuoteRequired() {
         return false;
+    }
+
+    /**
+     * Indicates whether values of this type are comparable.
+     * <p>
+     * All {@link java.time.temporal.Temporal} subtypes (e.g., {@code Instant}, {@code LocalDate},
+     * {@code LocalDateTime}, {@code OffsetDateTime}, {@code ZonedDateTime}) implement
+     * {@link Comparable}, so values of this type are naturally orderable.
+     * </p>
+     *
+     * @return {@code true}, as temporal values implement {@link Comparable}
+     */
+    @Override
+    public boolean isComparable() {
+        return true;
     }
 }

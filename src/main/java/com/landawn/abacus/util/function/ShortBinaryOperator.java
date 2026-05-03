@@ -57,11 +57,6 @@ public interface ShortBinaryOperator extends Throwables.ShortBinaryOperator<Runt
      * short sum = add.applyAsShort((short) 100, (short) 200);               // Returns 300
      * short maximum = max.applyAsShort((short) -50, (short) 75);            // Returns 75
      * short result = bitwiseAnd.applyAsShort((short) 0xFF, (short) 0x0F);   // Returns 0x0F
-     *
-     * // Using with reduce operations
-     * short[] values = {1, 2, 3, 4, 5};
-     * short total = Arrays.stream(values)
-     *     .reduce((short) 0, add);   // Sum all values
      * }</pre>
      *
      * @param a the first operand

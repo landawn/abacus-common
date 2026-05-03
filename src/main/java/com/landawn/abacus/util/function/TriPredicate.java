@@ -96,9 +96,10 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
      * boolean test3 = combined.test(-1, 5, 7);   // returns false (not all positive)
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ANDed with this predicate
      * @return a composed predicate that represents the short-circuiting logical AND of this
      *         predicate and the other predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default TriPredicate<A, B, C> and(final TriPredicate<? super A, ? super B, ? super C> other) {
         return (a, b, c) -> test(a, b, c) && other.test(a, b, c);
@@ -125,9 +126,10 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
      * boolean test3 = combined.test("short", "text", "here");              // returns false
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ORed with this predicate
      * @return a composed predicate that represents the short-circuiting logical OR of this
      *         predicate and the other predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default TriPredicate<A, B, C> or(final TriPredicate<? super A, ? super B, ? super C> other) {
         return (a, b, c) -> test(a, b, c) || other.test(a, b, c);

@@ -16,7 +16,6 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.u.OptionalFloat;
 import com.landawn.abacus.util.function.FloatPredicate;
 import com.landawn.abacus.util.function.FloatSupplier;
 import com.landawn.abacus.util.stream.FloatStream;

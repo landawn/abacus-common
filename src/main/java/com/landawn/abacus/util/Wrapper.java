@@ -26,11 +26,11 @@ import java.util.function.ToIntFunction;
  * An immutable wrapper class that provides custom hashCode and equals implementations for wrapped objects.
  * This is particularly useful for using arrays or other objects with non-standard equality semantics
  * as keys in HashMaps or elements in HashSets.
- * 
- * <p>Once a Wrapper object is stored in a {@code Set} or used as a key in a {@code Map}, 
+ *
+ * <p>Once a Wrapper object is stored in a {@code Set} or used as a key in a {@code Map},
  * the wrapped object should not be modified, as this would change its hash code and equals behavior,
  * leading to undefined behavior in the collection.</p>
- * 
+ *
  * <p>Key features:</p>
  * <ul>
  *   <li>Special handling for arrays with deep equality and hash code computation</li>
@@ -38,17 +38,17 @@ import java.util.function.ToIntFunction;
  *   <li>Object pooling for zero-length arrays to reduce memory allocation</li>
  *   <li>Immutable design to ensure collection safety</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Wrapping arrays for use as map keys
  * int[] array1 = {1, 2, 3};
  * int[] array2 = {1, 2, 3};
- * 
+ *
  * Map<Wrapper<int[]>, String> map = new HashMap<>();
  * map.put(Wrapper.of(array1), "value");
  * String result = map.get(Wrapper.of(array2));   // Returns "value"
- * 
+ *
  * // Custom wrapper with specific hash/equals logic
  * Person person = new Person("John", 30);
  * Wrapper<Person> wrapper = Wrapper.of(person,
@@ -321,6 +321,14 @@ public abstract class Wrapper<T> implements Immutable {
     @Override
     public abstract boolean equals(final Object obj);
 
+    /**
+     * A {@link Wrapper} implementation that delegates {@code hashCode}, {@code equals}, and
+     * {@code toString} to caller-supplied functions. Created by
+     * {@link Wrapper#of(Object, ToIntFunction, BiPredicate)} and
+     * {@link Wrapper#of(Object, ToIntFunction, BiPredicate, Function)}.
+     *
+     * @param <T> the type of the wrapped value
+     */
     static final class AnyWrapper<T> extends Wrapper<T> {
 
         private final ToIntFunction<? super T> hashFunction;
@@ -368,11 +376,21 @@ public abstract class Wrapper<T> implements Immutable {
         }
     }
 
+    /**
+     * A {@link Wrapper} implementation that uses deep-equality semantics (via
+     * {@link N#deepHashCode(Object)} and {@link N#deepEquals(Object, Object)}) for arrays.
+     * Created by {@link Wrapper#of(Object)} and used for all array-typed values, including
+     * {@code null}. Zero-length arrays are pooled to reduce allocation.
+     *
+     * @param <T> the type of the wrapped (array) value
+     */
     static final class ArrayWrapper<T> extends Wrapper<T> {
 
+        /** Shared instance used when {@code null} is passed to {@link Wrapper#of(Object)}. */
         @SuppressWarnings("rawtypes")
         static final Wrapper WRAPPER_FOR_NULL_ARRAY = new ArrayWrapper<>(null);
 
+        /** Pool of pre-allocated wrappers for zero-length arrays, keyed by component type. */
         @SuppressWarnings("rawtypes")
         static final Map<Object, Wrapper> WRAPPER_POOL = new ConcurrentHashMap<>();
 

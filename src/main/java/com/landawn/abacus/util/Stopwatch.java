@@ -47,7 +47,7 @@ import java.util.concurrent.TimeUnit;
  *
  * Duration duration = stopwatch.elapsed();
  *
- * log.info("time: " + stopwatch);   // formatted string like "12.3 ms"
+ * log.info("time: " + stopwatch);   // formatted string like "12.30 ms"
  * }</pre>
  *
  * <p>Stopwatch methods are not idempotent; it is an error to start or stop a stopwatch that is
@@ -85,7 +85,7 @@ public final class Stopwatch {
 
     /**
      * Creates (but does not start) a new stopwatch using {@link System#nanoTime} as its time source.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Stopwatch stopwatch = Stopwatch.createUnstarted();
@@ -103,7 +103,7 @@ public final class Stopwatch {
     /**
      * Creates (but does not start) a new stopwatch, using the specified time source.
      * This is useful for testing or when you need to use an alternative time source.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Ticker mockTicker = new Ticker() {
@@ -123,7 +123,7 @@ public final class Stopwatch {
     /**
      * Creates (and starts) a new stopwatch using {@link System#nanoTime} as its time source.
      * This is a convenience method equivalent to calling {@code createUnstarted().start()}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Stopwatch stopwatch = Stopwatch.createStarted();
@@ -140,7 +140,7 @@ public final class Stopwatch {
     /**
      * Creates (and starts) a new stopwatch, using the specified time source.
      * This is a convenience method equivalent to calling {@code createUnstarted(ticker).start()}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Stopwatch stopwatch = Stopwatch.createStarted(
@@ -169,7 +169,7 @@ public final class Stopwatch {
     /**
      * Returns {@code true} if {@link #start()} has been called on this stopwatch, and {@link #stop()}
      * has not been called since the last call to {@code start()}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (stopwatch.isRunning()) {
@@ -288,12 +288,12 @@ public final class Stopwatch {
      * Returns the current elapsed time shown on this stopwatch as a {@link Duration}.
      * Unlike {@link #elapsed(TimeUnit)}, this method returns a strongly-typed {@code Duration}
      * instance that preserves nanosecond precision.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Duration elapsed = stopwatch.elapsed();
      * System.out.println("Elapsed: " + elapsed.toMillis() + " ms");
-     * 
+     *
      * // Can be used with Java 8+ time APIs
      * if (elapsed.compareTo(Duration.ofSeconds(5)) > 0) {
      *     System.out.println("Operation took more than 5 seconds");
@@ -312,7 +312,7 @@ public final class Stopwatch {
      *
      * <p>Example outputs:</p>
      * <ul>
-     *   <li>{@code "38.0 ns"} for 38 nanoseconds</li>
+     *   <li>{@code "38.00 ns"} for 38 nanoseconds</li>
      *   <li>{@code "1.234 μs"} for 1234 nanoseconds</li>
      *   <li>{@code "5.678 ms"} for 5678123 nanoseconds</li>
      *   <li>{@code "1.234 s"} for 1.234 seconds</li>
@@ -345,7 +345,7 @@ public final class Stopwatch {
      * Formats a double value to 4 significant figures using scientific notation when appropriate.
      * This method uses {@code "%.4g"} format which automatically chooses between fixed-point
      * and exponential notation.
-     * 
+     *
      * <p>Example outputs:</p>
      * <ul>
      *   <li>{@code "1.234"} for 1.234</li>

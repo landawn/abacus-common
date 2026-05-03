@@ -20,11 +20,11 @@ import java.io.InputStream;
  * An InputStream that decompresses data in the Brotli compression format.
  * This class wraps the org.brotli.dec.BrotliInputStream to provide seamless
  * decompression of Brotli-compressed data streams.
- * 
+ *
  * <p>Brotli is a generic-purpose lossless compression algorithm that compresses
  * data using a combination of a modern variant of the LZ77 algorithm, Huffman
  * coding and 2nd order context modeling.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * try (InputStream compressed = new FileInputStream("data.br");
@@ -36,7 +36,7 @@ import java.io.InputStream;
  *     }
  * }
  * }</pre>
- * 
+ *
  * @see java.io.InputStream
  */
 public final class BrotliInputStream extends InputStream {
@@ -46,7 +46,7 @@ public final class BrotliInputStream extends InputStream {
     /**
      * Creates a new BrotliInputStream that decompresses data from the specified source stream.
      * Uses the default internal buffer size for reading.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * InputStream compressed = new FileInputStream("compressed.br");
@@ -63,7 +63,7 @@ public final class BrotliInputStream extends InputStream {
     /**
      * Creates a new BrotliInputStream with a specified internal buffer size.
      * A larger buffer size may improve performance when reading large amounts of data.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * InputStream compressed = new FileInputStream("large-file.br");
@@ -81,7 +81,7 @@ public final class BrotliInputStream extends InputStream {
 
     /**
      * Reads the next byte of decompressed data from the input stream.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int b = brotliStream.read();
@@ -103,7 +103,7 @@ public final class BrotliInputStream extends InputStream {
      * Reads decompressed data into an array of bytes.
      * This method will block until some input is available, an I/O error occurs,
      * or the end of the stream is reached.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] buffer = new byte[1024];
@@ -121,7 +121,7 @@ public final class BrotliInputStream extends InputStream {
 
     /**
      * Reads up to len bytes of decompressed data into an array of bytes.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] buffer = new byte[1024];
@@ -143,7 +143,7 @@ public final class BrotliInputStream extends InputStream {
     /**
      * Skips over and discards n bytes of decompressed data from this input stream.
      * The skip method may skip fewer bytes than requested.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long skipped = brotliStream.skip(1024);   // Try to skip 1KB
@@ -166,7 +166,7 @@ public final class BrotliInputStream extends InputStream {
      * Returns an estimate of the number of bytes that can be read (or skipped over)
      * from this input stream without blocking by the next invocation of a method
      * for this input stream.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (brotliStream.available() > 0) {
@@ -187,7 +187,7 @@ public final class BrotliInputStream extends InputStream {
     /**
      * Marks the current position in this input stream.
      * A subsequent call to the reset method repositions this stream at the last marked position.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (brotliStream.markSupported()) {
@@ -206,7 +206,7 @@ public final class BrotliInputStream extends InputStream {
 
     /**
      * Repositions this stream to the position at the time the mark method was last called.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * brotliStream.mark(100);
@@ -224,7 +224,7 @@ public final class BrotliInputStream extends InputStream {
 
     /**
      * Tests if this input stream supports the mark and reset methods.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (brotliStream.markSupported()) {
@@ -243,7 +243,7 @@ public final class BrotliInputStream extends InputStream {
      * Closes this input stream and releases any system resources associated with the stream.
      * Once the stream has been closed, further read(), available(), reset(), or skip()
      * invocations will throw an IOException.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BrotliInputStream brotliStream = new BrotliInputStream(inputStream);

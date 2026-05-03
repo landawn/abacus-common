@@ -21,12 +21,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Type handler for {@link java.sql.Array} objects, providing conversion between SQL Array and its string representation.
+ * Type handler for {@link java.sql.Array} objects, used primarily for JDBC operations that read
+ * SQL ARRAY values from a {@link ResultSet} and bind them to {@link PreparedStatement}/{@link CallableStatement}
+ * parameters. SQL Arrays are database-specific structures and cannot be meaningfully serialized to or
+ * deserialized from a string; {@link #stringOf(Array)} and {@link #valueOf(String)} therefore throw
+ * {@link UnsupportedOperationException}.
  */
 public class SQLArrayType extends AbstractType<Array> {
 
     static final String SQL_ARRAY = "SQLArray";
 
+    /**
+     * Constructs a new SQLArrayType instance.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
+     */
     SQLArrayType() {
         super(SQL_ARRAY);
     }

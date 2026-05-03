@@ -59,8 +59,8 @@ public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<Runtim
      * boolean result = xor.test(true, false);   // Returns true
      * }</pre>
      *
-     * @param a the first input argument
-     * @param b the second input argument
+     * @param a the first input argument ({@code boolean} value)
+     * @param b the second input argument ({@code boolean} value)
      * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
      */
     @Override
@@ -98,6 +98,7 @@ public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<Runtim
      *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default BooleanBiPredicate and(final BooleanBiPredicate other) {
         return (a, b) -> test(a, b) && other.test(a, b);
@@ -120,6 +121,7 @@ public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<Runtim
      *
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default BooleanBiPredicate or(final BooleanBiPredicate other) {
         return (a, b) -> test(a, b) || other.test(a, b);

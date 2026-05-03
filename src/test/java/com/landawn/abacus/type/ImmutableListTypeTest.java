@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,9 +47,9 @@ public class ImmutableListTypeTest extends TestBase {
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = immutableListType.parameterTypes();
+        List<Type<?>> paramTypes = immutableListType.parameterTypes();
         assertNotNull(paramTypes);
-        assertEquals(1, paramTypes.length);
+        assertEquals(1, paramTypes.size());
     }
 
     @Test

@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,9 +49,9 @@ public class TripleTypeTest extends TestBase {
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = tripleType.parameterTypes();
+        List<Type<?>> paramTypes = tripleType.parameterTypes();
         assertNotNull(paramTypes);
-        assertEquals(3, paramTypes.length);
+        assertEquals(3, paramTypes.size());
     }
 
     @Test

@@ -26,11 +26,11 @@ import com.landawn.abacus.annotation.Internal;
 
 /**
  * Internal utility class for the abacus-common library.
- * 
+ *
  * <p><strong>WARNING:</strong> This class is for internal use only. Do not use any methods
  * in this class directly. The API is subject to change without notice and may break
  * your code in future versions.</p>
- * 
+ *
  * <p>This class contains various internal constants and helper methods used throughout
  * the abacus-common library for performance optimization and internal operations.</p>
  *
@@ -49,11 +49,15 @@ public final class InternalUtil {
     public static final String ERROR_MSG_FOR_NULL_ELEMENT_EX = "Target object/value does not exist or is not found, or its value is null";
 
     // To avoid SpotBugs: CD_CIRCULAR_DEPENDENCY, IC_INIT_CIRCULARITY
+    /**
+     * The number of CPU cores available to the JVM, obtained at class initialization time.
+     * Used internally to tune parallel operation thresholds.
+     */
     static final int CPU_CORES = Runtime.getRuntime().availableProcessors();
 
     /**
      * Internal pool size calculated based on available memory.
-     * 
+     *
      * <p>The pool size is dynamically calculated based on the JVM's maximum memory,
      * ranging from 1000 to 8192 elements.</p>
      *
@@ -127,10 +131,10 @@ public final class InternalUtil {
 
     /**
      * Creates an ArrayList by initializing its elements with the specified array.
-     * 
+     *
      * <p>The returned list may share the same elements array with the input array.
      * Any modification to the list/array will affect the array/list.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "b", "c"};
@@ -156,10 +160,10 @@ public final class InternalUtil {
 
     /**
      * Gets the character array from a string for read-only purposes.
-     * 
+     *
      * <p>This method attempts to optimize string to char array conversion.
      * The returned array should not be modified as it may be shared with the original string.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = InternalUtil.getCharsForReadOnly("Hello");

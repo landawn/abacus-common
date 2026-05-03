@@ -36,13 +36,13 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 
 /**
  * A high-performance utility class for JSON serialization and deserialization operations using Jackson's JsonMapper.
- * This class provides a comprehensive set of static methods for converting Java objects to JSON and parsing JSON back 
+ * This class provides a comprehensive set of static methods for converting Java objects to JSON and parsing JSON back
  * to Java objects from various sources including strings, files, streams, and URLs.
- * 
+ *
  * <p>The class maintains an internal pool of JsonMapper instances for performance optimization, reusing mappers
  * when custom configurations are needed. All methods handle exceptions internally and wrap them in RuntimeExceptions
  * for simplified error handling.</p>
- * 
+ *
  * <p>Key features:</p>
  * <ul>
  *   <li>Thread-safe static methods for JSON operations</li>
@@ -58,17 +58,17 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
  * // Simple serialization
  * Person person = new Person("John", 30);
  * String json = JsonMappers.toJson(person);
- * 
+ *
  * // Pretty formatted output
  * String prettyJson = JsonMappers.toJson(person, true);
- * 
+ *
  * // Simple deserialization
  * Person parsed = JsonMappers.fromJson(json, Person.class);
- * 
+ *
  * // Generic type handling
- * List<Person> people = JsonMappers.fromJson(jsonArray, 
+ * List<Person> people = JsonMappers.fromJson(jsonArray,
  *     new TypeReference<List<Person>>() {});
- * 
+ *
  * // Custom configuration
  * String jsonWithTimestamps = JsonMappers.toJson(dateObject,
  *     SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -141,7 +141,7 @@ public final class JsonMappers {
     /**
      * Serializes the specified object to a JSON string using default configuration.
      * This method provides the simplest way to convert a Java object to JSON format.
-     * 
+     *
      * <p>The serialization uses Jackson's default configuration settings. For custom
      * serialization behavior, use the overloaded methods that accept configuration parameters.</p>
      *
@@ -169,7 +169,7 @@ public final class JsonMappers {
     /**
      * Serializes the specified object to a JSON string with optional pretty formatting.
      * Pretty formatting adds line breaks and indentation to make the JSON human-readable.
-     * 
+     *
      * <p>When pretty format is enabled, the output includes proper indentation and line breaks.
      * This is useful for debugging, logging, or generating human-readable configuration files.</p>
      *
@@ -207,22 +207,22 @@ public final class JsonMappers {
      * Serializes the specified object to a JSON string with custom serialization features.
      * This method allows fine-grained control over the serialization process by enabling
      * specific Jackson features.
-     * 
+     *
      * <p>Common serialization features include:</p>
      * <ul>
      *   <li>WRITE_DATES_AS_TIMESTAMPS - Write dates as numeric timestamps</li>
      *   <li>WRITE_ENUMS_USING_INDEX - Write enums using their ordinal values</li>
      *   <li>INDENT_OUTPUT - Pretty print the output</li>
-     *   <li>WRITE_NULL_MAP_VALUES - Include {@code null} values in maps</li>
+     *   <li>WRAP_ROOT_VALUE - Wrap the root value with the type name</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Serialize with multiple features
-     * String json = JsonMappers.toJson(myObject, 
+     * String json = JsonMappers.toJson(myObject,
      *     SerializationFeature.WRITE_DATES_AS_TIMESTAMPS,
      *     SerializationFeature.WRITE_ENUMS_USING_INDEX);
-     * 
+     *
      * // Serialize with pretty formatting
      * String prettyJson = JsonMappers.toJson(myObject,
      *     SerializationFeature.INDENT_OUTPUT);
@@ -243,7 +243,7 @@ public final class JsonMappers {
     /**
      * Serializes the specified object to a JSON string using a custom serialization configuration.
      * This method provides maximum flexibility by accepting a complete SerializationConfig object.
-     * 
+     *
      * <p>Use this method when you need complex configuration that cannot be achieved with
      * individual features, such as custom serializers, date formats, or visibility settings.</p>
      *
@@ -253,7 +253,7 @@ public final class JsonMappers {
      * SerializationConfig config = JsonMappers.createSerializationConfig()
      *     .with(SerializationFeature.INDENT_OUTPUT)
      *     .without(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-     * 
+     *
      * // Serialize with custom config
      * String json = JsonMappers.toJson(myObject, config);
      * }</pre>
@@ -280,9 +280,9 @@ public final class JsonMappers {
     /**
      * Serializes the specified object to JSON and writes it to a file.
      * The file is created if it doesn't exist, or overwritten if it does.
-     * 
-     * <p>This method handles all I/O operations internally, creating parent directories
-     * if necessary. The character encoding used is UTF-8 by default.</p>
+     *
+     * <p>The character encoding used is UTF-8. The parent directory must already
+     * exist; this method does not create missing parent directories.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -293,7 +293,7 @@ public final class JsonMappers {
      * }</pre>
      *
      * @param obj the object to serialize; can be {@code null} (produces "null")
-     * @param output the file to write the JSON to; parent directories will be created if needed
+     * @param output the file to write the JSON to; the parent directory must already exist
      * @throws RuntimeException if serialization fails or file cannot be written
      * @see #toJson(Object, File, SerializationConfig)
      */
@@ -308,7 +308,7 @@ public final class JsonMappers {
     /**
      * Serializes the specified object to JSON and writes it to a file using custom configuration.
      * This method combines file output with custom serialization settings.
-     * 
+     *
      * <p>Use this method when you need to write formatted JSON to a file or apply
      * specific serialization rules for file-based output.</p>
      *
@@ -316,12 +316,12 @@ public final class JsonMappers {
      * <pre>{@code
      * SerializationConfig config = JsonMappers.createSerializationConfig()
      *     .with(SerializationFeature.INDENT_OUTPUT);
-     * 
+     *
      * JsonMappers.toJson(myData, new File("formatted-data.json"), config);
      * }</pre>
      *
      * @param obj the object to serialize; can be {@code null} (produces "null")
-     * @param output the file to write the JSON to; parent directories will be created if needed
+     * @param output the file to write the JSON to; the parent directory must already exist
      * @param config the custom serialization configuration to use; if {@code null}, uses default configuration
      * @throws RuntimeException if serialization fails or file cannot be written
      * @see #toJson(Object, File)
@@ -342,7 +342,7 @@ public final class JsonMappers {
     /**
      * Serializes the specified object to JSON and writes it to an output stream.
      * The stream is not closed by this method, allowing for additional operations.
-     * 
+     *
      * <p>This method is useful for writing JSON to network streams, HTTP responses,
      * or any other output stream. The caller is responsible for closing the stream.</p>
      *
@@ -351,7 +351,7 @@ public final class JsonMappers {
      * try (FileOutputStream fos = new FileOutputStream("data.json")) {
      *     JsonMappers.toJson(myObject, fos);
      * }
-     * 
+     *
      * // Writing to HTTP response
      * JsonMappers.toJson(responseData, httpServletResponse.getOutputStream());
      * }</pre>
@@ -372,7 +372,7 @@ public final class JsonMappers {
     /**
      * Serializes the specified object to JSON and writes it to an output stream using custom configuration.
      * This method combines stream output with custom serialization settings.
-     * 
+     *
      * <p>The stream is not closed by this method. Use this when you need specific
      * serialization behavior for stream-based output, such as custom date formats
      * or pretty printing for HTTP responses.</p>
@@ -382,7 +382,7 @@ public final class JsonMappers {
      * SerializationConfig config = JsonMappers.createSerializationConfig()
      *     .with(SerializationFeature.INDENT_OUTPUT)
      *     .without(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-     * 
+     *
      * JsonMappers.toJson(apiResponse, response.getOutputStream(), config);
      * }</pre>
      *
@@ -408,7 +408,7 @@ public final class JsonMappers {
     /**
      * Serializes the specified object to JSON and writes it to a Writer.
      * The writer is not closed by this method, allowing for additional operations.
-     * 
+     *
      * <p>This method is ideal for writing JSON to character-based outputs such as
      * StringWriter, FileWriter, or any custom Writer implementation. The character
      * encoding is handled by the Writer itself.</p>
@@ -420,7 +420,7 @@ public final class JsonMappers {
      *         new FileOutputStream("data.json"), StandardCharsets.UTF_8)) {
      *     JsonMappers.toJson(myObject, writer);
      * }
-     * 
+     *
      * // Write to StringWriter for further processing
      * StringWriter sw = new StringWriter();
      * JsonMappers.toJson(myObject, sw);
@@ -443,7 +443,7 @@ public final class JsonMappers {
     /**
      * Serializes the specified object to JSON and writes it to a Writer using custom configuration.
      * This method combines writer output with custom serialization settings.
-     * 
+     *
      * <p>Use this method when you need specific serialization behavior for character-based
      * output, such as pretty printing to a log file or custom formatting for templates.</p>
      *
@@ -451,7 +451,7 @@ public final class JsonMappers {
      * <pre>{@code
      * SerializationConfig config = JsonMappers.createSerializationConfig()
      *     .with(SerializationFeature.INDENT_OUTPUT);
-     * 
+     *
      * try (FileWriter writer = new FileWriter("formatted.json")) {
      *     JsonMappers.toJson(myData, writer, config);
      * }
@@ -479,7 +479,7 @@ public final class JsonMappers {
     /**
      * Serializes the specified object to JSON and writes it to a DataOutput.
      * This method is useful for writing JSON in binary protocols or custom serialization formats.
-     * 
+     *
      * <p>DataOutput is typically used in scenarios involving RandomAccessFile,
      * DataOutputStream, or custom binary protocols that need to embed JSON data.</p>
      *
@@ -511,7 +511,7 @@ public final class JsonMappers {
     /**
      * Serializes the specified object to JSON and writes it to a DataOutput using custom configuration.
      * This method combines DataOutput with custom serialization settings.
-     * 
+     *
      * <p>Use this method when embedding JSON in binary formats with specific
      * serialization requirements, such as compact format without whitespace.</p>
      *
@@ -519,7 +519,7 @@ public final class JsonMappers {
      * <pre>{@code
      * SerializationConfig config = JsonMappers.createSerializationConfig()
      *     .without(SerializationFeature.INDENT_OUTPUT);
-     * 
+     *
      * try (RandomAccessFile raf = new RandomAccessFile("data.bin", "rw")) {
      *     JsonMappers.toJson(myObject, raf, config);
      * }
@@ -548,7 +548,7 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from a byte array to an object of the specified type.
      * This method assumes the byte array contains UTF-8 encoded JSON data.
-     * 
+     *
      * <p>Use this method when working with JSON data from network protocols,
      * file systems, or any binary source. The entire byte array is processed.</p>
      *
@@ -556,7 +556,7 @@ public final class JsonMappers {
      * <pre>{@code
      * byte[] jsonBytes = "{\"name\":\"John\",\"age\":30}".getBytes(StandardCharsets.UTF_8);
      * Person person = JsonMappers.fromJson(jsonBytes, Person.class);
-     * 
+     *
      * // From network
      * byte[] responseBytes = httpResponse.getBody();
      * ApiResponse response = JsonMappers.fromJson(responseBytes, ApiResponse.class);
@@ -581,7 +581,7 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from a portion of a byte array to an object of the specified type.
      * This method is useful when the JSON data is embedded within a larger byte array.
-     * 
+     *
      * <p>The method processes only the specified portion of the byte array,
      * starting at the given offset and reading the specified number of bytes.</p>
      *
@@ -591,7 +591,7 @@ public final class JsonMappers {
      * byte[] buffer = loadBuffer();
      * int jsonStart = 100;
      * int jsonLength = 250;
-     * 
+     *
      * Person person = JsonMappers.fromJson(buffer, jsonStart, jsonLength, Person.class);
      * }</pre>
      *
@@ -616,7 +616,7 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from a string to an object of the specified type.
      * This is the most commonly used deserialization method.
-     * 
+     *
      * <p>The method handles all standard JSON types including objects, arrays,
      * primitives, and {@code null} values. For complex generic types, use the TypeReference
      * overload instead.</p>
@@ -626,11 +626,11 @@ public final class JsonMappers {
      * // Simple object
      * String json = "{\"name\":\"John\",\"age\":30}";
      * Person person = JsonMappers.fromJson(json, Person.class);
-     * 
+     *
      * // Array
      * String jsonArray = "[1,2,3,4,5]";
      * Integer[] numbers = JsonMappers.fromJson(jsonArray, Integer[].class);
-     * 
+     *
      * // Handling null
      * String nullJson = "null";
      * Person nullPerson = JsonMappers.fromJson(nullJson, Person.class);   // returns null
@@ -655,7 +655,7 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from a string to an object with custom deserialization features.
      * This method allows fine-grained control over the deserialization process.
-     * 
+     *
      * <p>Common deserialization features include:</p>
      * <ul>
      *   <li>FAIL_ON_UNKNOWN_PROPERTIES - Fail if JSON contains unknown properties</li>
@@ -670,7 +670,7 @@ public final class JsonMappers {
      * String json = "{\"name\":\"John\",\"age\":30,\"unknown\":\"field\"}";
      * Person person = JsonMappers.fromJson(json, Person.class,
      *     DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
-     * 
+     *
      * // Accept single value as array
      * String singleValue = "\"value\"";
      * List<String> list = JsonMappers.fromJson(singleValue, List.class,
@@ -695,7 +695,7 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from a string using a custom deserialization configuration.
      * This method provides maximum control over the deserialization process.
-     * 
+     *
      * <p>Use this method when you need complex configuration that cannot be achieved
      * with individual features, such as custom deserializers, date formats, or
      * visibility settings.</p>
@@ -706,7 +706,7 @@ public final class JsonMappers {
      * DeserializationConfig config = JsonMappers.createDeserializationConfig()
      *     .without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
      *     .with(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
-     * 
+     *
      * // Deserialize with custom config
      * Person person = JsonMappers.fromJson(json, Person.class, config);
      * }</pre>
@@ -735,7 +735,7 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from a file to an object of the specified type.
      * This method reads the entire file content and parses it as JSON.
-     * 
+     *
      * <p>The file is expected to contain valid JSON data encoded in UTF-8.
      * The method handles all file I/O operations internally.</p>
      *
@@ -744,10 +744,10 @@ public final class JsonMappers {
      * // Read configuration from file
      * File configFile = new File("config/app-settings.json");
      * AppConfig config = JsonMappers.fromJson(configFile, AppConfig.class);
-     * 
+     *
      * // Read data file
      * File dataFile = new File("data/users.json");
-     * List<User> users = JsonMappers.fromJson(dataFile, 
+     * List<User> users = JsonMappers.fromJson(dataFile,
      *     new TypeReference<List<User>>() {});
      * }</pre>
      *
@@ -770,7 +770,7 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from a file using custom deserialization configuration.
      * This method combines file input with custom deserialization settings.
-     * 
+     *
      * <p>Use this method when reading JSON files that require special handling,
      * such as lenient parsing or custom date formats.</p>
      *
@@ -778,7 +778,7 @@ public final class JsonMappers {
      * <pre>{@code
      * DeserializationConfig config = JsonMappers.createDeserializationConfig()
      *     .without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-     * 
+     *
      * // Read config file with unknown properties
      * AppConfig appConfig = JsonMappers.fromJson(
      *     new File("config.json"), AppConfig.class, config);
@@ -808,7 +808,7 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from an input stream to an object of the specified type.
      * The stream is not closed by this method, allowing for additional operations.
-     * 
+     *
      * <p>This method is ideal for reading JSON from network connections, file streams,
      * or any other input source. The caller is responsible for closing the stream.</p>
      *
@@ -818,12 +818,12 @@ public final class JsonMappers {
      * try (FileInputStream fis = new FileInputStream("data.json")) {
      *     Person person = JsonMappers.fromJson(fis, Person.class);
      * }
-     * 
+     *
      * // Read from HTTP response
      * try (InputStream is = httpConnection.getInputStream()) {
      *     ApiResponse response = JsonMappers.fromJson(is, ApiResponse.class);
      * }
-     * 
+     *
      * // Read from classpath resource
      * try (InputStream is = getClass().getResourceAsStream("/config.json")) {
      *     Config config = JsonMappers.fromJson(is, Config.class);
@@ -849,7 +849,7 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from an input stream using custom deserialization configuration.
      * This method combines stream input with custom deserialization settings.
-     * 
+     *
      * <p>The stream is not closed by this method. Use this when reading JSON from
      * streams that require special handling, such as lenient parsing for external APIs.</p>
      *
@@ -858,7 +858,7 @@ public final class JsonMappers {
      * DeserializationConfig config = JsonMappers.createDeserializationConfig()
      *     .without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
      *     .with(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
-     * 
+     *
      * try (InputStream is = externalApi.getDataStream()) {
      *     ApiData data = JsonMappers.fromJson(is, ApiData.class, config);
      * }
@@ -888,7 +888,7 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from a Reader to an object of the specified type.
      * The reader is not closed by this method, allowing for additional operations.
-     * 
+     *
      * <p>This method is useful when you need to control the character encoding
      * or when working with character-based input sources. The Reader handles
      * the character encoding.</p>
@@ -900,7 +900,7 @@ public final class JsonMappers {
      *         new FileInputStream("data.json"), StandardCharsets.UTF_8)) {
      *     Person person = JsonMappers.fromJson(reader, Person.class);
      * }
-     * 
+     *
      * // Read from StringReader
      * String jsonString = "{\"name\":\"John\",\"age\":30}";
      * try (StringReader reader = new StringReader(jsonString)) {
@@ -927,7 +927,7 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from a Reader using custom deserialization configuration.
      * This method combines reader input with custom deserialization settings.
-     * 
+     *
      * <p>The reader is not closed by this method. Use this when reading JSON from
      * character sources that require special handling.</p>
      *
@@ -935,7 +935,7 @@ public final class JsonMappers {
      * <pre>{@code
      * DeserializationConfig config = JsonMappers.createDeserializationConfig()
      *     .with(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
-     * 
+     *
      * try (FileReader reader = new FileReader("financial-data.json")) {
      *     FinancialReport report = JsonMappers.fromJson(
      *         reader, FinancialReport.class, config);
@@ -966,7 +966,7 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from a URL to an object of the specified type.
      * This method fetches JSON content from the specified URL and parses it.
-     * 
+     *
      * <p>The method handles all network operations internally, including opening
      * the connection and reading the response. It's suitable for REST APIs and
      * web services that return JSON data.</p>
@@ -976,7 +976,7 @@ public final class JsonMappers {
      * // Fetch user data from API
      * URL apiUrl = new URL("https://api.example.com/users/123");
      * User user = JsonMappers.fromJson(apiUrl, User.class);
-     * 
+     *
      * // Load configuration from web
      * URL configUrl = new URL("https://config.example.com/app-config.json");
      * AppConfig config = JsonMappers.fromJson(configUrl, AppConfig.class);
@@ -1002,7 +1002,7 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from a URL using custom deserialization configuration.
      * This method combines URL input with custom deserialization settings.
-     * 
+     *
      * <p>Use this method when fetching JSON from URLs that require special handling,
      * such as APIs that may include unknown properties or use non-standard formats.</p>
      *
@@ -1010,7 +1010,7 @@ public final class JsonMappers {
      * <pre>{@code
      * DeserializationConfig config = JsonMappers.createDeserializationConfig()
      *     .without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-     * 
+     *
      * URL apiUrl = new URL("https://external-api.com/data");
      * ExternalData data = JsonMappers.fromJson(apiUrl, ExternalData.class, config);
      * }</pre>
@@ -1040,7 +1040,7 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from a DataInput to an object of the specified type.
      * This method is useful for reading JSON from binary protocols or custom formats.
-     * 
+     *
      * <p>DataInput is typically used with RandomAccessFile, DataInputStream,
      * or custom binary protocols that embed JSON data.</p>
      *
@@ -1075,7 +1075,7 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from a DataInput using custom deserialization configuration.
      * This method combines DataInput with custom deserialization settings.
-     * 
+     *
      * <p>Use this method when reading JSON from binary formats that require
      * special deserialization handling.</p>
      *
@@ -1083,7 +1083,7 @@ public final class JsonMappers {
      * <pre>{@code
      * DeserializationConfig config = JsonMappers.createDeserializationConfig()
      *     .with(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
-     * 
+     *
      * try (RandomAccessFile raf = new RandomAccessFile("data.bin", "r")) {
      *     raf.seek(jsonOffset);
      *     FinancialData data = JsonMappers.fromJson(raf, FinancialData.class, config);
@@ -1115,7 +1115,7 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from a byte array to an object using TypeReference for generic types.
      * This method is essential for deserializing complex generic types like collections and maps.
-     * 
+     *
      * <p>TypeReference captures the full generic type information at compile time,
      * allowing proper deserialization of parameterized types that would otherwise
      * be lost due to type erasure.</p>
@@ -1124,14 +1124,14 @@ public final class JsonMappers {
      * <pre>{@code
      * // Deserialize a List of objects
      * byte[] jsonBytes = "[{\"name\":\"John\"},{\"name\":\"Jane\"}]".getBytes();
-     * List<Person> people = JsonMappers.fromJson(jsonBytes, 
+     * List<Person> people = JsonMappers.fromJson(jsonBytes,
      *     new TypeReference<List<Person>>() {});
-     * 
+     *
      * // Deserialize a Map
      * byte[] mapBytes = "{\"key1\":\"value1\",\"key2\":\"value2\"}".getBytes();
      * Map<String, String> map = JsonMappers.fromJson(mapBytes,
      *     new TypeReference<Map<String, String>>() {});
-     * 
+     *
      * // Deserialize nested generics
      * List<Map<String, Person>> complex = JsonMappers.fromJson(complexBytes,
      *     new TypeReference<List<Map<String, Person>>>() {});
@@ -1156,7 +1156,7 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from a portion of a byte array using TypeReference for generic types.
      * This method combines partial array reading with generic type support.
-     * 
+     *
      * <p>Use this method when working with generic types in byte buffers where
      * the JSON data is embedded within a larger array.</p>
      *
@@ -1166,7 +1166,7 @@ public final class JsonMappers {
      * byte[] buffer = loadBuffer();
      * int listStart = 100;
      * int listLength = 500;
-     * 
+     *
      * List<Product> products = JsonMappers.fromJson(buffer, listStart, listLength,
      *     new TypeReference<List<Product>>() {});
      * }</pre>
@@ -1193,7 +1193,7 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from a string to an object using TypeReference for generic types.
      * This is the most commonly used method for deserializing generic types.
-     * 
+     *
      * <p>TypeReference preserves full generic type information, enabling proper
      * deserialization of collections, maps, and other parameterized types.</p>
      *
@@ -1203,12 +1203,12 @@ public final class JsonMappers {
      * String jsonArray = "[{\"id\":1,\"name\":\"Item1\"},{\"id\":2,\"name\":\"Item2\"}]";
      * List<Item> items = JsonMappers.fromJson(jsonArray,
      *     new TypeReference<List<Item>>() {});
-     * 
+     *
      * // Deserialize a Map
      * String jsonMap = "{\"user1\":{\"name\":\"John\"},\"user2\":{\"name\":\"Jane\"}}";
      * Map<String, User> users = JsonMappers.fromJson(jsonMap,
      *     new TypeReference<Map<String, User>>() {});
-     * 
+     *
      * // Deserialize complex nested types
      * Map<String, List<Order>> ordersByUser = JsonMappers.fromJson(complexJson,
      *     new TypeReference<Map<String, List<Order>>>() {});
@@ -1234,7 +1234,7 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from a string using TypeReference with custom deserialization features.
      * This method combines generic type support with custom deserialization control.
-     * 
+     *
      * <p>Use this method when deserializing generic types that require special
      * handling, such as collections that should accept single values as arrays.</p>
      *
@@ -1245,7 +1245,7 @@ public final class JsonMappers {
      * List<String> list = JsonMappers.fromJson(singleValue,
      *     new TypeReference<List<String>>() {},
      *     DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
-     * 
+     *
      * // Use BigDecimal for financial data
      * List<FinancialRecord> records = JsonMappers.fromJson(jsonData,
      *     new TypeReference<List<FinancialRecord>>() {},
@@ -1271,7 +1271,7 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from a string using TypeReference with custom configuration.
      * This method provides maximum flexibility for deserializing generic types.
-     * 
+     *
      * <p>Use this method when you need complex configuration for generic types,
      * such as custom deserializers for collection elements or special date handling
      * in maps.</p>
@@ -1282,7 +1282,7 @@ public final class JsonMappers {
      * DeserializationConfig config = JsonMappers.createDeserializationConfig()
      *     .without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
      *     .with(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL);
-     * 
+     *
      * // Deserialize with custom config
      * Map<String, List<Event>> eventMap = JsonMappers.fromJson(json,
      *     new TypeReference<Map<String, List<Event>>>() {}, config);
@@ -1313,7 +1313,7 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from a file using TypeReference for generic types.
      * This method enables reading generic types from JSON files.
-     * 
+     *
      * <p>The file is expected to contain valid JSON data encoded in UTF-8.
      * This method is particularly useful for loading collections or maps from
      * configuration or data files.</p>
@@ -1324,7 +1324,7 @@ public final class JsonMappers {
      * File usersFile = new File("data/users.json");
      * List<User> users = JsonMappers.fromJson(usersFile,
      *     new TypeReference<List<User>>() {});
-     * 
+     *
      * // Load configuration map
      * File configFile = new File("config/settings.json");
      * Map<String, ConfigValue> settings = JsonMappers.fromJson(configFile,
@@ -1351,7 +1351,7 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from a file using TypeReference with custom configuration.
      * This method combines file input with generic type support and custom settings.
-     * 
+     *
      * <p>Use this method when reading generic types from files that require
      * special deserialization handling, such as legacy data formats.</p>
      *
@@ -1359,7 +1359,7 @@ public final class JsonMappers {
      * <pre>{@code
      * DeserializationConfig config = JsonMappers.createDeserializationConfig()
      *     .without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-     * 
+     *
      * // Read legacy data with extra fields
      * List<LegacyRecord> records = JsonMappers.fromJson(
      *     new File("legacy-data.json"),
@@ -1392,7 +1392,7 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from an input stream using TypeReference for generic types.
      * The stream is not closed by this method.
-     * 
+     *
      * <p>This method is ideal for deserializing collections, maps, and other generic
      * types from network streams, file streams, or resources. The caller is responsible
      * for closing the stream.</p>
@@ -1404,7 +1404,7 @@ public final class JsonMappers {
      *     List<Item> items = JsonMappers.fromJson(fis,
      *         new TypeReference<List<Item>>() {});
      * }
-     * 
+     *
      * // Read map from classpath resource
      * try (InputStream is = getClass().getResourceAsStream("/data.json")) {
      *     Map<String, Object> data = JsonMappers.fromJson(is,
@@ -1432,18 +1432,18 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from an InputStream into a Java object of the specified generic type with custom deserialization configuration.
      * This method allows fine-grained control over the deserialization process through a custom {@link DeserializationConfig}.
-     * 
+     *
      * <p>This method is ideal for deserializing collections, maps, and other generic
      * types from network streams, file streams, or resources. The caller is responsible
      * for closing the stream.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Read a list of users with custom configuration
      * FileInputStream fis = new FileInputStream("users.json");
      * DeserializationConfig config = JsonMappers.createDeserializationConfig()
      *     .with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-     * List<User> users = JsonMappers.fromJson(fis, 
+     * List<User> users = JsonMappers.fromJson(fis,
      *     new TypeReference<List<User>>() {}, config);
      * }</pre>
      *
@@ -1471,16 +1471,16 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from a Reader into a Java object of the specified generic type using default configuration.
      * This method is suitable for reading JSON from character-based sources like StringReader or FileReader.
-     * 
+     *
      * <p>This method is ideal for deserializing collections, maps, and other generic
      * types from network streams, file streams, or resources. The caller is responsible
      * for closing the stream/Reader.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Read JSON from a StringReader
      * StringReader reader = new StringReader("[{\"name\":\"John\"},{\"name\":\"Jane\"}]");
-     * List<Person> people = JsonMappers.fromJson(reader, 
+     * List<Person> people = JsonMappers.fromJson(reader,
      *     new TypeReference<List<Person>>() {});
      * }</pre>
      *
@@ -1502,11 +1502,11 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from a Reader into a Java object of the specified generic type with custom deserialization configuration.
      * This method combines the flexibility of Reader-based input with custom configuration control.
-     * 
+     *
      * <p>This method is ideal for deserializing collections, maps, and other generic
      * types from network streams, file streams, or resources. The caller is responsible
      * for closing the stream/Reader.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Read JSON with lenient parsing configuration
@@ -1541,16 +1541,16 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from a URL into a Java object of the specified generic type using default configuration.
      * This method fetches JSON content from the specified URL and deserializes it.
-     * 
+     *
      * <p>This method is ideal for deserializing collections, maps, and other generic
      * types from network streams, file streams, or resources. The caller is responsible
      * for closing the stream/Reader.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Fetch and deserialize JSON from a web API
      * URL apiUrl = new URL("https://api.example.com/users");
-     * List<User> users = JsonMappers.fromJson(apiUrl, 
+     * List<User> users = JsonMappers.fromJson(apiUrl,
      *     new TypeReference<List<User>>() {});
      * }</pre>
      *
@@ -1573,11 +1573,11 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from a URL into a Java object of the specified generic type with custom deserialization configuration.
      * This method provides control over the deserialization process when fetching JSON from URLs.
-     * 
+     *
      * <p>This method is ideal for deserializing collections, maps, and other generic
      * types from network streams, file streams, or resources. The caller is responsible
      * for closing the stream/Reader.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Fetch JSON with custom date handling
@@ -1613,16 +1613,16 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from a DataInput into a Java object of the specified generic type using default configuration.
      * This method is useful for reading JSON from custom binary protocols or specialized I/O streams.
-     * 
+     *
      * <p>This method is ideal for deserializing collections, maps, and other generic
      * types from network streams, file streams, or resources. The caller is responsible
      * for closing the stream/Reader.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Read JSON from a DataInputStream
      * DataInputStream dis = new DataInputStream(inputStream);
-     * Product product = JsonMappers.fromJson(dis, 
+     * Product product = JsonMappers.fromJson(dis,
      *     new TypeReference<Product>() {});
      * }</pre>
      *
@@ -1645,11 +1645,11 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from a DataInput into a Java object of the specified generic type with custom deserialization configuration.
      * This method combines DataInput flexibility with custom configuration control.
-     * 
+     *
      * <p>This method is ideal for deserializing collections, maps, and other generic
      * types from network streams, file streams, or resources. The caller is responsible
      * for closing the stream/Reader.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Read JSON with custom configuration from binary protocol
@@ -1686,7 +1686,7 @@ public final class JsonMappers {
      * Creates a new SerializationConfig instance with default settings.
      * This method provides a base configuration that can be customized for specific serialization needs.
      * The returned configuration is a copy and can be modified without affecting other operations.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create custom serialization config
@@ -1709,7 +1709,7 @@ public final class JsonMappers {
      * Creates a new DeserializationConfig instance with default settings.
      * This method provides a base configuration that can be customized for specific deserialization needs.
      * The returned configuration is a copy and can be modified without affecting other operations.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create custom deserialization config
@@ -1792,17 +1792,17 @@ public final class JsonMappers {
      * Wraps a Jackson ObjectMapper instance to provide convenient JSON operations through the One wrapper class.
      * This method allows using a custom ObjectMapper with specific configurations while benefiting from
      * the simplified API provided by the One wrapper.
-     * 
+     *
      * <p>The wrapped mapper will be used for all JSON operations performed through the returned One instance.
      * A separate mapper instance with pretty printing enabled is automatically created for formatted output.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Use custom ObjectMapper with specific modules
      * ObjectMapper customMapper = new ObjectMapper();
      * customMapper.registerModule(new JavaTimeModule());
      * customMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-     * 
+     *
      * JsonMappers.One jsonOps = JsonMappers.wrap(customMapper);
      * String json = jsonOps.toJson(myObject);
      * MyObject obj = jsonOps.fromJson(json, MyObject.class);
@@ -1821,7 +1821,7 @@ public final class JsonMappers {
      * A wrapper class that provides convenient JSON serialization and deserialization methods using a specific ObjectMapper instance.
      * This class encapsulates a configured ObjectMapper and provides a simplified API for common JSON operations
      * with support for pretty printing and various input/output sources.
-     * 
+     *
      * <p>Key features:</p>
      * <ul>
      *   <li>Encapsulates a specific ObjectMapper configuration</li>
@@ -1829,10 +1829,10 @@ public final class JsonMappers {
      *   <li>Consistent exception handling (wraps checked exceptions as RuntimeException)</li>
      *   <li>Support for multiple input/output formats</li>
      * </ul>
-     * 
+     *
      * <p>This class is typically obtained through {@link JsonMappers#wrap(ObjectMapper)} rather than
      * instantiated directly.</p>
-     * 
+     *
      * @see JsonMappers#wrap(ObjectMapper)
      */
     public static final class One {
@@ -1850,7 +1850,7 @@ public final class JsonMappers {
         /**
          * Serializes a Java object to its JSON string representation using the wrapped ObjectMapper.
          * This method provides the most common use case for JSON serialization.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Person person = new Person("John", 30);
@@ -1873,13 +1873,13 @@ public final class JsonMappers {
         /**
          * Serializes a Java object to its JSON string representation with optional pretty formatting.
          * When pretty format is enabled, the output includes indentation and line breaks for readability.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Map<String, Object> data = new HashMap<>();
          * data.put("name", "John");
          * data.put("age", 30);
-         * 
+         *
          * String json = jsonOps.toJson(data, true);
          * // Result:
          * // {
@@ -1908,7 +1908,7 @@ public final class JsonMappers {
         /**
          * Serializes a Java object to JSON and writes it to the specified file.
          * The file is created if it doesn't exist, or overwritten if it does.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * List<User> users = getUserList();
@@ -1931,7 +1931,7 @@ public final class JsonMappers {
         /**
          * Serializes a Java object to JSON and writes it to the specified OutputStream.
          * The stream is not closed by this method, allowing for further operations.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Product product = new Product("Widget", 29.99);
@@ -1955,7 +1955,7 @@ public final class JsonMappers {
         /**
          * Serializes a Java object to JSON and writes it to the specified Writer.
          * This method is useful for character-based output destinations.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Order order = new Order(12345, "Processing");
@@ -1980,7 +1980,7 @@ public final class JsonMappers {
         /**
          * Serializes a Java object to JSON and writes it to the specified DataOutput.
          * This method is useful for binary protocols or custom I/O implementations.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Message message = new Message("Hello", System.currentTimeMillis());
@@ -2004,7 +2004,7 @@ public final class JsonMappers {
         /**
          * Deserializes JSON from a byte array into a Java object of the specified type.
          * This method efficiently handles binary JSON data.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * byte[] jsonBytes = getJsonDataFromNetwork();
@@ -2028,7 +2028,7 @@ public final class JsonMappers {
         /**
          * Deserializes JSON from a portion of a byte array into a Java object of the specified type.
          * This method allows reading JSON from a specific segment of a larger byte array.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * byte[] buffer = new byte[1024];
@@ -2055,7 +2055,7 @@ public final class JsonMappers {
         /**
          * Deserializes JSON from a String into a Java object of the specified type.
          * This is the most common deserialization use case.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * String json = "{\"name\":\"John\",\"age\":30}";
@@ -2079,7 +2079,7 @@ public final class JsonMappers {
         /**
          * Deserializes JSON from a File into a Java object of the specified type.
          * This method reads the entire file content and deserializes it.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * File configFile = new File("config.json");
@@ -2103,7 +2103,7 @@ public final class JsonMappers {
         /**
          * Deserializes JSON from an InputStream into a Java object of the specified type.
          * The stream is not closed by this method.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * try (FileInputStream fis = new FileInputStream("data.json")) {
@@ -2128,7 +2128,7 @@ public final class JsonMappers {
         /**
          * Deserializes JSON from a Reader into a Java object of the specified type.
          * This method is suitable for character-based input sources.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * try (FileReader reader = new FileReader("users.json")) {
@@ -2153,7 +2153,7 @@ public final class JsonMappers {
         /**
          * Deserializes JSON from a URL into a Java object of the specified type.
          * This method fetches content from the URL and deserializes it.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * URL apiEndpoint = new URL("https://api.example.com/weather");
@@ -2178,7 +2178,7 @@ public final class JsonMappers {
         /**
          * Deserializes JSON from a DataInput into a Java object of the specified type.
          * This method is useful for custom binary protocols.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DataInputStream dis = new DataInputStream(socket.getInputStream());
@@ -2203,7 +2203,7 @@ public final class JsonMappers {
         /**
          * Deserializes JSON from a byte array into a Java object of the specified generic type.
          * This method supports complex generic types through TypeReference.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * byte[] jsonBytes = getJsonArrayBytes();
@@ -2229,7 +2229,7 @@ public final class JsonMappers {
         /**
          * Deserializes JSON from a portion of a byte array into a Java object of the specified generic type.
          * This method combines array segment reading with generic type support.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * byte[] buffer = new byte[4096];
@@ -2258,13 +2258,13 @@ public final class JsonMappers {
         /**
          * Deserializes JSON from a String into a Java object of the specified generic type.
          * This method is essential for handling complex generic types like collections and maps.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * String jsonArray = "[{\"id\":1,\"name\":\"Item1\"},{\"id\":2,\"name\":\"Item2\"}]";
          * List<Item> items = jsonOps.fromJson(jsonArray,
          *     new TypeReference<List<Item>>() {});
-         * 
+         *
          * String jsonMap = "{\"key1\":{\"value\":100},\"key2\":{\"value\":200}}";
          * Map<String, ValueObject> map = jsonOps.fromJson(jsonMap,
          *     new TypeReference<Map<String, ValueObject>>() {});
@@ -2288,7 +2288,7 @@ public final class JsonMappers {
         /**
          * Deserializes JSON from a File into a Java object of the specified generic type.
          * This method reads files containing complex generic types.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * File dataFile = new File("complex-data.json");
@@ -2314,7 +2314,7 @@ public final class JsonMappers {
         /**
          * Deserializes JSON from an InputStream into a Java object of the specified generic type.
          * This method handles stream-based input with complex generic types.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * try (InputStream is = getClass().getResourceAsStream("/data.json")) {
@@ -2341,7 +2341,7 @@ public final class JsonMappers {
         /**
          * Deserializes JSON from a Reader into a Java object of the specified generic type.
          * This method combines character-based input with generic type support.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * StringReader reader = new StringReader(jsonString);
@@ -2367,7 +2367,7 @@ public final class JsonMappers {
         /**
          * Deserializes JSON from a URL into a Java object of the specified generic type.
          * This method fetches and deserializes JSON with complex type support.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * URL restApi = new URL("https://api.example.com/inventory");
@@ -2394,7 +2394,7 @@ public final class JsonMappers {
         /**
          * Deserializes JSON from a DataInput into a Java object of the specified generic type.
          * This method supports binary protocol reading with complex generic types.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DataInputStream dis = new DataInputStream(binaryStream);

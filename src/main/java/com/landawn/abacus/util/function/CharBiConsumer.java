@@ -68,6 +68,7 @@ public interface CharBiConsumer extends Throwables.CharBiConsumer<RuntimeExcepti
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code CharBiConsumer} that performs in sequence this operation
      *         followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     default CharBiConsumer andThen(final CharBiConsumer after) {
         return (a, b) -> {

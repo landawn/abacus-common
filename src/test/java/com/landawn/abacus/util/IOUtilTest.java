@@ -4167,8 +4167,10 @@ public class IOUtilTest extends TestBase {
     }
 
     @Test
-    public void testNewFileOutputStream_InvalidDirectory() {
-        File invalidFile = new File("/invalid/path/that/does/not/exist/file.txt");
+    public void testNewFileOutputStream_InvalidDirectory() throws IOException {
+        // Block the path: parent is a regular file, so mkdirs cannot succeed there.
+        File blocker = Files.createTempFile(tempFolder, "blocker", "").toFile();
+        File invalidFile = new File(blocker, "subdir/file.txt");
         assertThrows(UncheckedIOException.class, () -> IOUtil.newFileOutputStream(invalidFile));
     }
 
@@ -4260,8 +4262,9 @@ public class IOUtilTest extends TestBase {
     }
 
     @Test
-    public void testNewFileWriter_InvalidDirectory() {
-        File invalidFile = new File("/invalid/path/that/does/not/exist/file.txt");
+    public void testNewFileWriter_InvalidDirectory() throws IOException {
+        File blocker = Files.createTempFile(tempFolder, "blocker", "").toFile();
+        File invalidFile = new File(blocker, "subdir/file.txt");
         assertThrows(UncheckedIOException.class, () -> IOUtil.newFileWriter(invalidFile));
     }
 
@@ -4521,8 +4524,9 @@ public class IOUtilTest extends TestBase {
     }
 
     @Test
-    public void testNewBufferedOutputStream_InvalidDirectory() {
-        File invalidFile = new File("/invalid/path/that/does/not/exist/file.txt");
+    public void testNewBufferedOutputStream_InvalidDirectory() throws IOException {
+        File blocker = Files.createTempFile(tempFolder, "blocker", "").toFile();
+        File invalidFile = new File(blocker, "subdir/file.txt");
         assertThrows(UncheckedIOException.class, () -> IOUtil.newBufferedOutputStream(invalidFile));
     }
 
@@ -4602,8 +4606,9 @@ public class IOUtilTest extends TestBase {
     }
 
     @Test
-    public void testNewBufferedWriter_InvalidDirectory() {
-        File invalidFile = new File("/invalid/path/that/does/not/exist/file.txt");
+    public void testNewBufferedWriter_InvalidDirectory() throws IOException {
+        File blocker = Files.createTempFile(tempFolder, "blocker", "").toFile();
+        File invalidFile = new File(blocker, "subdir/file.txt");
         assertThrows(UncheckedIOException.class, () -> IOUtil.newBufferedWriter(invalidFile));
     }
 

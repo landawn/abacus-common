@@ -18,9 +18,10 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.u.OptionalLong;
 
 /**
- * Type handler for {@link OptionalLong} objects, providing serialization, deserialization,
- * and database interaction capabilities for optional long integer values. This handler manages
- * the conversion between database long values and OptionalLong wrapper objects.
+ * Type handler for {@link OptionalLong} objects from the {@code com.landawn.abacus.util.u} package,
+ * providing serialization, deserialization, and database interaction capabilities for optional long integer values.
+ * Note: this handles the abacus-specific {@code OptionalLong}, not {@code java.util.OptionalLong}.
+ * This handler manages the conversion between database long values and {@link OptionalLong} wrapper objects.
  */
 public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
 
@@ -28,8 +29,7 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
 
     /**
      * Constructs a new OptionalLongType instance.
-     * This constructor is protected to allow subclassing while maintaining controlled instantiation
-     * through the TypeFactory.
+     * Instances are normally obtained via the TypeFactory rather than constructed directly.
      */
     protected OptionalLongType() {
         super(OPTIONAL_LONG);

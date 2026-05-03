@@ -1905,10 +1905,13 @@ public final class HttpClient {
     }
 
     /**
-     * Sets the http properties.
+     * Applies the HTTP header properties from the given settings to the specified connection.
+     * Iterates over all header names in the settings and sets them as request properties on the
+     * connection. Content-Encoding headers are skipped when the connection is not configured for output,
+     * to avoid errors on the server side when no body is being sent.
      *
      * @param connection the HTTP URL connection to configure
-     * @param settings the HTTP settings to apply
+     * @param settings the HTTP settings whose headers are to be applied
      * @throws UncheckedIOException if an I/O error occurs
      */
     void setHttpProperties(final HttpURLConnection connection, final HttpSettings settings) throws UncheckedIOException {
@@ -2382,7 +2385,7 @@ public final class HttpClient {
 
     /**
      * Executes an asynchronous HTTP request with the specified method and request body, returning the response as a String.
-     * Executes the request asynchronously without blocking the calling thread.
+     * The request is submitted to the executor and returns immediately without blocking the calling thread.
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
      * @param request The request body (can be {@code null} for GET/DELETE)
@@ -2394,7 +2397,7 @@ public final class HttpClient {
 
     /**
      * Executes an asynchronous HTTP request and deserializes the response to the specified type.
-     * Executes the request asynchronously without blocking the calling thread.
+     * The request is submitted to the executor and returns immediately without blocking the calling thread.
      *
      * @param <T> The type of the response object
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
@@ -2408,7 +2411,8 @@ public final class HttpClient {
 
     /**
      * Executes an asynchronous HTTP request with custom settings and returns the response as a String.
-     * Executes the request asynchronously with the specified HTTP settings.
+     * The request is submitted to the executor with the specified HTTP settings and returns immediately
+     * without blocking the calling thread.
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
      * @param request The request body (can be {@code null} for GET/DELETE)
@@ -2421,8 +2425,8 @@ public final class HttpClient {
 
     /**
      * Executes an asynchronous HTTP request with all options and deserializes the response to the specified type.
-     * This is the core async method that all other async request methods delegate to.
-     * Executes the request asynchronously with full control over method, request body, and settings.
+     * This is the core async method that all other async request methods delegate to. Provides full control
+     * over the HTTP method, request body, settings, and response deserialization type.
      *
      * @param <T> The type of the response object
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
@@ -2438,14 +2442,15 @@ public final class HttpClient {
     }
 
     /**
-     * Executes an asynchronous HTTP request and writes the response to a file.
-     * Executes the request asynchronously and writes the response body directly to the specified file.
+     * Executes an asynchronous HTTP request and writes the response body to the specified file.
+     * The request is submitted to the executor and the response is streamed directly to the file
+     * without returning the body as an object.
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
      * @param request The request body (can be {@code null} for GET/DELETE)
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param output The file to write the response to
-     * @return A ContinuableFuture that will complete when the file is written successfully
+     * @return a ContinuableFuture that completes after the response has been written to the file
      */
     public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final File output) {
         final Callable<Void> cmd = () -> {
@@ -2458,14 +2463,14 @@ public final class HttpClient {
     }
 
     /**
-     * Executes an asynchronous HTTP request and writes the response to an output stream.
-     * Executes the request asynchronously and writes the response body to the stream. The stream is not closed by this method.
+     * Executes an asynchronous HTTP request and writes the response body to the given output stream.
+     * The stream is not closed by this method; the caller is responsible for closing it.
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
      * @param request The request body (can be {@code null} for GET/DELETE)
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param output The output stream to write the response to
-     * @return A ContinuableFuture that will complete when the stream is written successfully
+     * @return a ContinuableFuture that completes after the response has been written to the stream
      */
     public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final OutputStream output) {
         final Callable<Void> cmd = () -> {
@@ -2478,14 +2483,14 @@ public final class HttpClient {
     }
 
     /**
-     * Executes an asynchronous HTTP request and writes the response to a writer.
-     * Executes the request asynchronously and writes the response body to the writer. The writer is not closed by this method.
+     * Executes an asynchronous HTTP request and writes the response body to the given writer.
+     * The writer is not closed by this method; the caller is responsible for closing it.
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
      * @param request The request body (can be {@code null} for GET/DELETE)
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param output The writer to write the response to
-     * @return A ContinuableFuture that will complete when the writer is written successfully
+     * @return a ContinuableFuture that completes after the response has been written to the writer
      */
     public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final Writer output) {
         final Callable<Void> cmd = () -> {

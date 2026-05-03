@@ -20,6 +20,9 @@ import com.landawn.abacus.util.Throwables;
  * and returns no result. This is the {@code (int, reference)} specialization of {@link java.util.function.BiConsumer}.
  * Unlike most other functional interfaces, {@code IntObjConsumer} is expected to operate via side-effects.
  *
+ * <p>The parameter order follows the {@code IntObj*} convention: the {@code int} argument comes
+ * first, followed by the object argument of type {@code T}.
+ *
  * <p>This is a functional interface whose functional method is {@link #accept(int, Object)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -53,9 +56,10 @@ public interface IntObjConsumer<T> extends Throwables.IntObjConsumer<T, RuntimeE
      * to the caller of the composed operation. If performing this operation throws an exception,
      * the {@code after} operation will not be performed.
      *
-     * @param after the operation to perform after this operation
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code IntObjConsumer} that performs in sequence this operation followed by
      *         the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     default IntObjConsumer<T> andThen(final IntObjConsumer<? super T> after) {
         return (i, t) -> {

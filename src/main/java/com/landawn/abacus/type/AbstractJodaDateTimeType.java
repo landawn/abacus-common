@@ -25,14 +25,17 @@ import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.Dates;
 
 /**
- * The Abstract base class for Joda-Time {@code DateTime} types in the type system.
+ * The abstract base class for Joda-Time instant types in the type system.
  * <p>
- * This class provides common functionality for handling Joda-Time instant types
- * (such as {@code DateTime}, {@code Instant}) including serialization and formatting operations.
- * It uses pre-configured {@code DateTimeFormatter}s for ISO 8601 date formats.
+ * This class provides common functionality for handling Joda-Time instant-based types
+ * (such as {@code org.joda.time.DateTime} and {@code org.joda.time.Instant}),
+ * including serialization, deserialization, and output formatting operations.
+ * It uses pre-configured {@link org.joda.time.format.DateTimeFormatter}s for
+ * ISO 8601 date-time and timestamp formats.
  * </p>
  *
- * @param <T> the specific Joda-Time instant type (e.g., {@link org.joda.time.DateTime}, {@link org.joda.time.Instant})
+ * @param <T> the specific Joda-Time instant subtype (e.g., {@link org.joda.time.DateTime},
+ *            {@link org.joda.time.Instant})
  */
 public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extends AbstractType<T> {
 
@@ -52,12 +55,9 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
     }
 
     /**
-     * Checks if this type represents a Joda {@code DateTime} type.
-     * <p>
-     * This method always returns {@code true} for Joda {@code DateTime} types.
-     * </p>
+     * Returns {@code true} because this type represents a Joda {@code DateTime} type.
      *
-     * @return {@code true}, indicating this is a Joda {@code DateTime} type
+     * @return {@code true}
      */
     @Override
     public boolean isJodaDateTime() {
@@ -65,12 +65,10 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
     }
 
     /**
-     * Checks if this type is comparable.
-     * <p>
-     * Joda {@code DateTime} types are comparable based on their millisecond instant values.
-     * </p>
+     * Returns {@code true} because Joda {@code DateTime} types are comparable based on
+     * their millisecond instant values.
      *
-     * @return {@code true}, indicating that Joda {@code DateTime} types support comparison
+     * @return {@code true}
      */
     @Override
     public boolean isComparable() {
@@ -78,12 +76,9 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
     }
 
     /**
-     * Indicates whether values of this type require quoting in CSV format.
-     * <p>
-     * Joda {@code DateTime} values are typically formatted as timestamp strings that do not require quotes.
-     * </p>
+     * Returns {@code false} because Joda {@code DateTime} values do not require quoting in CSV format.
      *
-     * @return {@code false}, as Joda {@code DateTime} values do not require quoting in CSV format
+     * @return {@code false}
      */
     @Override
     public boolean isCsvQuoteRequired() {

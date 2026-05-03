@@ -49,10 +49,10 @@ public interface IntTriFunction<R> extends Throwables.IntTriFunction<R, RuntimeE
      *   <li>Creating composite keys or identifiers from three int values</li>
      * </ul>
      *
-     * @param a the first function argument
-     * @param b the second function argument
-     * @param c the third function argument
-     * @return the function result of type R
+     * @param a the first {@code int} function argument
+     * @param b the second {@code int} function argument
+     * @param c the third {@code int} function argument
+     * @return the function result of type {@code R}
      */
     @Override
     R apply(int a, int b, int c);
@@ -80,6 +80,7 @@ public interface IntTriFunction<R> extends Throwables.IntTriFunction<R, RuntimeE
      *              Must not be {@code null}.
      * @return a composed function that first applies this function and then
      *         applies the {@code after} function
+     * @throws NullPointerException if {@code after} is null
      */
     default <V> IntTriFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return (a, b, c) -> after.apply(apply(a, b, c));

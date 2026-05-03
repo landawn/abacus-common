@@ -27,6 +27,7 @@ import java.io.StringWriter;
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +38,7 @@ import com.landawn.abacus.util.Tuple.Tuple2;
 
 public class Tuple2TypeTest extends TestBase {
 
-    private final Tuple2Type type = new Tuple2Type("String", "String");
+    private final Tuple2Type<String, String> type = new Tuple2Type("String", "String");
 
     @Test
     public void test_declaringName() {
@@ -53,9 +54,9 @@ public class Tuple2TypeTest extends TestBase {
 
     @Test
     public void test_parameterTypes() {
-        Type<?>[] params = type.parameterTypes();
+        List<Type<?>> params = type.parameterTypes();
         assertNotNull(params);
-        assertEquals(2, params.length);
+        assertEquals(2, params.size());
     }
 
     @Test
@@ -92,7 +93,7 @@ public class Tuple2TypeTest extends TestBase {
         Tuple2<String, String> t = Tuple.of("hello", "world");
         String json = type.stringOf(t);
         @SuppressWarnings("unchecked")
-        Tuple2<String, String> result = (Tuple2<String, String>) type.valueOf(json);
+        Tuple2<String, String> result = type.valueOf(json);
         assertNotNull(result);
         assertEquals("hello", result._1);
         assertEquals("world", result._2);
@@ -100,9 +101,9 @@ public class Tuple2TypeTest extends TestBase {
 
     @Test
     public void test_valueOf_IntegerTypes() {
-        Tuple2Type intType = new Tuple2Type("Integer", "Integer");
+        Tuple2Type<Integer, Integer> intType = new Tuple2Type("Integer", "Integer");
         @SuppressWarnings("unchecked")
-        Tuple2<Integer, Integer> result = (Tuple2<Integer, Integer>) intType.valueOf("[1, 2]");
+        Tuple2<Integer, Integer> result = intType.valueOf("[1, 2]");
         assertNotNull(result);
         assertEquals(1, result._1);
         assertEquals(2, result._2);

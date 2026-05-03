@@ -17,12 +17,12 @@ package com.landawn.abacus.exception;
 import java.io.Serial;
 
 /**
- * Exception thrown when a parsing operation fails.
- * This is a runtime exception that indicates an error occurred while parsing text, data structures,
- * or other formatted input. Unlike {@link java.text.ParseException}, this is an unchecked exception.
+ * Unchecked exception thrown when a parsing operation fails.
+ * Unlike {@link java.text.ParseException}, this is a runtime exception that does not need
+ * to be declared in method signatures, making it suitable for use in lambdas and streams.
  *
- * <p>This exception can optionally store a token value that indicates the position or type of token
- * where the parsing error occurred. The default token value is {@code -2} when not specified.</p>
+ * <p>This exception can optionally store a token value indicating the position or token type
+ * where the parsing error occurred. The default value is {@code -2} when not specified.</p>
  *
  * <p>Common use cases include:</p>
  * <ul>
@@ -34,18 +34,15 @@ import java.io.Serial;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // Basic usage
  * if (!isValidFormat(input)) {
  *     throw new ParsingException("Invalid date format: " + input);
  * }
  *
- * // With token information
- * if (unexpectedToken) {
- *     throw new ParsingException("Unexpected token at position " + position, currentToken);
- * }
+ * // With token position information
+ * throw new ParsingException("Unexpected token at position " + position, position);
  * }</pre>
  *
- * @see RuntimeException
+ * @see UncheckedParseException
  * @see java.text.ParseException
  */
 public class ParsingException extends RuntimeException {
@@ -54,8 +51,8 @@ public class ParsingException extends RuntimeException {
     private static final long serialVersionUID = 7678894353902496315L;
 
     /**
-     * The error token position or type associated with this parse exception.
-     * The default value is {@code -2} if not specified.
+     * The token, position, or error code where the parse failure occurred.
+     * Defaults to {@code -2} when not specified by the caller.
      */
     private int errorToken = -2; //NOSONAR
 

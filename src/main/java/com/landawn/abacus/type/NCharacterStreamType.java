@@ -30,34 +30,23 @@ public class NCharacterStreamType extends ReaderType {
     public static final String N_CHARACTER_STREAM = "NCharacterStream";
 
     /**
-     * Constructs an NCharacterStreamType.
-     * This constructor initializes the type handler for national character stream objects.
+     * Package-private constructor for NCharacterStreamType.
+     * This constructor is called by the TypeFactory to create NCharacterStream type instances.
      */
     NCharacterStreamType() {
         super(N_CHARACTER_STREAM);
     }
 
     /**
-     * Retrieves a national character stream (Reader) from a ResultSet at the specified column index.
-     * The returned Reader can be used to read Unicode character data from the database.
+     * Retrieves a national character stream ({@link java.io.Reader}) from the specified column
+     * in the {@link ResultSet} using {@link ResultSet#getNCharacterStream(int)}.
+     * The returned {@code Reader} can be used to read Unicode character data from the database.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Reader> type = TypeFactory.getType(Reader.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     *
-     * // Reading Unicode text from NCLOB column
-     * Reader reader = type.get(rs, 1);
-     * if (reader != null) {
-     *     String content = IOUtils.readAllChars(reader);
-     *     reader.close();
-     * }
-     * }</pre>
-     *
-     * @param rs the ResultSet to read from
-     * @param columnIndex the column index (1-based) to retrieve the character stream from
-     * @return a Reader for the national character stream, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnIndex the 1-based index of the column to retrieve the character stream from
+     * @return a {@code Reader} for the national character stream,
+     *         or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public Reader get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -65,30 +54,15 @@ public class NCharacterStreamType extends ReaderType {
     }
 
     /**
-     * Retrieves a national character stream (Reader) from a ResultSet using the specified column label.
-     * The returned Reader can be used to read Unicode character data from the database.
+     * Retrieves a national character stream ({@link java.io.Reader}) from the specified column
+     * in the {@link ResultSet} using {@link ResultSet#getNCharacterStream(String)}.
+     * The returned {@code Reader} can be used to read Unicode character data from the database.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Reader> type = TypeFactory.getType(Reader.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     *
-     * // Reading Unicode text from NCLOB column by name
-     * Reader reader = type.get(rs, "description");
-     * if (reader != null) {
-     *     BufferedReader br = new BufferedReader(reader);
-     *     String line;
-     *     while ((line = br.readLine()) != null) {
-     *         System.out.println(line);
-     *     }
-     *     br.close();
-     * }
-     * }</pre>
-     *
-     * @param rs the ResultSet to read from
-     * @param columnName the label for the column specified with the SQL AS clause
-     * @return a Reader for the national character stream, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnName is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnName the label of the column to retrieve (as specified in the SQL AS clause)
+     * @return a {@code Reader} for the national character stream,
+     *         or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
     @Override
     public Reader get(final ResultSet rs, final String columnName) throws SQLException {
@@ -96,25 +70,13 @@ public class NCharacterStreamType extends ReaderType {
     }
 
     /**
-     * Sets a parameter in a PreparedStatement to a national character stream value.
-     * The Reader will be read until end-of-file is reached for the stream.
+     * Sets a national character stream parameter in a {@link PreparedStatement} at the specified index.
+     * The {@link java.io.Reader} will be read until end-of-file is reached.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Reader> type = TypeFactory.getType(Reader.class);
-     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
-     *
-     * // Setting Unicode text to NCLOB column
-     * String unicodeText = "Unicode content: 中文";
-     * Reader reader = new StringReader(unicodeText);
-     * type.set(stmt, 2, reader);
-     * stmt.executeUpdate();
-     * }</pre>
-     *
-     * @param stmt the PreparedStatement to set the parameter on
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the Reader containing the Unicode character stream to set
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param columnIndex the 1-based index of the parameter to set
+     * @param x the {@code Reader} containing the Unicode character stream to set
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Reader x) throws SQLException {
@@ -122,25 +84,13 @@ public class NCharacterStreamType extends ReaderType {
     }
 
     /**
-     * Sets a named parameter in a CallableStatement to a national character stream value.
-     * The Reader will be read until end-of-file is reached for the stream.
+     * Sets a national character stream parameter in a {@link CallableStatement} by name.
+     * The {@link java.io.Reader} will be read until end-of-file is reached.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Reader> type = TypeFactory.getType(Reader.class);
-     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
-     *
-     * // Setting Unicode text to named parameter
-     * String unicodeText = "Content: 日本語";
-     * Reader reader = new StringReader(unicodeText);
-     * type.set(stmt, "p_content", reader);
-     * stmt.execute();
-     * }</pre>
-     *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
-     * @param x the Reader containing the Unicode character stream to set
-     * @throws SQLException if a database access error occurs or the parameterName is invalid
+     * @param x the {@code Reader} containing the Unicode character stream to set
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Reader x) throws SQLException {
@@ -148,26 +98,14 @@ public class NCharacterStreamType extends ReaderType {
     }
 
     /**
-     * Sets a parameter in a PreparedStatement to a national character stream value with a specified length.
-     * Only the specified number of characters will be read from the Reader.
+     * Sets a national character stream parameter in a {@link PreparedStatement} at the specified index,
+     * reading at most {@code sqlTypeOrLength} characters from the {@link java.io.Reader}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Reader> type = TypeFactory.getType(Reader.class);
-     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
-     *
-     * // Setting Unicode text with specific length
-     * String longText = "Very long Unicode text...";
-     * Reader reader = new StringReader(longText);
-     * type.set(stmt, 2, reader, 100);  // Only read first 100 characters
-     * stmt.executeUpdate();
-     * }</pre>
-     *
-     * @param stmt the PreparedStatement to set the parameter on
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the Reader containing the Unicode character stream to set
-     * @param sqlTypeOrLength the number of characters in the stream
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param columnIndex the 1-based index of the parameter to set
+     * @param x the {@code Reader} containing the Unicode character stream to set
+     * @param sqlTypeOrLength the maximum number of characters to read from the stream
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Reader x, final int sqlTypeOrLength) throws SQLException {
@@ -175,26 +113,14 @@ public class NCharacterStreamType extends ReaderType {
     }
 
     /**
-     * Sets a named parameter in a CallableStatement to a national character stream value with a specified length.
-     * Only the specified number of characters will be read from the Reader.
+     * Sets a national character stream parameter in a {@link CallableStatement} by name,
+     * reading at most {@code sqlTypeOrLength} characters from the {@link java.io.Reader}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Reader> type = TypeFactory.getType(Reader.class);
-     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
-     *
-     * // Setting Unicode text with specific length to named parameter
-     * String text = "Summary text in Unicode...";
-     * Reader reader = new StringReader(text);
-     * type.set(stmt, "p_summary", reader, 50);  // Only read first 50 characters
-     * stmt.execute();
-     * }</pre>
-     *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
-     * @param x the Reader containing the Unicode character stream to set
-     * @param sqlTypeOrLength the number of characters in the stream
-     * @throws SQLException if a database access error occurs or the parameterName is invalid
+     * @param x the {@code Reader} containing the Unicode character stream to set
+     * @param sqlTypeOrLength the maximum number of characters to read from the stream
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Reader x, final int sqlTypeOrLength) throws SQLException {

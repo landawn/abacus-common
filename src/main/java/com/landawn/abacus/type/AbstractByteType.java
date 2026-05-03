@@ -28,11 +28,16 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
 /**
- * The abstract base class for byte types in the type system.
- * This class provides common functionality for handling byte values,
- * including conversion, database operations, and serialization.
- * <p>Note: this class uses {@code Number} as its generic type to allow for both
- * primitive {@code byte} and {@code Byte} wrapper handling.</p>
+ * The abstract base class for {@code byte} types in the type system.
+ * <p>
+ * This class provides common functionality for handling {@code byte}/{@code Byte} values,
+ * including string/character-array parsing, JDBC read/write operations, and serialization.
+ * It uses {@code Number} as its generic type parameter so that both the primitive
+ * {@code byte} type and the {@code Byte} wrapper type can share this implementation.
+ * Concrete subclasses cover each of those two variants.
+ * </p>
+ *
+ * @see ByteType
  */
 public abstract class AbstractByteType extends NumberType<Number> {
 
@@ -64,25 +69,19 @@ public abstract class AbstractByteType extends NumberType<Number> {
 
     /**
      * Converts the specified string to a {@code Byte} value.
-     * This method handles various string formats:
+     * <p>
+     * Handles the following string formats:
+     * </p>
      * <ul>
-     *   <li>Empty or {@code null} strings return the default value.</li>
-     *   <li>Strings ending with 'l', 'L', 'f', 'F', 'd', or 'D' have the suffix stripped before parsing.</li>
-     *   <li>Valid numeric strings are parsed to byte values.</li>
+     *   <li>Empty or {@code null} strings — returns the default value.</li>
+     *   <li>Strings with a trailing type suffix ({@code l}, {@code L}, {@code f}, {@code F},
+     *       {@code d}, or {@code D}) — the suffix is stripped before parsing.</li>
+     *   <li>All other strings — parsed as a decimal byte value.</li>
      * </ul>
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Byte> type = TypeFactory.getType(Byte.class);
-     * Byte value1 = type.valueOf("42");    // returns 42
-     * Byte value2 = type.valueOf("127");   // returns 127
-     * Byte value3 = type.valueOf("42L");   // returns 42 (suffix stripped)
-     * Byte value4 = type.valueOf("");      // returns default value
-     * }</pre>
-     *
-     * @param str the string to convert
-     * @return the {@code Byte} value
-     * @throws NumberFormatException if the string cannot be parsed as a byte
+     * @param str the string to convert, may be {@code null} or empty
+     * @return the parsed {@code Byte} value, or the default value if {@code str} is empty or {@code null}
+     * @throws NumberFormatException if the string cannot be parsed as a {@code byte}
      */
     @Override
     public Byte valueOf(final String str) {
@@ -107,20 +106,13 @@ public abstract class AbstractByteType extends NumberType<Number> {
 
     /**
      * Converts the specified character array to a {@code Byte} value.
-     * Parses the character array as an integer and checks if it's within byte range
+     * Parses the character array as an integer and checks that the result is within byte range
      * ({@code Byte.MIN_VALUE} to {@code Byte.MAX_VALUE}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Byte> type = TypeFactory.getType(Byte.class);
-     * char[] buffer = "100".toCharArray();
-     * Byte value = type.valueOf(buffer, 0, 3);   // returns 100
-     * }</pre>
-     *
-     * @param cbuf the character array to convert
-     * @param offset the starting position in the array
+     * @param cbuf the character array to convert, may be {@code null}
+     * @param offset the starting position in the array (0-based)
      * @param len the number of characters to read
-     * @return the {@code Byte} value, or default value if the input is {@code null} or empty
+     * @return the {@code Byte} value, or the default value if {@code cbuf} is {@code null} or {@code len} is {@code 0}
      * @throws NumberFormatException if the value is out of byte range or not a valid number
      */
     @Override
@@ -139,16 +131,7 @@ public abstract class AbstractByteType extends NumberType<Number> {
     }
 
     /**
-     * Returns {@code true} because this type represents a byte type.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Byte> type = TypeFactory.getType(Byte.class);
-     * if (type.isByte()) {
-     *     // Handle byte type specific logic
-     *     System.out.println("This is a byte type");
-     * }
-     * }</pre>
+     * Returns {@code true} because this type represents a {@code byte}/{@code Byte} type.
      *
      * @return {@code true}
      */
@@ -159,23 +142,12 @@ public abstract class AbstractByteType extends NumberType<Number> {
 
     /**
      * Retrieves a byte value from the specified {@code ResultSet} at the given column index.
-     * This method uses {@code rs.getByte()} which returns 0 for SQL {@code NULL} values.
+     * Uses {@link java.sql.ResultSet#getByte(int)} which returns {@code 0} for SQL {@code NULL} values.
      * Subclasses may override this to return {@code null} for SQL {@code NULL} values.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * // For primitive byte types
-     * Type<Byte> type = TypeFactory.getType(byte.class);
-     * byte value = type.get(rs, 1);   // Returns 0 for SQL NULL
-     *
-     * // For wrapper Byte types
-     * Type<Byte> type = TypeFactory.getType(Byte.class);
-     * Byte value = type.get(rs, 1);   // Returns null for SQL NULL (overridden in subclass)
-     * }</pre>
      *
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the column index (1-based)
-     * @return the byte value at the specified column; returns 0 if SQL {@code NULL} (may be overridden by subclasses to return {@code null})
+     * @return the byte value at the specified column, or {@code 0} if SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the {@code columnIndex} is invalid
      */
     @Override
@@ -185,23 +157,12 @@ public abstract class AbstractByteType extends NumberType<Number> {
 
     /**
      * Retrieves a byte value from the specified {@code ResultSet} using the given column label.
-     * This method uses {@code rs.getByte()} which returns 0 for SQL {@code NULL} values.
+     * Uses {@link java.sql.ResultSet#getByte(String)} which returns {@code 0} for SQL {@code NULL} values.
      * Subclasses may override this to return {@code null} for SQL {@code NULL} values.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * // For primitive byte types
-     * Type<Byte> type = TypeFactory.getType(byte.class);
-     * byte value = type.get(rs, "status");   // Returns 0 for SQL NULL
-     *
-     * // For wrapper Byte types
-     * Type<Byte> type = TypeFactory.getType(Byte.class);
-     * Byte value = type.get(rs, "status");   // Returns null for SQL NULL (overridden in subclass)
-     * }</pre>
      *
      * @param rs the {@code ResultSet} to read from
      * @param columnName the column label
-     * @return the byte value at the specified column; returns 0 if SQL {@code NULL} (may be overridden by subclasses to return {@code null})
+     * @return the byte value at the specified column, or {@code 0} if SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the {@code columnName} is not found
      */
     @Override

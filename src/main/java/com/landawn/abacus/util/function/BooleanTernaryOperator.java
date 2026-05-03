@@ -35,10 +35,10 @@ public interface BooleanTernaryOperator extends Throwables.BooleanTernaryOperato
      * boolean result = majorityVote.applyAsBoolean(true, true, false);   // Returns true
      * }</pre>
      *
-     * @param a the first operand
-     * @param b the second operand
-     * @param c the third operand
-     * @return the operator result
+     * @param a the first operand ({@code boolean} value)
+     * @param b the second operand ({@code boolean} value)
+     * @param c the third operand ({@code boolean} value)
+     * @return the operator result ({@code boolean} value)
      */
     @Override
     boolean applyAsBoolean(boolean a, boolean b, boolean c);

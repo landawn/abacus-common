@@ -23,31 +23,38 @@ import java.sql.SQLException;
 import com.landawn.abacus.exception.UncheckedSQLException;
 
 /**
- * Type handler for CLOB (Character Large Object) values.
- * This class provides database operations for handling CLOB objects directly.
- * Note that string serialization/deserialization is not supported for CLOB types
- * as CLOBs are database-specific objects that cannot be meaningfully represented as strings.
+ * Type handler for JDBC {@link Clob} (Character Large Object) values.
+ * This class provides database read/write operations for {@link Clob} objects.
+ *
+ * <p>{@link #stringOf} reads the complete character content of a CLOB and returns it as a
+ * {@link String}. The CLOB is freed automatically after reading.
+ * {@link #valueOf(String)} is not supported and always throws {@link UnsupportedOperationException},
+ * because CLOB objects must be created through a JDBC {@link java.sql.Connection}.</p>
+ *
+ * @see AbstractType
+ * @see Clob
  */
 public class ClobType extends AbstractType<Clob> {
 
-    /** The type name constant for Clob type identification. */
+    /** The type name constant for Clob type identification, equal to {@code "Clob"}. */
     public static final String CLOB = Clob.class.getSimpleName();
 
-    /** The specific Clob implementation class. */
+    /** The concrete {@link Clob} implementation class managed by this type handler. */
     private final Class<Clob> clazz;
 
     /**
-     * Package-private constructor for ClobType.
-     * This constructor is called by the TypeFactory to create Clob type instances.
+     * Package-private constructor for {@code ClobType}.
+     * Instances are created by the {@code TypeFactory}.
      */
     ClobType() {
         this(Clob.class);
     }
 
     /**
-     * Package-private constructor for ClobType with a specific Clob implementation class.
+     * Package-private constructor for {@code ClobType} with a specific {@link Clob} implementation class.
+     * Used when a concrete JDBC driver CLOB subtype needs to be registered.
      *
-     * @param clazz the specific Clob implementation class
+     * @param clazz the specific {@link Clob} implementation class to handle
      */
     ClobType(Class<? extends Clob> clazz) {
         super(CLOB);
@@ -55,9 +62,9 @@ public class ClobType extends AbstractType<Clob> {
     }
 
     /**
-     * Returns the Java class type handled by this type handler.
+     * Returns the Java class represented by this type handler.
      *
-     * @return The Class object representing Clob.class
+     * @return the concrete {@link Clob} implementation class, defaulting to {@code Clob.class}
      */
     @Override
     public Class<Clob> javaType() {
@@ -65,19 +72,24 @@ public class ClobType extends AbstractType<Clob> {
     }
 
     /**
-     * Converts a CLOB object to its string representation by extracting the complete character content.
-     * This method reads the entire CLOB content and returns it as a String.
-     * The CLOB is automatically freed after reading.
+     * Returns the complete character content of a {@link Clob} as a {@link String}.
+     * After reading, the CLOB is freed via {@link Clob#free()}.
+     * If an exception occurs during the read, any subsequent exception from {@code free()} is
+     * attached as a suppressed exception.
      *
-     * @param x the CLOB object to convert. Can be {@code null}.
-     * @return The complete character content of the CLOB as a String, or {@code null} if input is null
-     * @throws UncheckedSQLException if a SQLException occurs while reading the CLOB content or freeing resources
+     * @param x the {@link Clob} to read; may be {@code null}
+     * @return the full character content of the CLOB, or {@code null} if {@code x} is {@code null}
+     * @throws UnsupportedOperationException if the CLOB length exceeds {@link Integer#MAX_VALUE} characters
+     * @throws UncheckedSQLException         if a {@link java.sql.SQLException} occurs while reading the CLOB
+     *                                       content or freeing its resources
      */
     @Override
     public String stringOf(final Clob x) {
         if (x == null) {
             return null;
         }
+
+        RuntimeException primaryException = null;
 
         try {
             final long len = x.length();
@@ -86,23 +98,33 @@ public class ClobType extends AbstractType<Clob> {
             }
             return x.getSubString(1, (int) len);
         } catch (final SQLException e) {
-            throw new UncheckedSQLException(e);
+            primaryException = new UncheckedSQLException(e);
+            throw primaryException;
+        } catch (final RuntimeException e) {
+            primaryException = e;
+            throw primaryException;
         } finally {
             try {
                 x.free();
             } catch (final SQLException e) {
-                throw new UncheckedSQLException(e); //NOSONAR
+                final UncheckedSQLException freeException = new UncheckedSQLException(e);
+                if (primaryException != null) {
+                    primaryException.addSuppressed(freeException);
+                } else {
+                    throw freeException; //NOSONAR
+                }
             }
         }
     }
 
     /**
-     * String deserialization is not supported for CLOB objects.
-     * CLOBs are database-specific objects that must be created through JDBC.
+     * Not supported for {@link Clob} objects.
+     * CLOB instances must be created through a JDBC {@link java.sql.Connection} and cannot be
+     * reconstructed from a plain string.
      *
-     * @param str the string value (parameter is ignored)
-     * @return Never returns normally
-     * @throws UnsupportedOperationException always thrown as this operation is not supported
+     * @param str ignored
+     * @return never returns normally
+     * @throws UnsupportedOperationException always
      */
     @Override
     public Clob valueOf(final String str) throws UnsupportedOperationException {
@@ -110,11 +132,12 @@ public class ClobType extends AbstractType<Clob> {
     }
 
     /**
-     * Retrieves a CLOB value from a ResultSet at the specified column index.
+     * Retrieves a {@link Clob} value from a {@link java.sql.ResultSet} at the specified column index.
      *
-     * @param rs the ResultSet containing the data
-     * @param columnIndex the column index (1-based) of the CLOB value
-     * @return The CLOB object at the specified column, or {@code null} if the column value is SQL NULL
+     * @param rs          the {@link java.sql.ResultSet} to read from
+     * @param columnIndex the 1-based column index
+     * @return the {@link Clob} at the specified column,
+     *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
@@ -123,11 +146,12 @@ public class ClobType extends AbstractType<Clob> {
     }
 
     /**
-     * Retrieves a CLOB value from a ResultSet using the specified column label.
+     * Retrieves a {@link Clob} value from a {@link java.sql.ResultSet} using the specified column label.
      *
-     * @param rs the ResultSet containing the data
-     * @param columnName the label of the column containing the CLOB value
-     * @return The CLOB object in the specified column, or {@code null} if the column value is SQL NULL
+     * @param rs         the {@link java.sql.ResultSet} to read from
+     * @param columnName the label of the column to retrieve
+     * @return the {@link Clob} in the specified column,
+     *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
@@ -136,11 +160,11 @@ public class ClobType extends AbstractType<Clob> {
     }
 
     /**
-     * Sets a CLOB value as a parameter in a PreparedStatement.
+     * Sets a {@link Clob} value as a parameter in a {@link java.sql.PreparedStatement}.
      *
-     * @param stmt the PreparedStatement in which to set the parameter
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the CLOB object to set. Can be {@code null}.
+     * @param stmt        the {@link java.sql.PreparedStatement} in which to set the parameter
+     * @param columnIndex the 1-based parameter index
+     * @param x           the {@link Clob} to set; may be {@code null}
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
@@ -149,11 +173,11 @@ public class ClobType extends AbstractType<Clob> {
     }
 
     /**
-     * Sets a CLOB value as a named parameter in a CallableStatement.
+     * Sets a {@link Clob} value as a named parameter in a {@link java.sql.CallableStatement}.
      *
-     * @param stmt the CallableStatement in which to set the parameter
+     * @param stmt          the {@link java.sql.CallableStatement} in which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the CLOB object to set. Can be {@code null}.
+     * @param x             the {@link Clob} to set; may be {@code null}
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override

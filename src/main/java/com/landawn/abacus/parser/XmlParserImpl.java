@@ -59,7 +59,7 @@ import com.landawn.abacus.util.XmlUtil;
 /**
  * Implementation of the XmlParser interface providing XML serialization and deserialization capabilities.
  * This parser supports both StAX (Streaming API for XML) and DOM (Document Object Model) parsing modes.
- * 
+ *
  * <p>The parser handles various Java types including:
  * <ul>
  *   <li>Primitive types and their wrappers</li>
@@ -67,7 +67,7 @@ import com.landawn.abacus.util.XmlUtil;
  *   <li>Maps and MapEntity objects</li>
  *   <li>JavaBeans with getter/setter methods</li>
  * </ul>
- * 
+ *
  * <p>Key features:
  * <ul>
  *   <li>Circular reference detection and handling</li>
@@ -76,25 +76,25 @@ import com.landawn.abacus.util.XmlUtil;
  *   <li>Flexible property naming policies</li>
  *   <li>Ignoring specific properties during serialization/deserialization</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * XmlParser parser = new XmlParserImpl(XmlParserType.StAX);
- * 
+ *
  * // Serialize object to XML
  * MyBean bean = new MyBean();
  * String xml = parser.serialize(bean);
- * 
+ *
  * // Deserialize XML to object
  * MyBean restored = parser.deserialize(xml, MyBean.class);
- * 
+ *
  * // With configuration
  * XmlSerConfig config = new XmlSerConfig()
  *     .setPrettyFormat(true)
  *     .setWriteTypeInfo(false);
  * String xmlWithConfig = parser.serialize(bean, config);
  * }</pre>
- * 
+ *
  * @see XmlParser
  * @see XmlSerConfig
  * @see XmlDeserConfig
@@ -105,7 +105,7 @@ final class XmlParserImpl extends AbstractXmlParser {
 
     /**
      * Constructs a new XmlParserImpl with the specified parser type.
-     * 
+     *
      * @param parserType the type of XML parser to use (StAX or DOM)
      */
     XmlParserImpl(final XmlParserType parserType) {
@@ -114,7 +114,7 @@ final class XmlParserImpl extends AbstractXmlParser {
 
     /**
      * Constructs a new XmlParserImpl with the specified parser type and configurations.
-     * 
+     *
      * @param parserType the type of XML parser to use (StAX or DOM)
      * @param xsc the XML serialization configuration
      * @param xdc the XML deserialization configuration
@@ -298,7 +298,7 @@ final class XmlParserImpl extends AbstractXmlParser {
     /**
      * Writes an object to XML using the specified configuration and writer.
      * This is the main internal method that handles the serialization logic.
-     * 
+     *
      * @param obj the object to write
      * @param config the serialization configuration
      * @param indentation the current indentation string for pretty printing
@@ -509,7 +509,9 @@ final class XmlParserImpl extends AbstractXmlParser {
                 }
 
                 if (propInfo.isJsonRawValue) {
-                    strType.writeCharacter(bw, jsonParser.serialize(propValue, getJSC(config)), config);
+                    // Raw JSON: write the serialized payload verbatim. strType.writeCharacter
+                    // would quote/escape it and produce <metadata>"{\"k\":\"v\"}"</metadata>.
+                    bw.write(jsonParser.serialize(propValue, getJSC(config)));
                 } else if (propInfo.hasFormat) {
                     propInfo.writePropValue(bw, propValue, config);
                 } else {
@@ -841,7 +843,7 @@ final class XmlParserImpl extends AbstractXmlParser {
 
     /**
      * Writes a value to XML, handling different types appropriately.
-     * 
+     *
      * @param value the value to write
      * @param config the serialization configuration
      * @param isPrettyFormat whether pretty formatting is enabled
@@ -861,7 +863,7 @@ final class XmlParserImpl extends AbstractXmlParser {
         //    }
 
         if (propInfo != null && propInfo.isJsonRawValue) {
-            strType.writeCharacter(bw, jsonParser.serialize(value, getJSC(config)), config);
+            bw.write(jsonParser.serialize(value, getJSC(config)));
         } else if (valueType.isSerializable()) {
             if (valueType.isObjectArray() || valueType.isCollection()) {
                 // jsonParser.serialize(bw, value);
@@ -943,7 +945,7 @@ final class XmlParserImpl extends AbstractXmlParser {
     /**
      * Checks if an array can be serialized as JSON.
      * Arrays containing only serializable types can be serialized as JSON for efficiency.
-     * 
+     *
      * @param a the array to check
      * @return {@code true} if the array can be serialized as JSON
      */
@@ -1643,8 +1645,41 @@ final class XmlParserImpl extends AbstractXmlParser {
         return readByStreamParser(xmlReader, config, null, null, targetType);
     }
 
-    @SuppressWarnings({ "null", "deprecation" })
+    /** Maximum permitted XML element-nesting depth. Defends against StackOverflowError on hostile input. */
+    private static final int MAX_XML_NESTING_DEPTH = 1000;
+
+    /** Per-thread XML nesting depth counter. */
+    private static final ThreadLocal<int[]> XML_NESTING_DEPTH = ThreadLocal.withInitial(() -> new int[1]);
+
+    private static void enterXmlNesting() {
+        final int[] depth = XML_NESTING_DEPTH.get();
+        if (++depth[0] > MAX_XML_NESTING_DEPTH) {
+            depth[0]--;
+            throw new ParsingException("XML nesting depth exceeded " + MAX_XML_NESTING_DEPTH + " (defends against stack-overflow DoS)");
+        }
+    }
+
+    private static void exitXmlNesting() {
+        final int[] depth = XML_NESTING_DEPTH.get();
+        if (--depth[0] <= 0) {
+            depth[0] = 0;
+            XML_NESTING_DEPTH.remove();
+        }
+    }
+
+    @SuppressWarnings({})
     protected <T> T readByStreamParser(final XMLStreamReader xmlReader, final XmlDeserConfig config, PropInfo propInfo, Type<?> propType, Type<?> targetType)
+            throws XMLStreamException {
+        enterXmlNesting();
+        try {
+            return readByStreamParserBody(xmlReader, config, propInfo, propType, targetType);
+        } finally {
+            exitXmlNesting();
+        }
+    }
+
+    @SuppressWarnings({ "null", "deprecation" })
+    private <T> T readByStreamParserBody(final XMLStreamReader xmlReader, final XmlDeserConfig config, PropInfo propInfo, Type<?> propType, Type<?> targetType)
             throws XMLStreamException {
         if (targetType.javaType().equals(Object.class)) {
             targetType = mapEntityType;
@@ -1856,10 +1891,10 @@ final class XmlParserImpl extends AbstractXmlParser {
                 final Collection<String> ignoredClassPropNames = configToUse.getIgnoredPropNames(Map.class);
                 Type<?> keyType = defaultKeyType;
 
-                if (propInfo != null && propInfo.jsonXmlType.parameterTypes().length == 2 && !propInfo.jsonXmlType.parameterTypes()[0].isObject()) {
-                    keyType = propInfo.jsonXmlType.parameterTypes()[0];
-                } else if (propType != null && propType.parameterTypes().length == 2 && propType.isMap() && !propType.parameterTypes()[0].isObject()) {
-                    keyType = propType.parameterTypes()[0];
+                if (propInfo != null && propInfo.jsonXmlType.parameterTypes().size() == 2 && !propInfo.jsonXmlType.parameterTypes().get(0).isObject()) {
+                    keyType = propInfo.jsonXmlType.parameterTypes().get(0);
+                } else if (propType != null && propType.parameterTypes().size() == 2 && propType.isMap() && !propType.parameterTypes().get(0).isObject()) {
+                    keyType = propType.parameterTypes().get(0);
                 } else {
                     if (configToUse.getMapKeyType() != null && !configToUse.getMapKeyType().isObject()) {
                         keyType = configToUse.getMapKeyType();
@@ -1869,10 +1904,10 @@ final class XmlParserImpl extends AbstractXmlParser {
                 final boolean isStringKey = keyType.javaType() == String.class;
                 Type<?> valueType = defaultValueType;
 
-                if (propInfo != null && propInfo.jsonXmlType.parameterTypes().length == 2 && !propInfo.jsonXmlType.parameterTypes()[1].isObject()) {
-                    valueType = propInfo.jsonXmlType.parameterTypes()[1];
-                } else if (propType != null && propType.parameterTypes().length == 2 && propType.isMap() && !propType.parameterTypes()[1].isObject()) {
-                    valueType = propType.parameterTypes()[1];
+                if (propInfo != null && propInfo.jsonXmlType.parameterTypes().size() == 2 && !propInfo.jsonXmlType.parameterTypes().get(1).isObject()) {
+                    valueType = propInfo.jsonXmlType.parameterTypes().get(1);
+                } else if (propType != null && propType.parameterTypes().size() == 2 && propType.isMap() && !propType.parameterTypes().get(1).isObject()) {
+                    valueType = propType.parameterTypes().get(1);
                 } else {
                     if (configToUse.getMapValueType() != null && !configToUse.getMapValueType().isObject()) {
                         valueType = configToUse.getMapValueType();
@@ -2040,10 +2075,10 @@ final class XmlParserImpl extends AbstractXmlParser {
                 final Collection<String> ignoredClassPropNames = configToUse.getIgnoredPropNames(Map.class);
                 Type<?> valueType = defaultValueType;
 
-                if (propInfo != null && propInfo.jsonXmlType.parameterTypes().length == 2 && !propInfo.jsonXmlType.parameterTypes()[1].isObject()) {
-                    valueType = propInfo.jsonXmlType.parameterTypes()[1];
-                } else if (propType != null && propType.parameterTypes().length == 2 && propType.isMap() && !propType.parameterTypes()[1].isObject()) {
-                    valueType = propType.parameterTypes()[1];
+                if (propInfo != null && propInfo.jsonXmlType.parameterTypes().size() == 2 && !propInfo.jsonXmlType.parameterTypes().get(1).isObject()) {
+                    valueType = propInfo.jsonXmlType.parameterTypes().get(1);
+                } else if (propType != null && propType.parameterTypes().size() == 2 && propType.isMap() && !propType.parameterTypes().get(1).isObject()) {
+                    valueType = propType.parameterTypes().get(1);
                 } else {
                     if (configToUse.getMapValueType() != null && !configToUse.getMapValueType().isObject()) {
                         valueType = configToUse.getMapValueType();
@@ -2306,9 +2341,9 @@ final class XmlParserImpl extends AbstractXmlParser {
 
                 if (propInfo != null && propInfo.clazz.isArray() && !Object.class.equals(propInfo.clazz.getComponentType())) {
                     eleType = Type.of(propInfo.clazz.getComponentType());
-                } else if (propType != null && propType.parameterTypes().length == 1 && Collection.class.isAssignableFrom(propType.javaType())
-                        && !propType.parameterTypes()[0].isObject()) {
-                    eleType = propType.parameterTypes()[0];
+                } else if (propType != null && propType.parameterTypes().size() == 1 && Collection.class.isAssignableFrom(propType.javaType())
+                        && !propType.parameterTypes().get(0).isObject()) {
+                    eleType = propType.parameterTypes().get(0);
                 } else {
                     if (configToUse.getElementType() != null && !configToUse.getElementType().isObject()) {
                         eleType = configToUse.getElementType();
@@ -2399,10 +2434,21 @@ final class XmlParserImpl extends AbstractXmlParser {
         return readByDOMParser(node, configToUse, configToUse.getElementType(), false, false, false, true, targetType);
     }
 
-    @SuppressWarnings({ "unchecked", "null", "deprecation" })
+    @SuppressWarnings({ "unchecked" })
     protected <T> T readByDOMParser(final Node node, final XmlDeserConfig config, Type<?> propType, boolean checkedAttr, boolean isTagByPropertyName,
             boolean ignoreTypeInfo, final boolean isFirstCall, Type<? extends T> inputType) {
-        if (node.getNodeType() == Document.TEXT_NODE) {
+        enterXmlNesting();
+        try {
+            return readByDOMParserBody(node, config, propType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, isFirstCall, inputType);
+        } finally {
+            exitXmlNesting();
+        }
+    }
+
+    @SuppressWarnings({ "deprecation", "null" })
+    protected <T> T readByDOMParserBody(final Node node, final XmlDeserConfig config, Type<?> propType, boolean checkedAttr, boolean isTagByPropertyName,
+            boolean ignoreTypeInfo, final boolean isFirstCall, Type<? extends T> inputType) {
+        if (node.getNodeType() == Node.TEXT_NODE) {
             return null;
         }
 
@@ -2480,7 +2526,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                 for (int i = 0; i < propNodeLength; i++) {
                     propNode = propNodes.item(i);
 
-                    if (propNode.getNodeType() == Document.TEXT_NODE) {
+                    if (propNode.getNodeType() == Node.TEXT_NODE) {
                         continue;
                     }
 
@@ -2531,8 +2577,8 @@ final class XmlParserImpl extends AbstractXmlParser {
                 final Collection<String> ignoredClassPropNames = configToUse.getIgnoredPropNames(Map.class);
                 Type<?> keyType = defaultKeyType;
 
-                if (propType != null && propType.isMap() && !propType.parameterTypes()[0].isObject()) {
-                    keyType = propType.parameterTypes()[0];
+                if (propType != null && propType.isMap() && !propType.parameterTypes().get(0).isObject()) {
+                    keyType = propType.parameterTypes().get(0);
                 } else {
                     if (configToUse.getMapKeyType() != null && !configToUse.getMapKeyType().isObject()) {
                         keyType = configToUse.getMapKeyType();
@@ -2543,8 +2589,8 @@ final class XmlParserImpl extends AbstractXmlParser {
 
                 Type<?> valueType = defaultValueType;
 
-                if (propType != null && propType.isMap() && !propType.parameterTypes()[1].isObject()) {
-                    valueType = propType.parameterTypes()[1];
+                if (propType != null && propType.isMap() && !propType.parameterTypes().get(1).isObject()) {
+                    valueType = propType.parameterTypes().get(1);
                 } else {
                     if (configToUse.getMapValueType() != null && !configToUse.getMapValueType().isObject()) {
                         valueType = configToUse.getMapValueType();
@@ -2564,7 +2610,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                 for (int i = 0; i < propNodeLength; i++) {
                     propNode = propNodes.item(i);
 
-                    if (propNode.getNodeType() == Document.TEXT_NODE) {
+                    if (propNode.getNodeType() == Node.TEXT_NODE) {
                         continue;
                     }
 
@@ -2604,8 +2650,8 @@ final class XmlParserImpl extends AbstractXmlParser {
                 final Collection<String> ignoredClassPropNames = configToUse.getIgnoredPropNames(Map.class);
                 Type<?> valueType = null;
 
-                if (propType != null && propType.isMap() && !propType.parameterTypes()[1].isObject()) {
-                    valueType = propType.parameterTypes()[1];
+                if (propType != null && propType.isMap() && !propType.parameterTypes().get(1).isObject()) {
+                    valueType = propType.parameterTypes().get(1);
                 } else {
                     if (configToUse.getMapValueType() != null && !configToUse.getMapValueType().isObject()) {
                         valueType = configToUse.getMapValueType();
@@ -2627,7 +2673,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                 for (int i = 0; i < propNodeLength; i++) {
                     propNode = propNodes.item(i);
 
-                    if (propNode.getNodeType() == Document.TEXT_NODE) {
+                    if (propNode.getNodeType() == Node.TEXT_NODE) {
                         continue;
                     }
 
@@ -2695,7 +2741,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                     for (int i = 0; i < eleNodes.getLength(); i++) {
                         eleNode = eleNodes.item(i);
 
-                        if (eleNode.getNodeType() == Document.TEXT_NODE) {
+                        if (eleNode.getNodeType() == Node.TEXT_NODE) {
                             continue;
                         }
 
@@ -2760,7 +2806,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                 for (int i = 0; i < eleNodes.getLength(); i++) {
                     eleNode = eleNodes.item(i);
 
-                    if (eleNode.getNodeType() == Document.TEXT_NODE) {
+                    if (eleNode.getNodeType() == Node.TEXT_NODE) {
                         continue;
                     }
 
@@ -2826,7 +2872,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                 Node subPropNode = null;
                 for (int k = 0; k < subPropNodeLength; k++) {
                     subPropNode = subPropNodes.item(k);
-                    if (subPropNode.getNodeType() == Document.TEXT_NODE) {
+                    if (subPropNode.getNodeType() == Node.TEXT_NODE) {
                         continue;
                     }
 
@@ -2859,8 +2905,8 @@ final class XmlParserImpl extends AbstractXmlParser {
 
         if (propType.javaType().isArray() && (propType.elementType().isBean() || propType.elementType().isMap())) {
             propEleType = propType.elementType();
-        } else if (propType.parameterTypes().length == 1 && (propType.parameterTypes()[0].isBean() || propType.parameterTypes()[0].isMap())) {
-            propEleType = propType.parameterTypes()[0];
+        } else if (propType.parameterTypes().size() == 1 && (propType.parameterTypes().get(0).isBean() || propType.parameterTypes().get(0).isMap())) {
+            propEleType = propType.parameterTypes().get(0);
         } else {
             propEleType = mapType;
         }

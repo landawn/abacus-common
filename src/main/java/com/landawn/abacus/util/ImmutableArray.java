@@ -23,21 +23,21 @@ import com.landawn.abacus.util.stream.Stream;
  * An immutable wrapper around an array that provides read-only access to its elements.
  * Once created, the contents of an ImmutableArray cannot be modified, making it thread-safe
  * and suitable for use as a defensive copy of array data.
- * 
+ *
  * <p>This class implements {@link Iterable} to allow for enhanced for-loop iteration and
  * provides various utility methods for accessing and searching array elements. It also
  * supports conversion to {@link ImmutableList} and {@link Stream} for functional operations.</p>
- * 
+ *
  * <p>Note: While the ImmutableArray itself cannot be modified, if it contains mutable objects,
  * those objects themselves can still be modified. For {@code true} immutability, ensure that the
  * array contains only immutable objects.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ImmutableArray<String> array = ImmutableArray.of("apple", "banana", "cherry");
  * String first = array.get(0);   // "apple"
  * boolean hasApple = array.contains("apple");   // true
- * 
+ *
  * // Iterate over elements
  * for (String fruit : array) {
  *     System.out.println(fruit);
@@ -254,7 +254,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * Wraps the provided array into an ImmutableArray without copying. Changes to the
      * specified array will be reflected in the returned ImmutableArray, which violates
      * the immutability contract.
-     * 
+     *
      * <p><strong>Warning:</strong> This method should be used with extreme caution and only
      * when you can guarantee that the provided array will not be modified after wrapping.
      * In most cases, use {@link #copyOf(Object[])} instead.</p>
@@ -269,9 +269,8 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * @param <T> the type of the elements
      * @param elements the array to be wrapped
      * @return an ImmutableArray backed by the specified array
-     * @deprecated the ImmutableArray may be modified through the specified {@code elements}
-     * 
-     * <p>Example (showing the danger):</p>
+     * @deprecated the ImmutableArray may be modified through the specified {@code elements};
+     *             use {@link #copyOf(Object[])} instead for {@code true} immutability.
      */
     @Deprecated
     @Beta
@@ -570,7 +569,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * ImmutableArray<String> array1 = ImmutableArray.of("a", "b", "c");
      * ImmutableArray<String> array2 = ImmutableArray.of("a", "b", "c");
      * ImmutableArray<String> array3 = ImmutableArray.of("a", "b", "d");
-     * 
+     *
      * boolean equal1 = array1.equals(array2);   // returns true
      * boolean equal2 = array1.equals(array3);   // returns false
      * }</pre>

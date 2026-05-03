@@ -21,9 +21,9 @@ import com.landawn.abacus.util.Throwables;
  * A functional interface that represents a predicate (boolean-valued function) of four arguments.
  * This is the four-arity specialization of {@link java.util.function.Predicate}.
  *
- * <p>This interface extends the standard Java functional interfaces to support predicates
- * with four parameters, which is useful for complex conditional logic that requires
- * multiple inputs to determine a boolean result.
+ * <p>This interface generalizes the standard Java functional predicate interfaces to support
+ * predicates with four parameters, which is useful for complex conditional logic that
+ * requires multiple inputs to determine a boolean result.
  *
  * <p>This is a functional interface whose functional method is {@link #test(Object, Object, Object, Object)}.
  *
@@ -122,9 +122,10 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
      *     hasBalance.and(hasStock);
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate
+     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default QuadPredicate<A, B, C, D> and(final QuadPredicate<? super A, ? super B, ? super C, ? super D> other) {
         return (a, b, c, d) -> test(a, b, c, d) && other.test(a, b, c, d);
@@ -153,9 +154,10 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
      *     isPremiumUser.or(hasLoyaltyPoints);
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate
+     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default QuadPredicate<A, B, C, D> or(final QuadPredicate<? super A, ? super B, ? super C, ? super D> other) {
         return (a, b, c, d) -> test(a, b, c, d) || other.test(a, b, c, d);

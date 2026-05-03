@@ -115,6 +115,7 @@ public interface ObjBiIntPredicate<T> extends Throwables.ObjBiIntPredicate<T, Ru
      * @param other a predicate that will be logically-ANDed with this predicate
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default ObjBiIntPredicate<T> and(final ObjBiIntPredicate<T> other) {
         return (t, i, j) -> test(t, i, j) && other.test(t, i, j);
@@ -145,6 +146,7 @@ public interface ObjBiIntPredicate<T> extends Throwables.ObjBiIntPredicate<T, Ru
      * @param other a predicate that will be logically-ORed with this predicate
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default ObjBiIntPredicate<T> or(final ObjBiIntPredicate<T> other) {
         return (t, i, j) -> test(t, i, j) || other.test(t, i, j);

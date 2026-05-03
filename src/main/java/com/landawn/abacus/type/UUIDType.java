@@ -52,7 +52,7 @@ public class UUIDType extends AbstractType<UUID> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * UUIDType uuidType = new UUIDType();
+     * Type<UUID> uuidType = TypeFactory.getType(UUID.class);
      * Class<UUID> clazz = uuidType.javaType();   // Returns UUID.class
      * }</pre>
      *
@@ -73,8 +73,9 @@ public class UUIDType extends AbstractType<UUID> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * Type<UUID> type = TypeFactory.getType(UUID.class);
      * UUID uuid = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
-     * String str = uuidType.stringOf(uuid);   // Returns "550e8400-e29b-41d4-a716-446655440000"
+     * String str = type.stringOf(uuid);   // Returns "550e8400-e29b-41d4-a716-446655440000"
      * }</pre>
      *
      * @param x the UUID instance to convert to string
@@ -90,17 +91,19 @@ public class UUIDType extends AbstractType<UUID> {
      * <p>
      * This method creates a UUID instance from the provided string using {@link UUID#fromString(String)}.
      * The string must be in the standard UUID format "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-     * where 'x' is a hexadecimal digit. If the string is {@code null} or empty, this method returns {@code null}.
+     * where 'x' is a hexadecimal digit. If the string is {@code null}, empty, or blank, this method returns {@code null}.
+     * Leading and trailing whitespace is trimmed before parsing.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * UUID uuid = uuidType.valueOf("550e8400-e29b-41d4-a716-446655440000");
+     * Type<UUID> type = TypeFactory.getType(UUID.class);
+     * UUID uuid = type.valueOf("550e8400-e29b-41d4-a716-446655440000");
      * // uuid represents the parsed UUID object
      * }</pre>
      *
      * @param str the string to convert to a UUID
-     * @return a UUID instance created from the string, or {@code null} if the string is empty
+     * @return a UUID instance created from the string, or {@code null} if the string is {@code null}, empty, or blank
      * @throws IllegalArgumentException if the string is not in the correct UUID format
      */
     @Override

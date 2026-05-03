@@ -42,9 +42,9 @@ import com.landawn.abacus.util.u.Optional;
  * Utility class for exception handling and conversion.
  * Provides methods to convert checked exceptions to runtime exceptions, extract stack traces,
  * find causes, and handle exception messages.
- * 
+ *
  * <p>This class contains methods copied from Apache Commons and Google Guava under Apache License v2.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Convert checked exception to runtime exception
@@ -53,7 +53,7 @@ import com.landawn.abacus.util.u.Optional;
  * } catch (IOException e) {
  *     throw ExceptionUtil.toRuntimeException(e);
  * }
- * 
+ *
  * // Get stack trace as string
  * try {
  *     riskyOperation();
@@ -61,7 +61,7 @@ import com.landawn.abacus.util.u.Optional;
  *     String stackTrace = ExceptionUtil.getStackTrace(e);
  *     logger.error(stackTrace);
  * }
- * 
+ *
  * // Find specific cause in exception chain
  * try {
  *     databaseOperation();
@@ -634,7 +634,7 @@ public final class ExceptionUtil {
      * try {
      *     complexOperation();
      * } catch (Exception e) {
-     *     Optional<Throwable> timeoutError = ExceptionUtil.findCause(e, 
+     *     Optional<Throwable> timeoutError = ExceptionUtil.findCause(e,
      *         ex -> ex.getMessage() != null && ex.getMessage().contains("timeout")
      *     );
      *     if (timeoutError.isPresent()) {

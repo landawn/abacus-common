@@ -13,6 +13,7 @@
  */
 package com.landawn.abacus.annotation;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -20,12 +21,15 @@ import java.lang.annotation.RetentionPolicy;
  * Annotation used to suppress FindBugs/SpotBugs warnings on annotated program elements.
  * FindBugs (now succeeded by SpotBugs) is a static analysis tool that detects potential bugs
  * and security vulnerabilities in Java code. This annotation allows developers to suppress
- * specific warnings when they are {@code false} positives or when the code is intentionally
+ * specific warnings when they are false positives or when the code is intentionally
  * designed a certain way.
+ *
+ * <p>This annotation carries no {@code @Target} restriction and may be applied to any
+ * annotated element (types, methods, constructors, fields, parameters, etc.).</p>
  *
  * <p>This annotation should be used judiciously and only when:</p>
  * <ul>
- *   <li>You have thoroughly analyzed the warning and determined it is a {@code false} positive.</li>
+ *   <li>You have thoroughly analyzed the warning and determined it is a false positive.</li>
  *   <li>The code design intentionally violates a FindBugs rule for valid reasons.</li>
  *   <li>The warning cannot be fixed without significant architectural changes.</li>
  *   <li>You have provided proper justification for suppressing the warning.</li>
@@ -77,7 +81,8 @@ import java.lang.annotation.RetentionPolicy;
  * @see <a href="https://spotbugs.readthedocs.io/en/stable/">SpotBugs Documentation</a>
  * @see <a href="https://spotbugs.readthedocs.io/en/stable/bugDescriptions.html">Bug Descriptions</a>
  */
-@Retention(RetentionPolicy.CLASS)
+@Documented
+@Retention(value = RetentionPolicy.CLASS)
 public @interface SuppressFBWarnings {
 
     /**
@@ -108,7 +113,7 @@ public @interface SuppressFBWarnings {
      *
      * <p><b>Best practices for justifications:</b></p>
      * <ul>
-     *   <li>Explain why the warning is a {@code false} positive.</li>
+     *   <li>Explain why the warning is a false positive.</li>
      *   <li>Describe the intentional design decision.</li>
      *   <li>Reference external validation or security measures.</li>
      *   <li>Note if the issue is addressed elsewhere in the codebase.</li>

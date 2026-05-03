@@ -22,10 +22,10 @@ import com.landawn.abacus.annotation.Internal;
  * including SQL keywords, special characters, operators, and mathematical functions.
  * This class serves as a centralized repository for string constants to avoid hardcoding
  * and improve code maintainability.
- * 
+ *
  * <p>All fields in this class are public static final constants representing either
  * single characters (prefixed with underscore) or their string equivalents.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * String query = SK.SELECT + SK.SPACE + "*" + SK.SPACE + SK.FROM + SK.SPACE + "users";
@@ -61,14 +61,14 @@ public final class SK {
 
     /**
      * Represents the space character: {@code ' '}.
-     * 
+     *
      */
     public static final char _SPACE = ' ';
 
     /**
      * Represents the space string: {@code " "}.
      * Useful for string concatenation operations.
-     * 
+     *
      */
     public static final String SPACE = " ";
 
@@ -80,7 +80,7 @@ public final class SK {
 
     /**
      * Represents the period string: {@code "."}.
-     * 
+     *
      */
     public static final String PERIOD = ".";
 
@@ -92,14 +92,14 @@ public final class SK {
 
     /**
      * Represents the comma string: {@code ","}.
-     * 
+     *
      */
     public static final String COMMA = ",";
 
     /**
      * Represents comma followed by space: {@code ", "}.
      * Commonly used for readable list formatting.
-     * 
+     *
      */
     public static final String COMMA_SPACE = ", ";
 
@@ -117,7 +117,7 @@ public final class SK {
     /**
      * Represents colon followed by space: {@code ": "}.
      * Commonly used in key-value formatting.
-     * 
+     *
      */
     public static final String COLON_SPACE = ": ";
 
@@ -512,7 +512,7 @@ public final class SK {
     /**
      * SQL WITH keyword: {@code "WITH"}.
      * Used for common table expressions (CTEs).
-     * 
+     *
      */
     public static final String WITH = "WITH";
 
@@ -526,7 +526,7 @@ public final class SK {
     /**
      * SQL SELECT keyword: {@code "SELECT"}.
      * Used to query data from database tables.
-     * 
+     *
      */
     public static final String SELECT = "SELECT";
 
@@ -671,7 +671,7 @@ public final class SK {
     public static final String INNER = "INNER";
 
     /**
-     * SQL OUTER keyword with trailing space: {@code "OUTER"}.
+     * SQL OUTER keyword: {@code "OUTER"}.
      * Used with LEFT, RIGHT, or FULL keywords to specify outer join operations.
      *
      */
@@ -764,7 +764,7 @@ public final class SK {
     /**
      * SQL WHERE keyword: {@code "WHERE"}.
      * Used to filter query results.
-     * 
+     *
      */
     public static final String WHERE = "WHERE";
 

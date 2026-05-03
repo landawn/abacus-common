@@ -27,7 +27,7 @@ import com.landawn.abacus.util.stream.Stream;
  * Interface for JSON parsing and serialization operations.
  * This interface extends the base Parser interface and provides additional methods
  * specifically for JSON processing, including streaming support and direct string parsing.
- * 
+ *
  * <p>The JsonParser provides various methods for:</p>
  * <ul>
  *   <li>Deserializing JSON strings, files, streams, and readers into Java objects</li>
@@ -48,7 +48,7 @@ import com.landawn.abacus.util.stream.Stream;
  *       and {@code Reader}. Use {@code deserialize()} when reading from files, streams, or when you need
  *       substring-based deserialization with {@code fromIndex}/{@code toIndex}.</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * JsonParser parser = ParserFactory.createJsonParser();
@@ -67,7 +67,7 @@ import com.landawn.abacus.util.stream.Stream;
  *           .forEach(System.out::println);
  * }
  * }</pre>
- * 
+ *
  * @see JsonSerConfig
  * @see JsonDeserConfig
  * @see ParserFactory

@@ -99,9 +99,10 @@ public interface FloatTriPredicate extends Throwables.FloatTriPredicate<RuntimeE
      * boolean result = combined.test(10.0f, 20.0f, 30.0f);   // Returns true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ANDed with this predicate
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default FloatTriPredicate and(final FloatTriPredicate other) {
         return (a, b, c) -> test(a, b, c) && other.test(a, b, c);
@@ -125,9 +126,10 @@ public interface FloatTriPredicate extends Throwables.FloatTriPredicate<RuntimeE
      * boolean result = combined.test(0.0f, 5.0f, 10.0f);   // Returns true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ORed with this predicate
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default FloatTriPredicate or(final FloatTriPredicate other) {
         return (a, b, c) -> test(a, b, c) || other.test(a, b, c);

@@ -68,9 +68,8 @@ import com.landawn.abacus.util.function.IntFunction;
  * convenient methods for creating functions that instantiate collections (List, Set, Queue, etc.), maps,
  * primitive arrays, and specialized list types.</p>
  *
- * <p>The class is designed as a sealed abstract class that permits only the nested {@code Factory} class
- * to extend it, ensuring controlled inheritance and maintaining the utility class pattern. All methods
- * are static and thread-safe.</p>
+ * <p>The class is declared {@code final} to prevent extension, ensuring controlled inheritance and
+ * maintaining the utility class pattern. All methods are static and thread-safe.</p>
  *
  * <p>Key features:</p>
  * <ul>
@@ -89,9 +88,9 @@ import com.landawn.abacus.util.function.IntFunction;
  * IntFunction<List<String>> listCreator = IntFunctions.ofList();
  * List<String> list = listCreator.apply(100);   // ArrayList with capacity 100
  *
- * // Create a function for TreeSet (capacity ignored)
+ * // Create a function for HashSet with initial capacity
  * IntFunction<Set<Integer>> setCreator = IntFunctions.ofSet();
- * Set<Integer> set = setCreator.apply(50);
+ * Set<Integer> set = setCreator.apply(50);   // HashSet with capacity 50
  *
  * // Create a function for HashMap with initial capacity
  * IntFunction<Map<String, Object>> mapCreator = IntFunctions.ofMap();
@@ -102,7 +101,7 @@ import com.landawn.abacus.util.function.IntFunction;
  * int[] array = arrayCreator.apply(1000);   // int array with length 1000
  *
  * // Dynamic collection type creation
- * IntFunction<? extends Collection<String>> dynamicCreator = 
+ * IntFunction<? extends Collection<String>> dynamicCreator =
  *     IntFunctions.ofCollection(LinkedHashSet.class);
  * Collection<String> collection = dynamicCreator.apply(75);
  * }</pre>
@@ -119,145 +118,145 @@ import com.landawn.abacus.util.function.IntFunction;
  */
 @SuppressWarnings({ "java:S1694" })
 public final class IntFunctions {
-    /** The Constant BOOLEAN_ARRAY. */
+    /** Shared factory function that creates a new {@code boolean[]} of the given length. */
     private static final IntFunction<boolean[]> BOOLEAN_ARRAY = boolean[]::new;
 
-    /** The Constant CHAR_ARRAY. */
+    /** Shared factory function that creates a new {@code char[]} of the given length. */
     private static final IntFunction<char[]> CHAR_ARRAY = char[]::new;
 
-    /** The Constant BYTE_ARRAY. */
+    /** Shared factory function that creates a new {@code byte[]} of the given length. */
     private static final IntFunction<byte[]> BYTE_ARRAY = byte[]::new;
 
-    /** The Constant SHORT_ARRAY. */
+    /** Shared factory function that creates a new {@code short[]} of the given length. */
     private static final IntFunction<short[]> SHORT_ARRAY = short[]::new;
 
-    /** The Constant INT_ARRAY. */
+    /** Shared factory function that creates a new {@code int[]} of the given length. */
     private static final IntFunction<int[]> INT_ARRAY = int[]::new;
 
-    /** The Constant LONG_ARRAY. */
+    /** Shared factory function that creates a new {@code long[]} of the given length. */
     private static final IntFunction<long[]> LONG_ARRAY = long[]::new;
 
-    /** The Constant FLOAT_ARRAY. */
+    /** Shared factory function that creates a new {@code float[]} of the given length. */
     private static final IntFunction<float[]> FLOAT_ARRAY = float[]::new;
 
-    /** The Constant DOUBLE_ARRAY. */
+    /** Shared factory function that creates a new {@code double[]} of the given length. */
     private static final IntFunction<double[]> DOUBLE_ARRAY = double[]::new;
 
-    /** The Constant STRING_ARRAY. */
+    /** Shared factory function that creates a new {@code String[]} of the given length. */
     private static final IntFunction<String[]> STRING_ARRAY = String[]::new;
 
-    /** The Constant OBJECT_ARRAY. */
+    /** Shared factory function that creates a new {@code Object[]} of the given length. */
     private static final IntFunction<Object[]> OBJECT_ARRAY = Object[]::new;
 
-    /** The Constant BOOLEAN_LIST. */
+    /** Shared factory function that creates a new {@link BooleanList} with the given initial capacity. */
     private static final IntFunction<BooleanList> BOOLEAN_LIST = BooleanList::new;
 
-    /** The Constant CHAR_LIST. */
+    /** Shared factory function that creates a new {@link CharList} with the given initial capacity. */
     private static final IntFunction<CharList> CHAR_LIST = CharList::new;
 
-    /** The Constant BYTE_LIST. */
+    /** Shared factory function that creates a new {@link ByteList} with the given initial capacity. */
     private static final IntFunction<ByteList> BYTE_LIST = ByteList::new;
 
-    /** The Constant SHORT_LIST. */
+    /** Shared factory function that creates a new {@link ShortList} with the given initial capacity. */
     private static final IntFunction<ShortList> SHORT_LIST = ShortList::new;
 
-    /** The Constant INT_LIST. */
+    /** Shared factory function that creates a new {@link IntList} with the given initial capacity. */
     private static final IntFunction<IntList> INT_LIST = IntList::new;
 
-    /** The Constant LONG_LIST. */
+    /** Shared factory function that creates a new {@link LongList} with the given initial capacity. */
     private static final IntFunction<LongList> LONG_LIST = LongList::new;
 
-    /** The Constant FLOAT_LIST. */
+    /** Shared factory function that creates a new {@link FloatList} with the given initial capacity. */
     private static final IntFunction<FloatList> FLOAT_LIST = FloatList::new;
 
-    /** The Constant DOUBLE_LIST. */
+    /** Shared factory function that creates a new {@link DoubleList} with the given initial capacity. */
     private static final IntFunction<DoubleList> DOUBLE_LIST = DoubleList::new;
 
-    /** The Constant LIST_FACTORY. */
+    /** Shared factory function that creates a new {@link ArrayList} with the given initial capacity. */
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super List> LIST_FACTORY = ArrayList::new;
 
-    /** The Constant LINKED_LIST_FACTORY. */
+    /** Shared factory function that creates a new {@link LinkedList} (capacity parameter is ignored). */
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super LinkedList> LINKED_LIST_FACTORY = len -> new LinkedList<>();
 
-    /** The Constant SET_FACTORY. */
+    /** Shared factory function that creates a new {@link java.util.HashSet} with the given initial capacity. */
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super Set> SET_FACTORY = N::newHashSet;
 
-    /** The Constant LINKED_HASH_SET_FACTORY. */
+    /** Shared factory function that creates a new {@link LinkedHashSet} with the given initial capacity. */
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super Set> LINKED_HASH_SET_FACTORY = N::newLinkedHashSet;
 
-    /** The Constant TREE_SET_FACTORY. */
+    /** Shared factory function that creates a new {@link TreeSet} (capacity parameter is ignored). */
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super TreeSet> TREE_SET_FACTORY = len -> new TreeSet<>();
 
-    /** The Constant QUEUE_FACTORY. */
+    /** Shared factory function that creates a new {@link LinkedList} as a {@link java.util.Queue} (capacity parameter is ignored). */
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super Queue> QUEUE_FACTORY = len -> new LinkedList();
 
-    /** The Constant DEQUE_FACTORY. */
+    /** Shared factory function that creates a new {@link LinkedList} as a {@link java.util.Deque} (capacity parameter is ignored). */
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super Deque> DEQUE_FACTORY = len -> new LinkedList();
 
-    /** The Constant ARRAY_DEQUE_FACTORY. */
+    /** Shared factory function that creates a new {@link ArrayDeque} with the given initial capacity. */
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super ArrayDeque> ARRAY_DEQUE_FACTORY = ArrayDeque::new;
 
-    /** The Constant LINKED_BLOCKING_QUEUE_FACTORY. */
+    /** Shared factory function that creates a new {@link LinkedBlockingQueue} with the given capacity. */
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super LinkedBlockingQueue> LINKED_BLOCKING_QUEUE_FACTORY = LinkedBlockingQueue::new;
 
-    /** The Constant ARRAY_BLOCKING_QUEUE_FACTORY. */
+    /** Shared factory function that creates a new {@link ArrayBlockingQueue} with the given capacity. */
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super ArrayBlockingQueue> ARRAY_BLOCKING_QUEUE_FACTORY = ArrayBlockingQueue::new;
 
-    /** The Constant LINKED_BLOCKING_DEQUE_FACTORY. */
+    /** Shared factory function that creates a new {@link LinkedBlockingDeque} with the given capacity. */
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super LinkedBlockingDeque> LINKED_BLOCKING_DEQUE_FACTORY = LinkedBlockingDeque::new;
 
-    /** The Constant CONCURRENT_LINKED_QUEUE_FACTORY. */
+    /** Shared factory function that creates a new {@link java.util.concurrent.ConcurrentLinkedQueue} (capacity parameter is ignored). */
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super ConcurrentLinkedQueue> CONCURRENT_LINKED_QUEUE_FACTORY = capacity -> new ConcurrentLinkedQueue();
 
-    /** The Constant PRIORITY_QUEUE_FACTORY. */
+    /** Shared factory function that creates a new {@link java.util.PriorityQueue} with the given initial capacity. */
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super PriorityQueue> PRIORITY_QUEUE_FACTORY = PriorityQueue::new;
 
-    /** The Constant MAP_FACTORY. */
+    /** Shared factory function that creates a new {@link java.util.HashMap} with the given initial capacity. */
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super Map> MAP_FACTORY = N::newHashMap;
 
-    /** The Constant LINKED_HASH_MAP_FACTORY. */
+    /** Shared factory function that creates a new {@link java.util.LinkedHashMap} with the given initial capacity. */
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super Map> LINKED_HASH_MAP_FACTORY = N::newLinkedHashMap;
 
-    /** The Constant IDENTITY_HASH_MAP_FACTORY. */
+    /** Shared factory function that creates a new {@link java.util.IdentityHashMap} with the given expected size. */
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super IdentityHashMap> IDENTITY_HASH_MAP_FACTORY = N::newIdentityHashMap;
 
-    /** The Constant TREE_MAP_FACTORY. */
+    /** Shared factory function that creates a new {@link TreeMap} (capacity parameter is ignored). */
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super TreeMap> TREE_MAP_FACTORY = len -> N.newTreeMap();
 
-    /** The Constant CONCURRENT_HASH_MAP_FACTORY. */
+    /** Shared factory function that creates a new {@link java.util.concurrent.ConcurrentHashMap} with the given initial capacity. */
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super ConcurrentHashMap> CONCURRENT_HASH_MAP_FACTORY = N::newConcurrentHashMap;
 
-    /** The Constant BI_MAP_FACTORY. */
+    /** Shared factory function that creates a new {@link BiMap} with the given initial capacity. */
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super BiMap> BI_MAP_FACTORY = N::newBiMap;
 
-    /** The Constant MULTISET_FACTORY. */
+    /** Shared factory function that creates a new {@link Multiset} with the given initial capacity. */
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super Multiset> MULTISET_FACTORY = N::newMultiset;
 
-    /** The Constant LIST_MULTIMAP_FACTORY. */
+    /** Shared factory function that creates a new {@link ListMultimap} with the given initial capacity. */
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super ListMultimap> LIST_MULTIMAP_FACTORY = N::newLinkedListMultimap;
 
-    /** The Constant SET_MULTIMAP_FACTORY. */
+    /** Shared factory function that creates a new {@link SetMultimap} with the given initial capacity. */
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super SetMultimap> SET_MULTIMAP_FACTORY = N::newSetMultimap;
 
@@ -266,11 +265,12 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns the provided IntFunction as is - a shorthand identity method for IntFunction instances.
-     * 
+     * Returns the provided {@link IntFunction} as-is. This is an identity helper method that aids
+     * with type inference in contexts where the compiler cannot infer the generic type automatically.
+     *
      * <p>This method serves as a shorthand convenience method that can help with type inference
-     * in certain contexts. It's part of a family of factory methods that handle various function types.</p>
-     * 
+     * in certain contexts. It is part of a family of factory methods that handle various function types.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Instead of explicitly typing:
@@ -279,9 +279,9 @@ public final class IntFunctions {
      * var arrayCreator = IntFunctions.of(size -> new String[size]);
      * }</pre>
      *
-     * @param <T> the type of the result of the function
-     * @param func the IntFunction to return
-     * @return the IntFunction unchanged
+     * @param <T> the type of the result produced by the function
+     * @param func the {@code IntFunction} to return unchanged; must not be {@code null}
+     * @return the same {@code IntFunction} instance passed as the argument
      */
     public static <T> IntFunction<T> of(IntFunction<T> func) {
         return func;
@@ -289,7 +289,7 @@ public final class IntFunctions {
 
     /**
      * Returns an IntFunction that creates boolean arrays of the specified size.
-     * 
+     *
      * <p>The returned function creates new boolean arrays with all elements initialized to {@code false}.</p>
      *
      * @return an IntFunction that creates boolean arrays
@@ -300,7 +300,7 @@ public final class IntFunctions {
 
     /**
      * Returns an IntFunction that creates char arrays of the specified size.
-     * 
+     *
      * <p>The returned function creates new char arrays with all elements initialized to '\u0000'.</p>
      *
      * @return an IntFunction that creates char arrays
@@ -311,7 +311,7 @@ public final class IntFunctions {
 
     /**
      * Returns an IntFunction that creates byte arrays of the specified size.
-     * 
+     *
      * <p>The returned function creates new byte arrays with all elements initialized to 0.</p>
      *
      * @return an IntFunction that creates byte arrays
@@ -322,7 +322,7 @@ public final class IntFunctions {
 
     /**
      * Returns an IntFunction that creates short arrays of the specified size.
-     * 
+     *
      * <p>The returned function creates new short arrays with all elements initialized to 0.</p>
      *
      * @return an IntFunction that creates short arrays
@@ -333,7 +333,7 @@ public final class IntFunctions {
 
     /**
      * Returns an IntFunction that creates int arrays of the specified size.
-     * 
+     *
      * <p>The returned function creates new int arrays with all elements initialized to 0.</p>
      *
      * @return an IntFunction that creates int arrays
@@ -344,7 +344,7 @@ public final class IntFunctions {
 
     /**
      * Returns an IntFunction that creates long arrays of the specified size.
-     * 
+     *
      * <p>The returned function creates new long arrays with all elements initialized to 0L.</p>
      *
      * @return an IntFunction that creates long arrays
@@ -355,7 +355,7 @@ public final class IntFunctions {
 
     /**
      * Returns an IntFunction that creates float arrays of the specified size.
-     * 
+     *
      * <p>The returned function creates new float arrays with all elements initialized to 0.0f.</p>
      *
      * @return an IntFunction that creates float arrays
@@ -366,7 +366,7 @@ public final class IntFunctions {
 
     /**
      * Returns an IntFunction that creates double arrays of the specified size.
-     * 
+     *
      * <p>The returned function creates new double arrays with all elements initialized to 0.0.</p>
      *
      * @return an IntFunction that creates double arrays
@@ -377,7 +377,7 @@ public final class IntFunctions {
 
     /**
      * Returns an IntFunction that creates String arrays of the specified size.
-     * 
+     *
      * <p>The returned function creates new String arrays with all elements initialized to {@code null}.</p>
      *
      * @return an IntFunction that creates String arrays
@@ -388,7 +388,7 @@ public final class IntFunctions {
 
     /**
      * Returns an IntFunction that creates Object arrays of the specified size.
-     * 
+     *
      * <p>The returned function creates new Object arrays with all elements initialized to {@code null}.</p>
      *
      * @return an IntFunction that creates Object arrays
@@ -399,7 +399,7 @@ public final class IntFunctions {
 
     /**
      * Returns an IntFunction that creates BooleanList instances with the specified initial capacity.
-     * 
+     *
      * <p>BooleanList is a specialized list implementation for primitive boolean values,
      * avoiding boxing/unboxing overhead.</p>
      *
@@ -411,7 +411,7 @@ public final class IntFunctions {
 
     /**
      * Returns an IntFunction that creates CharList instances with the specified initial capacity.
-     * 
+     *
      * <p>CharList is a specialized list implementation for primitive char values,
      * avoiding boxing/unboxing overhead.</p>
      *
@@ -423,7 +423,7 @@ public final class IntFunctions {
 
     /**
      * Returns an IntFunction that creates ByteList instances with the specified initial capacity.
-     * 
+     *
      * <p>ByteList is a specialized list implementation for primitive byte values,
      * avoiding boxing/unboxing overhead.</p>
      *
@@ -435,7 +435,7 @@ public final class IntFunctions {
 
     /**
      * Returns an IntFunction that creates ShortList instances with the specified initial capacity.
-     * 
+     *
      * <p>ShortList is a specialized list implementation for primitive short values,
      * avoiding boxing/unboxing overhead.</p>
      *
@@ -447,7 +447,7 @@ public final class IntFunctions {
 
     /**
      * Returns an IntFunction that creates IntList instances with the specified initial capacity.
-     * 
+     *
      * <p>IntList is a specialized list implementation for primitive int values,
      * avoiding boxing/unboxing overhead.</p>
      *
@@ -459,7 +459,7 @@ public final class IntFunctions {
 
     /**
      * Returns an IntFunction that creates LongList instances with the specified initial capacity.
-     * 
+     *
      * <p>LongList is a specialized list implementation for primitive long values,
      * avoiding boxing/unboxing overhead.</p>
      *
@@ -471,7 +471,7 @@ public final class IntFunctions {
 
     /**
      * Returns an IntFunction that creates FloatList instances with the specified initial capacity.
-     * 
+     *
      * <p>FloatList is a specialized list implementation for primitive float values,
      * avoiding boxing/unboxing overhead.</p>
      *
@@ -483,7 +483,7 @@ public final class IntFunctions {
 
     /**
      * Returns an IntFunction that creates DoubleList instances with the specified initial capacity.
-     * 
+     *
      * <p>DoubleList is a specialized list implementation for primitive double values,
      * avoiding boxing/unboxing overhead.</p>
      *
@@ -495,7 +495,7 @@ public final class IntFunctions {
 
     /**
      * Returns an IntFunction that creates ArrayList instances with the specified initial capacity.
-     * 
+     *
      * <p>The returned function creates new ArrayList instances optimized with the given initial capacity
      * to avoid resizing during element addition.</p>
      *
@@ -509,7 +509,7 @@ public final class IntFunctions {
 
     /**
      * Returns an IntFunction that creates LinkedList instances.
-     * 
+     *
      * <p>The returned function creates new LinkedList instances. Note that the capacity parameter
      * is ignored as LinkedList does not support initial capacity.</p>
      *
@@ -523,7 +523,7 @@ public final class IntFunctions {
 
     /**
      * Returns an IntFunction that creates HashSet instances with the specified initial capacity.
-     * 
+     *
      * <p>The returned function creates new HashSet instances optimized with the given initial capacity
      * to avoid rehashing during element addition.</p>
      *
@@ -537,7 +537,7 @@ public final class IntFunctions {
 
     /**
      * Returns an IntFunction that creates LinkedHashSet instances with the specified initial capacity.
-     * 
+     *
      * <p>The returned function creates new LinkedHashSet instances that maintain insertion order
      * and are optimized with the given initial capacity.</p>
      *
@@ -551,7 +551,7 @@ public final class IntFunctions {
 
     /**
      * Returns an IntFunction that creates TreeSet instances.
-     * 
+     *
      * <p>The returned function creates new TreeSet instances that maintain elements in sorted order.
      * Note that the capacity parameter is ignored as TreeSet does not support initial capacity.</p>
      *
@@ -565,7 +565,7 @@ public final class IntFunctions {
 
     /**
      * Returns an IntFunction that creates TreeSet instances as NavigableSet.
-     * 
+     *
      * <p>The returned function creates new TreeSet instances that provide navigation methods
      * for accessing elements relative to other elements. Note that the capacity parameter
      * is ignored as TreeSet does not support initial capacity.</p>
@@ -580,7 +580,7 @@ public final class IntFunctions {
 
     /**
      * Returns an IntFunction that creates TreeSet instances.
-     * 
+     *
      * <p>The returned function creates new TreeSet instances that maintain elements in sorted order.
      * Note that the capacity parameter is ignored as TreeSet does not support initial capacity.</p>
      *
@@ -594,7 +594,7 @@ public final class IntFunctions {
 
     /**
      * Returns an IntFunction that creates LinkedList instances as Queue.
-     * 
+     *
      * <p>The returned function creates new LinkedList instances that implement the Queue interface.
      * Note that the capacity parameter is ignored as LinkedList does not support initial capacity.</p>
      *
@@ -608,7 +608,7 @@ public final class IntFunctions {
 
     /**
      * Returns an IntFunction that creates LinkedList instances as Deque.
-     * 
+     *
      * <p>The returned function creates new LinkedList instances that implement the Deque interface,
      * supporting element insertion and removal at both ends. Note that the capacity parameter
      * is ignored as LinkedList does not support initial capacity.</p>

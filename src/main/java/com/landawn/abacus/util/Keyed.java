@@ -20,20 +20,20 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * An immutable container that pairs a key with a value, where equality and hashing
  * are based solely on the key. This design provides significant performance improvements
  * in collections by avoiding expensive value comparisons.
- * 
- * <p>It's designed for performance improvement by only hash/compare {@code key} in 
+ *
+ * <p>It's designed for performance improvement by only hash/compare {@code key} in
  * {@code hashCode/equals} method. This makes it ideal for scenarios where you need
  * to store key-value pairs in sets or as map keys, but only want to consider the
  * key for uniqueness.</p>
- * 
+ *
  * <p>This class is sealed and only permits {@link IndexedKeyed} as a subclass.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Keyed<String, User> userKeyed = Keyed.of("userId123", new User("John", "Doe"));
  * Set<Keyed<String, User>> userSet = new HashSet<>();
  * userSet.add(userKeyed);
- * 
+ *
  * // Only the key is used for equality
  * Keyed<String, User> sameKey = Keyed.of("userId123", new User("Jane", "Smith"));
  * System.out.println(userKeyed.equals(sameKey));   // true

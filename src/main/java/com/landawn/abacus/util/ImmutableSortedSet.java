@@ -30,19 +30,19 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * An immutable, thread-safe implementation of the SortedSet interface.
  * Once created, the contents of an ImmutableSortedSet cannot be modified.
  * All mutating operations inherited from the parent interfaces will throw UnsupportedOperationException.
- * 
+ *
  * <p>This class maintains elements in sorted order according to their natural ordering
  * (if they implement Comparable) or by a Comparator provided at set creation time.
  * The implementation preserves the sorted order of elements when created from another SortedSet.</p>
- * 
+ *
  * <p>This class provides several static factory methods for creating instances:
  * <ul>
  * <li>{@link #empty()} - returns an empty immutable sorted set</li>
- * <li>{@link #of(Object[])} - creates sets with specific elements</li>
+ * <li>{@link #of(Comparable)} (and arity-overloads up to ten elements) - creates sets with specific elements</li>
  * <li>{@link #copyOf(Collection)} - creates a defensive copy from another collection</li>
  * <li>{@link #wrap(SortedSet)} - wraps an existing sorted set (changes to the underlying set will be reflected)</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ImmutableSortedSet<String> set = ImmutableSortedSet.of("apple", "banana", "cherry");
@@ -106,13 +106,13 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     //    }
 
     /**
-     * Returns an ImmutableSortedSet containing a single element.
-     * This method exists for API consistency with other immutable collection factories.
+     * Returns an ImmutableSortedSet containing a single element in sorted order.
+     * The element must implement {@link Comparable} to determine its natural ordering.
      *
      * @param <E> the type of element, must extend Comparable
      * @param e1 the element to be contained in the set
      * @return an ImmutableSortedSet containing only the specified element
-     * @see #of(Comparable, Comparable)
+     * @see #of(Object, Object)
      */
     public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E e1) {
         return new ImmutableSortedSet<>(new TreeSet<>(Collections.singletonList(e1)));
@@ -295,10 +295,10 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * If the provided collection is already an instance of ImmutableSortedSet, it is directly returned.
      * If the provided collection is {@code null} or empty, an empty ImmutableSortedSet is returned.
      * Otherwise, a new ImmutableSortedSet is created with the elements of the provided collection.
-     * 
+     *
      * <p>The elements are sorted according to their natural ordering if they implement Comparable,
      * or a ClassCastException will be thrown if they don't.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("charlie", "alpha", "beta");
@@ -324,16 +324,16 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     * Wraps the provided SortedSet into an ImmutableSortedSet. Changes to the specified SortedSet 
+     * Wraps the provided SortedSet into an ImmutableSortedSet. Changes to the specified SortedSet
      * will be reflected in the ImmutableSortedSet.
      * If the provided SortedSet is already an instance of ImmutableSortedSet, it is directly returned.
      * If the provided SortedSet is {@code null}, an empty ImmutableSortedSet is returned.
      * Otherwise, returns a new ImmutableSortedSet backed by the provided SortedSet.
-     * 
+     *
      * <p><b>Warning:</b> This method does not create a defensive copy. Changes to the underlying
      * SortedSet will be visible through the returned ImmutableSortedSet, which violates the
      * immutability contract. Use {@link #copyOf(Collection)} for a {@code true} immutable copy.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SortedSet<String> mutableSet = new TreeSet<>();
@@ -342,8 +342,9 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * }</pre>
      *
      * @param <E> the type of elements in the set
-     * @param sortedSet the sorted set to wrap
-     * @return an {@code ImmutableSortedSet} backed by the specified {@code sortedSet}
+     * @param sortedSet the sorted set to wrap; may be {@code null}
+     * @return an {@code ImmutableSortedSet} backed by the specified {@code sortedSet},
+     *         or {@link #empty()} if {@code sortedSet} is {@code null}
      */
     @Beta
     public static <E> ImmutableSortedSet<E> wrap(final SortedSet<? extends E> sortedSet) {
@@ -379,7 +380,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * <pre>{@code
      * ImmutableSortedSet<String> naturalOrder = ImmutableSortedSet.of("a", "b", "c");
      * System.out.println(naturalOrder.comparator());   // null
-     * 
+     *
      * Comparator<String> reverseOrder = Comparator.reverseOrder();
      * SortedSet<String> customSet = new TreeSet<>(reverseOrder);
      * customSet.add("a");
@@ -399,10 +400,10 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * Returns a view of the portion of this set whose elements range from {@code fromElement},
      * inclusive, to {@code toElement}, exclusive. The returned set is backed by this set,
      * so it remains immutable.
-     * 
+     *
      * <p>The returned set will throw an {@code IllegalArgumentException} on an attempt to insert
      * an element outside its range.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(1, 2, 3, 4, 5);
@@ -430,7 +431,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     /**
      * Returns a view of the portion of this set whose elements are strictly less than
      * {@code toElement}. The returned set is backed by this set, so it remains immutable.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSortedSet<String> set = ImmutableSortedSet.of("a", "b", "c", "d");
@@ -454,7 +455,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     /**
      * Returns a view of the portion of this set whose elements are greater than or equal to
      * {@code fromElement}. The returned set is backed by this set, so it remains immutable.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(10, 20, 30, 40);
@@ -477,7 +478,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
 
     /**
      * Returns the first (lowest) element currently in this set.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSortedSet<String> set = ImmutableSortedSet.of("banana", "apple", "cherry");
@@ -494,7 +495,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
 
     /**
      * Returns the last (highest) element currently in this set.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(3, 1, 4, 1, 5);

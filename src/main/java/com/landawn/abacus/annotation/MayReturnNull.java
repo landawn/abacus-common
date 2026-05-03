@@ -27,19 +27,19 @@ import java.lang.annotation.Target;
  *
  * <p><b>Purpose and benefits:</b></p>
  * <ul>
- *   <li>Makes null-return contracts explicit and visible</li>
- *   <li>Helps prevent {@code NullPointerException} in calling code</li>
- *   <li>Enables better IDE support with null-safety warnings</li>
- *   <li>Documents API behavior clearly for users</li>
- *   <li>Facilitates static analysis for null-safety verification</li>
+ *   <li>Makes null-return contracts explicit and visible in the API.</li>
+ *   <li>Helps prevent {@link NullPointerException} in calling code.</li>
+ *   <li>Enables better IDE support with null-safety warnings.</li>
+ *   <li>Documents API behavior clearly for users.</li>
+ *   <li>Facilitates static analysis for null-safety verification.</li>
  * </ul>
  *
  * <p><b>Best practices:</b></p>
  * <ul>
- *   <li>Always document in Javadoc when and why {@code null} might be returned</li>
- *   <li>Consider returning {@code Optional} instead for new APIs</li>
- *   <li>Use consistently with {@link NotNull} to establish complete null-safety contracts</li>
- *   <li>Ensure calling code handles the {@code null} case appropriately</li>
+ *   <li>Always document in Javadoc when and why {@code null} might be returned.</li>
+ *   <li>Consider returning {@link java.util.Optional} instead for new APIs.</li>
+ *   <li>Use consistently with {@link NotNull} to establish complete null-safety contracts.</li>
+ *   <li>Ensure calling code handles the {@code null} case appropriately.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>

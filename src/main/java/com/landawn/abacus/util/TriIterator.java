@@ -31,14 +31,38 @@ import com.landawn.abacus.util.function.TriPredicate;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * The TriIterator class is an abstract class that extends ImmutableIterator.
- * It represents an iterator over triples of values of type A, B, and C.
- * This class provides a blueprint for classes that need to iterate over three related values simultaneously.
+ * An abstract iterator that produces triples of values of types A, B, and C simultaneously.
+ * Each call to {@link #next()} returns a {@link Triple} containing one element from each
+ * of the three logical sequences being iterated.
+ *
+ * <p>TriIterator extends {@link ImmutableIterator} and therefore does not support
+ * the {@link java.util.Iterator#remove()} operation.</p>
+ *
+ * <p>Factory methods are provided for common construction patterns:</p>
+ * <ul>
+ *   <li>{@link #empty()} — an empty iterator</li>
+ *   <li>{@link #generate(java.util.function.Consumer)} — infinite iterator driven by a consumer</li>
+ *   <li>{@link #generate(java.util.function.BooleanSupplier, java.util.function.Consumer)} — bounded iterator driven by a consumer</li>
+ *   <li>{@link #generate(int, int, com.landawn.abacus.util.function.IntObjConsumer)} — index-ranged iterator</li>
+ *   <li>{@link #zip(Object[], Object[], Object[])} — zip three arrays into triples</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * String[] names = {"Alice", "Bob"};
+ * Integer[] ages  = {25, 30};
+ * Boolean[] active = {true, false};
+ *
+ * TriIterator<String, Integer, Boolean> iter = TriIterator.zip(names, ages, active);
+ * iter.forEachRemaining((name, age, isActive) ->
+ *     System.out.println(name + ", " + age + ", " + isActive));
+ * }</pre>
  *
  * @param <A> the first type of elements returned by this iterator
  * @param <B> the second type of elements returned by this iterator
  * @param <C> the third type of elements returned by this iterator
  *
+ * @see Triple
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Enumerations
  */
@@ -807,7 +831,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * are passed directly to the action consumer.</p>
      *
      * <p>Example implementation:
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * protected <E extends Exception> void next(Throwables.TriConsumer<A, B, C, E> action) {
@@ -1075,7 +1099,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
-     * Returns a new TriIterator that includes only the elements that satisfy the provided predicate.
+     * Returns a new {@code TriIterator} that includes only the triples satisfying the provided predicate.
+     * Triples for which the predicate returns {@code false} are skipped during iteration.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1089,8 +1114,9 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * // Output: (3, ccc, true), (5, eeeee, true)
      * }</pre>
      *
-     * @param predicate the predicate to apply to each triple of elements
-     * @return a new TriIterator containing only the elements that match the predicate
+     * @param predicate the predicate to apply to each triple of elements, must not be {@code null}
+     * @return a new {@code TriIterator} containing only the triples that satisfy the predicate
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     public TriIterator<A, B, C> filter(final TriPredicate<? super A, ? super B, ? super C> predicate) {
         N.checkArgNotNull(predicate, cs.Predicate);
@@ -1218,7 +1244,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     public abstract <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper);
 
     /**
-     * Returns a Stream of elements produced by applying the given mapper function to each triple of elements in this TriIterator.
+     * Returns a {@link Stream} of elements produced by applying the given mapper function to each
+     * triple of elements in this {@code TriIterator}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1235,8 +1262,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * }</pre>
      *
      * @param <R> the type of elements in the resulting Stream
-     * @param mapper the function to apply to each triple of elements
-     * @return a Stream containing the elements produced by the mapper function
+     * @param mapper the function to apply to each triple of elements, must not be {@code null}
+     * @return a {@code Stream} containing the elements produced by the mapper function
      */
     public <R> Stream<R> stream(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper) {
         return Stream.of(map(mapper));

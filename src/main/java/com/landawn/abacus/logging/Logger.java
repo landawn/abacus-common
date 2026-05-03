@@ -382,7 +382,7 @@ public interface Logger {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * logger.debug("User {} accessed resource {} ", username, resourceId);
+     * logger.debug("User {} accessed resource {}", username, resourceId);
      * }</pre>
      *
      * @param template the message template containing two placeholders

@@ -40,17 +40,17 @@ import com.landawn.abacus.logging.LoggerFactory;
  * A factory class for creating and recycling commonly used objects to reduce memory allocation overhead.
  * This class maintains object pools for various data structures and buffers, allowing for efficient
  * reuse of objects in performance-critical applications.
- * 
+ *
  * <p>The Objectory pattern helps to:</p>
  * <ul>
  *   <li>Reduce garbage collection pressure by reusing objects</li>
  *   <li>Improve performance in scenarios with frequent object creation/destruction</li>
  *   <li>Provide pre-sized buffers for common I/O operations</li>
  * </ul>
- * 
+ *
  * <p><b>Important:</b> Objects obtained from Objectory should be properly recycled after use
  * to maintain pool efficiency. Failing to recycle objects will result in new allocations.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create and use a StringBuilder
@@ -62,9 +62,9 @@ import com.landawn.abacus.logging.LoggerFactory;
  *     Objectory.recycle(sb);   // Return to pool for reuse
  * }
  * }</pre>
- * 
- * @see BufferedWriter
- * @see BufferedReader
+ *
+ * @see java.io.BufferedWriter
+ * @see java.io.BufferedReader
  */
 @Internal
 @Beta
@@ -129,7 +129,7 @@ public final class Objectory {
     /**
      * Creates or retrieves a List from the object pool.
      * The returned list is empty and ready for use.
-     * 
+     *
      * <p>After use, the list should be recycled using {@link #recycle(List)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -157,7 +157,7 @@ public final class Objectory {
     /**
      * Creates or retrieves a Set from the object pool.
      * The returned set is empty and ready for use.
-     * 
+     *
      * <p>After use, the set should be recycled using {@link #recycle(Set)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -185,7 +185,7 @@ public final class Objectory {
     /**
      * Creates or retrieves a LinkedHashSet from the object pool.
      * The returned set is empty and ready for use, maintaining insertion order.
-     * 
+     *
      * <p>After use, the set should be recycled using {@link #recycle(Set)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -213,7 +213,7 @@ public final class Objectory {
     /**
      * Creates or retrieves a Map from the object pool.
      * The returned map is empty and ready for use.
-     * 
+     *
      * <p>After use, the map should be recycled using {@link #recycle(Map)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -241,7 +241,7 @@ public final class Objectory {
     /**
      * Creates or retrieves a LinkedHashMap from the object pool.
      * The returned map is empty and ready for use, maintaining insertion order.
-     * 
+     *
      * <p>After use, the map should be recycled using {@link #recycle(Map)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -269,7 +269,7 @@ public final class Objectory {
     /**
      * Creates or retrieves an Object array with the default poolable size.
      * The array length will be {@link #POOLABLE_ARRAY_LENGTH}.
-     * 
+     *
      * <p>After use, the array should be recycled using {@link #recycle(Object[])}.</p>
      *
      * @return an Object array from the pool or a new instance if the pool is empty
@@ -281,7 +281,7 @@ public final class Objectory {
     /**
      * Creates or retrieves an Object array of the specified size.
      * Arrays larger than {@link #POOLABLE_ARRAY_LENGTH} are always newly allocated.
-     * 
+     *
      * <p>After use, the array should be recycled using {@link #recycle(Object[])}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -329,7 +329,7 @@ public final class Objectory {
     /**
      * Creates or retrieves a char array buffer with the default buffer size.
      * The buffer size will be {@link #BUFFER_SIZE}.
-     * 
+     *
      * <p>After use, the buffer should be recycled using {@link #recycle(char[])}.</p>
      *
      * @return a char array buffer from the pool or a new instance if the pool is empty
@@ -341,7 +341,7 @@ public final class Objectory {
     /**
      * Creates or retrieves a char array buffer of the specified capacity.
      * Buffers larger than {@link #BUFFER_SIZE} are always newly allocated.
-     * 
+     *
      * <p>This is useful for character-based I/O operations where a temporary buffer is needed.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -380,7 +380,7 @@ public final class Objectory {
     /**
      * Creates or retrieves a byte array buffer with the default buffer size.
      * The buffer size will be {@link #BUFFER_SIZE}.
-     * 
+     *
      * <p>After use, the buffer should be recycled using {@link #recycle(byte[])}.</p>
      *
      * @return a byte array buffer from the pool or a new instance if the pool is empty
@@ -392,7 +392,7 @@ public final class Objectory {
     /**
      * Creates or retrieves a byte array buffer of the specified capacity.
      * Buffers larger than {@link #BUFFER_SIZE} are always newly allocated.
-     * 
+     *
      * <p>This is useful for binary I/O operations where a temporary buffer is needed.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -431,7 +431,7 @@ public final class Objectory {
     /**
      * Creates or retrieves a StringBuilder with the default buffer size.
      * The initial capacity will be {@link #BUFFER_SIZE}.
-     * 
+     *
      * <p>After use, the StringBuilder should be recycled using {@link #recycle(StringBuilder)}.</p>
      *
      * @return a StringBuilder from the pool or a new instance if the pool is empty
@@ -479,7 +479,7 @@ public final class Objectory {
     /**
      * Creates or retrieves a ByteArrayOutputStream with the default buffer size.
      * The initial capacity will be {@link #BUFFER_SIZE}.
-     * 
+     *
      * <p>After use, the stream should be recycled using {@link #recycle(ByteArrayOutputStream)}.</p>
      *
      * @return a ByteArrayOutputStream from the pool or a new instance if the pool is empty
@@ -527,7 +527,7 @@ public final class Objectory {
     /**
      * Creates or retrieves a BufferedWriter with no underlying writer.
      * The writer must be initialized with {@link BufferedWriter#reinit(Writer)} before use.
-     * 
+     *
      * <p>After use, the writer should be recycled using {@link #recycle(java.io.BufferedWriter)}.</p>
      *
      * @return a BufferedWriter from the pool or a new instance if the pool is empty
@@ -548,7 +548,7 @@ public final class Objectory {
 
     /**
      * Creates or retrieves a BufferedWriter wrapping the specified OutputStream.
-     * 
+     *
      * <p>After use, the writer should be recycled using {@link #recycle(java.io.BufferedWriter)}.</p>
      *
      * @param os the OutputStream to wrap
@@ -571,7 +571,7 @@ public final class Objectory {
     /**
      * Creates or retrieves a BufferedWriter wrapping the specified Writer.
      * If the writer is already a BufferedWriter, it is returned as-is.
-     * 
+     *
      * <p>After use, the writer should be recycled using {@link #recycle(java.io.BufferedWriter)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -611,7 +611,7 @@ public final class Objectory {
     /**
      * Creates or retrieves a BufferedXmlWriter with no underlying writer.
      * The writer must be initialized before use.
-     * 
+     *
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedXmlWriter)}.</p>
      *
      * @return a BufferedXmlWriter from the pool or a new instance if the pool is empty
@@ -632,7 +632,7 @@ public final class Objectory {
 
     /**
      * Creates or retrieves a BufferedXmlWriter wrapping the specified OutputStream.
-     * 
+     *
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedXmlWriter)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -664,7 +664,7 @@ public final class Objectory {
 
     /**
      * Creates or retrieves a BufferedXmlWriter wrapping the specified Writer.
-     * 
+     *
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedXmlWriter)}.</p>
      *
      * @param writer the Writer to wrap
@@ -687,7 +687,7 @@ public final class Objectory {
     /**
      * Creates or retrieves a BufferedJsonWriter with no underlying writer.
      * The writer must be initialized before use.
-     * 
+     *
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedJsonWriter)}.</p>
      *
      * @return a BufferedJsonWriter from the pool or a new instance if the pool is empty
@@ -708,7 +708,7 @@ public final class Objectory {
 
     /**
      * Creates or retrieves a BufferedJsonWriter wrapping the specified OutputStream.
-     * 
+     *
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedJsonWriter)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -740,7 +740,7 @@ public final class Objectory {
 
     /**
      * Creates or retrieves a BufferedJsonWriter wrapping the specified Writer.
-     * 
+     *
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedJsonWriter)}.</p>
      *
      * @param writer the Writer to wrap
@@ -763,7 +763,7 @@ public final class Objectory {
     /**
      * Creates or retrieves a BufferedCsvWriter with no underlying writer.
      * The writer must be initialized before use.
-     * 
+     *
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedCsvWriter)}.</p>
      *
      * @return a BufferedCsvWriter from the pool or a new instance if the pool is empty
@@ -784,7 +784,7 @@ public final class Objectory {
 
     /**
      * Creates or retrieves a BufferedCsvWriter wrapping the specified OutputStream.
-     * 
+     *
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedCsvWriter)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -816,7 +816,7 @@ public final class Objectory {
 
     /**
      * Creates or retrieves a BufferedCsvWriter wrapping the specified Writer.
-     * 
+     *
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedCsvWriter)}.</p>
      *
      * @param writer the Writer to wrap
@@ -864,7 +864,7 @@ public final class Objectory {
 
     /**
      * Creates or retrieves a BufferedReader wrapping the specified InputStream.
-     * 
+     *
      * <p>After use, the reader should be recycled using {@link #recycle(java.io.BufferedReader)}.</p>
      *
      * @param is the InputStream to wrap
@@ -941,9 +941,9 @@ public final class Objectory {
      * Returns a List to the object pool for reuse.
      * The list is cleared before being added to the pool.
      * Lists larger than {@link #POOLABLE_SIZE} are not pooled.
-     * 
+     *
      * <p>This method should be called in a finally block to ensure proper recycling:</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Objectory.createList();

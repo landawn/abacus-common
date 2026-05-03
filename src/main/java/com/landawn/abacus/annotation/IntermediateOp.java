@@ -27,30 +27,30 @@ import java.lang.annotation.Target;
  *
  * <p>This annotation is used for documentation purposes and to indicate methods that:</p>
  * <ul>
- *   <li>Transform elements without consuming the entire stream</li>
- *   <li>Return a new stream or processing pipeline</li>
- *   <li>Can be chained with other intermediate operations</li>
- *   <li>Are typically lazily evaluated</li>
+ *   <li>Transform elements without consuming the entire stream.</li>
+ *   <li>Return a new stream or processing pipeline.</li>
+ *   <li>Can be chained with other intermediate operations.</li>
+ *   <li>Are typically lazily evaluated.</li>
  * </ul>
  *
  * <p><b>Characteristics of intermediate operations:</b></p>
  * <ul>
- *   <li><b>Lazy evaluation:</b> Operations are not executed until a terminal operation is invoked</li>
- *   <li><b>Stateless or stateful:</b> May maintain state between elements (e.g., distinct, sorted)</li>
- *   <li><b>Non-consuming:</b> Do not process the stream source directly</li>
- *   <li><b>Pipeline formation:</b> Enable fluent API design through method chaining</li>
+ *   <li><b>Lazy evaluation:</b> Operations are not executed until a terminal operation is invoked.</li>
+ *   <li><b>Stateless or stateful:</b> May maintain state between elements (e.g., {@code distinct}, {@code sorted}).</li>
+ *   <li><b>Non-consuming:</b> Do not process the stream source directly.</li>
+ *   <li><b>Pipeline formation:</b> Enable fluent API design through method chaining.</li>
  * </ul>
  *
  * <p><b>Common intermediate operations include:</b></p>
  * <ul>
- *   <li>filter() - Selects elements matching a predicate</li>
- *   <li>map() - Transforms each element</li>
- *   <li>flatMap() - Transforms and flattens nested structures</li>
- *   <li>distinct() - Removes duplicate elements</li>
- *   <li>sorted() - Orders elements</li>
- *   <li>peek() - Performs an action on each element without consuming</li>
- *   <li>limit() - Truncates the stream</li>
- *   <li>skip() - Discards initial elements</li>
+ *   <li>{@code filter()} - Selects elements matching a predicate.</li>
+ *   <li>{@code map()} - Transforms each element.</li>
+ *   <li>{@code flatMap()} - Transforms and flattens nested structures.</li>
+ *   <li>{@code distinct()} - Removes duplicate elements.</li>
+ *   <li>{@code sorted()} - Orders elements.</li>
+ *   <li>{@code peek()} - Performs an action on each element without consuming.</li>
+ *   <li>{@code limit()} - Truncates the stream.</li>
+ *   <li>{@code skip()} - Discards initial elements.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>

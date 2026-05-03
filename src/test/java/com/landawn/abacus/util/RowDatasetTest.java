@@ -73,21 +73,21 @@ public class RowDatasetTest extends TestBase {
         emptyDataset = new RowDataset(new ArrayList<>(), new ArrayList<>());
         columns = copyColumnList();
 
-        List<String> leftColumnNames = CommonUtil.toList("id", "name", "age");
+        List<String> leftColumnNames = N.toList("id", "name", "age");
         List<List<Object>> leftColumns = new ArrayList<>();
-        leftColumns.add(CommonUtil.toList(1, 2, 3));
-        leftColumns.add(CommonUtil.toList("Alice", "Bob", "Charlie"));
-        leftColumns.add(CommonUtil.toList(25, 30, 35));
+        leftColumns.add(N.toList(1, 2, 3));
+        leftColumns.add(N.toList("Alice", "Bob", "Charlie"));
+        leftColumns.add(N.toList(25, 30, 35));
         ds1 = new RowDataset(leftColumnNames, leftColumns);
 
-        List<String> rightColumnNames = CommonUtil.toList("id", "city", "salary");
+        List<String> rightColumnNames = N.toList("id", "city", "salary");
         List<List<Object>> rightColumns = new ArrayList<>();
-        rightColumns.add(CommonUtil.toList(2, 3, 4));
-        rightColumns.add(CommonUtil.toList("New York", "London", "Tokyo"));
-        rightColumns.add(CommonUtil.toList(50000, 60000, 70000));
+        rightColumns.add(N.toList(2, 3, 4));
+        rightColumns.add(N.toList("New York", "London", "Tokyo"));
+        rightColumns.add(N.toList(50000, 60000, 70000));
         ds2 = new RowDataset(rightColumnNames, rightColumns);
 
-        List<String> emptyColumnNames = CommonUtil.toList("col1", "col2");
+        List<String> emptyColumnNames = N.toList("col1", "col2");
         List<List<Object>> emptyColumns = new ArrayList<>();
         emptyColumns.add(new ArrayList<>());
         emptyColumns.add(new ArrayList<>());
@@ -1713,11 +1713,11 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     public void testDivideColumnWithFunction() {
-        List<String> names = CommonUtil.toList("fullName");
+        List<String> names = N.toList("fullName");
         List<List<Object>> cols = new ArrayList<>();
-        cols.add(new ArrayList<>(CommonUtil.toList("John Doe", "Jane Smith")));
+        cols.add(new ArrayList<>(N.toList("John Doe", "Jane Smith")));
         RowDataset ds = new RowDataset(names, cols);
-        ds.divideColumn("fullName", CommonUtil.toList("firstName", "lastName"), (String fullName) -> CommonUtil.toList(fullName.split(" ")));
+        ds.divideColumn("fullName", N.toList("firstName", "lastName"), (String fullName) -> N.toList(fullName.split(" ")));
         assertTrue(ds.containsColumn("firstName"));
         assertTrue(ds.containsColumn("lastName"));
         assertFalse(ds.containsColumn("fullName"));
@@ -1727,9 +1727,9 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     public void testDivideColumnWithBiConsumer() {
-        List<String> names = CommonUtil.toList("fullName");
+        List<String> names = N.toList("fullName");
         List<List<Object>> cols = new ArrayList<>();
-        cols.add(new ArrayList<>(CommonUtil.toList("John Doe", "Jane Smith")));
+        cols.add(new ArrayList<>(N.toList("John Doe", "Jane Smith")));
         RowDataset ds = new RowDataset(names, cols);
         ds.divideColumn("fullName", Arrays.asList("firstName", "lastName"), (String fullName, Object[] output) -> {
             String[] parts = fullName.split(" ");
@@ -2478,7 +2478,7 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     public void testMergeWithColumnNames() {
-        Collection<String> columnNames = CommonUtil.toList("id", "city");
+        Collection<String> columnNames = N.toList("id", "city");
         Dataset result = ds1.copy();
         result.merge(ds2, columnNames);
 
@@ -2488,8 +2488,8 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     public void testMergeMultipleDatasets() {
-        Collection<Dataset> ds = CommonUtil.toList(ds1, ds2, emptyDs);
-        Dataset result = CommonUtil.merge(ds);
+        Collection<Dataset> ds = N.toList(ds1, ds2, emptyDs);
+        Dataset result = N.merge(ds);
 
         assertNotNull(result);
         assertEquals(ds1.size() + ds2.size() + emptyDs.size(), result.size());
@@ -2953,8 +2953,8 @@ public class RowDatasetTest extends TestBase {
             values.add(i);
         }
 
-        List<String> columnNames = CommonUtil.toList("value");
-        List<List<Object>> columnValues = CommonUtil.toList(values);
+        List<String> columnNames = N.toList("value");
+        List<List<Object>> columnValues = N.toList(values);
         RowDataset largeDs = new RowDataset(columnNames, columnValues);
 
         Dataset seqCopy = largeDs.copy();
@@ -3153,16 +3153,16 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     public void testComplexJoinScenario() {
-        List<String> columnNames1 = CommonUtil.toList("id", "value");
+        List<String> columnNames1 = N.toList("id", "value");
         List<List<Object>> columns1 = new ArrayList<>();
-        columns1.add(CommonUtil.toList(1, null, 3));
-        columns1.add(CommonUtil.toList("A", "B", "C"));
+        columns1.add(N.toList(1, null, 3));
+        columns1.add(N.toList("A", "B", "C"));
         Dataset dsWithNull1 = new RowDataset(columnNames1, columns1);
 
-        List<String> columnNames2 = CommonUtil.toList("id", "score");
+        List<String> columnNames2 = N.toList("id", "score");
         List<List<Object>> columns2 = new ArrayList<>();
-        columns2.add(CommonUtil.toList((Object) null, 2, 3));
-        columns2.add(CommonUtil.toList(10, 20, 30));
+        columns2.add(N.toList((Object) null, 2, 3));
+        columns2.add(N.toList(10, 20, 30));
         Dataset dsWithNull2 = new RowDataset(columnNames2, columns2);
 
         Dataset result = dsWithNull1.rightJoin(dsWithNull2, "id", "id");
@@ -3173,7 +3173,7 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testFlatMapSingleColumn() {
         final RowDataset dataset = createFiveRowCityDataset();
-        Function<Object, Collection<String>> mapper = name -> CommonUtil.toList(((String) name).toLowerCase(), ((String) name).toUpperCase());
+        Function<Object, Collection<String>> mapper = name -> N.toList(((String) name).toLowerCase(), ((String) name).toUpperCase());
         Dataset flatMapped = dataset.flatMapColumn("name", "variations", "id", mapper);
 
         assertNotNull(flatMapped);
@@ -3185,8 +3185,8 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testFlatMapSingleColumnWithMultipleCopying() {
         final RowDataset dataset = createFiveRowCityDataset();
-        Function<Object, Collection<Integer>> mapper = age -> CommonUtil.toList((Integer) age, (Integer) age + 10);
-        Dataset flatMapped = dataset.flatMapColumn("age", "ages", CommonUtil.toList("id", "name"), mapper);
+        Function<Object, Collection<Integer>> mapper = age -> N.toList((Integer) age, (Integer) age + 10);
+        Dataset flatMapped = dataset.flatMapColumn("age", "ages", N.toList("id", "name"), mapper);
 
         assertNotNull(flatMapped);
         assertEquals(10, flatMapped.size());
@@ -3198,8 +3198,8 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testFlatMapTuple2() {
         final RowDataset dataset = createFiveRowCityDataset();
-        BiFunction<Object, Object, Collection<String>> mapper = (name, age) -> CommonUtil.toList(name + "-young", name + "-old");
-        Dataset flatMapped = dataset.flatMapColumns(Tuple.of("name", "age"), "status", CommonUtil.toList("id"), mapper);
+        BiFunction<Object, Object, Collection<String>> mapper = (name, age) -> N.toList(name + "-young", name + "-old");
+        Dataset flatMapped = dataset.flatMapColumns(Tuple.of("name", "age"), "status", N.toList("id"), mapper);
 
         assertNotNull(flatMapped);
         assertEquals(10, flatMapped.size());
@@ -3210,8 +3210,8 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testFlatMapTuple3() {
         final RowDataset dataset = createFiveRowCityDataset();
-        TriFunction<Object, Object, Object, Collection<String>> mapper = (id, name, age) -> CommonUtil.toList("ID" + id, "NAME" + name, "AGE" + age);
-        Dataset flatMapped = dataset.flatMapColumns(Tuple.of("id", "name", "age"), "tags", CommonUtil.toList("city"), mapper);
+        TriFunction<Object, Object, Object, Collection<String>> mapper = (id, name, age) -> N.toList("ID" + id, "NAME" + name, "AGE" + age);
+        Dataset flatMapped = dataset.flatMapColumns(Tuple.of("id", "name", "age"), "tags", N.toList("city"), mapper);
 
         assertNotNull(flatMapped);
         assertEquals(15, flatMapped.size());
@@ -3222,8 +3222,8 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testFlatMapMultipleColumns() {
         final RowDataset dataset = createFiveRowCityDataset();
-        Function<DisposableObjArray, Collection<String>> mapper = arr -> CommonUtil.toList(arr.get(0).toString(), arr.get(1).toString());
-        Dataset flatMapped = dataset.flatMapColumns(CommonUtil.toList("name", "city"), "values", CommonUtil.toList("id"), mapper);
+        Function<DisposableObjArray, Collection<String>> mapper = arr -> N.toList(arr.get(0).toString(), arr.get(1).toString());
+        Dataset flatMapped = dataset.flatMapColumns(N.toList("name", "city"), "values", N.toList("id"), mapper);
 
         assertNotNull(flatMapped);
         assertEquals(10, flatMapped.size());
@@ -3233,10 +3233,10 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     public void testNullHandling() {
-        List<String> columnNames = CommonUtil.toList("col1", "col2");
+        List<String> columnNames = N.toList("col1", "col2");
         List<List<Object>> columnValues = new ArrayList<>();
-        columnValues.add(CommonUtil.toList("A", null, "B"));
-        columnValues.add(CommonUtil.toList(1, 2, null));
+        columnValues.add(N.toList("A", null, "B"));
+        columnValues.add(N.toList(1, 2, null));
 
         RowDataset ds = new RowDataset(columnNames, columnValues);
 
@@ -3260,7 +3260,7 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testLargeDatasetOperations() {
         int size = 1000;
-        List<String> columnNames = CommonUtil.toList("id", "value", "category");
+        List<String> columnNames = N.toList("id", "value", "category");
         List<List<Object>> columnValues = new ArrayList<>();
 
         List<Object> ids = new ArrayList<>();
@@ -3294,10 +3294,10 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     public void testSpecialCharactersInData() {
-        List<String> columnNames = CommonUtil.toList("text", "value");
+        List<String> columnNames = N.toList("text", "value");
         List<List<Object>> columnValues = new ArrayList<>();
-        columnValues.add(CommonUtil.toList("Hello, World", "Test\"Quote", "Line\nBreak", "<tag>"));
-        columnValues.add(CommonUtil.toList(1, 2, 3, 4));
+        columnValues.add(N.toList("Hello, World", "Test\"Quote", "Line\nBreak", "<tag>"));
+        columnValues.add(N.toList(1, 2, 3, 4));
 
         RowDataset specialDs = new RowDataset(columnNames, columnValues);
 
@@ -3662,7 +3662,7 @@ public class RowDatasetTest extends TestBase {
 
         String keyColumn = "category";
         Collection<String> valueColumns = Arrays.asList("product", "price");
-        IntFunction<ListMultimap<String, List<Object>>> supplier = capacity -> CommonUtil.newLinkedListMultimap();
+        IntFunction<ListMultimap<String, List<Object>>> supplier = capacity -> N.newLinkedListMultimap();
 
         ListMultimap<String, List<Object>> result = dupDataset.toMultimap(0, dupDataset.size(), keyColumn, valueColumns, Clazz.ofList(), supplier);
 
@@ -3676,7 +3676,7 @@ public class RowDatasetTest extends TestBase {
         final RowDataset dataset = createFourRowCityDataset();
         String keyColumn = "city";
         Collection<String> valueColumns = Arrays.asList("id", "name", "age");
-        IntFunction<ListMultimap<String, Map<String, Object>>> supplier = capacity -> CommonUtil.newLinkedListMultimap();
+        IntFunction<ListMultimap<String, Map<String, Object>>> supplier = capacity -> N.newLinkedListMultimap();
 
         ListMultimap<String, Map<String, Object>> result = dataset.toMultimap(0, dataset.size(), keyColumn, valueColumns, Clazz.ofMap(), supplier);
 
@@ -3691,7 +3691,7 @@ public class RowDatasetTest extends TestBase {
         final RowDataset dataset = createFourRowCityDataset();
         String keyColumn = "city";
         Collection<String> valueColumns = Arrays.asList("id", "name", "age");
-        IntFunction<ListMultimap<String, Person>> supplier = capacity -> CommonUtil.newLinkedListMultimap();
+        IntFunction<ListMultimap<String, Person>> supplier = capacity -> N.newLinkedListMultimap();
 
         ListMultimap<String, Person> result = dataset.toMultimap(0, dataset.size(), keyColumn, valueColumns, Person.class, supplier);
 
@@ -3835,7 +3835,7 @@ public class RowDatasetTest extends TestBase {
         String keyColumn = "city";
         Collection<String> valueColumns = Arrays.asList("name", "age");
         IntFunction<Object[]> rowSupplier = size -> new Object[size];
-        IntFunction<ListMultimap<String, Object[]>> supplier = capacity -> CommonUtil.newLinkedListMultimap();
+        IntFunction<ListMultimap<String, Object[]>> supplier = capacity -> N.newLinkedListMultimap();
 
         ListMultimap<String, Object[]> result = dataset.toMultimap(keyColumn, valueColumns, rowSupplier, supplier);
 
@@ -4007,7 +4007,7 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testToXmlWithAllParameters() {
         final RowDataset dataset = createFiveRowCityDataset();
-        Collection<String> columns = CommonUtil.toList("name", "age");
+        Collection<String> columns = N.toList("name", "age");
         String xml = dataset.toXml(1, 3, columns, "employee");
         assertNotNull(xml);
         assertTrue(xml.contains("<employee>"));
@@ -4053,7 +4053,7 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testToXmlWithRowRangeAndColumnNames() {
         final RowDataset dataset = createFiveRowCityDataset();
-        Collection<String> columns = CommonUtil.toList("name", "age");
+        Collection<String> columns = N.toList("name", "age");
         String xml = dataset.toXml(1, 3, columns);
         assertNotNull(xml);
         assertTrue(xml.contains("Jane"));
@@ -4101,7 +4101,7 @@ public class RowDatasetTest extends TestBase {
     public void testToXmlToFileWithAllParams(@TempDir Path tempDir) throws IOException {
         final RowDataset dataset = createFiveRowCityDataset();
         File outputFile = tempDir.resolve("test4.xml").toFile();
-        Collection<String> columns = CommonUtil.toList("name", "age");
+        Collection<String> columns = N.toList("name", "age");
         dataset.toXml(0, 2, columns, "record", outputFile);
         assertTrue(outputFile.exists());
 
@@ -4147,7 +4147,7 @@ public class RowDatasetTest extends TestBase {
     public void testToXmlToOutputStreamWithAllParams() throws IOException {
         final RowDataset dataset = createFiveRowCityDataset();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        Collection<String> columns = CommonUtil.toList("name");
+        Collection<String> columns = N.toList("name");
         dataset.toXml(0, 2, columns, "person", baos);
 
         String xml = baos.toString();
@@ -4193,7 +4193,7 @@ public class RowDatasetTest extends TestBase {
     public void testToXmlToWriterWithAllParams() throws IOException {
         final RowDataset dataset = createFiveRowCityDataset();
         StringWriter writer = new StringWriter();
-        Collection<String> columns = CommonUtil.toList("id", "name");
+        Collection<String> columns = N.toList("id", "name");
         dataset.toXml(0, 2, columns, "user", writer);
 
         String xml = writer.toString();
@@ -4214,7 +4214,7 @@ public class RowDatasetTest extends TestBase {
         });
 
         assertThrows(IndexOutOfBoundsException.class, () -> {
-            dataset.toCsv(5, 3, CommonUtil.toList("name"));
+            dataset.toCsv(5, 3, N.toList("name"));
         });
 
         assertThrows(IndexOutOfBoundsException.class, () -> {
@@ -4251,7 +4251,7 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testToCsvWithRowRangeAndColumns() {
         final RowDataset dataset = createFiveRowCityDataset();
-        Collection<String> columns = CommonUtil.toList("name", "age");
+        Collection<String> columns = N.toList("name", "age");
         String csv = dataset.toCsv(1, 3, columns);
         assertNotNull(csv);
         assertTrue(csv.contains("\"name\",\"age\""));
@@ -4276,7 +4276,7 @@ public class RowDatasetTest extends TestBase {
     public void testToCsvToFileWithParams(@TempDir Path tempDir) throws IOException {
         final RowDataset dataset = createFiveRowCityDataset();
         File outputFile = tempDir.resolve("test2.csv").toFile();
-        Collection<String> columns = CommonUtil.toList("name", "city");
+        Collection<String> columns = N.toList("name", "city");
         dataset.toCsv(1, 3, columns, outputFile);
         assertTrue(outputFile.exists());
 
@@ -4301,7 +4301,7 @@ public class RowDatasetTest extends TestBase {
     public void testToCsvToOutputStreamWithParams() throws IOException {
         final RowDataset dataset = createFiveRowCityDataset();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        Collection<String> columns = CommonUtil.toList("id", "name");
+        Collection<String> columns = N.toList("id", "name");
         dataset.toCsv(0, 2, columns, baos);
 
         String csv = baos.toString();
@@ -4325,7 +4325,7 @@ public class RowDatasetTest extends TestBase {
     public void testToCsvToWriterWithParams() throws IOException {
         final RowDataset dataset = createFiveRowCityDataset();
         StringWriter writer = new StringWriter();
-        Collection<String> columns = CommonUtil.toList("name");
+        Collection<String> columns = N.toList("name");
         dataset.toCsv(2, 4, columns, writer);
 
         String csv = writer.toString();
@@ -4386,7 +4386,7 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testGroupByWithSingleKeyAndRowType() {
         final RowDataset dataset = createFiveRowCityDataset();
-        Dataset grouped = dataset.groupBy("city", CommonUtil.toList("name", "age"), "people", Object[].class);
+        Dataset grouped = dataset.groupBy("city", N.toList("name", "age"), "people", Object[].class);
 
         assertNotNull(grouped);
         assertEquals(3, grouped.size());
@@ -4398,7 +4398,7 @@ public class RowDatasetTest extends TestBase {
     public void testGroupByWithSingleKeyAndArrayCollector() {
         final RowDataset dataset = createFiveRowCityDataset();
         Collector<Object[], ?, List<Object[]>> collector = Collectors.toList();
-        Dataset grouped = dataset.groupBy("city", CommonUtil.toList("name", "age"), "data", collector);
+        Dataset grouped = dataset.groupBy("city", N.toList("name", "age"), "data", collector);
 
         assertNotNull(grouped);
         assertEquals(3, grouped.size());
@@ -4411,7 +4411,7 @@ public class RowDatasetTest extends TestBase {
         final RowDataset dataset = createFiveRowCityDataset();
         Function<DisposableObjArray, String> rowMapper = arr -> arr.get(0) + "-" + arr.get(1);
         Collector<String, ?, List<String>> collector = Collectors.toList();
-        Dataset grouped = dataset.groupBy("city", CommonUtil.toList("name", "age"), "info", rowMapper, collector);
+        Dataset grouped = dataset.groupBy("city", N.toList("name", "age"), "info", rowMapper, collector);
 
         assertNotNull(grouped);
         assertEquals(3, grouped.size());
@@ -4422,7 +4422,7 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testGroupByWithMultipleKeys() {
         final RowDataset dataset = createFiveRowCityDataset();
-        Dataset grouped = dataset.groupBy(CommonUtil.toList("city"));
+        Dataset grouped = dataset.groupBy(N.toList("city"));
 
         assertNotNull(grouped);
         assertEquals(3, grouped.size());
@@ -4433,7 +4433,7 @@ public class RowDatasetTest extends TestBase {
     public void testGroupByWithMultipleKeysAndCollector() {
         final RowDataset dataset = createFiveRowCityDataset();
         Collector<Object, ?, Long> countCollector = Collectors.counting();
-        Dataset grouped = dataset.groupBy(CommonUtil.toList("city"), "name", "count", countCollector);
+        Dataset grouped = dataset.groupBy(N.toList("city"), "name", "count", countCollector);
 
         assertNotNull(grouped);
         assertEquals(3, grouped.size());
@@ -4443,13 +4443,13 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     public void testGroupByWithMultipleKeysAndRowType() {
-        List<String> columnNames = CommonUtil.toList("id", "name");
+        List<String> columnNames = N.toList("id", "name");
         List<List<Object>> columnValues = new ArrayList<>();
-        columnValues.add(CommonUtil.toList(1, 2, 3, 4));
-        columnValues.add(CommonUtil.toList("A", "B", "A", "B"));
+        columnValues.add(N.toList(1, 2, 3, 4));
+        columnValues.add(N.toList("A", "B", "A", "B"));
 
         RowDataset ds = new RowDataset(columnNames, columnValues);
-        Dataset grouped = ds.groupBy(CommonUtil.toList("name"), CommonUtil.toList("id"), "ids", List.class);
+        Dataset grouped = ds.groupBy(N.toList("name"), N.toList("id"), "ids", List.class);
 
         assertNotNull(grouped);
         assertEquals(2, grouped.size());
@@ -4461,7 +4461,7 @@ public class RowDatasetTest extends TestBase {
     public void testGroupByWithMultipleKeysAndArrayCollector() {
         final RowDataset dataset = createFiveRowCityDataset();
         Collector<Object[], ?, Long> countCollector = Collectors.counting();
-        Dataset grouped = dataset.groupBy(CommonUtil.toList("city"), CommonUtil.toList("name", "age"), "count", countCollector);
+        Dataset grouped = dataset.groupBy(N.toList("city"), N.toList("name", "age"), "count", countCollector);
 
         assertNotNull(grouped);
         assertEquals(3, grouped.size());
@@ -4474,7 +4474,7 @@ public class RowDatasetTest extends TestBase {
         final RowDataset dataset = createFiveRowCityDataset();
         Function<DisposableObjArray, Integer> rowMapper = arr -> (Integer) arr.get(0);
         Collector<Integer, ?, Integer> sumCollector = Collectors.summingInt(Integer::intValue);
-        Dataset grouped = dataset.groupBy(CommonUtil.toList("city"), CommonUtil.toList("age"), "totalAge", rowMapper, sumCollector);
+        Dataset grouped = dataset.groupBy(N.toList("city"), N.toList("age"), "totalAge", rowMapper, sumCollector);
 
         assertNotNull(grouped);
         assertEquals(3, grouped.size());
@@ -4486,7 +4486,7 @@ public class RowDatasetTest extends TestBase {
     public void testGroupByWithMultipleKeysAndKeyExtractor() {
         final RowDataset dataset = createFiveRowCityDataset();
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
-        Dataset grouped = dataset.groupBy(CommonUtil.toList("city"), keyExtractor);
+        Dataset grouped = dataset.groupBy(N.toList("city"), keyExtractor);
 
         assertNotNull(grouped);
         assertTrue(grouped.containsColumn("city"));
@@ -4497,7 +4497,7 @@ public class RowDatasetTest extends TestBase {
         final RowDataset dataset = createFiveRowCityDataset();
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
         Collector<Object, ?, Long> countCollector = Collectors.counting();
-        Dataset grouped = dataset.groupBy(CommonUtil.toList("city"), keyExtractor, "name", "count", countCollector);
+        Dataset grouped = dataset.groupBy(N.toList("city"), keyExtractor, "name", "count", countCollector);
 
         assertNotNull(grouped);
         assertTrue(grouped.containsColumn("city"));
@@ -4508,7 +4508,7 @@ public class RowDatasetTest extends TestBase {
     public void testGroupByWithMultipleKeysKeyExtractorAndRowType() {
         final RowDataset dataset = createFiveRowCityDataset();
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
-        Dataset grouped = dataset.groupBy(CommonUtil.toList("city"), keyExtractor, CommonUtil.toList("name"), "names", List.class);
+        Dataset grouped = dataset.groupBy(N.toList("city"), keyExtractor, N.toList("name"), "names", List.class);
         dataset.println();
 
         grouped.println();
@@ -4523,7 +4523,7 @@ public class RowDatasetTest extends TestBase {
         final RowDataset dataset = createFiveRowCityDataset();
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
         Collector<Object[], ?, Long> countCollector = Collectors.counting();
-        Dataset grouped = dataset.groupBy(CommonUtil.toList("city"), keyExtractor, CommonUtil.toList("name"), "count", countCollector);
+        Dataset grouped = dataset.groupBy(N.toList("city"), keyExtractor, N.toList("name"), "count", countCollector);
 
         grouped.println();
 
@@ -4539,7 +4539,7 @@ public class RowDatasetTest extends TestBase {
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
         Function<DisposableObjArray, String> rowMapper = arr -> arr.get(0).toString();
         Collector<String, ?, List<String>> collector = Collectors.toList();
-        Dataset grouped = dataset.groupBy(CommonUtil.toList("city"), keyExtractor, CommonUtil.toList("name"), "names", rowMapper, collector);
+        Dataset grouped = dataset.groupBy(N.toList("city"), keyExtractor, N.toList("name"), "names", rowMapper, collector);
 
         assertNotNull(grouped);
         assertTrue(grouped.containsColumn("city"));
@@ -4660,11 +4660,11 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     public void testPivotWithSingleAggregateColumn() {
-        List<String> columnNames = CommonUtil.toList("row", "col", "value");
+        List<String> columnNames = N.toList("row", "col", "value");
         List<List<Object>> columnValues = new ArrayList<>();
-        columnValues.add(CommonUtil.toList("A", "A", "B", "B"));
-        columnValues.add(CommonUtil.toList("X", "Y", "X", "Y"));
-        columnValues.add(CommonUtil.toList(1, 2, 3, 4));
+        columnValues.add(N.toList("A", "A", "B", "B"));
+        columnValues.add(N.toList("X", "Y", "X", "Y"));
+        columnValues.add(N.toList(1, 2, 3, 4));
 
         RowDataset ds = new RowDataset(columnNames, columnValues);
         Collector<Object, ?, Integer> sumCollector = Collectors.summingInt(o -> (Integer) o);
@@ -4678,17 +4678,17 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     public void testPivotWithMultipleAggregateColumns() {
-        List<String> columnNames = CommonUtil.toList("row", "col", "val1", "val2");
+        List<String> columnNames = N.toList("row", "col", "val1", "val2");
         List<List<Object>> columnValues = new ArrayList<>();
-        columnValues.add(CommonUtil.toList("A", "A", "B", "B"));
-        columnValues.add(CommonUtil.toList("X", "Y", "X", "Y"));
-        columnValues.add(CommonUtil.toList(1, 2, 3, 4));
-        columnValues.add(CommonUtil.toList(5, 6, 7, 8));
+        columnValues.add(N.toList("A", "A", "B", "B"));
+        columnValues.add(N.toList("X", "Y", "X", "Y"));
+        columnValues.add(N.toList(1, 2, 3, 4));
+        columnValues.add(N.toList(5, 6, 7, 8));
 
         RowDataset ds = new RowDataset(columnNames, columnValues);
         Collector<Object[], ?, String> joiningCollector = Collectors.mapping(arr -> arr[0] + "-" + arr[1], Collectors.joining(","));
 
-        Sheet<String, String, String> pivot = ds.pivot("row", "col", CommonUtil.toList("val1", "val2"), joiningCollector);
+        Sheet<String, String, String> pivot = ds.pivot("row", "col", N.toList("val1", "val2"), joiningCollector);
 
         assertNotNull(pivot);
         assertEquals(2, pivot.rowKeySet().size());
@@ -4697,18 +4697,18 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     public void testPivotWithRowMapper() {
-        List<String> columnNames = CommonUtil.toList("row", "col", "val1", "val2");
+        List<String> columnNames = N.toList("row", "col", "val1", "val2");
         List<List<Object>> columnValues = new ArrayList<>();
-        columnValues.add(CommonUtil.toList("A", "A", "B", "B"));
-        columnValues.add(CommonUtil.toList("X", "Y", "X", "Y"));
-        columnValues.add(CommonUtil.toList(1, 2, 3, 4));
-        columnValues.add(CommonUtil.toList(5, 6, 7, 8));
+        columnValues.add(N.toList("A", "A", "B", "B"));
+        columnValues.add(N.toList("X", "Y", "X", "Y"));
+        columnValues.add(N.toList(1, 2, 3, 4));
+        columnValues.add(N.toList(5, 6, 7, 8));
 
         RowDataset ds = new RowDataset(columnNames, columnValues);
         Function<DisposableObjArray, Integer> rowMapper = arr -> (Integer) arr.get(0) + (Integer) arr.get(1);
         Collector<Integer, ?, Integer> sumCollector = Collectors.summingInt(Integer::intValue);
 
-        Sheet<String, String, Integer> pivot = ds.pivot("row", "col", CommonUtil.toList("val1", "val2"), rowMapper, sumCollector);
+        Sheet<String, String, Integer> pivot = ds.pivot("row", "col", N.toList("val1", "val2"), rowMapper, sumCollector);
 
         assertNotNull(pivot);
         assertEquals(2, pivot.rowKeySet().size());
@@ -4718,7 +4718,7 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testRollup() {
         final RowDataset dataset = createFiveRowCityDataset();
-        List<Dataset> rollups = dataset.rollup(CommonUtil.toList("city", "name")).toList();
+        List<Dataset> rollups = dataset.rollup(N.toList("city", "name")).toList();
 
         assertNotNull(rollups);
         assertTrue(rollups.size() > 0);
@@ -4728,7 +4728,7 @@ public class RowDatasetTest extends TestBase {
     public void testRollupWithCollector() {
         final RowDataset dataset = createFiveRowCityDataset();
         Collector<Object, ?, Long> countCollector = Collectors.counting();
-        List<Dataset> rollups = dataset.rollup(CommonUtil.toList("city"), "name", "count", countCollector).toList();
+        List<Dataset> rollups = dataset.rollup(N.toList("city"), "name", "count", countCollector).toList();
 
         assertNotNull(rollups);
         assertTrue(rollups.size() > 0);
@@ -4741,7 +4741,7 @@ public class RowDatasetTest extends TestBase {
     public void testRollupWithArrayCollector() {
         final RowDataset dataset = createFiveRowCityDataset();
         Collector<Object[], ?, Long> countCollector = Collectors.counting();
-        List<Dataset> rollups = dataset.rollup(CommonUtil.toList("city"), CommonUtil.toList("name", "age"), "count", countCollector).toList();
+        List<Dataset> rollups = dataset.rollup(N.toList("city"), N.toList("name", "age"), "count", countCollector).toList();
 
         assertNotNull(rollups);
         assertTrue(rollups.size() > 0);
@@ -4756,7 +4756,7 @@ public class RowDatasetTest extends TestBase {
     public void testRollupWithKeyExtractor() {
         final RowDataset dataset = createFiveRowCityDataset();
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
-        List<Dataset> rollups = dataset.rollup(CommonUtil.toList("city"), keyExtractor).toList();
+        List<Dataset> rollups = dataset.rollup(N.toList("city"), keyExtractor).toList();
 
         assertNotNull(rollups);
         assertTrue(rollups.size() > 0);
@@ -4767,7 +4767,7 @@ public class RowDatasetTest extends TestBase {
         final RowDataset dataset = createFiveRowCityDataset();
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
         Collector<Object, ?, Long> countCollector = Collectors.counting();
-        List<Dataset> rollups = dataset.rollup(CommonUtil.toList("city"), keyExtractor, "name", "count", countCollector).toList();
+        List<Dataset> rollups = dataset.rollup(N.toList("city"), keyExtractor, "name", "count", countCollector).toList();
 
         assertNotNull(rollups);
         assertTrue(rollups.size() > 0);
@@ -4777,7 +4777,7 @@ public class RowDatasetTest extends TestBase {
     public void testRollupWithKeyExtractorAndRowType() {
         final RowDataset dataset = createFiveRowCityDataset();
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
-        List<Dataset> rollups = dataset.rollup(CommonUtil.toList("city"), keyExtractor, CommonUtil.toList("name"), "names", List.class).toList();
+        List<Dataset> rollups = dataset.rollup(N.toList("city"), keyExtractor, N.toList("name"), "names", List.class).toList();
 
         assertNotNull(rollups);
         assertTrue(rollups.size() > 0);
@@ -4788,7 +4788,7 @@ public class RowDatasetTest extends TestBase {
         final RowDataset dataset = createFiveRowCityDataset();
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
         Collector<Object[], ?, Long> countCollector = Collectors.counting();
-        List<Dataset> rollups = dataset.rollup(CommonUtil.toList("city"), keyExtractor, CommonUtil.toList("name"), "count", countCollector).toList();
+        List<Dataset> rollups = dataset.rollup(N.toList("city"), keyExtractor, N.toList("name"), "count", countCollector).toList();
 
         assertNotNull(rollups);
         assertTrue(rollups.size() > 0);
@@ -4800,7 +4800,7 @@ public class RowDatasetTest extends TestBase {
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
         Function<DisposableObjArray, String> rowMapper = arr -> arr.get(0).toString();
         Collector<String, ?, List<String>> collector = Collectors.toList();
-        List<Dataset> rollups = dataset.rollup(CommonUtil.toList("city"), keyExtractor, CommonUtil.toList("name"), "names", rowMapper, collector).toList();
+        List<Dataset> rollups = dataset.rollup(N.toList("city"), keyExtractor, N.toList("name"), "names", rowMapper, collector).toList();
 
         assertNotNull(rollups);
         assertTrue(rollups.size() > 0);
@@ -4809,7 +4809,7 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testRollupWithRowType() {
         final RowDataset dataset = createFiveRowCityDataset();
-        List<Dataset> rollups = dataset.rollup(CommonUtil.toList("city"), CommonUtil.toList("name"), "names", List.class).toList();
+        List<Dataset> rollups = dataset.rollup(N.toList("city"), N.toList("name"), "names", List.class).toList();
 
         assertNotNull(rollups);
         assertTrue(rollups.size() > 0);
@@ -4825,7 +4825,7 @@ public class RowDatasetTest extends TestBase {
         final RowDataset dataset = createFiveRowCityDataset();
         Function<DisposableObjArray, String> rowMapper = arr -> arr.get(0).toString();
         Collector<String, ?, List<String>> collector = Collectors.toList();
-        List<Dataset> rollups = dataset.rollup(CommonUtil.toList("city"), CommonUtil.toList("name"), "names", rowMapper, collector).toList();
+        List<Dataset> rollups = dataset.rollup(N.toList("city"), N.toList("name"), "names", rowMapper, collector).toList();
 
         assertNotNull(rollups);
         assertTrue(rollups.size() > 0);
@@ -4839,7 +4839,7 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testCube() {
         final RowDataset dataset = createFiveRowCityDataset();
-        List<Dataset> cubes = dataset.cube(CommonUtil.toList("city", "name")).toList();
+        List<Dataset> cubes = dataset.cube(N.toList("city", "name")).toList();
 
         assertNotNull(cubes);
         assertTrue(cubes.size() > 0);
@@ -4849,7 +4849,7 @@ public class RowDatasetTest extends TestBase {
     public void testCubeWithCollector() {
         final RowDataset dataset = createFiveRowCityDataset();
         Collector<Object, ?, Long> countCollector = Collectors.counting();
-        List<Dataset> cubes = dataset.cube(CommonUtil.toList("city"), "name", "count", countCollector).toList();
+        List<Dataset> cubes = dataset.cube(N.toList("city"), "name", "count", countCollector).toList();
 
         assertNotNull(cubes);
         assertTrue(cubes.size() > 0);
@@ -4859,7 +4859,7 @@ public class RowDatasetTest extends TestBase {
     public void testCubeWithArrayCollector() {
         final RowDataset dataset = createFiveRowCityDataset();
         Collector<Object[], ?, Long> countCollector = Collectors.counting();
-        List<Dataset> cubes = dataset.cube(CommonUtil.toList("city"), CommonUtil.toList("name"), "count", countCollector).toList();
+        List<Dataset> cubes = dataset.cube(N.toList("city"), N.toList("name"), "count", countCollector).toList();
 
         assertNotNull(cubes);
         assertTrue(cubes.size() > 0);
@@ -4869,7 +4869,7 @@ public class RowDatasetTest extends TestBase {
     public void testCubeWithKeyExtractor() {
         final RowDataset dataset = createFiveRowCityDataset();
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
-        List<Dataset> cubes = dataset.cube(CommonUtil.toList("city"), keyExtractor).toList();
+        List<Dataset> cubes = dataset.cube(N.toList("city"), keyExtractor).toList();
 
         assertNotNull(cubes);
         assertTrue(cubes.size() > 0);
@@ -4880,7 +4880,7 @@ public class RowDatasetTest extends TestBase {
         final RowDataset dataset = createFiveRowCityDataset();
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
         Collector<Object, ?, Long> countCollector = Collectors.counting();
-        List<Dataset> cubes = dataset.cube(CommonUtil.toList("city"), keyExtractor, "name", "count", countCollector).toList();
+        List<Dataset> cubes = dataset.cube(N.toList("city"), keyExtractor, "name", "count", countCollector).toList();
 
         assertNotNull(cubes);
         assertTrue(cubes.size() > 0);
@@ -4890,7 +4890,7 @@ public class RowDatasetTest extends TestBase {
     public void testCubeWithKeyExtractorAndRowType() {
         final RowDataset dataset = createFiveRowCityDataset();
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.join(", ");
-        List<Dataset> cubes = dataset.cube(CommonUtil.toList("city"), keyExtractor, CommonUtil.toList("name"), "names", List.class).toList();
+        List<Dataset> cubes = dataset.cube(N.toList("city"), keyExtractor, N.toList("name"), "names", List.class).toList();
         dataset.println();
 
         cubes.forEach(Dataset::println);
@@ -4900,14 +4900,14 @@ public class RowDatasetTest extends TestBase {
 
         N.println(Strings.repeat("=", 80));
 
-        cubes = dataset.cube(CommonUtil.toList("city", "age"), keyExtractor, CommonUtil.toList("name"), "names", List.class).toList();
+        cubes = dataset.cube(N.toList("city", "age"), keyExtractor, N.toList("name"), "names", List.class).toList();
 
         cubes.forEach(Dataset::println);
 
         assertNotNull(cubes);
         assertEquals(4, cubes.size());
 
-        dataset.groupBy(CommonUtil.toList("city", "age"), keyExtractor, CommonUtil.toList("name"), "names", List.class).println();
+        dataset.groupBy(N.toList("city", "age"), keyExtractor, N.toList("name"), "names", List.class).println();
     }
 
     @Test
@@ -4915,7 +4915,7 @@ public class RowDatasetTest extends TestBase {
         final RowDataset dataset = createFiveRowCityDataset();
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
         Collector<Object[], ?, Long> countCollector = Collectors.counting();
-        List<Dataset> cubes = dataset.cube(CommonUtil.toList("city"), keyExtractor, CommonUtil.toList("name"), "count", countCollector).toList();
+        List<Dataset> cubes = dataset.cube(N.toList("city"), keyExtractor, N.toList("name"), "count", countCollector).toList();
 
         assertNotNull(cubes);
         assertTrue(cubes.size() > 0);
@@ -4927,7 +4927,7 @@ public class RowDatasetTest extends TestBase {
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
         Function<DisposableObjArray, String> rowMapper = arr -> arr.get(0).toString();
         Collector<String, ?, List<String>> collector = Collectors.toList();
-        List<Dataset> cubes = dataset.cube(CommonUtil.toList("city"), keyExtractor, CommonUtil.toList("name"), "names", rowMapper, collector).toList();
+        List<Dataset> cubes = dataset.cube(N.toList("city"), keyExtractor, N.toList("name"), "names", rowMapper, collector).toList();
 
         assertNotNull(cubes);
         assertTrue(cubes.size() > 0);
@@ -4936,7 +4936,7 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testCubeWithRowType() {
         final RowDataset dataset = createFiveRowCityDataset();
-        List<Dataset> cubes = dataset.cube(CommonUtil.toList("city"), CommonUtil.toList("name"), "names", List.class).toList();
+        List<Dataset> cubes = dataset.cube(N.toList("city"), N.toList("name"), "names", List.class).toList();
 
         assertNotNull(cubes);
         assertTrue(cubes.size() > 0);
@@ -4947,7 +4947,7 @@ public class RowDatasetTest extends TestBase {
         final RowDataset dataset = createFiveRowCityDataset();
         Function<DisposableObjArray, String> rowMapper = arr -> arr.get(0).toString();
         Collector<String, ?, List<String>> collector = Collectors.toList();
-        List<Dataset> cubes = dataset.cube(CommonUtil.toList("city"), CommonUtil.toList("name"), "names", rowMapper, collector).toList();
+        List<Dataset> cubes = dataset.cube(N.toList("city"), N.toList("name"), "names", rowMapper, collector).toList();
 
         assertNotNull(cubes);
         assertTrue(cubes.size() > 0);
@@ -4981,7 +4981,7 @@ public class RowDatasetTest extends TestBase {
     public void testSortByMultipleColumns() {
         final RowDataset dataset = createFiveRowCityDataset();
         Dataset copy = dataset.copy();
-        copy.sortBy(CommonUtil.toList("city", "age"));
+        copy.sortBy(N.toList("city", "age"));
 
         List<Object> cities = copy.getColumn("city");
         List<Object> ages = copy.getColumn("age");
@@ -5006,7 +5006,7 @@ public class RowDatasetTest extends TestBase {
             }
             return result;
         };
-        copy.sortBy(CommonUtil.toList("city", "age"), comp);
+        copy.sortBy(N.toList("city", "age"), comp);
 
         assertNotNull(copy);
         assertEquals(dataset.size(), copy.size());
@@ -5017,7 +5017,7 @@ public class RowDatasetTest extends TestBase {
         final RowDataset dataset = createFiveRowCityDataset();
         Dataset copy = dataset.copy();
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0) + "-" + arr.get(1);
-        copy.sortBy(CommonUtil.toList("name", "age"), keyExtractor);
+        copy.sortBy(N.toList("name", "age"), keyExtractor);
 
         assertNotNull(copy);
         assertEquals(dataset.size(), copy.size());
@@ -5072,7 +5072,7 @@ public class RowDatasetTest extends TestBase {
         final RowDataset dataset = createFiveRowCityDataset();
         Dataset copy = dataset.copy();
         Function<DisposableObjArray, Integer> keyExtractor = arr -> (Integer) arr.get(0);
-        copy.parallelSortBy(CommonUtil.toList("age"), keyExtractor);
+        copy.parallelSortBy(N.toList("age"), keyExtractor);
 
         List<Object> ages = copy.getColumn("age");
         for (int i = 1; i < ages.size(); i++) {
@@ -5096,7 +5096,7 @@ public class RowDatasetTest extends TestBase {
     public void testParallelSortByMultipleColumns() {
         final RowDataset dataset = createFiveRowCityDataset();
         Dataset copy = dataset.copy();
-        copy.parallelSortBy(CommonUtil.toList("city", "name"));
+        copy.parallelSortBy(N.toList("city", "name"));
 
         assertNotNull(copy);
         assertEquals(dataset.size(), copy.size());
@@ -5107,7 +5107,7 @@ public class RowDatasetTest extends TestBase {
         final RowDataset dataset = createFiveRowCityDataset();
         Dataset copy = dataset.copy();
         Comparator<Object[]> comp = Comparator.comparing((Object[] a) -> (String) a[0]).thenComparing(a -> (String) a[1]);
-        copy.parallelSortBy(CommonUtil.toList("city", "name"), comp);
+        copy.parallelSortBy(N.toList("city", "name"), comp);
 
         assertNotNull(copy);
         assertEquals(dataset.size(), copy.size());
@@ -5138,7 +5138,7 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testTopByMultipleColumns() {
         final RowDataset dataset = createFiveRowCityDataset();
-        Dataset top = dataset.topBy(CommonUtil.toList("city", "age"), 3);
+        Dataset top = dataset.topBy(N.toList("city", "age"), 3);
 
         assertNotNull(top);
         assertEquals(3, top.size());
@@ -5148,7 +5148,7 @@ public class RowDatasetTest extends TestBase {
     public void testTopByMultipleColumnsWithComparator() {
         final RowDataset dataset = createFiveRowCityDataset();
         Comparator<Object[]> comp = (a, b) -> ((String) a[0]).compareTo((String) b[0]);
-        Dataset top = dataset.topBy(CommonUtil.toList("city"), 2, comp);
+        Dataset top = dataset.topBy(N.toList("city"), 2, comp);
 
         assertNotNull(top);
         assertEquals(2, top.size());
@@ -5158,7 +5158,7 @@ public class RowDatasetTest extends TestBase {
     public void testTopByWithKeyExtractor() {
         final RowDataset dataset = createFiveRowCityDataset();
         Function<DisposableObjArray, Integer> keyExtractor = arr -> (Integer) arr.get(0);
-        Dataset top = dataset.topBy(CommonUtil.toList("age"), 3, keyExtractor);
+        Dataset top = dataset.topBy(N.toList("age"), 3, keyExtractor);
 
         assertNotNull(top);
         assertEquals(3, top.size());
@@ -5172,10 +5172,10 @@ public class RowDatasetTest extends TestBase {
         Dataset singleTop = dataset.topBy("age", 1);
         assertEquals(1, singleTop.size());
 
-        List<String> columnNames = CommonUtil.toList("id", "value");
+        List<String> columnNames = N.toList("id", "value");
         List<List<Object>> columnValues = new ArrayList<>();
-        columnValues.add(CommonUtil.toList(1, 2, 3, 4, 5));
-        columnValues.add(CommonUtil.toList(10, 10, 20, 20, 30));
+        columnValues.add(N.toList(1, 2, 3, 4, 5));
+        columnValues.add(N.toList(10, 10, 20, 20, 30));
 
         RowDataset tieDs = new RowDataset(columnNames, columnValues);
         Dataset topWithTies = tieDs.topBy("value", 3);
@@ -5216,34 +5216,34 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     public void testDistinctComplexKeys() {
-        List<String> columnNames = CommonUtil.toList("a", "b", "c");
+        List<String> columnNames = N.toList("a", "b", "c");
         List<List<Object>> columnValues = new ArrayList<>();
-        columnValues.add(CommonUtil.toList(1, 1, 2, 2, 3));
-        columnValues.add(CommonUtil.toList("X", "X", "Y", "Y", "Z"));
-        columnValues.add(CommonUtil.toList(true, false, true, true, false));
+        columnValues.add(N.toList(1, 1, 2, 2, 3));
+        columnValues.add(N.toList("X", "X", "Y", "Y", "Z"));
+        columnValues.add(N.toList(true, false, true, true, false));
 
         RowDataset complexDs = new RowDataset(columnNames, columnValues);
 
         Dataset distinctA = complexDs.distinctBy("a");
         assertEquals(3, distinctA.size());
 
-        Dataset distinctAB = complexDs.distinctBy(CommonUtil.toList("a", "b"));
+        Dataset distinctAB = complexDs.distinctBy(N.toList("a", "b"));
         assertEquals(3, distinctAB.size());
 
         Dataset distinctAll = complexDs.distinct();
         assertEquals(4, distinctAll.size());
 
         Function<DisposableObjArray, String> compositeKeyExtractor = arr -> arr.get(0) + "-" + arr.get(1);
-        Dataset distinctComposite = complexDs.distinctBy(CommonUtil.toList("a", "b"), compositeKeyExtractor);
+        Dataset distinctComposite = complexDs.distinctBy(N.toList("a", "b"), compositeKeyExtractor);
         assertEquals(3, distinctComposite.size());
     }
 
     @Test
     public void testDistinct() {
-        List<String> columnNames = CommonUtil.toList("col1", "col2");
+        List<String> columnNames = N.toList("col1", "col2");
         List<List<Object>> columnValues = new ArrayList<>();
-        columnValues.add(CommonUtil.toList("A", "A", "B", "B", "A"));
-        columnValues.add(CommonUtil.toList(1, 1, 2, 2, 1));
+        columnValues.add(N.toList("A", "A", "B", "B", "A"));
+        columnValues.add(N.toList(1, 1, 2, 2, 1));
 
         RowDataset ds = new RowDataset(columnNames, columnValues);
         Dataset distinct = ds.distinct();
@@ -5273,14 +5273,14 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     public void testDistinctByMultipleColumns() {
-        List<String> columnNames = CommonUtil.toList("col1", "col2", "col3");
+        List<String> columnNames = N.toList("col1", "col2", "col3");
         List<List<Object>> columnValues = new ArrayList<>();
-        columnValues.add(CommonUtil.toList("A", "A", "B", "B", "A"));
-        columnValues.add(CommonUtil.toList(1, 2, 1, 1, 1));
-        columnValues.add(CommonUtil.toList("X", "Y", "Z", "W", "V"));
+        columnValues.add(N.toList("A", "A", "B", "B", "A"));
+        columnValues.add(N.toList(1, 2, 1, 1, 1));
+        columnValues.add(N.toList("X", "Y", "Z", "W", "V"));
 
         RowDataset ds = new RowDataset(columnNames, columnValues);
-        Dataset distinct = ds.distinctBy(CommonUtil.toList("col1", "col2"));
+        Dataset distinct = ds.distinctBy(N.toList("col1", "col2"));
 
         assertNotNull(distinct);
         assertEquals(3, distinct.size());
@@ -5290,7 +5290,7 @@ public class RowDatasetTest extends TestBase {
     public void testDistinctByMultipleColumnsWithKeyExtractor() {
         final RowDataset dataset = createFiveRowCityDataset();
         Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
-        Dataset distinct = dataset.distinctBy(CommonUtil.toList("city", "age"), keyExtractor);
+        Dataset distinct = dataset.distinctBy(N.toList("city", "age"), keyExtractor);
 
         assertNotNull(distinct);
         assertTrue(distinct.size() <= dataset.size());
@@ -5358,7 +5358,7 @@ public class RowDatasetTest extends TestBase {
     public void testFilterByMultipleColumns() {
         final RowDataset dataset = createFiveRowCityDataset();
         Predicate<DisposableObjArray> filter = arr -> "NYC".equals(arr.get(0)) && ((Integer) arr.get(1)) > 30;
-        Dataset filtered = dataset.filter(CommonUtil.toList("city", "age"), filter);
+        Dataset filtered = dataset.filter(N.toList("city", "age"), filter);
 
         assertNotNull(filtered);
         assertEquals(1, filtered.size());
@@ -5368,7 +5368,7 @@ public class RowDatasetTest extends TestBase {
     public void testFilterByMultipleColumnsWithMax() {
         final RowDataset dataset = createFiveRowCityDataset();
         Predicate<DisposableObjArray> filter = arr -> arr.get(0) != null;
-        Dataset filtered = dataset.filter(CommonUtil.toList("name", "city"), filter, 3);
+        Dataset filtered = dataset.filter(N.toList("name", "city"), filter, 3);
 
         assertNotNull(filtered);
         assertEquals(3, filtered.size());
@@ -5493,7 +5493,7 @@ public class RowDatasetTest extends TestBase {
     public void testFilterByMultipleColumnsWithRowRange() {
         final RowDataset dataset = createFiveRowCityDataset();
         Predicate<DisposableObjArray> filter = arr -> true;
-        Dataset filtered = dataset.filter(1, 3, CommonUtil.toList("name", "age"), filter);
+        Dataset filtered = dataset.filter(1, 3, N.toList("name", "age"), filter);
 
         assertNotNull(filtered);
         assertEquals(2, filtered.size());
@@ -5503,7 +5503,7 @@ public class RowDatasetTest extends TestBase {
     public void testFilterByMultipleColumnsWithRowRangeAndMax() {
         final RowDataset dataset = createFiveRowCityDataset();
         Predicate<DisposableObjArray> filter = arr -> true;
-        Dataset filtered = dataset.filter(0, 5, CommonUtil.toList("id", "name"), filter, 4);
+        Dataset filtered = dataset.filter(0, 5, N.toList("id", "name"), filter, 4);
 
         assertNotNull(filtered);
         assertEquals(4, filtered.size());
@@ -5567,7 +5567,7 @@ public class RowDatasetTest extends TestBase {
     public void testMapSingleColumnWithMultipleCopying() {
         final RowDataset dataset = createFiveRowCityDataset();
         Function<Object, Integer> mapper = age -> ((Integer) age) * 2;
-        Dataset mapped = dataset.mapColumn("age", "doubleAge", CommonUtil.toList("id", "name"), mapper);
+        Dataset mapped = dataset.mapColumn("age", "doubleAge", N.toList("id", "name"), mapper);
 
         assertNotNull(mapped);
         assertEquals(5, mapped.size());
@@ -5581,11 +5581,11 @@ public class RowDatasetTest extends TestBase {
     public void testMapWithDifferentDataTypes() {
         final RowDataset dataset = createFiveRowCityDataset();
         Function<Object, String> toStringMapper = obj -> "ID:" + obj;
-        Dataset stringMapped = dataset.mapColumn("id", "stringId", CommonUtil.toList("name"), toStringMapper);
+        Dataset stringMapped = dataset.mapColumn("id", "stringId", N.toList("name"), toStringMapper);
         assertEquals("ID:1", stringMapped.moveToRow(0).get("stringId"));
 
         Function<Object, Double> doubleMapper = obj -> ((Integer) obj) * 1.5;
-        Dataset doubleMapped = dataset.mapColumn("age", "adjustedAge", CommonUtil.toList("name"), doubleMapper);
+        Dataset doubleMapped = dataset.mapColumn("age", "adjustedAge", N.toList("name"), doubleMapper);
         assertEquals(37.5, doubleMapped.moveToRow(0).get("adjustedAge"));
 
         Function<DisposableObjArray, Map<String, Object>> mapMapper = arr -> {
@@ -5594,7 +5594,7 @@ public class RowDatasetTest extends TestBase {
             map.put("age", arr.get(1));
             return map;
         };
-        Dataset objectMapped = dataset.mapColumns(CommonUtil.toList("name", "age"), "info", CommonUtil.toList("id"), mapMapper);
+        Dataset objectMapped = dataset.mapColumns(N.toList("name", "age"), "info", N.toList("id"), mapMapper);
         assertNotNull(objectMapped.moveToRow(0).get("info"));
         assertTrue(objectMapped.moveToRow(0).get("info") instanceof Map);
     }
@@ -5621,7 +5621,7 @@ public class RowDatasetTest extends TestBase {
     public void testMapTuple2() {
         final RowDataset dataset = createFiveRowCityDataset();
         BiFunction<Object, Object, String> mapper = (name, age) -> name + ":" + age;
-        Dataset mapped = dataset.mapColumns(Tuple.of("name", "age"), "info", CommonUtil.toList("id"), mapper);
+        Dataset mapped = dataset.mapColumns(Tuple.of("name", "age"), "info", N.toList("id"), mapper);
 
         assertNotNull(mapped);
         assertEquals(5, mapped.size());
@@ -5634,7 +5634,7 @@ public class RowDatasetTest extends TestBase {
     public void testMapTuple3() {
         final RowDataset dataset = createFiveRowCityDataset();
         TriFunction<Object, Object, Object, String> mapper = (id, name, age) -> id + "-" + name + "-" + age;
-        Dataset mapped = dataset.mapColumns(Tuple.of("id", "name", "age"), "combined", CommonUtil.toList("city"), mapper);
+        Dataset mapped = dataset.mapColumns(Tuple.of("id", "name", "age"), "combined", N.toList("city"), mapper);
 
         assertNotNull(mapped);
         assertEquals(5, mapped.size());
@@ -5647,7 +5647,7 @@ public class RowDatasetTest extends TestBase {
     public void testMapMultipleColumns() {
         final RowDataset dataset = createFiveRowCityDataset();
         Function<DisposableObjArray, String> mapper = arr -> arr.get(0) + ":" + arr.get(1);
-        Dataset mapped = dataset.mapColumns(CommonUtil.toList("name", "city"), "location", CommonUtil.toList("id"), mapper);
+        Dataset mapped = dataset.mapColumns(N.toList("name", "city"), "location", N.toList("id"), mapper);
 
         assertNotNull(mapped);
         assertEquals(5, mapped.size());
@@ -5686,7 +5686,7 @@ public class RowDatasetTest extends TestBase {
     public void testFlatMapEdgeCases() {
         final RowDataset dataset = createFiveRowCityDataset();
         Function<Object, Collection<String>> emptyMapper = obj -> Collections.emptyList();
-        Dataset emptyFlatMapped = dataset.flatMapColumn("name", "empty", CommonUtil.toList("id"), emptyMapper);
+        Dataset emptyFlatMapped = dataset.flatMapColumn("name", "empty", N.toList("id"), emptyMapper);
         assertEquals(0, emptyFlatMapped.size());
 
         Function<Object, Collection<Integer>> variableMapper = obj -> {
@@ -5697,11 +5697,11 @@ public class RowDatasetTest extends TestBase {
             }
             return result;
         };
-        Dataset variableFlatMapped = dataset.flatMapColumn("id", "values", CommonUtil.toList("name"), variableMapper);
+        Dataset variableFlatMapped = dataset.flatMapColumn("id", "values", N.toList("name"), variableMapper);
         assertNotNull(variableFlatMapped);
 
-        Function<Object, Collection<String>> nullSafeMapper = obj -> obj == null ? Collections.emptyList() : CommonUtil.toList(obj.toString());
-        Dataset nullSafeFlatMapped = dataset.flatMapColumn("name", "safe", CommonUtil.toList("id"), nullSafeMapper);
+        Function<Object, Collection<String>> nullSafeMapper = obj -> obj == null ? Collections.emptyList() : N.toList(obj.toString());
+        Dataset nullSafeFlatMapped = dataset.flatMapColumn("name", "safe", N.toList("id"), nullSafeMapper);
         assertEquals(5, nullSafeFlatMapped.size());
     }
 
@@ -5814,7 +5814,7 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testCopyWithColumns() {
         final RowDataset dataset = createFiveRowCityDataset();
-        Dataset copy = dataset.copy(CommonUtil.toList("id", "name"));
+        Dataset copy = dataset.copy(N.toList("id", "name"));
 
         assertNotNull(copy);
         assertEquals(dataset.size(), copy.size());
@@ -5835,7 +5835,7 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testCopyWithRowRangeAndColumns() {
         final RowDataset dataset = createFiveRowCityDataset();
-        Dataset copy = dataset.copy(1, 3, CommonUtil.toList("name", "age"));
+        Dataset copy = dataset.copy(1, 3, N.toList("name", "age"));
 
         assertNotNull(copy);
         assertEquals(2, copy.size());
@@ -5873,10 +5873,10 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testInnerJoinSingleColumn() {
         final RowDataset dataset = createFiveRowCityDataset();
-        List<String> rightColumns = CommonUtil.toList("city", "country");
+        List<String> rightColumns = N.toList("city", "country");
         List<List<Object>> rightValues = new ArrayList<>();
-        rightValues.add(CommonUtil.toList("NYC", "LA", "Chicago"));
-        rightValues.add(CommonUtil.toList("USA", "USA", "USA"));
+        rightValues.add(N.toList("NYC", "LA", "Chicago"));
+        rightValues.add(N.toList("USA", "USA", "USA"));
 
         RowDataset right = new RowDataset(rightColumns, rightValues);
 
@@ -5892,11 +5892,11 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testInnerJoinMultipleColumns() {
         final RowDataset dataset = createFiveRowCityDataset();
-        List<String> rightColumns = CommonUtil.toList("city", "age", "salary");
+        List<String> rightColumns = N.toList("city", "age", "salary");
         List<List<Object>> rightValues = new ArrayList<>();
-        rightValues.add(CommonUtil.toList("NYC", "LA", "NYC"));
-        rightValues.add(CommonUtil.toList(25, 30, 35));
-        rightValues.add(CommonUtil.toList(50000, 60000, 70000));
+        rightValues.add(N.toList("NYC", "LA", "NYC"));
+        rightValues.add(N.toList(25, 30, 35));
+        rightValues.add(N.toList(50000, 60000, 70000));
 
         RowDataset right = new RowDataset(rightColumns, rightValues);
 
@@ -5913,10 +5913,10 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testInnerJoinWithNewColumn() {
         final RowDataset dataset = createFiveRowCityDataset();
-        List<String> rightColumns = CommonUtil.toList("city", "info");
+        List<String> rightColumns = N.toList("city", "info");
         List<List<Object>> rightValues = new ArrayList<>();
-        rightValues.add(CommonUtil.toList("NYC", "LA", "Chicago"));
-        rightValues.add(CommonUtil.toList("Big Apple", "City of Angels", "Windy City"));
+        rightValues.add(N.toList("NYC", "LA", "Chicago"));
+        rightValues.add(N.toList("Big Apple", "City of Angels", "Windy City"));
 
         RowDataset right = new RowDataset(rightColumns, rightValues);
 
@@ -5932,10 +5932,10 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testInnerJoinWithCollectionSupplier() {
         final RowDataset dataset = createFiveRowCityDataset();
-        List<String> rightColumns = CommonUtil.toList("city", "tag");
+        List<String> rightColumns = N.toList("city", "tag");
         List<List<Object>> rightValues = new ArrayList<>();
-        rightValues.add(CommonUtil.toList("NYC", "NYC", "LA"));
-        rightValues.add(CommonUtil.toList("tag1", "tag2", "tag3"));
+        rightValues.add(N.toList("NYC", "NYC", "LA"));
+        rightValues.add(N.toList("tag1", "tag2", "tag3"));
 
         RowDataset right = new RowDataset(rightColumns, rightValues);
 
@@ -5959,10 +5959,10 @@ public class RowDatasetTest extends TestBase {
         assertNotNull(selfJoined);
         assertTrue(selfJoined.size() > 0);
 
-        List<String> rightColumns = CommonUtil.toList("city", "data");
+        List<String> rightColumns = N.toList("city", "data");
         List<List<Object>> rightValues = new ArrayList<>();
-        rightValues.add(CommonUtil.toList("Paris", "London"));
-        rightValues.add(CommonUtil.toList("data1", "data2"));
+        rightValues.add(N.toList("Paris", "London"));
+        rightValues.add(N.toList("data1", "data2"));
 
         RowDataset noMatchRight = new RowDataset(rightColumns, rightValues);
         Dataset noMatchJoined = dataset.innerJoin(noMatchRight, "city", "city");
@@ -6006,10 +6006,10 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testLeftJoinSingleColumn() {
         final RowDataset dataset = createFiveRowCityDataset();
-        List<String> rightColumns = CommonUtil.toList("city", "country");
+        List<String> rightColumns = N.toList("city", "country");
         List<List<Object>> rightValues = new ArrayList<>();
-        rightValues.add(CommonUtil.toList("NYC", "LA"));
-        rightValues.add(CommonUtil.toList("USA", "USA"));
+        rightValues.add(N.toList("NYC", "LA"));
+        rightValues.add(N.toList("USA", "USA"));
 
         RowDataset right = new RowDataset(rightColumns, rightValues);
 
@@ -6023,11 +6023,11 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testLeftJoinMultipleColumns() {
         final RowDataset dataset = createFiveRowCityDataset();
-        List<String> rightColumns = CommonUtil.toList("city", "age", "bonus");
+        List<String> rightColumns = N.toList("city", "age", "bonus");
         List<List<Object>> rightValues = new ArrayList<>();
-        rightValues.add(CommonUtil.toList("NYC", "LA"));
-        rightValues.add(CommonUtil.toList(25, 30));
-        rightValues.add(CommonUtil.toList(1000, 2000));
+        rightValues.add(N.toList("NYC", "LA"));
+        rightValues.add(N.toList(25, 30));
+        rightValues.add(N.toList(1000, 2000));
 
         RowDataset right = new RowDataset(rightColumns, rightValues);
 
@@ -6044,10 +6044,10 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testLeftJoinWithNewColumn() {
         final RowDataset dataset = createFiveRowCityDataset();
-        List<String> rightColumns = CommonUtil.toList("city", "population");
+        List<String> rightColumns = N.toList("city", "population");
         List<List<Object>> rightValues = new ArrayList<>();
-        rightValues.add(CommonUtil.toList("NYC", "LA"));
-        rightValues.add(CommonUtil.toList(8000000, 4000000));
+        rightValues.add(N.toList("NYC", "LA"));
+        rightValues.add(N.toList(8000000, 4000000));
 
         RowDataset right = new RowDataset(rightColumns, rightValues);
 
@@ -6064,10 +6064,10 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testLeftJoinWithCollectionSupplier() {
         final RowDataset dataset = createFiveRowCityDataset();
-        List<String> rightColumns = CommonUtil.toList("city", "feature");
+        List<String> rightColumns = N.toList("city", "feature");
         List<List<Object>> rightValues = new ArrayList<>();
-        rightValues.add(CommonUtil.toList("NYC", "NYC", "LA"));
-        rightValues.add(CommonUtil.toList("feature1", "feature2", "feature3"));
+        rightValues.add(N.toList("NYC", "NYC", "LA"));
+        rightValues.add(N.toList("feature1", "feature2", "feature3"));
 
         RowDataset right = new RowDataset(rightColumns, rightValues);
 
@@ -6130,18 +6130,18 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     public void testRightJoinWithMultipleColumns() {
-        List<String> columnNames1 = CommonUtil.toList("id", "type", "value");
+        List<String> columnNames1 = N.toList("id", "type", "value");
         List<List<Object>> columns1 = new ArrayList<>();
-        columns1.add(CommonUtil.toList(1, 1, 2));
-        columns1.add(CommonUtil.toList("A", "B", "A"));
-        columns1.add(CommonUtil.toList(100, 200, 300));
+        columns1.add(N.toList(1, 1, 2));
+        columns1.add(N.toList("A", "B", "A"));
+        columns1.add(N.toList(100, 200, 300));
         Dataset multiDs1 = new RowDataset(columnNames1, columns1);
 
-        List<String> columnNames2 = CommonUtil.toList("id", "type", "score");
+        List<String> columnNames2 = N.toList("id", "type", "score");
         List<List<Object>> columns2 = new ArrayList<>();
-        columns2.add(CommonUtil.toList(1, 2, 3));
-        columns2.add(CommonUtil.toList("A", "A", "B"));
-        columns2.add(CommonUtil.toList(10, 20, 30));
+        columns2.add(N.toList(1, 2, 3));
+        columns2.add(N.toList("A", "A", "B"));
+        columns2.add(N.toList(10, 20, 30));
         Dataset multiDs2 = new RowDataset(columnNames2, columns2);
 
         Map<String, String> onColumnNames = new HashMap<>();
@@ -6182,10 +6182,10 @@ public class RowDatasetTest extends TestBase {
         Map<String, String> onColumnNames = new HashMap<>();
         onColumnNames.put("id", "id");
 
-        List<String> columnNames = CommonUtil.toList("id", "value");
+        List<String> columnNames = N.toList("id", "value");
         List<List<Object>> columns = new ArrayList<>();
-        columns.add(CommonUtil.toList(2, 2, 3));
-        columns.add(CommonUtil.toList("X", "Y", "Z"));
+        columns.add(N.toList(2, 2, 3));
+        columns.add(N.toList("X", "Y", "Z"));
         Dataset dsWithDuplicates = new RowDataset(columnNames, columns);
 
         Dataset result = ds1.rightJoin(dsWithDuplicates, onColumnNames, "values", List.class, ArrayList::new);
@@ -6205,7 +6205,7 @@ public class RowDatasetTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> emptyDs.union(ds1));
         assertThrows(IllegalArgumentException.class, () -> emptyDs.intersect(ds1));
 
-        Dataset emptyDataset = CommonUtil.newEmptyDataset(ds1.columnNames());
+        Dataset emptyDataset = N.newEmptyDataset(ds1.columnNames());
         Dataset result3 = emptyDataset.union(ds1);
         assertTrue(result3.size() >= 0);
         Dataset result4 = emptyDataset.intersect(ds1);
@@ -6300,11 +6300,11 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     public void testUnionWithSameColumnsRequired() {
-        List<String> columnNames = CommonUtil.toList("id", "name", "age");
+        List<String> columnNames = N.toList("id", "name", "age");
         List<List<Object>> columns = new ArrayList<>();
-        columns.add(CommonUtil.toList(4, 5));
-        columns.add(CommonUtil.toList("David", "Eve"));
-        columns.add(CommonUtil.toList(40, 45));
+        columns.add(N.toList(4, 5));
+        columns.add(N.toList("David", "Eve"));
+        columns.add(N.toList(40, 45));
         Dataset ds3 = new RowDataset(columnNames, columns);
 
         Dataset result = ds1.union(ds3, true);
@@ -6315,7 +6315,7 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     public void testUnionWithKeyColumns() {
-        Collection<String> keyColumns = CommonUtil.toList("id");
+        Collection<String> keyColumns = N.toList("id");
         Dataset result = ds1.union(ds2, keyColumns);
 
         assertNotNull(result);
@@ -6400,7 +6400,7 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     public void testIntersectWithKeyColumns() {
-        Collection<String> keyColumns = CommonUtil.toList("id");
+        Collection<String> keyColumns = N.toList("id");
         Dataset result = ds1.intersect(ds2, keyColumns);
 
         assertNotNull(result);
@@ -6461,7 +6461,7 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     public void testExceptWithKeyColumns() {
-        Collection<String> keyColumns = CommonUtil.toList("id");
+        Collection<String> keyColumns = N.toList("id");
         Dataset result = ds1.except(ds2, keyColumns);
 
         assertNotNull(result);
@@ -6512,16 +6512,16 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     public void testCartesianProduct() {
-        List<String> columnNames1 = CommonUtil.toList("a", "b");
+        List<String> columnNames1 = N.toList("a", "b");
         List<List<Object>> columns1 = new ArrayList<>();
-        columns1.add(CommonUtil.toList(1, 2));
-        columns1.add(CommonUtil.toList("X", "Y"));
+        columns1.add(N.toList(1, 2));
+        columns1.add(N.toList("X", "Y"));
         Dataset ds1New = new RowDataset(columnNames1, columns1);
 
-        List<String> columnNames2 = CommonUtil.toList("c", "d");
+        List<String> columnNames2 = N.toList("c", "d");
         List<List<Object>> columns2 = new ArrayList<>();
-        columns2.add(CommonUtil.toList(10, 20));
-        columns2.add(CommonUtil.toList("P", "Q"));
+        columns2.add(N.toList(10, 20));
+        columns2.add(N.toList("P", "Q"));
         Dataset ds2New = new RowDataset(columnNames2, columns2);
 
         Dataset result = ds1New.cartesianProduct(ds2New);
@@ -6564,7 +6564,7 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     public void testSplitWithColumns() {
-        Collection<String> columnNames = CommonUtil.toList("id", "name");
+        Collection<String> columnNames = N.toList("id", "name");
         Stream<Dataset> splitStream = ds1.split(2, columnNames);
         List<Dataset> splits = splitStream.toList();
 
@@ -6585,7 +6585,7 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     public void testSplitToListWithColumns() {
-        Collection<String> columnNames = CommonUtil.toList("id", "age");
+        Collection<String> columnNames = N.toList("id", "age");
         List<Dataset> splits = ds1.splitToList(2, columnNames);
 
         assertEquals(2, splits.size());
@@ -6603,7 +6603,7 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     public void testSlice() {
-        Collection<String> columnNames = CommonUtil.toList("id", "name");
+        Collection<String> columnNames = N.toList("id", "name");
         Dataset result = ds1.slice(columnNames);
 
         assertNotNull(result);
@@ -6635,7 +6635,7 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     public void testSliceWithRowRangeAndColumns() {
-        Collection<String> columnNames = CommonUtil.toList("name", "age");
+        Collection<String> columnNames = N.toList("name", "age");
         Dataset result = ds1.slice(0, 2, columnNames);
 
         assertNotNull(result);
@@ -6696,7 +6696,7 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     public void testPaginateWithColumns() {
-        Collection<String> columnNames = CommonUtil.toList("id", "name");
+        Collection<String> columnNames = N.toList("id", "name");
         Paginated<Dataset> paginated = ds1.paginate(columnNames, 2);
 
         assertNotNull(paginated);
@@ -6742,7 +6742,7 @@ public class RowDatasetTest extends TestBase {
         List<Integer> ids = idStream.toList();
 
         assertEquals(3, ids.size());
-        assertEquals(CommonUtil.toList(1, 2, 3), ids);
+        assertEquals(N.toList(1, 2, 3), ids);
     }
 
     @Test
@@ -6751,7 +6751,7 @@ public class RowDatasetTest extends TestBase {
         List<String> names = nameStream.toList();
 
         assertEquals(2, names.size());
-        assertEquals(CommonUtil.toList("Bob", "Charlie"), names);
+        assertEquals(N.toList("Bob", "Charlie"), names);
     }
 
     @Test
@@ -6996,7 +6996,7 @@ public class RowDatasetTest extends TestBase {
         });
 
         assertEquals(3, names.size());
-        assertEquals(CommonUtil.toList("Alice", "Bob", "Charlie"), names);
+        assertEquals(N.toList("Alice", "Bob", "Charlie"), names);
     }
 
     @Test
@@ -7121,7 +7121,7 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     public void testPrintlnWithRangeAndColumns() {
-        Collection<String> columnNames = CommonUtil.toList("id", "name");
+        Collection<String> columnNames = N.toList("id", "name");
         ds1.println(0, 2, columnNames);
         assertNotNull(columnNames);
     }
@@ -7141,7 +7141,7 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testPrintlnWithRangeColumnsAndWriter() {
         StringWriter writer = new StringWriter();
-        Collection<String> columnNames = CommonUtil.toList("id", "name");
+        Collection<String> columnNames = N.toList("id", "name");
         ds1.println(1, 3, columnNames, writer);
 
         String output = writer.toString();
@@ -7235,7 +7235,7 @@ public class RowDatasetTest extends TestBase {
             return name.length() > 3 && age > 30;
         };
 
-        Dataset subsetFiltered = dataset.filter(CommonUtil.toList("name", "age"), subsetPredicate);
+        Dataset subsetFiltered = dataset.filter(N.toList("name", "age"), subsetPredicate);
         assertNotNull(subsetFiltered);
     }
 

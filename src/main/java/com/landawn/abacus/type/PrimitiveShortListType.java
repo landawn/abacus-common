@@ -15,6 +15,7 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
+import java.util.List;
 
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
@@ -22,7 +23,11 @@ import com.landawn.abacus.util.ShortList;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for {@link ShortList} objects, providing serialization and deserialization support.
+ * Type handler for {@link ShortList} objects, which is a primitive-backed list of {@code short} values.
+ * Provides serialization and deserialization of {@link ShortList} instances by delegating to the
+ * underlying {@code short[]} array type handler.
+ * String representations use the format {@code [1, 2, 3]} with comma-separated elements
+ * enclosed in square brackets.
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveShortListType extends AbstractPrimitiveListType<ShortList> {
@@ -32,8 +37,13 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
     private final Type<short[]> arrayType = Type.of(short[].class);
 
     private final Type<Short> elementType = Type.of(short.class);
-    private final Type<Short>[] parameterTypes = new Type[] { elementType };
+    private final List<Type<?>> parameterTypes = List.of(elementType);
 
+    /**
+     * Constructs a new PrimitiveShortListType instance.
+     * This constructor is protected to allow subclassing while maintaining controlled instantiation
+     * through the TypeFactory.
+     */
     protected PrimitiveShortListType() {
         super(SHORT_LIST);
     }
@@ -79,16 +89,16 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<ShortList> type = TypeFactory.getType(ShortList.class);
-     * Type<Short>[] paramTypes = type.parameterTypes();
-     * System.out.println(paramTypes.length);      // Output: 1
-     * System.out.println(paramTypes[0].name());   // Output: short
+     * List<Type<?>> paramTypes = type.parameterTypes();
+     * System.out.println(paramTypes.size());        // Output: 1
+     * System.out.println(paramTypes.get(0).name()); // Output: short
      * }</pre>
      *
-     * @return an array containing the Short Type that describes the elements of this list type
+     * @return an immutable list containing the Short Type that describes the elements of this list type
      * @see #elementType()
      */
     @Override
-    public Type<Short>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 

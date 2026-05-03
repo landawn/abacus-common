@@ -68,7 +68,7 @@ public final class HttpSettings {
 
     private ContentFormat contentFormat;
 
-    private HttpHeaders headers = null;
+    private volatile HttpHeaders headers = null;
 
     private SSLSocketFactory sslSocketFactory;
 

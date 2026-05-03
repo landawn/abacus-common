@@ -9,6 +9,7 @@ import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,9 +41,9 @@ public class TimedTypeTest extends TestBase {
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = timedType.parameterTypes();
+        List<Type<?>> paramTypes = timedType.parameterTypes();
         assertNotNull(paramTypes);
-        assertEquals(1, paramTypes.length);
+        assertEquals(1, paramTypes.size());
     }
 
     @Test

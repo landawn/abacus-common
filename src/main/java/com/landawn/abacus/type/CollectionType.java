@@ -31,42 +31,33 @@ import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
-import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for Collection implementations including List, Set, Queue and their concrete implementations.
- * This class provides serialization and deserialization capabilities for collection types with generic element types.
+ * Type handler for {@link Collection} implementations, including {@link List}, {@link Set},
+ * {@link Queue}, and their concrete subtypes.
  *
- * <p>CollectionType instances are created by the TypeFactory and handle the conversion between collection
- * objects and their string representations (typically JSON format). The handler preserves generic type
- * information for proper serialization and deserialization of collection elements.</p>
+ * <p>Instances are created by the {@code TypeFactory} for parameterized collection type names such as
+ * {@code "List<String>"} or {@code "Set<Integer>"}. The handler converts between collection objects and
+ * their JSON array string representations, preserving generic element-type information for proper
+ * serialization and deserialization.</p>
  *
- * <p><b>Usage Examples:</b></p>
+ * <p>Example:</p>
  * <pre>{@code
- * // Get CollectionType for List<String>
+ * // Obtain a typed handler
  * Type<List<String>> listType = TypeFactory.getType("List<String>");
  *
- * // Serialize collection to string
+ * // Serialize
  * List<String> names = N.asList("Alice", "Bob", "Charlie");
- * String json = listType.stringOf(names);
- * // Result: ["Alice","Bob","Charlie"]
+ * String json = listType.stringOf(names);  // ["Alice","Bob","Charlie"]
  *
- * // Deserialize string to collection
- * String jsonInput = "[\"David\",\"Eve\",\"Frank\"]";
- * List<String> parsedNames = listType.valueOf(jsonInput);
- *
- * // Works with complex element types
- * Type<Set<Integer>> setType = TypeFactory.getType("Set<Integer>");
- * Set<Integer> numbers = new HashSet<>();
- * numbers.add(1);
- * numbers.add(2);
- * numbers.add(3);
- * String setJson = setType.stringOf(numbers);
+ * // Deserialize
+ * List<String> parsed = listType.valueOf("[\"Alice\",\"Bob\",\"Charlie\"]");
  * }</pre>
  *
  * @param <E> the element type of the collection
- * @param <T> the collection type (must extend Collection&lt;E&gt;)
+ * @param <T> the concrete collection type (must extend {@link Collection}{@code <E>})
  */
 @SuppressWarnings("java:S2160")
 public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> {
@@ -75,7 +66,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
 
     private final Class<T> typeClass;
 
-    private final Type<E>[] parameterTypes;
+    private final List<Type<?>> parameterTypes;
 
     private final Type<E> elementType;
 
@@ -85,6 +76,15 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
 
     private final JsonDeserConfig jdc;
 
+    /**
+     * Package-private constructor for {@code CollectionType}.
+     * Instances are created by the {@code TypeFactory} using a collection class and its element type name.
+     * The declaring name is resolved to the most specific collection interface implemented by
+     * {@code typeClass} (e.g., {@code List}, {@code Set}, or {@code Queue}).
+     *
+     * @param typeClass         the concrete or interface collection class to handle
+     * @param parameterTypeName the name of the element type (e.g., {@code "String"} or {@code "java.lang.Integer"})
+     */
     CollectionType(final Class<T> typeClass, final String parameterTypeName) {
         super(getTypeName(typeClass, parameterTypeName, false));
 
@@ -117,8 +117,8 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
         declaringName = declaringNameValue;
 
         this.typeClass = typeClass;
-        parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
-        elementType = parameterTypes[0];
+        elementType = TypeFactory.getType(parameterTypeName);
+        parameterTypes = List.of(elementType);
 
         jdc = JsonDeserConfig.create().setElementType(elementType);
 
@@ -159,13 +159,13 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     }
 
     /**
-     * Returns an array containing the parameter types of this generic collection type.
-     * For collection types, this array contains a single element representing the element type.
+     * Returns an immutable list containing the parameter types of this generic collection type.
+     * For collection types, this list contains a single element representing the element type.
      *
-     * @return an array containing the element type as the only parameter type
+     * @return an immutable list containing the element type as the only parameter type
      */
     @Override
-    public Type<E>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 
@@ -192,7 +192,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     /**
      * Always returns {@code true} as this type handler specifically handles Collection types.
      *
-     * @return true
+     * @return {@code true} always
      */
     @Override
     public boolean isCollection() {
@@ -202,7 +202,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     /**
      * Always returns {@code true} as collection types are parameterized with an element type.
      *
-     * @return true
+     * @return {@code true} always
      */
     @Override
     public boolean isParameterizedType() {
@@ -210,8 +210,9 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     }
 
     /**
-     * Checks whether the elements of this collection type are serializable.
-     * The collection itself is considered serializable if its element type is serializable.
+     * Checks whether the element type of this collection is directly serializable by the type system.
+     * If the element type is serializable, the collection as a whole can be written without delegating
+     * to a full JSON serializer.
      *
      * @return {@code true} if the element type is serializable, {@code false} otherwise
      */
@@ -222,9 +223,9 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
 
     /**
      * Returns the serialization type category for this collection.
-     * If the element type is serializable, returns SERIALIZABLE; otherwise returns COLLECTION.
      *
-     * @return SerializationType.SERIALIZABLE if elements are serializable, SerializationType.COLLECTION otherwise
+     * @return {@link SerializationType#SERIALIZABLE} if the element type is directly serializable,
+     *         or {@link SerializationType#COLLECTION} otherwise
      */
     @Override
     public SerializationType serializationType() {
@@ -232,13 +233,16 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     }
 
     /**
-     * Converts a collection to its string representation.
-     * If the collection is {@code null}, returns {@code null}.
-     * If the collection is empty, returns "[]".
-     * Otherwise, serializes the collection to a JSON array string where each element is serialized according to its type.
+     * Converts a collection to its JSON array string representation.
+     * <ul>
+     *   <li>{@code null} input returns {@code null}.</li>
+     *   <li>An empty collection returns {@code "[]"}.</li>
+     *   <li>Otherwise each element is serialized according to its element type and the results are
+     *       joined in a JSON array.</li>
+     * </ul>
      *
-     * @param x the collection to convert to string
-     * @return the string representation of the collection, or {@code null} if the input is null
+     * @param x the collection to serialize; may be {@code null}
+     * @return the JSON array string, or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final T x) {
@@ -281,12 +285,15 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     }
 
     /**
-     * Converts a string representation back to a collection instance.
-     * Handles {@code null} and empty strings by returning {@code null} or an empty collection respectively.
-     * The string should be in JSON array format.
+     * Parses a JSON array string back into a collection instance.
+     * <ul>
+     *   <li>{@code null}, blank, or empty string returns {@code null}.</li>
+     *   <li>{@code "[]"} returns an empty collection of the appropriate type.</li>
+     *   <li>Otherwise the string is deserialized by the JSON parser with the configured element type.</li>
+     * </ul>
      *
-     * @param str the string to parse
-     * @return a new collection instance containing the parsed elements, or {@code null} if the input is null
+     * @param str the JSON array string to parse; may be {@code null}
+     * @return a new collection containing the parsed elements, or {@code null} if {@code str} is {@code null} or blank
      */
     @Override
     public T valueOf(final String str) {
@@ -300,12 +307,12 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     }
 
     /**
-     * Appends the string representation of a collection to an Appendable.
-     * The output format is a JSON array with elements separated by commas.
-     * Handles Writer instances specially for better performance with buffering.
+     * Appends the JSON array representation of a collection to an {@link Appendable}.
+     * When the {@link Appendable} is a {@link java.io.Writer}, a buffered wrapper is used for
+     * better I/O performance. If {@code x} is {@code null}, the literal {@code null} is appended.
      *
-     * @param appendable the Appendable to write to
-     * @param x the collection to append
+     * @param appendable the {@link Appendable} to write to
+     * @param x          the collection to append; may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
@@ -365,13 +372,14 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     }
 
     /**
-     * Writes the character representation of a collection to a CharacterWriter.
-     * This method is optimized for performance when writing to character-based outputs.
-     * The collection is serialized as a JSON array.
+     * Writes the JSON array representation of a collection to a {@link CharacterWriter}.
+     * Each element is written using its own type's {@code writeCharacter} method, so element-level
+     * quotation and escaping are applied correctly. If {@code x} is {@code null}, the literal
+     * {@code null} is written.
      *
-     * @param writer the CharacterWriter to write to
-     * @param x the collection to write
-     * @param config the serialization configuration to use
+     * @param writer the {@link CharacterWriter} to write to
+     * @param x      the collection to write; may be {@code null}
+     * @param config serialization configuration forwarded to each element's writer; may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
@@ -399,14 +407,15 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     }
 
     /**
-     * Generates a type name string for a collection type with the specified element type.
-     * The format depends on whether a declaring name (simplified) or full name is requested.
-     * This is an internal method used by the type system.
+     * Generates the type name string for a collection type parameterized with the given element type.
      *
-     * @param typeClass the collection class
-     * @param parameterTypeName the name of the element type
-     * @param isDeclaringName {@code true} to generate a declaring name with simple class names, {@code false} for fully qualified names
-     * @return the formatted type name (e.g., "List&lt;String&gt;" or "java.util.List&lt;java.lang.String&gt;")
+     * @param typeClass         the collection class (e.g., {@code List.class})
+     * @param parameterTypeName the element type name (e.g., {@code "String"})
+     * @param isDeclaringName   {@code true} to produce a simple (declaring) name using
+     *                          {@link com.landawn.abacus.util.ClassUtil#getSimpleClassName(Class)}
+     *                          (e.g., {@code "List<String>"}); {@code false} for the fully qualified
+     *                          form (e.g., {@code "java.util.List<java.lang.String>"})
+     * @return the formatted type name
      */
     protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {

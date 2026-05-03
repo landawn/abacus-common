@@ -1924,11 +1924,11 @@ public final class Comparators {
      * Map<String, Integer> map1 = new TreeMap<>();
      * map1.put("apple", 1);
      * map1.put("banana", 2);
-     * 
+     *
      * Map<String, Integer> map2 = new TreeMap<>();
      * map2.put("apple", 1);
      * map2.put("cherry", 3);
-     * 
+     *
      * Comparator<Map<String, Integer>> cmp = Comparators.comparingMapByKey();
      * int result = cmp.compare(map1, map2);   // returns negative (banana < cherry)
      * }</pre>
@@ -2011,11 +2011,11 @@ public final class Comparators {
      * Map<String, Integer> scores1 = new LinkedHashMap<>();
      * scores1.put("Alice", 85);
      * scores1.put("Bob", 92);
-     * 
+     *
      * Map<String, Integer> scores2 = new LinkedHashMap<>();
      * scores2.put("Carol", 85);
      * scores2.put("Dave", 88);
-     * 
+     *
      * Comparator<Map<String, Integer>> cmp = Comparators.comparingMapByValue();
      * int result = cmp.compare(scores1, scores2);   // returns positive (92 > 88)
      * }</pre>
@@ -2160,7 +2160,7 @@ public final class Comparators {
      * <pre>{@code
      * Comparator<Person> byAge = Comparator.comparing(Person::getAge);
      * Comparator<Person> byAgeReversed = Comparators.reverseOrder(byAge);
-     * 
+     *
      * List<Person> people = getPeople();
      * people.sort(byAgeReversed);   // Sorts from oldest to youngest
      * }</pre>
@@ -2192,7 +2192,7 @@ public final class Comparators {
      * List<Task> tasks = getTasks();
      * // Sort tasks with completed tasks first
      * tasks.sort(Comparators.reversedComparingBoolean(Task::isCompleted));
-     * 
+     *
      * // Sort products with in-stock items first
      * products.sort(Comparators.reversedComparingBoolean(Product::isInStock));
      * }</pre>
@@ -2217,7 +2217,7 @@ public final class Comparators {
      * List<Student> students = getStudents();
      * // Sort students by grade in reverse order (Z to A)
      * students.sort(Comparators.reversedComparingChar(Student::getGrade));
-     * 
+     *
      * // Sort items by priority code in reverse order
      * items.sort(Comparators.reversedComparingChar(Item::getPriorityCode));
      * }</pre>
@@ -2242,7 +2242,7 @@ public final class Comparators {
      * List<DataPacket> packets = getPackets();
      * // Sort packets by priority byte in reverse order (highest priority first)
      * packets.sort(Comparators.reversedComparingByte(DataPacket::getPriority));
-     * 
+     *
      * // Sort by compression level in reverse order
      * files.sort(Comparators.reversedComparingByte(File::getCompressionLevel));
      * }</pre>
@@ -2267,7 +2267,7 @@ public final class Comparators {
      * List<Product> products = getProducts();
      * // Sort products by quantity in reverse order (highest quantity first)
      * products.sort(Comparators.reversedComparingShort(Product::getQuantity));
-     * 
+     *
      * // Sort by year in reverse order (newest first)
      * records.sort(Comparators.reversedComparingShort(Record::getYear));
      * }</pre>
@@ -2295,7 +2295,7 @@ public final class Comparators {
      * List<Employee> employees = getEmployees();
      * // Sort employees by salary in descending order
      * employees.sort(Comparators.reversedComparingInt(Employee::getSalary));
-     * 
+     *
      * // Sort posts by view count (most viewed first)
      * posts.sort(Comparators.reversedComparingInt(Post::getViewCount));
      * }</pre>
@@ -2323,7 +2323,7 @@ public final class Comparators {
      * List<Transaction> transactions = getTransactions();
      * // Sort transactions by timestamp (newest first)
      * transactions.sort(Comparators.reversedComparingLong(Transaction::getTimestamp));
-     * 
+     *
      * // Sort files by size (largest first)
      * files.sort(Comparators.reversedComparingLong(File::getSize));
      * }</pre>
@@ -2349,7 +2349,7 @@ public final class Comparators {
      * List<Product> products = getProducts();
      * // Sort products by rating (highest rated first)
      * products.sort(Comparators.reversedComparingFloat(Product::getRating));
-     * 
+     *
      * // Sort by discount percentage (highest discount first)
      * items.sort(Comparators.reversedComparingFloat(Item::getDiscountPercent));
      * }</pre>
@@ -2375,7 +2375,7 @@ public final class Comparators {
      * List<Student> students = getStudents();
      * // Sort students by GPA (highest first)
      * students.sort(Comparators.reversedComparingDouble(Student::getGpa));
-     * 
+     *
      * // Sort locations by distance (farthest first)
      * locations.sort(Comparators.reversedComparingDouble(Location::getDistance));
      * }</pre>
@@ -2403,7 +2403,7 @@ public final class Comparators {
      * List<Person> people = getPeople();
      * // Sort people by name in reverse alphabetical order (Z to A)
      * people.sort(Comparators.reversedComparingBy(Person::getName));
-     * 
+     *
      * // Sort events by date in reverse chronological order (newest first)
      * events.sort(Comparators.reversedComparingBy(Event::getDate));
      * }</pre>
@@ -2547,7 +2547,7 @@ public final class Comparators {
      * Comparator<Map.Entry<String, Integer>> cmp = Comparators.reversedComparingByKey(
      *     Comparator.comparingInt(String::length)
      * );
-     * 
+     *
      * Map<String, Integer> data = Map.of("a", 1, "abc", 2, "ab", 3);
      * List<Map.Entry<String, Integer>> entries = new ArrayList<>(data.entrySet());
      * entries.sort(cmp);
@@ -2580,7 +2580,7 @@ public final class Comparators {
      * Comparator<Map.Entry<String, Person>> cmp = Comparators.reversedComparingByValue(
      *     Comparator.comparingInt(Person::getAge)
      * );
-     * 
+     *
      * Map<String, Person> people = getPeopleMap();
      * List<Map.Entry<String, Person>> entries = new ArrayList<>(people.entrySet());
      * entries.sort(cmp);

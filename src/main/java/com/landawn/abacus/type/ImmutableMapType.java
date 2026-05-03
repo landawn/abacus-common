@@ -16,12 +16,13 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.List;
 
 import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ImmutableMap;
-import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Strings;
 
 /**
  * Type handler for ImmutableMap objects with generic key and value types.
@@ -38,10 +39,17 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
 
     private final Class<T> typeClass;
 
-    private final Type<?>[] parameterTypes;
+    private final List<Type<?>> parameterTypes;
 
     private final JsonDeserConfig jdc;
 
+    /**
+     * Package-private constructor for ImmutableMapType.
+     * This constructor is called by the TypeFactory to create ImmutableMap&lt;K,V&gt; type instances.
+     *
+     * @param keyTypeName the name of the key type parameter
+     * @param valueTypeName the name of the value type parameter
+     */
     @SuppressWarnings("rawtypes")
     ImmutableMapType(final String keyTypeName, final String valueTypeName) {
         super(getTypeName(ImmutableMap.class, keyTypeName, valueTypeName, false));
@@ -50,16 +58,17 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
 
         this.typeClass = (Class) ImmutableMap.class;
 
-        parameterTypes = new Type[] { TypeFactory.getType(keyTypeName), TypeFactory.getType(valueTypeName) };
+        parameterTypes = List.of(TypeFactory.getType(keyTypeName), TypeFactory.getType(valueTypeName));
 
-        jdc = JsonDeserConfig.create().setMapKeyType(parameterTypes[0]).setMapValueType(parameterTypes[1]);
+        jdc = JsonDeserConfig.create().setMapKeyType(parameterTypes.get(0)).setMapValueType(parameterTypes.get(1));
     }
 
     /**
      * Returns the declaring name of this ImmutableMap type.
-     * The declaring name includes the fully qualified class names of the key and value types.
+     * The declaring name uses simple class names (rather than fully qualified names) for the map class
+     * and its key/value type parameters.
      *
-     * @return The declaring name in format "MapClass&lt;KeyDeclaringName, ValueDeclaringName&gt;"
+     * @return the declaring name in the format "MapClass&lt;KeyDeclaringName, ValueDeclaringName&gt;"
      */
     @Override
     public String declaringName() {
@@ -69,7 +78,7 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
     /**
      * Returns the Class object representing the specific ImmutableMap implementation type.
      *
-     * @return The Class object for the ImmutableMap implementation
+     * @return the Class object for the ImmutableMap implementation
      */
     @Override
     public Class<T> javaType() {
@@ -77,21 +86,20 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
     }
 
     /**
-     * Gets the parameter types for this generic ImmutableMap type.
-     * The array contains two elements: the key type at index 0 and the value type at index 1.
+     * Returns the parameter types for this generic ImmutableMap type.
+     * The list contains two elements: the key type at index 0 and the value type at index 1.
      *
-     * @return An array containing the key type and value type
+     * @return an immutable list containing the key type and value type
      */
     @Override
-    public Type<?>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 
     /**
-     * Indicates whether this type represents an ImmutableMap.
-     * For ImmutableMapType, this always returns {@code true}.
+     * Indicates whether this type represents a {@link ImmutableMap}.
      *
-     * @return {@code true}, indicating that this type represents an ImmutableMap
+     * @return {@code true}, always, because this handler is dedicated to {@link ImmutableMap} objects
      */
     @Override
     public boolean isMap() {
@@ -99,10 +107,10 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
     }
 
     /**
-     * Indicates whether this is a generic type.
-     * For ImmutableMapType, this always returns {@code true} since ImmutableMap is parameterized with key and value types.
+     * Indicates whether this is a generic type with type parameters.
+     * {@link ImmutableMap} is always parameterized with key and value types.
      *
-     * @return {@code true}, indicating that ImmutableMap is a generic type
+     * @return {@code true}, always, because {@link ImmutableMap} is a generic type
      */
     @Override
     public boolean isParameterizedType() {
@@ -110,10 +118,11 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
     }
 
     /**
-     * Indicates whether instances of this type can be serialized.
-     * ImmutableMap objects are not directly serializable through this type handler.
+     * Indicates whether this type uses string-based serialization.
+     * Returns {@code false} because ImmutableMap values are serialized structurally as a
+     * {@link SerializationType#MAP} rather than as opaque strings.
      *
-     * @return {@code false}, indicating that ImmutableMap is not serializable through this type
+     * @return {@code false}, indicating that ImmutableMap uses structural map serialization
      */
     @Override
     public boolean isSerializable() {
@@ -121,10 +130,10 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
     }
 
     /**
-     * Gets the serialization type category for ImmutableMap.
-     * This indicates how the ImmutableMap should be treated during serialization processes.
+     * Returns the serialization type category for this ImmutableMap type.
+     * ImmutableMap values are serialized and deserialized as structured map objects.
      *
-     * @return SerializationType.MAP
+     * @return {@link SerializationType#MAP}
      */
     @Override
     public SerializationType serializationType() {
@@ -132,23 +141,11 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
     }
 
     /**
-     * Converts an ImmutableMap object to its JSON string representation.
-     * Empty ImmutableMaps are represented as "{}".
+     * Serializes an {@link ImmutableMap} to its JSON string representation.
+     * An empty map is represented as {@code "{}"}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<ImmutableMap<String, Integer>> type =
-     *     TypeFactory.getType("ImmutableMap<String, Integer>");
-     * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
-     * String result = type.stringOf(map);
-     * // Returns: {"a":1,"b":2}
-     *
-     * String empty = type.stringOf(ImmutableMap.empty());
-     * // Returns: {}
-     * }</pre>
-     *
-     * @param x The ImmutableMap object to convert
-     * @return The JSON string representation of the ImmutableMap, or {@code null} if the input is null
+     * @param x the {@link ImmutableMap} to serialize; may be {@code null}
+     * @return the JSON string representation of the map, or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final T x) {
@@ -162,25 +159,15 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
     }
 
     /**
-     * Parses a JSON string to create an ImmutableMap object.
-     * The method handles:
-     * - {@code null} or empty/blank string: returns {@code null}
-     * - "{}": returns an empty ImmutableMap of the appropriate type
-     * - Valid JSON object strings: deserialized into an ImmutableMap
+     * Parses a JSON string back into an {@link ImmutableMap} object.
+     * <ul>
+     *   <li>{@code null} or blank string: returns {@code null}</li>
+     *   <li>{@code "{}"}: returns an empty {@link ImmutableMap}</li>
+     *   <li>Valid JSON object string: deserialized into an {@link ImmutableMap}</li>
+     * </ul>
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<ImmutableMap<String, Integer>> type =
-     *     TypeFactory.getType("ImmutableMap<String, Integer>");
-     * ImmutableMap<String, Integer> map = type.valueOf("{\"a\":1,\"b\":2}");
-     * // map contains {"a"=1, "b"=2}
-     *
-     * ImmutableMap<String, Integer> empty = type.valueOf("{}");
-     * // Returns empty ImmutableMap
-     * }</pre>
-     *
-     * @param str The JSON string to parse
-     * @return The parsed ImmutableMap object, or {@code null} if the input is {@code null} or blank
+     * @param str the JSON string to parse; may be {@code null} or blank
+     * @return the parsed {@link ImmutableMap}, or {@code null} if {@code str} is {@code null} or blank
      */
     @Override
     public T valueOf(final String str) {
@@ -196,22 +183,13 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
     }
 
     /**
-     * Appends the string representation of an ImmutableMap to an Appendable.
-     * The ImmutableMap is serialized as a JSON object. If the Appendable is a Writer,
-     * the serialization is performed directly to the Writer for better performance.
+     * Appends the JSON string representation of an {@link ImmutableMap} to an {@link Appendable}.
+     * If the {@link Appendable} is a {@link java.io.Writer}, the serialization is written directly
+     * to it for better performance.
+     * If {@code x} is {@code null}, the literal {@code null} is appended.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<ImmutableMap<String, Integer>> type =
-     *     TypeFactory.getType("ImmutableMap<String, Integer>");
-     * StringBuilder sb = new StringBuilder();
-     * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
-     * type.appendTo(sb, map);
-     * // sb contains: {"a":1,"b":2}
-     * }</pre>
-     *
-     * @param appendable The Appendable to write to
-     * @param x The ImmutableMap to append
+     * @param appendable the {@link Appendable} to write to
+     * @param x          the {@link ImmutableMap} to append; may be {@code null}
      * @throws IOException if an I/O error occurs while appending
      */
     @Override
@@ -230,13 +208,15 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
     }
 
     /**
-     * Generates the type name for an ImmutableMap with the specified implementation class, key and value types.
+     * Generates the type name for an {@link ImmutableMap} with the specified implementation class,
+     * key type, and value type.
      *
-     * @param typeClass The ImmutableMap implementation class
-     * @param keyTypeName The name of the key type
-     * @param valueTypeName The name of the value type
-     * @param isDeclaringName Whether to use declaring names (true) or regular names (false)
-     * @return The formatted type name string
+     * @param typeClass       the {@link ImmutableMap} implementation class
+     * @param keyTypeName     the name of the key type
+     * @param valueTypeName   the name of the value type
+     * @param isDeclaringName {@code true} to use declaring names (simple class names),
+     *                        {@code false} to use regular names (canonical class names)
+     * @return the formatted type name string
      */
     protected static String getTypeName(final Class<?> typeClass, final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {

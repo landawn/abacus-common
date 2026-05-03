@@ -22,7 +22,6 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>This is a functional interface whose functional method is {@link #accept(Object, Object, int)}.
  *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <T> the type of the first object argument to the operation
@@ -64,6 +63,7 @@ public interface BiObjIntConsumer<T, U> extends Throwables.BiObjIntConsumer<T, U
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code BiObjIntConsumer} that performs in sequence this operation followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     default BiObjIntConsumer<T, U> andThen(final BiObjIntConsumer<? super T, ? super U> after) {
         return (t, u, i) -> {

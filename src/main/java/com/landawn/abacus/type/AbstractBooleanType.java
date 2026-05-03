@@ -26,8 +26,16 @@ import com.landawn.abacus.util.Strings;
 
 /**
  * The abstract base class for boolean types in the type system.
- * This class provides common functionality for handling boolean values,
- * including conversion, database operations, and serialization.
+ * <p>
+ * This class provides common functionality for handling {@code boolean}/{@code Boolean} values,
+ * including string conversion (recognising {@code "true"}, {@code "Y"}, {@code "y"}, and
+ * {@code "1"} as {@code true}), conversion from {@code Number} values (positive numbers are
+ * {@code true}), JDBC read/write operations using {@link java.sql.Types#BOOLEAN}, and JSON/XML
+ * serialization with optional {@code writeNullBooleanAsFalse} support.
+ * Concrete subclasses cover the primitive {@code boolean} type and the {@code Boolean} wrapper.
+ * </p>
+ *
+ * @see BooleanType
  */
 public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
 
@@ -55,18 +63,20 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
 
     /**
      * Converts the specified object to a {@code Boolean} value.
-     * This method handles various input types:
+     * <p>
+     * This method handles the following input types:
+     * </p>
      * <ul>
-     *   <li>{@code null} returns the default value.</li>
-     *   <li>{@code Boolean} instances are returned as-is.</li>
-     *   <li>Numbers are converted to {@code true} if greater than 0, {@code false} otherwise.</li>
-     *   <li>{@code CharSequence} instances: single character 'Y', 'y', or '1' returns {@code true};
-     *       otherwise parsed using {@link Boolean#valueOf(String)}.</li>
-     *   <li>Other objects are converted via {@code Boolean.valueOf(obj.toString())}.</li>
+     *   <li>{@code null} — returns the default value.</li>
+     *   <li>{@code Boolean} — returned as-is.</li>
+     *   <li>{@code Number} — returns {@code true} if {@code longValue() > 0}, {@code false} otherwise.</li>
+     *   <li>{@code CharSequence} — single character {@code 'Y'}, {@code 'y'}, or {@code '1'} returns
+     *       {@code true}; other values are parsed using {@link Boolean#valueOf(String)}.</li>
+     *   <li>Other objects — converted via {@code Boolean.valueOf(obj.toString())}.</li>
      * </ul>
      *
-     * @param obj the source object to convert
-     * @return the {@code Boolean} value, or default value if the input is {@code null}
+     * @param obj the source object to convert, may be {@code null}
+     * @return the corresponding {@code Boolean} value, or the default value if the input is {@code null}
      */
     @Override
     public Boolean valueOf(final Object obj) {
@@ -111,19 +121,21 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
     }
 
     /**
-     * Converts the specified character array to a {@code Boolean} value.
+     * Converts a region of the specified character array to a {@code Boolean} value.
+     * <p>
      * Handles the following cases:
+     * </p>
      * <ul>
-     *   <li>{@code null} or empty array returns the default value.</li>
-     *   <li>Single character 'Y', 'y', or '1' returns {@code true}.</li>
-     *   <li>"true" (case-insensitive) returns {@code true}.</li>
-     *   <li>Any other value returns {@code false}.</li>
+     *   <li>{@code null} or zero-length region — returns the default value.</li>
+     *   <li>Single character {@code 'Y'}, {@code 'y'}, or {@code '1'} — returns {@code true}.</li>
+     *   <li>Four-character sequence equal to {@code "true"} (case-insensitive) — returns {@code true}.</li>
+     *   <li>Any other value — returns {@code false}.</li>
      * </ul>
      *
-     * @param cbuf the character array to convert
-     * @param offset the starting position in the array
+     * @param cbuf the character array to convert, may be {@code null}
+     * @param offset the starting position in the array (0-based)
      * @param len the number of characters to read
-     * @return {@code true} if the array contains "true" (case-insensitive), {@code false} otherwise
+     * @return the corresponding {@code Boolean} value, or the default value if {@code cbuf} is {@code null} or {@code len} is 0
      */
     @Override
     public Boolean valueOf(final char[] cbuf, final int offset, final int len) {
@@ -163,12 +175,12 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
 
     /**
      * Retrieves a boolean value from the specified {@code ResultSet} at the given column index.
-     * <p>Note: This method uses {@code rs.getBoolean()} which returns {@code false} for SQL {@code NULL} values.
-     * Therefore, SQL {@code NULL} values are converted to {@code Boolean.valueOf(false)}, not {@code null}.</p>
+     * Uses {@link java.sql.ResultSet#getBoolean(int)} which returns {@code false} for SQL {@code NULL} values.
+     * Therefore, SQL {@code NULL} values are converted to {@code false}, not {@code null}.
      *
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the column index (1-based)
-     * @return the boolean value at the specified column, or {@code Boolean.valueOf(false)} if the value is SQL {@code NULL}
+     * @return the boolean value at the specified column, or {@code false} if the value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -178,12 +190,12 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
 
     /**
      * Retrieves a boolean value from the specified {@code ResultSet} using the given column label.
-     * <p>Note: This method uses {@code rs.getBoolean()} which returns {@code false} for SQL {@code NULL} values.
-     * Therefore, SQL {@code NULL} values are converted to {@code Boolean.valueOf(false)}, not {@code null}.</p>
+     * Uses {@link java.sql.ResultSet#getBoolean(String)} which returns {@code false} for SQL {@code NULL} values.
+     * Therefore, SQL {@code NULL} values are converted to {@code false}, not {@code null}.
      *
      * @param rs the {@code ResultSet} to read from
      * @param columnName the column label
-     * @return the boolean value at the specified column, or {@code Boolean.valueOf(false)} if the value is SQL {@code NULL}
+     * @return the boolean value at the specified column, or {@code false} if the value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs
      */
     @Override

@@ -9,6 +9,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
@@ -17,9 +18,10 @@ import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.u.Optional;
 
 /**
- * Generic type handler for {@link Optional} wrapper objects, providing serialization,
- * deserialization, and database interaction capabilities for optional values of any type.
- * This type handler supports generic type parameters and delegates operations to the
+ * Generic type handler for {@link Optional} wrapper objects from the {@code com.landawn.abacus.util.u} package,
+ * providing serialization, deserialization, and database interaction capabilities for optional values of any type.
+ * Note: this handles the abacus-specific {@code Optional<T>}, not {@code java.util.Optional<T>}.
+ * This type handler supports generic type parameters and delegates serialization/deserialization operations to the
  * appropriate element type handler.
  *
  * @param <T> the type of value wrapped by the Optional
@@ -31,7 +33,7 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
 
     private final String declaringName;
 
-    private final Type<T>[] parameterTypes;
+    private final List<Type<?>> parameterTypes;
 
     private final Type<T> elementType;
 
@@ -46,8 +48,8 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
         super(OPTIONAL + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).name() + SK.GREATER_THAN);
 
         declaringName = OPTIONAL + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + SK.GREATER_THAN;
-        parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
-        elementType = parameterTypes[0];
+        elementType = TypeFactory.getType(parameterTypeName);
+        parameterTypes = List.of(elementType);
     }
 
     /**
@@ -89,13 +91,13 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
     }
 
     /**
-     * Gets the array of parameter types for this generic type.
-     * For Optional, this returns a single-element array containing the element type.
+     * Gets the immutable list of parameter types for this generic type.
+     * For Optional, this returns a single-element list containing the element type.
      *
-     * @return an array containing the element type
+     * @return an immutable list containing the element type
      */
     @Override
-    public Type<T>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 
@@ -152,7 +154,7 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
      */
     @Override
     public String stringOf(final Optional<T> x) {
-        return (x == null || x.isEmpty()) ? null : N.stringOf(x.get()); // elementType.stringOf(x.get());
+        return (x == null || x.isEmpty()) ? null : elementType.stringOf(x.get());
     }
 
     /**

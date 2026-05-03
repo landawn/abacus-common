@@ -253,19 +253,9 @@ public class XBean {
             return false;
         }
 
-        if (typeChar != other.typeChar) {
-            return false;
-        }
-
-        if (!Objects.equals(typeDate, other.typeDate)) {
-            return false;
-        }
-
-        if (Double.doubleToLongBits(typeDouble) != Double.doubleToLongBits(other.typeDouble)) {
-            return false;
-        }
-
-        if (Float.floatToIntBits(typeFloat) != Float.floatToIntBits(other.typeFloat)) {
+        if ((typeChar != other.typeChar) || !Objects.equals(typeDate, other.typeDate)
+                || (Double.doubleToLongBits(typeDouble) != Double.doubleToLongBits(other.typeDouble))
+                || (Float.floatToIntBits(typeFloat) != Float.floatToIntBits(other.typeFloat))) {
             return false;
         }
 

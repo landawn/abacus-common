@@ -40,8 +40,8 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
     public static final String OFFSET_DATE_TIME = OffsetDateTime.class.getSimpleName();
 
     /**
-     * Constructs an OffsetDateTimeType.
-     * This constructor initializes the type handler for OffsetDateTime objects.
+     * Package-private constructor for OffsetDateTimeType.
+     * This constructor is called by the TypeFactory to create OffsetDateTime type instances.
      */
     OffsetDateTimeType() {
         super(OFFSET_DATE_TIME);
@@ -58,8 +58,9 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
     }
 
     /**
-     * Converts an {@link OffsetDateTime} object to its ISO-8601 string representation.
-     * The format used is "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" with UTC timezone.
+     * Converts an {@link OffsetDateTime} object to its ISO-8601 timestamp string representation.
+     * Uses a format equivalent to {@link java.time.format.DateTimeFormatter#ISO_OFFSET_DATE_TIME}
+     * (e.g., {@code "2011-12-03T10:15:30.000+01:00"}), preserving the OffsetDateTime's UTC offset.
      *
      * @param x the OffsetDateTime object to convert
      * @return the ISO-8601 formatted string, or {@code null} if the input is null
@@ -227,15 +228,19 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
 
     /**
      * Writes the character representation of an {@link OffsetDateTime} to a CharacterWriter.
-     * The format depends on the serialization configuration, supporting:
-     * - LONG format: epoch milliseconds as a number
-     * - ISO_8601_DATE_TIME: "yyyy-MM-dd'T'HH:mm:ss'Z'"
-     * - ISO_8601_TIMESTAMP: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-     * - Default: standard string representation
+     * The format depends on the serialization configuration:
+     * <ul>
+     *   <li>{@code LONG}: epoch milliseconds written as a numeric value</li>
+     *   <li>{@code ISO_8601_DATE_TIME}: ISO offset date-time format (e.g., {@code "2011-12-03T10:15:30+01:00"})</li>
+     *   <li>{@code ISO_8601_TIMESTAMP}: ISO offset timestamp format (e.g., {@code "2011-12-03T10:15:30.000+01:00"})</li>
+     *   <li>Default ({@code null} config or {@code null} format): same as {@code ISO_8601_TIMESTAMP}</li>
+     * </ul>
+     * When the format is not {@code LONG} and the config specifies a string quotation character,
+     * the formatted value is wrapped in that quotation character.
      *
      * @param writer the CharacterWriter to write to
-     * @param x the OffsetDateTime value to write
-     * @param config the serialization configuration specifying format and quoting
+     * @param x the OffsetDateTime value to write; if {@code null}, writes the literal {@code "null"}
+     * @param config the serialization configuration specifying format and quoting; may be {@code null}
      * @throws IOException if an I/O error occurs during the write operation
      */
     @SuppressWarnings("null")

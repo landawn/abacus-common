@@ -130,6 +130,7 @@ public interface NPredicate<T> {
      * @param other a predicate that will be logically-ANDed with this predicate
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default NPredicate<T> and(final NPredicate<? super T> other) {
         return t -> test(t) && other.test(t);
@@ -167,6 +168,7 @@ public interface NPredicate<T> {
      * @param other a predicate that will be logically-ORed with this predicate
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default NPredicate<T> or(final NPredicate<? super T> other) {
         return t -> test(t) || other.test(t);

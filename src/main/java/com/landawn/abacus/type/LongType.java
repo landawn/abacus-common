@@ -20,9 +20,9 @@ import java.sql.SQLException;
 import com.landawn.abacus.util.Numbers;
 
 /**
- * Type handler for Long wrapper type.
- * This class provides functionality to handle Long objects in database operations and type conversions.
- * It extends AbstractLongType to inherit common long type handling behavior.
+ * Type handler for the {@link Long} wrapper type.
+ * Provides serialization, deserialization, and JDBC integration for {@code Long} objects,
+ * including flexible conversion from various numeric database types to {@code Long}.
  */
 public final class LongType extends AbstractLongType {
 

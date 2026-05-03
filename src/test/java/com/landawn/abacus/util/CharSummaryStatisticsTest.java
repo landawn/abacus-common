@@ -137,7 +137,7 @@ public class CharSummaryStatisticsTest extends TestBase {
         assertEquals('X', stats.getMin());
         assertEquals('X', stats.getMax());
         assertEquals(3L * 'X', stats.getSum());
-        assertEquals((double) 'X', stats.getAverage());
+        assertEquals('X', stats.getAverage());
     }
 
     @Test

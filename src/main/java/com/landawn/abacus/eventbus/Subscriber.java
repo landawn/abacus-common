@@ -69,26 +69,17 @@ package com.landawn.abacus.eventbus;
 public interface Subscriber<E> {
 
     /**
-     * Called when an event of type {@code E} is posted to the {@code EventBus}.
-     * This method will be invoked by the {@code EventBus} when a matching event is posted.
+     * Called when an event of type {@code E} is posted to the {@link EventBus}.
+     * This method is invoked by the {@code EventBus} when a matching event is posted.
      *
-     * <p>The method will be called on the thread specified during registration,
-     * or on the posting thread if no thread mode was specified.</p>
+     * <p>The method will be called on the thread determined by the thread mode specified during
+     * registration (see {@link Subscribe#threadMode()}), or on the posting thread if no thread
+     * mode was specified.</p>
      *
-     * <p>Implementations should handle the event appropriately and should not throw
-     * unchecked exceptions. Any exceptions thrown will be caught and logged by the {@code EventBus}.</p>
+     * <p>Implementations should handle the event and should avoid throwing unchecked exceptions.
+     * Any exceptions thrown will be caught and logged by the {@code EventBus}.</p>
      *
-     * <p><b>Usage Examples for implementation:</b></p>
-     * <pre>{@code
-     * @Override
-     * public void on(UserEvent event) {
-     *     // Process the user event
-     *     updateUserInterface(event.getUser());
-     *     logUserActivity(event);
-     * }
-     * }</pre>
-     *
-     * @param event the event instance posted to the {@code EventBus}. Never {@code null}.
+     * @param event the event instance posted to the {@code EventBus}; never {@code null}
      */
     void on(E event);
 }

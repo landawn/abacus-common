@@ -78,9 +78,9 @@ import com.landawn.abacus.util.stream.FloatStream;
  * <pre>{@code
  * // Creating and initializing float lists
  * FloatList coordinates = FloatList.of(1.5f, 2.7f, 3.14f, 4.2f);
- * FloatList range = FloatList.range(0.0f, 10.0f, 0.5f);   // [0.0, 0.5, 1.0, ..., 9.5]
- * FloatList audioSamples = new FloatList(44100);   // Pre-sized for 1 second at 44.1kHz
- * FloatList random = FloatList.random(0.0f, 1.0f, 1000);   // 1000 random floats [0.0, 1.0)
+ * FloatList repeated = FloatList.repeat(0.0f, 10);              // [0.0, 0.0, ..., 0.0] (10 elements)
+ * FloatList audioSamples = new FloatList(44100);                 // Pre-sized for 1 second at 44.1kHz
+ * FloatList random = FloatList.random(1000);                     // 1000 random floats
  *
  * // Basic operations
  * coordinates.add(5.8f);   // Append float value
@@ -144,10 +144,9 @@ import com.landawn.abacus.util.stream.FloatStream;
  *
  * <p><b>Float-Specific Operations:</b>
  * <ul>
- *   <li><b>Range Generation:</b> {@code range()}, {@code rangeClosed()} for arithmetic sequences</li>
  *   <li><b>Mathematical Functions:</b> {@code min()}, {@code max()}, {@code median()}</li>
  *   <li><b>Type Conversions:</b> {@code toDoubleList()} for increased precision</li>
- *   <li><b>Random Generation:</b> {@code random()} methods for simulations and testing</li>
+ *   <li><b>Random Generation:</b> {@code random(int)} for simulations and testing</li>
  *   <li><b>Parallel Operations:</b> {@code parallelSort()} for large dataset optimization</li>
  * </ul>
  *
@@ -155,7 +154,6 @@ import com.landawn.abacus.util.stream.FloatStream;
  * <ul>
  *   <li><b>{@code of(float...)}:</b> Create from varargs array</li>
  *   <li><b>{@code copyOf(float[])}:</b> Create defensive copy of array</li>
- *   <li><b>{@code range(float, float, float)}:</b> Create arithmetic sequence with step</li>
  *   <li><b>{@code repeat(float, int)}:</b> Create with repeated values</li>
  *   <li><b>{@code random(int)}:</b> Create with random float values</li>
  * </ul>
@@ -182,7 +180,7 @@ import com.landawn.abacus.util.stream.FloatStream;
  * <ul>
  *   <li><b>Not Thread-Safe:</b> This implementation is not synchronized</li>
  *   <li><b>External Synchronization:</b> Required for concurrent access</li>
- *   <li><b>Fail-Fast Iterators:</b> Detect concurrent modifications</li>
+ *   <li><b>Iterators:</b> Not fail-fast; concurrent modification yields undefined results</li>
  *   <li><b>Read-Only Access:</b> Multiple threads can safely read simultaneously</li>
  * </ul>
  *
@@ -687,7 +685,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * If this list does not contain the element, it is unchanged. The comparison is done using
      * Float.compare() to handle NaN values correctly.
      *
-     * <p>This method runs in linear time, as it may need to search through the entire list
+     * <p>This method runs in linear time, as it may need to search through the entire list.</p>
      * <p><b>Note:</b> This method removes by value. To remove by index, use {@link #removeAt(int)}.</p>
      *
      * @param e the element to be removed from this list, if present
@@ -1031,8 +1029,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * The elements from fromIndex (inclusive) to toIndex (exclusive) are moved
      * so that the element originally at fromIndex will be at newPositionAfterMove.
      * Other elements are shifted as necessary to accommodate the move.
-     * 
-     * <p><b>Usage Examples:</b></p> 
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = FloatList.of(0f, 1f, 2f, 3f, 4f, 5f);
      * list.moveRange(1, 3, 3);   // Moves elements [1, 2] to position starting at index 3
@@ -1041,13 +1039,14 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      *
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and size() - lengthOfRange, inclusive.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the list
      */
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
+        N.checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, size);
         N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
     }
 
@@ -1411,7 +1410,6 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @see #difference(FloatList)
      * @see #symmetricDifference(FloatList)
      * @see N#intersection(float[], float[])
-     * @see N#intersection(int[], int[])
      */
     @Override
     public FloatList intersection(final FloatList b) {
@@ -1457,7 +1455,6 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @see #difference(float[])
      * @see #symmetricDifference(float[])
      * @see N#intersection(float[], float[])
-     * @see N#intersection(int[], int[])
      */
     @Override
     public FloatList intersection(final float[] b) {
@@ -1492,7 +1489,6 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @see #symmetricDifference(FloatList)
      * @see #intersection(FloatList)
      * @see N#difference(float[], float[])
-     * @see N#difference(int[], int[])
      */
     @Override
     public FloatList difference(final FloatList b) {
@@ -1538,7 +1534,6 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @see #symmetricDifference(float[])
      * @see #intersection(float[])
      * @see N#difference(float[], float[])
-     * @see N#difference(int[], int[])
      */
     @Override
     public FloatList difference(final float[] b) {
@@ -1578,7 +1573,6 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @see #difference(FloatList)
      * @see #intersection(FloatList)
      * @see N#symmetricDifference(float[], float[])
-     * @see N#symmetricDifference(int[], int[])
      */
     @Override
     public FloatList symmetricDifference(final FloatList b) {
@@ -1639,7 +1633,6 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @see #difference(float[])
      * @see #intersection(float[])
      * @see N#symmetricDifference(float[], float[])
-     * @see N#symmetricDifference(int[], int[])
      */
     @Override
     public FloatList symmetricDifference(final float[] b) {
@@ -1779,7 +1772,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
     /**
      * Returns the maximum value in this list as an OptionalFloat.
-     * 
+     *
      * @return an OptionalFloat containing the maximum value, or an empty OptionalFloat if this list is empty
      */
     public OptionalFloat max() {
@@ -1802,7 +1795,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
     /**
      * Returns the median value of all elements in this list.
-     * 
+     *
      * <p>The median is the middle value when the elements are sorted in ascending order. For lists with
      * an odd number of elements, this is the exact middle element. For lists with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
@@ -1815,7 +1808,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
     /**
      * Returns the median value of elements within the specified range of this list.
-     * 
+     *
      * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
      * For ranges with an odd number of elements, this returns the exact middle element when sorted.
      * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
@@ -2047,8 +2040,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Rotates all elements in this list by the specified distance.
      * After calling rotate(distance), the element at index i will be moved to
-     * index (i + distance) % size. 
-     * 
+     * index (i + distance) % size.
+     *
      * <p>Positive values of distance rotate elements towards higher indices (right rotation),
      * while negative values rotate towards lower indices (left rotation).
      * The list is modified in place.</p>
@@ -2344,10 +2337,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Returns an iterator over the elements in this list in proper sequence.
      *
-     * <p>The returned iterator is fail-fast: if the list is structurally modified
-     * at any time after the iterator is created, the iterator may throw a
-     * {@code ConcurrentModificationException}. This behavior is not guaranteed
-     * and should not be relied upon for correctness.</p>
+     * <p>The returned iterator is <b>not</b> fail-fast: it iterates over the list's
+     * backing array directly, and concurrent structural modifications during iteration
+     * yield undefined results rather than a {@code ConcurrentModificationException}.</p>
      *
      * @return a FloatIterator over the elements in this list
      */

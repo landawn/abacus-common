@@ -31,16 +31,18 @@ import java.util.List;
 
 /**
  * Utility class for handling and parsing network addresses.
- * Provides methods to convert various address formats (strings, URLs) into
- * InetSocketAddress instances suitable for network operations.
- * 
+ * Provides methods to convert various address formats (strings, {@link java.net.URL URLs}) into
+ * {@link java.net.InetSocketAddress} instances suitable for network operations.
+ *
  * <p>This class supports parsing of multiple address formats including:</p>
  * <ul>
- *   <li>Space-separated addresses: "host1:port1 host2:port2"</li>
- *   <li>Comma-separated addresses: "host1:port1, host2:port2"</li>
- *   <li>IPv6 addresses with colons: "::1:11211"</li>
+ *   <li>Space-separated addresses: {@code "host1:port1 host2:port2"}</li>
+ *   <li>Comma-separated addresses: {@code "host1:port1, host2:port2"}</li>
+ *   <li>IPv6 addresses with colons: {@code "::1:11211"}</li>
+ *   <li>Bracketed IPv6 addresses: {@code "[::1]:11211"}</li>
  * </ul>
- * 
+ *
+ * <p>This is a utility class and cannot be instantiated.</p>
  */
 public final class AddrUtil {
 
@@ -255,8 +257,8 @@ public final class AddrUtil {
      *
      * <p>If the URL does not specify a port explicitly and {@link URL#getPort()} returns -1,
      * the method will attempt to use {@link URL#getDefaultPort()} to get the protocol's default port.
-     * If no default port is available, the resulting {@link InetSocketAddress} will be created with port -1,
-     * which typically needs to be handled by the calling code.</p>
+     * If neither an explicit nor a default port is available (i.e., the resolved port is outside
+     * the valid range 0-65535), an {@link IllegalArgumentException} is thrown.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -268,6 +270,7 @@ public final class AddrUtil {
      * @param url a {@link URL} from which the host and port are to be extracted; must not be {@code null}
      * @return an {@link InetSocketAddress} instance corresponding to the host and port of the URL
      * @throws NullPointerException if {@code url} is {@code null}
+     * @throws IllegalArgumentException if the URL has no usable port (resolved port is outside the range 0-65535)
      * @see #getAddressList(Collection)
      */
     public static InetSocketAddress getAddressFromUrl(final URL url) {
@@ -284,7 +287,8 @@ public final class AddrUtil {
      * <p>This method handles {@code null} or empty input collections gracefully by returning an
      * empty list. If a URL does not specify a port explicitly and {@link URL#getPort()} returns -1,
      * the method will attempt to use {@link URL#getDefaultPort()} to get the protocol's default port.
-     * If no default port is available, the resulting {@link InetSocketAddress} will be created with port -1.</p>
+     * If neither an explicit nor a default port is available (i.e., the resolved port is outside
+     * the valid range 0-65535), an {@link IllegalArgumentException} is thrown.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -299,6 +303,7 @@ public final class AddrUtil {
      * @param urls a collection of {@link URL} objects to be converted; may be {@code null} or empty
      * @return a list of {@link InetSocketAddress} instances corresponding to the URLs,
      *         or an empty list if the input collection is {@code null} or empty
+     * @throws IllegalArgumentException if any URL has no usable port (resolved port is outside the range 0-65535)
      * @see #getAddressFromUrl(URL)
      */
     public static List<InetSocketAddress> getAddressListFromUrls(final Collection<URL> urls) {
@@ -319,7 +324,8 @@ public final class AddrUtil {
      * Extracts the port number from a URL, falling back to the default port if not explicitly specified.
      *
      * @param url the URL from which to extract the port
-     * @return the explicit port if specified, or the default port for the URL's protocol, or -1 if neither is available
+     * @return the explicit port if specified, or the default port for the URL's protocol
+     * @throws IllegalArgumentException if neither an explicit port nor a default port is available (i.e., the resolved port is not in the range 0-65535)
      */
     private static int getPort(final URL url) {
         int port = url.getPort();

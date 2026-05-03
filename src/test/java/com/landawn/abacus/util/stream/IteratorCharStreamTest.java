@@ -108,10 +108,10 @@ public class IteratorCharStreamTest extends TestBase {
         assertEquals(0, createCharStream().distinct().count());
     }
 
-    // Covers IteratorCharStream.flatmap(CharFunction<char[]>)
+    // Covers IteratorCharStream.flatMapArray(CharFunction<char[]>)
     @Test
     public void testFlatmap_NonEmpty() {
-        java.util.List<Character> result = createCharStream('a', 'b').flatmap(c -> new char[] { c, Character.toUpperCase(c) }).boxed().toList();
+        java.util.List<Character> result = createCharStream('a', 'b').flatMapArray(c -> new char[] { c, Character.toUpperCase(c) }).boxed().toList();
         assertEquals(4, result.size());
         assertTrue(result.contains('a'));
         assertTrue(result.contains('A'));
@@ -200,8 +200,27 @@ public class IteratorCharStreamTest extends TestBase {
 
     @Test
     public void testFlatmap() {
-        List<Character> result = createCharStream('a', 'b').flatmap(c -> new char[] { c, Character.toUpperCase(c) }).boxed().toList();
+        List<Character> result = createCharStream('a', 'b').flatMapArray(c -> new char[] { c, Character.toUpperCase(c) }).boxed().toList();
         assertEquals(Arrays.asList('a', 'A', 'b', 'B'), result);
+    }
+
+    @Test
+    public void testFlatmapCollection() {
+        // multi-element
+        assertEquals(Arrays.asList('a', 'A', 'b', 'B'), createCharStream('a', 'b').flatmap(c -> Arrays.asList(c, Character.toUpperCase(c))).boxed().toList());
+
+        // empty stream
+        assertTrue(createCharStream(new char[] {}).flatmap(c -> Arrays.asList((Character) c)).boxed().toList().isEmpty());
+
+        // empty collection
+        assertTrue(createCharStream('a', 'b').flatmap(c -> java.util.Collections.<Character> emptyList()).boxed().toList().isEmpty());
+
+        // null collection
+        assertTrue(createCharStream('a').flatmap(c -> (java.util.Collection<Character>) null).boxed().toList().isEmpty());
+
+        // null elements -> (char) 0
+        List<Character> withNulls = createCharStream('a').flatmap(c -> Arrays.asList((Character) null, 'z')).boxed().toList();
+        assertEquals(Arrays.asList((char) 0, 'z'), withNulls);
     }
 
     @Test

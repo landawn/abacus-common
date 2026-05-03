@@ -2050,6 +2050,7 @@ public class StreamTest extends AbstractTest {
         assertEquals(Arrays.asList("A", "B", "C"), result);
     }
 
+
     @Test
     public void testStreamCreatedAfterThrowIfEmpty() {
         assertEquals(5, Stream.of(1, 2, 3, 4, 5).throwIfEmpty().count());
@@ -2768,6 +2769,20 @@ public class StreamTest extends AbstractTest {
     }
 
     @Test
+    public void testFlatMapJdkStream() {
+        List<String> result = Stream.of("a", "bb").flatMapJdkStream(s -> java.util.stream.Stream.of(s, s.toUpperCase())).toList();
+
+        assertEquals(Arrays.asList("a", "A", "bb", "BB"), result);
+    }
+
+    @Test
+    public void testFlatMapJdkStream_EmptyInput() {
+        List<String> result = Stream.<String> empty().flatMapJdkStream(s -> java.util.stream.Stream.of(s)).toList();
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
     public void testFlatmapCollection() {
         Stream<Integer> stream = Stream.of(1, 2, 3).flatmap(n -> Arrays.asList(n, n * 10));
         assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), stream.toList());
@@ -2784,7 +2799,7 @@ public class StreamTest extends AbstractTest {
         CharStream charStream = createStream01("hello", "world").flatMapToChar(s -> CharStream.of(s.toCharArray()));
         assertEquals("helloworld", new String(charStream.toArray()));
 
-        CharStream charStream2 = createStream01("hello", "world").flatmapToChar(String::toCharArray);
+        CharStream charStream2 = createStream01("hello", "world").flatMapArrayToChar(String::toCharArray);
         assertEquals("helloworld", new String(charStream2.toArray()));
 
     }
@@ -2840,7 +2855,7 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void testFlattMapArray() {
-        List<Integer> result = Stream.of("1,2", "3,4").flatmapToInt(s -> Stream.of(s.split(",")).mapToInt(Integer::parseInt).toArray()).toList();
+        List<Integer> result = Stream.of("1,2", "3,4").flatMapArrayToInt(s -> Stream.of(s.split(",")).mapToInt(Integer::parseInt).toArray()).toList();
         assertEquals(Arrays.asList(1, 2, 3, 4), result);
     }
 
@@ -2858,7 +2873,7 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void testFlatmapToChar() {
-        char[] result = Stream.of("ab", "cd", "ef").flatmapToChar(s -> s.toCharArray()).toArray();
+        char[] result = Stream.of("ab", "cd", "ef").flatMapArrayToChar(s -> s.toCharArray()).toArray();
         assertArrayEquals(new char[] { 'a', 'b', 'c', 'd', 'e', 'f' }, result);
     }
 
@@ -2870,13 +2885,13 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void testFlatmapToCharFromArray() {
-        char[] result = Stream.of("ab", "cd").flatmapToChar(s -> s.toCharArray()).toArray();
+        char[] result = Stream.of("ab", "cd").flatMapArrayToChar(s -> s.toCharArray()).toArray();
         assertArrayEquals(new char[] { 'a', 'b', 'c', 'd' }, result);
     }
 
     @Test
     public void testFlatmapToCharEmpty() {
-        char[] result = Stream.<String> empty().flatmapToChar(s -> s.toCharArray()).toArray();
+        char[] result = Stream.<String> empty().flatMapArrayToChar(s -> s.toCharArray()).toArray();
         assertEquals(0, result.length);
     }
 
@@ -2888,7 +2903,7 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void testFlatmapToByte() {
-        byte[] result = Stream.of(new byte[] { 1, 2 }, new byte[] { 3, 4 }).flatmapToByte(b -> b).toArray();
+        byte[] result = Stream.of(new byte[] { 1, 2 }, new byte[] { 3, 4 }).flatMapArrayToByte(b -> b).toArray();
         assertArrayEquals(new byte[] { 1, 2, 3, 4 }, result);
     }
 
@@ -2900,7 +2915,7 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void testFlatmapToByteEmpty() {
-        byte[] result = Stream.<byte[]> empty().flatmapToByte(b -> b).toArray();
+        byte[] result = Stream.<byte[]> empty().flatMapArrayToByte(b -> b).toArray();
         assertEquals(0, result.length);
     }
 
@@ -2912,7 +2927,7 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void testFlatmapToShort() {
-        short[] result = Stream.of(new short[] { 1, 2 }, new short[] { 3, 4 }).flatmapToShort(s -> s).toArray();
+        short[] result = Stream.of(new short[] { 1, 2 }, new short[] { 3, 4 }).flatMapArrayToShort(s -> s).toArray();
         assertArrayEquals(new short[] { 1, 2, 3, 4 }, result);
     }
 
@@ -2924,7 +2939,7 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void testFlatmapToShortEmpty() {
-        short[] result = Stream.<short[]> empty().flatmapToShort(s -> s).toArray();
+        short[] result = Stream.<short[]> empty().flatMapArrayToShort(s -> s).toArray();
         assertEquals(0, result.length);
     }
 
@@ -2943,20 +2958,20 @@ public class StreamTest extends AbstractTest {
     @Test
     public void testFlatmapToIntArray() {
         int[] result = Stream.of("12", "34")
-                .flatmapToInt(s -> new int[] { Character.getNumericValue(s.charAt(0)), Character.getNumericValue(s.charAt(1)) })
+                .flatMapArrayToInt(s -> new int[] { Character.getNumericValue(s.charAt(0)), Character.getNumericValue(s.charAt(1)) })
                 .toArray();
         assertArrayEquals(new int[] { 1, 2, 3, 4 }, result);
     }
 
     @Test
     public void testFlatmapToIntFromArray() {
-        int[] result = Stream.of(Pair.of(1, 2), Pair.of(3, 4)).flatmapToInt(p -> new int[] { p.left(), p.right() }).toArray();
+        int[] result = Stream.of(Pair.of(1, 2), Pair.of(3, 4)).flatMapArrayToInt(p -> new int[] { p.left(), p.right() }).toArray();
         assertArrayEquals(new int[] { 1, 2, 3, 4 }, result);
     }
 
     @Test
     public void testFlatmapToIntArrayEmpty() {
-        int[] result = Stream.<String> empty().flatmapToInt(s -> new int[] { 1, 2 }).toArray();
+        int[] result = Stream.<String> empty().flatMapArrayToInt(s -> new int[] { 1, 2 }).toArray();
         assertEquals(0, result.length);
     }
 
@@ -2968,19 +2983,19 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void testFlatmapToLongArray() {
-        long[] result = Stream.of(new long[] { 1L, 2L }, new long[] { 3L, 4L }).flatmapToLong(arr -> arr).toArray();
+        long[] result = Stream.of(new long[] { 1L, 2L }, new long[] { 3L, 4L }).flatMapArrayToLong(arr -> arr).toArray();
         assertArrayEquals(new long[] { 1L, 2L, 3L, 4L }, result);
     }
 
     @Test
     public void testFlatmapToLongArrayEmpty() {
-        long[] result = Stream.<long[]> empty().flatmapToLong(arr -> arr).toArray();
+        long[] result = Stream.<long[]> empty().flatMapArrayToLong(arr -> arr).toArray();
         assertEquals(0, result.length);
     }
 
     @Test
     public void testFlatmapToFloat() {
-        float[] result = Stream.of(new float[] { 1.0f, 2.0f }, new float[] { 3.0f, 4.0f }).flatmapToFloat(f -> f).toArray();
+        float[] result = Stream.of(new float[] { 1.0f, 2.0f }, new float[] { 3.0f, 4.0f }).flatMapArrayToFloat(f -> f).toArray();
         assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f, 4.0f }, result, 0.001f);
     }
 
@@ -2992,7 +3007,7 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void testFlatmapToFloatEmpty() {
-        float[] result = Stream.<float[]> empty().flatmapToFloat(f -> f).toArray();
+        float[] result = Stream.<float[]> empty().flatMapArrayToFloat(f -> f).toArray();
         assertEquals(0, result.length);
     }
 
@@ -3010,13 +3025,13 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void testFlatmapToDoubleArray() {
-        double[] result = Stream.of(new double[] { 1.0, 2.0 }, new double[] { 3.0, 4.0 }).flatmapToDouble(arr -> arr).toArray();
+        double[] result = Stream.of(new double[] { 1.0, 2.0 }, new double[] { 3.0, 4.0 }).flatMapArrayToDouble(arr -> arr).toArray();
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0 }, result, 0.001);
     }
 
     @Test
     public void testFlatmapToDoubleArrayEmpty() {
-        double[] result = Stream.<double[]> empty().flatmapToDouble(arr -> arr).toArray();
+        double[] result = Stream.<double[]> empty().flatMapArrayToDouble(arr -> arr).toArray();
         assertEquals(0, result.length);
     }
 
@@ -6103,6 +6118,18 @@ public class StreamTest extends AbstractTest {
     public void testFilterE() {
         List<Integer> result = Stream.of(1, 2, 3, 4, 5).filterE(x -> x > 3).toList();
         assertEquals(Arrays.asList(4, 5), result);
+    }
+
+    @Test
+    public void testMapE() throws Exception {
+        List<Integer> result = Stream.of("1", "2", "3").mapE(Integer::parseInt).toList();
+
+        assertEquals(Arrays.asList(1, 2, 3), result);
+    }
+
+    @Test
+    public void testMapE_ErrorPath() {
+        assertThrows(NumberFormatException.class, () -> Stream.of("1", "x").mapE(Integer::parseInt).toList());
     }
 
     @Test
@@ -11082,6 +11109,46 @@ public class StreamTest extends AbstractTest {
     }
 
     @Test
+    public void testParallelZipIterables() {
+        List<List<Integer>> iterables = Arrays.asList(Arrays.asList(1, 2), Arrays.asList(10, 20));
+
+        List<Integer> result = Stream.parallelZipIterables(iterables, values -> values.get(0) + values.get(1), 2).toList();
+        Collections.sort(result);
+
+        assertEquals(Arrays.asList(11, 22), result);
+    }
+
+    @Test
+    public void testParallelZipIterables_WithDefaults() {
+        List<List<Integer>> iterables = Arrays.asList(Arrays.asList(1, 2), Arrays.asList(10));
+
+        List<Integer> result = Stream.parallelZipIterables(iterables, Arrays.asList(0, 99), values -> values.get(0) + values.get(1), 2).toList();
+        Collections.sort(result);
+
+        assertEquals(Arrays.asList(11, 101), result);
+    }
+
+    @Test
+    public void testParallelZipIterators() {
+        List<Iterator<Integer>> iterators = Arrays.asList(Arrays.asList(1, 2).iterator(), Arrays.asList(10, 20).iterator());
+
+        List<Integer> result = Stream.parallelZipIterators(iterators, values -> values.get(0) + values.get(1), 2).toList();
+        Collections.sort(result);
+
+        assertEquals(Arrays.asList(11, 22), result);
+    }
+
+    @Test
+    public void testParallelZipIterators_WithDefaults() {
+        List<Iterator<Integer>> iterators = Arrays.asList(Arrays.asList(1, 2).iterator(), Arrays.asList(10).iterator());
+
+        List<Integer> result = Stream.parallelZipIterators(iterators, Arrays.asList(0, 99), values -> values.get(0) + values.get(1), 2).toList();
+        Collections.sort(result);
+
+        assertEquals(Arrays.asList(11, 101), result);
+    }
+
+    @Test
     public void testZip_ThreeIterables_WithDefaultValues() {
         // Covers Stream.zip(Iterable, Iterable, Iterable, valueA, valueB, valueC, TriFunction)
         List<Integer> a = Arrays.asList(1, 2, 3);
@@ -12248,6 +12315,7 @@ public class StreamTest extends AbstractTest {
 
         assertEquals(5, Stream.iterate(1, x -> x + 1).limit(5).count());
     }
+
 
     @Test
     public void test_ArrayDeque() {

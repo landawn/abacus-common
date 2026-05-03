@@ -18,15 +18,15 @@ package com.landawn.abacus.util;
  * Enumeration representing distinct types of database operations.
  * Each operation type has an associated integer flag value that can participate in bitwise
  * combinations, although this enum itself models only the individual operations.
- * 
+ *
  * <p>This enum is typically used in ORM frameworks and data access layers to specify
  * what type of operation is being performed on entities or database records.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * OperationType opType = OperationType.UPDATE;
  * int intValue = opType.intValue();   // Returns 4
- * 
+ *
  * // Convert from int value
  * OperationType retrieved = OperationType.valueOf(4);   // Returns UPDATE
  * }</pre>

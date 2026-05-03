@@ -27,6 +27,7 @@ import java.io.StringWriter;
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +38,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
 
 public class Tuple4TypeTest extends TestBase {
 
-    private final Tuple4Type type = new Tuple4Type("String", "String", "String", "String");
+    private final Tuple4Type<String, String, String, String> type = new Tuple4Type("String", "String", "String", "String");
 
     @Test
     public void test_declaringName() {
@@ -53,9 +54,9 @@ public class Tuple4TypeTest extends TestBase {
 
     @Test
     public void test_parameterTypes() {
-        Type<?>[] params = type.parameterTypes();
+        List<Type<?>> params = type.parameterTypes();
         assertNotNull(params);
-        assertEquals(4, params.length);
+        assertEquals(4, params.size());
     }
 
     @Test
@@ -92,7 +93,7 @@ public class Tuple4TypeTest extends TestBase {
         Tuple4<String, String, String, String> t = Tuple.of("w", "x", "y", "z");
         String json = type.stringOf(t);
         @SuppressWarnings("unchecked")
-        Tuple4<String, String, String, String> result = (Tuple4<String, String, String, String>) type.valueOf(json);
+        Tuple4<String, String, String, String> result = type.valueOf(json);
         assertNotNull(result);
         assertEquals("w", result._1);
         assertEquals("x", result._2);
@@ -102,14 +103,14 @@ public class Tuple4TypeTest extends TestBase {
 
     @Test
     public void test_valueOf_MixedTypes() {
-        Tuple4Type mixedType = new Tuple4Type("String", "Integer", "Boolean", "Double");
+        Tuple4Type<String, Integer, Boolean, Double> mixedType = new Tuple4Type("String", "Integer", "Boolean", "Double");
         @SuppressWarnings("unchecked")
-        Tuple4<String, Integer, Boolean, Double> result = (Tuple4<String, Integer, Boolean, Double>) mixedType.valueOf("[\"hello\", 42, true, 3.14]");
+        Tuple4<String, Integer, Boolean, Double> result = mixedType.valueOf("[\"hello\", 42, true, 3.14]");
         assertNotNull(result);
         assertEquals("hello", result._1);
         assertEquals(42, result._2);
         assertEquals(true, result._3);
-        assertEquals(3.14, (double) result._4, 0.001);
+        assertEquals(3.14, result._4, 0.001);
     }
 
     @Test

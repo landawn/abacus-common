@@ -21,6 +21,10 @@ import com.landawn.abacus.util.Throwables;
  * of {@link java.util.function.BiConsumer}. Unlike most other functional interfaces,
  * {@code LongObjConsumer} is expected to operate via side-effects.
  *
+ * <p>The parameter order follows the {@code LongObj*} convention: the {@code long} argument
+ * comes first, followed by the object argument of type {@code T}. This is the reverse of
+ * {@link java.util.function.ObjLongConsumer}, which takes the object first.
+ *
  * <p>This interface extends {@link Throwables.LongObjConsumer} with
  * {@link RuntimeException}, providing compatibility with the abacus-common framework's
  * exception handling capabilities.
@@ -64,8 +68,8 @@ public interface LongObjConsumer<T> extends Throwables.LongObjConsumer<T, Runtim
      * logger.accept(System.currentTimeMillis(), "Application started");
      * }</pre>
      *
-     * @param i the first input argument (long value)
-     * @param t the second input argument (object of type T)
+     * @param i the first {@code long} input argument
+     * @param t the second input argument of type {@code T}
      */
     // @ai-ignore LongObj*/ObjLong* argument order convention - intentional: class name prefix determines parameter order. LongObj* has long first; ObjLong* has object first. Do not suggest reordering.
     @Override
@@ -95,10 +99,9 @@ public interface LongObjConsumer<T> extends Throwables.LongObjConsumer<T, Runtim
      * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.
-     *              Note that the type parameter must be {@code ? super T} to ensure
-     *              type safety when composing consumers
      * @return a composed {@code LongObjConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     default LongObjConsumer<T> andThen(final LongObjConsumer<? super T> after) {
         return (i, t) -> {

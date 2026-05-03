@@ -9,6 +9,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 
 import com.landawn.abacus.parser.JsonXmlSerConfig;
@@ -17,10 +18,14 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.SK;
 
 /**
- * Type handler for java.util.Optional with generic type parameter.
- * This class provides serialization, deserialization, and database access capabilities for Optional instances.
- * Optional is a container that may or may not contain a {@code non-null} value.
- * Empty optionals are represented as {@code null} in serialized form.
+ * Type handler for {@link java.util.Optional} with a generic type parameter.
+ * This class provides serialization, deserialization, and database access capabilities for
+ * {@code Optional} instances. An {@code Optional} is a container that may or may not contain
+ * a non-null value. Empty optionals are serialized as {@code null}; a non-null string is parsed
+ * by the element type and the result wrapped in {@code Optional.ofNullable}.
+ *
+ * <p>Serialization uses the runtime type of the contained value for accuracy, rather than
+ * the declared element type.</p>
  *
  * @param <T> the type of value that may be present in the Optional
  */
@@ -31,16 +36,22 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
 
     private final String declaringName;
 
-    private final Type<T>[] parameterTypes;
+    private final List<Type<?>> parameterTypes;
 
     private final Type<T> elementType;
 
+    /**
+     * Package-private constructor for JdkOptionalType.
+     * This constructor is called by the TypeFactory to create {@code JdkOptional<T>} type instances.
+     *
+     * @param parameterTypeName the name of the element type parameter
+     */
     protected JdkOptionalType(final String parameterTypeName) {
         super(OPTIONAL + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).name() + SK.GREATER_THAN);
 
         declaringName = OPTIONAL + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + SK.GREATER_THAN;
-        parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
-        elementType = parameterTypes[0];
+        elementType = TypeFactory.getType(parameterTypeName);
+        parameterTypes = List.of(elementType);
     }
 
     /**
@@ -55,9 +66,9 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
     }
 
     /**
-     * Returns the Class object representing the Optional type.
+     * Returns the Java class represented by this type handler.
      *
-     * @return Optional.class with appropriate generic type casting
+     * @return {@code Optional.class}
      */
     @SuppressWarnings("rawtypes")
     @Override
@@ -76,13 +87,13 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
     }
 
     /**
-     * Returns an array containing the parameter types of this generic optional type.
-     * For optional types, this array contains a single element representing the value type.
+     * Returns an immutable list containing the parameter types of this generic optional type.
+     * For optional types, this list contains a single element representing the value type.
      *
-     * @return an array containing the value type as the only parameter type
+     * @return an immutable list containing the value type as the only parameter type
      */
     @Override
-    public Type<T>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 
@@ -123,11 +134,12 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
 
     /**
      * Parses a string representation into an Optional.
-     * Null strings result in an empty Optional.
-     * Non-null strings are parsed according to the element type and wrapped in Optional.
+     * A {@code null} string returns an empty Optional. Non-null strings (including empty strings)
+     * are parsed according to the element type and wrapped in an {@code Optional.ofNullable}.
      *
-     * @param str the string to parse
-     * @return Optional.empty() if the string is {@code null}, otherwise Optional.ofNullable() of the parsed value
+     * @param str the string to parse; may be {@code null}
+     * @return {@code Optional.empty()} if the string is {@code null}; otherwise
+     *         {@code Optional.ofNullable} wrapping the parsed element value
      */
     @Override
     public Optional<T> valueOf(final String str) {

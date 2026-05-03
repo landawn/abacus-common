@@ -16,6 +16,9 @@ package com.landawn.abacus.http;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,27 +32,27 @@ import com.landawn.abacus.util.cs;
  * Represents an HTTP response containing status code, headers, and body.
  * This class encapsulates all the information returned from an HTTP request,
  * including timing information, response status, headers, and the response body.
- * 
+ *
  * <p>The response body is stored as a byte array and can be deserialized to various types
  * using the {@code body(Class)} or {@code body(Type)} methods.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * HttpResponse response = httpClient.get(HttpResponse.class);
- * 
+ *
  * // Check if request was successful
  * if (response.isSuccessful()) {
  *     // Get response as string
  *     String body = response.body(String.class);
- *     
+ *
  *     // Get status code
  *     int status = response.statusCode();
- *     
+ *
  *     // Get headers
  *     Map<String, List<String>> headers = response.headers();
  * }
  * }</pre>
- * 
+ *
  * @see HttpClient
  * @see HttpRequest
  */
@@ -79,16 +82,16 @@ public class HttpResponse {
         this.responseReceivedAtMillis = responseReceivedAtMillis;
         this.statusCode = statusCode;
         this.message = message;
-        this.headers = headers;
-        this.body = body;
+        this.headers = copyHeaders(headers);
+        this.body = copyBody(body);
         this.bodyFormat = bodyFormat == null ? ContentFormat.NONE : bodyFormat;
         this.respCharset = respCharset;
     }
 
     /**
      * Checks if the response status code indicates success.
-     * Returns {@code true} if the code is in [200..300), which means the request was successfully received,
-     * understood, and accepted.
+     * Returns {@code true} if the status code is in the range {@code [200, 300)}, which means the request
+     * was successfully received, understood, and accepted.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -185,8 +188,9 @@ public class HttpResponse {
     }
 
     /**
-     * Gets the raw response body as a byte array.
-     * This method returns the original bytes received from the server.
+     * Returns a copy of the raw response body as a byte array.
+     * Each call returns a new defensive copy of the internal byte array to prevent
+     * external modification of the response state.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -194,10 +198,10 @@ public class HttpResponse {
      * // Process raw bytes
      * }</pre>
      *
-     * @return The response body as a byte array
+     * @return a copy of the response body as a byte array, or {@code null} if no body was received
      */
     public byte[] body() {
-        return body;
+        return copyBody(body);
     }
 
     /**
@@ -230,10 +234,14 @@ public class HttpResponse {
     public <T> T body(final Class<T> resultClass) throws IllegalArgumentException {
         N.checkArgNotNull(resultClass, cs.resultClass);
 
+        if (body == null) {
+            return null;
+        }
+
         if (resultClass.equals(String.class)) {
             return (T) new String(body, respCharset);
         } else if (byte[].class.equals(resultClass)) {
-            return (T) body;
+            return (T) copyBody(body);
         } else {
             if (bodyFormat == ContentFormat.KRYO && HttpUtil.kryoParser != null) {
                 return HttpUtil.kryoParser.deserialize(new ByteArrayInputStream(body), resultClass);
@@ -271,10 +279,14 @@ public class HttpResponse {
     public <T> T body(final Type<T> resultType) throws IllegalArgumentException {
         N.checkArgNotNull(resultType, cs.resultType);
 
+        if (body == null) {
+            return null;
+        }
+
         if (resultType.javaType().equals(String.class)) {
             return (T) new String(body, respCharset);
         } else if (resultType.javaType().equals(byte[].class)) {
-            return (T) body;
+            return (T) copyBody(body);
         } else {
             if (bodyFormat == ContentFormat.KRYO && HttpUtil.kryoParser != null) {
                 return HttpUtil.kryoParser.deserialize(new ByteArrayInputStream(body), null, resultType);
@@ -288,6 +300,25 @@ public class HttpResponse {
                 return HttpUtil.getParser(bodyFormat).deserialize(new String(body, respCharset), resultType);
             }
         }
+    }
+
+    private static Map<String, List<String>> copyHeaders(final Map<String, List<String>> headers) {
+        if (headers == null) {
+            return null;
+        }
+
+        final Map<String, List<String>> copiedHeaders = new LinkedHashMap<>(headers.size());
+
+        for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+            final List<String> values = entry.getValue();
+            copiedHeaders.put(entry.getKey(), values == null ? null : Collections.unmodifiableList(new ArrayList<>(values)));
+        }
+
+        return Collections.unmodifiableMap(copiedHeaders);
+    }
+
+    private static byte[] copyBody(final byte[] body) {
+        return body == null ? null : body.clone();
     }
 
     /**

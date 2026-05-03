@@ -174,7 +174,7 @@ import com.landawn.abacus.util.stream.IntStream;
  * <ul>
  *   <li><b>Not Thread-Safe:</b> This implementation is not synchronized</li>
  *   <li><b>External Synchronization:</b> Required for concurrent access</li>
- *   <li><b>Fail-Fast Iterators:</b> Detect concurrent modifications</li>
+ *   <li><b>Iterators:</b> Not fail-fast; concurrent modification yields undefined results</li>
  *   <li><b>Read-Only Access:</b> Multiple threads can safely read simultaneously</li>
  * </ul>
  *
@@ -266,20 +266,20 @@ import com.landawn.abacus.util.stream.IntStream;
  * <pre>{@code
  * // Generate and analyze a dataset
  * IntList dataset = IntList.random(1, 1000, 10000);   // 10K random numbers
- * 
+ *
  * // Statistical analysis
  * dataset.sort();   // Sort for median calculation
  * OptionalInt min = dataset.min();   // Minimum value
  * OptionalInt max = dataset.max();   // Maximum value
  * OptionalInt median = dataset.median();   // Median value
- * 
+ *
  * // Functional processing
  * long sum = dataset.stream().sum();   // Total sum
  * double average = dataset.stream().average().orElse(0.0);   // Average
  * IntList filtered = dataset.stream()                // Values > 500
  *     .filter(x -> x > 500)
  *     .collect(IntList::new, IntList::add, IntList::addAll);
- *     
+ *
  * // Performance-optimized operations
  * boolean hasEven = dataset.stream().anyMatch(x -> x % 2 == 0);
  * IntList squares = dataset.stream().map(x -> x * x).collect(...);
@@ -343,7 +343,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * The IntList directly uses the provided array as its internal storage without copying,
      * making this constructor very efficient. The size of the list will be equal to the
      * length of the array.
-     * 
+     *
      * <p><b>Note:</b> Since the array is used directly, any external modifications to the
      * array will affect this list and vice versa.
      *
@@ -357,7 +357,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Constructs an IntList using the specified array as the element array for this list
      * without copying. This allows creating a list that uses only a portion of the array.
      * The list will contain the first <i>size</i> elements from the array.
-     * 
+     *
      * <p><b>Note:</b> Since the array is used directly, any external modifications to the
      * array will affect this list and vice versa.
      *
@@ -449,7 +449,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      * Creates a new IntList containing a sequence of integers from startInclusive (inclusive)
      * to endExclusive (exclusive), incremented by the specified step value.
-     * 
+     *
      * <p>Examples:
      * <ul>
      * <li>range(0, 10, 2) returns [0, 2, 4, 6, 8]</li>
@@ -483,7 +483,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      * Creates a new IntList containing a sequence of integers from startInclusive
      * to endInclusive (both inclusive), incremented by the specified step value.
-     * 
+     *
      * <p>Examples:
      * <ul>
      * <li>rangeClosed(0, 10, 2) returns [0, 2, 4, 6, 8, 10]</li>
@@ -539,7 +539,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Creates a new IntList filled with random int values within the specified range.
      * Each element is randomly generated to be greater than or equal to startInclusive
      * and less than endExclusive.
-     * 
+     *
      * <p>The distribution of values is uniform across the specified range.
      *
      * @param startInclusive the lower bound (inclusive) for the random values
@@ -795,9 +795,10 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      * Removes the first occurrence of the specified element from this list, if it is present.
      * If the list does not contain the element, it is unchanged. More formally, removes the
-     * element with the lowest index i such that get(i) == e.
+     * element with the lowest index {@code i} such that {@code get(i) == e}.
      *
-     * <p>This method runs in linear time, as it may need to search through the entire list
+     * <p>This method runs in linear time, as it may need to search through the entire list.</p>
+     *
      * <p><b>Note:</b> This method removes by value. To remove by index, use {@link #removeAt(int)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -995,7 +996,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * In other words, removes from this list all of its elements that are not contained
      * in the specified list. Elements are compared by value.
      *
-     * @param c the IntList containing elements to be retained in this list. If {@code null} or empty, this list remains unchanged.
+     * <p>If the specified list is {@code null} or empty, all elements are removed from this list.</p>
+     *
+     * @param c the IntList containing elements to be retained in this list
      * @return {@code true} if this list was modified as a result of the call
      */
     @Override
@@ -1014,7 +1017,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * In other words, removes from this list all of its elements that are not contained
      * in the specified array. Elements are compared by value.
      *
-     * @param a the array containing elements to be retained in this list. If {@code null} or empty, this list remains unchanged.
+     * <p>If the specified array is {@code null} or empty, all elements are removed from this list.</p>
+     *
+     * @param a the array containing elements to be retained in this list
      * @return {@code true} if this list was modified as a result of the call
      */
     @Override
@@ -1156,8 +1161,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * The elements from fromIndex (inclusive) to toIndex (exclusive) are moved
      * so that the element originally at fromIndex will be at newPositionAfterMove.
      * Other elements are shifted as necessary to accommodate the move.
-     * 
-     * <p><b>Usage Examples:</b></p> 
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntList.of(0, 1, 2, 3, 4, 5);
      * list.moveRange(1, 3, 3);   // Moves elements [1, 2] to position starting at index 3
@@ -1166,13 +1171,14 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and size() - lengthOfRange, inclusive.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the list
      */
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
+        N.checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, size);
         N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
     }
 
@@ -1917,7 +1923,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
     /**
      * Returns the median value of all elements in this list.
-     * 
+     *
      * <p>The median is the middle value when the elements are sorted in ascending order. For lists with
      * an odd number of elements, this is the exact middle element. For lists with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
@@ -2000,7 +2006,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
     /**
      * Returns the first element in this list wrapped in an OptionalInt.
-     * 
+     *
      * @return an OptionalInt containing the first element if the list is not empty,
      *         or an empty OptionalInt if the list is empty
      */
@@ -2010,7 +2016,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
     /**
      * Returns the last element in this list wrapped in an OptionalInt.
-     * 
+     *
      * @return an OptionalInt containing the last element if the list is not empty,
      *         or an empty OptionalInt if the list is empty
      */
@@ -2068,7 +2074,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      * Sorts all elements in this list in ascending order.
      * This method modifies the list in place using an efficient sorting algorithm.
-     * 
+     *
      * <p>The sorting algorithm used is typically a dual-pivot quicksort which offers
      * O(n log n) performance on average.</p>
      */
@@ -2083,7 +2089,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Sorts all elements in this list in ascending order using a parallel sorting algorithm.
      * This method modifies the list in place and may offer better performance than sort()
      * for large lists on multi-core systems.
-     * 
+     *
      * <p>The parallel sorting algorithm divides the list into sub-arrays which are sorted
      * in parallel and then merged. For small lists, it may fall back to sequential sorting.</p>
      */
@@ -2110,7 +2116,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Searches for the specified value in this list using binary search algorithm.
      * The list must be sorted in ascending order prior to making this call.
      * If the list is not sorted, the results are undefined.
-     * 
+     *
      * <p>If the list contains multiple elements equal to the specified value,
      * there is no guarantee which one will be found.</p>
      *
@@ -2127,7 +2133,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Searches for the specified value in the specified range of this list using binary search algorithm.
      * The range must be sorted in ascending order prior to making this call.
      * If the range is not sorted, the results are undefined.
-     * 
+     *
      * <p>If the range contains multiple elements equal to the specified value,
      * there is no guarantee which one will be found.</p>
      *
@@ -2180,8 +2186,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      * Rotates all elements in this list by the specified distance.
      * After calling rotate(distance), the element at index i will be moved to
-     * index (i + distance) % size. 
-     * 
+     * index (i + distance) % size.
+     *
      * <p>Positive values of distance rotate elements towards higher indices (right rotation),
      * while negative values rotate towards lower indices (left rotation).
      * The list is modified in place.</p>
@@ -2201,7 +2207,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Randomly shuffles all elements in this list.
      * After this method returns, the elements will be in a random order.
      * This method uses a default source of randomness and modifies the list in place.
-     * 
+     *
      * <p>This implementation uses the Fisher-Yates shuffle algorithm which
      * guarantees that all permutations are equally likely.</p>
      */
@@ -2216,7 +2222,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Randomly shuffles all elements in this list using the specified source of randomness.
      * After this method returns, the elements will be in a random order determined by
      * the given Random object. This method modifies the list in place.
-     * 
+     *
      * <p>This implementation uses the Fisher-Yates shuffle algorithm which
      * guarantees that all permutations are equally likely, assuming the Random
      * object produces uniformly distributed values.</p>
@@ -2280,7 +2286,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      * Returns a new IntList containing a copy of elements from the specified range of this list,
      * selecting only elements at intervals defined by the step parameter.
-     * 
+     *
      * <p>For example, with step=2, this method returns every second element in the range.
      * If step is negative and fromIndex &gt; toIndex, elements are selected in reverse order.</p>
      *
@@ -2305,7 +2311,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Splits this list into consecutive chunks of the specified size and returns them as a List of IntLists.
      * Each chunk (except possibly the last) will have exactly chunkSize elements.
      * The last chunk may have fewer elements if the range size is not evenly divisible by chunkSize.
-     * 
+     *
      * <p>The returned chunks are independent copies, so modifications to them will not
      * affect this list or each other.</p>
      *
@@ -2335,7 +2341,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Trims the capacity of this IntList instance to be the list's current size.
      * This method can be used to minimize the storage of an IntList instance.
      * If the capacity is already equal to the size, this method does nothing.
-     * 
+     *
      * <p>After this call, the capacity of the list will be equal to its size,
      * eliminating any unused capacity.</p>
      *
@@ -2373,6 +2379,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return size == 0;
     }
 
+    /**
+     * Returns the number of elements in this list.
+     *
+     * @return the number of elements in this list
+     */
     @Override
     public int size() {
         return size;
@@ -2381,7 +2392,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      * Returns a List containing all elements in this list converted to Integer objects.
      * The returned list is a new ArrayList and is independent of this list.
-     * 
+     *
      * <p>This method is useful when you need to work with APIs that require
      * List&lt;Integer&gt; rather than primitive int arrays.</p>
      *
@@ -2396,7 +2407,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Returns a List containing elements from the specified range of this list
      * converted to Integer objects. The returned list is a new ArrayList and
      * is independent of this list.
-     * 
+     *
      * <p>This method is useful when you need to work with APIs that require
      * List&lt;Integer&gt; rather than primitive int arrays.</p>
      *
@@ -2534,7 +2545,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      * Returns an iterator over all elements in this list.
      * The iterator returns elements in the order they appear in the list (from index 0 to size-1).
-     * 
+     *
      * <p>The returned iterator does not support the remove operation.</p>
      *
      * @return an IntIterator over the elements in this list
@@ -2602,7 +2613,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      * Inserts the specified element at the beginning of this list.
      * Shifts all existing elements to the right (adds one to their indices).
-     * 
+     *
      * <p>This operation has O(n) time complexity where n is the size of the list.</p>
      *
      * @param e the element to add at the beginning of the list
@@ -2624,7 +2635,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      * Removes and returns the first element from this list.
      * Shifts all remaining elements to the left (subtracts one from their indices).
-     * 
+     *
      * <p>This operation has O(n) time complexity where n is the size of the list.</p>
      *
      * @return the first int value that was removed from the list
@@ -2652,10 +2663,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      * Returns the hash code value for this list.
      * The hash code is computed based on the elements in the list and their order.
-     * 
-     * <p>The hash code is defined to be the result of the following calculation:
-     * 
-     * <p><b>Usage Examples:</b></p>
+     *
+     * <p>The hash code is defined to be the result of the following calculation:</p>
      * <pre>{@code
      * int hashCode = 1;
      * for (int e : list)
@@ -2674,7 +2683,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Returns {@code true} if and only if the specified object is also an IntList,
      * both lists have the same size, and all corresponding pairs of elements
      * in the two lists are equal.
-     * 
+     *
      * <p>Two int values are considered equal if they have the same value.</p>
      *
      * @param obj the object to be compared for equality with this list

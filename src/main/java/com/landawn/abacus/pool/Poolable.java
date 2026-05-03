@@ -65,10 +65,10 @@ public interface Poolable {
     /**
      * Returns the activity print associated with this poolable object.
      * The activity print tracks the lifecycle and usage statistics of this object within the pool.
-     * 
+     *
      * <p>The returned ActivityPrint should be the same instance throughout the object's lifetime
      * to ensure consistent tracking of access patterns and expiration.
-     * 
+     *
      * @return the ActivityPrint for this object, never {@code null}
      */
     ActivityPrint activityPrint();
@@ -76,7 +76,7 @@ public interface Poolable {
     /**
      * Destroys this poolable object and releases any resources it holds.
      * This method is called when the object is being removed from the pool.
-     * 
+     *
      * <p>Implementations should:
      * <ul>
      *   <li>Close any open resources (connections, files, etc.)</li>
@@ -84,10 +84,10 @@ public interface Poolable {
      *   <li>Clear references to help garbage collection</li>
      *   <li>Handle exceptions gracefully without throwing</li>
      * </ul>
-     * 
+     *
      * <p>The caller parameter indicates why the object is being destroyed,
      * which can be useful for logging or different cleanup strategies.
-     * 
+     *
      * @param caller the reason for destruction, providing context about why the object is being removed
      * @see Caller
      */
@@ -191,7 +191,7 @@ public interface Poolable {
 
         /**
          * Returns the numeric value associated with this caller reason.
-         * 
+         *
          * @return the numeric identifier for this caller type
          */
         public int value() {

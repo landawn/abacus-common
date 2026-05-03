@@ -16,17 +16,19 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for primitive boolean arrays (boolean[]).
- * Provides functionality for serialization, deserialization, and conversion between
- * boolean arrays and their string representations or collections.
+ * Type handler for primitive {@code boolean[]} arrays, providing serialization, deserialization,
+ * and conversion between boolean arrays and their string representations or collections.
+ * String representations use the format {@code [true, false, true]} with comma-separated elements
+ * enclosed in square brackets.
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<boolean[]> {
@@ -35,7 +37,7 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
 
     private final Type<Boolean> elementType;
 
-    private final Type<Boolean>[] parameterTypes;
+    private final List<Type<?>> parameterTypes;
 
     /**
      * Constructs a new PrimitiveBooleanArrayType instance.
@@ -45,7 +47,7 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
         super(BOOLEAN_ARRAY);
 
         elementType = TypeFactory.getType(boolean.class);
-        parameterTypes = new Type[] { elementType };
+        parameterTypes = List.of(elementType);
     }
 
     /**
@@ -71,11 +73,11 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
     /**
      * Returns the parameter types associated with this array type.
      *
-     * @return an array containing the Boolean Type that describes the elements of this array type
+     * @return an immutable list containing the Boolean Type that describes the elements of this array type
      * @see #elementType()
      */
     @Override
-    public Type<Boolean>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 

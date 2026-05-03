@@ -18,18 +18,18 @@ package com.landawn.abacus.util;
  * Represents the days of the week as an enumeration with associated integer values.
  * This enum provides a mapping between day names and numeric representations (0-6),
  * where Sunday is 0 and Saturday is 6.
- * 
+ *
  * <p>This enum can be useful for calendar operations, scheduling systems, or any
  * application that needs to work with days of the week using numeric codes.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Get day from integer value
  * DayOfWeek monday = DayOfWeek.valueOf(1);   // Returns MONDAY
- * 
+ *
  * // Get integer value from day
  * int dayValue = DayOfWeek.FRIDAY.intValue();   // Returns 5
- * 
+ *
  * // Use in switch statements
  * DayOfWeek today = DayOfWeek.WEDNESDAY;
  * switch(today) {
@@ -43,7 +43,7 @@ package com.landawn.abacus.util;
  *     default:
  *         System.out.println("Regular day");
  * }
- * 
+ *
  * // Iterate through all days
  * for (DayOfWeek day : DayOfWeek.values()) {
  *     System.out.println(day + " = " + day.intValue());
@@ -88,7 +88,7 @@ public enum DayOfWeek {
      * Returns the integer value associated with this day of the week.
      * This can be useful for database storage, array indexing, or integration
      * with systems that use numeric day codes.
-     * 
+     *
      * <p>The mapping is:</p>
      * <ul>
      * <li>SUNDAY = 0</li>
@@ -116,13 +116,13 @@ public enum DayOfWeek {
      * Returns the DayOfWeek enum constant associated with the specified integer value.
      * This method provides a way to convert numeric day representations back to
      * DayOfWeek enum constants.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DayOfWeek monday = DayOfWeek.valueOf(1);     // Returns MONDAY
      * DayOfWeek sunday = DayOfWeek.valueOf(0);     // Returns SUNDAY
      * DayOfWeek saturday = DayOfWeek.valueOf(6);   // Returns SATURDAY
-     * 
+     *
      * // Useful for database operations
      * int storedDay = resultSet.getInt("day_of_week");
      * DayOfWeek day = DayOfWeek.valueOf(storedDay);

@@ -30,26 +30,26 @@ import java.util.function.Supplier;
  * Utility class providing static methods for working with {@link Enumeration} objects.
  * This class offers functionality to create, transform, and manipulate Enumerations,
  * bridging the gap between the legacy Enumeration interface and modern Java collections.
- * 
+ *
  * <p>While {@link Enumeration} is a legacy interface, it is still used in some APIs
  * (e.g., servlet API, network interfaces). This utility class makes it easier to work
  * with such APIs in a modern Java context.</p>
- * 
+ *
  * <p>All methods in this class are static and the class cannot be instantiated.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Convert a Collection to Enumeration
  * List<String> list = Arrays.asList("a", "b", "c");
  * Enumeration<String> enum1 = Enumerations.create(list);
- * 
+ *
  * // Convert Enumeration to List
  * List<String> result = Enumerations.toList(enum1);
- * 
+ *
  * // Concatenate multiple Enumerations
  * Enumeration<String> combined = Enumerations.concat(enum1, enum2, enum3);
  * }</pre>
- * 
+ *
  * @see com.landawn.abacus.util.ObjIterator
  * @see com.landawn.abacus.util.Iterators
  */
@@ -74,8 +74,6 @@ public final class Enumerations {
 
     /**
      * Private constructor to prevent instantiation of this utility class.
-     * 
-     * @throws AssertionError if called
      */
     private Enumerations() {
         // Utility class - prevent instantiation
@@ -204,7 +202,7 @@ public final class Enumerations {
     /**
      * Creates an Enumeration from an Iterator.
      * This provides a bridge from the Iterator interface to the Enumeration interface.
-     * 
+     *
      * <p>Note: The returned Enumeration is backed by the Iterator, so any modifications
      * to the underlying collection during enumeration may cause undefined behavior.</p>
      *
@@ -315,7 +313,7 @@ public final class Enumerations {
      * <pre>{@code
      * Enumeration<String> enum1 = getEnumeration();
      * ObjIterator<String> iter = Enumerations.toIterator(enum1);
-     * 
+     *
      * // Now can use iterator methods
      * List<String> filtered = iter
      *     .filter(s -> s.length() > 5)
@@ -414,7 +412,7 @@ public final class Enumerations {
      * // Convert to LinkedList
      * Enumeration<String> enum1 = getEnumeration();
      * LinkedList<String> list = Enumerations.toCollection(enum1, LinkedList::new);
-     * 
+     *
      * // Convert to TreeSet
      * TreeSet<String> sorted = Enumerations.toCollection(enum1, TreeSet::new);
      * }</pre>

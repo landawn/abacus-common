@@ -71,7 +71,6 @@ public class AbstractFloatTypeTest extends TestBase {
         ResultSet rs = mock(ResultSet.class);
         when(rs.getObject(1)).thenReturn(3.14f);
         when(rs.getObject(2)).thenReturn(0.0f);
-        when(rs.wasNull()).thenReturn(false);
 
         assertEquals(Float.valueOf(3.14f), floatType.get(rs, 1));
         assertEquals(Float.valueOf(0.0f), floatType.get(rs, 2));
@@ -97,8 +96,9 @@ public class AbstractFloatTypeTest extends TestBase {
     public void testSetPreparedStatement() throws SQLException {
         PreparedStatement stmt = mock(PreparedStatement.class);
 
+        // Bug fix: null float should use Types.REAL (single-precision), not Types.FLOAT (double-precision)
         floatType.set(stmt, 1, null);
-        verify(stmt).setNull(1, Types.FLOAT);
+        verify(stmt).setNull(1, Types.REAL);
 
         floatType.set(stmt, 2, 3.14f);
         verify(stmt).setFloat(2, 3.14f);
@@ -111,11 +111,21 @@ public class AbstractFloatTypeTest extends TestBase {
     }
 
     @Test
+    public void testSetPreparedStatement_NullUsesSqlTypeReal_NotFloat() throws SQLException {
+        // Regression test for bug: setNull must use Types.REAL (4-byte single-precision)
+        // because setFloat() maps to SQL REAL, not SQL FLOAT (which is double-precision).
+        PreparedStatement stmt = mock(PreparedStatement.class);
+        floatType.set(stmt, 1, null);
+        verify(stmt).setNull(1, Types.REAL);
+    }
+
+    @Test
     public void testSetCallableStatement() throws SQLException {
         CallableStatement stmt = mock(CallableStatement.class);
 
+        // Bug fix: null float should use Types.REAL (single-precision), not Types.FLOAT (double-precision)
         floatType.set(stmt, "param1", null);
-        verify(stmt).setNull("param1", Types.FLOAT);
+        verify(stmt).setNull("param1", Types.REAL);
 
         floatType.set(stmt, "param2", 3.14f);
         verify(stmt).setFloat("param2", 3.14f);
@@ -125,6 +135,15 @@ public class AbstractFloatTypeTest extends TestBase {
 
         floatType.set(stmt, "param4", Integer.valueOf(42));
         verify(stmt).setFloat("param4", 42.0f);
+    }
+
+    @Test
+    public void testSetCallableStatement_NullUsesSqlTypeReal_NotFloat() throws SQLException {
+        // Regression test for bug: setNull must use Types.REAL (4-byte single-precision)
+        // because setFloat() maps to SQL REAL, not SQL FLOAT (which is double-precision).
+        CallableStatement stmt = mock(CallableStatement.class);
+        floatType.set(stmt, "ratio", null);
+        verify(stmt).setNull("ratio", Types.REAL);
     }
 
     @Test

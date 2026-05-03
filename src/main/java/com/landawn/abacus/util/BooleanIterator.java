@@ -26,16 +26,16 @@ import com.landawn.abacus.util.stream.Stream;
  * A specialized Iterator for primitive boolean values.
  * This abstract class provides an efficient iteration mechanism for boolean values
  * without the overhead of boxing/unboxing.
- * 
+ *
  * <p>This iterator is immutable and provides various utility methods for transformation,
  * filtering, and conversion operations. It extends ImmutableIterator to ensure that
  * the remove() operation is not supported.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * boolean[] values = {true, false, true, true, false};
  * BooleanIterator iter = BooleanIterator.of(values);
- * 
+ *
  * while (iter.hasNext()) {
  *     boolean value = iter.nextBoolean();
  *     System.out.println(value);
@@ -178,7 +178,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Returns a BooleanIterator instance created lazily using the provided Supplier.
      * The Supplier is responsible for producing the BooleanIterator instance when the first method in the returned {@code BooleanIterator} is called.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.defer(() -> BooleanIterator.of(true, false, true));
@@ -225,7 +225,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
     /**
      * Returns an infinite {@code BooleanIterator} that generates values using the provided supplier.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Random random = new Random();
@@ -255,7 +255,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
     /**
      * Returns a BooleanIterator that generates values while a condition is {@code true}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AtomicInteger counter = new AtomicInteger(0);
@@ -383,7 +383,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
     /**
      * Limits the number of elements returned by this iterator.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false, true, false);
@@ -426,7 +426,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
     /**
      * Filters elements based on the provided predicate.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false, true, false);
@@ -529,7 +529,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
     /**
      * Converts this iterator to a Stream of Boolean values.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false, true);
@@ -546,7 +546,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
     /**
      * Returns an iterator of IndexedBoolean elements with indices starting from 0.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false);
@@ -563,7 +563,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
     /**
      * Returns an iterator of IndexedBoolean elements with indices starting from the specified value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false);
@@ -610,7 +610,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
     /**
      * Performs the given action for each remaining element.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false, true);
@@ -632,11 +632,11 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
     /**
      * Performs the given action for each remaining element, providing the element index.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false, true);
-     * iter.foreachIndexed((index, value) -> 
+     * iter.foreachIndexed((index, value) ->
      *     System.out.println("Index " + index + ": " + value)
      * );
      * }</pre>

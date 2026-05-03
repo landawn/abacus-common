@@ -31,7 +31,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * A utility class that provides convenient wrapper methods for JSON serialization and deserialization
  * operations using Alibaba's FastJSON2 library. This class serves as a simplified facade for common
  * JSON operations, offering various serialization formats and deserialization options.
- * 
+ *
  * <p>This utility class supports:
  * <ul>
  * <li>Object to JSON string conversion with optional pretty formatting</li>
@@ -40,13 +40,13 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * <li>Type-safe deserialization using Class, Type, and TypeReference</li>
  * <li>Customization through JSONWriter and JSONReader features and contexts</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * String json = FastJson.toJson(myObject);
  * MyClass obj = FastJson.fromJson(json, MyClass.class);
  * }</pre>
- *  
+ *
  */
 public final class FastJson {
 
@@ -59,16 +59,16 @@ public final class FastJson {
 
     /**
      * Converts the specified object to its JSON string representation.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("John", 30);
      * String json = FastJson.toJson(person);
      * // Result: {"name":"John","age":30}
      * }</pre>
-     * 
+     *
      * @param obj the object to be converted to JSON string
-     * @return the JSON string representation of the object, or "null" if the object is null
+     * @return the JSON string representation of the object, or {@code "null"} if the object is {@code null}
      */
     public static String toJson(final Object obj) {
         return JSON.toJSONString(obj);
@@ -78,7 +78,7 @@ public final class FastJson {
      * Converts the specified object to its JSON string representation with optional pretty formatting.
      * When pretty formatting is enabled, the JSON output will be formatted with proper indentation
      * and line breaks for improved readability.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("John", 30);
@@ -89,7 +89,7 @@ public final class FastJson {
      * //   "age": 30
      * // }
      * }</pre>
-     * 
+     *
      * @param obj the object to be converted to JSON string
      * @param prettyFormat {@code true} to enable pretty formatting with indentation and line breaks, {@code false} for compact output
      * @return the JSON string representation of the object with or without pretty formatting
@@ -106,13 +106,13 @@ public final class FastJson {
      * Converts the specified object to its JSON string representation using the specified JSONWriter features.
      * This method allows fine-grained control over the JSON serialization process by specifying various
      * writer features such as pretty formatting, {@code null} value handling, date formatting, etc.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("John", 30);
      * String json = FastJson.toJson(person, JSONWriter.Feature.PrettyFormat, JSONWriter.Feature.WriteNulls);
      * }</pre>
-     * 
+     *
      * @param obj the object to be converted to JSON string
      * @param features variable number of JSONWriter features to control serialization behavior
      * @return the JSON string representation of the object with the specified features applied
@@ -125,14 +125,14 @@ public final class FastJson {
      * Converts the specified object to its JSON string representation using the specified JSONWriter context.
      * The context provides comprehensive control over serialization behavior including custom serializers,
      * date formats, filters, and other serialization settings.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONWriter.Context context = new JSONWriter.Context();
      * context.setDateFormat("yyyy-MM-dd");
      * String json = FastJson.toJson(person, context);
      * }</pre>
-     * 
+     *
      * @param obj the object to be converted to JSON string
      * @param context the JSONWriter context containing serialization configuration
      * @return the JSON string representation of the object using the specified context
@@ -144,13 +144,13 @@ public final class FastJson {
     /**
      * Serializes the specified object to JSON and writes it to the specified file.
      * This method creates or overwrites the target file with the JSON representation of the object.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("John", 30);
      * FastJson.toJson(person, new File("person.json"));
      * }</pre>
-     * 
+     *
      * @param obj the object to be serialized to JSON
      * @param output the file where the JSON will be written
      * @throws RuntimeException if an I/O error occurs during file writing
@@ -166,13 +166,13 @@ public final class FastJson {
     /**
      * Serializes the specified object to JSON and writes it to the specified file using the given JSONWriter features.
      * This method provides control over the serialization format while writing directly to a file.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("John", 30);
      * FastJson.toJson(person, new File("person.json"), JSONWriter.Feature.PrettyFormat);
      * }</pre>
-     * 
+     *
      * @param obj the object to be serialized to JSON
      * @param output the file where the JSON will be written
      * @param features variable number of JSONWriter features to control serialization behavior
@@ -189,14 +189,14 @@ public final class FastJson {
     /**
      * Serializes the specified object to JSON and writes it to the specified file using the given JSONWriter context.
      * This method provides comprehensive control over the serialization process while writing directly to a file.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONWriter.Context context = new JSONWriter.Context();
      * context.setDateFormat("yyyy-MM-dd");
      * FastJson.toJson(person, new File("person.json"), context);
      * }</pre>
-     * 
+     *
      * @param obj the object to be serialized to JSON
      * @param output the file where the JSON will be written
      * @param context the JSONWriter context containing serialization configuration
@@ -213,13 +213,13 @@ public final class FastJson {
     /**
      * Serializes the specified object to JSON and writes it to the specified OutputStream.
      * The caller is responsible for managing the OutputStream lifecycle (opening and closing).
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("John", 30);
      * FastJson.toJson(person, new FileOutputStream("person.json"));
      * }</pre>
-     * 
+     *
      * @param obj the object to be serialized to JSON
      * @param output the OutputStream where the JSON will be written
      */
@@ -230,13 +230,13 @@ public final class FastJson {
     /**
      * Serializes the specified object to JSON and writes it to the specified OutputStream using the given JSONWriter features.
      * The caller is responsible for managing the OutputStream lifecycle.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("John", 30);
      * FastJson.toJson(person, outputStream, JSONWriter.Feature.PrettyFormat);
      * }</pre>
-     * 
+     *
      * @param obj the object to be serialized to JSON
      * @param output the OutputStream where the JSON will be written
      * @param features variable number of JSONWriter features to control serialization behavior
@@ -248,13 +248,13 @@ public final class FastJson {
     /**
      * Serializes the specified object to JSON and writes it to the specified OutputStream using the given JSONWriter context.
      * The caller is responsible for managing the OutputStream lifecycle.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONWriter.Context context = new JSONWriter.Context();
      * FastJson.toJson(person, outputStream, context);
      * }</pre>
-     * 
+     *
      * @param obj the object to be serialized to JSON
      * @param output the OutputStream where the JSON will be written
      * @param context the JSONWriter context containing serialization configuration
@@ -267,13 +267,13 @@ public final class FastJson {
      * Serializes the specified object to JSON and writes it to the specified Writer.
      * The JSON string is first generated in memory and then written to the Writer.
      * The caller is responsible for managing the Writer lifecycle.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("John", 30);
      * FastJson.toJson(person, new FileWriter("person.json"));
      * }</pre>
-     * 
+     *
      * @param obj the object to be serialized to JSON
      * @param output the Writer where the JSON will be written
      * @throws RuntimeException if an I/O error occurs during writing
@@ -291,13 +291,13 @@ public final class FastJson {
     /**
      * Serializes the specified object to JSON and writes it to the specified Writer using the given JSONWriter features.
      * The JSON string is generated with the specified features and then written to the Writer.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("John", 30);
      * FastJson.toJson(person, writer, JSONWriter.Feature.PrettyFormat);
      * }</pre>
-     * 
+     *
      * @param obj the object to be serialized to JSON
      * @param output the Writer where the JSON will be written
      * @param features variable number of JSONWriter features to control serialization behavior
@@ -316,13 +316,13 @@ public final class FastJson {
     /**
      * Serializes the specified object to JSON and writes it to the specified Writer using the given JSONWriter context.
      * The JSON string is generated with the specified context and then written to the Writer.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONWriter.Context context = new JSONWriter.Context();
      * FastJson.toJson(person, writer, context);
      * }</pre>
-     * 
+     *
      * @param obj the object to be serialized to JSON
      * @param output the Writer where the JSON will be written
      * @param context the JSONWriter context containing serialization configuration
@@ -363,13 +363,13 @@ public final class FastJson {
      * Deserializes JSON from a byte array segment into an object of the specified target type.
      * This method allows parsing JSON from a specific portion of a byte array, which is useful
      * when the JSON data is embedded within a larger byte array.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] buffer = "prefix{\"name\":\"John\",\"age\":30}suffix".getBytes();
      * Person person = FastJson.fromJson(buffer, 6, 24, Person.class);
      * }</pre>
-     * 
+     *
      * @param <T> the type of the target object
      * @param json the byte array containing JSON data
      * @param offset the starting position in the byte array
@@ -385,13 +385,13 @@ public final class FastJson {
     /**
      * Deserializes JSON from a string into an object of the specified target type.
      * This is the most commonly used deserialization method for simple object types.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "{\"name\":\"John\",\"age\":30}";
      * Person person = FastJson.fromJson(json, Person.class);
      * }</pre>
-     * 
+     *
      * @param <T> the type of the target object
      * @param json the JSON string to be deserialized
      * @param targetType the Class object representing the target type
@@ -405,13 +405,13 @@ public final class FastJson {
     /**
      * Deserializes JSON from a string into an object of the specified target type using the given JSONReader features.
      * This method allows customization of the deserialization process through various reader features.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "{\"name\":\"John\",\"age\":30}";
      * Person person = FastJson.fromJson(json, Person.class, JSONReader.Feature.SupportSmartMatch);
      * }</pre>
-     * 
+     *
      * @param <T> the type of the target object
      * @param json the JSON string to be deserialized
      * @param targetType the Class object representing the target type
@@ -427,13 +427,13 @@ public final class FastJson {
      * Deserializes JSON from a string into an object of the specified target type using the given JSONReader context.
      * The context provides comprehensive control over deserialization behavior including custom deserializers,
      * date formats, and other parsing settings.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONReader.Context context = new JSONReader.Context();
      * Person person = FastJson.fromJson(json, Person.class, context);
      * }</pre>
-     * 
+     *
      * @param <T> the type of the target object
      * @param json the JSON string to be deserialized
      * @param targetType the Class object representing the target type
@@ -449,14 +449,14 @@ public final class FastJson {
      * Deserializes JSON from a string into an object of the specified target Type.
      * This method is useful for deserializing generic types or complex type structures
      * where Class objects are insufficient.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "[{\"name\":\"John\"},{\"name\":\"Jane\"}]";
      * Type listType = new TypeToken<List<Person>>(){}.getType();
      * List<Person> people = FastJson.fromJson(json, listType);
      * }</pre>
-     * 
+     *
      * @param <T> the type of the target object
      * @param json the JSON string to be deserialized
      * @param targetType the Type object representing the target type
@@ -470,13 +470,13 @@ public final class FastJson {
     /**
      * Deserializes JSON from a string into an object of the specified target Type using the given JSONReader features.
      * This method combines the flexibility of Type-based deserialization with customizable reader features.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type listType = new TypeToken<List<Person>>(){}.getType();
      * List<Person> people = FastJson.fromJson(json, listType, JSONReader.Feature.SupportSmartMatch);
      * }</pre>
-     * 
+     *
      * @param <T> the type of the target object
      * @param json the JSON string to be deserialized
      * @param targetType the Type object representing the target type
@@ -491,14 +491,14 @@ public final class FastJson {
     /**
      * Deserializes JSON from a string into an object of the specified target Type using the given JSONReader context.
      * This method provides the most comprehensive control over Type-based deserialization.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONReader.Context context = new JSONReader.Context();
      * Type listType = new TypeToken<List<Person>>(){}.getType();
      * List<Person> people = FastJson.fromJson(json, listType, context);
      * }</pre>
-     * 
+     *
      * @param <T> the type of the target object
      * @param json the JSON string to be deserialized
      * @param targetType the Type object representing the target type
@@ -514,13 +514,13 @@ public final class FastJson {
      * Deserializes JSON from a string into an object of the type specified by the TypeReference.
      * TypeReference is particularly useful for preserving generic type information that would
      * otherwise be lost due to type erasure.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "[{\"name\":\"John\"},{\"name\":\"Jane\"}]";
      * List<Person> people = FastJson.fromJson(json, new TypeReference<List<Person>>(){});
      * }</pre>
-     * 
+     *
      * @param <T> the type of the target object
      * @param json the JSON string to be deserialized
      * @param typeReference the TypeReference object containing type information
@@ -534,13 +534,13 @@ public final class FastJson {
     /**
      * Deserializes JSON from a string into an object of the type specified by the TypeReference using the given JSONReader features.
      * This method combines the type safety of TypeReference with customizable reader features.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "[{\"name\":\"John\"},{\"name\":\"Jane\"}]";
      * List<Person> people = FastJson.fromJson(json, new TypeReference<List<Person>>(){}, JSONReader.Feature.SupportSmartMatch);
      * }</pre>
-     * 
+     *
      * @param <T> the type of the target object
      * @param json the JSON string to be deserialized
      * @param typeReference the TypeReference object containing type information
@@ -555,13 +555,13 @@ public final class FastJson {
     /**
      * Deserializes JSON from a string into an object of the type specified by the TypeReference using the given JSONReader context.
      * This method provides comprehensive control over TypeReference-based deserialization.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONReader.Context context = new JSONReader.Context();
      * List<Person> people = FastJson.fromJson(json, new TypeReference<List<Person>>(){}, context);
      * }</pre>
-     * 
+     *
      * @param <T> the type of the target object
      * @param json the JSON string to be deserialized
      * @param typeReference the TypeReference object containing type information
@@ -577,13 +577,13 @@ public final class FastJson {
      * Deserializes JSON from a Reader into an object of the specified target type.
      * This method is useful when reading JSON from various input sources such as files,
      * network streams, or other character-based input sources.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Reader reader = new FileReader("person.json");
      * Person person = FastJson.fromJson(reader, Person.class);
      * }</pre>
-     * 
+     *
      * @param <T> the type of the target object
      * @param json the Reader containing JSON data
      * @param targetType the Class object representing the target type
@@ -597,13 +597,13 @@ public final class FastJson {
     /**
      * Deserializes JSON from a Reader into an object of the specified target type using the given JSONReader features.
      * This method allows customization of the deserialization process when reading from character-based sources.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Reader reader = new FileReader("person.json");
      * Person person = FastJson.fromJson(reader, Person.class, JSONReader.Feature.SupportSmartMatch);
      * }</pre>
-     * 
+     *
      * @param <T> the type of the target object
      * @param json the Reader containing JSON data
      * @param targetType the Class object representing the target type
@@ -619,13 +619,13 @@ public final class FastJson {
      * Deserializes JSON from a Reader into an object of the specified target type using the given JSONReader context.
      * This method provides comprehensive control over Reader-based deserialization by first reading all content
      * into a string and then parsing with the specified context.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONReader.Context context = new JSONReader.Context();
      * Person person = FastJson.fromJson(reader, Person.class, context);
      * }</pre>
-     * 
+     *
      * @param <T> the type of the target object
      * @param json the Reader containing JSON data
      * @param targetType the Class object representing the target type
@@ -642,14 +642,14 @@ public final class FastJson {
      * Deserializes JSON from a Reader into an object of the specified target Type.
      * This method is useful for deserializing generic types or complex type structures
      * from character-based input sources.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Reader reader = new FileReader("people.json");
      * Type listType = new TypeToken<List<Person>>(){}.getType();
      * List<Person> people = FastJson.fromJson(reader, listType);
      * }</pre>
-     * 
+     *
      * @param <T> the type of the target object
      * @param json the Reader containing JSON data
      * @param targetType the Type object representing the target type
@@ -664,14 +664,14 @@ public final class FastJson {
      * Deserializes JSON from a Reader into an object of the specified target Type using the given JSONReader features.
      * This method combines the flexibility of Type-based deserialization with customizable reader features
      * for character-based input sources.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Reader reader = new FileReader("people.json");
      * Type listType = new TypeToken<List<Person>>(){}.getType();
      * List<Person> people = FastJson.fromJson(reader, listType, JSONReader.Feature.SupportSmartMatch);
      * }</pre>
-     * 
+     *
      * @param <T> the type of the target object
      * @param json the Reader containing JSON data
      * @param targetType the Type object representing the target type
@@ -687,14 +687,14 @@ public final class FastJson {
      * Deserializes JSON from a Reader into an object of the specified target Type using the given JSONReader context.
      * This method provides comprehensive control over Type-based deserialization from character-based input sources
      * by first reading all content into a string and then parsing with the specified context.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONReader.Context context = new JSONReader.Context();
      * Type listType = new TypeToken<List<Person>>(){}.getType();
      * List<Person> people = FastJson.fromJson(reader, listType, context);
      * }</pre>
-     * 
+     *
      * @param <T> the type of the target object
      * @param json the Reader containing JSON data
      * @param targetType the Type object representing the target type

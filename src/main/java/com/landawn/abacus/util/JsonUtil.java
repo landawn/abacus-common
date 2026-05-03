@@ -295,26 +295,26 @@ import com.landawn.abacus.type.Type;
  * <pre>{@code
  * @RestController
  * public class UserController {
- *     
+ *
  *     @PostMapping("/users")
  *     public ResponseEntity<String> createUser(@RequestBody String jsonRequest) {
  *         try {
  *             // Parse JSON request
  *             JSONObject requestJson = new JSONObject(jsonRequest);
  *             User user = JsonUtil.unwrap(requestJson, User.class);
- *             
+ *
  *             // Process user creation
  *             User createdUser = userService.createUser(user);
- *             
+ *
  *             // Convert response to JSON
  *             JSONObject responseJson = JsonUtil.wrap(createdUser);
  *             return ResponseEntity.ok(responseJson.toString());
- *             
+ *
  *         } catch (JSONException e) {
  *             return ResponseEntity.badRequest().body("Invalid JSON format");
  *         }
  *     }
- *     
+ *
  *     @GetMapping("/users/{id}")
  *     public ResponseEntity<String> getUser(@PathVariable Long id) {
  *         User user = userService.findById(id);
@@ -373,7 +373,7 @@ public final class JsonUtil {
      * and values can be any type supported by JSONObject including primitives, Strings, Collections,
      * Maps, and other JSONObject/JSONArray instances.
      * </p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
@@ -402,12 +402,12 @@ public final class JsonUtil {
      *   <li><b>JavaBeans:</b> Converted using deep bean-to-map transformation, including all
      *       accessible properties and nested objects</li>
      * </ol>
-     * 
+     *
      * <p>
      * The deep conversion process recursively transforms nested beans, collections, and maps
      * into their JSON-compatible representations.
      * </p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with a JavaBean
@@ -417,11 +417,11 @@ public final class JsonUtil {
      *     private Address address;
      *     // getters and setters...
      * }
-     * 
+     *
      * Person person = new Person("John", 30, new Address("123 Main St"));
      * JSONObject json = JsonUtil.wrap(person);
      * // Result: {"name":"John","age":30,"address":{"street":"123 Main St"}}
-     * 
+     *
      * // Example with a Map
      * Map<String, Object> map = new HashMap<>();
      * map.put("id", 123);
@@ -442,13 +442,13 @@ public final class JsonUtil {
      * <p>
      * Each element in the boolean array is added to the JSONArray in the same order.
      * </p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] flags = {true, false, true, true, false};
      * JSONArray json = JsonUtil.wrap(flags);
      * // Result: [true,false,true,true,false]
-     * 
+     *
      * // Unwrap back to array
      * boolean[] restored = JsonUtil.unwrap(json, boolean[].class);
      * }</pre>
@@ -467,7 +467,7 @@ public final class JsonUtil {
      * Each character is stored as a string in the JSONArray since JSON doesn't have
      * a native character type.
      * </p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = {'H', 'e', 'l', 'l', 'o'};
@@ -488,7 +488,7 @@ public final class JsonUtil {
      * <p>
      * Each byte value is stored as a number in the JSONArray.
      * </p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] bytes = {10, 20, 30, 40, 50};
@@ -509,7 +509,7 @@ public final class JsonUtil {
      * <p>
      * Each short value is stored as a number in the JSONArray.
      * </p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] shorts = {100, 200, 300, 400, 500};
@@ -530,13 +530,13 @@ public final class JsonUtil {
      * <p>
      * Each integer value is stored as a number in the JSONArray.
      * </p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] numbers = {1, 2, 3, 4, 5};
      * JSONArray json = JsonUtil.wrap(numbers);
      * // Result: [1,2,3,4,5]
-     * 
+     *
      * // Can be used with mathematical data
      * int[] fibonacci = {0, 1, 1, 2, 3, 5, 8, 13};
      * JSONArray fibJson = JsonUtil.wrap(fibonacci);
@@ -557,7 +557,7 @@ public final class JsonUtil {
      * long values may lose precision when converted to JSON due to JavaScript's
      * number limitations.
      * </p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] timestamps = {1609459200000L, 1609545600000L, 1609632000000L};
@@ -579,7 +579,7 @@ public final class JsonUtil {
      * Each float value is stored as a number in the JSONArray. Special float values
      * (NaN, Infinity) may be converted according to JSON specifications.
      * </p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] measurements = {98.6f, 99.1f, 97.8f, 98.2f};
@@ -601,13 +601,13 @@ public final class JsonUtil {
      * Each double value is stored as a number in the JSONArray. Special double values
      * (NaN, Infinity) may cause JSONException as they're not valid in standard JSON.
      * </p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] prices = {19.99, 29.99, 39.99, 49.99};
      * JSONArray json = JsonUtil.wrap(prices);
      * // Result: [19.99,29.99,39.99,49.99]
-     * 
+     *
      * // Scientific data
      * double[] coefficients = {3.14159, 2.71828, 1.41421};
      * JSONArray sciJson = JsonUtil.wrap(coefficients);
@@ -632,7 +632,7 @@ public final class JsonUtil {
      *   <li>Maps and Beans: converted to JSONObject</li>
      *   <li>Collections and Arrays: converted to JSONArray</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Object[] mixed = {
@@ -662,19 +662,19 @@ public final class JsonUtil {
      * each element according to its type. The order of elements in the JSONArray matches
      * the iteration order of the Collection.
      * </p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Converting a List
      * List<String> names = Arrays.asList("Alice", "Bob", "Charlie");
      * JSONArray json = JsonUtil.wrap(names);
      * // Result: ["Alice","Bob","Charlie"]
-     * 
+     *
      * // Converting a Set
      * Set<Integer> numbers = new LinkedHashSet<>(Arrays.asList(1, 2, 3));
      * JSONArray json2 = JsonUtil.wrap(numbers);
      * // Result: [1,2,3]
-     * 
+     *
      * // Mixed types
      * List<Object> mixed = Arrays.asList("text", 123, true, null);
      * JSONArray json3 = JsonUtil.wrap(mixed);
@@ -696,7 +696,7 @@ public final class JsonUtil {
      * The resulting Map will contain all key-value pairs from the JSONObject, with values
      * converted to appropriate Java types.
      * </p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONObject json = new JSONObject("{\"name\":\"John\",\"age\":30,\"active\":true}");
@@ -723,21 +723,21 @@ public final class JsonUtil {
      *   <li><b>Map implementations:</b> HashMap, LinkedHashMap, TreeMap, etc.</li>
      *   <li><b>JavaBeans:</b> Any class with proper getter/setter methods</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert to a specific Map type
      * JSONObject json = new JSONObject("{\"z\":1,\"a\":2}");
      * TreeMap<String, Object> sorted = JsonUtil.unwrap(json, TreeMap.class);
      * // Keys will be sorted: "a"=2, "z"=1
-     * 
+     *
      * // Convert to a JavaBean
      * public class User {
      *     private String name;
      *     private int age;
      *     // getters and setters...
      * }
-     * 
+     *
      * JSONObject userJson = new JSONObject("{\"name\":\"Alice\",\"age\":25}");
      * User user = JsonUtil.unwrap(userJson, User.class);
      * // user.getName() returns "Alice"
@@ -766,12 +766,12 @@ public final class JsonUtil {
      *   <li>Complex nested beans with generic properties</li>
      *   <li>Type inference for Object.class (defaults to Map&lt;String, Object&gt;)</li>
      * </ul>
-     * 
+     *
      * <p>
      * The method performs deep conversion, recursively transforming nested JSONObjects
      * and JSONArrays according to the specified type information.
      * </p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Complex generic Map
@@ -779,12 +779,12 @@ public final class JsonUtil {
      * JSONObject json = new JSONObject("{\"tags\":[\"java\",\"json\"],\"categories\":[\"util\",\"parser\"]}");
      * Map<String, List<String>> result = JsonUtil.unwrap(json, type);
      * // result.get("tags") returns List ["java", "json"]
-     * 
+     *
      * // Nested bean structures
      * Type<Department> deptType = Type.of(Department.class);
      * JSONObject deptJson = new JSONObject("{\"name\":\"Engineering\",\"employees\":[...]}");
      * Department dept = JsonUtil.unwrap(deptJson, deptType);
-     * 
+     *
      * // Object type defaults to Map
      * Type<Object> objType = Type.of(Object.class);
      * Object result2 = JsonUtil.unwrap(json, objType);   // Returns Map<String, Object>
@@ -810,7 +810,7 @@ public final class JsonUtil {
             @SuppressWarnings("rawtypes")
             final Map<String, Object> map = N.newMap((Class<Map>) cls, jsonObject.keySet().size());
             final Iterator<String> iter = jsonObject.keys();
-            final Type<?> valueType = targetType.parameterTypes()[1];
+            final Type<?> valueType = targetType.parameterTypes().get(1);
             String key = null;
             Object value = null;
 
@@ -874,7 +874,7 @@ public final class JsonUtil {
      * The resulting List will contain elements converted to appropriate Java types based on
      * their JSON representation.
      * </p>
-     * 
+     *
      * <p><b>Type Inference:</b></p>
      * <ul>
      *   <li>JSON numbers → Integer, Long, or Double based on value</li>
@@ -884,7 +884,7 @@ public final class JsonUtil {
      *   <li>JSON objects → Map&lt;String, Object&gt;</li>
      *   <li>JSON arrays → List&lt;Object&gt;</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONArray json = new JSONArray("[\"text\",123,true,null,{\"key\":\"value\"},[1,2,3]]");
@@ -916,22 +916,22 @@ public final class JsonUtil {
      *   <li><b>Collection types:</b> List, Set, Queue implementations</li>
      *   <li><b>Array types:</b> Both primitive arrays (int[], double[], etc.) and object arrays</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert to typed List
      * JSONArray json = new JSONArray("[\"Alice\",\"Bob\",\"Charlie\"]");
      * List<String> names = JsonUtil.unwrap(json, List.class);
-     * 
+     *
      * // Convert to Set
      * JSONArray numbers = new JSONArray("[1,2,3,2,1]");
      * Set<Integer> uniqueNumbers = JsonUtil.unwrap(numbers, Set.class);
      * // Set contains: 1, 2, 3
-     * 
+     *
      * // Convert to primitive array
      * JSONArray scores = new JSONArray("[85,90,78,92,88]");
      * int[] scoresArray = JsonUtil.unwrap(scores, int[].class);
-     * 
+     *
      * // Convert to object array
      * String[] namesArray = JsonUtil.unwrap(json, String[].class);
      * }</pre>
@@ -957,7 +957,7 @@ public final class JsonUtil {
      *   <li>Multi-dimensional arrays: {@code String[][]}, {@code int[][]}</li>
      *   <li>Complex nested structures with full type preservation</li>
      * </ul>
-     * 
+     *
      * <p>
      * The method handles several special cases:
      * </p>
@@ -966,19 +966,19 @@ public final class JsonUtil {
      *   <li>Primitive arrays use default values for {@code null} elements</li>
      *   <li>JSONObject.NULL is converted to Java null</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Typed List with complex elements
      * Type<List<User>> userListType = Type.of("List<User>");
      * JSONArray json = new JSONArray("[{\"name\":\"Alice\",\"age\":25},{\"name\":\"Bob\",\"age\":30}]");
      * List<User> users = JsonUtil.unwrap(json, userListType);
-     * 
+     *
      * // Set of Maps
      * Type<Set<Map<String, String>>> type = Type.of("Set<Map<String, String>>");
      * JSONArray data = new JSONArray("[{\"id\":\"1\"},{\"id\":\"2\"},{\"id\":\"1\"}]");
      * Set<Map<String, String>> result = JsonUtil.unwrap(data, type);
-     * 
+     *
      * // Multi-dimensional array
      * Type<int[][]> matrixType = Type.of(int[][].class);
      * JSONArray matrix = new JSONArray("[[1,2,3],[4,5,6],[7,8,9]]");
@@ -1078,17 +1078,17 @@ public final class JsonUtil {
      * This method provides a convenient way to create a List with a specific element type
      * from a JSONArray. Each element in the JSONArray is converted to the specified type.
      * </p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // List of strings
      * JSONArray json = new JSONArray("[\"apple\",\"banana\",\"orange\"]");
      * List<String> fruits = JsonUtil.toList(json, String.class);
-     * 
+     *
      * // List of integers
      * JSONArray numbers = new JSONArray("[10,20,30,40,50]");
      * List<Integer> intList = JsonUtil.toList(numbers, Integer.class);
-     * 
+     *
      * // List of custom objects
      * JSONArray users = new JSONArray("[{\"name\":\"Alice\"},{\"name\":\"Bob\"}]");
      * List<User> userList = JsonUtil.toList(users, User.class);
@@ -1112,19 +1112,19 @@ public final class JsonUtil {
      * that cannot be expressed with simple Class parameters. It performs deep conversion
      * of nested structures according to the provided type information.
      * </p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // List of Maps
      * Type<Map<String, Object>> mapType = Type.of("Map<String, Object>");
      * JSONArray json = new JSONArray("[{\"id\":1,\"name\":\"Item1\"},{\"id\":2,\"name\":\"Item2\"}]");
      * List<Map<String, Object>> items = JsonUtil.toList(json, mapType);
-     * 
+     *
      * // List of Lists (nested structure)
      * Type<List<Integer>> listType = Type.of("List<Integer>");
      * JSONArray matrix = new JSONArray("[[1,2,3],[4,5,6],[7,8,9]]");
      * List<List<Integer>> rows = JsonUtil.toList(matrix, listType);
-     * 
+     *
      * // Complex bean with generics
      * Type<Response<User>> responseType = Type.of("Response<User>");
      * JSONArray responses = new JSONArray("[{\"status\":200,\"data\":{\"name\":\"Alice\"}}]");

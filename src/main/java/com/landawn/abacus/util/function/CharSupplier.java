@@ -31,7 +31,7 @@ import com.landawn.abacus.util.Throwables;
 @FunctionalInterface
 public interface CharSupplier extends Throwables.CharSupplier<RuntimeException> { //NOSONAR
     /**
-     * A supplier that always returns the {@code null} character ('\0').
+     * A supplier that always returns the NUL character ({@code '\0'}, Unicode U+0000).
      * This is useful as a default value or for initialization purposes.
      */
     CharSupplier ZERO = () -> 0;

@@ -83,6 +83,7 @@ public interface ShortFunction<R> extends Throwables.ShortFunction<R, RuntimeExc
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied
      * @return a composed function that first applies this function and then applies the {@code after} function
+     * @throws NullPointerException if {@code after} is null
      */
     default <V> ShortFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return t -> after.apply(apply(t));
@@ -97,12 +98,6 @@ public interface ShortFunction<R> extends Throwables.ShortFunction<R, RuntimeExc
      * ShortFunction<Short> identity = ShortFunction.identity();
      * Short result1 = identity.apply((short) 42);     // returns 42
      * Short result2 = identity.apply((short) -100);   // returns -100
-     *
-     * // Useful in stream operations
-     * short[] values = {1, 2, 3, 4, 5};
-     * List<Short> boxed = Arrays.stream(values)
-     *     .mapToObj(v -> ShortFunction.identity().apply((short) v))
-     *     .collect(Collectors.toList());
      * }</pre>
      *
      * @return a function that always returns its input argument as a Short object

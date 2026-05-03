@@ -87,7 +87,7 @@ import com.landawn.abacus.util.function.Supplier;
  * Supplier<List<String>> listSupplier = Suppliers.ofList();
  * List<String> list = listSupplier.get();
  *
- * // Create a supplier for TreeSet
+ * // Create a supplier for HashSet
  * Supplier<Set<Integer>> setSupplier = Suppliers.ofSet();
  * Set<Integer> set = setSupplier.get();
  *
@@ -278,7 +278,7 @@ public final class Suppliers {
 
     /**
      * Returns the provided supplier as is - a shorthand identity method for suppliers.
-     * 
+     *
      * <p>This method serves as a shorthand convenience method that can help with type inference
      * in certain contexts. It's part of a family of shorthand methods like {@code p()} for Predicate
      * and others.</p>
@@ -300,7 +300,7 @@ public final class Suppliers {
 
     /**
      * Creates a supplier that always returns the result of applying the provided function to the given value.
-     * 
+     *
      * <p>This method creates a supplier that captures the provided value and function,
      * and when the supplier is called, it applies the function to the value and returns the result.</p>
      *
@@ -323,7 +323,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that always supplies the same instance.
-     * 
+     *
      * <p>This method creates a supplier that always returns the provided instance,
      * useful for creating constant suppliers.</p>
      *
@@ -337,7 +337,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that generates unique identifier (UUID) strings.
-     * 
+     *
      * <p>Each call to the supplier's get() method will generate a new unique identifier (UUID) string.</p>
      *
      * @return a supplier that generates unique identifier (UUID) strings
@@ -349,7 +349,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that generates unique identifier (UUID) strings without hyphens.
-     * 
+     *
      * <p>Each call to the supplier's get() method will generate a new unique identifier (UUID) string without hyphens.</p>
      *
      * @return a supplier that generates unique identifier (UUID) strings without hyphens
@@ -361,7 +361,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that supplies empty boolean arrays.
-     * 
+     *
      * <p>This supplier always returns the same empty boolean array instance for efficiency.</p>
      *
      * @return a supplier that returns an empty boolean array
@@ -372,7 +372,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that supplies empty char arrays.
-     * 
+     *
      * <p>This supplier always returns the same empty char array instance for efficiency.</p>
      *
      * @return a supplier that returns an empty char array
@@ -383,7 +383,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that supplies empty byte arrays.
-     * 
+     *
      * <p>This supplier always returns the same empty byte array instance for efficiency.</p>
      *
      * @return a supplier that returns an empty byte array
@@ -394,7 +394,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that supplies empty short arrays.
-     * 
+     *
      * <p>This supplier always returns the same empty short array instance for efficiency.</p>
      *
      * @return a supplier that returns an empty short array
@@ -405,7 +405,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that supplies empty int arrays.
-     * 
+     *
      * <p>This supplier always returns the same empty int array instance for efficiency.</p>
      *
      * @return a supplier that returns an empty int array
@@ -416,7 +416,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that supplies empty long arrays.
-     * 
+     *
      * <p>This supplier always returns the same empty long array instance for efficiency.</p>
      *
      * @return a supplier that returns an empty long array
@@ -427,7 +427,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that supplies empty float arrays.
-     * 
+     *
      * <p>This supplier always returns the same empty float array instance for efficiency.</p>
      *
      * @return a supplier that returns an empty float array
@@ -438,7 +438,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that supplies empty double arrays.
-     * 
+     *
      * <p>This supplier always returns the same empty double array instance for efficiency.</p>
      *
      * @return a supplier that returns an empty double array
@@ -449,7 +449,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that supplies empty String arrays.
-     * 
+     *
      * <p>This supplier always returns the same empty String array instance for efficiency.</p>
      *
      * @return a supplier that returns an empty String array
@@ -460,7 +460,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that supplies empty Object arrays.
-     * 
+     *
      * <p>This supplier always returns the same empty Object array instance for efficiency.</p>
      *
      * @return a supplier that returns an empty Object array
@@ -471,7 +471,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that supplies empty strings.
-     * 
+     *
      * <p>This supplier always returns the same empty string instance.</p>
      *
      * @return a supplier that returns an empty string
@@ -482,7 +482,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new BooleanList instances.
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty BooleanList.</p>
      *
      * @return a supplier that creates new BooleanList instances
@@ -493,7 +493,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new CharList instances.
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty CharList.</p>
      *
      * @return a supplier that creates new CharList instances
@@ -504,7 +504,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new ByteList instances.
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty ByteList.</p>
      *
      * @return a supplier that creates new ByteList instances
@@ -515,7 +515,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new ShortList instances.
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty ShortList.</p>
      *
      * @return a supplier that creates new ShortList instances
@@ -526,7 +526,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new IntList instances.
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty IntList.</p>
      *
      * @return a supplier that creates new IntList instances
@@ -537,7 +537,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new LongList instances.
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty LongList.</p>
      *
      * @return a supplier that creates new LongList instances
@@ -548,7 +548,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new FloatList instances.
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty FloatList.</p>
      *
      * @return a supplier that creates new FloatList instances
@@ -559,7 +559,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new DoubleList instances.
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty DoubleList.</p>
      *
      * @return a supplier that creates new DoubleList instances
@@ -570,7 +570,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new List instances (ArrayList).
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty ArrayList.</p>
      *
      * @param <T> the type of elements in the list
@@ -583,7 +583,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new LinkedList instances.
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty LinkedList.</p>
      *
      * @param <T> the type of elements in the list
@@ -596,7 +596,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new Set instances (HashSet).
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty HashSet.</p>
      *
      * @param <T> the type of elements in the set
@@ -609,7 +609,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new LinkedHashSet instances.
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty LinkedHashSet.</p>
      *
      * @param <T> the type of elements in the set
@@ -622,7 +622,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new SortedSet instances (TreeSet).
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty TreeSet.</p>
      *
      * @param <T> the type of elements in the set
@@ -635,7 +635,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new NavigableSet instances (TreeSet).
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty TreeSet.</p>
      *
      * @param <T> the type of elements in the set
@@ -648,7 +648,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new TreeSet instances.
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty TreeSet.</p>
      *
      * @param <T> the type of elements in the set
@@ -661,7 +661,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new Queue instances (LinkedList).
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty LinkedList as a Queue.</p>
      *
      * @param <T> the type of elements in the queue
@@ -674,7 +674,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new Deque instances (LinkedList).
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty LinkedList as a Deque.</p>
      *
      * @param <T> the type of elements in the deque
@@ -687,7 +687,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new ArrayDeque instances.
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty ArrayDeque.</p>
      *
      * @param <T> the type of elements in the deque
@@ -700,7 +700,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new LinkedBlockingQueue instances.
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty LinkedBlockingQueue
      * with unbounded capacity.</p>
      *
@@ -714,7 +714,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new LinkedBlockingDeque instances.
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty LinkedBlockingDeque
      * with unbounded capacity.</p>
      *
@@ -728,7 +728,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new ConcurrentLinkedQueue instances.
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty ConcurrentLinkedQueue.</p>
      *
      * @param <T> the type of elements in the queue
@@ -741,7 +741,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new PriorityQueue instances.
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty PriorityQueue
      * with natural ordering.</p>
      *
@@ -755,7 +755,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new Map instances (HashMap).
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty HashMap.</p>
      *
      * @param <K> the key type
@@ -769,7 +769,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new LinkedHashMap instances.
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty LinkedHashMap.</p>
      *
      * @param <K> the key type
@@ -783,7 +783,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new IdentityHashMap instances.
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty IdentityHashMap.
      * IdentityHashMap uses reference equality (==) instead of object equality (equals).</p>
      *
@@ -798,7 +798,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new SortedMap instances (TreeMap).
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty TreeMap.</p>
      *
      * @param <K> the key type
@@ -812,7 +812,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new NavigableMap instances (TreeMap).
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty TreeMap.</p>
      *
      * @param <K> the key type
@@ -826,7 +826,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new TreeMap instances.
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty TreeMap.</p>
      *
      * @param <K> the key type
@@ -840,7 +840,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new ConcurrentMap instances (ConcurrentHashMap).
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty ConcurrentHashMap.</p>
      *
      * @param <K> the key type
@@ -854,7 +854,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new ConcurrentHashMap instances.
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty ConcurrentHashMap.</p>
      *
      * @param <K> the key type
@@ -882,7 +882,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new concurrent Set instances.
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty Set backed by ConcurrentHashMap.</p>
      *
      * @param <T> the type of elements in the set
@@ -895,7 +895,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new BiMap instances.
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty BiMap.
      * A BiMap maintains a bidirectional mapping between keys and values.</p>
      *
@@ -910,7 +910,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new Multiset instances.
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty Multiset.
      * A Multiset is a collection that allows duplicate elements and counts their occurrences.</p>
      *
@@ -924,7 +924,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new Multiset instances with a specific map type.
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty Multiset
      * backed by the specified type of Map.</p>
      *
@@ -939,7 +939,7 @@ public final class Suppliers {
 
     /**
      * Returns a supplier that creates new Multiset instances with a custom map supplier.
-     * 
+     *
      * <p>Each call to the supplier's get() method will create a new, empty Multiset
      * backed by a Map created by the provided supplier.</p>
      *
@@ -953,7 +953,7 @@ public final class Suppliers {
 
     /**
      * Returns a Supplier that creates a new ListMultimap with default backing Map and List implementations.
-     * 
+     *
      * <p>The returned supplier creates ListMultimaps backed by HashMap and ArrayList.
      * Each invocation of the supplier creates a new empty ListMultimap instance.</p>
      *
@@ -968,7 +968,7 @@ public final class Suppliers {
 
     /**
      * Returns a Supplier that creates a new ListMultimap with the specified Map type and default List implementation.
-     * 
+     *
      * <p>The returned supplier creates ListMultimaps backed by the specified Map type and ArrayList.
      * Each invocation of the supplier creates a new empty ListMultimap instance.</p>
      *
@@ -985,7 +985,7 @@ public final class Suppliers {
 
     /**
      * Returns a Supplier that creates a new ListMultimap with the specified Map and List types.
-     * 
+     *
      * <p>The returned supplier creates ListMultimaps backed by the specified Map and List implementations.
      * Each invocation of the supplier creates a new empty ListMultimap instance.</p>
      *
@@ -1003,7 +1003,7 @@ public final class Suppliers {
 
     /**
      * Returns a Supplier that creates a new ListMultimap using the provided map and value suppliers.
-     * 
+     *
      * <p>The returned supplier creates ListMultimaps using custom suppliers for both the backing Map
      * and the List instances used for values. This allows for complete control over the multimap's
      * internal structure.</p>
@@ -1022,7 +1022,7 @@ public final class Suppliers {
 
     /**
      * Returns a Supplier that creates a new SetMultimap with default backing Map and Set implementations.
-     * 
+     *
      * <p>The returned supplier creates SetMultimaps backed by HashMap and HashSet.
      * Each invocation of the supplier creates a new empty SetMultimap instance.</p>
      *
@@ -1037,7 +1037,7 @@ public final class Suppliers {
 
     /**
      * Returns a Supplier that creates a new SetMultimap with the specified Map type and default Set implementation.
-     * 
+     *
      * <p>The returned supplier creates SetMultimaps backed by the specified Map type and HashSet.
      * Each invocation of the supplier creates a new empty SetMultimap instance.</p>
      *
@@ -1054,7 +1054,7 @@ public final class Suppliers {
 
     /**
      * Returns a Supplier that creates a new SetMultimap with the specified Map and Set types.
-     * 
+     *
      * <p>The returned supplier creates SetMultimaps backed by the specified Map and Set implementations.
      * Each invocation of the supplier creates a new empty SetMultimap instance.</p>
      *
@@ -1072,7 +1072,7 @@ public final class Suppliers {
 
     /**
      * Returns a Supplier that creates a new SetMultimap using the provided map and value suppliers.
-     * 
+     *
      * <p>The returned supplier creates SetMultimaps using custom suppliers for both the backing Map
      * and the Set instances used for values. This allows for complete control over the multimap's
      * internal structure.</p>
@@ -1091,7 +1091,7 @@ public final class Suppliers {
 
     /**
      * Returns a Supplier that creates a new Multimap using the provided map and value collection suppliers.
-     * 
+     *
      * <p>This is the most general multimap supplier, allowing any Collection type for values.
      * The returned supplier creates Multimaps using custom suppliers for both the backing Map
      * and the Collection instances used for values.</p>
@@ -1111,7 +1111,7 @@ public final class Suppliers {
 
     /**
      * Returns a Supplier that creates new StringBuilder instances.
-     * 
+     *
      * <p>Each invocation of the supplier creates a new empty StringBuilder with default initial capacity.</p>
      *
      * @return a Supplier that creates new StringBuilder instances
@@ -1125,10 +1125,10 @@ public final class Suppliers {
 
     /**
      * Returns a Supplier that creates Collection instances of the specified type.
-     * 
+     *
      * <p>This method provides suppliers for various Collection implementations including List, Set, Queue,
      * and their subtypes. The method uses a cache to avoid creating duplicate suppliers for the same type.</p>
-     * 
+     *
      * <p>Supported types include:
      * <ul>
      *   <li>Collection, List, ArrayList - returns ArrayList supplier</li>
@@ -1136,7 +1136,7 @@ public final class Suppliers {
      *   <li>Set, HashSet - returns HashSet supplier</li>
      *   <li>LinkedHashSet - returns LinkedHashSet supplier</li>
      *   <li>SortedSet, TreeSet - returns TreeSet supplier</li>
-     *   <li>Queue, Deque - returns ArrayDeque supplier</li>
+     *   <li>Queue, Deque - returns LinkedList supplier (as Deque)</li>
      *   <li>Various concurrent collections</li>
      * </ul>
      *
@@ -1215,10 +1215,10 @@ public final class Suppliers {
 
     /**
      * Returns a Supplier that creates Map instances of the specified type.
-     * 
+     *
      * <p>This method provides suppliers for various Map implementations including HashMap, LinkedHashMap,
      * TreeMap, and concurrent maps. The method uses a cache to avoid creating duplicate suppliers for the same type.</p>
-     * 
+     *
      * <p>Supported types include:
      * <ul>
      *   <li>Map, HashMap - returns HashMap supplier</li>
@@ -1293,11 +1293,11 @@ public final class Suppliers {
 
     /**
      * Registers a custom Supplier for creating instances of the specified Collection class.
-     * 
+     *
      * <p>This method allows registering custom suppliers for Collection implementations that are not
      * built-in or require special initialization. Once registered, the supplier will be used by
      * {@link #ofCollection(Class)} when creating instances of the target class.</p>
-     * 
+     *
      * <p>Note: Built-in classes (like ArrayList, HashSet, etc.) cannot be registered with custom suppliers.</p>
      *
      * @param <T> the Collection type
@@ -1325,11 +1325,11 @@ public final class Suppliers {
 
     /**
      * Registers a custom Supplier for creating instances of the specified Map class.
-     * 
+     *
      * <p>This method allows registering custom suppliers for Map implementations that are not
      * built-in or require special initialization. Once registered, the supplier will be used by
      * {@link #ofMap(Class)} when creating instances of the target class.</p>
-     * 
+     *
      * <p>Note: Built-in classes (like HashMap, TreeMap, etc.) cannot be registered with custom suppliers.</p>
      *
      * @param <T> the Map type
@@ -1395,7 +1395,7 @@ public final class Suppliers {
 
     /**
      * Returns a Supplier that creates new Exception instances.
-     * 
+     *
      * <p>Each invocation of the supplier creates a new Exception with no message or cause.</p>
      *
      * @return a Supplier that creates new Exception instances
@@ -1409,7 +1409,7 @@ public final class Suppliers {
 
     /**
      * Returns a Supplier that creates new RuntimeException instances.
-     * 
+     *
      * <p>Each invocation of the supplier creates a new RuntimeException with no message or cause.</p>
      *
      * @return a Supplier that creates new RuntimeException instances
@@ -1423,7 +1423,7 @@ public final class Suppliers {
 
     /**
      * Returns a Supplier that creates new NoSuchElementException instances.
-     * 
+     *
      * <p>Each invocation of the supplier creates a new NoSuchElementException with no message.</p>
      *
      * @return a Supplier that creates new NoSuchElementException instances

@@ -70,7 +70,7 @@ import com.landawn.abacus.annotation.Internal;
  *
  * // Forward lookup (key to value)
  * Integer aliceId = userIdMap.get("alice");   // 1001
- * 
+ *
  * // Reverse lookup (value to key)
  * String userName = userIdMap.getByValue(1002);   // "bob"
  *
@@ -101,8 +101,8 @@ import com.landawn.abacus.annotation.Internal;
  * <ul>
  *   <li><b>Key Uniqueness:</b> Standard Map behavior - each key maps to at most one value</li>
  *   <li><b>Value Uniqueness:</b> BiMap constraint - each value maps to at most one key</li>
- *   <li><b>Constraint Violation:</b> {@code put()} operations remove conflicting mappings</li>
- *   <li><b>Force Operations:</b> {@code forcePut()} explicitly handles conflicts</li>
+ *   <li><b>Constraint Violation:</b> {@code put()} throws {@link IllegalArgumentException} when the value is already mapped to a different key</li>
+ *   <li><b>Force Operations:</b> {@code forcePut()} silently removes any conflicting mapping for the value</li>
  * </ul>
  *
  * <p><b>Factory Methods:</b>
@@ -172,7 +172,7 @@ import com.landawn.abacus.annotation.Internal;
  *
  * <p><b>Error Conditions:</b>
  * <ul>
- *   <li><b>Duplicate Values:</b> {@code put()} removes existing mapping for the value</li>
+ *   <li><b>Duplicate Values:</b> {@code put()} throws {@link IllegalArgumentException} if the value is already mapped to a different key (use {@link #forcePut} to override)</li>
  *   <li><b>Builder Validation:</b> Builder throws {@code IllegalArgumentException} for duplicates</li>
  *   <li><b>Null Arguments:</b> Factory methods validate non-null arguments</li>
  * </ul>
@@ -224,7 +224,7 @@ import com.landawn.abacus.annotation.Internal;
  *   <li><b>vs Google Guava BiMap:</b> Similar API with builder pattern and force operations</li>
  *   <li><b>vs Apache Commons BidiMap:</b> Type-safe generics and modern Java features</li>
  * </ul>
- * 
+ *
  * @param <K> the type of keys maintained by this BiMap
  * @param <V> the type of mapped values
  *
@@ -316,7 +316,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * }</pre>
      *
      * @param keyMapType the Class object representing the type of Map to be used for storing keys; must not be {@code null}
-     * @param valueMapType the Class object representing the type of Map to be used for storing values; must not be {@code null} 
+     * @param valueMapType the Class object representing the type of Map to be used for storing values; must not be {@code null}
      */
     @SuppressWarnings("rawtypes")
     public BiMap(final Class<? extends Map> keyMapType, final Class<? extends Map> valueMapType) {
@@ -593,7 +593,6 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param k7 the seventh key to be inserted into the BiMap.
      * @param v7 the value to be associated with the seventh key in the BiMap.
      * @return a BiMap containing the specified key-value pairs.
-     *
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
             final K k6, final V v6, final K k7, final V v7) {
@@ -641,7 +640,6 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param k8 the eighth key to be inserted into the BiMap.
      * @param v8 the value to be associated with the eighth key in the BiMap.
      * @return a BiMap containing the specified key-value pairs.
-     *
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
             final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) {
@@ -935,8 +933,8 @@ public final class BiMap<K, V> implements Map<K, V> {
      * }</pre>
      *
      * @param key the key with which the specified value is to be associated.
-     * @param value the value to be associated with the specified key. 
-     * @return the previous value associated with the key, or {@code null} if there was no mapping for the key. 
+     * @param value the value to be associated with the specified key.
+     * @return the previous value associated with the key, or {@code null} if there was no mapping for the key.
      * @see #put(Object, Object)
      */
     public V forcePut(final K key, final V value) {
@@ -1240,7 +1238,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * BiMap<String, Integer> map = BiMap.of("one", 1, "two", 2);
      * int count = map.size();   // returns 2
      * }</pre>
-     * 
+     *
      * @return the number of key-value mappings in this BiMap.
      */
     @Override
@@ -1266,11 +1264,12 @@ public final class BiMap<K, V> implements Map<K, V> {
 
     /**
      * Compares the specified object with this BiMap for equality.
-     * Returns {@code true} if the given object is also a BiMap and the two BiMaps represent the same mappings.
-     * Two BiMaps are considered equal if they have the same key-value mappings.
+     * Returns {@code true} if the given object is also a {@link Map} and the two represent the same key-value mappings.
+     * The comparison is delegated to the underlying key-to-value map's {@code equals} method,
+     * so any {@code Map} (not just a BiMap) with the same mappings is considered equal.
      *
      * @param obj the object to be compared for equality with this BiMap.
-     * @return {@code true} if the specified object is equal to this BiMap, {@code false} otherwise.
+     * @return {@code true} if the specified object is a Map equal to this BiMap, {@code false} otherwise.
      */
     @Override
     public boolean equals(final Object obj) {

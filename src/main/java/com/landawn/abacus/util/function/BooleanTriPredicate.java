@@ -43,9 +43,9 @@ public interface BooleanTriPredicate extends Throwables.BooleanTriPredicate<Runt
      * boolean result = allTrue.test(true, true, false);   // Returns false
      * }</pre>
      *
-     * @param a the first input argument
-     * @param b the second input argument
-     * @param c the third input argument
+     * @param a the first input argument ({@code boolean} value)
+     * @param b the second input argument ({@code boolean} value)
+     * @param c the third input argument ({@code boolean} value)
      * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
      */
     @Override
@@ -83,6 +83,7 @@ public interface BooleanTriPredicate extends Throwables.BooleanTriPredicate<Runt
      *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default BooleanTriPredicate and(final BooleanTriPredicate other) {
         return (a, b, c) -> test(a, b, c) && other.test(a, b, c);
@@ -105,6 +106,7 @@ public interface BooleanTriPredicate extends Throwables.BooleanTriPredicate<Runt
      *
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default BooleanTriPredicate or(final BooleanTriPredicate other) {
         return (a, b, c) -> test(a, b, c) || other.test(a, b, c);

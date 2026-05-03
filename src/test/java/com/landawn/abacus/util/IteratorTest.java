@@ -1,7 +1,5 @@
 package com.landawn.abacus.util;
 
-import com.landawn.abacus.TestBase;
-
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.Map;
@@ -9,13 +7,14 @@ import java.util.function.BiPredicate;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.stream.Stream;
 
 public class IteratorTest extends TestBase {
 
     @Test
     public void test_BiIterator_filter() {
-        Map<Integer, String> map = CommonUtil.toMap(Stream.range(1, 10).toList(), Fn.identity(), v -> v + ": aaa", IntFunctions.ofLinkedHashMap());
+        Map<Integer, String> map = N.toMap(Stream.range(1, 10).toList(), Fn.identity(), v -> v + ": aaa", IntFunctions.ofLinkedHashMap());
 
         BiPredicate<? super Integer, ? super String> predicate_1 = (a, b) -> a > 2;
 
@@ -29,7 +28,7 @@ public class IteratorTest extends TestBase {
 
     @Test
     public void test_BiIterator_limit() {
-        Map<Integer, String> map = CommonUtil.toMap(Stream.range(1, 10).toList(), Fn.identity(), v -> v + ": aaa", IntFunctions.ofLinkedHashMap());
+        Map<Integer, String> map = N.toMap(Stream.range(1, 10).toList(), Fn.identity(), v -> v + ": aaa", IntFunctions.ofLinkedHashMap());
 
         BiIterator.of(map).foreachRemaining((a, b) -> N.println(a + "=" + b));
         N.println(Strings.repeat("=", 80));
@@ -53,7 +52,7 @@ public class IteratorTest extends TestBase {
 
     @Test
     public void test_BiIterator_skip() {
-        Map<Integer, String> map = CommonUtil.toMap(Stream.range(1, 10).toList(), Fn.identity(), v -> v + ": aaa", IntFunctions.ofLinkedHashMap());
+        Map<Integer, String> map = N.toMap(Stream.range(1, 10).toList(), Fn.identity(), v -> v + ": aaa", IntFunctions.ofLinkedHashMap());
 
         BiIterator.of(map).foreachRemaining((a, b) -> N.println(a + "=" + b));
         N.println(Strings.repeat("=", 80));
@@ -77,7 +76,7 @@ public class IteratorTest extends TestBase {
 
     @Test
     public void test_BiIterator() {
-        Map<Integer, String> map = CommonUtil.toMap(Stream.range(1, 10).toList(), Fn.identity(), v -> v + ": aaa", IntFunctions.ofLinkedHashMap());
+        Map<Integer, String> map = N.toMap(Stream.range(1, 10).toList(), Fn.identity(), v -> v + ": aaa", IntFunctions.ofLinkedHashMap());
 
         BiIterator.of(map).toSet().forEach(Fn.println());
 

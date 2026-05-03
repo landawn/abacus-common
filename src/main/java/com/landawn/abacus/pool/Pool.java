@@ -40,65 +40,65 @@ public interface Pool extends Serializable, AutoCloseable {
 
     /**
      * Returns the maximum capacity of this pool.
-     * 
+     *
      * <p>The capacity represents the maximum number of objects that can be
      * stored in the pool at any given time. Attempting to add objects beyond
      * this capacity may fail or trigger balancing operations depending on
      * the pool configuration.
-     * 
+     *
      * @return the maximum number of objects this pool can hold
      */
     int capacity();
 
     /**
      * Returns the current number of objects in this pool.
-     * 
+     *
      * <p>The size may change between the time this method returns and when
      * the returned value is used, as other threads may be concurrently
      * adding or removing objects.
-     * 
+     *
      * @return the current number of objects in the pool
      */
     int size();
 
     /**
      * Checks whether this pool is empty.
-     * 
+     *
      * <p>This is a convenience method equivalent to {@code size() == 0}.
-     * 
+     *
      * @return {@code true} if the pool contains no objects, {@code false} otherwise
      */
     boolean isEmpty();
 
     /**
      * Removes a portion of objects from the pool to free up space.
-     * 
+     *
      * <p>This method is typically called when the pool is full and auto-balancing
      * is enabled. The number of objects removed is determined by the pool's
      * balance factor configuration. Objects are selected for removal based on
      * the pool's eviction policy.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (pool.size() >= pool.capacity() * 0.9) {
      *     pool.evict();   // free up some space
      * }
      * }</pre>
-     * 
+     *
      * @throws IllegalStateException if the pool has been closed
      */
     void evict();
 
     /**
      * Removes all objects from this pool.
-     * 
+     *
      * <p>All pooled objects will be destroyed according to their cleanup logic.
      * After this method returns, the pool will be empty but still usable for
      * storing new objects.
-     * 
+     *
      * <p>This method differs from {@link #close()} in that the pool remains
      * open and operational after clearing.
-     * 
+     *
      * @throws IllegalStateException if the pool has been closed
      */
     void clear();
@@ -129,7 +129,7 @@ public interface Pool extends Serializable, AutoCloseable {
 
     /**
      * Closes this pool and releases all resources.
-     * 
+     *
      * <p>This method performs the following actions:
      * <ul>
      *   <li>Cancels any scheduled eviction tasks</li>
@@ -137,12 +137,12 @@ public interface Pool extends Serializable, AutoCloseable {
      *   <li>Marks the pool as closed</li>
      *   <li>Releases any other resources held by the pool</li>
      * </ul>
-     * 
+     *
      * <p>After calling this method, any attempt to use the pool will result in
      * an {@link IllegalStateException}. A closed pool cannot be reopened.
-     * 
+     *
      * <p>This method is idempotent - calling it multiple times has no additional effect.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
@@ -157,10 +157,10 @@ public interface Pool extends Serializable, AutoCloseable {
 
     /**
      * Checks whether this pool has been closed.
-     * 
+     *
      * <p>Once a pool is closed via {@link #close()}, it cannot be reopened
      * and this method will always return {@code true}.
-     * 
+     *
      * @return {@code true} if the pool has been closed, {@code false} otherwise
      */
     boolean isClosed();

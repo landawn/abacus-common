@@ -349,43 +349,83 @@ public class ByteStreamTest extends TestBase {
     @Test
     public void testFlatmap() {
         ByteStream stream = ByteStream.of((byte) 1, (byte) 2);
-        assertArrayEquals(new byte[] { 1, 10, 2, 20 }, stream.flatmap(b -> new byte[] { b, (byte) (b * 10) }).toArray());
+        assertArrayEquals(new byte[] { 1, 10, 2, 20 }, stream.flatMapArray(b -> new byte[] { b, (byte) (b * 10) }).toArray());
 
         ByteStream stream2 = ByteStream.of((byte) 1, (byte) 2);
-        assertEquals(2, stream2.flatmap(b -> new byte[] { b }).count());
+        assertEquals(2, stream2.flatMapArray(b -> new byte[] { b }).count());
+    }
+
+    @Test
+    public void testFlatmapCollection() {
+        // multi-element happy path
+        assertArrayEquals(new byte[] { 1, 10, 2, 20 }, createByteStream((byte) 1, (byte) 2).flatmap(b -> Arrays.asList((Byte) b, (byte) (b * 10))).toArray());
+
+        // single element
+        assertArrayEquals(new byte[] { 7, 8 }, createByteStream((byte) 7).flatmap(b -> Arrays.asList((Byte) b, (byte) 8)).toArray());
+
+        // empty stream
+        assertArrayEquals(new byte[] {}, createByteStream(new byte[] {}).flatmap(b -> Arrays.asList((Byte) b)).toArray());
+
+        // empty collection from mapper - element contributes nothing
+        assertArrayEquals(new byte[] {}, createByteStream((byte) 1, (byte) 2).flatmap(b -> java.util.Collections.<Byte> emptyList()).toArray());
+
+        // null collection from mapper - treated as empty (matches Stream.flatmap)
+        assertArrayEquals(new byte[] {}, createByteStream((byte) 1, (byte) 2).flatmap(b -> (Collection<Byte>) null).toArray());
+
+        // collection with all null elements -> all become (byte) 0
+        assertArrayEquals(new byte[] { 0, 0 }, createByteStream((byte) 1).flatmap(b -> Arrays.asList((Byte) null, (Byte) null)).toArray());
+
+        // collection mixing nulls and real values
+        assertArrayEquals(new byte[] { 0, 5, 0 }, createByteStream((byte) 1).flatmap(b -> Arrays.asList((Byte) null, (byte) 5, (Byte) null)).toArray());
+
+        // count with nulls included
+        assertEquals(4, createByteStream((byte) 1, (byte) 2).flatmap(b -> Arrays.asList((Byte) null, b)).count());
     }
 
     @Test
     public void testFlatmapByteArray() {
         byteStream = createByteStream(new byte[] { 1, 2 });
-        List<Byte> result = byteStream.flatmap(b -> new byte[] { b, (byte) (b * 10) }).toList();
+        List<Byte> result = byteStream.flatMapArray(b -> new byte[] { b, (byte) (b * 10) }).toList();
         assertEquals(Arrays.asList((byte) 1, (byte) 10, (byte) 2, (byte) 20), result);
     }
 
     @Test
     public void testFlatmapArray() {
-        assertEquals(10, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatmap(e -> new byte[] { e, (byte) (e * 2) }).count());
-        assertEquals(9, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatmap(e -> new byte[] { e, (byte) (e * 2) }).skip(1).count());
+        assertEquals(10, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapArray(e -> new byte[] { e, (byte) (e * 2) }).count());
+        assertEquals(9, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapArray(e -> new byte[] { e, (byte) (e * 2) }).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 2, 4, 3, 6, 4, 8, 5, 10 },
-                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatmap(e -> new byte[] { e, (byte) (e * 2) }).toArray());
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapArray(e -> new byte[] { e, (byte) (e * 2) }).toArray());
         assertArrayEquals(new byte[] { 2, 2, 4, 3, 6, 4, 8, 5, 10 },
-                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatmap(e -> new byte[] { e, (byte) (e * 2) }).skip(1).toArray());
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapArray(e -> new byte[] { e, (byte) (e * 2) }).skip(1).toArray());
         assertEquals(N.toList((byte) 1, (byte) 2, (byte) 2, (byte) 4, (byte) 3, (byte) 6, (byte) 4, (byte) 8, (byte) 5, (byte) 10),
-                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatmap(e -> new byte[] { e, (byte) (e * 2) }).toList());
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapArray(e -> new byte[] { e, (byte) (e * 2) }).toList());
         assertEquals(N.toList((byte) 2, (byte) 2, (byte) 4, (byte) 3, (byte) 6, (byte) 4, (byte) 8, (byte) 5, (byte) 10),
-                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatmap(e -> new byte[] { e, (byte) (e * 2) }).skip(1).toList());
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapArray(e -> new byte[] { e, (byte) (e * 2) }).skip(1).toList());
 
-        assertEquals(10, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatmap(e -> new byte[] { e, (byte) (e * 2) }).count());
+        assertEquals(10,
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMapArray(e -> new byte[] { e, (byte) (e * 2) }).count());
         assertEquals(9,
-                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatmap(e -> new byte[] { e, (byte) (e * 2) }).skip(1).count());
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)
+                        .map(e -> e)
+                        .flatMapArray(e -> new byte[] { e, (byte) (e * 2) })
+                        .skip(1)
+                        .count());
         assertArrayEquals(new byte[] { 1, 2, 2, 4, 3, 6, 4, 8, 5, 10 },
-                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatmap(e -> new byte[] { e, (byte) (e * 2) }).toArray());
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMapArray(e -> new byte[] { e, (byte) (e * 2) }).toArray());
         assertArrayEquals(new byte[] { 2, 2, 4, 3, 6, 4, 8, 5, 10 },
-                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatmap(e -> new byte[] { e, (byte) (e * 2) }).skip(1).toArray());
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)
+                        .map(e -> e)
+                        .flatMapArray(e -> new byte[] { e, (byte) (e * 2) })
+                        .skip(1)
+                        .toArray());
         assertEquals(N.toList((byte) 1, (byte) 2, (byte) 2, (byte) 4, (byte) 3, (byte) 6, (byte) 4, (byte) 8, (byte) 5, (byte) 10),
-                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatmap(e -> new byte[] { e, (byte) (e * 2) }).toList());
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMapArray(e -> new byte[] { e, (byte) (e * 2) }).toList());
         assertEquals(N.toList((byte) 2, (byte) 2, (byte) 4, (byte) 3, (byte) 6, (byte) 4, (byte) 8, (byte) 5, (byte) 10),
-                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatmap(e -> new byte[] { e, (byte) (e * 2) }).skip(1).toList());
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)
+                        .map(e -> e)
+                        .flatMapArray(e -> new byte[] { e, (byte) (e * 2) })
+                        .skip(1)
+                        .toList());
     }
 
     @Test

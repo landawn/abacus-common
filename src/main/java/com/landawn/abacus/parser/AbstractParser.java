@@ -59,9 +59,9 @@ import com.landawn.abacus.util.ImmutableSortedMap;
 import com.landawn.abacus.util.ImmutableSortedSet;
 import com.landawn.abacus.util.MapEntity;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple2;
-import com.landawn.abacus.util.SK;
 
 /**
  * Abstract base class providing common functionality for parser implementations.
@@ -358,8 +358,9 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      *   <li>If type class is assignable to target class, use type class (more specific)</li>
      *   <li>Otherwise, use target class (type class is incompatible)</li>
      * </ul>
+     *
      * @param typeClass the type class from serialized type information (may be {@code null})
-     * @param targetClass the target class from the deserialization context (may be {@code null}) 
+     * @param targetClass the target class from the deserialization context (may be {@code null})
      * @return the concrete class to instantiate
      */
     protected static Class<?> getConcreteClass(final Class<?> typeClass, final Class<?> targetClass) {
@@ -455,13 +456,27 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     }
 
     /**
-     * Checks if an object has already been serialized (circular reference detection).
-     * 
-     * @param obj the object to check
-     * @param serializedObjects set of already serialized objects
-     * @param config the serialization configuration
-     * @param bw the character writer (currently unused)
-     * @return {@code true} if circular reference was found and handled, {@code false} otherwise
+     * Checks whether the given object creates a circular reference in the serialization graph.
+     *
+     * <p>If a circular reference is detected and the configuration does not enable
+     * {@link JsonXmlSerConfig#isSupportCircularReference() supportCircularReference},
+     * a {@link ParsingException} is thrown. When circular-reference support is enabled, this
+     * method returns {@code true} so the caller can skip re-serializing the object (typically
+     * by writing {@code null} in its place).</p>
+     *
+     * <p>Only bean, map, collection, object-array, and {@code MapEntity} objects are tracked;
+     * primitive wrappers and simple value types are never considered circular.</p>
+     *
+     * @param obj the object currently being serialized; may be {@code null} (returns {@code false})
+     * @param serializedObjects the set of objects already visited on the current serialization path;
+     *        may be {@code null}, in which case no tracking is performed
+     * @param config the serialization configuration used to determine whether circular references
+     *        are permitted; may be {@code null}
+     * @param bw the character writer for the current serialization output (currently unused)
+     * @return {@code true} if {@code obj} was already encountered (circular reference detected and
+     *         allowed by config), {@code false} otherwise
+     * @throws ParsingException if a circular reference is detected and
+     *         {@code config.isSupportCircularReference()} is {@code false}
      */
     protected static boolean hasCircularReference(final Object obj, final IdentityHashSet<Object> serializedObjects, final JsonXmlSerConfig<?> config,
             @SuppressWarnings("unused") final CharacterWriter bw) {

@@ -48,8 +48,8 @@ public class StreamTest extends AbstractTest {
     @Test
     public void test_groupJoin() {
 
-        final List<String> c = CommonUtil.toList("aa", "ab", "bc");
-        final List<String> b = CommonUtil.toList("aa", "ab", "cc");
+        final List<String> c = N.toList("aa", "ab", "bc");
+        final List<String> b = N.toList("aa", "ab", "cc");
 
         Stream.of(c).groupJoin(b, it -> it.charAt(0)).foreach(Fn.println());
 
@@ -60,23 +60,23 @@ public class StreamTest extends AbstractTest {
     @Test
     public void test_partitionTo() {
         N.println(Strings.repeat("=", 80));
-        CommonUtil.emptyList().stream().collect(Collectors.partitioningBy(it -> it != null)).forEach(Fn.println("="));
+        N.emptyList().stream().collect(Collectors.partitioningBy(it -> it != null)).forEach(Fn.println("="));
 
         N.println(Strings.repeat("=", 80));
-        CommonUtil.emptyList().stream().collect(java.util.stream.Collectors.partitioningBy(it -> it != null)).forEach(Fn.println("="));
+        N.emptyList().stream().collect(java.util.stream.Collectors.partitioningBy(it -> it != null)).forEach(Fn.println("="));
 
         N.println(Strings.repeat("=", 80));
-        Stream.of(CommonUtil.emptyList()).collect(Collectors.partitioningBy(it -> it != null)).forEach(Fn.println("="));
+        Stream.of(N.emptyList()).collect(Collectors.partitioningBy(it -> it != null)).forEach(Fn.println("="));
 
         N.println(Strings.repeat("=", 80));
-        Stream.of(CommonUtil.emptyList()).collect(java.util.stream.Collectors.partitioningBy(it -> it != null)).forEach(Fn.println("="));
+        Stream.of(N.emptyList()).collect(java.util.stream.Collectors.partitioningBy(it -> it != null)).forEach(Fn.println("="));
 
         N.println(Strings.repeat("=", 80));
-        Stream.of(CommonUtil.emptyList()).partitionTo(it -> it != null).forEach(Fn.println("="));
+        Stream.of(N.emptyList()).partitionTo(it -> it != null).forEach(Fn.println("="));
 
-        assertEquals(2, Stream.of(CommonUtil.emptyList()).partitionTo(it -> it != null).size());
+        assertEquals(2, Stream.of(N.emptyList()).partitionTo(it -> it != null).size());
 
-        assertEquals(2, Stream.of(CommonUtil.emptyList()).partitionBy(it -> it != null).count());
+        assertEquals(2, Stream.of(N.emptyList()).partitionBy(it -> it != null).count());
     }
 
     @Test
@@ -509,13 +509,13 @@ public class StreamTest extends AbstractTest {
     @Test
     public void test_skipRange() {
         List<Integer> ret = Stream.range(0, 7).skipRange(0, 3).toList();
-        assertEquals(ret, CommonUtil.toList(3, 4, 5, 6));
+        assertEquals(ret, N.toList(3, 4, 5, 6));
 
         ret = Stream.range(0, 7).skipRange(5, 5).toList();
-        assertEquals(ret, CommonUtil.toList(0, 1, 2, 3, 4, 5, 6));
+        assertEquals(ret, N.toList(0, 1, 2, 3, 4, 5, 6));
 
         ret = Stream.range(0, 7).skipRange(3, 6).toList();
-        assertEquals(ret, CommonUtil.toList(0, 1, 2, 6));
+        assertEquals(ret, N.toList(0, 1, 2, 6));
     }
 
     @Test
@@ -629,32 +629,32 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void test_min_max_all() throws Exception {
-        assertEquals(CommonUtil.toList(10, 10), Stream.of(1, 10, 9, 10, 2, 1).maxAll(Comparators.naturalOrder()));
-        assertEquals(CommonUtil.toList(10, 10), Stream.of(1, 10, 9, 10, 2, 1).sorted().maxAll(Comparators.naturalOrder()));
-        assertEquals(CommonUtil.toList(1, 1), Stream.of(1, 10, 9, 10, 2, 1).minAll(Comparators.naturalOrder()));
-        assertEquals(CommonUtil.toList(1, 1), Stream.of(1, 10, 9, 10, 2, 1).sorted().minAll(Comparators.naturalOrder()));
+        assertEquals(N.toList(10, 10), Stream.of(1, 10, 9, 10, 2, 1).maxAll(Comparators.naturalOrder()));
+        assertEquals(N.toList(10, 10), Stream.of(1, 10, 9, 10, 2, 1).sorted().maxAll(Comparators.naturalOrder()));
+        assertEquals(N.toList(1, 1), Stream.of(1, 10, 9, 10, 2, 1).minAll(Comparators.naturalOrder()));
+        assertEquals(N.toList(1, 1), Stream.of(1, 10, 9, 10, 2, 1).sorted().minAll(Comparators.naturalOrder()));
     }
 
     @Test
     public void test_Fn_notEmptyOrNull() throws Exception {
         assertDoesNotThrow(() -> {
-            Stream.just(CommonUtil.asArray(Dates.currentCalendar())).filter(Fn.notEmptyArray()).forEach(Fn.println());
-            Stream.just(CommonUtil.toList(Dates.currentDate())).filter(Fn.notEmptyCollection()).forEach(Fn.println());
-            Stream.just(CommonUtil.asMap("key", Dates.currentDate())).filter(Fn.notEmptyMap()).forEach(Fn.println());
+            Stream.just(N.asArray(Dates.currentCalendar())).filter(Fn.notEmptyArray()).forEach(Fn.println());
+            Stream.just(N.toList(Dates.currentDate())).filter(Fn.notEmptyCollection()).forEach(Fn.println());
+            Stream.just(N.asMap("key", Dates.currentDate())).filter(Fn.notEmptyMap()).forEach(Fn.println());
 
-            Stream.just(CommonUtil.asArray(Dates.currentCalendar())).filter(Fn.isEmptyArray()).forEach(Fn.println());
-            Stream.just(CommonUtil.toList(Dates.currentDate())).filter(Fn.isEmptyCollection()).forEach(Fn.println());
-            Stream.just(CommonUtil.asMap("key", Dates.currentDate())).filter(Fn.isEmptyMap()).forEach(Fn.println());
+            Stream.just(N.asArray(Dates.currentCalendar())).filter(Fn.isEmptyArray()).forEach(Fn.println());
+            Stream.just(N.toList(Dates.currentDate())).filter(Fn.isEmptyCollection()).forEach(Fn.println());
+            Stream.just(N.asMap("key", Dates.currentDate())).filter(Fn.isEmptyMap()).forEach(Fn.println());
 
             N.println(Strings.repeat('=', 80));
 
-            Seq.just(CommonUtil.asArray(Dates.currentCalendar())).filter(Fnn.notEmptyArray()).forEach(Fn.println());
-            Seq.just(CommonUtil.toList(Dates.currentDate())).filter(Fnn.notEmptyCollection()).forEach(Fn.println());
-            Seq.just(CommonUtil.asMap("key", Dates.currentDate())).filter(Fnn.notEmptyMap()).forEach(Fn.println());
+            Seq.just(N.asArray(Dates.currentCalendar())).filter(Fnn.notEmptyArray()).forEach(Fn.println());
+            Seq.just(N.toList(Dates.currentDate())).filter(Fnn.notEmptyCollection()).forEach(Fn.println());
+            Seq.just(N.asMap("key", Dates.currentDate())).filter(Fnn.notEmptyMap()).forEach(Fn.println());
 
-            Seq.just(CommonUtil.asArray(Dates.currentCalendar())).filter(Fnn.isEmptyArray()).forEach(Fn.println());
-            Seq.just(CommonUtil.toList(Dates.currentDate())).filter(Fnn.isEmptyCollection()).forEach(Fn.println());
-            Seq.just(CommonUtil.asMap("key", Dates.currentDate())).filter(Fnn.isEmptyMap()).forEach(Fn.println());
+            Seq.just(N.asArray(Dates.currentCalendar())).filter(Fnn.isEmptyArray()).forEach(Fn.println());
+            Seq.just(N.toList(Dates.currentDate())).filter(Fnn.isEmptyCollection()).forEach(Fn.println());
+            Seq.just(N.asMap("key", Dates.currentDate())).filter(Fnn.isEmptyMap()).forEach(Fn.println());
         });
     }
 
@@ -768,19 +768,19 @@ public class StreamTest extends AbstractTest {
     @Test
     public void test_performance_comparasion() throws Exception {
         long startTime = System.currentTimeMillis();
-        CommonUtil.toList(Array.range(1, 1000)).stream().parallel().map(Fn.identity()).peek(Fn.sleep(10)).filter(Fn.alwaysTrue()).count();
+        N.toList(Array.range(1, 1000)).stream().parallel().map(Fn.identity()).peek(Fn.sleep(10)).filter(Fn.alwaysTrue()).count();
         N.println("java stream took: " + (System.currentTimeMillis() - startTime));
 
         startTime = System.currentTimeMillis();
-        CommonUtil.toList(Array.range(1, 1000)).stream().map(Fn.identity()).parallel().peek(Fn.sleep(10)).filter(Fn.alwaysTrue()).count();
+        N.toList(Array.range(1, 1000)).stream().map(Fn.identity()).parallel().peek(Fn.sleep(10)).filter(Fn.alwaysTrue()).count();
         N.println("java stream took: " + (System.currentTimeMillis() - startTime));
 
         startTime = System.currentTimeMillis();
-        Stream.of(CommonUtil.toList(Array.range(1, 1000))).parallel(64).map(Fn.identity()).peek(Fn.sleep(10)).filter(Fn.alwaysTrue()).count();
+        Stream.of(N.toList(Array.range(1, 1000))).parallel(64).map(Fn.identity()).peek(Fn.sleep(10)).filter(Fn.alwaysTrue()).count();
         N.println("abacus stream took: " + (System.currentTimeMillis() - startTime));
 
         startTime = System.currentTimeMillis();
-        Stream.of(CommonUtil.toList(Array.range(1, 1000))).map(Fn.identity()).sps(64, ss -> ss.peek(Fn.sleep(10))).filter(Fn.alwaysTrue()).count();
+        Stream.of(N.toList(Array.range(1, 1000))).map(Fn.identity()).sps(64, ss -> ss.peek(Fn.sleep(10))).filter(Fn.alwaysTrue()).count();
         N.println("abacus stream took: " + (System.currentTimeMillis() - startTime));
         assertNotNull(startTime);
     }
@@ -963,7 +963,7 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void test_map() {
-        final Map<String, Integer> map = CommonUtil.asMap("a", 1, "b", 2);
+        final Map<String, Integer> map = N.asMap("a", 1, "b", 2);
         final long count = Stream.of(map).filter(it -> Strings.isNotEmpty(it.getKey())).map(Fn.value()).mapToInt(ToIntFunction.UNBOX).count();
         N.println(count);
         assertNotNull(count);
@@ -971,9 +971,9 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void test_intersection() {
-        final List<String> list = Stream.of("a", "b", "C", "d", "b", "d").intersection(CommonUtil.toList("b", "b", "d")).toList();
+        final List<String> list = Stream.of("a", "b", "C", "d", "b", "d").intersection(N.toList("b", "b", "d")).toList();
         N.println(list);
-        assertEquals(list, CommonUtil.toList("b", "d", "b"));
+        assertEquals(list, N.toList("b", "d", "b"));
 
         IntList a = IntList.of(0, 1, 2, 2, 3);
         IntList b = IntList.of(2, 5, 1);
@@ -993,36 +993,36 @@ public class StreamTest extends AbstractTest {
 
         N.println(c);
 
-        Dataset ds1 = CommonUtil.newDataset(CommonUtil.toList("c1", "c2"),
-                CommonUtil.toList(CommonUtil.toList(1, 1), CommonUtil.toList(2, 2), CommonUtil.toList(3, 3), CommonUtil.toList(2, 2)));
-        Dataset ds2 = CommonUtil.newDataset(CommonUtil.toList("c1", "c2"),
-                CommonUtil.toList(CommonUtil.toList(2, 2), CommonUtil.toList(3, 3), CommonUtil.toList(2, 2)));
+        Dataset ds1 = N.newDataset(N.toList("c1", "c2"),
+                N.toList(N.toList(1, 1), N.toList(2, 2), N.toList(3, 3), N.toList(2, 2)));
+        Dataset ds2 = N.newDataset(N.toList("c1", "c2"),
+                N.toList(N.toList(2, 2), N.toList(3, 3), N.toList(2, 2)));
         Dataset ds3 = ds1.intersectAll(ds2);
         ds3.println();
 
-        ds2 = CommonUtil.newDataset(CommonUtil.toList("c1", "c2"), CommonUtil.toList(CommonUtil.toList(3, 3), CommonUtil.toList(2, 2)));
+        ds2 = N.newDataset(N.toList("c1", "c2"), N.toList(N.toList(3, 3), N.toList(2, 2)));
         ds3 = ds1.intersectAll(ds2);
         ds3.println();
 
         N.println(Strings.repeat('=', 80));
 
-        ds1 = CommonUtil.newDataset(CommonUtil.toList("c1", "c2"),
-                CommonUtil.toList(CommonUtil.toList(1, 1), CommonUtil.toList(2, 2), CommonUtil.toList(3, 3), CommonUtil.toList(2, 2)));
-        ds2 = CommonUtil.newDataset(CommonUtil.toList("c1", "c2"),
-                CommonUtil.toList(CommonUtil.toList(2, 2), CommonUtil.toList(3, 3), CommonUtil.toList(2, 2)));
+        ds1 = N.newDataset(N.toList("c1", "c2"),
+                N.toList(N.toList(1, 1), N.toList(2, 2), N.toList(3, 3), N.toList(2, 2)));
+        ds2 = N.newDataset(N.toList("c1", "c2"),
+                N.toList(N.toList(2, 2), N.toList(3, 3), N.toList(2, 2)));
         ds3 = N.intersection(ds1, ds2);
         ds3.println();
 
-        ds2 = CommonUtil.newDataset(CommonUtil.toList("c1", "c2"), CommonUtil.toList(CommonUtil.toList(3, 3), CommonUtil.toList(2, 2)));
+        ds2 = N.newDataset(N.toList("c1", "c2"), N.toList(N.toList(3, 3), N.toList(2, 2)));
         ds3 = N.intersection(ds1, ds2);
         ds3.println();
 
         N.println(Strings.repeat('=', 80));
 
-        ds1 = CommonUtil.newDataset(CommonUtil.toList("c1", "c2"),
-                CommonUtil.toList(CommonUtil.toList(1, 1), CommonUtil.toList(2, 2), CommonUtil.toList(3, 3), CommonUtil.toList(2, 2)));
-        ds2 = CommonUtil.newDataset(CommonUtil.toList("c1", "c2"),
-                CommonUtil.toList(CommonUtil.toList(2, 2), CommonUtil.toList(3, 3), CommonUtil.toList(2, 2)));
+        ds1 = N.newDataset(N.toList("c1", "c2"),
+                N.toList(N.toList(1, 1), N.toList(2, 2), N.toList(3, 3), N.toList(2, 2)));
+        ds2 = N.newDataset(N.toList("c1", "c2"),
+                N.toList(N.toList(2, 2), N.toList(3, 3), N.toList(2, 2)));
         ds3 = ds1.intersect(ds2);
         ds3.println();
 
@@ -1087,7 +1087,7 @@ public class StreamTest extends AbstractTest {
         N.println(a);
 
         Stream.of(IntStream.random(0, 10).distinct().limit(3).toList())
-                .flatmapToByte(i -> Array.repeat(i.byteValue(), i.intValue()))
+                .flatMapArrayToByte(i -> Array.repeat(i.byteValue(), i.intValue()))
                 .boxed()
                 .countBy(Fn.identity())
                 .peek(it -> assertEquals(it.getKey().intValue(), it.getValue().intValue()))
@@ -1099,7 +1099,7 @@ public class StreamTest extends AbstractTest {
                 .distinct()
                 .limit(3)
                 .boxed()
-                .flatmapToByte(i -> Array.repeat(i.byteValue(), i.intValue()))
+                .flatMapArrayToByte(i -> Array.repeat(i.byteValue(), i.intValue()))
                 .boxed()
                 .countBy(Fn.identity())
                 .peek(it -> assertEquals(it.getKey().intValue(), it.getValue().intValue()))
@@ -1109,7 +1109,7 @@ public class StreamTest extends AbstractTest {
 
         Stream.of(IntStream.random(0, 10).distinct().limit(3).toList())
                 .parallel(3)
-                .flatmapToByte(i -> Array.repeat(i.byteValue(), i.intValue()))
+                .flatMapArrayToByte(i -> Array.repeat(i.byteValue(), i.intValue()))
                 .boxed()
                 .countBy(Fn.identity())
                 .peek(it -> assertEquals(it.getKey().intValue(), it.getValue().intValue()))
@@ -1122,7 +1122,7 @@ public class StreamTest extends AbstractTest {
                 .limit(3)
                 .boxed()
                 .parallel(3)
-                .flatmapToByte(i -> Array.repeat(i.byteValue(), i.intValue()))
+                .flatMapArrayToByte(i -> Array.repeat(i.byteValue(), i.intValue()))
                 .boxed()
                 .countBy(Fn.identity())
                 .peek(it -> assertEquals(it.getKey().intValue(), it.getValue().intValue()))
@@ -1140,7 +1140,7 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void test_parallelConcat() {
-        final List<Iterator<Integer>> iters = IntStream.range(0, 64).mapToObj(it -> CommonUtil.toList(it).iterator()).toList();
+        final List<Iterator<Integer>> iters = IntStream.range(0, 64).mapToObj(it -> N.toList(it).iterator()).toList();
 
         N.println(Stream.parallelConcatIterators(iters).sumInt(Integer::intValue));
         assertNotNull(iters);
@@ -1178,19 +1178,19 @@ public class StreamTest extends AbstractTest {
     @Test
     public void test_rollup() {
         assertDoesNotThrow(() -> {
-            Iterables.rollup(CommonUtil.toList(1, 2, 3)).forEach(Fn.println());
+            Iterables.rollup(N.toList(1, 2, 3)).forEach(Fn.println());
             N.println(Strings.repeat("=", 80));
-            Iterables.rollup(CommonUtil.<String> emptyList()).forEach(Fn.println());
+            Iterables.rollup(N.<String> emptyList()).forEach(Fn.println());
 
             N.println(Strings.repeat("=", 80));
 
-            Stream.of(CommonUtil.<String> emptyList()).rollup().forEach(Fn.println());
-            Stream.of(CommonUtil.<String> emptyList()).rollup().skip(10).forEach(Fn.println());
+            Stream.of(N.<String> emptyList()).rollup().forEach(Fn.println());
+            Stream.of(N.<String> emptyList()).rollup().skip(10).forEach(Fn.println());
 
             N.println(Strings.repeat("=", 80));
-            Stream.of(CommonUtil.toList(1, 2, 3)).rollup().forEach(Fn.println());
-            Stream.of(CommonUtil.toList(1, 2, 3)).rollup().skip(2).forEach(Fn.println());
-            Stream.of(CommonUtil.<String> emptyList()).rollup().skip(3).limit(1).forEach(Fn.println());
+            Stream.of(N.toList(1, 2, 3)).rollup().forEach(Fn.println());
+            Stream.of(N.toList(1, 2, 3)).rollup().skip(2).forEach(Fn.println());
+            Stream.of(N.<String> emptyList()).rollup().skip(3).limit(1).forEach(Fn.println());
         });
     }
 
@@ -1229,43 +1229,43 @@ public class StreamTest extends AbstractTest {
     @Test
     public void test_cycled2() {
         assertDoesNotThrow(() -> {
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled().limit(0).println();
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled().limit(1).println();
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled().limit(2).println();
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled().limit(3).println();
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled().limit(4).println();
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled().limit(5).println();
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled().limit(6).println();
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled().limit(7).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled().limit(0).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled().limit(1).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled().limit(2).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled().limit(3).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled().limit(4).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled().limit(5).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled().limit(6).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled().limit(7).println();
 
             N.println(Strings.repeat("=", 80));
 
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(0).limit(0).println();
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(0).limit(1).println();
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(0).limit(2).println();
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(0).limit(3).println();
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(0).limit(4).println();
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(0).limit(5).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled(0).limit(0).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled(0).limit(1).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled(0).limit(2).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled(0).limit(3).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled(0).limit(4).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled(0).limit(5).println();
 
             N.println(Strings.repeat("=", 80));
 
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(1).limit(0).println();
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(1).limit(1).println();
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(1).limit(2).println();
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(1).limit(3).println();
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(1).limit(4).println();
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(1).limit(5).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled(1).limit(0).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled(1).limit(1).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled(1).limit(2).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled(1).limit(3).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled(1).limit(4).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled(1).limit(5).println();
 
             N.println(Strings.repeat("=", 80));
 
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(10).limit(0).println();
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(10).limit(1).println();
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(10).limit(2).println();
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(10).limit(3).println();
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(10).limit(4).println();
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(10).limit(5).println();
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(10).limit(6).println();
-            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(10).limit(7).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled(10).limit(0).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled(10).limit(1).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled(10).limit(2).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled(10).limit(3).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled(10).limit(4).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled(10).limit(5).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled(10).limit(6).println();
+            Stream.of(N.asArray(1, 2, 3)).cycled(10).limit(7).println();
         });
     }
 
@@ -1342,16 +1342,16 @@ public class StreamTest extends AbstractTest {
     @Test
     public void test_cartesianProduct() {
         assertDoesNotThrow(() -> {
-            Stream.of("1").cartesianProduct(CommonUtil.toList("a", "b")).forEach(Fn.println());
+            Stream.of("1").cartesianProduct(N.toList("a", "b")).forEach(Fn.println());
 
             N.println("===================================================");
-            Stream.of("1", "2").cartesianProduct(CommonUtil.toList("a", "b")).forEach(Fn.println());
+            Stream.of("1", "2").cartesianProduct(N.toList("a", "b")).forEach(Fn.println());
 
             N.println("===================================================");
-            Stream.of("1", "2", "3").cartesianProduct(CommonUtil.toList("a", "b")).forEach(Fn.println());
+            Stream.of("1", "2", "3").cartesianProduct(N.toList("a", "b")).forEach(Fn.println());
 
             N.println("===================================================");
-            Stream.of("1", "2", "3").cartesianProduct(CommonUtil.toList("a")).forEach(Fn.println());
+            Stream.of("1", "2", "3").cartesianProduct(N.toList("a")).forEach(Fn.println());
         });
     }
 
@@ -1392,9 +1392,9 @@ public class StreamTest extends AbstractTest {
 
                 for (int k = -97; k < 97; k++) {
                     final byte[] tmp = a.clone();
-                    CommonUtil.rotate(tmp, k);
+                    N.rotate(tmp, k);
 
-                    assertTrue(CommonUtil.equals(tmp, ByteStream.range((byte) j, (byte) i).rotated(k).toArray()));
+                    assertTrue(N.equals(tmp, ByteStream.range((byte) j, (byte) i).rotated(k).toArray()));
                 }
             }
         }
@@ -1428,31 +1428,31 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void test_join() {
-        final List<String[]> a = CommonUtil.toList(CommonUtil.asArray("a", "1"), CommonUtil.asArray("b", "2"), CommonUtil.asArray("c", "3"));
-        final List<String[]> b = CommonUtil.toList(CommonUtil.asArray("3", "d"), CommonUtil.asArray("2", "e"), CommonUtil.asArray("2", "f"),
-                CommonUtil.asArray("4", "f"));
+        final List<String[]> a = N.toList(N.asArray("a", "1"), N.asArray("b", "2"), N.asArray("c", "3"));
+        final List<String[]> b = N.toList(N.asArray("3", "d"), N.asArray("2", "e"), N.asArray("2", "f"),
+                N.asArray("4", "f"));
 
-        Stream.of(a).innerJoin(b, (BiPredicate<String[], String[]>) (t, u) -> CommonUtil.equals(t[1], u[0])).println();
-
-        N.println(Strings.repeat("=", 80));
-
-        Stream.of(a).fullJoin(b, (BiPredicate<String[], String[]>) (t, u) -> CommonUtil.equals(t[1], u[0])).println();
+        Stream.of(a).innerJoin(b, (BiPredicate<String[], String[]>) (t, u) -> N.equals(t[1], u[0])).println();
 
         N.println(Strings.repeat("=", 80));
 
-        Stream.of(a).leftJoin(b, (BiPredicate<String[], String[]>) (t, u) -> CommonUtil.equals(t[1], u[0])).println();
+        Stream.of(a).fullJoin(b, (BiPredicate<String[], String[]>) (t, u) -> N.equals(t[1], u[0])).println();
 
         N.println(Strings.repeat("=", 80));
 
-        Stream.of(a).rightJoin(b, (BiPredicate<String[], String[]>) (t, u) -> CommonUtil.equals(t[1], u[0])).println();
+        Stream.of(a).leftJoin(b, (BiPredicate<String[], String[]>) (t, u) -> N.equals(t[1], u[0])).println();
+
+        N.println(Strings.repeat("=", 80));
+
+        Stream.of(a).rightJoin(b, (BiPredicate<String[], String[]>) (t, u) -> N.equals(t[1], u[0])).println();
         assertNotNull(a);
     }
 
     @Test
     public void test_join_2() {
-        final List<String[]> a = CommonUtil.toList(CommonUtil.asArray("a", "1"), CommonUtil.asArray("b", "2"), CommonUtil.asArray("c", "3"));
-        final List<String[]> b = CommonUtil.toList(CommonUtil.asArray("3", "d"), CommonUtil.asArray("2", "e"), CommonUtil.asArray("2", "f"),
-                CommonUtil.asArray("4", "f"));
+        final List<String[]> a = N.toList(N.asArray("a", "1"), N.asArray("b", "2"), N.asArray("c", "3"));
+        final List<String[]> b = N.toList(N.asArray("3", "d"), N.asArray("2", "e"), N.asArray("2", "f"),
+                N.asArray("4", "f"));
 
         Stream.of(a).innerJoin(b, (Function<String[], String>) t -> t[1], (Function<String[], String>) t -> t[0]).println();
 
@@ -1494,19 +1494,19 @@ public class StreamTest extends AbstractTest {
         N.println(IntStream.of(1, 2, 3).reduce(op).get());
 
         final Collector<String, ?, List<String>> collector = Collectors.toList();
-        final List<String> list = Stream.of(CommonUtil.asArray("a", "b", "c")).collect(collector);
+        final List<String> list = Stream.of(N.asArray("a", "b", "c")).collect(collector);
         N.println(list);
 
         final Function<? super String, ? extends String> classifier = t -> "b";
 
         final Collector<String, ?, Map<String, List<String>>> collector2 = Collectors.groupingBy(classifier);
-        final Map<String, List<String>> map = Stream.of(CommonUtil.asArray("a", "b", "c")).collect(collector2);
+        final Map<String, List<String>> map = Stream.of(N.asArray("a", "b", "c")).collect(collector2);
         N.println(map);
 
         final Predicate<? super String> predicate = "b"::equals;
 
         final Collector<String, ?, Map<Boolean, List<String>>> collector3 = Collectors.partitioningBy(predicate);
-        final Map<Boolean, List<String>> map3 = Stream.of(CommonUtil.asArray("a", "b", "c")).collect(collector3);
+        final Map<Boolean, List<String>> map3 = Stream.of(N.asArray("a", "b", "c")).collect(collector3);
         N.println(map3);
     }
 
@@ -1526,7 +1526,7 @@ public class StreamTest extends AbstractTest {
     @Test
     public void test_perf() {
         final String[] strs = new String[1_000];
-        CommonUtil.fill(strs, Strings.uuid());
+        N.fill(strs, Strings.uuid());
 
         final int m = 600;
         final ToLongFunction<String> mapper = str -> {
@@ -1581,7 +1581,7 @@ public class StreamTest extends AbstractTest {
     @Test
     public void test_perf_2() {
         final String[] strs = new String[1_000];
-        CommonUtil.fill(strs, Strings.uuid());
+        N.fill(strs, Strings.uuid());
 
         final Predicate<String> filter = it -> {
             N.sleep(1);
@@ -1622,7 +1622,7 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void test_map_onclose() {
-        final java.util.stream.Stream<Timestamp> s1 = CommonUtil.toList("a", "b")
+        final java.util.stream.Stream<Timestamp> s1 = N.toList("a", "b")
                 .stream()
                 .map(it -> new Timestamp(System.currentTimeMillis()))
                 .onClose(Fn.emptyAction());
@@ -1631,7 +1631,7 @@ public class StreamTest extends AbstractTest {
         final Stream<Timestamp> s2 = Stream.of("a", "b").map(it -> new Timestamp(System.currentTimeMillis())).onClose(Fn.emptyAction());
         s2.forEach(Fn.println());
 
-        final Stream<Timestamp> s3 = Stream.zip(CommonUtil.toList("a", "b"), CommonUtil.toList(1, 2), (a, b) -> new Timestamp(System.currentTimeMillis()))
+        final Stream<Timestamp> s3 = Stream.zip(N.toList("a", "b"), N.toList(1, 2), (a, b) -> new Timestamp(System.currentTimeMillis()))
                 .onClose(Fn.emptyAction());
         s3.forEach(Fn.println());
         assertNotNull(s2);

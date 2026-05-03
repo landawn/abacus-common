@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -64,21 +65,21 @@ public class ImmutableMapTypeTest extends TestBase {
     @Test
     @DisplayName("Test getParameterTypes() returns array with key and value types")
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = immutableMapType.parameterTypes();
+        List<Type<?>> paramTypes = immutableMapType.parameterTypes();
         assertNotNull(paramTypes);
-        assertEquals(2, paramTypes.length);
-        assertNotNull(paramTypes[0]);
-        assertNotNull(paramTypes[1]);
+        assertEquals(2, paramTypes.size());
+        assertNotNull(paramTypes.get(0));
+        assertNotNull(paramTypes.get(1));
     }
 
     @Test
     @DisplayName("Test getParameterTypes() consistency")
     public void testGetParameterTypesConsistency() {
-        Type<?>[] params1 = immutableMapType.parameterTypes();
-        Type<?>[] params2 = immutableMapType.parameterTypes();
+        List<Type<?>> params1 = immutableMapType.parameterTypes();
+        List<Type<?>> params2 = immutableMapType.parameterTypes();
 
         assertSame(params1, params2);
-        assertEquals(params1.length, params2.length);
+        assertEquals(params1.size(), params2.size());
     }
 
     @Test

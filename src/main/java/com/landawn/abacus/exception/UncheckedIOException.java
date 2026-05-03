@@ -25,13 +25,13 @@ import java.io.Serial;
  * <ul>
  *   <li>Lambda expressions and functional interfaces.</li>
  *   <li>Stream operations.</li>
- *   <li>Implementing interfaces that don't declare {@code IOException}.</li>
+ *   <li>Implementing interfaces that do not declare {@code IOException}.</li>
  *   <li>Simplifying exception handling in I/O-heavy code.</li>
  * </ul>
  *
- * <p><strong>Note:</strong> Java 8+ includes its own {@link java.io.UncheckedIOException}.
- * This class predates the Java 8 version and may be retained for backward compatibility
- * or to maintain consistency with other unchecked exceptions in this framework.</p>
+ * <p><strong>Note:</strong> The JDK includes its own {@link java.io.UncheckedIOException} since Java 8.
+ * This class is retained for consistency with the other unchecked wrappers in this framework
+ * and to avoid mixing framework and JDK unchecked I/O exceptions.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -45,15 +45,6 @@ import java.io.Serial;
  *         }
  *     })
  *     .forEach(System.out::println);
- *
- * // In a lambda expression
- * Supplier<String> fileReader = () -> {
- *     try {
- *         return new String(Files.readAllBytes(path));
- *     } catch (IOException e) {
- *         throw new UncheckedIOException(e);
- *     }
- * };
  * }</pre>
  *
  * @see UncheckedException
@@ -66,9 +57,9 @@ public class UncheckedIOException extends UncheckedException {
     private static final long serialVersionUID = -8702336402043331418L;
 
     /**
-     * The wrapped checked I/O exception.
+     * The wrapped {@link IOException} cause.
      *
-     * @serial the wrapped {@link IOException} cause.
+     * @serial
      */
     private final IOException cause;
 

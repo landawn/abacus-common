@@ -23,20 +23,20 @@ import java.lang.annotation.Target;
 
 /**
  * Indicates that fields should be accessed via getter/setter methods rather than direct field access.
- * This annotation is primarily used in serialization/deserialization contexts and reflection-based operations
- * to ensure that field access goes through proper accessor methods, allowing for lazy initialization,
- * validation, or other custom logic.
+ * This annotation is primarily used in serialization/deserialization contexts and reflection-based
+ * operations to ensure that field access goes through proper accessor methods, allowing for lazy
+ * initialization, validation, or other custom logic defined in those methods.
  *
- * <p>When applied to a type (class or interface), all fields within that type will be accessed via their
- * corresponding getter/setter methods. When applied to a specific method or field, only that element's
- * access behavior is affected.</p>
+ * <p>When applied to a type (class or interface), all fields within that type will be accessed via
+ * their corresponding getter/setter methods. When applied to a specific field or method, only that
+ * element's access behavior is affected.</p>
  *
  * <p>This annotation is useful in scenarios where:</p>
  * <ul>
- *   <li>Fields have lazy initialization logic in their getters</li>
- *   <li>Setters perform validation or transformation of values</li>
- *   <li>Direct field access would bypass important business logic</li>
- *   <li>Compatibility with frameworks that require method-based access</li>
+ *   <li>Fields have lazy initialization logic in their getters.</li>
+ *   <li>Setters perform validation or transformation of incoming values.</li>
+ *   <li>Direct field access would bypass important business logic.</li>
+ *   <li>Compatibility with frameworks that require method-based access is needed.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
@@ -50,9 +50,6 @@ import java.lang.annotation.Target;
  *     }
  * }
  * }</pre>
- *
- * @see java.lang.reflect.Field
- * @see java.lang.reflect.Method
  */
 @Documented
 @Target(value = { ElementType.TYPE, ElementType.METHOD, ElementType.FIELD })
@@ -60,17 +57,10 @@ import java.lang.annotation.Target;
 public @interface AccessFieldByMethod {
 
     /**
-     * Optional value to specify additional configuration for field access behavior.
-     * This value can be used by frameworks to provide custom access strategies or configurations.
+     * Reserved for future use. Currently unused; the presence of the annotation alone
+     * is sufficient to indicate that field access should be performed via getter/setter methods.
      *
-     * <p>The interpretation of this value is framework-specific. Common uses include:</p>
-     * <ul>
-     *   <li>Specifying a custom accessor pattern (e.g., "fluent" for fluent-style accessors)</li>
-     *   <li>Providing hints for method name generation</li>
-     *   <li>Enabling/disabling specific access behaviors</li>
-     * </ul>
-     *
-     * @return the configuration value, empty string by default (which uses standard getter/setter conventions)
+     * @return always an empty string (the default)
      */
     String value() default "";
 }

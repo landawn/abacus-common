@@ -54,6 +54,7 @@ public interface BooleanBiConsumer extends Throwables.BooleanBiConsumer<RuntimeE
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code BooleanBiConsumer} that performs in sequence this operation followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     default BooleanBiConsumer andThen(final BooleanBiConsumer after) {
         return (a, b) -> {

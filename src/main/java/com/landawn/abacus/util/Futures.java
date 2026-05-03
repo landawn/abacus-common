@@ -272,8 +272,9 @@ import com.landawn.abacus.util.Tuple.Tuple7;
  *         ContinuableFuture<Tuple3<User, Boolean, PaymentMethod>> validations =
  *             Futures.combine(userValidation, inventoryCheck, paymentValidation, Tuple::of);
  *
- *         // Step 3: Process order if all validations pass
- *         return validations.thenCompose(result -> {
+ *         // Step 3: Process order if all validations pass.
+ *         // ContinuableFuture exposes thenCallAsync(Function) for chaining a follow-up async stage.
+ *         return validations.thenCallAsync(result -> {
  *             if (!result._2) { // inventory not available
  *                 throw new OrderProcessingException("Insufficient inventory");
  *             }
@@ -283,7 +284,8 @@ import com.landawn.abacus.util.Tuple.Tuple7;
  *             Future<Shipment> shippingArrangement = shippingService.arrangeShipping(request.getShippingAddress());
  *
  *             return Futures.combine(paymentProcessing, shippingArrangement,
- *                 (payment, shipment) -> new OrderResult(request.getOrderId(), payment.getId(), shipment.getTrackingNumber()));
+ *                 (payment, shipment) -> new OrderResult(request.getOrderId(), payment.getId(), shipment.getTrackingNumber()))
+ *                 .get(); // unwrap nested ContinuableFuture
  *         });
  *     }
  *
@@ -1067,7 +1069,7 @@ public final class Futures {
      * ContinuableFuture<Tuple2<User, List<Order>>> combined =
      *     Futures.combine(userFuture, ordersFuture);
      *
-     * combined.thenAccept(tuple -> {
+     * combined.thenRunAsync(tuple -> {
      *     User user = tuple._1;
      *     List<Order> orders = tuple._2;
      *     displayUserProfile(user, orders);
@@ -1141,7 +1143,7 @@ public final class Futures {
      * ContinuableFuture<Tuple4<Config, Database, Cache, Logger>> deps =
      *     Futures.combine(configFuture, dbFuture, cacheFuture, loggerFuture);
      *
-     * deps.thenAccept(tuple -> {
+     * deps.thenRunAsync(tuple -> {
      *     initializeApplication(tuple._1, tuple._2, tuple._3, tuple._4);
      * });
      * }</pre>
@@ -1185,7 +1187,7 @@ public final class Futures {
      *     Futures.combine(userService, orderService, prefService,
      *                     recService, logService);
      *
-     * allData.thenAccept(data -> renderDashboard(data));
+     * allData.thenRunAsync(data -> renderDashboard(data));
      * }</pre>
      *
      * @param <T1> the result type of the first future.
@@ -1229,7 +1231,7 @@ public final class Futures {
      *                          MetricsCollector, EventBus, SchedulerService>> system =
      *     Futures.combine(network, storage, security, metrics, events, scheduler);
      *
-     * system.thenAccept(components -> startApplication(components));
+     * system.thenRunAsync(components -> startApplication(components));
      * }</pre>
      *
      * @param <T1> the result type of the first future.
@@ -1282,7 +1284,7 @@ public final class Futures {
      *     Futures.combine(customer, account, transactions, credit,
      *                     risk, compliance, marketing);
      *
-     * fullProfile.thenAccept(data -> generateComprehensiveReport(data));
+     * fullProfile.thenRunAsync(data -> generateComprehensiveReport(data));
      * }</pre>
      *
      * @param <T1> the result type of the first future.
@@ -1436,7 +1438,7 @@ public final class Futures {
      *     future1, future2, future3
      * );
      *
-     * allData.thenAccept(results -> {
+     * allData.thenRunAsync(results -> {
      *     System.out.println("All services returned: " + results);
      * });
      * }</pre>
@@ -1471,7 +1473,7 @@ public final class Futures {
      * ContinuableFuture<List<ValidationResult>> allValidations =
      *     Futures.allOf(validations);
      *
-     * allValidations.thenAccept(results -> {
+     * allValidations.thenRunAsync(results -> {
      *     boolean allValid = results.stream()
      *         .allMatch(ValidationResult::isValid);
      *     if (allValid) {
@@ -1615,7 +1617,7 @@ public final class Futures {
      *
      * ContinuableFuture<Price> firstQuote = Futures.anyOf(priceQueries);
      *
-     * firstQuote.thenAccept(price -> {
+     * firstQuote.thenRunAsync(price -> {
      *     System.out.println("First price received: " + price);
      *     // Optionally cancel remaining queries
      * });
@@ -1865,8 +1867,9 @@ public final class Futures {
      * or exceptions, allowing custom handling of both cases. This is useful for logging,
      * error recovery, or transforming results.
      *
-     * <p>The Result object provides methods like isSuccess(), isFailure(), get(), and
-     * getException() for handling both success and failure cases elegantly.
+     * <p>The Result object provides methods like {@code isSuccess()}, {@code isFailure()},
+     * {@code orElseThrow()}, {@code orElseIfFailure(defaultValue)}, and {@code getException()}
+     * for handling both success and failure cases elegantly.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1875,7 +1878,7 @@ public final class Futures {
      * ObjIterator<String> results = Futures.iterate(calculations,
      *     result -> {
      *         if (result.isSuccess()) {
-     *             return "Success: " + result.get();
+     *             return "Success: " + result.orElseThrow();
      *         } else {
      *             return "Failed: " + result.getException().getMessage();
      *         }
@@ -1915,7 +1918,7 @@ public final class Futures {
      *     10, TimeUnit.SECONDS,
      *     result -> {
      *         if (result.isSuccess()) {
-     *             return processDataPoint(result.get());
+     *             return processDataPoint(result.orElseThrow());
      *         } else if (result.getException() instanceof TimeoutException) {
      *             return ProcessedData.timeout();
      *         } else {

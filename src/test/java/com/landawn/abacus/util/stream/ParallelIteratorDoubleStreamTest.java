@@ -263,7 +263,7 @@ public class ParallelIteratorDoubleStreamTest extends TestBase {
     public void testFlatMapDoubleArray() {
         DoubleStream stream = createDoubleStream(new double[] { 1.0, 2.0 });
         DoubleFunction<double[]> mapper = d -> new double[] { d, d + 0.5 };
-        List<Double> result = stream.flatmap(mapper).toList();
+        List<Double> result = stream.flatMapArray(mapper).toList();
         assertEquals(4, result.size());
         assertTrue(result.contains(1.0));
         assertTrue(result.contains(1.5));
@@ -304,10 +304,40 @@ public class ParallelIteratorDoubleStreamTest extends TestBase {
 
     @Test
     public void testFlatmap_singleThread() {
-        List<Double> result = createSingleThreadDoubleStream(new double[] { 1.0, 2.0 }).flatmap(d -> new double[] { d, d + 0.5 }).toList();
+        List<Double> result = createSingleThreadDoubleStream(new double[] { 1.0, 2.0 }).flatMapArray(d -> new double[] { d, d + 0.5 }).toList();
         assertEquals(4, result.size());
         assertTrue(result.contains(1.0));
         assertTrue(result.contains(1.5));
+    }
+
+    @Test
+    public void testFlatmapCollection() {
+        List<Double> r = createDoubleStream(new double[] { 1.0, 2.0 }).flatmap(d -> Arrays.asList(d, d * 10)).boxed().toList();
+        assertHaveSameElements(Arrays.asList(1.0, 10.0, 2.0, 20.0), r);
+
+        // empty stream
+        assertEquals(0, createDoubleStream(new double[] {}).flatmap(d -> Arrays.asList((Double) d)).count());
+
+        // empty / null collection
+        assertEquals(0, createDoubleStream(new double[] { 1.0 }).flatmap(d -> java.util.Collections.<Double> emptyList()).count());
+        assertEquals(0, createDoubleStream(new double[] { 1.0 }).flatmap(d -> (java.util.Collection<Double>) null).count());
+
+        // null elements -> 0d
+        double[] withNulls = createDoubleStream(new double[] { 1.0 }).flatmap(d -> Arrays.asList((Double) null, 7.5)).toArray();
+        assertEquals(2, withNulls.length);
+        assertEquals(0.0, withNulls[0], 0.0001);
+        assertEquals(7.5, withNulls[1], 0.0001);
+    }
+
+    @Test
+    public void testFlatmapCollection_SequentialFallback() {
+        List<Double> r = createSingleThreadDoubleStream(new double[] { 1.0, 2.0 }).flatmap(d -> Arrays.asList(d, d + 10.0)).boxed().toList();
+        assertHaveSameElements(Arrays.asList(1.0, 11.0, 2.0, 12.0), r);
+
+        double[] withNulls = createSingleThreadDoubleStream(new double[] { 1.0 }).flatmap(d -> Arrays.asList((Double) null, d)).toArray();
+        assertEquals(2, withNulls.length);
+        assertEquals(0.0, withNulls[0], 0.0001);
+        assertEquals(1.0, withNulls[1], 0.0001);
     }
 
     @Test

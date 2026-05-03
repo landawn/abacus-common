@@ -18,30 +18,33 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Type handler for Character (wrapper class) values.
- * This class provides database operations and type information for Character objects.
- * It handles the conversion between database string values and Java Character objects,
- * extracting the first character from string values when available.
+ * Type handler for {@link Character} (wrapper class) values.
+ * This class provides database operations and type information for {@link Character} objects.
+ *
+ * <p>When reading from a database, the column value is retrieved as a {@link String} and the first
+ * character of that string is returned. An empty or {@code NULL} column value yields {@code null}.</p>
+ *
+ * @see AbstractCharacterType
  */
 public final class CharacterType extends AbstractCharacterType {
 
     /**
-     * The type name constant for Character type identification.
+     * The type name constant for Character type identification, equal to {@code "Character"}.
      */
     public static final String CHARACTER = Character.class.getSimpleName();
 
     /**
-     * Package-private constructor for CharacterType.
-     * This constructor is called by the TypeFactory to create Character type instances.
+     * Package-private constructor for {@code CharacterType}.
+     * Instances are created by the {@code TypeFactory}.
      */
     CharacterType() {
         super(CHARACTER);
     }
 
     /**
-     * Returns the Class object representing the Character class.
+     * Returns the Java class represented by this type handler.
      *
-     * @return the Class object for Character.class
+     * @return {@code Character.class}
      */
     @Override
     public Class<Character> javaType() {
@@ -50,9 +53,9 @@ public final class CharacterType extends AbstractCharacterType {
 
     /**
      * Indicates whether this type represents a primitive wrapper class.
-     * Character is the wrapper class for the primitive char type.
+     * {@link Character} is the wrapper for the primitive {@code char} type.
      *
-     * @return {@code true}, indicating Character is a primitive wrapper
+     * @return {@code true}, always, because {@link Character} is a primitive wrapper
      */
     @Override
     public boolean isPrimitiveWrapper() {
@@ -60,19 +63,13 @@ public final class CharacterType extends AbstractCharacterType {
     }
 
     /**
-     * Retrieves a Character value from a ResultSet at the specified column index.
-     * The method reads the value as a String and returns the first character.
+     * Retrieves a {@link Character} value from a {@link ResultSet} at the specified column index.
+     * The column is read as a {@link String}; the first character of that string is returned.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Character> type = TypeFactory.getType(Character.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * Character initial = type.get(rs, 1);   // retrieves Character from column 1
-     * }</pre>
-     *
-     * @param rs the ResultSet containing the data, must not be {@code null}
-     * @param columnIndex the column index (1-based) to retrieve the value from
-     * @return the first character of the string value at the specified column, or {@code null} if the column value is SQL NULL
+     * @param rs          the {@link ResultSet} to read from; must not be {@code null}
+     * @param columnIndex the 1-based column index
+     * @return the first character of the column's string value,
+     *         or {@code null} if the column value is SQL {@code NULL} or an empty string
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -87,19 +84,13 @@ public final class CharacterType extends AbstractCharacterType {
     }
 
     /**
-     * Retrieves a Character value from a ResultSet using the specified column label.
-     * The method reads the value as a String and returns the first character.
+     * Retrieves a {@link Character} value from a {@link ResultSet} using the specified column label.
+     * The column is read as a {@link String}; the first character of that string is returned.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Character> type = TypeFactory.getType(Character.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * Character initial = type.get(rs, "initial");   // retrieves Character from "initial" column
-     * }</pre>
-     *
-     * @param rs the ResultSet containing the data, must not be {@code null}
-     * @param columnName the label of the column to retrieve the value from, must not be {@code null}
-     * @return the first character of the string value in the specified column, or {@code null} if the column value is SQL NULL
+     * @param rs         the {@link ResultSet} to read from; must not be {@code null}
+     * @param columnName the label of the column to retrieve
+     * @return the first character of the column's string value,
+     *         or {@code null} if the column value is SQL {@code NULL} or an empty string
      * @throws SQLException if a database access error occurs
      */
     @Override

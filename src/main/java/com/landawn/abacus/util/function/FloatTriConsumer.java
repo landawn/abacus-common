@@ -63,9 +63,10 @@ public interface FloatTriConsumer extends Throwables.FloatTriConsumer<RuntimeExc
      * combined.accept(1.5f, 2.5f, 3.5f);   // Logs then calculates sum
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation
      * @return a composed {@code FloatTriConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     default FloatTriConsumer andThen(final FloatTriConsumer after) {
         return (a, b, c) -> {

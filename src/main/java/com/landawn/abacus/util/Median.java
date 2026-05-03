@@ -238,7 +238,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *     public StatisticalSummary analyzeDataset(double[] dataset) {
  *         // Calculate median efficiently
  *         Pair<Double, OptionalDouble> medianResult = Median.of(dataset);
- *         double median = medianResult.right.isPresent() 
+ *         double median = medianResult.right.isPresent()
  *             ? (medianResult.left + medianResult.right.get()) / 2.0
  *             : medianResult.left;
  *
@@ -318,17 +318,17 @@ public final class Median {
 
     /**
      * Finds the median value(s) from a subarray of characters defined by the specified range using natural ordering.
-     * 
+     *
      * <p>The median represents the middle value(s) when the subarray elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method operates on a contiguous subarray defined
      * by the range [fromIndex, toIndex) and uses an efficient priority queue-based algorithm.</p>
-     * 
+     *
      * <p>For subarrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
-     * 
+     *
      * <p>For subarrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = {'z', 'a', 'm', 'x'};
@@ -428,18 +428,18 @@ public final class Median {
 
     /**
      * Finds the median value(s) from a subarray of bytes defined by the specified range using natural ordering.
-     * 
+     *
      * <p>The median represents the middle value(s) when the subarray elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method operates on a contiguous subarray defined
      * by the range [fromIndex, toIndex) and uses an efficient priority queue-based algorithm that maintains
      * only the necessary elements for median calculation.</p>
-     * 
+     *
      * <p>For subarrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
-     * 
+     *
      * <p>For subarrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] bytes = {30, 10, 20, 40};
@@ -538,18 +538,18 @@ public final class Median {
 
     /**
      * Finds the median value(s) from a subarray of short integers defined by the specified range using natural ordering.
-     * 
+     *
      * <p>The median represents the middle value(s) when the subarray elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method operates on a contiguous subarray defined
      * by the range [fromIndex, toIndex) and efficiently computes the median using a bounded priority queue
      * that avoids the overhead of full array sorting.</p>
-     * 
+     *
      * <p>For subarrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
-     * 
+     *
      * <p>For subarrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] values = {300, 100, 200, 400};
@@ -649,18 +649,18 @@ public final class Median {
 
     /**
      * Finds the median value(s) from a subarray of integers defined by the specified range using natural ordering.
-     * 
+     *
      * <p>The median represents the middle value(s) when the subarray elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method operates on a contiguous subarray defined
      * by the range [fromIndex, toIndex) and uses an efficient selection algorithm based on a priority queue
      * that maintains only the smallest (length/2 + 1) elements during processing.</p>
-     * 
+     *
      * <p>For subarrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
-     * 
+     *
      * <p>For subarrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] numbers = {100, 50, 75, 25, 90};
@@ -760,18 +760,18 @@ public final class Median {
 
     /**
      * Finds the median value(s) from a subarray of long integers defined by the specified range using natural ordering.
-     * 
+     *
      * <p>The median represents the middle value(s) when the subarray elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method operates on a contiguous subarray defined
      * by the range [fromIndex, toIndex) and uses an efficient selection algorithm that maintains a min-heap
      * of the k smallest elements where k = (length/2 + 1).</p>
-     * 
+     *
      * <p>For subarrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
-     * 
+     *
      * <p>For subarrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] values = {3000L, 1000L, 2000L, 4000L, 1500L};
@@ -872,19 +872,19 @@ public final class Median {
 
     /**
      * Finds the median value(s) from a subarray of float values defined by the specified range using natural ordering.
-     * 
+     *
      * <p>The median represents the middle value(s) when the subarray elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method operates on a contiguous subarray defined
      * by the range [fromIndex, toIndex) and efficiently computes the median using a bounded priority queue.
      * This implementation handles floating-point values correctly, including proper handling of NaN values
      * according to IEEE 754 floating-point standards.</p>
-     * 
+     *
      * <p>For subarrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
-     * 
+     *
      * <p>For subarrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] values = {30.5f, 10.2f, 20.8f, 40.1f};
@@ -986,19 +986,19 @@ public final class Median {
 
     /**
      * Finds the median value(s) from a subarray of double values defined by the specified range using natural ordering.
-     * 
+     *
      * <p>The median represents the middle value(s) when the subarray elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method operates on a contiguous subarray defined
      * by the range [fromIndex, toIndex) and efficiently computes the median using a bounded priority queue.
      * This implementation handles double-precision floating-point values with full IEEE 754 compliance,
      * including proper treatment of special values like NaN and infinity.</p>
-     * 
+     *
      * <p>For subarrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
-     * 
+     *
      * <p>For subarrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] values = {30.5, 10.2, 20.8, 40.1, 15.3};
@@ -1063,7 +1063,7 @@ public final class Median {
 
     /**
      * Finds the median value(s) from an array of Comparable objects using their natural ordering.
-     * 
+     *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order
      * according to their natural comparison method (compareTo). The input array does not need to be pre-sorted.
      * This method uses an efficient priority queue-based algorithm that works with any type implementing
@@ -1071,10 +1071,10 @@ public final class Median {
      *
      * <p>For arrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
-     * 
+     *
      * <p>For arrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] words = {"apple", "banana", "cherry"};
@@ -1099,7 +1099,7 @@ public final class Median {
 
     /**
      * Finds the median value(s) from a subarray of Comparable objects defined by the specified range using their natural ordering.
-     * 
+     *
      * <p>The median represents the middle value(s) when the subarray elements are arranged in sorted order
      * according to their natural comparison method (compareTo). The input array does not need to be pre-sorted.
      * This method operates on a contiguous subarray defined by the range [fromIndex, toIndex) and delegates
@@ -1107,10 +1107,10 @@ public final class Median {
      *
      * <p>For subarrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
-     * 
+     *
      * <p>For subarrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] words = {"zebra", "apple", "banana", "cherry"};
@@ -1139,7 +1139,7 @@ public final class Median {
 
     /**
      * Finds the median value(s) from an array of objects using a custom comparator for ordering.
-     * 
+     *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order
      * according to the provided comparator. The input array does not need to be pre-sorted. This method
      * uses an efficient priority queue-based algorithm that works with any custom comparison logic,
@@ -1152,10 +1152,10 @@ public final class Median {
      *
      * <p>For arrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
-     * 
+     *
      * <p>For arrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] words = {"apple", "pie", "banana"};
@@ -1182,7 +1182,7 @@ public final class Median {
 
     /**
      * Finds the median value(s) from a subarray of objects defined by the specified range using a custom comparator for ordering.
-     * 
+     *
      * <p>The median represents the middle value(s) when the subarray elements are arranged in sorted order
      * according to the provided comparator. The input array does not need to be pre-sorted. This method
      * operates on a contiguous subarray defined by the range [fromIndex, toIndex) and uses an efficient
@@ -1197,10 +1197,10 @@ public final class Median {
      *
      * <p>For subarrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
-     * 
+     *
      * <p>For subarrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] words = {"elephant", "ant", "bee", "tiger"};
@@ -1305,7 +1305,7 @@ public final class Median {
 
     /**
      * Finds the median value(s) from a collection of objects using a custom comparator for ordering.
-     * 
+     *
      * <p>The median represents the middle value(s) when the collection elements are arranged in sorted order
      * according to the provided comparator. The input collection does not need to be sorted. This method
      * uses an efficient priority queue-based algorithm that works with any custom comparison logic,
@@ -1321,10 +1321,10 @@ public final class Median {
      *
      * <p>For collections with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
-     * 
+     *
      * <p>For collections with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Set<String> words = new HashSet<>(Arrays.asList("apple", "pie", "banana"));
@@ -1388,7 +1388,7 @@ public final class Median {
 
     /**
      * Finds the median value(s) from a subcollection of Comparable objects defined by the specified range using their natural ordering.
-     * 
+     *
      * <p>The median represents the middle value(s) when the subcollection elements are arranged in sorted order
      * according to their natural comparison method (compareTo). The input collection does not need to be sorted.
      * This method extracts a slice of the collection defined by the range [fromIndex, toIndex) and delegates
@@ -1399,10 +1399,10 @@ public final class Median {
      *
      * <p>For subcollections with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
-     * 
+     *
      * <p>For subcollections with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> numbers = Arrays.asList(100, 50, 75, 25, 90);
@@ -1431,7 +1431,7 @@ public final class Median {
 
     /**
      * Finds the median value(s) from a subcollection of objects defined by the specified range using a custom comparator for ordering.
-     * 
+     *
      * <p>The median represents the middle value(s) when the subcollection elements are arranged in sorted order
      * according to the provided comparator. The input collection does not need to be sorted. This method
      * extracts a slice of the collection defined by the range [fromIndex, toIndex) and then applies the
@@ -1447,10 +1447,10 @@ public final class Median {
      *
      * <p>For subcollections with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
-     * 
+     *
      * <p>For subcollections with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> words = Arrays.asList("elephant", "ant", "bee", "tiger", "cat");

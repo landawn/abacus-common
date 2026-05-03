@@ -121,10 +121,7 @@ public class GenericEntity {
                 || !Objects.equals(intMap, other.intMap)) {
             return false;
         }
-        if (!Objects.equals(stringList, other.stringList)) {
-            return false;
-        }
-        if (!Objects.equals(stringMap, other.stringMap)) {
+        if (!Objects.equals(stringList, other.stringList) || !Objects.equals(stringMap, other.stringMap)) {
             return false;
         }
         return true;

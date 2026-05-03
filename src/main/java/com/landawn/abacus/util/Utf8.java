@@ -21,11 +21,11 @@ import static java.lang.Character.MIN_SURROGATE;
  * Low-level, high-performance utility methods for working with UTF-8 character encoding.
  * This class provides optimized implementations for UTF-8 validation and length calculation
  * that are more efficient than using {@code String.getBytes(UTF_8)}.
- * 
+ *
  * <p>The implementation follows the restricted definition of UTF-8 introduced in Unicode 3.1,
  * which means it rejects "non-shortest form" byte sequences. This is stricter than some
  * JDK decoders which may accept such sequences.</p>
- * 
+ *
  * <p>Key features:</p>
  * <ul>
  *   <li>Highly optimized for performance with special handling for ASCII characters</li>
@@ -33,18 +33,18 @@ import static java.lang.Character.MIN_SURROGATE;
  *   <li>Rejects overlong encodings and invalid byte sequences</li>
  *   <li>More efficient than standard Java UTF-8 operations for validation and length calculation</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * String text = "Hello 世界";
  * int utf8Length = Utf8.encodedLength(text);   // More efficient than text.getBytes("UTF-8").length
- * 
+ *
  * byte[] bytes = getDataFromNetwork();
  * if (Utf8.isWellFormed(bytes)) {
  *     String decoded = new String(bytes, StandardCharsets.UTF_8);
  * }
  * }</pre>
- * 
+ *
  * <p>Note: This class is adapted from Google Guava under Apache License 2.0.</p>
  *
  * @author Martin Buchholz
@@ -56,22 +56,22 @@ public class Utf8 {
      * Returns the number of bytes in the UTF-8-encoded form of the given character sequence.
      * This method is equivalent to {@code string.getBytes(UTF_8).length}, but is more efficient
      * in both time and space.
-     * 
+     *
      * <p>The implementation is optimized with fast paths for:</p>
      * <ul>
      *   <li>Pure ASCII strings (single pass, no expansion)</li>
      *   <li>Characters less than 0x800 (2-byte UTF-8)</li>
      *   <li>General Unicode including surrogate pairs</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String ascii = "Hello World";
      * int length1 = Utf8.encodedLength(ascii);   // Returns 11 (1 byte per char)
-     * 
+     *
      * String unicode = "Hello 世界";
      * int length2 = Utf8.encodedLength(unicode);   // Returns 12 (6 + 3 + 3)
-     * 
+     *
      * String emoji = "Hello 👋";
      * int length3 = Utf8.encodedLength(emoji);   // Accounts for surrogate pairs
      * }</pre>
@@ -109,6 +109,18 @@ public class Utf8 {
         return utf8Length;
     }
 
+    /**
+     * Computes the additional UTF-8 encoded bytes required for the portion of {@code sequence}
+     * starting at {@code start}, for characters that need more than one byte in UTF-8 (i.e.,
+     * characters at code-point {@code >= 0x800}, including surrogate pairs). Pure-ASCII and
+     * two-byte characters have already been counted by the caller.
+     *
+     * @param sequence the character sequence being measured
+     * @param start the index in {@code sequence} from which to begin counting
+     * @return the extra byte count (on top of the char count) needed for the characters
+     *         from {@code start} onwards
+     * @throws IllegalArgumentException if an unpaired surrogate is encountered
+     */
     private static int encodedLengthGeneral(final CharSequence sequence, final int start) {
         final int utf16Length = sequence.length();
         int utf8Length = 0;
@@ -135,7 +147,7 @@ public class Utf8 {
      * Returns {@code true} if the given byte array is a well-formed UTF-8 byte sequence
      * according to Unicode 6.0 standards. This method performs stricter validation than
      * simple decoding - it ensures the bytes follow proper UTF-8 encoding rules.
-     * 
+     *
      * <p>The validation checks for:</p>
      * <ul>
      *   <li>Proper continuation byte sequences</li>
@@ -143,16 +155,16 @@ public class Utf8 {
      *   <li>No invalid surrogate code points</li>
      *   <li>Valid Unicode code point ranges</li>
      * </ul>
-     * 
-     * <p>This method returns {@code true} if and only if 
+     *
+     * <p>This method returns {@code true} if and only if
      * {@code Arrays.equals(bytes, new String(bytes, UTF_8).getBytes(UTF_8))} would return {@code true},
      * but is more efficient in both time and space.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] validUtf8 = "Hello 世界".getBytes(StandardCharsets.UTF_8);
      * boolean valid1 = Utf8.isWellFormed(validUtf8);   // Returns true
-     * 
+     *
      * byte[] invalid = {(byte)0xC0, (byte)0x80};  // Overlong encoding of NULL
      * boolean valid2 = Utf8.isWellFormed(invalid);   // Returns false
      * }</pre>
@@ -166,12 +178,12 @@ public class Utf8 {
 
     /**
      * Returns whether the given byte array slice is a well-formed UTF-8 byte sequence,
-     * as defined by {@link #isWellFormed(byte[])}. 
-     * 
+     * as defined by {@link #isWellFormed(byte[])}.
+     *
      * <p>This method allows validation of a portion of a byte array without copying.
-     * Note that this can return {@code false} even when {@code isWellFormed(bytes)} 
+     * Note that this can return {@code false} even when {@code isWellFormed(bytes)}
      * would return {@code true} if the slice boundaries split a multi-byte character.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] buffer = new byte[1024];
@@ -200,6 +212,18 @@ public class Utf8 {
         return true;
     }
 
+    /**
+     * Validates the UTF-8 byte sequence in {@code bytes} starting at {@code off} (inclusive)
+     * and ending at {@code end} (exclusive), beginning at the first non-ASCII byte already
+     * identified by the caller. Iterates through multi-byte sequences and validates each
+     * leading byte and its required continuation bytes according to the UTF-8 specification.
+     *
+     * @param bytes the byte array containing the data to validate
+     * @param off   the index of the first non-ASCII byte (i.e., the first byte with the high bit set)
+     * @param end   the exclusive upper bound of the range to validate ({@code off + len})
+     * @return {@code true} if all multi-byte sequences in the range are well-formed UTF-8,
+     *         {@code false} if any invalid byte sequence is found
+     */
     private static boolean isWellFormedSlowPath(final byte[] bytes, final int off, final int end) {
         int index = off;
         while (true) {
@@ -256,6 +280,13 @@ public class Utf8 {
         }
     }
 
+    /**
+     * Constructs the error message used when an unpaired surrogate character is detected
+     * at the given index in the character sequence.
+     *
+     * @param i the index in the character sequence where the unpaired surrogate was found
+     * @return a human-readable error message identifying the location of the unpaired surrogate
+     */
     private static String unpairedSurrogateMsg(final int i) {
         return "Unpaired surrogate at index " + i;
     }

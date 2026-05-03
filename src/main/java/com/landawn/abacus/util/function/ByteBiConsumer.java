@@ -61,6 +61,7 @@ public interface ByteBiConsumer extends Throwables.ByteBiConsumer<RuntimeExcepti
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code ByteBiConsumer} that performs in sequence this operation followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     default ByteBiConsumer andThen(final ByteBiConsumer after) {
         return (a, b) -> {

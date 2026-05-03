@@ -31,34 +31,24 @@ public class NClobReaderType extends ReaderType {
     public static final String NCLOB_READER = "NClobReader";
 
     /**
-     * Constructs an NClobReaderType.
-     * This constructor initializes the type handler for NCLOB reader objects.
+     * Package-private constructor for NClobReaderType.
+     * This constructor is called by the TypeFactory to create NClobReader type instances.
      */
     NClobReaderType() {
         super(NCLOB_READER);
     }
 
     /**
-     * Retrieves an NCLOB value from a ResultSet at the specified column index and converts it to a Reader.
-     * The NCLOB resource is automatically freed after obtaining the character stream.
+     * Retrieves an {@link java.sql.NClob} from the specified column in the {@link ResultSet}
+     * and converts it to a {@link java.io.Reader} via {@link java.sql.NClob#getCharacterStream()}.
+     * The {@code NClob} itself is not freed by this method; callers are responsible for
+     * closing the returned {@code Reader} and releasing any associated database resources.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Reader> type = TypeFactory.getType("NClobReader");
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     *
-     * // Reading NCLOB content from database
-     * Reader reader = type.get(rs, 1);
-     * if (reader != null) {
-     *     String content = IOUtils.readAllChars(reader);
-     *     reader.close();
-     * }
-     * }</pre>
-     *
-     * @param rs the ResultSet to read from
-     * @param columnIndex the column index (1-based) to retrieve the NCLOB from
-     * @return a Reader for the NCLOB character stream, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnIndex the 1-based index of the column to retrieve the {@code NClob} from
+     * @return a {@code Reader} for the {@code NClob} character stream,
+     *         or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public Reader get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -67,30 +57,16 @@ public class NClobReaderType extends ReaderType {
     }
 
     /**
-     * Retrieves an NCLOB value from a ResultSet using the specified column label and converts it to a Reader.
-     * The NCLOB resource is automatically freed after obtaining the character stream.
+     * Retrieves an {@link java.sql.NClob} from the specified column in the {@link ResultSet}
+     * and converts it to a {@link java.io.Reader} via {@link java.sql.NClob#getCharacterStream()}.
+     * The {@code NClob} itself is not freed by this method; callers are responsible for
+     * closing the returned {@code Reader} and releasing any associated database resources.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Reader> type = TypeFactory.getType("NClobReader");
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     *
-     * // Reading NCLOB by column name
-     * Reader reader = type.get(rs, "document_content");
-     * if (reader != null) {
-     *     BufferedReader br = new BufferedReader(reader);
-     *     String line;
-     *     while ((line = br.readLine()) != null) {
-     *         System.out.println(line);
-     *     }
-     *     br.close();
-     * }
-     * }</pre>
-     *
-     * @param rs the ResultSet to read from
-     * @param columnName the label for the column specified with the SQL AS clause
-     * @return a Reader for the NCLOB character stream, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnName is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnName the label of the column to retrieve (as specified in the SQL AS clause)
+     * @return a {@code Reader} for the {@code NClob} character stream,
+     *         or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
     @Override
     public Reader get(final ResultSet rs, final String columnName) throws SQLException {
@@ -98,25 +74,13 @@ public class NClobReaderType extends ReaderType {
     }
 
     /**
-     * Sets a parameter in a PreparedStatement to an NCLOB value using a Reader.
-     * The database will read from the Reader until end-of-file is reached.
+     * Sets a parameter in a {@link PreparedStatement} to an {@code NCLOB} value using a {@link java.io.Reader}.
+     * The database will read from the {@code Reader} until end-of-file is reached.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Reader> type = TypeFactory.getType("NClobReader");
-     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
-     *
-     * // Setting NCLOB from Reader
-     * String content = "Large document content...";
-     * Reader reader = new StringReader(content);
-     * type.set(stmt, 2, reader);
-     * stmt.executeUpdate();
-     * }</pre>
-     *
-     * @param stmt the PreparedStatement to set the parameter on
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the Reader containing the character data to be stored as NCLOB
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param columnIndex the 1-based index of the parameter to set
+     * @param x the {@code Reader} containing the character data to be stored as {@code NCLOB}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Reader x) throws SQLException {
@@ -124,25 +88,13 @@ public class NClobReaderType extends ReaderType {
     }
 
     /**
-     * Sets a named parameter in a CallableStatement to an NCLOB value using a Reader.
-     * The database will read from the Reader until end-of-file is reached.
+     * Sets a parameter in a {@link CallableStatement} by name to an {@code NCLOB} value using a {@link java.io.Reader}.
+     * The database will read from the {@code Reader} until end-of-file is reached.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Reader> type = TypeFactory.getType("NClobReader");
-     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
-     *
-     * // Setting NCLOB using named parameter
-     * String content = "Document content...";
-     * Reader reader = new StringReader(content);
-     * type.set(stmt, "p_content", reader);
-     * stmt.execute();
-     * }</pre>
-     *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
-     * @param x the Reader containing the character data to be stored as NCLOB
-     * @throws SQLException if a database access error occurs or the parameterName is invalid
+     * @param x the {@code Reader} containing the character data to be stored as {@code NCLOB}
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Reader x) throws SQLException {
@@ -150,26 +102,14 @@ public class NClobReaderType extends ReaderType {
     }
 
     /**
-     * Sets a parameter in a PreparedStatement to an NCLOB value using a Reader with a specified length.
-     * Only the specified number of characters will be read from the Reader.
+     * Sets a parameter in a {@link PreparedStatement} at the specified index to an {@code NCLOB} value,
+     * reading at most {@code sqlTypeOrLength} characters from the {@link java.io.Reader}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Reader> type = TypeFactory.getType("NClobReader");
-     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
-     *
-     * // Setting NCLOB with specific length
-     * String longText = "Very long text content...";
-     * Reader reader = new StringReader(longText);
-     * type.set(stmt, 2, reader, 1000);  // Only read first 1000 characters
-     * stmt.executeUpdate();
-     * }</pre>
-     *
-     * @param stmt the PreparedStatement to set the parameter on
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the Reader containing the character data to be stored as NCLOB
-     * @param sqlTypeOrLength the number of characters in the stream
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param columnIndex the 1-based index of the parameter to set
+     * @param x the {@code Reader} containing the character data to be stored as {@code NCLOB}
+     * @param sqlTypeOrLength the maximum number of characters to read from the stream
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Reader x, final int sqlTypeOrLength) throws SQLException {
@@ -177,26 +117,14 @@ public class NClobReaderType extends ReaderType {
     }
 
     /**
-     * Sets a named parameter in a CallableStatement to an NCLOB value using a Reader with a specified length.
-     * Only the specified number of characters will be read from the Reader.
+     * Sets a parameter in a {@link CallableStatement} by name to an {@code NCLOB} value,
+     * reading at most {@code sqlTypeOrLength} characters from the {@link java.io.Reader}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Reader> type = TypeFactory.getType("NClobReader");
-     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
-     *
-     * // Setting NCLOB with specific length using named parameter
-     * String text = "Summary text...";
-     * Reader reader = new StringReader(text);
-     * type.set(stmt, "p_summary", reader, 500);  // Only read first 500 characters
-     * stmt.execute();
-     * }</pre>
-     *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
-     * @param x the Reader containing the character data to be stored as NCLOB
-     * @param sqlTypeOrLength the number of characters in the stream
-     * @throws SQLException if a database access error occurs or the parameterName is invalid
+     * @param x the {@code Reader} containing the character data to be stored as {@code NCLOB}
+     * @param sqlTypeOrLength the maximum number of characters to read from the stream
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Reader x, final int sqlTypeOrLength) throws SQLException {
@@ -204,20 +132,13 @@ public class NClobReaderType extends ReaderType {
     }
 
     /**
-     * Converts an NCLOB object to a Reader.
-     * This method extracts the character stream from the NCLOB.
-     * Note that the NCLOB is not freed by this method; the caller is responsible
-     * for managing the NCLOB lifecycle.
+     * Converts an NClob object to a Reader by extracting its character stream.
+     * The NClob is not freed by this method; the caller is responsible
+     * for managing the NClob lifecycle.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * NClob nclob = resultSet.getNClob(1);
-     * Reader reader = NClobReaderType.clobToReader(nclob);
-     * }</pre>
-     *
-     * @param clob the NCLOB to convert to a Reader
-     * @return a Reader for the NCLOB character stream, or {@code null} if the input NCLOB is null
-     * @throws SQLException if a database access error occurs while accessing the NCLOB
+     * @param clob the NClob to convert to a Reader
+     * @return a Reader for the NClob character stream, or {@code null} if the input NClob is {@code null}
+     * @throws SQLException if a database access error occurs while accessing the NClob
      */
     static Reader clobToReader(final NClob clob) throws SQLException {
         Reader reader = null;

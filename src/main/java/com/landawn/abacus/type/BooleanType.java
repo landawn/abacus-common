@@ -20,30 +20,40 @@ import java.sql.SQLException;
 import com.landawn.abacus.util.N;
 
 /**
- * Type handler for Boolean (wrapper class) values.
- * This class provides database operations and type information for Boolean objects.
- * It handles the conversion between database values and Java Boolean objects,
- * with automatic type conversion for non-Boolean database values, supporting {@code null} values.
+ * Type handler for {@link Boolean} (boxed wrapper) values.
+ * Provides JDBC read operations for {@code Boolean} objects, supporting {@code null} values
+ * (SQL NULL maps to Java {@code null}).
+ *
+ * <p>Retrieval is performed via {@link java.sql.ResultSet#getObject(int)}, and non-Boolean
+ * database values (e.g. numeric types or strings) are automatically converted to {@code Boolean}
+ * using {@link com.landawn.abacus.util.N#convert(Object, Class)}.</p>
+ *
+ * <p>String serialization and JDBC write operations are inherited from
+ * {@link AbstractBooleanType}. The SQL type used for null writes is
+ * {@link java.sql.Types#BOOLEAN}.</p>
+ *
+ * @see AbstractBooleanType
  */
 public final class BooleanType extends AbstractBooleanType {
 
     /**
-     * The type name constant for Boolean type identification.
+     * The type name constant used to identify this type within the type system
+     * (value: {@code "Boolean"}).
      */
     public static final String BOOLEAN = Boolean.class.getSimpleName();
 
     /**
-     * Package-private constructor for BooleanType.
-     * This constructor is called by the TypeFactory to create Boolean type instances.
+     * Package-private constructor for {@code BooleanType}.
+     * Instances are created by {@link TypeFactory}; do not instantiate directly.
      */
     BooleanType() {
         super(BOOLEAN);
     }
 
     /**
-     * Returns the Class object representing the Boolean class.
+     * Returns the Java class represented by this type handler.
      *
-     * @return the Class object for Boolean.class
+     * @return {@code Boolean.class}
      */
     @Override
     public Class<Boolean> javaType() {
@@ -51,10 +61,9 @@ public final class BooleanType extends AbstractBooleanType {
     }
 
     /**
-     * Indicates whether this type represents a primitive wrapper class.
-     * Boolean is the wrapper class for the primitive boolean type.
+     * Indicates that {@link Boolean} is the wrapper class for the primitive {@code boolean} type.
      *
-     * @return {@code true}, indicating Boolean is a primitive wrapper
+     * @return {@code true} always
      */
     @Override
     public boolean isPrimitiveWrapper() {
@@ -62,21 +71,15 @@ public final class BooleanType extends AbstractBooleanType {
     }
 
     /**
-     * Retrieves a Boolean value from a ResultSet at the specified column index.
-     * This method handles various data types in the database and converts them to Boolean,
-     * automatically converting numeric and string values to Boolean.
+     * Retrieves a {@link Boolean} from a {@link java.sql.ResultSet} at the specified column index.
+     * The column value is read via {@link java.sql.ResultSet#getObject(int)}. If the result is
+     * already a {@code Boolean} (or {@code null}), it is returned directly; otherwise it is
+     * converted using {@link com.landawn.abacus.util.N#convert(Object, Class)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Boolean> type = TypeFactory.getType(Boolean.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * Boolean isActive = type.get(rs, 1);   // retrieves Boolean from column 1
-     * }</pre>
-     *
-     * @param rs the ResultSet containing the data, must not be {@code null}
-     * @param columnIndex the column index (1-based) to retrieve the value from
-     * @return the Boolean value at the specified column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs
+     * @param rs the {@code ResultSet} to read from
+     * @param columnIndex the 1-based index of the column containing the boolean value
+     * @return the {@code Boolean} value at the specified column, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
      */
     @Override
     public Boolean get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -90,21 +93,15 @@ public final class BooleanType extends AbstractBooleanType {
     }
 
     /**
-     * Retrieves a Boolean value from a ResultSet using the specified column label.
-     * This method handles various data types in the database and converts them to Boolean,
-     * automatically converting numeric and string values to Boolean.
+     * Retrieves a {@link Boolean} from a {@link java.sql.ResultSet} using the specified column label.
+     * The column value is read via {@link java.sql.ResultSet#getObject(String)}. If the result is
+     * already a {@code Boolean} (or {@code null}), it is returned directly; otherwise it is
+     * converted using {@link com.landawn.abacus.util.N#convert(Object, Class)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Boolean> type = TypeFactory.getType(Boolean.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * Boolean isActive = type.get(rs, "is_active");   // retrieves Boolean from "is_active" column
-     * }</pre>
-     *
-     * @param rs the ResultSet containing the data, must not be {@code null}
-     * @param columnName the label of the column to retrieve the value from, must not be {@code null}
-     * @return the Boolean value in the specified column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs
+     * @param rs the {@code ResultSet} to read from
+     * @param columnName the column label as specified in the SQL AS clause, or the column name if no AS clause was used
+     * @return the {@code Boolean} value in the specified column, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
     @Override
     public Boolean get(final ResultSet rs, final String columnName) throws SQLException {

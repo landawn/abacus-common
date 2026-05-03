@@ -78,7 +78,7 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * IntStream.of(1, 2, 3, 4, 5).filter(isEven).forEach(System.out::println);   // Prints: 2 4
      * }</pre>
      *
-     * @param value the input argument
+     * @param value the {@code int} input argument
      * @return {@code true} if the input argument matches the predicate, {@code false} otherwise
      */
     @Override
@@ -121,9 +121,10 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * IntStream.of(-2, -1, 0, 1, 2, 3, 4).filter(isPositive.and(isEven)).forEach(System.out::println);   // Prints: 2 4
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate
+     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and
      *         the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     @Override
     default IntPredicate and(final java.util.function.IntPredicate other) {
@@ -149,9 +150,10 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * IntStream.of(-2, -1, 0, 1, 2).filter(isNegative.or(isZero)).forEach(System.out::println);   // Prints: -2 -1 0
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate
+     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and
      *         the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     @Override
     default IntPredicate or(final java.util.function.IntPredicate other) {

@@ -27,11 +27,11 @@ import com.landawn.abacus.util.stream.ShortStream;
  * A specialized iterator for primitive short values that extends ImmutableIterator.
  * This class provides various factory methods and operations for creating and manipulating
  * iterators over short values without the overhead of boxing/unboxing.
- * 
+ *
  * <p>The iterator is immutable, meaning elements cannot be removed during iteration.
  * It provides specialized methods like {@code nextShort()} to avoid boxing overhead,
  * and various transformation methods like {@code skip()}, {@code limit()}, and {@code filter()}.
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * short[] array = {1, 2, 3, 4, 5};
@@ -176,7 +176,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * Creates a ShortIterator that is initialized lazily using the provided Supplier.
      * The actual iterator is not created until the first method call on the returned iterator.
      * This is useful for deferring expensive iterator creation until it's actually needed.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator iter = ShortIterator.defer(() -> ShortIterator.of(computeExpensiveArray()));
@@ -224,7 +224,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * Creates an infinite ShortIterator that generates values using the provided supplier.
      * The iterator will continuously return values from the supplier and never return {@code false} from hasNext().
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator randomShorts = ShortIterator.generate(() -> (short)(Math.random() * 100));
@@ -255,7 +255,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * Creates a ShortIterator that generates values using the provided supplier while the hasNext condition is {@code true}.
      * This allows for creating finite iterators with custom termination conditions.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] counter = {0};
@@ -324,7 +324,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * Returns a new ShortIterator that skips the first n elements.
      * If n is greater than the number of remaining elements, all elements are skipped.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator iter = ShortIterator.of(new short[] {1, 2, 3, 4, 5});
@@ -380,7 +380,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * Returns a new ShortIterator that limits the number of elements to iterate over.
      * The returned iterator will iterate over at most count elements.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator iter = ShortIterator.generate(() -> (short)1);
@@ -423,7 +423,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * Returns a new ShortIterator that only includes elements matching the given predicate.
      * Elements that don't satisfy the predicate are skipped.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator iter = ShortIterator.of(new short[] {1, 2, 3, 4, 5});
@@ -526,7 +526,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * Creates a ShortStream from the remaining elements in this iterator.
      * This provides access to stream operations like map, filter, reduce, etc.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double average = ShortIterator.of(new short[] {1, 2, 3, 4, 5})
@@ -544,7 +544,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * Returns an iterator of IndexedShort objects pairing each element with its index.
      * Indexing starts from 0.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator iter = ShortIterator.of(new short[] {10, 20, 30});
@@ -562,7 +562,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * Returns an iterator of IndexedShort objects pairing each element with its index.
      * Indexing starts from the specified startIndex.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator iter = ShortIterator.of(new short[] {10, 20, 30});
@@ -611,7 +611,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * Performs the given action for each remaining short element.
      * This method avoids boxing overhead by using a specialized ShortConsumer.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator iter = ShortIterator.of(new short[] {1, 2, 3});
@@ -620,6 +620,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      *
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each element
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachRemaining(final Throwables.ShortConsumer<E> action) throws E {//NOSONAR
@@ -633,11 +634,11 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * Performs the given action for each remaining element along with its index.
      * The index starts from 0 and increments for each element.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator iter = ShortIterator.of(new short[] {10, 20, 30});
-     * iter.foreachIndexed((index, value) -> 
+     * iter.foreachIndexed((index, value) ->
      *     System.out.println("Element at " + index + " is " + value));
      * // Prints:
      * // Element at 0 is 10
@@ -646,7 +647,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
-     * @param action the action to perform on each element with its index 
+     * @param action the action to perform on each element with its index
      * @throws IllegalArgumentException if action is null
      * @throws E if the action throws an exception
      */

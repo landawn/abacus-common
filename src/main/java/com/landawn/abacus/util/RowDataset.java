@@ -79,13 +79,15 @@ import com.landawn.abacus.util.stream.ObjIteratorEx;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * A row-oriented implementation of the Dataset interface that stores data in rows.
- * This class provides a comprehensive set of operations for data manipulation, transformation,
- * and analysis similar to a data frame structure in other programming languages.
+ * The default implementation of the {@link Dataset} interface, providing a comprehensive set of
+ * operations for data manipulation, transformation, and analysis similar to a data frame structure
+ * in other programming languages.
  *
- * <p>The data is organized as rows of records, where each row contains values for multiple columns.
- * This implementation is cloneable and provides various methods for filtering, sorting, grouping,
- * joining, and aggregating data.
+ * <p>Although the class is named {@code RowDataset}, the underlying data is stored column-wise
+ * (one {@code List<Object>} per column) for memory efficiency and cache-friendly columnar access.
+ * Logically the dataset is still addressed by row index and column name/index, exposing a familiar
+ * row-oriented API on top of the columnar storage. This implementation is cloneable and provides
+ * methods for filtering, sorting, grouping, joining, and aggregating data.</p>
  *
  * @see Dataset
  */
@@ -191,12 +193,12 @@ public final class RowDataset implements Dataset, Cloneable {
      *
      * @throws IllegalArgumentException if any of the following conditions are met:
      *         <ul>
-     *         <li>columnNameList is null</li>
-     *         <li>columnList is null</li>
+     *         <li>columnNameList is {@code null}</li>
+     *         <li>columnList is {@code null}</li>
      *         <li>columnNameList contains empty or {@code null} column names</li>
      *         <li>columnNameList contains duplicate column names</li>
      *         <li>the size of columnNameList differs from the size of columnList</li>
-     *         <li>any column in columnList is null</li>
+     *         <li>any column in columnList is {@code null}</li>
      *         <li>columns in columnList have different sizes</li>
      *         </ul>
      *
@@ -247,12 +249,12 @@ public final class RowDataset implements Dataset, Cloneable {
      *
      * @throws IllegalArgumentException if any of the following conditions are met:
      *         <ul>
-     *         <li>columnNameList is null</li>
-     *         <li>columnList is null</li>
+     *         <li>columnNameList is {@code null}</li>
+     *         <li>columnList is {@code null}</li>
      *         <li>columnNameList contains empty or {@code null} column names</li>
      *         <li>columnNameList contains duplicate column names</li>
      *         <li>the size of columnNameList differs from the size of columnList</li>
-     *         <li>any column in columnList is null</li>
+     *         <li>any column in columnList is {@code null}</li>
      *         <li>columns in columnList have different sizes</li>
      *         </ul>
      *
@@ -719,10 +721,10 @@ public final class RowDataset implements Dataset, Cloneable {
     //    }
 
     @Override
-    public void set(final int rowIndex, final int columnIndex, final Object element) {
+    public void set(final int rowIndex, final int columnIndex, final Object value) {
         checkFrozen();
 
-        _columnList.get(columnIndex).set(rowIndex, element);
+        _columnList.get(columnIndex).set(rowIndex, value);
 
         modCount++;
     }
@@ -4197,7 +4199,7 @@ public final class RowDataset implements Dataset, Cloneable {
                     bw.write(separator);
                 }
 
-                // bw.write(getColumnName(columnIndexes[i])); 
+                // bw.write(getColumnName(columnIndexes[i]));
 
                 CsvUtil.writeField(bw, strType, getColumnName(columnIndexes[i]));
             }
@@ -5036,7 +5038,7 @@ public final class RowDataset implements Dataset, Cloneable {
     @Override
     public Stream<Dataset> rollup(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyExtractor,
             final String aggregateOnColumnName, final String aggregateResultColumnName, final Collector<?, ?, ?> collector) {
-        return Stream.of(Iterables.rollup(keyColumnNames)) // 
+        return Stream.of(Iterables.rollup(keyColumnNames)) //
                 .reversed()
                 .map(columnNames -> {
                     if (columnNames.isEmpty()) {
@@ -5200,7 +5202,7 @@ public final class RowDataset implements Dataset, Cloneable {
     public <T> Stream<Dataset> cube(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyExtractor,
             final Collection<String> aggregateOnColumnNames, final String aggregateResultColumnName,
             final Function<? super DisposableObjArray, ? extends T> rowMapper, final Collector<? super T, ?, ?> collector) {
-        return cubeSet(keyColumnNames) // 
+        return cubeSet(keyColumnNames) //
                 .map(columnNames -> {
                     if (columnNames.isEmpty()) {
                         final String firstKeyColumnName = N.firstOrNullIfEmpty(keyColumnNames);

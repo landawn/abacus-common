@@ -28,7 +28,6 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.stream.Stream;
-import com.landawn.abacus.util.stream.Stream.StreamEx;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -423,7 +422,7 @@ public final class CodeGenerationUtil {
 
         final Collection<Class<?>> entityClasses = N.checkArgNotEmpty(codeConfig.getEntityClasses(), "entityClasses");
 
-        final List<Class<?>> entityClassesToUse = StreamEx.of(entityClasses).filter(cls -> {
+        final List<Class<?>> entityClassesToUse = Stream.of(entityClasses).filter(cls -> {
             if (cls.isInterface()) {
                 return false;
             }
@@ -459,9 +458,9 @@ public final class CodeGenerationUtil {
             sb.append(LINE_SEPARATOR).append("import java.util.List;").append(LINE_SEPARATOR);
         }
 
-        final String allClassName = StreamEx.of(entityClassesToUse).map(ClassUtil::getSimpleClassName).join(", ", "[", "]");
+        final String allClassName = Stream.of(entityClassesToUse).map(ClassUtil::getSimpleClassName).join(", ", "[", "]");
 
-        if (generateClassPropNameList && StreamEx.of(entityClassesToUse).map(ClassUtil::getSimpleClassName).containsDuplicates()) {
+        if (generateClassPropNameList && Stream.of(entityClassesToUse).map(ClassUtil::getSimpleClassName).containsDuplicates()) {
             throw new IllegalArgumentException(
                     "Duplicate simple class names found: " + allClassName + ". It's not supported when generateClassPropNameList is true");
         }
@@ -548,7 +547,7 @@ public final class CodeGenerationUtil {
                             .append(propNameMap.containsKey(fieldNameForPropNameList) ? "_" : "")
                             .append(fieldNameForPropNameList)
                             .append(" = List.of(")
-                            .append(StreamEx.of(classPropNameListEntry.getValue()).sorted().join(", "))
+                            .append(Stream.of(classPropNameListEntry.getValue()).sorted().join(", "))
                             .append(");")
                             .append(LINE_SEPARATOR);
                 }
@@ -559,8 +558,8 @@ public final class CodeGenerationUtil {
             if (codeConfig.isGenerateSnakeCase()) {
                 final ListMultimap<Tuple2<String, String>, String> propNameMap = N.newListMultimap();
                 final ListMultimap<String, String> classPropNameListMap = N.newListMultimap();
-                final BiFunction<Class<?>, String, String> propNameConverterForSnakeCase = N.defaultIfNull(codeConfig.getPropNameConverterForSnakeCase(),
-                        (cls, propName) -> Strings.toSnakeCase(propName));
+                final BiFunction<Class<?>, String, String> propNameConverterForSnakeCase = CommonUtil
+                        .defaultIfNull(codeConfig.getPropNameConverterForSnakeCase(), (cls, propName) -> Strings.toSnakeCase(propName));
 
                 for (final Class<?> cls : entityClassesToUse) {
                     final String simpleClassName = ClassUtil.getSimpleClassName(cls);
@@ -654,7 +653,7 @@ public final class CodeGenerationUtil {
                                 .append(propNames.contains(fieldNameForPropNameList) ? "_" : "")
                                 .append(fieldNameForPropNameList)
                                 .append(" = List.of(")
-                                .append(StreamEx.of(classPropNameListEntry.getValue()).sorted().join(", "))
+                                .append(Stream.of(classPropNameListEntry.getValue()).sorted().join(", "))
                                 .append(");")
                                 .append(LINE_SEPARATOR);
                     }
@@ -669,7 +668,7 @@ public final class CodeGenerationUtil {
             if (codeConfig.isGenerateScreamingSnakeCase()) {
                 final ListMultimap<Tuple2<String, String>, String> propNameMap = N.newListMultimap();
                 final ListMultimap<String, String> classPropNameListMap = N.newListMultimap();
-                final BiFunction<Class<?>, String, String> propNameConverterForScreamingSnakeCase = N
+                final BiFunction<Class<?>, String, String> propNameConverterForScreamingSnakeCase = CommonUtil
                         .defaultIfNull(codeConfig.getPropNameConverterForScreamingSnakeCase(), (cls, propName) -> Strings.toScreamingSnakeCase(propName));
 
                 for (final Class<?> cls : entityClassesToUse) {
@@ -764,7 +763,7 @@ public final class CodeGenerationUtil {
                                 .append(propNames.contains(fieldNameForPropNameList) ? "_" : "")
                                 .append(fieldNameForPropNameList)
                                 .append(" = List.of(")
-                                .append(StreamEx.of(classPropNameListEntry.getValue()).sorted().join(", "))
+                                .append(Stream.of(classPropNameListEntry.getValue()).sorted().join(", "))
                                 .append(");")
                                 .append(LINE_SEPARATOR);
                     }

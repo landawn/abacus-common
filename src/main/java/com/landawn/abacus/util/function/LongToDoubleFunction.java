@@ -61,8 +61,8 @@ public interface LongToDoubleFunction extends Throwables.LongToDoubleFunction<Ru
      *   <li>Custom business logic transformations</li>
      * </ul>
      *
-     * @param value the function argument as a long
-     * @return the function result as a double
+     * @param value the {@code long} function argument
+     * @return the {@code double} result of applying this function to the argument
      */
     @Override
     double applyAsDouble(long value);

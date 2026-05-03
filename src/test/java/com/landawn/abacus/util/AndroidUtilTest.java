@@ -1,7 +1,5 @@
 package com.landawn.abacus.util;
 
-import com.landawn.abacus.TestBase;
-
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -9,6 +7,8 @@ import java.util.concurrent.Executor;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import com.landawn.abacus.TestBase;
 
 public class AndroidUtilTest extends TestBase {
 

@@ -27,17 +27,17 @@ import com.landawn.abacus.util.u.Optional;
  * A mutable container class that holds two related objects as a pair.
  * This class implements {@link Map.Entry} to provide compatibility with Java's Map interface
  * and {@link Mutable} to indicate that its state can be modified after creation.
- * 
+ *
  * <p>The pair consists of two elements referred to as "left" and "right". Both elements
  * can be of any type, including {@code null}. This class is particularly useful when you need
  * to return two values from a method or store two related objects together.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Pair<String, Integer> nameAge = Pair.of("John", 25);
  * String name = nameAge.left();
  * Integer age = nameAge.right();
- * 
+ *
  * // Modify the pair
  * nameAge.setLeft("Jane");
  * nameAge.setRight(30);
@@ -62,7 +62,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     /**
      * Constructs an empty Pair with both left and right elements initialized to {@code null}.
      * This constructor is useful when you need to create a pair and set its values later.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = new Pair<>();
@@ -290,10 +290,13 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     }
 
     /**
-     * Atomically sets the left element to the given value and returns the previous value.
+     * Sets the left element to the given value and returns the previous value.
      *
      * <p>This method performs a swap operation: it sets the new value and returns what was
      * previously held. This is particularly useful when you need to track state changes.</p>
+     *
+     * <p><b>Note:</b> This operation is not atomic; this class is not thread-safe.
+     * External synchronization is required for concurrent use.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -333,10 +336,13 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     }
 
     /**
-     * Atomically sets the right element to the given value and returns the previous value.
+     * Sets the right element to the given value and returns the previous value.
      *
      * <p>This method performs a swap operation: it sets the new value and returns what was
      * previously held. This is particularly useful when you need to track state changes.</p>
+     *
+     * <p><b>Note:</b> This operation is not atomic; this class is not thread-safe.
+     * External synchronization is required for concurrent use.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -459,10 +465,11 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * updated to {@code newLeft} and {@code newRight} respectively. If the predicate
      * returns {@code false}, this pair remains unchanged.</p>
      *
-     * <p>From the caller's perspective, the update of left and right is atomic:
+     * <p>From a single thread's perspective, the update of left and right is all-or-nothing:
      * either both values are changed, or neither is. The predicate is evaluated at
      * most once. If it throws an exception, neither element is modified and the
-     * exception is propagated.</p>
+     * exception is propagated. Note: this class is not thread-safe; the two field
+     * assignments are not atomic with respect to other threads.</p>
      *
      * <p><b>Usage examples:</b></p>
      * <pre>{@code
@@ -501,7 +508,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Creates and returns a new Pair with the left and right elements swapped.
      * The original pair remains unchanged. This method is marked as @Beta,
      * indicating it may be subject to change in future versions.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> original = Pair.of("Hello", 42);
@@ -522,7 +529,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * The new pair contains the same left and right references as this pair.
      * Note that this is a shallow copy - if the elements are mutable objects,
      * changes to those objects will be reflected in both pairs.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, List<Integer>> original = Pair.of("Numbers", new ArrayList<>());
@@ -546,7 +553,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Converts this pair to an Object array containing two elements.
      * The first element of the array is the left element of the pair,
      * and the second element is the right element. Either or both can be {@code null}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 42);
@@ -566,18 +573,18 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * at index 0 and the right element at index 1. If the provided array has a length
      * of at least 2, it is used directly; otherwise, a new array of the same type
      * with length 2 is created.
-     * 
+     *
      * <p>This method follows the contract of {@link java.util.Collection#toArray(Object[])}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, String> pair = Pair.of("Hello", "World");
-     * 
+     *
      * // Using an array with sufficient size
      * String[] existing = new String[3];
      * String[] result = pair.toArray(existing);
      * // result == existing, result[0] = "Hello", result[1] = "World", result[2] = null
-     * 
+     *
      * // Using an array with insufficient size
      * String[] small = new String[1];
      * String[] result2 = pair.toArray(small);
@@ -585,10 +592,10 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * }</pre>
      *
      * @param <A> the component type of the array.
-     * @param a the array into which the elements are to be stored, if it is big enough;.
+     * @param a the array into which the elements are to be stored, if it is big enough;
      *          otherwise, a new array of the same runtime type is allocated for this purpose
      * @return an array containing the left element at index 0 and the right element at index 1.
-     * @throws ArrayStoreException if the runtime type of the specified array is not a.
+     * @throws ArrayStoreException if the runtime type of the specified array is not a
      *         supertype of the runtime type of the elements in this pair
      */
     public <A> A[] toArray(A[] a) {
@@ -606,14 +613,14 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Performs the given action on each element of this pair.
      * The consumer is called first with the left element, then with the right element.
      * The consumer must be able to handle the types of both elements.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, String> pair = Pair.of("Hello", "World");
      * List<String> collected = new ArrayList<>();
      * pair.forEach(collected::add);
      * // collected now contains ["Hello", "World"]
-     * 
+     *
      * // With different types (requires consumer that accepts Object)
      * Pair<String, Integer> mixed = Pair.of("Count", 42);
      * mixed.forEach(System.out::println);
@@ -621,7 +628,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * }</pre>
      *
      * @param <E> the type of exception that the consumer may throw.
-     * @param consumer the action to be performed on each element; must accept a common.
+     * @param consumer the action to be performed on each element; must accept a common
      *                 supertype of both L and R (typically Object)
      * @throws E if the consumer throws an exception.
      * @throws ClassCastException if the consumer cannot accept the types of the elements.
@@ -637,14 +644,14 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Performs the given action with both elements of this pair as arguments.
      * This method is useful when you need to process both elements together
      * in a single operation.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Age", 25);
      * Map<String, Integer> map = new HashMap<>();
      * pair.accept(map::put);
      * // map now contains {"Age": 25}
-     * 
+     *
      * pair.accept((name, value) -> {
      *     System.out.println(name + " = " + value);
      * });
@@ -663,7 +670,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Performs the given action with this pair as the argument.
      * This method is useful when you want to process the pair as a whole
      * rather than its individual elements.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Score", 100);
@@ -691,13 +698,13 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Applies the given function to both elements of this pair and returns the result.
      * The function receives the left element as the first argument and the right element
      * as the second argument.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Integer, Integer> dimensions = Pair.of(10, 20);
      * Integer area = dimensions.map((width, height) -> width * height);
      * // area equals 200
-     * 
+     *
      * Pair<String, String> names = Pair.of("John", "Doe");
      * String fullName = names.map((first, last) -> first + " " + last);
      * // fullName equals "John Doe"
@@ -717,7 +724,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Applies the given function to this pair and returns the result.
      * The function receives the entire pair as its argument, allowing it to
      * access both elements and any methods of the pair.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> entry = Pair.of("Temperature", 25);
@@ -741,18 +748,18 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     /**
      * Returns an Optional containing this pair if the given predicate evaluates to true
      * for the left and right elements, otherwise returns an empty Optional.
-     * 
+     *
      * <p>This method is useful for conditional processing in functional pipelines.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 5);
-     * 
+     *
      * Optional<Pair<String, Integer>> filtered = pair.filter(
      *     (left, right) -> left.length() == right
      * );
      * // filtered.isPresent() is true because "Hello".length() == 5
-     * 
+     *
      * Optional<Pair<String, Integer>> filtered2 = pair.filter(
      *     (left, right) -> right > 10
      * );
@@ -761,7 +768,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * @param <E> the type of exception that the predicate may throw.
      * @param predicate the condition to test with the left and right elements.
-     * @return an Optional containing this pair if the predicate returns {@code true},.
+     * @return an Optional containing this pair if the predicate returns {@code true},
      *         otherwise an empty Optional
      * @throws E if the predicate throws an exception.
      */
@@ -772,10 +779,10 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     /**
      * Returns an Optional containing this pair if the given predicate evaluates to true
      * for this pair, otherwise returns an empty Optional.
-     * 
+     *
      * <p>This method is useful for conditional processing in functional pipelines
      * where the predicate needs access to the pair object itself.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Test", 10);
@@ -793,7 +800,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * @param <E> the type of exception that the predicate may throw.
      * @param predicate the condition to test with this pair.
-     * @return an Optional containing this pair if the predicate returns {@code true},.
+     * @return an Optional containing this pair if the predicate returns {@code true},
      *         otherwise an empty Optional
      * @throws E if the predicate throws an exception.
      */
@@ -805,7 +812,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Converts this pair to a Tuple2 (2-element tuple).
      * Tuples are similar to pairs but may provide different functionality
      * or be required by certain APIs.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 42);
@@ -823,10 +830,10 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Converts this pair to an immutable Map.Entry.
      * The resulting entry cannot be modified - attempts to call setValue()
      * on the returned entry will throw an UnsupportedOperationException.
-     * 
+     *
      * <p>This is useful when you need to pass the pair to APIs that expect
      * Map.Entry objects but want to ensure the values cannot be modified.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Age", 30);
@@ -948,20 +955,20 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Compares this pair to the specified object for equality.
      * Returns {@code true} if and only if the specified object is also a {@code Map.Entry},
      * and both entries have equal keys and values.
-     * 
+     *
      * <p>Two elements are considered equal if they are both {@code null},
      * or if they are equal according to their equals() method.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair1 = Pair.of("Hello", 42);
      * Pair<String, Integer> pair2 = Pair.of("Hello", 42);
      * Pair<String, Integer> pair3 = Pair.of("Hello", 43);
-     * 
+     *
      * pair1.equals(pair2);     // returns true
      * pair1.equals(pair3);     // returns false
      * pair1.equals("Hello");   // returns false (different type)
-     * 
+     *
      * Pair<String, Integer> pair4 = Pair.of(null, null);
      * Pair<String, Integer> pair5 = Pair.of(null, null);
      * pair4.equals(pair5);   // returns true
@@ -987,17 +994,17 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Returns a string representation of this pair.
      * The string representation consists of the left and right elements
      * enclosed in parentheses and separated by a comma and space.
-     * 
+     *
      * <p>The format is: {@code (left, right)}</p>
-     * 
+     *
      * <p>This format is compatible with Apache Commons Lang's Pair.toString()
      * for consistency across libraries.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 42);
      * System.out.println(pair);   // Prints: (Hello, 42)
-     * 
+     *
      * Pair<String, String> nullPair = Pair.of(null, "World");
      * System.out.println(nullPair);   // Prints: (null, World)
      * }</pre>

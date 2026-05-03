@@ -16,15 +16,19 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for primitive {@code long[]} arrays, providing serialization and deserialization support.
+ * Type handler for primitive {@code long[]} arrays, providing serialization, deserialization,
+ * and conversion between long arrays and their string representations or collections.
+ * String representations use the format {@code [1, 2, 3]} with comma-separated elements
+ * enclosed in square brackets.
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<long[]> {
@@ -32,13 +36,17 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
     public static final String LONG_ARRAY = long[].class.getSimpleName();
 
     private final Type<Long> elementType;
-    private final Type<Long>[] parameterTypes;
+    private final List<Type<?>> parameterTypes;
 
+    /**
+     * Constructs a new PrimitiveLongArrayType instance.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
+     */
     PrimitiveLongArrayType() {
         super(LONG_ARRAY);
 
         elementType = TypeFactory.getType(long.class);
-        parameterTypes = new Type[] { elementType };
+        parameterTypes = List.of(elementType);
     }
 
     /**
@@ -83,15 +91,15 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<long[]> type = TypeFactory.getType(long[].class);
-     * Type<Long>[] paramTypes = type.parameterTypes();
-     * // paramTypes[0] represents the element type
+     * List<Type<?>> paramTypes = type.parameterTypes();
+     * // paramTypes.get(0) represents the element type
      * }</pre>
      *
-     * @return an array containing the Long Type that describes the elements of this array type
+     * @return an immutable list containing the Long Type that describes the elements of this array type
      * @see #elementType()
      */
     @Override
-    public Type<Long>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 

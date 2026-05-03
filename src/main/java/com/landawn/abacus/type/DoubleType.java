@@ -20,29 +20,35 @@ import java.sql.SQLException;
 import com.landawn.abacus.util.Numbers;
 
 /**
- * Type handler for Double (wrapper class) values.
- * This class provides database operations and type information for Double objects.
- * It handles the conversion between database values and Java Double objects, supporting {@code null} values.
+ * Type handler for {@link Double} (wrapper class) values.
+ * This class provides database read operations and type information for {@link Double} objects.
+ *
+ * <p>When reading from a database, the column value is retrieved via
+ * {@link java.sql.ResultSet#getObject(int) ResultSet.getObject} to preserve SQL {@code NULL}:
+ * a {@code null} result returns {@code null}, a {@code Double} result is returned directly, and
+ * any other numeric type is converted via {@link com.landawn.abacus.util.Numbers#toDouble(Object)}.
+ *
+ * @see AbstractDoubleType
  */
 public final class DoubleType extends AbstractDoubleType {
 
     /**
-     * The type name constant for Double type identification.
+     * The type name constant for Double type identification, equal to {@code "Double"}.
      */
     public static final String DOUBLE = Double.class.getSimpleName();
 
     /**
-     * Package-private constructor for DoubleType.
-     * This constructor is called by the TypeFactory to create Double type instances.
+     * Package-private constructor for {@code DoubleType}.
+     * Instances are created by the {@code TypeFactory}.
      */
     DoubleType() {
         super(DOUBLE);
     }
 
     /**
-     * Returns the Class object representing the Double class.
+     * Returns the Java class represented by this type handler.
      *
-     * @return the Class object for Double.class
+     * @return {@code Double.class}
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
@@ -52,9 +58,9 @@ public final class DoubleType extends AbstractDoubleType {
 
     /**
      * Indicates whether this type represents a primitive wrapper class.
-     * Double is the wrapper class for the primitive double type.
+     * {@link Double} is the wrapper for the primitive {@code double} type.
      *
-     * @return {@code true}, indicating Double is a primitive wrapper
+     * @return {@code true}, always, because {@link Double} is a primitive wrapper
      */
     @Override
     public boolean isPrimitiveWrapper() {
@@ -62,19 +68,15 @@ public final class DoubleType extends AbstractDoubleType {
     }
 
     /**
-     * Retrieves a Double value from a ResultSet at the specified column index.
-     * This method handles various numeric types in the database and converts them to Double.
+     * Retrieves a {@link Double} value from a {@link java.sql.ResultSet} at the specified column index.
+     * The column is read via {@link java.sql.ResultSet#getObject(int)} to preserve SQL {@code NULL}.
+     * If the returned object is already a {@link Double} it is returned directly; any other numeric
+     * type is converted via {@link com.landawn.abacus.util.Numbers#toDouble(Object)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Double> type = TypeFactory.getType(Double.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * Double price = type.get(rs, 1);   // retrieves Double from column 1
-     * }</pre>
-     *
-     * @param rs the ResultSet containing the data, must not be {@code null}
-     * @param columnIndex the column index (1-based) to retrieve the value from
-     * @return the Double value at the specified column, or {@code null} if the column value is SQL NULL
+     * @param rs          the {@link java.sql.ResultSet} to read from; must not be {@code null}
+     * @param columnIndex the 1-based column index
+     * @return the {@link Double} value at the specified column,
+     *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -91,19 +93,15 @@ public final class DoubleType extends AbstractDoubleType {
     }
 
     /**
-     * Retrieves a Double value from a ResultSet using the specified column label.
-     * This method handles various numeric types in the database and converts them to Double.
+     * Retrieves a {@link Double} value from a {@link java.sql.ResultSet} using the specified column label.
+     * The column is read via {@link java.sql.ResultSet#getObject(String)} to preserve SQL {@code NULL}.
+     * If the returned object is already a {@link Double} it is returned directly; any other numeric
+     * type is converted via {@link com.landawn.abacus.util.Numbers#toDouble(Object)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Double> type = TypeFactory.getType(Double.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * Double price = type.get(rs, "price");   // retrieves Double from "price" column
-     * }</pre>
-     *
-     * @param rs the ResultSet containing the data, must not be {@code null}
-     * @param columnName the label of the column to retrieve the value from, must not be {@code null}
-     * @return the Double value in the specified column, or {@code null} if the column value is SQL NULL
+     * @param rs         the {@link java.sql.ResultSet} to read from; must not be {@code null}
+     * @param columnName the label of the column to retrieve
+     * @return the {@link Double} value in the specified column,
+     *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs
      */
     @Override

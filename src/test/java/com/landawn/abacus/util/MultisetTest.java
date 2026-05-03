@@ -37,6 +37,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
+import com.landawn.abacus.util.Multiset.Entry;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.function.IntBiFunction;
@@ -297,7 +298,7 @@ public class MultisetTest extends AbstractTest {
         min = multiset.minOccurrences();
         assertTrue(min.isPresent());
         assertEquals(1, min.get().left().intValue());
-        assertTrue(CommonUtil.toSet("b", "d").contains(min.get().right()));
+        assertTrue(N.toSet("b", "d").contains(min.get().right()));
 
         multiset.clear();
         multiset.add("x", 5);
@@ -347,7 +348,7 @@ public class MultisetTest extends AbstractTest {
         max = multiset.maxOccurrences();
         assertTrue(max.isPresent());
         assertEquals(3, max.get().left().intValue());
-        assertTrue(CommonUtil.toSet("c", "d").contains(max.get().right()));
+        assertTrue(N.toSet("c", "d").contains(max.get().right()));
 
         multiset.clear();
         multiset.add("y", 2);
@@ -396,7 +397,7 @@ public class MultisetTest extends AbstractTest {
         Optional<Pair<Integer, List<String>>> allMin = multiset.allMinOccurrences();
         assertTrue(allMin.isPresent());
         assertEquals(1, allMin.get().left().intValue());
-        assertEquals(CommonUtil.toSet("b", "d"), new HashSet<>(allMin.get().right()));
+        assertEquals(N.toSet("b", "d"), new HashSet<>(allMin.get().right()));
 
         multiset.clear();
         multiset.add("x", 5);
@@ -404,7 +405,7 @@ public class MultisetTest extends AbstractTest {
         allMin = multiset.allMinOccurrences();
         assertTrue(allMin.isPresent());
         assertEquals(5, allMin.get().left().intValue());
-        assertEquals(CommonUtil.toSet("x", "y"), new HashSet<>(allMin.get().right()));
+        assertEquals(N.toSet("x", "y"), new HashSet<>(allMin.get().right()));
     }
 
     @Test
@@ -465,7 +466,7 @@ public class MultisetTest extends AbstractTest {
         Optional<Pair<Integer, List<String>>> allMax = multiset.allMaxOccurrences();
         assertTrue(allMax.isPresent());
         assertEquals(3, allMax.get().left().intValue());
-        assertEquals(CommonUtil.toSet("a", "d"), new HashSet<>(allMax.get().right()));
+        assertEquals(N.toSet("a", "d"), new HashSet<>(allMax.get().right()));
 
         multiset.clear();
         multiset.add("x", 1);
@@ -473,7 +474,7 @@ public class MultisetTest extends AbstractTest {
         allMax = multiset.allMaxOccurrences();
         assertTrue(allMax.isPresent());
         assertEquals(1, allMax.get().left().intValue());
-        assertEquals(CommonUtil.toSet("x", "y"), new HashSet<>(allMax.get().right()));
+        assertEquals(N.toSet("x", "y"), new HashSet<>(allMax.get().right()));
     }
 
     @Test
@@ -600,7 +601,7 @@ public class MultisetTest extends AbstractTest {
 
     @Test
     public void test_01() {
-        Multiset<String> set = CommonUtil.toMultiset("a", "b", "c", "C");
+        Multiset<String> set = N.toMultiset("a", "b", "c", "C");
         N.println(set);
         set.add("a");
 
@@ -817,7 +818,7 @@ public class MultisetTest extends AbstractTest {
 
     @Test
     public void test_02() {
-        Multiset<String> set = CommonUtil.toMultiset("a", "b", "c");
+        Multiset<String> set = N.toMultiset("a", "b", "c");
         N.println(set);
 
         set.setCount("a", 0);
@@ -856,11 +857,11 @@ public class MultisetTest extends AbstractTest {
         assertTrue(set.contains("a"));
         assertFalse(set.contains("e"));
 
-        assertTrue(set.containsAll(CommonUtil.toList("a", "b")));
-        assertFalse(set.contains(CommonUtil.toList("b", "e")));
+        assertTrue(set.containsAll(N.toList("a", "b")));
+        assertFalse(set.contains(N.toList("b", "e")));
 
-        assertTrue(set.containsAll(CommonUtil.toList("a")));
-        assertFalse(set.contains(CommonUtil.toList("e")));
+        assertTrue(set.containsAll(N.toList("a")));
+        assertFalse(set.contains(N.toList("e")));
 
         try {
             set.remove("a", -1);
@@ -878,27 +879,27 @@ public class MultisetTest extends AbstractTest {
         set.add("a", 3);
         assertEquals(3, set.getCount("a"));
 
-        CommonUtil.toList("a").forEach(e -> set.remove(e));
+        N.toList("a").forEach(e -> set.remove(e));
         assertEquals(2, set.getCount("a"));
         assertEquals(1, set.getCount("b"));
 
-        CommonUtil.toList("a", "b", "e").forEach(e -> set.remove(e, 2));
+        N.toList("a", "b", "e").forEach(e -> set.remove(e, 2));
         assertEquals(0, set.getCount("a"));
         assertEquals(0, set.getCount("b"));
 
         set.add("a", 3);
         set.add("b", 3);
 
-        set.retainAll(CommonUtil.toList("a", "b", "e"));
+        set.retainAll(N.toList("a", "b", "e"));
 
         assertEquals(3, set.getCount("a"));
         assertEquals(3, set.getCount("b"));
 
-        Multiset<String> set2 = CommonUtil.toMultiset();
+        Multiset<String> set2 = N.toMultiset();
         set2.setCount("a", 3);
         set2.setCount("b", 3);
 
-        assertTrue(CommonUtil.toSet(set).contains(set2));
+        assertTrue(N.toSet(set).contains(set2));
 
         set.clear();
         assertTrue(set.isEmpty());
@@ -2614,10 +2615,8 @@ public class MultisetTest extends AbstractTest {
         multiset.add("a", 3);
         multiset.add("b", 2);
         Set<Multiset.Entry<String>> entrySet = multiset.entrySet();
-        Iterator<Multiset.Entry<String>> iter = entrySet.iterator();
         int count = 0;
-        while (iter.hasNext()) {
-            Multiset.Entry<String> entry = iter.next();
+        for (Entry<String> entry : entrySet) {
             assertNotNull(entry.element());
             assertTrue(entry.count() > 0);
             count++;
@@ -2752,7 +2751,7 @@ public class MultisetTest extends AbstractTest {
 
     @Test
     public void testConstructorWithSetCollection() {
-        Set<String> initialElements = CommonUtil.toSet("a", "b", "c");
+        Set<String> initialElements = N.toSet("a", "b", "c");
         Multiset<String> multiset = new Multiset<>(initialElements);
         assertEquals(3, multiset.size());
         assertEquals(1, multiset.getCount("a"));

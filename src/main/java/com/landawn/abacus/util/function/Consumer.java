@@ -76,6 +76,7 @@ public interface Consumer<T> extends Throwables.Consumer<T, RuntimeException>, j
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code Consumer} that performs in sequence this operation followed by
      *         the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     @Override
     default Consumer<T> andThen(final java.util.function.Consumer<? super T> after) {

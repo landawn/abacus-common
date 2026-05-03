@@ -34,8 +34,8 @@ public interface BooleanUnaryOperator extends Throwables.BooleanUnaryOperator<Ru
      * boolean result = not.applyAsBoolean(true);   // Returns false
      * }</pre>
      *
-     * @param operand the input operand
-     * @return the result of applying this operator
+     * @param operand the input operand ({@code boolean} value)
+     * @return the operator result ({@code boolean} value)
      */
     @Override
     boolean applyAsBoolean(boolean operand);
@@ -52,6 +52,7 @@ public interface BooleanUnaryOperator extends Throwables.BooleanUnaryOperator<Ru
      *
      * @param before the operator to apply before this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies the {@code before} operator and then applies this operator
+     * @throws NullPointerException if {@code before} is null
      * @see #andThen(BooleanUnaryOperator)
      */
     default BooleanUnaryOperator compose(final BooleanUnaryOperator before) {
@@ -70,6 +71,7 @@ public interface BooleanUnaryOperator extends Throwables.BooleanUnaryOperator<Ru
      *
      * @param after the operator to apply after this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies this operator and then applies the {@code after} operator
+     * @throws NullPointerException if {@code after} is null
      * @see #compose(BooleanUnaryOperator)
      */
     default BooleanUnaryOperator andThen(final BooleanUnaryOperator after) {

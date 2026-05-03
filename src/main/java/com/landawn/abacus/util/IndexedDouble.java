@@ -16,12 +16,12 @@ package com.landawn.abacus.util;
 
 /**
  * Represents a primitive double value paired with an index position.
- * 
+ *
  * <p>This class is a specialized version of {@link Indexed} for primitive double values,
  * providing better performance by avoiding boxing/unboxing overhead.</p>
- * 
+ *
  * <p>The class is immutable and extends {@link AbstractIndexed}.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedDouble indexedDouble = IndexedDouble.of(3.14159, 5);
@@ -55,7 +55,7 @@ public final class IndexedDouble extends AbstractIndexed {
 
     /**
      * Creates a new IndexedDouble instance with the specified value and index.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedDouble indexed = IndexedDouble.of(3.14159, 5);
@@ -74,9 +74,9 @@ public final class IndexedDouble extends AbstractIndexed {
 
     /**
      * Creates a new IndexedDouble instance with the specified value and index.
-     * 
+     *
      * <p>This overload accepts a long index for cases where the index might exceed Integer.MAX_VALUE.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedDouble indexed = IndexedDouble.of(3.14159, 5000000000L);
@@ -95,7 +95,7 @@ public final class IndexedDouble extends AbstractIndexed {
 
     /**
      * Returns the double value stored in this IndexedDouble instance.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedDouble indexed = IndexedDouble.of(3.14159, 5);
@@ -110,7 +110,7 @@ public final class IndexedDouble extends AbstractIndexed {
 
     /**
      * Returns the hash code of this IndexedDouble instance.
-     * 
+     *
      * <p>The hash code is computed based on both the index and the value.</p>
      *
      * @return the hash code
@@ -122,17 +122,17 @@ public final class IndexedDouble extends AbstractIndexed {
 
     /**
      * Checks if this IndexedDouble instance is equal to another object.
-     * 
+     *
      * <p>Two IndexedDouble instances are equal if they have the same index and value.
-     * Double values are compared using {@link N#equals(double, double)} which handles
+     * Double values are compared using {@code N.equals} which handles
      * NaN and positive/negative zero correctly.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedDouble indexed1 = IndexedDouble.of(3.14159, 5);
      * IndexedDouble indexed2 = IndexedDouble.of(3.14159, 5);
      * IndexedDouble indexed3 = IndexedDouble.of(2.71828, 5);
-     * 
+     *
      * indexed1.equals(indexed2);   // true
      * indexed1.equals(indexed3);   // false
      * }</pre>
@@ -147,16 +147,16 @@ public final class IndexedDouble extends AbstractIndexed {
 
     /**
      * Returns a string representation of this IndexedDouble instance.
-     * 
-     * <p>The format is: [index]=value</p>
-     * 
+     *
+     * <p>The format is: {@code [index]=value}</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedDouble indexed = IndexedDouble.of(3.14159, 5);
      * System.out.println(indexed);   // prints: [5]=3.14159
      * }</pre>
      *
-     * @return a string representation in the format [index]=value
+     * @return a string representation in the format {@code [index]=value}
      */
     @Override
     public String toString() {

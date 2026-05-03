@@ -17,15 +17,16 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents a function that accepts a variable number of float-valued arguments and produces a result.
- * This is a functional interface whose functional method is {@link #apply(float...)}.
+ * This is the N-arity specialization of {@link FloatFunction}.
  *
- * <p>This is a primitive type specialization of {@code Function} for {@code float} varargs.</p>
+ * <p>This is a functional interface whose functional method is {@link #apply(float...)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <R> the type of the result of the function
  *
- * @see java.util.function.Function
+ * @see FloatFunction
+ * @see FloatBiFunction
  */
 @FunctionalInterface
 public interface FloatNFunction<R> extends Throwables.FloatNFunction<R, RuntimeException> { //NOSONAR
@@ -72,9 +73,10 @@ public interface FloatNFunction<R> extends Throwables.FloatNFunction<R, RuntimeE
      *
      * @param <V> the type of output of the {@code after} function, and of the
      *           composed function
-     * @param after the function to apply after this function is applied. Must not be {@code null}.
+     * @param after the function to apply after this function is applied
      * @return a composed function that first applies this function and then
      *         applies the {@code after} function
+     * @throws NullPointerException if {@code after} is null
      */
     @Override
     default <V> FloatNFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {

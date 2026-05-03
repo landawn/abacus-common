@@ -225,14 +225,38 @@ public class ShortStreamTest extends TestBase {
 
     @Test
     public void testFlatmap() {
-        ShortStream stream = ShortStream.of((short) 1, (short) 2).flatmap(n -> new short[] { n, (short) (n + 10) });
+        ShortStream stream = ShortStream.of((short) 1, (short) 2).flatMapArray(n -> new short[] { n, (short) (n + 10) });
         assertArrayEquals(new short[] { 1, 11, 2, 12 }, stream.toArray());
     }
 
     @Test
-    @DisplayName("Test flatmap() with array")
+    public void testFlatmapCollection() {
+        // multi
+        assertArrayEquals(new short[] { 1, 10, 2, 20 },
+                ShortStream.of((short) 1, (short) 2).flatmap(n -> Arrays.asList((Short) n, (short) (n * 10))).toArray());
+
+        // single
+        assertArrayEquals(new short[] { 7, 9 }, ShortStream.of((short) 7).flatmap(n -> Arrays.asList((Short) n, (short) 9)).toArray());
+
+        // empty stream
+        assertArrayEquals(new short[] {}, ShortStream.empty().flatmap(n -> Arrays.asList((Short) n)).toArray());
+
+        // empty collection
+        assertArrayEquals(new short[] {}, ShortStream.of((short) 1, (short) 2).flatmap(n -> java.util.Collections.<Short> emptyList()).toArray());
+
+        // null collection
+        assertArrayEquals(new short[] {}, ShortStream.of((short) 1).flatmap(n -> (java.util.Collection<Short>) null).toArray());
+
+        // null elements -> (short) 0
+        assertArrayEquals(new short[] { 0, 5, 0 }, ShortStream.of((short) 1).flatmap(n -> Arrays.asList((Short) null, (short) 5, (Short) null)).toArray());
+
+        assertEquals(4, ShortStream.of((short) 1, (short) 2).flatmap(n -> Arrays.asList((Short) null, n)).count());
+    }
+
+    @Test
+    @DisplayName("Test flatMapArray() with array")
     public void testFlatmapArray() {
-        ShortStream flattened = stream.flatmap(n -> new short[] { n, (short) (n * 10) });
+        ShortStream flattened = stream.flatMapArray(n -> new short[] { n, (short) (n * 10) });
         assertArrayEquals(new short[] { 1, 10, 2, 20, 3, 30, 4, 40, 5, 50 }, flattened.toArray());
     }
 
@@ -244,7 +268,7 @@ public class ShortStreamTest extends TestBase {
 
     @Test
     public void testFlatmap_Empty() {
-        short[] result = ShortStream.empty().flatmap(s -> new short[] { s, (short) (s * 2) }).toArray();
+        short[] result = ShortStream.empty().flatMapArray(s -> new short[] { s, (short) (s * 2) }).toArray();
         assertEquals(0, result.length);
     }
 
@@ -2212,26 +2236,26 @@ public class ShortStreamTest extends TestBase {
 
     @Test
     public void testStreamCreatedAfterFlatmap() {
-        assertEquals(6, ShortStream.of((short) 1, (short) 2, (short) 3).flatmap(i -> new short[] { i, (short) (i + 10) }).count());
-        assertEquals(4, ShortStream.of((short) 1, (short) 2, (short) 3).flatmap(i -> new short[] { i, (short) (i + 10) }).skip(2).count());
+        assertEquals(6, ShortStream.of((short) 1, (short) 2, (short) 3).flatMapArray(i -> new short[] { i, (short) (i + 10) }).count());
+        assertEquals(4, ShortStream.of((short) 1, (short) 2, (short) 3).flatMapArray(i -> new short[] { i, (short) (i + 10) }).skip(2).count());
         assertArrayEquals(new short[] { 1, 11, 2, 12, 3, 13 },
-                ShortStream.of((short) 1, (short) 2, (short) 3).flatmap(i -> new short[] { i, (short) (i + 10) }).toArray());
+                ShortStream.of((short) 1, (short) 2, (short) 3).flatMapArray(i -> new short[] { i, (short) (i + 10) }).toArray());
         assertArrayEquals(new short[] { 2, 12, 3, 13 },
-                ShortStream.of((short) 1, (short) 2, (short) 3).flatmap(i -> new short[] { i, (short) (i + 10) }).skip(2).toArray());
+                ShortStream.of((short) 1, (short) 2, (short) 3).flatMapArray(i -> new short[] { i, (short) (i + 10) }).skip(2).toArray());
         assertEquals(N.toList((short) 1, (short) 11, (short) 2, (short) 12, (short) 3, (short) 13),
-                ShortStream.of((short) 1, (short) 2, (short) 3).flatmap(i -> new short[] { i, (short) (i + 10) }).toList());
+                ShortStream.of((short) 1, (short) 2, (short) 3).flatMapArray(i -> new short[] { i, (short) (i + 10) }).toList());
         assertEquals(N.toList((short) 2, (short) 12, (short) 3, (short) 13),
-                ShortStream.of((short) 1, (short) 2, (short) 3).flatmap(i -> new short[] { i, (short) (i + 10) }).skip(2).toList());
-        assertEquals(6, ShortStream.of((short) 1, (short) 2, (short) 3).map(e -> e).flatmap(i -> new short[] { i, (short) (i + 10) }).count());
-        assertEquals(4, ShortStream.of((short) 1, (short) 2, (short) 3).map(e -> e).flatmap(i -> new short[] { i, (short) (i + 10) }).skip(2).count());
+                ShortStream.of((short) 1, (short) 2, (short) 3).flatMapArray(i -> new short[] { i, (short) (i + 10) }).skip(2).toList());
+        assertEquals(6, ShortStream.of((short) 1, (short) 2, (short) 3).map(e -> e).flatMapArray(i -> new short[] { i, (short) (i + 10) }).count());
+        assertEquals(4, ShortStream.of((short) 1, (short) 2, (short) 3).map(e -> e).flatMapArray(i -> new short[] { i, (short) (i + 10) }).skip(2).count());
         assertArrayEquals(new short[] { 1, 11, 2, 12, 3, 13 },
-                ShortStream.of((short) 1, (short) 2, (short) 3).map(e -> e).flatmap(i -> new short[] { i, (short) (i + 10) }).toArray());
+                ShortStream.of((short) 1, (short) 2, (short) 3).map(e -> e).flatMapArray(i -> new short[] { i, (short) (i + 10) }).toArray());
         assertArrayEquals(new short[] { 2, 12, 3, 13 },
-                ShortStream.of((short) 1, (short) 2, (short) 3).map(e -> e).flatmap(i -> new short[] { i, (short) (i + 10) }).skip(2).toArray());
+                ShortStream.of((short) 1, (short) 2, (short) 3).map(e -> e).flatMapArray(i -> new short[] { i, (short) (i + 10) }).skip(2).toArray());
         assertEquals(N.toList((short) 1, (short) 11, (short) 2, (short) 12, (short) 3, (short) 13),
-                ShortStream.of((short) 1, (short) 2, (short) 3).map(e -> e).flatmap(i -> new short[] { i, (short) (i + 10) }).toList());
+                ShortStream.of((short) 1, (short) 2, (short) 3).map(e -> e).flatMapArray(i -> new short[] { i, (short) (i + 10) }).toList());
         assertEquals(N.toList((short) 2, (short) 12, (short) 3, (short) 13),
-                ShortStream.of((short) 1, (short) 2, (short) 3).map(e -> e).flatmap(i -> new short[] { i, (short) (i + 10) }).skip(2).toList());
+                ShortStream.of((short) 1, (short) 2, (short) 3).map(e -> e).flatMapArray(i -> new short[] { i, (short) (i + 10) }).skip(2).toList());
     }
 
     @Test

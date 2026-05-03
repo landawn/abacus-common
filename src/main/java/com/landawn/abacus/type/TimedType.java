@@ -17,6 +17,7 @@ package com.landawn.abacus.type;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.List;
 
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
@@ -26,9 +27,9 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.Timed;
-import com.landawn.abacus.util.SK;
 
 /**
  * Type handler for {@link Timed} objects. This class provides serialization and
@@ -47,7 +48,7 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
 
     private final Type<T> valueType;
 
-    private final Type<?>[] parameterTypes;
+    private final List<Type<?>> parameterTypes;
 
     /**
      * Constructs a TimedType instance with the specified value type.
@@ -60,7 +61,7 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
 
         declaringName = getTypeName(valueTypeName, true);
         valueType = TypeFactory.getType(valueTypeName);
-        parameterTypes = new Type[] { valueType };
+        parameterTypes = List.of(valueType);
     }
 
     /**
@@ -85,15 +86,21 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
 
     /**
      * Returns the parameter types of this generic type.
-     * For Timed, this is an array containing a single element: the value type.
+     * For Timed, this is an immutable list containing a single element: the value type.
      *
-     * @return an array containing the value type
+     * @return an immutable list containing the value type
      */
     @Override
-    public Type<?>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 
+    /**
+     * Indicates whether this type is a parameterized type.
+     * {@code TimedType} is always parameterized as it carries a value type parameter.
+     *
+     * @return {@code true}, indicating this is a parameterized type
+     */
     @Override
     public boolean isParameterizedType() {
         return true;

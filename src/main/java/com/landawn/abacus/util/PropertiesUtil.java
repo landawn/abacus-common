@@ -57,7 +57,7 @@ import com.landawn.abacus.type.Type;
  * Utility class for working with properties files and XML configuration files.
  * This class provides methods to load, store, and convert between different property formats,
  * as well as support for automatic refresh of properties when files are modified.
- * 
+ *
  * <p>Key features include:</p>
  * <ul>
  *   <li>Loading properties from files, streams, and readers</li>
@@ -66,19 +66,19 @@ import com.landawn.abacus.type.Type;
  *   <li>Auto-refresh capability for properties when source files are modified</li>
  *   <li>Converting XML configuration to Java classes</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Load properties from file
  * Properties<String, String> props = PropertiesUtil.load(new File("config.properties"));
- * 
+ *
  * // Load with auto-refresh
  * Properties<String, String> autoProps = PropertiesUtil.load(new File("config.properties"), true);
- * 
+ *
  * // Load from XML
  * Properties<String, Object> xmlProps = PropertiesUtil.loadFromXml(new File("config.xml"));
  * }</pre>
- * 
+ *
  * @see Properties
  */
 @SuppressWarnings("java:S1192")
@@ -215,10 +215,10 @@ public final class PropertiesUtil {
      * This method returns absolute paths to existing directories from the predefined list of
      * common configuration locations. The search includes Maven/Gradle build directories,
      * resources directories, and standard config/conf directories at both current and parent levels.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<String> paths = Configuration.getCommonConfigPaths();
+     * List<String> paths = PropertiesUtil.getCommonConfigPaths();
      * for (String path : paths) {
      *     System.out.println("Config path: " + path);
      * }
@@ -282,11 +282,11 @@ public final class PropertiesUtil {
      * If the original file doesn't exist but a file with decoded spaces does exist,
      * returns the decoded file. This method helps handle file paths that may have
      * been URL-encoded.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File file = new File("/path/with%20spaces/file.xml");
-     * File formatted = Configuration.formatPath(file);
+     * File formatted = PropertiesUtil.formatPath(file);
      * // Returns File with path "/path/with spaces/file.xml"
      * }</pre>
      *
@@ -437,11 +437,11 @@ public final class PropertiesUtil {
      * The search starts in the parent directory of the source file, then falls back
      * to common configuration paths if not found. This method is useful for finding
      * related configuration files that are referenced from within another configuration file.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File mainConfig = new File("/app/config/main.xml");
-     * File dbConfig = Configuration.findFileRelativeTo(mainConfig, "database.xml");
+     * File dbConfig = PropertiesUtil.findFileRelativeTo(mainConfig, "database.xml");
      * // First looks in /app/config/, then searches common paths
      * }</pre>
      *
@@ -471,11 +471,11 @@ public final class PropertiesUtil {
      * The search is recursive and will search all subdirectories.
      * Directories named .cvs, .svn, and .git are ignored during the search.
      * The file name can include a relative path which will be preserved during the search.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File rootDir = new File("/app");
-     * File configFile = Configuration.findFileInDir("config/database.xml", rootDir, false);
+     * File configFile = PropertiesUtil.findFileInDir("config/database.xml", rootDir, false);
      * // Searches for database.xml in config subdirectories under /app
      * }</pre>
      *
@@ -709,8 +709,7 @@ public final class PropertiesUtil {
      * Merges the source properties into the target properties.
      *
      * @param srcProperties the source properties to merge from.
-     * @param targetProperties the target properties to merge into. If {@code null}, a new Properties object will be created.
-     * @return a Properties object containing the merged properties.
+     * @param targetProperties the target properties to merge into.
      */
     @SuppressWarnings("rawtypes")
     private static void merge(final java.util.Properties srcProperties, final Properties<String, String> targetProperties) {
@@ -993,7 +992,7 @@ public final class PropertiesUtil {
         for (int i = 0; i < propNodeLength; i++) {
             propNode = propNodes.item(i);
 
-            if (propNode.getNodeType() != Document.ELEMENT_NODE) {
+            if (propNode.getNodeType() != Node.ELEMENT_NODE) {
                 continue;
             }
 
@@ -1572,7 +1571,7 @@ public final class PropertiesUtil {
             for (int i = 0; i < childNodes.getLength(); i++) {
                 childNode = childNodes.item(i);
 
-                if (childNode.getNodeType() != Document.ELEMENT_NODE) {
+                if (childNode.getNodeType() != Node.ELEMENT_NODE) {
                     continue;
                 }
 
@@ -1594,7 +1593,7 @@ public final class PropertiesUtil {
             for (int i = 0; i < childNodes.getLength(); i++) {
                 childNode = childNodes.item(i);
 
-                if (childNode.getNodeType() != Document.ELEMENT_NODE) {
+                if (childNode.getNodeType() != Node.ELEMENT_NODE) {
                     continue;
                 }
 
@@ -1654,7 +1653,7 @@ public final class PropertiesUtil {
             for (int i = 0; i < childNodes.getLength(); i++) {
                 childNode = childNodes.item(i);
 
-                if (childNode.getNodeType() != Document.ELEMENT_NODE) {
+                if (childNode.getNodeType() != Node.ELEMENT_NODE) {
                     continue;
                 }
 
@@ -1691,7 +1690,7 @@ public final class PropertiesUtil {
         for (int i = 0; i < childNodes.getLength(); i++) {
             childNode = childNodes.item(i);
 
-            if (childNode.getNodeType() != Document.ELEMENT_NODE) {
+            if (childNode.getNodeType() != Node.ELEMENT_NODE) {
                 continue;
             }
 
@@ -1806,7 +1805,7 @@ public final class PropertiesUtil {
         for (int i = 0; i < childNodes.getLength(); i++) {
             childNode = childNodes.item(i);
 
-            if (childNode.getNodeType() != Document.ELEMENT_NODE) {
+            if (childNode.getNodeType() != Node.ELEMENT_NODE) {
                 continue;
             }
 
@@ -1838,7 +1837,7 @@ public final class PropertiesUtil {
         for (int i = 0; i < childNodes.getLength(); i++) {
             childNode = childNodes.item(i);
 
-            if (childNode.getNodeType() != Document.ELEMENT_NODE) {
+            if (childNode.getNodeType() != Node.ELEMENT_NODE) {
                 continue;
             }
 

@@ -67,6 +67,7 @@ public interface DoubleNConsumer {
      *
      * @param after the operation to perform after this operation
      * @return a composed {@code DoubleNConsumer} that performs in sequence this operation followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     default DoubleNConsumer andThen(final DoubleNConsumer after) {
         return args -> {

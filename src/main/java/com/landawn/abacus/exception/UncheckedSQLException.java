@@ -84,8 +84,10 @@ public class UncheckedSQLException extends UncheckedException {
     private static final long serialVersionUID = 9083988895292299710L;
 
     /**
-     * The wrapped {@code SQLException} that caused this unchecked exception.
-     * Contains the original SQL error details including SQL state and error code.
+     * The wrapped {@link SQLException} that caused this unchecked exception.
+     * Retains the original SQL-specific information including SQL state and vendor error code.
+     *
+     * @serial
      */
     private final SQLException cause;
 

@@ -19,6 +19,9 @@ import com.landawn.abacus.util.Throwables;
  * Represents a predicate (boolean-valued function) of an {@code int}-valued and an object-valued argument.
  * This is the {@code (int, reference)} specialization of {@link java.util.function.BiPredicate}.
  *
+ * <p>The parameter order follows the {@code IntObj*} convention: the {@code int} argument comes
+ * first, followed by the object argument of type {@code T}.
+ *
  * <p>This is a functional interface whose functional method is {@link #test(int, Object)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -38,8 +41,8 @@ public interface IntObjPredicate<T> extends Throwables.IntObjPredicate<T, Runtim
      * boolean valid = indexInRange.test(5, "Hello World");   // Returns true
      * }</pre>
      *
-     * @param t the {@code int} argument
-     * @param u the object argument
+     * @param t the {@code int} argument (first parameter)
+     * @param u the object argument of type {@code T} (second parameter)
      * @return {@code true} if the input arguments match the predicate, {@code false} otherwise
      */
     // @ai-ignore IntObj*/ObjInt* argument order convention - intentional: class name prefix determines parameter order. IntObj* has int first; ObjInt* has object first. Do not suggest reordering.
@@ -78,9 +81,10 @@ public interface IntObjPredicate<T> extends Throwables.IntObjPredicate<T, Runtim
      * boolean result = inRangeAndVowel.test(1, "Hello");   // Returns true ('e' is a vowel)
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate
+     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and
      *         the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default IntObjPredicate<T> and(final IntObjPredicate<T> other) {
         return (i, t) -> test(i, t) && other.test(i, t);
@@ -102,9 +106,10 @@ public interface IntObjPredicate<T> extends Throwables.IntObjPredicate<T, Runtim
      * boolean result = isFirstOrLast.test(0, "Hello");   // Returns true (first position)
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate
+     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and
      *         the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default IntObjPredicate<T> or(final IntObjPredicate<T> other) {
         return (i, t) -> test(i, t) || other.test(i, t);

@@ -15,14 +15,25 @@
 package com.landawn.abacus.type;
 
 /**
- * Type handler for primitive int values.
- * This class handles the primitive int type specifically, as opposed to the Integer wrapper class.
- * It provides type information and default value handling for int primitives.
+ * Type handler for the primitive {@code int} type, as opposed to the {@link Integer} wrapper class.
+ * It provides type information and default value handling for {@code int} primitives.
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Type<Integer> type = TypeFactory.getType(int.class);
+ *
+ * // Convert string to int
+ * Integer value = type.valueOf("42");   // Returns 42
+ *
+ * // Get default value
  * Integer defaultVal = type.defaultValue();   // Returns 0
+ *
+ * // Read from database
+ * try (ResultSet rs = stmt.executeQuery("SELECT age FROM users")) {
+ *     if (rs.next()) {
+ *         Integer age = type.get(rs, 1);
+ *     }
+ * }
  * }</pre>
  */
 @SuppressWarnings("java:S2160")
@@ -32,6 +43,10 @@ public final class PrimitiveIntType extends AbstractIntegerType {
 
     private static final Integer DEFAULT_VALUE = 0;
 
+    /**
+     * Constructs a new PrimitiveIntType instance.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
+     */
     PrimitiveIntType() {
         super(INT);
     }

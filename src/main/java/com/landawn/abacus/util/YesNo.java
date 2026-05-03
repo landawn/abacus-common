@@ -19,19 +19,19 @@ package com.landawn.abacus.util;
  * Each value is associated with an integer: NO (0) and YES (1).
  * This enum provides a type-safe way to work with boolean-like values
  * that need numeric representation, such as database flags or configuration values.
- * 
+ *
  * <p>This enum is particularly useful when:</p>
  * <ul>
  *   <li>Interfacing with databases that store boolean values as integers</li>
  *   <li>Working with legacy systems that use 0/1 for false/true</li>
  *   <li>Needing a more explicit representation than boolean for yes/no choices</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * YesNo answer = YesNo.YES;
  * int dbValue = answer.intValue();   // Returns 1
- * 
+ *
  * // Converting from database
  * int storedValue = resultSet.getInt("active");
  * YesNo isActive = YesNo.valueOf(storedValue);
@@ -59,12 +59,12 @@ public enum YesNo {
     /**
      * Returns the integer value associated with this YesNo constant.
      * NO returns 0, YES returns 1.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * YesNo consent = YesNo.YES;
      * int value = consent.intValue();   // Returns 1
-     * 
+     *
      * // Storing in database
      * preparedStatement.setInt(1, userConsent.intValue());
      * }</pre>
@@ -78,13 +78,13 @@ public enum YesNo {
     /**
      * Returns the YesNo enum constant corresponding to the specified integer value.
      * This method provides a way to convert from numeric representation back to the enum.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Reading from database
      * int dbValue = resultSet.getInt("is_active");
      * YesNo isActive = YesNo.valueOf(dbValue);
-     * 
+     *
      * if (isActive == YesNo.YES) {
      *     // Process active record
      * }

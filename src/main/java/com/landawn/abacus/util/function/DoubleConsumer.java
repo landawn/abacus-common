@@ -59,8 +59,9 @@ public interface DoubleConsumer extends Throwables.DoubleConsumer<RuntimeExcepti
      * combined.accept(5.5);   // Logs then validates
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation
      * @return a composed {@code DoubleConsumer} that performs in sequence this operation followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     @Override
     default DoubleConsumer andThen(final java.util.function.DoubleConsumer after) {

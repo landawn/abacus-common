@@ -26,48 +26,47 @@ import java.sql.SQLException;
 
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
-import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.Objectory;
 
 /**
- * Type handler for CLOB ASCII stream values.
- * This class provides database operations for handling Character Large Objects (CLOBs)
- * as ASCII input streams. It extends InputStreamType to handle CLOB data specifically
- * through ASCII stream representations.
+ * Type handler for CLOB (Character Large Object) values accessed as ASCII {@link java.io.InputStream}s.
+ * This class extends {@link InputStreamType} and overrides the JDBC accessors so that
+ * CLOB columns are read via {@link java.sql.Clob#getAsciiStream()} and written via
+ * {@link java.sql.PreparedStatement#setAsciiStream setAsciiStream}.
+ *
+ * <p>When writing CLOB data to a {@link java.io.Writer}-based {@link Appendable}, the stream is
+ * decoded as US-ASCII. For other {@link Appendable} targets, the stream is fully buffered into a
+ * string first.</p>
+ *
+ * @see InputStreamType
+ * @see java.sql.Clob
  */
 public class ClobAsciiStreamType extends InputStreamType {
 
     /**
-     * The type name constant for CLOB ASCII stream type identification.
+     * The type name constant used for registration, equal to {@code "ClobAsciiStream"}.
      */
     public static final String CLOB_ASCII_STREAM = "ClobAsciiStream";
 
     /**
-     * Package-private constructor for ClobAsciiStreamType.
-     * This constructor is called by the TypeFactory to create ClobAsciiStream type instances.
-     * ClobAsciiStreamType specializes in converting between SQL CLOB objects and ASCII InputStreams.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * // Obtained via TypeFactory
-     * Type<InputStream> type = TypeFactory.getType("ClobAsciiStream");
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * InputStream asciiStream = type.get(rs, "text_document");
-     * String content = IOUtil.readAllToString(asciiStream);
-     * }</pre>
+     * Package-private constructor for {@code ClobAsciiStreamType}.
+     * Instances are created by the {@code TypeFactory}.
      */
     ClobAsciiStreamType() {
         super(CLOB_ASCII_STREAM);
     }
 
     /**
-     * Retrieves a CLOB value as an ASCII InputStream from a ResultSet at the specified column index.
+     * Retrieves a CLOB column as an ASCII {@link java.io.InputStream} from a {@link java.sql.ResultSet}
+     * at the specified column index.
      *
-     * @param rs the ResultSet containing the data
-     * @param columnIndex the column index (1-based) of the CLOB value
-     * @return An InputStream containing the ASCII representation of the CLOB, or {@code null} if the column value is SQL NULL
+     * @param rs          the {@link java.sql.ResultSet} to read from
+     * @param columnIndex the 1-based column index
+     * @return an ASCII {@link java.io.InputStream} for the CLOB value,
+     *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
@@ -77,11 +76,13 @@ public class ClobAsciiStreamType extends InputStreamType {
     }
 
     /**
-     * Retrieves a CLOB value as an ASCII InputStream from a ResultSet using the specified column label.
+     * Retrieves a CLOB column as an ASCII {@link java.io.InputStream} from a {@link java.sql.ResultSet}
+     * using the specified column label.
      *
-     * @param rs the ResultSet containing the data
-     * @param columnName the label of the column containing the CLOB value
-     * @return An InputStream containing the ASCII representation of the CLOB, or {@code null} if the column value is SQL NULL
+     * @param rs         the {@link java.sql.ResultSet} to read from
+     * @param columnName the label of the column to retrieve
+     * @return an ASCII {@link java.io.InputStream} for the CLOB value,
+     *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
@@ -90,12 +91,12 @@ public class ClobAsciiStreamType extends InputStreamType {
     }
 
     /**
-     * Sets an ASCII InputStream as a parameter in a PreparedStatement.
-     * The stream will be read and stored as CLOB data in ASCII format.
+     * Sets an ASCII {@link java.io.InputStream} as a parameter in a {@link java.sql.PreparedStatement}.
+     * The stream is bound via {@link java.sql.PreparedStatement#setAsciiStream(int, java.io.InputStream)}.
      *
-     * @param stmt the PreparedStatement in which to set the parameter
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the ASCII InputStream to set. Can be {@code null}.
+     * @param stmt        the {@link java.sql.PreparedStatement} in which to set the parameter
+     * @param columnIndex the 1-based parameter index
+     * @param x           the ASCII {@link java.io.InputStream} to bind; may be {@code null}
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
@@ -104,12 +105,12 @@ public class ClobAsciiStreamType extends InputStreamType {
     }
 
     /**
-     * Sets an ASCII InputStream as a named parameter in a CallableStatement.
-     * The stream will be read and stored as CLOB data in ASCII format.
+     * Sets an ASCII {@link java.io.InputStream} as a named parameter in a {@link java.sql.CallableStatement}.
+     * The stream is bound via {@link java.sql.CallableStatement#setAsciiStream(String, java.io.InputStream)}.
      *
-     * @param stmt the CallableStatement in which to set the parameter
+     * @param stmt          the {@link java.sql.CallableStatement} in which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the ASCII InputStream to set. Can be {@code null}.
+     * @param x             the ASCII {@link java.io.InputStream} to bind; may be {@code null}
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
@@ -118,13 +119,14 @@ public class ClobAsciiStreamType extends InputStreamType {
     }
 
     /**
-     * Sets an ASCII InputStream as a parameter in a PreparedStatement with a specified length.
-     * The stream will be read up to the specified length and stored as CLOB data.
+     * Sets an ASCII {@link java.io.InputStream} as a parameter in a {@link java.sql.PreparedStatement},
+     * specifying the number of bytes to read.
+     * The stream is bound via {@link java.sql.PreparedStatement#setAsciiStream(int, java.io.InputStream, int)}.
      *
-     * @param stmt the PreparedStatement in which to set the parameter
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the ASCII InputStream to set. Can be {@code null}.
-     * @param sqlTypeOrLength the length of the stream in bytes
+     * @param stmt            the {@link java.sql.PreparedStatement} in which to set the parameter
+     * @param columnIndex     the 1-based parameter index
+     * @param x               the ASCII {@link java.io.InputStream} to bind; may be {@code null}
+     * @param sqlTypeOrLength the number of bytes to read from the stream
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
@@ -133,13 +135,14 @@ public class ClobAsciiStreamType extends InputStreamType {
     }
 
     /**
-     * Sets an ASCII InputStream as a named parameter in a CallableStatement with a specified length.
-     * The stream will be read up to the specified length and stored as CLOB data.
+     * Sets an ASCII {@link java.io.InputStream} as a named parameter in a {@link java.sql.CallableStatement},
+     * specifying the number of bytes to read.
+     * The stream is bound via {@link java.sql.CallableStatement#setAsciiStream(String, java.io.InputStream, int)}.
      *
-     * @param stmt the CallableStatement in which to set the parameter
-     * @param parameterName the name of the parameter to set
-     * @param x the ASCII InputStream to set. Can be {@code null}.
-     * @param sqlTypeOrLength the length of the stream in bytes
+     * @param stmt            the {@link java.sql.CallableStatement} in which to set the parameter
+     * @param parameterName   the name of the parameter to set
+     * @param x               the ASCII {@link java.io.InputStream} to bind; may be {@code null}
+     * @param sqlTypeOrLength the number of bytes to read from the stream
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
@@ -148,12 +151,13 @@ public class ClobAsciiStreamType extends InputStreamType {
     }
 
     /**
-     * Appends the contents of an ASCII InputStream to an Appendable output.
-     * If the Appendable is a Writer, data is streamed directly for efficiency.
-     * Otherwise, the entire stream is read into a string first.
+     * Appends the contents of an ASCII {@link java.io.InputStream} to an {@link Appendable}.
+     * If {@code appendable} is a {@link java.io.Writer}, the stream is decoded with US-ASCII and
+     * piped directly for efficiency. Otherwise, the entire stream is read into a {@link String} first.
+     * If {@code x} is {@code null}, the literal {@code null} is appended.
      *
-     * @param appendable the Appendable to write to
-     * @param x the ASCII InputStream to append. Can be {@code null}.
+     * @param appendable the {@link Appendable} to write to
+     * @param x          the ASCII {@link java.io.InputStream} whose content to append; may be {@code null}
      * @throws IOException if an I/O error occurs during reading or writing
      */
     @Override
@@ -170,13 +174,14 @@ public class ClobAsciiStreamType extends InputStreamType {
     }
 
     /**
-     * Writes the contents of an ASCII InputStream to a CharacterWriter.
-     * The stream is read in chunks using a buffer for efficiency.
-     * If serialization config specifies string quotation, the content is wrapped in quotes.
+     * Writes the contents of an ASCII {@link java.io.InputStream} to a {@link CharacterWriter}.
+     * The stream is decoded with US-ASCII and read in chunks using a pooled character buffer.
+     * If {@code config} specifies a non-zero string quotation character, the entire content is
+     * wrapped in that quote character. If {@code x} is {@code null}, the literal {@code null} is written.
      *
-     * @param writer the CharacterWriter to write to
-     * @param x the ASCII InputStream to write. Can be {@code null}.
-     * @param config the serialization configuration for quotation settings. Can be {@code null}.
+     * @param writer the {@link CharacterWriter} to write to
+     * @param x      the ASCII {@link java.io.InputStream} to write; may be {@code null}
+     * @param config serialization configuration controlling string quotation; may be {@code null}
      * @throws IOException if an I/O error occurs during reading or writing
      */
     @Override
@@ -210,11 +215,12 @@ public class ClobAsciiStreamType extends InputStreamType {
     }
 
     /**
-     * Converts a CLOB to an ASCII InputStream.
-     * This is a utility method used internally to extract ASCII streams from CLOB objects.
+     * Extracts an ASCII {@link java.io.InputStream} from a {@link java.sql.Clob}.
+     * This is a package-private utility used by both {@code get} overloads.
      *
-     * @param clob the CLOB to convert. Can be {@code null}.
-     * @return An ASCII InputStream from the CLOB, or {@code null} if the CLOB is null
+     * @param clob the {@link java.sql.Clob} to read from; may be {@code null}
+     * @return an ASCII {@link java.io.InputStream} for the CLOB's content,
+     *         or {@code null} if {@code clob} is {@code null}
      * @throws SQLException if a database access error occurs while accessing the CLOB
      */
     static InputStream clobToAsciiStream(final Clob clob) throws SQLException {

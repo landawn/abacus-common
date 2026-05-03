@@ -258,7 +258,7 @@ public class ParallelIteratorLongStreamTest extends TestBase {
     public void testFlatMapLongArray() {
         LongStream stream = createLongStream(new long[] { 1L, 2L });
         LongFunction<long[]> mapper = l -> new long[] { l, l + 10L };
-        List<Long> result = stream.flatmap(mapper).toList();
+        List<Long> result = stream.flatMapArray(mapper).toList();
         assertEquals(4, result.size());
         assertTrue(result.contains(1L));
         assertTrue(result.contains(11L));
@@ -291,10 +291,38 @@ public class ParallelIteratorLongStreamTest extends TestBase {
 
     @Test
     public void testFlatmap_singleThread() {
-        List<Long> result = createSingleThreadLongStream(new long[] { 1L, 2L }).flatmap(l -> new long[] { l, l + 10L }).toList();
+        List<Long> result = createSingleThreadLongStream(new long[] { 1L, 2L }).flatMapArray(l -> new long[] { l, l + 10L }).toList();
         assertEquals(4, result.size());
         assertTrue(result.contains(1L));
         assertTrue(result.contains(11L));
+    }
+
+    @Test
+    public void testFlatmapCollection() {
+        List<Long> r = createLongStream(new long[] { 1L, 2L }).flatmap(l -> Arrays.asList(l, l * 10L)).boxed().toList();
+        assertHaveSameElements(Arrays.asList(1L, 10L, 2L, 20L), r);
+
+        // empty
+        assertEquals(0, createLongStream(new long[] {}).flatmap(l -> Arrays.asList((Long) l)).count());
+        assertEquals(0, createLongStream(new long[] { 1L }).flatmap(l -> java.util.Collections.<Long> emptyList()).count());
+        assertEquals(0, createLongStream(new long[] { 1L }).flatmap(l -> (java.util.Collection<Long>) null).count());
+
+        // null elements -> 0L
+        long[] withNulls = createLongStream(new long[] { 1L }).flatmap(l -> Arrays.asList((Long) null, 9L)).toArray();
+        assertEquals(2, withNulls.length);
+        assertEquals(0L, withNulls[0]);
+        assertEquals(9L, withNulls[1]);
+    }
+
+    @Test
+    public void testFlatmapCollection_SequentialFallback() {
+        List<Long> r = createSingleThreadLongStream(new long[] { 1L, 2L }).flatmap(l -> Arrays.asList(l, l + 10L)).boxed().toList();
+        assertHaveSameElements(Arrays.asList(1L, 11L, 2L, 12L), r);
+
+        long[] withNulls = createSingleThreadLongStream(new long[] { 1L }).flatmap(l -> Arrays.asList((Long) null, l)).toArray();
+        assertEquals(2, withNulls.length);
+        assertEquals(0L, withNulls[0]);
+        assertEquals(1L, withNulls[1]);
     }
 
     @Test
@@ -339,7 +367,7 @@ public class ParallelIteratorLongStreamTest extends TestBase {
     @Test
     public void testFlatMapToDouble() {
         LongStream stream = createLongStream(new long[] { 1L, 2L });
-        List<Double> result = stream.flatMapToDouble(l -> DoubleStream.of((double) l, (double) (l + 0.5))).toList();
+        List<Double> result = stream.flatMapToDouble(l -> DoubleStream.of(l, l + 0.5)).toList();
         assertEquals(4, result.size());
         assertTrue(result.contains(1.0));
         assertTrue(result.contains(1.5));
@@ -349,8 +377,7 @@ public class ParallelIteratorLongStreamTest extends TestBase {
 
     @Test
     public void testFlatMapToDouble_singleThread() {
-        List<Double> result = createSingleThreadLongStream(new long[] { 1L, 2L }).flatMapToDouble(l -> DoubleStream.of((double) l, (double) (l + 0.5)))
-                .toList();
+        List<Double> result = createSingleThreadLongStream(new long[] { 1L, 2L }).flatMapToDouble(l -> DoubleStream.of(l, l + 0.5)).toList();
         assertEquals(4, result.size());
         assertTrue(result.contains(1.0));
         assertTrue(result.contains(1.5));

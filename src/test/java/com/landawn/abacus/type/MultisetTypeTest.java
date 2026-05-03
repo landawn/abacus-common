@@ -2,6 +2,8 @@ package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,9 +43,9 @@ public class MultisetTypeTest extends TestBase {
 
     @Test
     public void testGetParameterTypes() {
-        Type<String>[] paramTypes = multisetType.parameterTypes();
+        List<Type<?>> paramTypes = multisetType.parameterTypes();
         Assertions.assertNotNull(paramTypes);
-        assertEquals(1, paramTypes.length);
+        assertEquals(1, paramTypes.size());
     }
 
     @Test

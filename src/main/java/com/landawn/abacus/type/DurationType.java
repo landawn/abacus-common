@@ -29,28 +29,35 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for Duration values.
- * This class provides serialization, deserialization, and database operations for Duration objects.
- * Durations are stored as milliseconds (long values) in the database and string representations.
+ * Type handler for {@link Duration} values.
+ * This class provides serialization, deserialization, and database operations for
+ * {@link Duration} objects.
+ *
+ * <p>Durations are represented as their millisecond count ({@code long}) in both string form
+ * and database storage. In the database, the corresponding SQL type is {@link Types#BIGINT}.
+ *
+ * @see AbstractType
+ * @see Duration
+ * @see Types#BIGINT
  */
 public class DurationType extends AbstractType<Duration> {
 
-    /** The type name constant for Duration type identification. */
+    /** The type name constant for Duration type identification, equal to {@code "Duration"}. */
     public static final String DURATION = Duration.class.getSimpleName();
 
     /**
-     * Package-private constructor for DurationType.
-     * This constructor is called by the TypeFactory to create Duration type instances.
+     * Package-private constructor for {@code DurationType}.
+     * Instances are created by the {@code TypeFactory}.
      */
     DurationType() {
         super(DURATION);
     }
 
     /**
-     * Indicates whether Duration values are comparable.
-     * Duration implements Comparable, so this returns {@code true}.
+     * Indicates whether {@link Duration} values are comparable.
+     * {@link Duration} implements {@link Comparable}, so this returns {@code true}.
      *
-     * @return {@code true}, indicating Duration values are comparable
+     * @return {@code true}, always, because {@link Duration} is {@link Comparable}
      */
     @Override
     public boolean isComparable() {
@@ -58,9 +65,9 @@ public class DurationType extends AbstractType<Duration> {
     }
 
     /**
-     * Returns the Java class type handled by this type handler.
+     * Returns the Java class represented by this type handler.
      *
-     * @return The Class object representing Duration.class
+     * @return {@code Duration.class}
      */
     @Override
     public Class<Duration> javaType() {
@@ -69,9 +76,9 @@ public class DurationType extends AbstractType<Duration> {
 
     /**
      * Indicates whether values of this type require quoting in CSV format.
-     * Duration values are numeric (milliseconds) and do not require quotes.
+     * Duration values are stored as plain numeric strings (millisecond counts) and do not need quotes.
      *
-     * @return {@code false}, as duration values do not require quoting in CSV format
+     * @return {@code false}, always, because duration values are plain numbers in CSV
      */
     @Override
     public boolean isCsvQuoteRequired() {
@@ -79,11 +86,11 @@ public class DurationType extends AbstractType<Duration> {
     }
 
     /**
-     * Converts a Duration to its string representation.
-     * The duration is represented as the number of milliseconds.
+     * Converts a {@link Duration} to its string representation.
+     * The duration is serialized as its millisecond count (e.g., {@code "5000"} for 5 seconds).
      *
-     * @param x the Duration to convert. Can be {@code null}.
-     * @return A string containing the milliseconds value, or {@code null} if input is null
+     * @param x the {@link Duration} to convert; may be {@code null}
+     * @return a string containing the millisecond count, or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final Duration x) {
@@ -91,24 +98,11 @@ public class DurationType extends AbstractType<Duration> {
     }
 
     /**
-     * Converts a string representation back to a Duration.
-     * The string should contain a numeric value representing milliseconds.
+     * Parses a millisecond-count string back into a {@link Duration}.
+     * The string must contain a valid {@code long} value (e.g., {@code "5000"} for 5 seconds).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Duration> type = TypeFactory.getType(Duration.class);
-     * Duration duration1 = type.valueOf("5000");
-     * // Creates 5-second duration
-     *
-     * Duration duration2 = type.valueOf("60000");
-     * // Creates 1-minute duration
-     *
-     * Duration duration3 = type.valueOf(null);
-     * // Returns null
-     * }</pre>
-     *
-     * @param str the string containing milliseconds value. Can be {@code null} or empty.
-     * @return A Duration created from the milliseconds value, or {@code null} if input is null/empty
+     * @param str the millisecond count as a string; may be {@code null} or empty
+     * @return the corresponding {@link Duration}, or {@code null} if {@code str} is {@code null} or empty
      */
     @Override
     public Duration valueOf(final String str) {
@@ -116,12 +110,14 @@ public class DurationType extends AbstractType<Duration> {
     }
 
     /**
-     * Retrieves a Duration value from a ResultSet at the specified column index.
-     * The database value is read as a long (milliseconds) and converted to Duration.
+     * Retrieves a {@link Duration} value from a {@link java.sql.ResultSet} at the specified column index.
+     * The column is read as a {@code long} (millisecond count) via {@link java.sql.ResultSet#getLong(int)};
+     * SQL {@code NULL} is detected with {@link java.sql.ResultSet#wasNull()} and returns {@code null}.
      *
-     * @param rs the ResultSet containing the data
-     * @param columnIndex the column index (1-based) of the duration value
-     * @return A Duration created from the milliseconds value in the database
+     * @param rs          the {@link java.sql.ResultSet} to read from
+     * @param columnIndex the 1-based column index
+     * @return a {@link Duration} created from the stored millisecond count,
+     *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
@@ -132,12 +128,14 @@ public class DurationType extends AbstractType<Duration> {
     }
 
     /**
-     * Retrieves a Duration value from a ResultSet using the specified column label.
-     * The database value is read as a long (milliseconds) and converted to Duration.
+     * Retrieves a {@link Duration} value from a {@link java.sql.ResultSet} using the specified column label.
+     * The column is read as a {@code long} (millisecond count) via {@link java.sql.ResultSet#getLong(String)};
+     * SQL {@code NULL} is detected with {@link java.sql.ResultSet#wasNull()} and returns {@code null}.
      *
-     * @param rs the ResultSet containing the data
-     * @param columnName the label of the column containing the duration value
-     * @return A Duration created from the milliseconds value in the database
+     * @param rs         the {@link java.sql.ResultSet} to read from
+     * @param columnName the label of the column to retrieve
+     * @return a {@link Duration} created from the stored millisecond count,
+     *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
@@ -148,13 +146,13 @@ public class DurationType extends AbstractType<Duration> {
     }
 
     /**
-     * Sets a Duration value as a parameter in a PreparedStatement.
-     * The duration is stored as milliseconds (long value) in the database.
-     * Null durations are stored as SQL NULL with BIGINT type.
+     * Sets a {@link Duration} value as a parameter in a {@link java.sql.PreparedStatement}.
+     * The duration is stored as its millisecond count ({@code long}).
+     * A {@code null} duration is stored as SQL {@code NULL} with JDBC type {@link Types#BIGINT}.
      *
-     * @param stmt the PreparedStatement in which to set the parameter
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the Duration value to set. Can be {@code null}.
+     * @param stmt        the {@link java.sql.PreparedStatement} in which to set the parameter
+     * @param columnIndex the 1-based parameter index
+     * @param x           the {@link Duration} to set; may be {@code null}
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
@@ -167,13 +165,13 @@ public class DurationType extends AbstractType<Duration> {
     }
 
     /**
-     * Sets a Duration value as a named parameter in a CallableStatement.
-     * The duration is stored as milliseconds (long value) in the database.
-     * Null durations are stored as SQL NULL with BIGINT type.
+     * Sets a {@link Duration} value as a named parameter in a {@link java.sql.CallableStatement}.
+     * The duration is stored as its millisecond count ({@code long}).
+     * A {@code null} duration is stored as SQL {@code NULL} with JDBC type {@link Types#BIGINT}.
      *
-     * @param stmt the CallableStatement in which to set the parameter
+     * @param stmt          the {@link java.sql.CallableStatement} in which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the Duration value to set. Can be {@code null}.
+     * @param x             the {@link Duration} to set; may be {@code null}
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
@@ -186,11 +184,11 @@ public class DurationType extends AbstractType<Duration> {
     }
 
     /**
-     * Appends a Duration value to an Appendable output.
-     * The duration is written as its milliseconds value.
+     * Appends a {@link Duration} value to an {@link Appendable} as its millisecond count.
+     * If {@code x} is {@code null}, the literal {@code null} is appended.
      *
-     * @param appendable the Appendable to write to
-     * @param x the Duration to append. Can be {@code null}.
+     * @param appendable the {@link Appendable} to write to
+     * @param x          the {@link Duration} to append; may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
@@ -203,12 +201,13 @@ public class DurationType extends AbstractType<Duration> {
     }
 
     /**
-     * Writes a Duration value to a CharacterWriter.
-     * The duration is written as its milliseconds value using optimized numeric writing.
+     * Writes a {@link Duration} value to a {@link CharacterWriter} as its millisecond count,
+     * using the writer's optimized {@code long}-write method.
+     * If {@code x} is {@code null}, the literal {@code null} is written.
      *
-     * @param writer the CharacterWriter to write to
-     * @param x the Duration to write. Can be {@code null}.
-     * @param config the serialization configuration (currently unused for Duration)
+     * @param writer the {@link CharacterWriter} to write to
+     * @param x      the {@link Duration} to write; may be {@code null}
+     * @param config serialization configuration (not used for {@link Duration}); may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override

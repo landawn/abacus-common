@@ -21,7 +21,6 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>This is a functional interface whose functional method is {@link #test(boolean)}.
  *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.Predicate
@@ -113,6 +112,7 @@ public interface BooleanPredicate extends Throwables.BooleanPredicate<RuntimeExc
      *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default BooleanPredicate and(final BooleanPredicate other) {
         return t -> test(t) && other.test(t);
@@ -135,6 +135,7 @@ public interface BooleanPredicate extends Throwables.BooleanPredicate<RuntimeExc
      *
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default BooleanPredicate or(final BooleanPredicate other) {
         return t -> test(t) || other.test(t);

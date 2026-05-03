@@ -11,8 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,7 +34,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.function.IntObjConsumer;
 import com.landawn.abacus.util.stream.EntryStream;
 import com.landawn.abacus.util.stream.Stream;
@@ -1616,7 +1613,7 @@ public class BiIteratorTest extends TestBase {
             collected.add(mapped.next());
         }
         assertEquals(5, collected.size());
-        assertEquals(CommonUtil.toList(0, 3, 6, 9, 12), collected);
+        assertEquals(N.toList(0, 3, 6, 9, 12), collected);
     }
 
     @Test

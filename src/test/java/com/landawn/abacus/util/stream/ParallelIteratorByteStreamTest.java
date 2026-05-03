@@ -178,11 +178,11 @@ public class ParallelIteratorByteStreamTest extends TestBase {
     @Test
     public void testFlatmapByteArray() {
         ByteStream stream1 = createStream(new byte[] { 1, 2, 3 });
-        byte[] result1 = stream1.flatmap(b -> new byte[] { b, (byte) (b + 10) }).toArray();
+        byte[] result1 = stream1.flatMapArray(b -> new byte[] { b, (byte) (b + 10) }).toArray();
         assertHaveSameElements(new byte[] { 1, 11, 2, 12, 3, 13 }, result1);
 
         ByteStream stream2 = createStream(new byte[] { 1, 2, 3 });
-        byte[] result2 = stream2.flatmap(b -> new byte[] { b, (byte) (b * 2) }).toArray();
+        byte[] result2 = stream2.flatMapArray(b -> new byte[] { b, (byte) (b * 2) }).toArray();
         assertHaveSameElements(new byte[] { 1, 2, 2, 4, 3, 6 }, result2);
     }
 
@@ -194,8 +194,40 @@ public class ParallelIteratorByteStreamTest extends TestBase {
 
     @Test
     public void testFlatmap_SequentialFallback() {
-        byte[] result = createSingleThreadStream((byte) 1, (byte) 2).flatmap(b -> new byte[] { b, (byte) (b + 10) }).toArray();
+        byte[] result = createSingleThreadStream((byte) 1, (byte) 2).flatMapArray(b -> new byte[] { b, (byte) (b + 10) }).toArray();
         assertHaveSameElements(new byte[] { 1, 11, 2, 12 }, result);
+    }
+
+    @Test
+    public void testFlatmapCollection() {
+        // parallel path
+        byte[] r = createStream(new byte[] { 1, 2, 3 }).flatmap(b -> Arrays.asList((Byte) b, (byte) (b + 10))).toArray();
+        assertHaveSameElements(new byte[] { 1, 11, 2, 12, 3, 13 }, r);
+
+        // empty stream
+        assertEquals(0, createStream(new byte[] {}).flatmap(b -> Arrays.asList((Byte) b)).count());
+
+        // empty collection from mapper
+        assertEquals(0, createStream(new byte[] { 1, 2, 3 }).flatmap(b -> java.util.Collections.<Byte> emptyList()).count());
+
+        // null collection from mapper
+        assertEquals(0, createStream(new byte[] { 1, 2 }).flatmap(b -> (java.util.Collection<Byte>) null).count());
+
+        // null elements -> (byte) 0
+        byte[] withNulls = createStream(new byte[] { 1, 2 }).flatmap(b -> Arrays.asList((Byte) null, b)).toArray();
+        assertEquals(4, withNulls.length);
+        java.util.Arrays.sort(withNulls);
+        assertArrayEquals(new byte[] { 0, 0, 1, 2 }, withNulls);
+    }
+
+    @Test
+    public void testFlatmapCollection_SequentialFallback() {
+        byte[] result = createSingleThreadStream((byte) 1, (byte) 2).flatmap(b -> Arrays.asList((Byte) b, (byte) (b + 10))).toArray();
+        assertHaveSameElements(new byte[] { 1, 11, 2, 12 }, result);
+
+        // null elements -> (byte) 0
+        byte[] withNulls = createSingleThreadStream((byte) 1).flatmap(b -> Arrays.asList((Byte) null, b)).toArray();
+        assertHaveSameElements(new byte[] { 0, 1 }, withNulls);
     }
 
     @Test

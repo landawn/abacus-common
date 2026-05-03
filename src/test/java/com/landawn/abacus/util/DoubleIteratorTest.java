@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.stream.DoubleStream;
 
 public class DoubleIteratorTest extends TestBase {

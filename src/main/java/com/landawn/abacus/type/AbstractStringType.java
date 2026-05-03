@@ -31,11 +31,15 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.Strings;
 
 /**
- * The Abstract base class for {@code String} type handling in the type system.
+ * The abstract base class for {@code String} type handling in the type system.
  * <p>
  * This class provides the foundation for {@code String} serialization/deserialization,
- * database operations, and character-based I/O operations.
+ * JDBC read/write operations, and character-based I/O operations.
+ * Special handling is provided for {@link java.io.Reader} and {@link java.sql.Clob} input objects
+ * during {@link #valueOf(Object)} conversion.
  * </p>
+ *
+ * @see StringType
  */
 public abstract class AbstractStringType extends AbstractCharSequenceType<String> {
 
@@ -51,13 +55,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     /**
      * Returns the {@code Class} object representing the {@code String} class.
      *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * Type<String> type = TypeFactory.getType(String.class);
-     * Class<?> clazz = type.javaType();   // returns String.class
-     * }</pre>
-     *
-     * @return the {@code Class} object for {@code String.class}
+     * @return {@code String.class}
      */
     @Override
     public Class<String> javaType() {
@@ -65,18 +63,9 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     }
 
     /**
-     * Determines whether this type represents a {@code String} type.
-     * <p>
-     * Always returns {@code true} for {@code AbstractStringType} implementations.
-     * </p>
+     * Returns {@code true} because this type represents a {@code String} type.
      *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * Type<String> type = TypeFactory.getType(String.class);
-     * boolean isString = type.isString();   // returns true
-     * }</pre>
-     *
-     * @return {@code true} indicating this is a string type
+     * @return {@code true}
      */
     @Override
     public boolean isString() {
@@ -84,20 +73,11 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     }
 
     /**
-     * Converts a {@code String} value to its string representation.
-     * <p>
-     * Since the input is already a {@code String}, this method simply returns the input value unchanged.
-     * </p>
-     *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * Type<String> type = TypeFactory.getType(String.class);
-     * String result = type.stringOf("hello");    // returns "hello"
-     * String nullResult = type.stringOf(null);   // returns null
-     * }</pre>
+     * Returns the input string unchanged.
+     * Since the value is already a {@code String}, no conversion is needed.
      *
      * @param str the {@code String} value to convert, may be {@code null}
-     * @return the same {@code String} value passed as input, or {@code null} if input is {@code null}
+     * @return the same {@code String} value, or {@code null} if input is {@code null}
      */
     @Override
     public String stringOf(final String str) {
@@ -105,20 +85,11 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     }
 
     /**
-     * Converts a string representation to a {@code String} value.
-     * <p>
-     * Since the input is already a {@code String}, this method simply returns the input value unchanged.
-     * </p>
+     * Returns the input string unchanged.
+     * Since the value is already a {@code String}, no conversion is needed.
      *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * Type<String> type = TypeFactory.getType(String.class);
-     * String result = type.valueOf("hello");    // returns "hello"
-     * String nullResult = type.valueOf(null);   // returns null
-     * }</pre>
-     *
-     * @param str the string representation to convert, may be {@code null}
-     * @return the same {@code String} value passed as input, or {@code null} if input is {@code null}
+     * @param str the string value, may be {@code null}
+     * @return the same {@code String} value, or {@code null} if input is {@code null}
      */
     @Override
     public String valueOf(final String str) {
@@ -126,24 +97,13 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     }
 
     /**
-     * Creates a {@code String} from a character array subset.
-     * <p>
-     * Constructs a new {@code String} from the specified subset of the character array.
-     * </p>
+     * Creates a {@code String} from a subset of the given character array.
      *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * Type<String> type = TypeFactory.getType(String.class);
-     * char[] chars = {'h', 'e', 'l', 'l', 'o'};
-     * String result = type.valueOf(chars, 0, 5);    // returns "hello"
-     * String partial = type.valueOf(chars, 0, 3);   // returns "hel"
-     * }</pre>
-     *
-     * @param cbuf the character array containing the characters to convert, may be {@code null}
-     * @param offset the starting position in the character array (0-based)
+     * @param cbuf the character array, may be {@code null}
+     * @param offset the starting position in the array (0-based)
      * @param len the number of characters to include
-     * @return a new {@code String} created from the specified characters, or {@code null} if {@code cbuf} is {@code null},
-     *         or an empty string if {@code cbuf} is empty or {@code len} is 0
+     * @return a new {@code String} from the specified characters, {@code null} if {@code cbuf} is
+     *         {@code null}, or an empty string if {@code cbuf} is empty or {@code len} is {@code 0}
      */
     @Override
     public String valueOf(final char[] cbuf, final int offset, final int len) {
@@ -153,24 +113,19 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     /**
      * Converts an {@code Object} to a {@code String} value.
      * <p>
-     * This method handles special cases including {@code Clob} objects and uses type-specific
-     * string conversion for other object types.
+     * Special handling is applied for the following input types:
      * </p>
+     * <ul>
+     *   <li>{@code null} — returns {@code null}</li>
+     *   <li>{@link java.io.Reader} — reads all content and returns it as a {@code String}</li>
+     *   <li>{@link java.sql.Clob} — extracts character data via {@link java.sql.Clob#getSubString}</li>
+     *   <li>All other types — uses the type-specific {@code stringOf} conversion</li>
+     * </ul>
      *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * Type<String> type = TypeFactory.getType(String.class);
-     * String result1 = type.valueOf(Integer.valueOf(123));   // returns "123"
-     * String result2 = type.valueOf("hello");                // returns "hello"
-     * String nullResult = type.valueOf(null);                // returns null
-     * }</pre>
-     *
-     * @param obj the object to convert to {@code String}, may be {@code null}
-     * @return the {@code String} representation of the object, or {@code null} if {@code obj} is {@code null}.
-     *         For {@code Clob} objects, extracts and returns the character data.
-     *         For {@code Reader} objects, reads all content and returns as {@code String}.
-     *         For other objects, uses their type-specific string conversion.
-     * @throws UncheckedSQLException if there's an error reading from a {@code Clob} or freeing {@code Clob} resources
+     * @param obj the object to convert, may be {@code null}
+     * @return the {@code String} representation of the object, or {@code null} if {@code obj} is {@code null}
+     * @throws UncheckedSQLException if a SQL error occurs while reading from a {@code Clob}
+     * @throws UnsupportedOperationException if a {@code Clob} is too large to convert (exceeds {@link Integer#MAX_VALUE} characters)
      */
     @SuppressFBWarnings
     @Override
@@ -204,14 +159,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     /**
      * Retrieves a {@code String} value from a {@code ResultSet} at the specified column index.
      *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * Type<String> type = TypeFactory.getType(String.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * String name = type.get(rs, 1);   // retrieves String from column 1
-     * }</pre>
-     *
-     * @param rs the {@code ResultSet} to retrieve the value from, must not be {@code null}
+     * @param rs the {@code ResultSet} to retrieve the value from
      * @param columnIndex the column index (1-based) of the value to retrieve
      * @return the {@code String} value at the specified column, or {@code null} if the value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the {@code columnIndex} is invalid
@@ -224,16 +172,9 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     /**
      * Retrieves a {@code String} value from a {@code ResultSet} using the specified column label.
      *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * Type<String> type = TypeFactory.getType(String.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * String name = type.get(rs, "name");   // retrieves String from "name" column
-     * }</pre>
-     *
-     * @param rs the {@code ResultSet} to retrieve the value from, must not be {@code null}
-     * @param columnName the label for the column specified with the SQL AS clause,
-     *                    or the column name if no AS clause was specified, must not be {@code null}
+     * @param rs the {@code ResultSet} to retrieve the value from
+     * @param columnName the label for the column specified with the SQL {@code AS} clause,
+     *                   or the column name if no {@code AS} clause was specified
      * @return the {@code String} value in the specified column, or {@code null} if the value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the {@code columnName} is invalid
      */
@@ -245,15 +186,8 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     /**
      * Sets a {@code String} parameter in a {@code PreparedStatement} at the specified position.
      *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * Type<String> type = TypeFactory.getType(String.class);
-     * PreparedStatement stmt = conn.prepareStatement("UPDATE users SET name = ? WHERE id = ?");
-     * type.set(stmt, 1, "John Doe");   // sets parameter 1 to "John Doe"
-     * }</pre>
-     *
-     * @param stmt the {@code PreparedStatement} to set the parameter on, must not be {@code null}
-     * @param columnIndex the parameter index (1-based) to set
+     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param columnIndex the parameter index (1-based)
      * @param x the {@code String} value to set, may be {@code null}
      * @throws SQLException if a database access error occurs or the {@code columnIndex} is invalid
      */
@@ -265,15 +199,8 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     /**
      * Sets a named {@code String} parameter in a {@code CallableStatement}.
      *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * Type<String> type = TypeFactory.getType(String.class);
-     * CallableStatement stmt = conn.prepareCall("{call updateUser(?, ?)}");
-     * type.set(stmt, "name", "John Doe");   // sets named parameter "name"
-     * }</pre>
-     *
-     * @param stmt the {@code CallableStatement} to set the parameter on, must not be {@code null}
-     * @param parameterName the name of the parameter to set, must not be {@code null}
+     * @param stmt the {@code CallableStatement} to set the parameter on
+     * @param parameterName the name of the parameter to set
      * @param x the {@code String} value to set, may be {@code null}
      * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
@@ -283,22 +210,12 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     }
 
     /**
-     * Appends a {@code String} value to an {@code Appendable} object.
-     * <p>
-     * If the {@code String} is {@code null}, appends the string "null" instead.
-     * </p>
+     * Appends a {@code String} value to an {@code Appendable}.
+     * Appends the literal {@code "null"} string if the value is {@code null}.
      *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * Type<String> type = TypeFactory.getType(String.class);
-     * StringBuilder sb = new StringBuilder();
-     * type.appendTo(sb, "hello");   // appends "hello" to StringBuilder
-     * type.appendTo(sb, null);      // appends "null" to StringBuilder
-     * }</pre>
-     *
-     * @param appendable the {@code Appendable} object to append to, must not be {@code null}
+     * @param appendable the {@code Appendable} to append to
      * @param x the {@code String} value to append, may be {@code null}
-     * @throws IOException if an I/O error occurs during the append operation
+     * @throws IOException if an I/O error occurs
      */
     @Override
     public void appendTo(final Appendable appendable, final String x) throws IOException {
@@ -306,24 +223,18 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     }
 
     /**
-     * Writes a {@code String} value to a {@code CharacterWriter} with optional quotation based on configuration.
+     * Writes a {@code String} value to a {@code CharacterWriter} with optional quotation.
      * <p>
-     * This method handles {@code null} values and applies string quotation marks if specified in the configuration.
+     * If the configuration specifies {@code writeNullStringAsEmpty} and the value is
+     * {@code null}, writes an empty string instead. Otherwise writes {@code "null"} for
+     * {@code null} values. Applies string quotation marks from {@code config} if specified.
      * </p>
      *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * Type<String> type = TypeFactory.getType(String.class);
-     * CharacterWriter writer = new CharacterWriter();
-     * type.writeCharacter(writer, "hello", null);   // writes "hello"
-     * type.writeCharacter(writer, null, null);      // writes "null"
-     * }</pre>
-     *
-     * @param writer the {@code CharacterWriter} to write to, must not be {@code null}
+     * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code String} value to write, may be {@code null}
-     * @param config the serialization configuration that may specify string quotation preferences
-     *               and {@code null} string handling options, may be {@code null}
-     * @throws IOException if an I/O error occurs during the write operation
+     * @param config the serialization configuration controlling quotation and null handling,
+     *               may be {@code null}
+     * @throws IOException if an I/O error occurs
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, String x, final JsonXmlSerConfig<?> config) throws IOException {

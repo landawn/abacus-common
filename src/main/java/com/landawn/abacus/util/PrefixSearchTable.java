@@ -35,7 +35,7 @@ import com.landawn.abacus.util.stream.EntryStream;
  *
  * <p>Conceptually it's a "Trie" except it searches by a list of key prefixes instead of string
  * prefixes.
- * 
+ *
  * <br />
  * Note: copied from <a href="https://github.com/google/mug">google mug</a> under Apache License, Version 2.0 and modified.
  *
@@ -158,13 +158,13 @@ public final class PrefixSearchTable<K, V> {
         /**
          * Adds the mapping from {@code compoundKey} to {@code value}.
          *
-         * @param compoundKey the compound key to add
-         * @param value the value to associate with the compound key
+         * @param compoundKey the non-empty compound key to add
+         * @param value the non-{@code null} value to associate with the compound key
          * @return this builder
          * @throws IllegalArgumentException if {@code compoundKey} is empty, or it has already been mapped to a
-         *     value that's not equal to {@code value}.
-         * @throws NullPointerException if {@code compoundKey} is null, any of the key element is null
-         *     or {@code value} is null
+         *     value that is not equal to {@code value}
+         * @throws NullPointerException if {@code compoundKey} is {@code null}, any key element is {@code null},
+         *     or {@code value} is {@code null}
          */
         public Builder<K, V> add(List<? extends K> compoundKey, V value) {
             int size = compoundKey.size();
@@ -183,10 +183,14 @@ public final class PrefixSearchTable<K, V> {
         }
 
         /**
-         * Adds all of {@code mappings} into this builder.
+         * Adds all mappings from {@code mappings} into this builder.
+         * Each entry's key becomes the compound key and its value becomes the associated value.
          *
-         * @param mappings the mappings to add
+         * @param mappings the mappings to add; {@code null} keys or values are not permitted
          * @return this builder
+         * @throws IllegalArgumentException if any compound key is empty or conflicts with an existing mapping
+         * @throws NullPointerException if {@code mappings} is {@code null}, or any compound key element
+         *     or value is {@code null}
          */
         public Builder<K, V> addAll(Map<? extends List<? extends K>, ? extends V> mappings) {
             EntryStream.of(mappings).forEach(this::add);

@@ -25,13 +25,13 @@ import com.landawn.abacus.util.N;
  * Package-private implementation of {@link HashFunction} that wraps a Google Guava
  * {@link com.google.common.hash.HashFunction}. This class serves as an adapter between
  * the abacus-common hashing API and the underlying Guava implementation.
- * 
+ *
  * <p>This class is immutable and thread-safe, as it delegates all operations to the
  * wrapped Guava hash function which maintains these properties.
- * 
+ *
  * <p><b>Implementation Note:</b> This class is not intended for direct use by clients.
  * Use the factory methods in {@link Hashing} to obtain hash function instances.
- * 
+ *
  * @see HashFunction
  * @see Hashing
  */
@@ -45,7 +45,7 @@ final class GuavaHashFunction implements HashFunction {
 
     /**
      * Constructs a new GuavaHashFunction wrapping the specified Guava hash function.
-     * 
+     *
      * @param gHashFunction the Guava hash function to wrap
      */
     GuavaHashFunction(final com.google.common.hash.HashFunction gHashFunction) {
@@ -80,7 +80,7 @@ final class GuavaHashFunction implements HashFunction {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>Creates a new hasher by delegating to the wrapped Guava hash function's
      * {@code newHasher()} method. The returned hasher is wrapped in a {@link GuavaHasher}
      * to adapt it to the abacus-common API.
@@ -94,7 +94,7 @@ final class GuavaHashFunction implements HashFunction {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>Creates a new hasher optimized for the expected input size by delegating to
      * the wrapped Guava hash function's {@code newHasher(int)} method. The returned
      * hasher is wrapped in a {@link GuavaHasher}.
@@ -109,7 +109,7 @@ final class GuavaHashFunction implements HashFunction {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>Computes the hash of an integer by delegating to the wrapped Guava hash
      * function's {@code hashInt()} method.
      *
@@ -123,7 +123,7 @@ final class GuavaHashFunction implements HashFunction {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>Computes the hash of a long by delegating to the wrapped Guava hash
      * function's {@code hashLong()} method.
      *
@@ -137,7 +137,7 @@ final class GuavaHashFunction implements HashFunction {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>Computes the hash of a byte array by delegating to the wrapped Guava hash
      * function's {@code hashBytes()} method.
      *
@@ -151,7 +151,7 @@ final class GuavaHashFunction implements HashFunction {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>Computes the hash of a portion of a byte array by delegating to the wrapped
      * Guava hash function's {@code hashBytes(byte[], int, int)} method.
      *
@@ -167,7 +167,7 @@ final class GuavaHashFunction implements HashFunction {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>Computes the hash of a character sequence without encoding by delegating to
      * the wrapped Guava hash function's {@code hashUnencodedChars()} method.
      *
@@ -181,7 +181,7 @@ final class GuavaHashFunction implements HashFunction {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>Computes the hash of an encoded character sequence by delegating to the
      * wrapped Guava hash function's {@code hashString()} method.
      *
@@ -196,7 +196,7 @@ final class GuavaHashFunction implements HashFunction {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>Computes the hash of an object using a funnel by delegating to the wrapped
      * Guava hash function's {@code hashObject()} method.
      *
@@ -212,7 +212,7 @@ final class GuavaHashFunction implements HashFunction {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * <p>Returns the number of bits in hash codes produced by this function by
      * delegating to the wrapped Guava hash function's {@code bits()} method.
      *

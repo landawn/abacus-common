@@ -68,8 +68,9 @@ public interface ShortTriConsumer extends Throwables.ShortTriConsumer<RuntimeExc
      * combined.accept((short) 10, (short) 20, (short) 30);   // Logs then calculates sum
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation
      * @return a composed {@code ShortTriConsumer} that performs in sequence this operation followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     default ShortTriConsumer andThen(final ShortTriConsumer after) {
         return (a, b, c) -> {

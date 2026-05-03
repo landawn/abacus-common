@@ -14,8 +14,8 @@
 package com.landawn.abacus.util.function;
 
 /**
- * Represents a function that accepts an int-valued argument and produces a
- * float-valued result. This is the {@code int}-to-{@code float} primitive
+ * Represents a function that accepts an {@code int}-valued argument and produces a
+ * {@code float}-valued result. This is the {@code int}-to-{@code float} primitive
  * specialization for {@link java.util.function.Function}.
  *
  * <p>This is a functional interface whose functional method is
@@ -39,20 +39,11 @@ public interface IntToFloatFunction {
     /**
      * Applies this function to the given argument.
      *
-     * <p>The function performs a conversion from an {@code int} value to a
-     * {@code float} value. This is a widening primitive conversion, but unlike
-     * the int-to-double conversion, it may result in loss of precision for
-     * large integer values.
-     *
-     * <p>Important considerations:
-     * <ul>
-     *   <li>Float values have approximately 7 decimal digits of precision</li>
-     *   <li>Int values larger than 2^24 (16,777,216) may lose precision when
-     *       converted to float</li>
-     *   <li>The sign of the int value is always preserved</li>
-     *   <li>Special int values like Integer.MAX_VALUE and Integer.MIN_VALUE
-     *       will be approximated as float values</li>
-     * </ul>
+     * <p>The function performs a transformation from an {@code int} value to a
+     * {@code float} value. The default implementation provided by {@link #DEFAULT}
+     * performs a widening primitive conversion, which may lose precision for
+     * int values whose magnitude exceeds 2^24 (16,777,216). Custom implementations
+     * may apply arbitrary computations.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -61,8 +52,7 @@ public interface IntToFloatFunction {
      * }</pre>
      *
      * @param value the function argument, an int value to be converted to float
-     * @return the function result as a float value. For int values with magnitude
-     *         greater than 2^24, the result may be an approximation of the input value
+     * @return the function result as a float value
      */
     float applyAsFloat(int value);
 }

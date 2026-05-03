@@ -1553,7 +1553,7 @@ public final class HttpRequest {
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The file to write the response body to. Must not be {@code null}.
-     * @return A ContinuableFuture that will complete when the file is written successfully
+     * @return a ContinuableFuture that completes after the response has been written to the file
      */
     @Beta
     public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final File output) {
@@ -1582,7 +1582,7 @@ public final class HttpRequest {
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The file to write the response body to. Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
-     * @return A ContinuableFuture that will complete when the file is written successfully
+     * @return a ContinuableFuture that completes after the response has been written to the file
      */
     @Beta
     public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final File output, final Executor executor) {
@@ -1609,7 +1609,7 @@ public final class HttpRequest {
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The output stream to write the response body to. Must not be {@code null}.
-     * @return A ContinuableFuture that will complete when the stream is written successfully
+     * @return a ContinuableFuture that completes after the response has been written to the stream
      */
     @Beta
     public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final OutputStream output) {
@@ -1638,7 +1638,7 @@ public final class HttpRequest {
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The output stream to write the response body to. Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
-     * @return A ContinuableFuture that will complete when the stream is written successfully
+     * @return a ContinuableFuture that completes after the response has been written to the stream
      */
     @Beta
     public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final OutputStream output, final Executor executor) {
@@ -1665,7 +1665,7 @@ public final class HttpRequest {
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The writer to write the response body to. Must not be {@code null}.
-     * @return A ContinuableFuture that will complete when the writer is written successfully
+     * @return a ContinuableFuture that completes after the response has been written to the writer
      */
     @Beta
     public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final Writer output) {
@@ -1694,7 +1694,7 @@ public final class HttpRequest {
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The writer to write the response body to. Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
-     * @return A ContinuableFuture that will complete when the writer is written successfully
+     * @return a ContinuableFuture that completes after the response has been written to the writer
      */
     @Beta
     public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final Writer output, final Executor executor) {

@@ -36,7 +36,7 @@ import com.landawn.abacus.util.Tuple.Tuple6;
 
 public class Tuple6TypeTest extends TestBase {
 
-    private final Tuple6Type type = new Tuple6Type("String", "String", "String", "String", "String", "String");
+    private final Tuple6Type<String, String, String, String, String, String> type = new Tuple6Type("String", "String", "String", "String", "String", "String");
 
     @Test
     public void test_valueOf_Null() {
@@ -53,7 +53,7 @@ public class Tuple6TypeTest extends TestBase {
         Tuple6<String, String, String, String, String, String> t = Tuple.of("a", "b", "c", "d", "e", "f");
         String json = type.stringOf(t);
         @SuppressWarnings("unchecked")
-        Tuple6<String, String, String, String, String, String> result = (Tuple6<String, String, String, String, String, String>) type.valueOf(json);
+        Tuple6<String, String, String, String, String, String> result = type.valueOf(json);
         assertNotNull(result);
         assertEquals("a", result._1);
         assertEquals("f", result._6);

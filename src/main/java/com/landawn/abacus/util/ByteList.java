@@ -76,7 +76,7 @@ import com.landawn.abacus.util.stream.ByteStream;
  * // Creating and initializing byte lists
  * ByteList data = ByteList.of((byte)1, (byte)2, (byte)3, (byte)255);
  * ByteList buffer = new ByteList(1024);   // Pre-sized for network buffer
- * ByteList range = ByteList.range((byte)0, (byte)256);   // All byte values
+ * ByteList range = ByteList.range(Byte.MIN_VALUE, Byte.MAX_VALUE);   // All byte values except Byte.MAX_VALUE (exclusive end)
  *
  * // Basic operations
  * data.add((byte)42);   // Append byte value
@@ -160,7 +160,7 @@ import com.landawn.abacus.util.stream.ByteStream;
  * <ul>
  *   <li><b>Not Thread-Safe:</b> This implementation is not synchronized</li>
  *   <li><b>External Synchronization:</b> Required for concurrent access</li>
- *   <li><b>Fail-Fast Iterators:</b> Detect concurrent modifications</li>
+ *   <li><b>Iterators:</b> Not fail-fast; concurrent modification yields undefined results</li>
  *   <li><b>Read-Only Access:</b> Multiple threads can safely read simultaneously</li>
  * </ul>
  *
@@ -241,18 +241,18 @@ import com.landawn.abacus.util.stream.ByteStream;
  * <pre>{@code
  * // Process a network packet with header and payload
  * ByteList packet = new ByteList(1024);
- * 
+ *
  * // Add packet header
  * packet.addAll(new byte[]{0x01, 0x02});   // Protocol version
  * packet.addAll(intToBytes(payloadLength));   // Payload length
- * 
+ *
  * // Add payload data
  * packet.addAll(payloadData);
- * 
+ *
  * // Extract header information
  * byte version = packet.get(0);
  * int length = bytesToInt(packet.toArray(), 2);
- * 
+ *
  * // Validate and process
  * if (packet.size() >= length + headerSize) {
  *     ByteList payload = packet.copy(headerSize, headerSize + length);
@@ -734,7 +734,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * If the list does not contain the element, it is unchanged. This method scans the list
      * from the beginning and removes the first matching element found.
      *
-     * <p>This method runs in linear time, as it may need to search through the entire list
+     * <p>This method runs in linear time, as it may need to search through the entire list.</p>
      * <p><b>Note:</b> This method removes by value. To remove by index, use {@link #removeAt(int)}.</p>
      *
      * @param e the byte value to be removed from this list
@@ -1101,7 +1101,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * The elements from fromIndex (inclusive) to toIndex (exclusive) are moved
      * so that the element originally at fromIndex will be at newPositionAfterMove.
      * Other elements are shifted as necessary to accommodate the move.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte)1, (byte)2, (byte)3, (byte)4, (byte)5);
@@ -1120,13 +1120,14 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and size() - lengthOfRange, inclusive.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the list
      */
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
+        N.checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, size);
         N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
     }
 
@@ -1638,7 +1639,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <pre>{@code
      * ByteList list1 = ByteList.of((byte)1, (byte)1, (byte)2, (byte)3);
      * ByteList list2 = ByteList.of((byte)2, (byte)3, (byte)3, (byte)4);
-     * ByteList result = list1.symmetricDifference(list2); 
+     * ByteList result = list1.symmetricDifference(list2);
      * // result: [(byte)1, (byte)1, (byte)3, (byte)4]
      * }</pre>
      *
@@ -1689,7 +1690,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <pre>{@code
      * ByteList list = ByteList.of((byte)1, (byte)1, (byte)2, (byte)3);
      * byte[] array = {(byte)2, (byte)3, (byte)3, (byte)4};
-     * ByteList result = list.symmetricDifference(array); 
+     * ByteList result = list.symmetricDifference(array);
      * // result: [(byte)1, (byte)1, (byte)3, (byte)4]
      * }</pre>
      *
@@ -1854,11 +1855,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Finds and returns the maximum byte value within the specified range of this list.
-     * 
+     *
      * <p>This method scans through the elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive)
      * and returns the largest byte value found. If the range is empty (fromIndex == toIndex), an empty
      * OptionalByte is returned.</p>
-     * 
+     *
      * <p>The comparison is performed using standard byte comparison, where bytes are treated as signed
      * values ranging from -128 to 127.</p>
      *
@@ -1875,7 +1876,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Returns the median value of all elements in this list.
-     * 
+     *
      * <p>The median is the middle value when the elements are sorted in ascending order. For lists with
      * an odd number of elements, this is the exact middle element. For lists with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
@@ -1888,7 +1889,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Returns the median value of elements within the specified range of this list.
-     * 
+     *
      * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
      * For ranges with an odd number of elements, this returns the exact middle element when sorted.
      * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
@@ -1906,11 +1907,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Performs the given action for each element in this list in sequential order.
-     * 
+     *
      * <p>This method iterates through all elements from index 0 to size-1, applying the specified
      * ByteConsumer action to each element. The action is performed in the order of iteration.</p>
-     * 
-     * <p>This is equivalent to:&lt;/&gt;
+     *
+     * <p>This is equivalent to:</p>
      * <pre>{@code
      * for (int i = 0; i < size(); i++) {
      *     action.accept(get(i));
@@ -1925,7 +1926,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Performs the given action for each element within the specified range of this list.
-     * 
+     *
      * <p>This method supports both forward and backward iteration based on the relative values of
      * fromIndex and toIndex:</p>
      * <ul>
@@ -1933,7 +1934,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *   <li>If {@code fromIndex > toIndex}: iterates backward from fromIndex (inclusive) to toIndex (exclusive)</li>
      *   <li>If {@code toIndex == -1}: treated as backward iteration from fromIndex to the beginning of the list</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * list.forEach(0, 5, action);    // Forward: processes indices 0,1,2,3,4
@@ -1964,11 +1965,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Returns the first element of this list wrapped in an OptionalByte.
-     * 
+     *
      * <p>This method provides a null-safe way to access the first element of the list. If the list
      * is empty, it returns an empty OptionalByte rather than throwing an exception. This is useful
      * when you want to safely check for and retrieve the first element without explicit size checking.</p>
-     * 
+     *
      * <p>This is equivalent to:</p>
      * <pre>{@code
      * size() == 0 ? OptionalByte.empty() : OptionalByte.of(get(0))
@@ -1982,11 +1983,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Returns the last element of this list wrapped in an OptionalByte.
-     * 
+     *
      * <p>This method provides a null-safe way to access the last element of the list. If the list
      * is empty, it returns an empty OptionalByte rather than throwing an exception. This is useful
      * when you want to safely check for and retrieve the last element without explicit size checking.</p>
-     * 
+     *
      * <p>This is equivalent to:</p>
      * <pre>{@code
      * size() == 0 ? OptionalByte.empty() : OptionalByte.of(get(size() - 1))
@@ -2000,13 +2001,13 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Returns a new ByteList containing only the distinct elements from the specified range of this list.
-     * 
+     *
      * <p>This method creates a new list containing each unique byte value from the specified range,
      * preserving the order of first occurrence. Duplicate values are removed, keeping only the first
      * occurrence of each distinct value.</p>
-     * 
+     *
      * <p>For example, if the range contains [1, 2, 2, 3, 1, 4], the returned list will contain [1, 2, 3, 4].</p>
-     * 
+     *
      * <p>The time complexity is O(n) for small ranges using a boolean array for tracking seen values,
      * where n is the size of the range. The original list is not modified.</p>
      *
@@ -2028,11 +2029,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Checks whether this list contains any duplicate elements.
-     * 
+     *
      * <p>This method scans through all elements in the list and returns {@code true} if any element appears
      * more than once. It uses an efficient algorithm that typically completes in O(n) time for byte
      * values by using a boolean array to track seen values.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list1 = ByteList.of(1, 2, 3, 4);   // containsDuplicates() returns false
@@ -2049,14 +2050,14 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Checks whether the elements in this list are sorted in ascending order.
-     * 
+     *
      * <p>This method verifies if each element in the list is less than or equal to the next element,
      * treating bytes as signed values (-128 to 127). An empty list or a list with a single element
      * is considered sorted.</p>
-     * 
+     *
      * <p>The check is performed in O(n) time by comparing adjacent elements. The method returns as
      * soon as it finds an element that is greater than its successor.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList.of(-5, 0, 3, 10).isSorted();   // returns true
@@ -2073,15 +2074,15 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Sorts all elements in this list in ascending order.
-     * 
+     *
      * <p>This method modifies the list in-place, rearranging elements so that they are in ascending
      * order. Bytes are compared as signed values, so the order will be from -128 to 127. The sort
      * is stable, meaning that equal elements retain their relative order.</p>
-     * 
+     *
      * <p>The sorting algorithm used is optimized for primitive arrays and typically performs in
      * O(n log n) time. For small lists or lists that are already nearly sorted, the performance
      * may be better.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(3, -1, 4, 1, 5);
@@ -2097,15 +2098,15 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Sorts all elements in this list in ascending order using a parallel sorting algorithm.
-     * 
+     *
      * <p>This method is similar to {@link #sort()} but uses a parallel sorting algorithm that can
      * take advantage of multiple processor cores for better performance on large lists. The sort
      * is performed in-place and produces the same result as the sequential sort.</p>
-     * 
+     *
      * <p>Parallel sorting is typically beneficial for lists with thousands of elements or more.
      * For smaller lists, the overhead of parallelization may make this method slower than the
      * sequential {@link #sort()} method.</p>
-     * 
+     *
      * <p>The sort is stable and compares bytes as signed values (-128 to 127).</p>
      */
     public void parallelSort() {
@@ -2116,14 +2117,14 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Sorts all elements in this list in descending order.
-     * 
+     *
      * <p>This method first sorts the list in ascending order and then reverses it to achieve
      * descending order. The result is that elements are arranged from highest to lowest value,
      * with bytes compared as signed values (127 down to -128).</p>
-     * 
+     *
      * <p>This is equivalent to calling {@link #sort()} followed by {@link #reverse()}, but may
      * be slightly more efficient as it's implemented as a single operation.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(3, -1, 4, 1, 5);
@@ -2140,15 +2141,15 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Searches for the specified byte value in this sorted list using binary search algorithm.
-     * 
+     *
      * <p>This method requires the list to be sorted in ascending order before calling. If the list
      * is not sorted, the results are undefined. The binary search algorithm provides O(log n)
      * performance, making it much faster than linear search for large sorted lists.</p>
-     * 
+     *
      * <p>The method returns the index of the search key if it is contained in the list. If the key
      * is not found, it returns {@code (-(insertion point) - 1)}, where insertion point is the index
      * at which the key would be inserted to maintain sorted order.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(1, 3, 5, 7, 9);
@@ -2165,14 +2166,14 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Searches for the specified byte value within a range of this sorted list using binary search.
-     * 
+     *
      * <p>This method performs a binary search on the specified range of the list, from {@code fromIndex}
      * (inclusive) to {@code toIndex} (exclusive). The range must be sorted in ascending order before
      * calling this method, or the results are undefined.</p>
-     * 
+     *
      * <p>Like the full-list binary search, this returns the index if found, or {@code (-(insertion point) - 1)}
      * if not found. The insertion point is relative to the entire list, not just the searched range.</p>
-     * 
+     *
      * <p>This method is useful when you know the value you're searching for is likely to be in a
      * specific portion of a large sorted list.</p>
      *
@@ -2190,13 +2191,13 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Reverses the order of all elements in this list.
-     * 
+     *
      * <p>This method modifies the list in-place, swapping elements from both ends moving toward
      * the center. After this operation, the first element becomes the last, the second becomes
      * the second-to-last, and so on.</p>
-     * 
+     *
      * <p>The operation is performed in O(n/2) time, where n is the size of the list.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(1, 2, 3, 4, 5);
@@ -2212,11 +2213,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Reverses the order of elements within the specified range of this list.
-     * 
+     *
      * <p>This method modifies the list in-place, reversing only the elements from {@code fromIndex}
      * (inclusive) to {@code toIndex} (exclusive). Elements outside this range remain unchanged.
      * The reversal is done by swapping elements from both ends of the range moving toward the center.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(1, 2, 3, 4, 5, 6);
@@ -2239,8 +2240,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Rotates all elements in this list by the specified distance.
      * After calling rotate(distance), the element at index i will be moved to
-     * index (i + distance) % size. 
-     * 
+     * index (i + distance) % size.
+     *
      * <p>Positive values of distance rotate elements towards higher indices (right rotation),
      * while negative values rotate towards lower indices (left rotation).
      * The list is modified in place.</p>
@@ -2258,14 +2259,14 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Randomly shuffles all elements in this list.
-     * 
+     *
      * <p>This method rearranges the elements in random order using the default random number generator.
      * Each possible permutation of the list has equal probability of being produced. The shuffle is
      * performed in-place using the Fisher-Yates algorithm, which runs in O(n) time.</p>
-     * 
+     *
      * <p>This method uses a default source of randomness that is suitable for most applications
      * but not for cryptographic purposes.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(1, 2, 3, 4, 5);
@@ -2281,7 +2282,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Randomly shuffles all elements in this list using the specified random number generator.
-     * 
+     *
      * <p>This method rearranges the elements in random order using the provided Random object.
      * This allows you to control the randomness source, which is useful for:</p>
      * <ul>
@@ -2289,9 +2290,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *   <li>Cryptographically strong randomness using SecureRandom</li>
      *   <li>Custom random number generators</li>
      * </ul>
-     * 
+     *
      * <p>The shuffle is performed in-place using the Fisher-Yates algorithm in O(n) time.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(1, 2, 3, 4, 5);
@@ -2310,11 +2311,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Swaps the elements at the specified positions in this list.
-     * 
+     *
      * <p>This method exchanges the elements at indices {@code i} and {@code j}. If {@code i} and {@code j}
      * are equal, the list is unchanged. This operation is useful for custom sorting algorithms or
      * manual list reordering.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(1, 2, 3, 4, 5);
@@ -2335,12 +2336,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Creates and returns a copy of this entire list.
-     * 
+     *
      * <p>This method creates a new ByteList instance containing all elements from this list in the
      * same order. The returned list is independent of this list; changes to either list will not
      * affect the other. The element array is copied, so this is a "deep copy" with respect to the
      * primitive values.</p>
-     * 
+     *
      * <p>This is equivalent to calling {@code copy(0, size())} but may be slightly more efficient.</p>
      *
      * @return a new ByteList containing all elements from this list
@@ -2352,11 +2353,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Creates and returns a copy of the specified range of this list.
-     * 
+     *
      * <p>This method creates a new ByteList containing elements from {@code fromIndex} (inclusive)
      * to {@code toIndex} (exclusive). The returned list is independent of this list; changes to
      * either list will not affect the other.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(1, 2, 3, 4, 5);
@@ -2377,22 +2378,22 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Creates and returns a copy of elements from the specified range with the given step.
-     * 
+     *
      * <p>This method creates a new ByteList by copying elements starting from {@code fromIndex},
      * moving by {@code step} positions each time, until reaching {@code toIndex}. This allows for
      * operations like selecting every nth element or reversing with a specific stride.</p>
-     * 
+     *
      * <p>The step parameter determines the direction and stride:</p>
      * <ul>
      *   <li>Positive step: moves forward through the list</li>
      *   <li>Negative step: moves backward through the list</li>
      *   <li>Step magnitude &gt; 1: skips elements</li>
      * </ul>
-     * 
+     *
      * <p>Special handling for reverse iteration: if {@code fromIndex > toIndex}, the indices are
      * automatically adjusted, and if {@code toIndex == -1}, it's treated as reverse iteration to
      * the start of the list.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(0, 1, 2, 3, 4, 5);
@@ -2417,14 +2418,14 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Splits this list into multiple consecutive sublists of the specified size.
-     * 
+     *
      * <p>This method divides the specified range of the list into chunks of the given size. All chunks
      * except possibly the last one will have exactly {@code chunkSize} elements. The last chunk may
      * be smaller if the range size is not evenly divisible by the chunk size.</p>
-     * 
+     *
      * <p>Each returned ByteList is independent (a copy of the data), so modifications to the returned
      * lists do not affect this list or each other.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(1, 2, 3, 4, 5, 6, 7);
@@ -2456,14 +2457,14 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Trims the internal array to the current size of the list.
-     * 
+     *
      * <p>This method reduces the capacity of the internal array to match the actual number of elements
      * in the list, potentially saving memory. This is useful after a large number of removals or when
      * you know the list size won't increase significantly.</p>
-     * 
+     *
      * <p>The operation creates a new internal array of exactly the right size and copies existing
      * elements to it. This is an O(n) operation where n is the current size of the list.</p>
-     * 
+     *
      * <p>Note: This method returns the list itself to allow method chaining.</p>
      *
      * @return this ByteList instance (for method chaining)
@@ -2512,11 +2513,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Returns a List containing boxed Byte objects for all elements in this list.
-     * 
+     *
      * <p>This method creates a new ArrayList&lt;Byte&gt; and populates it with boxed versions of all
      * primitive byte values in this list. The order of elements is preserved. This is useful when
      * you need to interface with APIs that require object types rather than primitives.</p>
-     * 
+     *
      * <p>Note: Boxing primitive values has memory and performance overhead. Each byte value will
      * be wrapped in a Byte object, which typically requires 16+ bytes of memory compared to 1 byte
      * for the primitive value.</p>
@@ -2530,11 +2531,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Returns a List containing boxed Byte objects for elements in the specified range.
-     * 
+     *
      * <p>This method creates a new ArrayList&lt;Byte&gt; containing boxed versions of the primitive byte
      * values from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive). The relative order
      * of elements is preserved.</p>
-     * 
+     *
      * <p>This is useful when you need to:</p>
      * <ul>
      *   <li>Pass a subset of values to APIs requiring object types</li>
@@ -2572,18 +2573,18 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Converts this ByteList to an IntList.
-     * 
+     *
      * <p>This method creates a new IntList where each byte value from this list is promoted to an
      * int value. The conversion preserves the sign of byte values, so negative bytes become negative
      * ints (e.g., byte -1 becomes int -1, not 255).</p>
-     * 
+     *
      * <p>This conversion is useful when you need to:</p>
      * <ul>
      *   <li>Perform arithmetic operations that might overflow byte range</li>
      *   <li>Interface with APIs that work with int values</li>
      *   <li>Avoid repeated byte-to-int conversions in calculations</li>
      * </ul>
-     * 
+     *
      * <p>Note: This creates a new list with a larger memory footprint (4 bytes per element instead
      * of 1 byte).</p>
      *
@@ -2651,11 +2652,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Returns an iterator over all elements in this list.
-     * 
+     *
      * <p>This method returns a specialized ByteIterator that efficiently iterates over the primitive
      * byte values without boxing. The iterator supports standard operations like hasNext() and nextByte(),
      * providing better performance than a generic Iterator&lt;Byte&gt;.</p>
-     * 
+     *
      * <p>The returned iterator:</p>
      * <ul>
      *   <li>Iterates elements in index order (0 to size-1)</li>
@@ -2677,14 +2678,14 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Returns a ByteStream with this list as its source.
-     * 
+     *
      * <p>This method creates a stream that allows functional-style operations on the byte values
      * in this list. The stream is sequential and ordered, processing elements in their index order.
      * Stream operations do not modify the original list.</p>
-     * 
+     *
      * <p>ByteStream provides specialized primitive operations that avoid boxing overhead, making it
      * more efficient than Stream&lt;Byte&gt; for primitive byte values.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(1, 2, 3, 4, 5);
@@ -2702,12 +2703,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Returns a ByteStream for the specified range of this list.
-     * 
+     *
      * <p>This method creates a stream over elements from {@code fromIndex} (inclusive) to
      * {@code toIndex} (exclusive). The stream processes elements in their index order and does
      * not modify the original list. This is useful for applying stream operations to a subset
      * of the list without creating a temporary sublist.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(1, 2, 3, 4, 5, 6);
@@ -2729,7 +2730,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Returns the first element in this list.
-     * 
+     *
      * <p>This method provides direct access to the first element without using Optional. Unlike
      * {@link #first()}, this method throws an exception if the list is empty, making it suitable
      * when you know the list is non-empty or want to fail fast.</p>
@@ -2745,7 +2746,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Returns the last element in this list.
-     * 
+     *
      * <p>This method provides direct access to the last element without using Optional. Unlike
      * {@link #last()}, this method throws an exception if the list is empty, making it suitable
      * when you know the list is non-empty or want to fail fast.</p>
@@ -2761,11 +2762,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Inserts the specified element at the beginning of this list.
-     * 
+     *
      * <p>This method adds the element at index 0, shifting all existing elements one position to
      * the right. This is equivalent to {@code add(0, e)} but may be more readable for stack-like
      * or deque-like usage patterns.</p>
-     * 
+     *
      * <p>Note: This operation requires shifting all existing elements and has O(n) time complexity.
      * For frequent additions at the beginning, consider using a different data structure.</p>
      *
@@ -2777,11 +2778,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Appends the specified element to the end of this list.
-     * 
+     *
      * <p>This method adds the element at the end of the list, which is equivalent to {@code add(e)}.
      * This method is provided for API consistency with other list-like structures and for clarity
      * in deque-like usage patterns.</p>
-     * 
+     *
      * <p>This operation typically runs in amortized constant time, growing the internal array as
      * needed.</p>
      *
@@ -2793,11 +2794,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Removes and returns the first element from this list.
-     * 
+     *
      * <p>This method removes the element at index 0 and shifts all remaining elements one position
      * to the left. The removed element is returned. This is useful for queue-like or deque-like
      * usage patterns where you process elements in FIFO order.</p>
-     * 
+     *
      * <p>Note: This operation requires shifting all remaining elements and has O(n) time complexity.
      * For frequent removals from the beginning, consider using a different data structure.</p>
      *
@@ -2812,7 +2813,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Removes and returns the last element from this list.
-     * 
+     *
      * <p>This method removes the element at the last position and returns it. This is useful for
      * stack-like or deque-like usage patterns where you process elements in LIFO order. Unlike
      * removing from the beginning, this operation is O(1) as no elements need to be shifted.</p>
@@ -2828,12 +2829,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Returns a hash code value for this list.
-     * 
+     *
      * <p>The hash code is computed based on all elements in the list and their order. Two ByteLists
      * are guaranteed to have the same hash code if they contain the same elements in the same order.
-     * The hash code is computed using a algorithm similar to that specified by List.hashCode(),
+     * The hash code is computed using an algorithm similar to that specified by List.hashCode(),
      * adapted for primitive byte values.</p>
-     * 
+     *
      * <p>Note: The hash code will change if the list is modified. Do not use mutable ByteLists as
      * keys in hash-based collections.</p>
      *
@@ -2846,11 +2847,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Compares this list with the specified object for equality.
-     * 
+     *
      * <p>Returns {@code true} if and only if the specified object is also a ByteList, both lists
      * have the same size, and all corresponding pairs of elements are equal. The comparison is
      * performed element by element in order.</p>
-     * 
+     *
      * <p>This method provides a fast path for ByteList-to-ByteList comparison and properly handles
      * all edge cases including {@code null} and self-comparison.</p>
      *
@@ -2873,11 +2874,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Returns a string representation of this list.
-     * 
+     *
      * <p>The string representation consists of the list's elements, separated by commas and enclosed
      * in square brackets ("[]"). Adjacent elements are separated by ", " (comma and space). Elements
      * are converted to strings as by {@code String.valueOf(byte)}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList.of().toString();          // Returns "[]"

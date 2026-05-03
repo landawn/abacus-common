@@ -26,14 +26,26 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 
 /**
- * Type handler for {@link LocalTime} values.
+ * Type handler for {@link java.time.LocalTime} values.
  * Provides serialization, deserialization, and database operations for LocalTime objects,
  * supporting conversion to/from strings and JDBC ResultSet/PreparedStatement operations.
+ *
+ * <p>String representations follow the ISO-8601 standard (e.g., {@code "10:30:00"} or
+ * {@code "10:30:00.123456789"} when sub-second precision is present).
+ * Database columns are read and written using JDBC's native {@code LocalTime} support with a
+ * {@link java.sql.Time} fallback for older drivers.</p>
+ *
+ * @see AbstractTemporalType
+ * @see java.time.LocalTime
  */
 public class LocalTimeType extends AbstractTemporalType<LocalTime> {
 
     public static final String LOCAL_TIME = LocalTime.class.getSimpleName();
 
+    /**
+     * Package-private constructor for LocalTimeType.
+     * This constructor is called by the TypeFactory to create LocalTime type instances.
+     */
     LocalTimeType() {
         super(LOCAL_TIME);
     }
@@ -55,8 +67,9 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
     }
 
     /**
-     * Converts a LocalTime object to its string representation.
-     * The string format follows the ISO-8601 standard (HH:mm:ss).
+     * Converts a LocalTime object to its ISO-8601 string representation.
+     * Uses {@code LocalTime.toString()}, which produces strings such as {@code "10:30"},
+     * {@code "10:30:00"}, or {@code "10:30:00.123456789"} depending on the precision.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -65,8 +78,8 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
      * String str = type.stringOf(time);   // "10:30:00"
      * }</pre>
      *
-     * @param x The LocalTime object to convert
-     * @return The string representation of the LocalTime, or {@code null} if the input is null
+     * @param x the LocalTime object to convert; may be {@code null}
+     * @return the ISO-8601 time string, or {@code null} if the input is {@code null}
      */
     @Override
     public String stringOf(final LocalTime x) {

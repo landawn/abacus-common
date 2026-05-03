@@ -15,9 +15,8 @@
 package com.landawn.abacus.type;
 
 /**
- * Type handler for primitive char values.
- * This class handles the primitive char type specifically, as opposed to the Character wrapper class.
- * It provides type information and default value handling for char primitives.
+ * Type handler for the primitive {@code char} type, as opposed to the {@link Character} wrapper class.
+ * It provides type information and default value handling for {@code char} primitives.
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -45,6 +44,10 @@ public final class PrimitiveCharType extends AbstractCharacterType {
 
     private static final Character DEFAULT_VALUE = 0;
 
+    /**
+     * Constructs a new PrimitiveCharType instance.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
+     */
     PrimitiveCharType() {
         super(CHAR);
     }

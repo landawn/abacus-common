@@ -29,13 +29,16 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
 /**
- * The Abstract base class for {@code float} types in the type system.
+ * The abstract base class for {@code float} types in the type system.
  * <p>
  * This class provides common functionality for handling {@code float} values,
- * including conversion, database operations, and serialization.
- * Note that this class uses {@code Number} as its generic type to allow for both
- * primitive {@code float} and {@code Float} wrapper handling.
+ * including string conversion, JDBC read/write operations, and serialization.
+ * This class uses {@code Number} as its generic type parameter so that both the primitive
+ * {@code float} type and the {@code Float} wrapper type can share this implementation.
+ * Concrete subclasses cover each of those two variants.
  * </p>
+ *
+ * @see FloatType
  */
 public abstract class AbstractFloatType extends NumberType<Number> {
 
@@ -50,10 +53,8 @@ public abstract class AbstractFloatType extends NumberType<Number> {
 
     /**
      * Converts a {@code Number} value to its string representation as a {@code float}.
-     * <p>
      * Returns {@code null} if the input is {@code null}, otherwise returns
      * the string representation obtained from the {@code Number}'s {@code toString()} method.
-     * </p>
      *
      * @param x the {@code Number} value to convert
      * @return the string representation of the {@code float} value, or {@code null} if input is {@code null}
@@ -75,20 +76,11 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * <ul>
      *   <li>Empty or {@code null} strings return the default value</li>
      *   <li>Strings ending with 'l', 'L', 'f', 'F', 'd', or 'D' have the suffix stripped before parsing</li>
-     *   <li>Valid numeric strings are parsed to {@code float} values</li>
+     *   <li>Valid numeric strings are parsed to {@code Float} values</li>
      * </ul>
      *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * Type<Float> type = TypeFactory.getType(Float.class);
-     * Float value1 = type.valueOf("3.14");     // returns 3.14f
-     * Float value2 = type.valueOf("100.5f");   // returns 100.5f (suffix stripped)
-     * Float value3 = type.valueOf("42.0F");    // returns 42.0f (suffix stripped)
-     * Float value4 = type.valueOf("");         // returns default value
-     * }</pre>
-     *
      * @param str the string to convert
-     * @return the {@code Float} value
+     * @return the {@code Float} value, or the default value if {@code str} is empty or {@code null}
      * @throws NumberFormatException if the string cannot be parsed as a {@code float}
      */
     @Override
@@ -114,21 +106,9 @@ public abstract class AbstractFloatType extends NumberType<Number> {
     }
 
     /**
-     * Checks if this type represents a {@code float} type.
-     * <p>
-     * This method always returns {@code true} for {@code float} types.
-     * </p>
+     * Returns {@code true} because this type represents a {@code float} type.
      *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * Type<Float> type = TypeFactory.getType(Float.class);
-     * if (type.isFloat()) {
-     *     // Handle float type specific logic
-     *     System.out.println("This is a float type");
-     * }
-     * }</pre>
-     *
-     * @return {@code true}, indicating this is a {@code float} type
+     * @return {@code true}
      */
     @Override
     public boolean isFloat() {
@@ -137,25 +117,12 @@ public abstract class AbstractFloatType extends NumberType<Number> {
 
     /**
      * Retrieves a {@code float} value from a {@code ResultSet} at the specified column index.
-     * <p>
-     * This method uses {@code rs.getFloat()} which returns {@code 0.0f} for SQL {@code NULL} values.
+     * Uses {@link java.sql.ResultSet#getFloat(int)} which returns {@code 0.0f} for SQL {@code NULL} values.
      * Subclasses may override this to return {@code null} for SQL {@code NULL} values.
-     * </p>
-     *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * // For primitive float types
-     * Type<Float> type = TypeFactory.getType(float.class);
-     * float value = type.get(rs, 1);   // Returns 0.0f for SQL NULL
-     *
-     * // For wrapper Float types
-     * Type<Float> type = TypeFactory.getType(Float.class);
-     * Float value = type.get(rs, 1);   // Returns null for SQL NULL (overridden in subclass)
-     * }</pre>
      *
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the column index (1-based)
-     * @return the {@code float} value at the specified column; returns {@code 0.0f} if SQL {@code NULL} (may be overridden by subclasses to return {@code null})
+     * @return the {@code float} value at the specified column, or {@code 0.0f} if SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the {@code columnIndex} is invalid
      */
     @Override
@@ -165,25 +132,12 @@ public abstract class AbstractFloatType extends NumberType<Number> {
 
     /**
      * Retrieves a {@code float} value from a {@code ResultSet} using the specified column label.
-     * <p>
-     * This method uses {@code rs.getFloat()} which returns {@code 0.0f} for SQL {@code NULL} values.
+     * Uses {@link java.sql.ResultSet#getFloat(String)} which returns {@code 0.0f} for SQL {@code NULL} values.
      * Subclasses may override this to return {@code null} for SQL {@code NULL} values.
-     * </p>
-     *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * // For primitive float types
-     * Type<Float> type = TypeFactory.getType(float.class);
-     * float value = type.get(rs, "ratio");   // Returns 0.0f for SQL NULL
-     *
-     * // For wrapper Float types
-     * Type<Float> type = TypeFactory.getType(Float.class);
-     * Float value = type.get(rs, "ratio");   // Returns null for SQL NULL (overridden in subclass)
-     * }</pre>
      *
      * @param rs the {@code ResultSet} to read from
      * @param columnName the column label
-     * @return the {@code float} value at the specified column; returns {@code 0.0f} if SQL {@code NULL} (may be overridden by subclasses to return {@code null})
+     * @return the {@code float} value at the specified column, or {@code 0.0f} if SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the {@code columnName} is not found
      */
     @Override
@@ -206,7 +160,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Number x) throws SQLException {
         if (x == null) {
-            stmt.setNull(columnIndex, Types.FLOAT);
+            stmt.setNull(columnIndex, Types.REAL);
         } else {
             stmt.setFloat(columnIndex, Numbers.toFloat(x));
         }
@@ -227,7 +181,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Number x) throws SQLException {
         if (x == null) {
-            stmt.setNull(parameterName, Types.FLOAT);
+            stmt.setNull(parameterName, Types.REAL);
         } else {
             stmt.setFloat(parameterName, Numbers.toFloat(x));
         }
@@ -235,10 +189,8 @@ public abstract class AbstractFloatType extends NumberType<Number> {
 
     /**
      * Appends the string representation of a {@code float} value to an {@code Appendable}.
-     * <p>
      * Writes "null" if the value is {@code null}, otherwise writes the numeric value
      * using its {@code toString()} representation.
-     * </p>
      *
      * @param appendable the {@code Appendable} to write to
      * @param x the {@code Number} value to append as {@code float}

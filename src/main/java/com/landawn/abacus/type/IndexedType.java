@@ -15,6 +15,7 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
+import java.util.List;
 
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
@@ -22,8 +23,8 @@ import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Indexed;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
-import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Strings;
 
 /**
  * Type handler for Indexed objects.
@@ -43,21 +44,11 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
 
     private final Type<T> valueType;
 
-    private final Type<?>[] parameterTypes;
+    private final List<Type<?>> parameterTypes;
 
     /**
      * Package-private constructor for IndexedType.
-     * Creates a type handler for Indexed objects containing values of the specified type.
-     * This constructor is called by the TypeFactory to create Indexed&lt;T&gt; type instances.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * // Obtained via TypeFactory
-     * Type<Indexed<String>> type = TypeFactory.getType("Indexed<String>");
-     * Indexed<String> indexed = Indexed.of("hello", 5);
-     * String serialized = type.stringOf(indexed);  // "[5,\"hello\"]"
-     * Indexed<String> deserialized = type.valueOf("[5,\"hello\"]");
-     * }</pre>
+     * This constructor is called by the TypeFactory to create {@code Indexed<T>} type instances.
      *
      * @param valueTypeName the name of the type for values stored in the Indexed container
      */
@@ -66,7 +57,7 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
 
         declaringName = getTypeName(valueTypeName, true);
         valueType = TypeFactory.getType(valueTypeName);
-        parameterTypes = new Type[] { valueType };
+        parameterTypes = List.of(valueType);
     }
 
     /**
@@ -92,40 +83,32 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
     }
 
     /**
-     * Returns an array containing the parameter types of this generic indexed type.
-     * For indexed types, this array contains a single element representing the value type.
+     * Returns an immutable list containing the parameter types of this generic indexed type.
+     * For indexed types, this list contains a single element representing the value type.
      *
-     * @return an array containing the value type as the only parameter type
+     * @return an immutable list containing the value type as the only parameter type
      */
     @Override
-    public Type<?>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 
+    /**
+     * Indicates whether this type is a generic type with type parameters.
+     * Indexed types are always parameterized with the value type.
+     *
+     * @return {@code true}, as Indexed is a generic type
+     */
     @Override
     public boolean isParameterizedType() {
         return true;
     }
 
     /**
-     * Converts an Indexed object to its string representation.
-     * The indexed value is serialized as a JSON array with two elements: [index, value].
+     * Serializes an {@link Indexed} object to its JSON array representation ({@code [index, value]}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Indexed<String>> type = TypeFactory.getType("Indexed<String>");
-     * Indexed<String> indexed = Indexed.of("hello", 5);
-     * String result = type.stringOf(indexed);
-     * // Returns: [5,"hello"]
-     *
-     * Type<Indexed<Integer>> intType = TypeFactory.getType("Indexed<Integer>");
-     * Indexed<Integer> intIndexed = Indexed.of(42, 0);
-     * result = intType.stringOf(intIndexed);
-     * // Returns: [0,42]
-     * }</pre>
-     *
-     * @param x the Indexed object to convert to string
-     * @return the JSON array representation "[index,value]", or {@code null} if the input is null
+     * @param x the {@link Indexed} object to serialize; may be {@code null}
+     * @return the JSON array string, or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final Indexed<T> x) {
@@ -133,24 +116,14 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
     }
 
     /**
-     * Parses a string representation into an Indexed instance.
-     * The string should be in JSON array format with exactly two elements: [index, value].
-     * The first element is converted to a long index, and the second element is parsed
-     * according to the value type.
+     * Deserializes a JSON array string into an {@link Indexed} instance.
+     * The string must be a JSON array of at least two elements: {@code [index, value]},
+     * where the first element is converted to a {@code long} index.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Indexed<String>> type = TypeFactory.getType("Indexed<String>");
-     * Indexed<String> indexed = type.valueOf("[5,\"hello\"]");
-     * // indexed.index() returns 5, indexed.value() returns "hello"
-     *
-     * Type<Indexed<Integer>> intType = TypeFactory.getType("Indexed<Integer>");
-     * Indexed<Integer> intIndexed = intType.valueOf("[0,42]");
-     * // intIndexed.index() returns 0, intIndexed.value() returns 42
-     * }</pre>
-     *
-     * @param str the JSON array string to parse (e.g., "[0,\"hello\"]")
-     * @return a new Indexed instance with the parsed index and value, or {@code null} if the input is {@code null} or empty
+     * @param str the JSON array string to parse (e.g., {@code "[5,\"hello\"]"}); may be {@code null} or empty
+     * @return a new {@link Indexed} instance with the parsed index and value,
+     *         or {@code null} if {@code str} is {@code null} or empty
+     * @throws IllegalArgumentException if the array has fewer than two elements
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -172,20 +145,11 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
     }
 
     /**
-     * Appends the string representation of an Indexed object to an Appendable.
-     * The output format is a JSON array: [index,value].
+     * Appends the JSON array representation of an {@link Indexed} object to an {@link Appendable}
+     * in the format {@code [index, value]}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Indexed<String>> type = TypeFactory.getType("Indexed<String>");
-     * StringBuilder sb = new StringBuilder();
-     * Indexed<String> indexed = Indexed.of("hello", 5);
-     * type.appendTo(sb, indexed);
-     * // sb contains: [5,"hello"]
-     * }</pre>
-     *
-     * @param appendable the Appendable to write to
-     * @param x the Indexed object to append
+     * @param appendable the {@link Appendable} to write to
+     * @param x the {@link Indexed} object to append; may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
@@ -204,24 +168,12 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
     }
 
     /**
-     * Writes the character representation of an Indexed object to a CharacterWriter.
-     * This method is optimized for performance when writing to character-based outputs.
-     * The indexed value is serialized as a JSON array.
+     * Writes the JSON array representation of an {@link Indexed} object to a {@link CharacterWriter}
+     * in the format {@code [index, value]}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Indexed<String>> type = TypeFactory.getType("Indexed<String>");
-     * CharacterWriter writer = new CharacterWriter();
-     * JsonXmlSerConfig config = JsonXmlSerConfig.of();
-     * Indexed<String> indexed = Indexed.of("hello", 5);
-     * type.writeCharacter(writer, indexed, config);
-     * String result = writer.toString();
-     * // result: [5,"hello"]
-     * }</pre>
-     *
-     * @param writer the CharacterWriter to write to
-     * @param x the Indexed object to write
-     * @param config the serialization configuration to use
+     * @param writer the {@link CharacterWriter} to write to
+     * @param x the {@link Indexed} object to write; may be {@code null}
+     * @param config the serialization configuration to use; may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override

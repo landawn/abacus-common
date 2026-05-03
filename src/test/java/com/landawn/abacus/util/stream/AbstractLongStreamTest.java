@@ -82,6 +82,24 @@ public class AbstractLongStreamTest extends TestBase {
     }
 
     @Test
+    public void testDebounce() {
+        long[] result = createLongStream(1, 2, 3, 4).debounce(2, Duration.ofHours(1)).toArray();
+        assertArrayEquals(new long[] { 1, 2 }, result);
+    }
+
+    @Test
+    public void testDebounce_EmptyInput() {
+        long[] result = createLongStream().debounce(2, Duration.ofHours(1)).toArray();
+        assertArrayEquals(new long[] {}, result);
+    }
+
+    @Test
+    public void testDebounce_ErrorPath() {
+        assertThrows(IllegalArgumentException.class, () -> createLongStream(1).debounce(0, Duration.ofHours(1)).toArray());
+        assertThrows(IllegalArgumentException.class, () -> createLongStream(1).debounce(1, Duration.ofMillis(0)).toArray());
+    }
+
+    @Test
     public void testSkipUntil() {
         stream = createLongStream(new long[] { 1, 2, 3, 4, 5 });
         long[] result = stream.skipUntil(x -> x > 3).toArray();
@@ -106,11 +124,11 @@ public class AbstractLongStreamTest extends TestBase {
     @Test
     public void testFlatmap() {
         stream = createLongStream(new long[] { 1, 2, 3 });
-        long[] result = stream.flatmap(x -> new long[] { x, x * 2 }).toArray();
+        long[] result = stream.flatMapArray(x -> new long[] { x, x * 2 }).toArray();
         assertArrayEquals(new long[] { 1, 2, 2, 4, 3, 6 }, result);
 
         stream = createLongStream(new long[] {});
-        result = stream.flatmap(x -> new long[] { x, x * 2 }).toArray();
+        result = stream.flatMapArray(x -> new long[] { x, x * 2 }).toArray();
         assertArrayEquals(new long[] {}, result);
     }
 

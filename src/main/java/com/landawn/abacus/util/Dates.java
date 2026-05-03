@@ -38,6 +38,7 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAccessor;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
 import java.util.TimeZone;
@@ -729,7 +730,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
         });
 
         calendarCreatorPool.put(java.util.GregorianCalendar.class, (millis, c) -> {
-            final Calendar ret = GregorianCalendar.getInstance();
+            final Calendar ret = Calendar.getInstance();
 
             if (!N.equals(ret.getTimeZone(), c.getTimeZone()) && c.getTimeZone() != null) {
                 ret.setTimeZone(c.getTimeZone());
@@ -1179,8 +1180,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Date utilDate = new Date();
-     * Date sqlDate = Dates.createDate(utilDate);   // Converts to java.sql.Date
+     * java.util.Date utilDate = new java.util.Date();
+     * java.sql.Date sqlDate = Dates.createDate(utilDate);   // Converts to java.sql.Date
      * }</pre>
      *
      * @param date the date providing the time value, not {@code null}.
@@ -1250,7 +1251,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Date utilDate = new Date();
+     * java.util.Date utilDate = new java.util.Date();
      * Time time = Dates.createTime(utilDate);   // Converts to java.sql.Time
      * }</pre>
      *
@@ -1320,7 +1321,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Date utilDate = new Date();
+     * java.util.Date utilDate = new java.util.Date();
      * Timestamp timestamp = Dates.createTimestamp(utilDate);   // Converts to java.sql.Timestamp
      * }</pre>
      *
@@ -1869,7 +1870,30 @@ public abstract sealed class Dates permits Dates.DateUtil {
             return null;
         }
 
-        return createDate(parse(date, format, timeZone));
+        final long millis = parse(date, format, timeZone);
+
+        // For format-parsed dates, normalize the time-of-day to 00:00:00 in the parsing zone
+        // per the JDBC java.sql.Date contract. Raw epoch-millis input (no format, numeric string)
+        // is left as-is so serialize/deserialize round-trips of sql.Date stay bit-exact.
+        if (format == null && isPossibleLong(date)) {
+            return createDate(millis);
+        }
+        return createDate(truncateMillisToDate(millis, timeZone));
+    }
+
+    /**
+     * Truncates a UTC-millisecond value to midnight in the supplied zone. Used to normalize
+     * java.sql.Date returns per JDBC contract.
+     */
+    private static long truncateMillisToDate(final long millis, final TimeZone timeZone) {
+        final TimeZone zone = timeZone == null ? TimeZone.getDefault() : timeZone;
+        final Calendar cal = Calendar.getInstance(zone);
+        cal.setTimeInMillis(millis);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal.getTimeInMillis();
     }
 
     /**
@@ -1879,8 +1903,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Time time1 = Dates.parseTime("14:30:45");
-     * Time time2 = Dates.parseTime("2025-10-22T14:30:45Z");   // Extracts time part
+     * Time time2 = Dates.parseTime("2025-10-22T14:30:45Z");   // Parsed as the underlying epoch millis
      * }</pre>
+     *
+     * <p>Note: this method ultimately constructs a {@link java.sql.Time} from the parsed
+     * epoch-millisecond value; it does not zero out the date portion of the input.</p>
      *
      * @param date the string representation of the time to be parsed.
      * @return the parsed {@code java.sql.Time} instance, or {@code null} if the input is {@code null}, empty, or the string "null".
@@ -1941,7 +1968,33 @@ public abstract sealed class Dates permits Dates.DateUtil {
             return null;
         }
 
-        return createTime(parse(date, format, timeZone));
+        final long millis = parse(date, format, timeZone);
+
+        // Format-parsed time strings get the date portion normalized to 1970-01-01 (JDBC
+        // java.sql.Time contract). Raw epoch-millis input (no format, numeric string) is left
+        // as-is so serialize/deserialize round-trips of sql.Time stay bit-exact.
+        if (format == null && isPossibleLong(date)) {
+            return createTime(millis);
+        }
+        return createTime(normalizeMillisToTime(millis, timeZone));
+    }
+
+    /**
+     * Normalizes the date portion of {@code millis} to 1970-01-01 in the supplied zone, while
+     * preserving hour/min/sec/ms. Matches {@link java.sql.Time#valueOf(String)} convention,
+     * where {@code getTime()} returns 1970-01-01 hh:mm:ss interpreted in the local zone.
+     */
+    private static long normalizeMillisToTime(final long millis, final TimeZone timeZone) {
+        final TimeZone zone = timeZone == null ? TimeZone.getDefault() : timeZone;
+        final Calendar cal = Calendar.getInstance(zone);
+        cal.setTimeInMillis(millis);
+        if (cal.get(Calendar.YEAR) == 1970 && cal.get(Calendar.MONTH) == Calendar.JANUARY && cal.get(Calendar.DAY_OF_MONTH) == 1) {
+            return millis; // already normalized
+        }
+        cal.set(Calendar.YEAR, 1970);
+        cal.set(Calendar.MONTH, Calendar.JANUARY);
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+        return cal.getTimeInMillis();
     }
 
     /**
@@ -3321,7 +3374,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
         //        throw new IllegalArgumentException("The amount :" + amount + " is too big for unit: " + unit);
         //    }
 
-        if (unit == CalendarField.MONTH || unit == CalendarField.YEAR) {
+        // DAY_OF_MONTH and WEEK_OF_YEAR also need calendar-rule arithmetic so that crossing a
+        // DST boundary preserves wall-clock time of day. Pre-fix the millisecond-arithmetic
+        // path treated a day as exactly 86_400_000ms, so addDays(d, 1) on a spring-forward day
+        // landed an hour off in zones that observe DST. Routing through Calendar.add fixes it.
+        if (unit == CalendarField.MONTH || unit == CalendarField.YEAR || unit == CalendarField.DAY_OF_MONTH || unit == CalendarField.WEEK_OF_YEAR) {
             final Calendar c = createCalendar(date);
             //noinspection MagicConstant
             c.add(unit.value(), amount);
@@ -4101,8 +4158,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Date date = Dates.parseTimestamp("2023-03-28 13:45:01");
-     * Date ceiled = Dates.ceiling(date, Calendar.HOUR_OF_DAY);
+     * java.util.Date date = Dates.parseTimestamp("2023-03-28 13:45:01");
+     * java.util.Date ceiled = Dates.ceiling(date, Calendar.HOUR_OF_DAY);
      * // Result: 2023-03-28 14:00:00
      * }</pre>
      *
@@ -4129,8 +4186,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Date date = Dates.parseTimestamp("2023-03-28 13:45:01");
-     * Date ceiled = Dates.ceiling(date, CalendarField.HOUR_OF_DAY);
+     * java.util.Date date = Dates.parseTimestamp("2023-03-28 13:45:01");
+     * java.util.Date ceiled = Dates.ceiling(date, CalendarField.HOUR_OF_DAY);
      * // Result: 2023-03-28 14:00:00
      * }</pre>
      *
@@ -4422,8 +4479,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Date date1 = Dates.parseTimestamp("2023-03-28 13:45:30");
-     * Date date2 = Dates.parseTimestamp("2023-03-28 18:20:15");
+     * java.util.Date date1 = Dates.parseTimestamp("2023-03-28 13:45:30");
+     * java.util.Date date2 = Dates.parseTimestamp("2023-03-28 18:20:15");
      * boolean sameDay = Dates.truncatedEquals(date1, date2, CalendarField.DAY_OF_MONTH);   // true
      * boolean sameHour = Dates.truncatedEquals(date1, date2, CalendarField.HOUR_OF_DAY);   // false
      * }</pre>
@@ -4447,8 +4504,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Date date1 = Dates.parseTimestamp("2023-03-28 13:45:30");
-     * Date date2 = Dates.parseTimestamp("2023-03-28 18:20:15");
+     * java.util.Date date1 = Dates.parseTimestamp("2023-03-28 13:45:30");
+     * java.util.Date date2 = Dates.parseTimestamp("2023-03-28 18:20:15");
      * boolean sameDay = Dates.truncatedEquals(date1, date2, Calendar.DAY_OF_MONTH);   // true
      * boolean sameHour = Dates.truncatedEquals(date1, date2, Calendar.HOUR_OF_DAY);   // false
      * }</pre>
@@ -4522,8 +4579,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Date date1 = Dates.parseTimestamp("2023-03-28 13:45:30");
-     * Date date2 = Dates.parseTimestamp("2023-03-28 18:20:15");
+     * java.util.Date date1 = Dates.parseTimestamp("2023-03-28 13:45:30");
+     * java.util.Date date2 = Dates.parseTimestamp("2023-03-28 18:20:15");
      * int dayComparison = Dates.truncatedCompareTo(date1, date2, CalendarField.DAY_OF_MONTH);   // 0 (same day)
      * int hourComparison = Dates.truncatedCompareTo(date1, date2, CalendarField.HOUR_OF_DAY);   // negative (13 < 18)
      * }</pre>
@@ -4547,8 +4604,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Date date1 = Dates.parseTimestamp("2023-03-28 13:45:30");
-     * Date date2 = Dates.parseTimestamp("2023-03-28 18:20:15");
+     * java.util.Date date1 = Dates.parseTimestamp("2023-03-28 13:45:30");
+     * java.util.Date date2 = Dates.parseTimestamp("2023-03-28 18:20:15");
      * int dayComparison = Dates.truncatedCompareTo(date1, date2, Calendar.DAY_OF_MONTH);   // 0 (same day)
      * int hourComparison = Dates.truncatedCompareTo(date1, date2, Calendar.HOUR_OF_DAY);   // negative (13 < 18)
      * }</pre>
@@ -4595,7 +4652,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Date date = Dates.parseTimestamp("2023-01-06 07:15:10.538");
+     * java.util.Date date = Dates.parseTimestamp("2023-01-06 07:15:10.538");
      * long millis = Dates.getFragmentInMilliseconds(date, CalendarField.SECOND);
      * // Result: 538 (milliseconds within the current second)
      * }</pre>
@@ -4642,7 +4699,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Date date = Dates.parseTimestamp("2023-01-06 07:15:10.538");
+     * java.util.Date date = Dates.parseTimestamp("2023-01-06 07:15:10.538");
      * long seconds = Dates.getFragmentInSeconds(date, CalendarField.MINUTE);
      * // Result: 10 (seconds within the current minute)
      * }</pre>
@@ -4689,7 +4746,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Date date = Dates.parseTimestamp("2023-01-06 07:15:10.538");
+     * java.util.Date date = Dates.parseTimestamp("2023-01-06 07:15:10.538");
      * long minutes = Dates.getFragmentInMinutes(date, CalendarField.HOUR_OF_DAY);
      * // Result: 15 (minutes within the current hour)
      * }</pre>
@@ -4736,7 +4793,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Date date = Dates.parseTimestamp("2023-01-06 07:15:10.538");
+     * java.util.Date date = Dates.parseTimestamp("2023-01-06 07:15:10.538");
      * long hours = Dates.getFragmentInHours(date, CalendarField.DAY_OF_YEAR);
      * // Result: 7 (hours within the current day)
      * }</pre>
@@ -5332,8 +5389,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Date date1 = Dates.parseTimestamp("2023-03-28 13:45:30.123");
-     * Date date2 = Dates.parseTimestamp("2023-03-28 13:45:30.123");
+     * java.util.Date date1 = Dates.parseTimestamp("2023-03-28 13:45:30.123");
+     * java.util.Date date2 = Dates.parseTimestamp("2023-03-28 13:45:30.123");
      * boolean sameInstant = Dates.isSameInstant(date1, date2);   // true
      * }</pre>
      *
@@ -5428,7 +5485,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
                 sdf = utcTimestampDFPool.poll();
 
                 if (sdf == null) {
-                    sdf = new SimpleDateFormat(format);
+                    sdf = new SimpleDateFormat(format, Locale.US);
                     sdf.setTimeZone(timeZone);
                 }
 
@@ -5438,7 +5495,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
                 sdf = utcDateTimeDFPool.poll();
 
                 if (sdf == null) {
-                    sdf = new SimpleDateFormat(format);
+                    sdf = new SimpleDateFormat(format, Locale.US);
                     sdf.setTimeZone(timeZone);
                 }
 
@@ -5456,7 +5513,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
         sdf = queue.poll();
 
         if (sdf == null) {
-            sdf = new SimpleDateFormat(format);
+            // Locale.US so cached SimpleDateFormat instances produce stable, RFC-conformant output
+            // for patterns containing EEE / MMM / a (AM/PM). The default-locale variant gave
+            // localized day/month names that broke HTTP Date headers etc. on non-English JVMs.
+            sdf = new SimpleDateFormat(format, Locale.US);
         }
 
         sdf.setTimeZone(timeZone);
@@ -5779,26 +5839,26 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example 1: Check if two date ranges overlap
-     * java.util.Date start1 = Dates.parse("2023-01-01");
-     * java.util.Date end1 = Dates.parse("2023-01-10");
-     * java.util.Date start2 = Dates.parse("2023-01-05");
-     * java.util.Date end2 = Dates.parse("2023-01-15");
+     * java.util.Date start1 = Dates.parseJUDate("2023-01-01");
+     * java.util.Date end1 = Dates.parseJUDate("2023-01-10");
+     * java.util.Date start2 = Dates.parseJUDate("2023-01-05");
+     * java.util.Date end2 = Dates.parseJUDate("2023-01-15");
      * boolean overlaps = Dates.isOverlapping(start1, end1, start2, end2);
      * // Result: true (ranges overlap from Jan 5 to Jan 10)
      *
      * // Example 2: Check non-overlapping ranges
-     * java.util.Date start1 = Dates.parse("2023-01-01");
-     * java.util.Date end1 = Dates.parse("2023-01-10");
-     * java.util.Date start2 = Dates.parse("2023-01-15");
-     * java.util.Date end2 = Dates.parse("2023-01-20");
+     * java.util.Date start1 = Dates.parseJUDate("2023-01-01");
+     * java.util.Date end1 = Dates.parseJUDate("2023-01-10");
+     * java.util.Date start2 = Dates.parseJUDate("2023-01-15");
+     * java.util.Date end2 = Dates.parseJUDate("2023-01-20");
      * boolean overlaps = Dates.isOverlapping(start1, end1, start2, end2);
      * // Result: false (no overlap, there's a gap)
      *
      * // Example 3: Check adjacent ranges (touching but not overlapping)
-     * java.util.Date start1 = Dates.parse("2023-01-01");
-     * java.util.Date end1 = Dates.parse("2023-01-10");
-     * java.util.Date start2 = Dates.parse("2023-01-10");
-     * java.util.Date end2 = Dates.parse("2023-01-20");
+     * java.util.Date start1 = Dates.parseJUDate("2023-01-01");
+     * java.util.Date end1 = Dates.parseJUDate("2023-01-10");
+     * java.util.Date start2 = Dates.parseJUDate("2023-01-10");
+     * java.util.Date end2 = Dates.parseJUDate("2023-01-20");
      * boolean overlaps = Dates.isOverlapping(start1, end1, start2, end2);
      * // Result: false (ranges are adjacent but don't overlap)
      * }</pre>
@@ -5830,30 +5890,30 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example 1: Check if a date is within a range (inclusive)
-     * java.util.Date checkDate = Dates.parse("2023-01-15");
-     * java.util.Date startDate = Dates.parse("2023-01-01");
-     * java.util.Date endDate = Dates.parse("2023-01-31");
+     * java.util.Date checkDate = Dates.parseJUDate("2023-01-15");
+     * java.util.Date startDate = Dates.parseJUDate("2023-01-01");
+     * java.util.Date endDate = Dates.parseJUDate("2023-01-31");
      * boolean isWithin = Dates.isBetween(checkDate, startDate, endDate);
      * // Result: true (Jan 15 is between Jan 1 and Jan 31)
      *
      * // Example 2: Check boundary dates (inclusive)
-     * java.util.Date checkDate = Dates.parse("2023-01-01");
-     * java.util.Date startDate = Dates.parse("2023-01-01");
-     * java.util.Date endDate = Dates.parse("2023-01-31");
+     * java.util.Date checkDate = Dates.parseJUDate("2023-01-01");
+     * java.util.Date startDate = Dates.parseJUDate("2023-01-01");
+     * java.util.Date endDate = Dates.parseJUDate("2023-01-31");
      * boolean isWithin = Dates.isBetween(checkDate, startDate, endDate);
      * // Result: true (boundary dates are included)
      *
      * // Example 3: Check date outside the range
-     * java.util.Date checkDate = Dates.parse("2023-02-15");
-     * java.util.Date startDate = Dates.parse("2023-01-01");
-     * java.util.Date endDate = Dates.parse("2023-01-31");
+     * java.util.Date checkDate = Dates.parseJUDate("2023-02-15");
+     * java.util.Date startDate = Dates.parseJUDate("2023-01-01");
+     * java.util.Date endDate = Dates.parseJUDate("2023-01-31");
      * boolean isWithin = Dates.isBetween(checkDate, startDate, endDate);
      * // Result: false (Feb 15 is after Jan 31)
      *
      * // Example 4: Validate if an event date falls within a campaign period
-     * java.util.Date eventDate = Dates.parse("2023-12-25");
-     * java.util.Date campaignStart = Dates.parse("2023-12-01");
-     * java.util.Date campaignEnd = Dates.parse("2023-12-31");
+     * java.util.Date eventDate = Dates.parseJUDate("2023-12-25");
+     * java.util.Date campaignStart = Dates.parseJUDate("2023-12-01");
+     * java.util.Date campaignEnd = Dates.parseJUDate("2023-12-31");
      * if (Dates.isBetween(eventDate, campaignStart, campaignEnd)) {
      *     // Event is within campaign period
      * }
@@ -5952,7 +6012,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p><b>Thread Safety:</b>
      * All methods are thread-safe. {@link DateTimeFormatter} instances are immutable and can be
      * safely shared across threads without synchronization.
-     * 
+     *
      * <p><b>DTF ==> Date Time Formatter</b></p>
      *
      * @see DateTimeFormatter
@@ -6195,7 +6255,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
         DTF(final String format) {
             this.format = format;
-            dateTimeFormatter = DateTimeFormatter.ofPattern(format);
+            // Locale.US for stable EEE/MMM/a formatting; see Dates.getSDF for the same rationale.
+            dateTimeFormatter = DateTimeFormatter.ofPattern(format, Locale.US);
         }
 
         //    DTF(final DateTimeFormatter dtf) {

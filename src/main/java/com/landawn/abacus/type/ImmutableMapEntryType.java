@@ -18,6 +18,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.AbstractMap;
+import java.util.List;
 import java.util.Map;
 
 import com.landawn.abacus.exception.UncheckedIOException;
@@ -29,8 +30,8 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.ImmutableEntry;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
-import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Strings;
 
 /**
  * Type handler for immutable Map.Entry objects.
@@ -54,17 +55,25 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
 
     private final Type<V> valueType;
 
-    private final Type<?>[] parameterTypes;
+    private final List<Type<?>> parameterTypes;
 
     private final JsonDeserConfig jdc;
 
+    /**
+     * Package-private constructor for ImmutableMapEntryType.
+     * This constructor is called by the TypeFactory to create
+     * {@code Map.ImmutableEntry<K, V>} type instances.
+     *
+     * @param keyTypeName the name of the key type parameter
+     * @param valueTypeName the name of the value type parameter
+     */
     ImmutableMapEntryType(final String keyTypeName, final String valueTypeName) {
         super(getTypeName(keyTypeName, valueTypeName, false));
 
         declaringName = getTypeName(keyTypeName, valueTypeName, true);
         keyType = TypeFactory.getType(keyTypeName);
         valueType = TypeFactory.getType(valueTypeName);
-        parameterTypes = new Type[] { keyType, valueType };
+        parameterTypes = List.of(keyType, valueType);
         jdc = JsonDeserConfig.create().setMapKeyType(keyType).setMapValueType(valueType);
     }
 
@@ -90,40 +99,33 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
     }
 
     /**
-     * Returns an array containing the parameter types of this generic map entry type.
-     * For map entry types, this array contains two elements: the key type and the value type.
+     * Returns an immutable list containing the parameter types of this generic map entry type.
+     * For map entry types, this list contains two elements: the key type and the value type.
      *
-     * @return an array containing the key type and value type
+     * @return an immutable list containing the key type and value type
      */
     @Override
-    public Type<?>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 
+    /**
+     * Indicates whether this type is a generic type with type parameters.
+     * ImmutableMapEntry types are always parameterized with key and value types.
+     *
+     * @return {@code true}, as {@code Map.ImmutableEntry} is a generic type
+     */
     @Override
     public boolean isParameterizedType() {
         return true;
     }
 
     /**
-     * Converts an immutable map entry to its string representation.
-     * The entry is serialized as a JSON object with a single key-value pair.
+     * Serializes an immutable map entry to its JSON string representation as a single-entry object
+     * (e.g., {@code {"age":25}}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<AbstractMap.SimpleImmutableEntry<String, Integer>> type =
-     *     TypeFactory.getType("Map.ImmutableEntry<String, Integer>");
-     * AbstractMap.SimpleImmutableEntry<String, Integer> entry =
-     *     new AbstractMap.SimpleImmutableEntry<>("age", 25);
-     * String result = type.stringOf(entry);
-     * // Returns: {"age":25}
-     *
-     * result = type.stringOf(null);
-     * // Returns: null
-     * }</pre>
-     *
-     * @param x the immutable map entry to convert to string
-     * @return the JSON string representation of the entry (e.g., "{\"key\":\"value\"}"), or {@code null} if the input is null
+     * @param x the immutable map entry to serialize; may be {@code null}
+     * @return the JSON string, or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final AbstractMap.SimpleImmutableEntry<K, V> x) {
@@ -131,24 +133,13 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
     }
 
     /**
-     * Parses a string representation into an immutable map entry instance.
-     * The string should be in JSON object format with a single key-value pair.
-     * Empty strings or empty JSON objects ("{}") result in {@code null}.
+     * Deserializes a JSON string into an immutable map entry instance.
+     * The string must be a single-entry JSON object (e.g., {@code {"age":25}}).
+     * Returns {@code null} for empty strings or the empty JSON object ({@code "{}"}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<AbstractMap.SimpleImmutableEntry<String, Integer>> type =
-     *     TypeFactory.getType("Map.ImmutableEntry<String, Integer>");
-     * AbstractMap.SimpleImmutableEntry<String, Integer> entry =
-     *     type.valueOf("{\"age\":25}");
-     * // entry.getKey() returns "age", entry.getValue() returns 25
-     *
-     * entry = type.valueOf("{}");
-     * // Returns: null
-     * }</pre>
-     *
-     * @param str the JSON string to parse (e.g., "{\"key\":\"value\"}")
-     * @return a new immutable map entry instance, or {@code null} if the input is {@code null}, empty, or "{}"
+     * @param str the JSON string to parse; may be {@code null} or empty
+     * @return a new immutable map entry, or {@code null} if the input is {@code null}, empty, or {@code "{}"}
+     * @throws IllegalArgumentException if the JSON object contains more than one entry
      */
     @Override
     public AbstractMap.SimpleImmutableEntry<K, V> valueOf(final String str) {
@@ -170,23 +161,12 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
     }
 
     /**
-     * Appends the string representation of an immutable map entry to an Appendable.
-     * The output format is a JSON object with the key and value.
-     * Handles Writer instances specially for better performance with buffering.
+     * Appends the JSON representation of an immutable map entry to an {@link Appendable}.
+     * The output format is a single-entry JSON object (e.g., {@code {"age":25}}).
+     * {@link Writer} instances are wrapped in a buffered writer for better performance.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<AbstractMap.SimpleImmutableEntry<String, Integer>> type =
-     *     TypeFactory.getType("Map.ImmutableEntry<String, Integer>");
-     * StringBuilder sb = new StringBuilder();
-     * AbstractMap.SimpleImmutableEntry<String, Integer> entry =
-     *     new AbstractMap.SimpleImmutableEntry<>("age", 25);
-     * type.appendTo(sb, entry);
-     * // sb contains: {"age":25}
-     * }</pre>
-     *
-     * @param appendable the Appendable to write to
-     * @param x the immutable map entry to append
+     * @param appendable the {@link Appendable} to write to
+     * @param x the immutable map entry to append; may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
@@ -230,26 +210,12 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
     }
 
     /**
-     * Writes the character representation of an immutable map entry to a CharacterWriter.
-     * This method is optimized for performance when writing to character-based outputs.
-     * The entry is serialized as a JSON object.
+     * Writes the JSON representation of an immutable map entry to a {@link CharacterWriter}
+     * as a single-entry JSON object (e.g., {@code {"age":25}}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<AbstractMap.SimpleImmutableEntry<String, Integer>> type =
-     *     TypeFactory.getType("Map.ImmutableEntry<String, Integer>");
-     * CharacterWriter writer = new CharacterWriter();
-     * JsonXmlSerConfig config = JsonXmlSerConfig.of();
-     * AbstractMap.SimpleImmutableEntry<String, Integer> entry =
-     *     new AbstractMap.SimpleImmutableEntry<>("age", 25);
-     * type.writeCharacter(writer, entry, config);
-     * String result = writer.toString();
-     * // result: {"age":25}
-     * }</pre>
-     *
-     * @param writer the CharacterWriter to write to
-     * @param x the immutable map entry to write
-     * @param config the serialization configuration to use
+     * @param writer the {@link CharacterWriter} to write to
+     * @param x the immutable map entry to write; may be {@code null}
+     * @param config the serialization configuration to use; may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override

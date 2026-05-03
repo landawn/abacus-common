@@ -43,7 +43,7 @@ public interface CharFunction<R> extends Throwables.CharFunction<R, RuntimeExcep
     CharFunction<Character> BOX = value -> value;
 
     /**
-     * Applies this function to the given argument.
+     * Applies this function to the given char-valued argument and produces a result.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -78,6 +78,7 @@ public interface CharFunction<R> extends Throwables.CharFunction<R, RuntimeExcep
      * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed function that first applies this function and then applies the
      *         {@code after} function
+     * @throws NullPointerException if {@code after} is null
      */
     default <V> CharFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return t -> after.apply(apply(t));

@@ -247,8 +247,8 @@ import com.landawn.abacus.annotation.NullSafe;
  * // Validate matrix structure
  * try {
  *     double[][] invalid = {{1.0, 2.0}, {3.0}};           // Irregular matrix
- *     double[][] transposed = Array.transpose(invalid);   // Will handle gracefully
- * } catch (Exception e) {
+ *     double[][] transposed = Array.transpose(invalid);   // Throws IllegalArgumentException
+ * } catch (IllegalArgumentException e) {
  *     // Handle validation errors
  * }
  * }</pre>
@@ -770,7 +770,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Returns a fixed-size list backed by the specified array if it's not {@code null} or empty, 
+     * Returns a fixed-size list backed by the specified array if it's not {@code null} or empty,
      * otherwise an immutable/unmodifiable empty list is returned.
      *
      * <p>This method provides a null-safe wrapper around {@link Arrays#asList(Object...)} that
@@ -790,10 +790,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * String[] array = {"a", "b", "c"};
      * List<String> list = Array.asList(array);
      * list.set(0, "x");   // Modifies both list and original array
-     * 
+     *
      * String[] emptyArray = {};
      * List<String> emptyList = Array.asList(emptyArray);   // Returns empty list
-     * 
+     *
      * String[] nullArray = null;
      * List<String> nullList = Array.asList(nullArray);   // Returns empty list
      * }</pre>
@@ -1044,6 +1044,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param a the input array.
      * @return the same input array.
      * @deprecated replaced by {@code N.asArray(Object...)}.
+     * @see #ofValues(Object...)
      * @see N#asArray(Object...)
      */
     @Deprecated
@@ -1054,15 +1055,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Returns the input array as-is without any modification or copying.
-     * 
+     *
      * @param <T> the type of the elements in the array.
      * @param a the input array.
      * @return the same input array.
-     * @see #oF(Object...)
      */
     @Beta
     @SafeVarargs
-    public static <T> T[] with(final T... a) { //NOSONAR
+    public static <T> T[] ofValues(final T... a) { //NOSONAR
         return a;
     }
 
@@ -1935,7 +1935,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param element the boolean value to be repeated in the array.
      * @param n the length of the array to be generated.
      * @return a boolean array of length <i>n</i> with all elements set to <i>element</i>.
-     * @throws IllegalArgumentException if n is negative..
+     * @throws IllegalArgumentException if n is negative.
      */
     public static boolean[] repeat(final boolean element, final int n) {
         N.checkArgNotNegative(n, cs.n);
@@ -2010,7 +2010,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param element the char value to be repeated in the array.
      * @param n the length of the array to be generated.
      * @return a char array of length <i>n</i> with all elements set to <i>element</i>.
-     * @throws IllegalArgumentException if n is negative..
+     * @throws IllegalArgumentException if n is negative.
      */
     public static char[] repeat(final char element, final int n) {
         N.checkArgNotNegative(n, cs.n);
@@ -2020,7 +2020,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
         return a;
     }
 
-    /** 
+    /**
      * Generates a new char array by repeating the input array a specified number of times.
      *
      * <p>This method creates a new char array where the input array is repeated consecutively
@@ -2168,7 +2168,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
         return a;
     }
 
-    /**     
+    /**
      * Generates a new short array by repeating the input array a specified number of times.
      *
      * <p>This method creates a new short array where the input array is repeated consecutively
@@ -2242,7 +2242,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
         return a;
     }
 
-    /**     
+    /**
      * Generates a new integer array by repeating the input array a specified number of times.
      *
      * <p>This method creates a new integer array where the input array is repeated consecutively
@@ -2316,7 +2316,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
         return a;
     }
 
-    /**     
+    /**
      * Generates a new long array by repeating the input array a specified number of times.
      *
      * <p>This method creates a new long array where the input array is repeated consecutively
@@ -2390,7 +2390,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
         return a;
     }
 
-    /**     
+    /**
      * Generates a new float array by repeating the input array a specified number of times.
      *
      * <p>This method creates a new float array where the input array is repeated consecutively
@@ -2464,7 +2464,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
         return a;
     }
 
-    /**     
+    /**
      * Generates a new double array by repeating the input array a specified number of times.
      *
      * <p>This method creates a new double array where the input array is repeated consecutively
@@ -3945,11 +3945,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     @MayReturnNull
     public static Boolean[] box(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
-
+        // Null check before bounds check, per the @return doc ("null if input is null").
+        // Otherwise N.checkFromToIndex(0, X>0, 0) throws IndexOutOfBoundsException for null arrays.
         if (a == null) {
             return null;
-        } else if (toIndex - fromIndex == 0) {
+        }
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (toIndex - fromIndex == 0) {
             return N.EMPTY_BOOLEAN_OBJ_ARRAY;
         }
 
@@ -4002,11 +4005,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     @MayReturnNull
     public static Character[] box(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
-
+        // Null check before bounds check, per the @return doc ("null if input is null").
+        // Otherwise N.checkFromToIndex(0, X>0, 0) throws IndexOutOfBoundsException for null arrays.
         if (a == null) {
             return null;
-        } else if (toIndex - fromIndex == 0) {
+        }
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (toIndex - fromIndex == 0) {
             return N.EMPTY_CHAR_OBJ_ARRAY;
         }
 
@@ -4059,11 +4065,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     @MayReturnNull
     public static Byte[] box(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
-
+        // Null check before bounds check, per the @return doc ("null if input is null").
+        // Otherwise N.checkFromToIndex(0, X>0, 0) throws IndexOutOfBoundsException for null arrays.
         if (a == null) {
             return null;
-        } else if (toIndex - fromIndex == 0) {
+        }
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (toIndex - fromIndex == 0) {
             return N.EMPTY_BYTE_OBJ_ARRAY;
         }
 
@@ -4116,11 +4125,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     @MayReturnNull
     public static Short[] box(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
-
+        // Null check before bounds check, per the @return doc ("null if input is null").
+        // Otherwise N.checkFromToIndex(0, X>0, 0) throws IndexOutOfBoundsException for null arrays.
         if (a == null) {
             return null;
-        } else if (toIndex - fromIndex == 0) {
+        }
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (toIndex - fromIndex == 0) {
             return N.EMPTY_SHORT_OBJ_ARRAY;
         }
 
@@ -4166,11 +4178,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     @MayReturnNull
     public static Integer[] box(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
-
+        // Null check before bounds check, per the @return doc ("null if input is null").
+        // Otherwise N.checkFromToIndex(0, X>0, 0) throws IndexOutOfBoundsException for null arrays.
         if (a == null) {
             return null;
-        } else if (toIndex - fromIndex == 0) {
+        }
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (toIndex - fromIndex == 0) {
             return N.EMPTY_INT_OBJ_ARRAY;
         }
 
@@ -4223,11 +4238,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     @MayReturnNull
     public static Long[] box(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
-
+        // Null check before bounds check, per the @return doc ("null if input is null").
+        // Otherwise N.checkFromToIndex(0, X>0, 0) throws IndexOutOfBoundsException for null arrays.
         if (a == null) {
             return null;
-        } else if (toIndex - fromIndex == 0) {
+        }
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (toIndex - fromIndex == 0) {
             return N.EMPTY_LONG_OBJ_ARRAY;
         }
 
@@ -4280,11 +4298,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     @MayReturnNull
     public static Float[] box(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
-
+        // Null check before bounds check, per the @return doc ("null if input is null").
+        // Otherwise N.checkFromToIndex(0, X>0, 0) throws IndexOutOfBoundsException for null arrays.
         if (a == null) {
             return null;
-        } else if (toIndex - fromIndex == 0) {
+        }
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (toIndex - fromIndex == 0) {
             return N.EMPTY_FLOAT_OBJ_ARRAY;
         }
 
@@ -4337,11 +4358,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     @MayReturnNull
     public static Double[] box(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
-
+        // Null check before bounds check, per the @return doc ("null if input is null").
+        // Otherwise N.checkFromToIndex(0, X>0, 0) throws IndexOutOfBoundsException for null arrays.
         if (a == null) {
             return null;
-        } else if (toIndex - fromIndex == 0) {
+        }
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (toIndex - fromIndex == 0) {
             return N.EMPTY_DOUBLE_OBJ_ARRAY;
         }
 
@@ -4782,11 +4806,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     @MayReturnNull
     public static boolean[] unbox(final Boolean[] a, final int fromIndex, final int toIndex, final boolean valueForNull) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
-
+        // Null check before bounds check, per the @return doc ("null if input is null").
+        // Otherwise N.checkFromToIndex(0, X>0, 0) throws IndexOutOfBoundsException for null arrays.
         if (a == null) {
             return null;
-        } else if (toIndex - fromIndex == 0) {
+        }
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (toIndex - fromIndex == 0) {
             return N.EMPTY_BOOLEAN_ARRAY;
         }
 
@@ -4845,11 +4872,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     @MayReturnNull
     public static char[] unbox(final Character[] a, final int fromIndex, final int toIndex, final char valueForNull) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
-
+        // Null check before bounds check, per the @return doc ("null if input is null").
+        // Otherwise N.checkFromToIndex(0, X>0, 0) throws IndexOutOfBoundsException for null arrays.
         if (a == null) {
             return null;
-        } else if (toIndex - fromIndex == 0) {
+        }
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (toIndex - fromIndex == 0) {
             return N.EMPTY_CHAR_ARRAY;
         }
 
@@ -4908,11 +4938,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     @MayReturnNull
     public static byte[] unbox(final Byte[] a, final int fromIndex, final int toIndex, final byte valueForNull) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
-
+        // Null check before bounds check, per the @return doc ("null if input is null").
+        // Otherwise N.checkFromToIndex(0, X>0, 0) throws IndexOutOfBoundsException for null arrays.
         if (a == null) {
             return null;
-        } else if (toIndex - fromIndex == 0) {
+        }
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (toIndex - fromIndex == 0) {
             return N.EMPTY_BYTE_ARRAY;
         }
 
@@ -4971,11 +5004,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     @MayReturnNull
     public static short[] unbox(final Short[] a, final int fromIndex, final int toIndex, final short valueForNull) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
-
+        // Null check before bounds check, per the @return doc ("null if input is null").
+        // Otherwise N.checkFromToIndex(0, X>0, 0) throws IndexOutOfBoundsException for null arrays.
         if (a == null) {
             return null;
-        } else if (toIndex - fromIndex == 0) {
+        }
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (toIndex - fromIndex == 0) {
             return N.EMPTY_SHORT_ARRAY;
         }
 
@@ -5056,11 +5092,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     @MayReturnNull
     public static int[] unbox(final Integer[] a, final int fromIndex, final int toIndex, final int valueForNull) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
-
+        // Null check before bounds check, per the @return doc ("null if input is null").
+        // Otherwise N.checkFromToIndex(0, X>0, 0) throws IndexOutOfBoundsException for null arrays.
         if (a == null) {
             return null;
-        } else if (toIndex - fromIndex == 0) {
+        }
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (toIndex - fromIndex == 0) {
             return N.EMPTY_INT_ARRAY;
         }
 
@@ -5141,11 +5180,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     @MayReturnNull
     public static long[] unbox(final Long[] a, final int fromIndex, final int toIndex, final long valueForNull) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
-
+        // Null check before bounds check, per the @return doc ("null if input is null").
+        // Otherwise N.checkFromToIndex(0, X>0, 0) throws IndexOutOfBoundsException for null arrays.
         if (a == null) {
             return null;
-        } else if (toIndex - fromIndex == 0) {
+        }
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (toIndex - fromIndex == 0) {
             return N.EMPTY_LONG_ARRAY;
         }
 
@@ -5205,11 +5247,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     @MayReturnNull
     public static float[] unbox(final Float[] a, final int fromIndex, final int toIndex, final float valueForNull) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
-
+        // Null check before bounds check, per the @return doc ("null if input is null").
+        // Otherwise N.checkFromToIndex(0, X>0, 0) throws IndexOutOfBoundsException for null arrays.
         if (a == null) {
             return null;
-        } else if (toIndex - fromIndex == 0) {
+        }
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (toIndex - fromIndex == 0) {
             return N.EMPTY_FLOAT_ARRAY;
         }
 
@@ -5290,11 +5335,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     @MayReturnNull
     public static double[] unbox(final Double[] a, final int fromIndex, final int toIndex, final double valueForNull) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
-
+        // Null check before bounds check, per the @return doc ("null if input is null").
+        // Otherwise N.checkFromToIndex(0, X>0, 0) throws IndexOutOfBoundsException for null arrays.
         if (a == null) {
             return null;
-        } else if (toIndex - fromIndex == 0) {
+        }
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (toIndex - fromIndex == 0) {
             return N.EMPTY_DOUBLE_ARRAY;
         }
 

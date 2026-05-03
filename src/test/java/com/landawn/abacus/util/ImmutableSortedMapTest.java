@@ -412,7 +412,7 @@ public class ImmutableSortedMapTest extends TestBase {
         Assertions.assertThrows(UnsupportedOperationException.class, () -> map.put("c", 3));
         Assertions.assertThrows(UnsupportedOperationException.class, () -> map.remove("a"));
         Assertions.assertThrows(UnsupportedOperationException.class, () -> map.clear());
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> map.putAll(CommonUtil.asMap("d", 4)));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> map.putAll(N.asMap("d", 4)));
     }
 
     @Test

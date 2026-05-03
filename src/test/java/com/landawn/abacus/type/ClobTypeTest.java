@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,6 +21,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.exception.UncheckedSQLException;
 
 public class ClobTypeTest extends TestBase {
 
@@ -155,6 +158,77 @@ public class ClobTypeTest extends TestBase {
     public void test_name() {
         assertNotNull(type.name());
         assertFalse(type.name().isEmpty());
+    }
+
+    /**
+     * Bug fix: when getSubString() throws and free() also throws, the original
+     * exception must not be lost.  The free() exception is attached as suppressed.
+     */
+    @Test
+    public void testStringOf_getSubStringThrows_freeAlsoThrows_primaryExceptionNotLost() throws SQLException {
+        final Clob clob = mock(Clob.class);
+        final SQLException getSubStringException = new SQLException("getSubString failed");
+        final SQLException freeException = new SQLException("free failed");
+
+        when(clob.length()).thenReturn(5L);
+        when(clob.getSubString(1, 5)).thenThrow(getSubStringException);
+        doThrow(freeException).when(clob).free();
+
+        final UncheckedSQLException thrown = Assertions.assertThrows(UncheckedSQLException.class, () -> type.stringOf(clob));
+
+        // The primary exception (from getSubString) must be the one that propagates
+        assertSame(getSubStringException, thrown.getCause());
+
+        // The free() exception must be attached as a suppressed exception, not lost
+        final Throwable[] suppressed = thrown.getSuppressed();
+        Assertions.assertEquals(1, suppressed.length);
+        Assertions.assertInstanceOf(UncheckedSQLException.class, suppressed[0]);
+        assertSame(freeException, ((UncheckedSQLException) suppressed[0]).getCause());
+    }
+
+    /**
+     * Bug fix: when getSubString() succeeds but free() throws, the free() exception
+     * is propagated (there is no primary exception to suppress it against).
+     */
+    @Test
+    public void testStringOf_getSubStringSucceeds_freeThrows_freeExceptionPropagates() throws SQLException {
+        final Clob clob = mock(Clob.class);
+        final SQLException freeException = new SQLException("free failed");
+
+        when(clob.length()).thenReturn(5L);
+        when(clob.getSubString(1, 5)).thenReturn("hello");
+        doThrow(freeException).when(clob).free();
+
+        final UncheckedSQLException thrown = Assertions.assertThrows(UncheckedSQLException.class, () -> type.stringOf(clob));
+        assertSame(freeException, thrown.getCause());
+    }
+
+    /**
+     * When getSubString() succeeds and free() also succeeds, the content is returned.
+     */
+    @Test
+    public void testStringOf_successPath() throws SQLException {
+        final Clob clob = mock(Clob.class);
+        when(clob.length()).thenReturn(5L);
+        when(clob.getSubString(1, 5)).thenReturn("hello");
+
+        final String result = type.stringOf(clob);
+
+        Assertions.assertEquals("hello", result);
+        verify(clob).free();
+    }
+
+    /**
+     * When the clob is too large (length > Integer.MAX_VALUE), an UnsupportedOperationException
+     * is thrown.  The free() exception (if any) is attached as suppressed.
+     */
+    @Test
+    public void testStringOf_clobTooLarge_throwsUnsupportedOperation() throws SQLException {
+        final Clob clob = mock(Clob.class);
+        when(clob.length()).thenReturn((long) Integer.MAX_VALUE + 1L);
+
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> type.stringOf(clob));
+        verify(clob).free();
     }
 
     @Test

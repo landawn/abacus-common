@@ -36,9 +36,9 @@ import javax.mail.internet.MimeMultipart;
 /**
  * Utility class for sending emails using JavaMail API.
  * Provides convenient methods for sending plain text and HTML emails with or without attachments.
- * 
+ *
  * <p>This class supports SMTP authentication and can be configured with various mail server properties.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Configure mail server properties
@@ -47,7 +47,7 @@ import javax.mail.internet.MimeMultipart;
  * props.put("mail.smtp.port", "587");
  * props.put("mail.smtp.auth", "true");
  * props.put("mail.smtp.starttls.enable", "true");
- * 
+ *
  * // Send plain text email
  * EmailUtil.sendEmail(
  *     new String[] {"recipient@example.com"},
@@ -58,7 +58,7 @@ import javax.mail.internet.MimeMultipart;
  *     "password",
  *     props
  * );
- * 
+ *
  * // Send HTML email with attachment
  * EmailUtil.sendHtmlEmailWithAttachment(
  *     new String[] {"recipient@example.com"},

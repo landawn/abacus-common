@@ -77,7 +77,7 @@ import jakarta.xml.bind.Unmarshaller;
 /**
  * A comprehensive utility class providing various XML processing capabilities including JAXB marshalling/unmarshalling,
  * DOM manipulation, SAX parsing, StAX processing, and XML transformation operations.
- * 
+ *
  * <p>This class offers a wide range of static methods for:</p>
  * <ul>
  *   <li>JAXB operations (marshal/unmarshal with caching)</li>
@@ -89,22 +89,22 @@ import jakarta.xml.bind.Unmarshaller;
  *   <li>Character encoding for XML content</li>
  *   <li>Node and attribute manipulation</li>
  * </ul>
- * 
+ *
  * <p>The class employs object pooling for parsers and contexts to improve performance in high-throughput scenarios.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // JAXB marshalling
  * Person person = new Person("John", 30);
  * String xml = XmlUtil.marshal(person);
- * 
+ *
  * // JAXB unmarshalling
  * Person p = XmlUtil.unmarshal(Person.class, xml);
- * 
+ *
  * // DOM parsing
  * DocumentBuilder parser = XmlUtil.createDOMParser();
  * Document doc = parser.parse(new File("data.xml"));
- * 
+ *
  * // Get element attributes
  * Element elem = doc.getDocumentElement();
  * String attr = XmlUtil.getAttribute(elem, "id");
@@ -131,6 +131,9 @@ public final class XmlUtil {
         setSaxParserFactoryFeature("http://xml.org/sax/features/external-parameter-entities", false);
         setSaxParserFactoryFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
         setSaxParserFactoryXIncludeAware(false);
+        // Namespace-awareness must be on for any code that walks the DOM by namespace URI (e.g.
+        // XML signature verification, XPath with namespaces). The factory default is false.
+        saxParserFactory.setNamespaceAware(true);
     }
 
     private static final Queue<SAXParser> saxParserPool = new ArrayBlockingQueue<>(POOL_SIZE);
@@ -148,6 +151,9 @@ public final class XmlUtil {
         setDocumentBuilderFactoryExpandEntityReferences(false);
         setDocumentBuilderFactoryAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
         setDocumentBuilderFactoryAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+        // Namespace-awareness must be on so DOMs preserve xmlns:* declarations and so XPath /
+        // attribute lookups by namespace URI work. Factory default is false.
+        docBuilderFactory.setNamespaceAware(true);
     }
 
     private static final Queue<DocumentBuilder> contentDocBuilderPool = new ArrayBlockingQueue<>(POOL_SIZE);
@@ -158,7 +164,11 @@ public final class XmlUtil {
     static {
         setXmlInputFactoryProperty(XMLInputFactory.SUPPORT_DTD, false);
         setXmlInputFactoryProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
-        setXmlInputFactoryProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, false);
+        // IS_REPLACING_ENTITY_REFERENCES must remain true (the factory default). When false, the
+        // JDK StAX impl emits ENTITY_REFERENCE events for predefined entities (&amp;, &lt;, &gt;, etc.)
+        // which the deserializers then drop, silently corrupting any string containing them. With
+        // SUPPORT_DTD and IS_SUPPORTING_EXTERNAL_ENTITIES already false, replacement is safe.
+        setXmlInputFactoryProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, true);
         setXmlInputFactoryResolver();
 
         try {
@@ -192,6 +202,10 @@ public final class XmlUtil {
         try {
             transferFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
         } catch (Exception e) { // NOSONAR
+            // FEATURE_SECURE_PROCESSING is the umbrella that defaults ACCESS_EXTERNAL_*; if it
+            // can't be set, the TransformerFactory may still permit `document(...)` etc.
+            logger.warn("Failed to enable FEATURE_SECURE_PROCESSING on TransformerFactory; XSLT may " + "permit external resource access (SSRF risk): "
+                    + e.getMessage());
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to enable secure processing for TransformerFactory: " + e.getMessage());
             }
@@ -222,13 +236,33 @@ public final class XmlUtil {
         // Utility class - prevent instantiation
     }
 
+    /**
+     * Names of factory features/properties/attributes that are essential to XXE / billion-laughs
+     * defense. If we can't set one of these, the application is silently insecure - so escalate
+     * to WARN (instead of DEBUG) so operators see the failure in production logs.
+     */
+    private static final java.util.Set<String> CRITICAL_SECURITY_NAMES = java.util.Set.of(XMLConstants.FEATURE_SECURE_PROCESSING,
+            "http://apache.org/xml/features/disallow-doctype-decl", "http://xml.org/sax/features/external-general-entities",
+            "http://xml.org/sax/features/external-parameter-entities", "http://apache.org/xml/features/nonvalidating/load-external-dtd",
+            XMLInputFactory.SUPPORT_DTD, XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, XMLConstants.ACCESS_EXTERNAL_DTD, XMLConstants.ACCESS_EXTERNAL_SCHEMA,
+            XMLConstants.ACCESS_EXTERNAL_STYLESHEET);
+
+    private static void logFactoryFailure(final String factory, final String name, final Exception e) {
+        // For critical XXE flags, fail-open is dangerous: the application keeps running with
+        // unrestricted DTD/external-entity processing. Log at WARN so operators notice.
+        if (CRITICAL_SECURITY_NAMES.contains(name)) {
+            logger.warn("Failed to apply critical XML security setting '" + name + "' on " + factory
+                    + ". Application may be vulnerable to XXE/external-entity attacks: " + e.getMessage());
+        } else if (logger.isDebugEnabled()) {
+            logger.debug("Failed to set " + factory + " '" + name + "': " + e.getMessage());
+        }
+    }
+
     private static void setSaxParserFactoryFeature(final String featureName, final boolean value) {
         try {
             saxParserFactory.setFeature(featureName, value);
         } catch (Exception e) { // NOSONAR
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to set SAXParserFactory feature '" + featureName + "': " + e.getMessage());
-            }
+            logFactoryFailure("SAXParserFactory feature", featureName, e);
         }
     }
 
@@ -236,9 +270,7 @@ public final class XmlUtil {
         try {
             saxParserFactory.setXIncludeAware(value);
         } catch (Exception e) { // NOSONAR
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to set SAXParserFactory XIncludeAware: " + e.getMessage());
-            }
+            logFactoryFailure("SAXParserFactory", "XIncludeAware", e);
         }
     }
 
@@ -246,9 +278,7 @@ public final class XmlUtil {
         try {
             docBuilderFactory.setFeature(featureName, value);
         } catch (Exception e) { // NOSONAR
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to set DocumentBuilderFactory feature '" + featureName + "': " + e.getMessage());
-            }
+            logFactoryFailure("DocumentBuilderFactory feature", featureName, e);
         }
     }
 
@@ -256,9 +286,7 @@ public final class XmlUtil {
         try {
             docBuilderFactory.setXIncludeAware(value);
         } catch (Exception e) { // NOSONAR
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to set DocumentBuilderFactory XIncludeAware: " + e.getMessage());
-            }
+            logFactoryFailure("DocumentBuilderFactory", "XIncludeAware", e);
         }
     }
 
@@ -266,9 +294,7 @@ public final class XmlUtil {
         try {
             docBuilderFactory.setExpandEntityReferences(value);
         } catch (Exception e) { // NOSONAR
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to set DocumentBuilderFactory expandEntityReferences: " + e.getMessage());
-            }
+            logFactoryFailure("DocumentBuilderFactory", "expandEntityReferences", e);
         }
     }
 
@@ -276,9 +302,7 @@ public final class XmlUtil {
         try {
             docBuilderFactory.setAttribute(attributeName, value);
         } catch (Exception e) { // NOSONAR
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to set DocumentBuilderFactory attribute '" + attributeName + "': " + e.getMessage());
-            }
+            logFactoryFailure("DocumentBuilderFactory attribute", attributeName, e);
         }
     }
 
@@ -286,9 +310,7 @@ public final class XmlUtil {
         try {
             xmlInputFactory.setProperty(propertyName, value);
         } catch (Exception e) { // NOSONAR
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to set XMLInputFactory property '" + propertyName + "': " + e.getMessage());
-            }
+            logFactoryFailure("XMLInputFactory property", propertyName, e);
         }
     }
 
@@ -298,9 +320,7 @@ public final class XmlUtil {
                 throw new XMLStreamException("External entity resolution is disabled");
             });
         } catch (Exception e) { // NOSONAR
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to set XMLInputFactory XMLResolver: " + e.getMessage());
-            }
+            logFactoryFailure("XMLInputFactory", "XMLResolver", e);
         }
     }
 
@@ -308,16 +328,14 @@ public final class XmlUtil {
         try {
             transferFactory.setAttribute(attributeName, value);
         } catch (Exception e) { // NOSONAR
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to set TransformerFactory attribute '" + attributeName + "': " + e.getMessage());
-            }
+            logFactoryFailure("TransformerFactory attribute", attributeName, e);
         }
     }
 
     /**
      * Marshals the given JAXB bean into an XML string.
      * The JAXBContext is cached for the bean's class to improve performance on repeated operations.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * @XmlRootElement
@@ -326,7 +344,7 @@ public final class XmlUtil {
      *     private int age;
      *     // getters and setters
      * }
-     * 
+     *
      * Person person = new Person("John", 30);
      * String xml = XmlUtil.marshal(person);
      * // Result: <?xml version="1.0" encoding="UTF-8" standalone="yes"?><person><age>30</age><name>John</name></person>
@@ -366,7 +384,7 @@ public final class XmlUtil {
     /**
      * Unmarshal the given XML string into an object of the specified class.
      * The JAXBContext is cached for the target class to improve performance on repeated operations.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><person><age>30</age><name>John</name></person>";
@@ -404,7 +422,7 @@ public final class XmlUtil {
     /**
      * Creates a JAXB Marshaller for the given context path.
      * The JAXBContext is cached to improve performance on repeated operations.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Marshaller marshaller = XmlUtil.createMarshaller("com.example.model");
@@ -436,7 +454,7 @@ public final class XmlUtil {
     /**
      * Creates a JAXB Marshaller for the given class.
      * The JAXBContext is cached to improve performance on repeated operations.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Marshaller marshaller = XmlUtil.createMarshaller(Person.class);
@@ -468,7 +486,7 @@ public final class XmlUtil {
     /**
      * Creates a JAXB Unmarshaller for the given context path.
      * The JAXBContext is cached to improve performance on repeated operations.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Unmarshaller unmarshaller = XmlUtil.createUnmarshaller("com.example.model");
@@ -499,7 +517,7 @@ public final class XmlUtil {
     /**
      * Creates a JAXB Unmarshaller for the given class.
      * The JAXBContext is cached to improve performance on repeated operations.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Unmarshaller unmarshaller = XmlUtil.createUnmarshaller(Person.class);
@@ -530,7 +548,7 @@ public final class XmlUtil {
     /**
      * Creates a new instance of {@code DocumentBuilder} with default configuration.
      * The parser is configured with the factory's default settings.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DocumentBuilder parser = XmlUtil.createDOMParser();
@@ -555,7 +573,7 @@ public final class XmlUtil {
     /**
      * Creates a new instance of {@code DocumentBuilder} with the specified configuration.
      * This method allows control over comment and whitespace handling.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create parser that ignores comments and whitespace
@@ -596,9 +614,9 @@ public final class XmlUtil {
      * Creates a new instance of {@code DocumentBuilder} optimized for parsing content.
      * The parser is pre-configured to ignore comments and element content whitespace.
      * This method uses object pooling for better performance.
-     * 
+     *
      * <p>Important: Call {@link #recycleContentParser(DocumentBuilder)} when done to return the parser to the pool.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DocumentBuilder parser = XmlUtil.createContentParser();
@@ -650,7 +668,7 @@ public final class XmlUtil {
     /**
      * Recycles the given DocumentBuilder instance by resetting it and adding it back to the pool.
      * This method should be called after using a DocumentBuilder obtained from {@link #createContentParser()}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DocumentBuilder parser = XmlUtil.createContentParser();
@@ -679,9 +697,9 @@ public final class XmlUtil {
     /**
      * Creates a new instance of {@code SAXParser} from a pool or creates a new one if the pool is empty.
      * This method uses object pooling for better performance.
-     * 
+     *
      * <p>Important: Call {@link #recycleSAXParser(SAXParser)} when done to return the parser to the pool.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SAXParser parser = XmlUtil.createSAXParser();
@@ -718,7 +736,7 @@ public final class XmlUtil {
     /**
      * Recycles the given SAXParser instance by resetting it and adding it back to the pool.
      * This method should be called after using a SAXParser obtained from {@link #createSAXParser()}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SAXParser parser = XmlUtil.createSAXParser();
@@ -747,7 +765,7 @@ public final class XmlUtil {
     /**
      * Creates an XMLStreamReader from the given Reader source.
      * This is used for StAX (Streaming API for XML) parsing.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringReader reader = new StringReader(xmlString);
@@ -774,7 +792,7 @@ public final class XmlUtil {
     /**
      * Creates an XMLStreamReader from the given InputStream source.
      * This is used for StAX (Streaming API for XML) parsing.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FileInputStream fis = new FileInputStream("data.xml");
@@ -798,7 +816,7 @@ public final class XmlUtil {
     /**
      * Creates an XMLStreamReader from the given InputStream source with the specified encoding.
      * This is used for StAX (Streaming API for XML) parsing with explicit character encoding.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FileInputStream fis = new FileInputStream("data.xml");
@@ -822,7 +840,7 @@ public final class XmlUtil {
     /**
      * Creates a filtered XMLStreamReader from the given source XMLStreamReader and StreamFilter.
      * The filter allows selective processing of XML events.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XMLStreamReader reader = XmlUtil.createXMLStreamReader(inputStream);
@@ -851,7 +869,7 @@ public final class XmlUtil {
     /**
      * Creates an XMLStreamWriter from the given Writer output.
      * This is used for StAX (Streaming API for XML) writing.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringWriter writer = new StringWriter();
@@ -879,7 +897,7 @@ public final class XmlUtil {
     /**
      * Creates an XMLStreamWriter from the given OutputStream.
      * This is used for StAX (Streaming API for XML) writing with default encoding.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FileOutputStream fos = new FileOutputStream("output.xml");
@@ -904,7 +922,7 @@ public final class XmlUtil {
     /**
      * Creates an XMLStreamWriter from the given OutputStream with the specified encoding.
      * This is used for StAX (Streaming API for XML) writing with explicit character encoding.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FileOutputStream fos = new FileOutputStream("output.xml");
@@ -930,7 +948,7 @@ public final class XmlUtil {
     /**
      * Creates a new instance of Transformer for XML transformation operations.
      * The Transformer can be used to transform XML documents using XSLT or for serialization.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Transformer transformer = XmlUtil.createXMLTransformer();
@@ -953,7 +971,7 @@ public final class XmlUtil {
     /**
      * Transforms the given XML Document to the specified output file.
      * The file will be created if it doesn't exist, or overwritten if it does.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Document doc = parser.parse(inputFile);
@@ -989,7 +1007,7 @@ public final class XmlUtil {
     /**
      * Transforms the given XML Document to the specified OutputStream.
      * The stream is not closed by this method.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Document doc = createDocument();
@@ -1019,7 +1037,7 @@ public final class XmlUtil {
     /**
      * Transforms the given XML Document to the specified Writer.
      * The writer is not closed by this method.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Document doc = createDocument();
@@ -1047,12 +1065,29 @@ public final class XmlUtil {
     }
 
     /**
-     * Encodes the given bean object into an XML string using Java's XMLEncoder.
+     * Opt-in escape hatch for {@link #xmlEncode}/{@link #xmlDecode}. Off by default because
+     * {@link java.beans.XMLDecoder} is a known deserialization gadget primitive (CVE-2017-3506,
+     * CVE-2017-10271, etc.) — a malicious payload can encode arbitrary reflective method
+     * invocations, including {@code Runtime.exec}. Set
+     * {@code -Dabacus.xml.allowXmlEncoderDecoder=true} only if you trust both the encode-side
+     * and decode-side inputs (e.g. a same-process round-trip).
+     */
+    private static final boolean ALLOW_XML_ENCODER_DECODER = Boolean.parseBoolean(System.getProperty("abacus.xml.allowXmlEncoderDecoder", "false"));
+
+    /**
+     * Encodes the given bean object into an XML string using Java's {@link XMLEncoder}.
      * This method is suitable for serializing JavaBeans with standard getter/setter patterns.
-     * 
-     * <p>Note: This uses Java's built-in XMLEncoder, not JAXB. The output format is specific
-     * to Java serialization and may not be suitable for interoperability with non-Java systems.</p>
-     * 
+     *
+     * <p>Note: This uses Java's built-in {@link XMLEncoder}, not JAXB. The output format is
+     * specific to Java serialization and may not be suitable for interoperability with non-Java
+     * systems.</p>
+     *
+     * <p><b>Disabled by default:</b> {@code xmlEncode}/{@link #xmlDecode(String)} are guarded by
+     * the system property {@code abacus.xml.allowXmlEncoderDecoder} (defaults to {@code false}).
+     * When the guard is off this method always throws {@link UnsupportedOperationException}, since
+     * {@link java.beans.XMLDecoder} is a well-known unsafe-deserialization primitive
+     * (CVE-2017-3506, CVE-2017-10271, ...). Migrate to JAXB or the abacus XML parser instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("John", 30);
@@ -1062,9 +1097,17 @@ public final class XmlUtil {
      *
      * @param bean The object to be encoded into XML
      * @return The XML string representation of the given object
+     * @throws UnsupportedOperationException if {@code abacus.xml.allowXmlEncoderDecoder} is not set to {@code true}
      * @see XMLEncoder#writeObject(Object)
+     * @deprecated unsafe deserialization primitive; disabled by default. Use JAXB or {@code XmlMappers}.
      */
+    @Deprecated
     public static String xmlEncode(final Object bean) {
+        if (!ALLOW_XML_ENCODER_DECODER) {
+            throw new UnsupportedOperationException("xmlEncode/xmlDecode are disabled by default because "
+                    + "java.beans.XMLDecoder is an unsafe-deserialization primitive (CVE-2017-3506 etc). "
+                    + "Set -Dabacus.xml.allowXmlEncoderDecoder=true to opt in for trusted round-trips, or migrate to JAXB / abacus XmlParser.");
+        }
         final ByteArrayOutputStream os = Objectory.createByteArrayOutputStream();
 
         try (XMLEncoder xmlEncoder = new XMLEncoder(os)) {
@@ -1079,13 +1122,19 @@ public final class XmlUtil {
     }
 
     /**
-     * Decodes the given XML string into an object using Java's XMLDecoder.
+     * Decodes the given XML string into an object using Java's {@link XMLDecoder}.
      * This method is the counterpart to {@link #xmlEncode(Object)} and should be used
-     * to decode XML created by XMLEncoder.
-     * 
-     * <p>Note: This uses Java's built-in XMLDecoder, not JAXB. The XML format must be
-     * compatible with Java's XMLEncoder output.</p>
-     * 
+     * to decode XML created by {@link XMLEncoder}.
+     *
+     * <p>Note: This uses Java's built-in {@link XMLDecoder}, not JAXB. The XML format must be
+     * compatible with Java's {@link XMLEncoder} output.</p>
+     *
+     * <p><b>Disabled by default:</b> {@link #xmlEncode(Object)}/{@code xmlDecode} are guarded by
+     * the system property {@code abacus.xml.allowXmlEncoderDecoder} (defaults to {@code false}).
+     * When the guard is off this method always throws {@link UnsupportedOperationException}, since
+     * {@link java.beans.XMLDecoder} is a well-known unsafe-deserialization primitive
+     * (CVE-2017-3506, CVE-2017-10271, ...). Migrate to JAXB or the abacus XML parser instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String xml = XmlUtil.xmlEncode(originalPerson);
@@ -1095,19 +1144,21 @@ public final class XmlUtil {
      * @param <T> The type of the object to be returned
      * @param xml The XML string to be decoded
      * @return The decoded object
+     * @throws UnsupportedOperationException if {@code abacus.xml.allowXmlEncoderDecoder} is not set to {@code true}
      * @see XMLDecoder#readObject()
+     * @deprecated unsafe deserialization primitive; disabled by default. Use JAXB or {@code XmlMappers}.
      */
+    @Deprecated
     public static <T> T xmlDecode(final String xml) {
-        InputStream is = null;
-        XMLDecoder xmlDecoder = null;
-        try {
-            is = new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8));
-            xmlDecoder = new XMLDecoder(is);
+        if (!ALLOW_XML_ENCODER_DECODER) {
+            throw new UnsupportedOperationException("xmlEncode/xmlDecode are disabled by default because "
+                    + "java.beans.XMLDecoder is an unsafe-deserialization primitive (CVE-2017-3506 etc). "
+                    + "Set -Dabacus.xml.allowXmlEncoderDecoder=true to opt in for trusted round-trips, or migrate to JAXB / abacus XmlParser.");
+        }
+        // The InputStream wraps a byte array, so closing it has no effect; we still close
+        // the XMLDecoder which drains references.
+        try (XMLDecoder xmlDecoder = new XMLDecoder(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)))) {
             return (T) xmlDecoder.readObject();
-        } finally {
-            if (xmlDecoder != null) {
-                xmlDecoder.close();
-            }
         }
     }
 
@@ -1115,7 +1166,7 @@ public final class XmlUtil {
      * Gets all direct child elements with the specified tag name from the given parent element.
      * This method only returns elements that are immediate children of the parent node,
      * not descendants at deeper levels.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Element parent = doc.getDocumentElement();
@@ -1145,7 +1196,7 @@ public final class XmlUtil {
     /**
      * Gets all nodes with the specified name from the given node and its descendants.
      * This method performs a recursive search through the entire node tree.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Document doc = parser.parse(xmlFile);
@@ -1226,7 +1277,7 @@ public final class XmlUtil {
 
     /**
      * Gets the attribute value of the specified attribute name from the given XML node.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Element element = doc.getElementById("myElement");
@@ -1254,7 +1305,7 @@ public final class XmlUtil {
     /**
      * Reads all attributes of the given XML node and returns them as a map.
      * The map keys are attribute names and values are attribute values.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Element element = doc.getElementById("myElement");
@@ -1298,7 +1349,7 @@ public final class XmlUtil {
      * Reads the given XML element and returns its attributes and text content as a map.
      * This method recursively processes the element and all its child elements,
      * creating a flattened map with dot-notation keys for nested elements.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Element root = doc.getDocumentElement();
@@ -1348,13 +1399,13 @@ public final class XmlUtil {
      * Checks if the given node is a text element.
      * A text element is defined as an element that does not contain any child elements,
      * only text content or other non-element nodes (like comments or text nodes).
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Element elem = doc.createElement("name");
      * elem.setTextContent("John");
      * boolean isText = XmlUtil.isTextElement(elem);   // Returns true
-     * 
+     *
      * Element parent = doc.createElement("person");
      * parent.appendChild(elem);
      * boolean isParentText = XmlUtil.isTextElement(parent);   // Returns false
@@ -1371,7 +1422,7 @@ public final class XmlUtil {
         final NodeList childNodeList = node.getChildNodes();
 
         for (int i = 0; i < childNodeList.getLength(); i++) {
-            if (childNodeList.item(i).getNodeType() == Document.ELEMENT_NODE) {
+            if (childNodeList.item(i).getNodeType() == Node.ELEMENT_NODE) {
                 return false;
             }
         }
@@ -1498,13 +1549,13 @@ public final class XmlUtil {
     /**
      * Writes XML-escaped characters from the specified character array to the given StringBuilder.
      * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = "Hello <world> & \"friends\"".toCharArray();
      * StringBuilder sb = new StringBuilder();
      * XmlUtil.writeCharacters(chars, sb);
-     * // Result: "Hello <world> &amp; &quot;friends&quot;"
+     * // Result: "Hello &lt;world&gt; &amp; &quot;friends&quot;"
      * }</pre>
      *
      * @param cbuf The character array containing the characters to be written
@@ -1524,7 +1575,7 @@ public final class XmlUtil {
      * char[] chars = "Data: <value> & 'text'".toCharArray();
      * StringBuilder sb = new StringBuilder();
      * XmlUtil.writeCharacters(chars, 6, 14, sb);
-     * // Result: "<value> &amp; "
+     * // Result: "&lt;value&gt; &amp; &apos;text"
      * }</pre>
      *
      * @param cbuf The character array containing the characters to be written
@@ -1546,7 +1597,7 @@ public final class XmlUtil {
      * <pre>{@code
      * StringBuilder sb = new StringBuilder();
      * XmlUtil.writeCharacters("<tag attr='value'>text & more</tag>", sb);
-     * // Result: "<tag attr=&apos;value&apos;>text &amp; more</tag>"
+     * // Result: "&lt;tag attr=&apos;value&apos;&gt;text &amp; more&lt;/tag&gt;"
      * }</pre>
      *
      * @param str The string containing the characters to be written
@@ -1567,7 +1618,7 @@ public final class XmlUtil {
      * String text = "Hello <world> & friends";
      * StringBuilder sb = new StringBuilder();
      * XmlUtil.writeCharacters(text, 6, 8, sb);
-     * // Result: "<world>"
+     * // Result: "&lt;world&gt; "
      * }</pre>
      *
      * @param str The string containing the characters to be written
@@ -1589,7 +1640,7 @@ public final class XmlUtil {
      * char[] chars = "<data>value & more</data>".toCharArray();
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
      * XmlUtil.writeCharacters(chars, baos);
-     * // Result: "<data>value &amp; more</data>"
+     * // Result: "&lt;data&gt;value &amp; more&lt;/data&gt;"
      * }</pre>
      *
      * @param cbuf The character array containing the characters to be written
@@ -1610,7 +1661,7 @@ public final class XmlUtil {
      * char[] chars = "Data: <value> & 'text'".toCharArray();
      * FileOutputStream fos = new FileOutputStream("output.xml");
      * XmlUtil.writeCharacters(chars, 7, 14, fos);
-     * // Writes: "<value> &amp; "
+     * // Writes: "value&gt; &amp; &apos;tex"
      * fos.close();
      * }</pre>
      *
@@ -1641,7 +1692,7 @@ public final class XmlUtil {
      * String data = "<message>Hello & goodbye</message>";
      * FileOutputStream fos = new FileOutputStream("output.xml");
      * XmlUtil.writeCharacters(data, fos);
-     * // Writes: "<message>Hello &amp; goodbye</message>"
+     * // Writes: "&lt;message&gt;Hello &amp; goodbye&lt;/message&gt;"
      * fos.close();
      * }</pre>
      *
@@ -1664,7 +1715,7 @@ public final class XmlUtil {
      * String text = "Prefix <tag>content</tag> suffix";
      * FileOutputStream fos = new FileOutputStream("output.xml");
      * XmlUtil.writeCharacters(text, 7, 17, fos);
-     * // Writes: "<tag>content</tag>"
+     * // Writes: "&lt;tag&gt;content&lt;/ta"
      * fos.close();
      * }</pre>
      *
@@ -1695,7 +1746,7 @@ public final class XmlUtil {
      * StringWriter writer = new StringWriter();
      * XmlUtil.writeCharacters(chars, writer);
      * String result = writer.toString();
-     * // Result: "Test: <value> &amp; &apos;more&apos;"
+     * // Result: "Test: &lt;value&gt; &amp; &apos;more&apos;"
      * }</pre>
      *
      * @param cbuf The character array containing the characters to be written
@@ -1716,7 +1767,7 @@ public final class XmlUtil {
      * char[] chars = "Data: <tag>value</tag> end".toCharArray();
      * StringWriter writer = new StringWriter();
      * XmlUtil.writeCharacters(chars, 6, 16, writer);
-     * // Result: "<tag>value</tag>"
+     * // Result: "&lt;tag&gt;value&lt;/tag&gt;"
      * }</pre>
      *
      * @param cbuf The character array containing the characters to be written
@@ -1750,7 +1801,7 @@ public final class XmlUtil {
      * StringWriter writer = new StringWriter();
      * XmlUtil.writeCharacters(xml, writer);
      * String result = writer.toString();
-     * // Result: "<book title=&apos;Java &amp; XML&apos;>Content</book>"
+     * // Result: "&lt;book title=&apos;Java &amp; XML&apos;&gt;Content&lt;/book&gt;"
      * }</pre>
      *
      * @param str The string containing the characters to be written
@@ -1765,12 +1816,12 @@ public final class XmlUtil {
     /**
      * Writes XML-escaped characters from a portion of a string to the given Writer.
      * Uses a BufferedXmlWriter for efficient writing if the output is not already a BufferedXmlWriter.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringWriter writer = new StringWriter();
      * XmlUtil.writeCharacters("Hello <world>", 0, 13, writer);
-     * String result = writer.toString();   // "Hello <world>"
+     * String result = writer.toString();   // "Hello &lt;world&gt;"
      * }</pre>
      *
      * @param str The string containing the characters to be written
@@ -1793,10 +1844,82 @@ public final class XmlUtil {
         }
     }
 
+    /**
+     * Opt-in escape hatch for the legacy "fall back to Class.forName for unknown type attributes"
+     * behavior. Off by default since attacker-controlled type= attributes feed directly into
+     * reflective construction (gadget-chain primitive — see CVE histories for similar Jackson /
+     * XStream issues). Enable with {@code -Dabacus.xml.allowTypeAttrClassForName=true} ONLY when
+     * deserializing trusted XML.
+     */
+    private static final boolean ALLOW_TYPE_ATTR_CLASS_FORNAME = Boolean.parseBoolean(System.getProperty("abacus.xml.allowTypeAttrClassForName", "false"));
+
+    /**
+     * Returns true if the typeAttr names a JDK type that is safe to resolve from attacker
+     * input (primitive name, or {@code java.*}/{@code javax.*}/{@code jakarta.*} class). Any
+     * other class on the classpath is treated as a potential gadget and requires explicit
+     * opt-in via {@link #ALLOW_TYPE_ATTR_CLASS_FORNAME}.
+     */
+    private static boolean isJdkTypeName(final String typeAttr) {
+        if (typeAttr == null || typeAttr.isEmpty()) {
+            return false;
+        }
+        // Common primitive / wrapper aliases used by the Type system.
+        switch (typeAttr) {
+            case "boolean":
+            case "byte":
+            case "char":
+            case "short":
+            case "int":
+            case "long":
+            case "float":
+            case "double":
+            case "Boolean":
+            case "Byte":
+            case "Character":
+            case "Short":
+            case "Integer":
+            case "Long":
+            case "Float":
+            case "Double":
+            case "String":
+            case "Object":
+            case "Number":
+            case "BigInteger":
+            case "BigDecimal":
+                return true;
+            default:
+                // FQNs in JDK packages.
+                return typeAttr.startsWith("java.") || typeAttr.startsWith("javax.") || typeAttr.startsWith("jakarta.");
+        }
+    }
+
+    /**
+     * Resolves the Java class indicated by the {@code type} attribute of the given XML node,
+     * subject to the security gate controlled by {@link #ALLOW_TYPE_ATTR_CLASS_FORNAME}.
+     * Returns {@code null} if the node has no {@code type} attribute, if the attribute names
+     * a non-JDK class and the opt-in system property is not set, or if the class cannot be
+     * found on the classpath.
+     *
+     * @param node the XML node whose {@code type} attribute is to be resolved; must not be {@code null}
+     * @return the resolved {@link Class}, or {@code null} if the type cannot or should not be resolved
+     */
     static Class<?> getAttributeTypeClass(final Node node) {
         final String typeAttr = XmlUtil.getAttribute(node, TYPE);
 
         if (typeAttr == null) {
+            return null;
+        }
+
+        // Gate non-JDK class resolution behind an explicit opt-in. Both Type.of(typeAttr) and
+        // the ClassUtil.forName fallback below can reflectively load arbitrary classes named
+        // in attacker-controlled XML, which is a deserialization gadget primitive (the loaded
+        // class is later instantiated by AbstractXmlParser.newPropInstance). Refusing
+        // user-package names by default closes that without breaking the common case of
+        // primitives + java.*/javax.* types.
+        if (!ALLOW_TYPE_ATTR_CLASS_FORNAME && !isJdkTypeName(typeAttr)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Refusing to resolve non-JDK type attribute '" + typeAttr + "'. Set -Dabacus.xml.allowTypeAttrClassForName=true to opt in.");
+            }
             return null;
         }
 
@@ -1830,6 +1953,16 @@ public final class XmlUtil {
      *
      * try { return N.forName(typeAttr); } catch (RuntimeException e) { return null; } }
      */
+    /**
+     * Returns the most concrete class to use when deserializing a value.
+     * If {@code typeClass} is {@code null} or is not assignable to {@code targetClass},
+     * {@code targetClass} is returned unchanged. Otherwise {@code typeClass} (the more
+     * specific, XML-declared type) is returned.
+     *
+     * @param targetClass the declared or expected class from the caller; may be {@code null}
+     * @param typeClass the class resolved from an XML {@code type} attribute; may be {@code null}
+     * @return {@code typeClass} when it is a valid sub-type of {@code targetClass}, otherwise {@code targetClass}
+     */
     static Class<?> getConcreteClass(final Class<?> targetClass, final Class<?> typeClass) {
         if ((typeClass == null) || ((targetClass != null) && !targetClass.isAssignableFrom(typeClass))) {
             return targetClass;
@@ -1838,6 +1971,16 @@ public final class XmlUtil {
         }
     }
 
+    /**
+     * Returns the most concrete class to use when deserializing a value, resolving the
+     * {@code type} attribute of {@code node} via {@link #getAttributeTypeClass(Node)} and
+     * delegating to {@link #getConcreteClass(Class, Class)}.
+     *
+     * @param targetClass the declared or expected class; may be {@code null}
+     * @param node the XML node that may carry a {@code type} attribute; may be {@code null}
+     * @return the resolved concrete class, or {@code targetClass} if {@code node} is {@code null}
+     *         or carries no usable type information
+     */
     static Class<?> getConcreteClass(final Class<?> targetClass, final Node node) {
         if (node == null) {
             return targetClass;
@@ -1856,6 +1999,17 @@ public final class XmlUtil {
      *
      * return getConcreteClass(targetClass, typeClass); }
      */
+    /**
+     * Determines the {@link NodeType} for an XML element based on its name and the type of
+     * its parent node. If the previous node was an {@link NodeType#ENTITY ENTITY}, the current
+     * node is treated as a {@link NodeType#PROPERTY PROPERTY}. Otherwise the node name is
+     * looked up in the internal type pool; if no match is found, {@link NodeType#ENTITY ENTITY}
+     * is returned.
+     *
+     * @param nodeName the local name of the XML element being classified
+     * @param previousNodeType the {@link NodeType} of the immediately enclosing parent node
+     * @return the resolved {@link NodeType} for the element
+     */
     static NodeType getNodeType(final String nodeName, final NodeType previousNodeType) {
         if (previousNodeType == NodeType.ENTITY) {
             return NodeType.PROPERTY;
@@ -1871,27 +2025,28 @@ public final class XmlUtil {
     }
 
     /**
-     * The Enum NodeType.
+     * Classifies each XML node encountered during abacus-XML deserialization so that the
+     * parser knows how to reconstruct the corresponding Java object graph.
      */
     enum NodeType {
 
-        /** The bean. */
+        /** A JavaBean (entity) element whose child elements are property values. */
         ENTITY,
-        /** The property. */
+        /** A single property element that belongs to an enclosing {@link #ENTITY}. */
         PROPERTY,
-        /** The array. */
+        /** An array container element. */
         ARRAY,
-        /** The element. */
+        /** An individual element within an array or collection. */
         ELEMENT,
-        /** The collection. */
+        /** A {@code Collection} (list/set) container element. */
         COLLECTION,
-        /** The map. */
+        /** A {@code Map} container element. */
         MAP,
-        /** The entry. */
+        /** A single map-entry element within a {@link #MAP}. */
         ENTRY,
-        /** The key. */
+        /** The key child element of a map {@link #ENTRY}. */
         KEY,
-        /** The value. */
+        /** The value child element of a map {@link #ENTRY}. */
         VALUE
     }
 

@@ -31,18 +31,18 @@ import java.lang.annotation.Target;
  *
  * <p>Lazy evaluation is commonly used in:</p>
  * <ul>
- *   <li>Stream operations that don't execute until a terminal operation</li>
- *   <li>Suppliers that compute values on demand</li>
- *   <li>Collections that generate elements as needed</li>
- *   <li>Properties that are calculated when first accessed</li>
+ *   <li>Stream operations that do not execute until a terminal operation is invoked.</li>
+ *   <li>Suppliers that compute values on demand.</li>
+ *   <li>Collections that generate elements as needed.</li>
+ *   <li>Properties that are computed when first accessed.</li>
  * </ul>
  *
  * <p><b>Benefits of lazy evaluation:</b></p>
  * <ul>
- *   <li>Improved performance by avoiding unnecessary computations</li>
- *   <li>Better memory efficiency by processing elements one at a time</li>
- *   <li>Support for infinite data structures</li>
- *   <li>Composition of operations without intermediate results</li>
+ *   <li>Improved performance by avoiding unnecessary computations.</li>
+ *   <li>Better memory efficiency by processing elements one at a time.</li>
+ *   <li>Support for potentially infinite data structures.</li>
+ *   <li>Composition of operations without materializing intermediate results.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
@@ -79,8 +79,8 @@ import java.lang.annotation.Target;
  * @see TerminalOpTriggered
  */
 @Documented
+@Retention(value = RetentionPolicy.CLASS)
 @Target({ ElementType.METHOD, ElementType.TYPE })
-@Retention(RetentionPolicy.RUNTIME)
 public @interface LazyEvaluation {
 
 }

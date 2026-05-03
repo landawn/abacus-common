@@ -14,17 +14,23 @@
 package com.landawn.abacus.util.function;
 
 /**
- * Represents an operation that accepts an int-valued argument and an IntConsumer,
- * and returns no result. This functional interface is used to implement a one-to-many
- * transformation operation, similar to flatMap. The IntConsumer parameter can be
- * invoked multiple times to pass multiple values downstream.
+ * Represents an operation that accepts an {@code int}-valued argument and an
+ * {@link java.util.function.IntConsumer}, and returns no result. This functional interface
+ * is used to implement a one-to-many (multi-mapping) transformation, similar to
+ * {@code flatMap}. The {@code IntConsumer} parameter may be invoked zero or more times
+ * to push any number of {@code int} values downstream for each input value.
+ *
+ * <p>This interface is the primitive {@code int} specialization of the
+ * {@code mapMulti} pattern introduced in Java 16. It allows implementations to
+ * conditionally emit multiple output values from a single input — or emit none at all —
+ * without creating intermediate collections or streams.
  *
  * <p>This is a functional interface whose functional method is {@link #accept(int, java.util.function.IntConsumer)}.
- *
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.stream.IntStream.IntMapMultiConsumer
+ * @see java.util.stream.IntStream#mapMulti(java.util.stream.IntStream.IntMapMultiConsumer)
  */
 @FunctionalInterface
 public interface IntMapMultiConsumer extends java.util.stream.IntStream.IntMapMultiConsumer { //NOSONAR

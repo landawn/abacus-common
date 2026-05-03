@@ -19,29 +19,48 @@ import java.io.Writer;
 
 /**
  * A specialized writer for efficient JSON output with automatic character escaping.
- * This class extends CharacterWriter and provides optimized writing of JSON content
+ * This class extends {@link CharacterWriter} and provides optimized writing of JSON content
  * with proper escaping of special JSON characters according to RFC 4627.
- * 
+ *
+ * <p>The following characters are automatically escaped when using the
+ * {@code writeCharacter} methods:</p>
+ * <ul>
+ *   <li>Double quotes ({@code "}) are escaped as {@code \"}</li>
+ *   <li>Backslashes ({@code \}) are escaped as {@code \\}</li>
+ *   <li>Tab ({@code \t}), backspace ({@code \b}), newline ({@code \n}),
+ *       carriage return ({@code \r}), and form feed ({@code \f}) use their
+ *       standard JSON escape sequences</li>
+ *   <li>Control characters (U+0000 through U+001F) and U+007F are escaped
+ *       as {@code \\uXXXX} sequences</li>
+ *   <li>Line separator (U+2028) and paragraph separator (U+2029) are escaped
+ *       as {@code  } and {@code  } to prevent JavaScript syntax errors</li>
+ * </ul>
+ *
  * <p>This writer also provides HTML-safe character replacements for environments where
- * JSON may be embedded in HTML contexts. The HTML-safe replacements include escaping
- * for &lt;, &gt;, &amp;, =, and single quotes.</p>
- * 
- * <p>This writer is designed for high-performance JSON generation and automatically
- * handles character escaping to ensure valid JSON output. It provides three modes
- * of operation: internal buffering, writing to an OutputStream, or writing to
- * another Writer.</p>
- * 
+ * JSON may be embedded in HTML contexts. The HTML-safe replacements include additional
+ * escaping for {@code <}, {@code >}, {@code &}, {@code =}, and single quotes.</p>
+ *
+ * <p>Note that escaping is performed only by the {@code writeCharacter(...)} methods
+ * inherited from {@link CharacterWriter}. The plain {@code write(...)} methods write
+ * their argument verbatim without escaping.</p>
+ *
+ * <p>This writer is designed for high-performance JSON generation. It provides three modes
+ * of operation: internal buffering, writing to an {@link java.io.OutputStream}, or writing
+ * to another {@link java.io.Writer}.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * try (BufferedJsonWriter writer = new BufferedJsonWriter()) {
- *     writer.write("{\"name\":\"John");
- *     writer.writeCharacter(" & ");
- *     writer.write("Jane\",\"data\":\"Line1\\nLine2\"}");
+ *     writer.write("{\"name\":\"");
+ *     writer.writeCharacter("John \"Johnny\" Doe");   // Escaped: John \"Johnny\" Doe
+ *     writer.write("\",\"data\":\"");
+ *     writer.writeCharacter("Line1\nLine2");           // Escaped: Line1\nLine2
+ *     writer.write("\"}");
  *     String json = writer.toString();
- *     // Result: {"name":"John & Jane","data":"Line1\nLine2"}
+ *     // Result: {"name":"John \"Johnny\" Doe","data":"Line1\nLine2"}
  * }
  * }</pre>
- * 
+ *
  * @see CharacterWriter
  */
 public final class BufferedJsonWriter extends CharacterWriter {
@@ -126,10 +145,10 @@ public final class BufferedJsonWriter extends CharacterWriter {
     /**
      * Creates a new BufferedJsonWriter with an internal buffer.
      * The content is stored in memory and can be retrieved using toString().
-     * 
+     *
      * <p>This constructor is package-private. Use factory methods or builder
      * patterns to create instances.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedJsonWriter writer = new BufferedJsonWriter();
@@ -144,11 +163,11 @@ public final class BufferedJsonWriter extends CharacterWriter {
     /**
      * Creates a new BufferedJsonWriter that writes to the specified OutputStream.
      * Characters are encoded using the default character encoding.
-     * 
+     *
      * <p>The writer will automatically escape JSON special characters as they
      * are written to the output stream. The stream is not closed when the
      * writer is closed; this is the caller's responsibility.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (FileOutputStream fos = new FileOutputStream("data.json");
@@ -165,11 +184,11 @@ public final class BufferedJsonWriter extends CharacterWriter {
 
     /**
      * Creates a new BufferedJsonWriter that writes to the specified Writer.
-     * 
+     *
      * <p>The writer will automatically escape JSON special characters as they
      * are written. The underlying Writer is not closed when this writer
      * is closed; this is the caller's responsibility.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (FileWriter fw = new FileWriter("data.json");

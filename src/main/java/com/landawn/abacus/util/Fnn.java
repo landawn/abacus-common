@@ -85,16 +85,16 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Memoized supplier with expiration for expensive operations
- * Throwables.Supplier<DatabaseConnection, SQLException> dbSupplier = 
+ * Throwables.Supplier<DatabaseConnection, SQLException> dbSupplier =
  *     Fnn.memoizeWithExpiration(() -> createConnection(), 5, TimeUnit.MINUTES);
  *
  * // Synchronized function for thread-safe operations
  * Object mutex = new Object();
- * Throwables.Function<String, String, IOException> safeProcessor = 
+ * Throwables.Function<String, String, IOException> safeProcessor =
  *     Fnn.sf(mutex, data -> processFile(data));
  *
  * // Convert consumer to function for pipeline compatibility
- * Throwables.Function<String, Void, Exception> logFunction = 
+ * Throwables.Function<String, Void, Exception> logFunction =
  *     Fnn.c2f(message -> logger.info(message));
  *
  * // Exception-safe predicates for filtering
@@ -103,7 +103,7 @@ import com.landawn.abacus.util.stream.Stream;
  *     .filter(Fnn.pp(data -> validateData(data)));
  *
  * // Rate-limited operations
- * Throwables.Consumer<ApiRequest, IOException> rateLimitedApi = 
+ * Throwables.Consumer<ApiRequest, IOException> rateLimitedApi =
  *     Fnn.rateLimiter(10.0);   // 10 requests per second
  *
  * // Map entry manipulation
@@ -381,7 +381,7 @@ public final class Fnn {
      * internally to store cached results, allowing safe concurrent access from multiple threads.</p>
      *
      * <p><b>Null Handling:</b> The function correctly handles {@code null} input values and {@code null}
-     * return values. Null inputs are cached separately from non-null inputs, and null results are
+     * return values. {@code null} inputs are cached separately from non-null inputs, and {@code null} results are
      * distinguished from cache misses using a sentinel value.</p>
      *
      * <p><b>Memory Considerations:</b> The cache grows unbounded as new distinct inputs are encountered.
@@ -530,7 +530,7 @@ public final class Fnn {
 
     /**
      * Returns a Function that converts its input to a String representation using {@link String#valueOf(Object)}.
-     * This function handles {@code null} inputs safely, returning the string {@code "null"} for null input.
+     * This function handles {@code null} inputs safely, returning the string {@code "null"} for {@code null} input.
      * The conversion never throws exceptions despite the generic exception type parameter.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1185,7 +1185,7 @@ public final class Fnn {
 
     /**
      * Returns a Predicate that tests whether its input is not {@code null}.
-     * 
+     *
      * @param <T> the type of the input to the predicate
      * @param <E> the type of the exception that may be thrown
      * @return a Predicate that returns {@code true} if the input is not {@code null}, {@code false} otherwise
@@ -1199,7 +1199,7 @@ public final class Fnn {
     /**
      * Returns a Predicate that tests whether a CharSequence is not empty.
      * A CharSequence is considered not empty if it is not {@code null} and has a length greater than 0.
-     * 
+     *
      * @param <T> the type of the CharSequence to test
      * @param <E> the type of the exception that may be thrown
      * @return a Predicate that returns {@code true} if the input CharSequence is not empty, {@code false} otherwise
@@ -1211,9 +1211,9 @@ public final class Fnn {
 
     /**
      * Returns a Predicate that tests whether a CharSequence is not blank.
-     * A CharSequence is considered not blank if it is not {@code null}, not empty, 
+     * A CharSequence is considered not blank if it is not {@code null}, not empty,
      * and contains at least one non-whitespace character.
-     * 
+     *
      * @param <T> the type of the CharSequence to test
      * @param <E> the type of the exception that may be thrown
      * @return a Predicate that returns {@code true} if the input CharSequence is not blank, {@code false} otherwise
@@ -1226,7 +1226,7 @@ public final class Fnn {
     /**
      * Returns a Predicate that tests whether an array is not empty.
      * An array is considered not empty if it is not {@code null} and has a length greater than 0.
-     * 
+     *
      * @param <T> the component type of the array
      * @param <E> the type of the exception that may be thrown
      * @return a Predicate that returns {@code true} if the input array is not empty, {@code false} otherwise
@@ -1241,7 +1241,7 @@ public final class Fnn {
     /**
      * Returns a Predicate that tests whether a Collection is not empty.
      * A Collection is considered not empty if it is not {@code null} and has a size greater than 0.
-     * 
+     *
      * @param <T> the type of the Collection to test
      * @param <E> the type of the exception that may be thrown
      * @return a Predicate that returns {@code true} if the input Collection is not empty, {@code false} otherwise
@@ -1256,7 +1256,7 @@ public final class Fnn {
     /**
      * Returns a Predicate that tests whether a Map is not empty.
      * A Map is considered not empty if it is not {@code null} and has a size greater than 0.
-     * 
+     *
      * @param <T> the type of the Map to test
      * @param <E> the type of the exception that may be thrown
      * @return a Predicate that returns {@code true} if the input Map is not empty, {@code false} otherwise
@@ -1271,7 +1271,7 @@ public final class Fnn {
     /**
      * Returns a BinaryOperator that throws an exception when attempting to merge duplicate keys.
      * This merger is typically used in Collectors.toMap() when duplicate keys should not be allowed.
-     * 
+     *
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
      * @return a BinaryOperator that throws an exception for any merge operation
@@ -1284,7 +1284,7 @@ public final class Fnn {
     /**
      * Returns a BinaryOperator that ignores the second value and returns the first value.
      * This merger is typically used in Collectors.toMap() when keeping the first occurrence of duplicate keys.
-     * 
+     *
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
      * @return a BinaryOperator that returns the first operand
@@ -1297,7 +1297,7 @@ public final class Fnn {
     /**
      * Returns a BinaryOperator that replaces the first value with the second value.
      * This merger is typically used in Collectors.toMap() when keeping the last occurrence of duplicate keys.
-     * 
+     *
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
      * @return a BinaryOperator that returns the second operand
@@ -1310,7 +1310,7 @@ public final class Fnn {
     /**
      * Returns a Predicate that tests Map.Entry objects by applying the given predicate to the entry's key.
      * The returned predicate extracts the key from the Map.Entry and applies the provided key predicate to it.
-     * 
+     *
      * @param <K> the type of the key
      * @param <V> the type of the value
      * @param <E> the type of the exception that may be thrown
@@ -1329,7 +1329,7 @@ public final class Fnn {
     /**
      * Returns a Predicate that tests Map.Entry objects by applying the given predicate to the entry's value.
      * The returned predicate extracts the value from the Map.Entry and applies the provided value predicate to it.
-     * 
+     *
      * @param <K> the type of the key
      * @param <V> the type of the value
      * @param <E> the type of the exception that may be thrown
@@ -1348,7 +1348,7 @@ public final class Fnn {
     /**
      * Returns a Consumer that accepts Map.Entry objects and applies the given consumer to the entry's key.
      * The returned consumer extracts the key from the Map.Entry and passes it to the provided key consumer.
-     * 
+     *
      * @param <K> the type of the key
      * @param <V> the type of the value
      * @param <E> the type of the exception that may be thrown
@@ -1367,7 +1367,7 @@ public final class Fnn {
     /**
      * Returns a Consumer that accepts Map.Entry objects and applies the given consumer to the entry's value.
      * The returned consumer extracts the value from the Map.Entry and passes it to the provided value consumer.
-     * 
+     *
      * @param <K> the type of the key
      * @param <V> the type of the value
      * @param <E> the type of the exception that may be thrown
@@ -1386,7 +1386,7 @@ public final class Fnn {
     /**
      * Returns a Function that applies the given function to a Map.Entry's key.
      * The returned function extracts the key from the Map.Entry and applies the provided key function to it.
-     * 
+     *
      * @param <K> the type of the key
      * @param <V> the type of the value
      * @param <R> the type of the result
@@ -1406,7 +1406,7 @@ public final class Fnn {
     /**
      * Returns a Function that applies the given function to a Map.Entry's value.
      * The returned function extracts the value from the Map.Entry and applies the provided value function to it.
-     * 
+     *
      * @param <K> the type of the key
      * @param <V> the type of the value
      * @param <R> the type of the result
@@ -1429,7 +1429,7 @@ public final class Fnn {
     /**
      * Returns a BinaryOperator that always returns the first of its two operands.
      * This operator ignores the second operand and returns the first operand unchanged.
-     * 
+     *
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
      * @return a BinaryOperator that returns the first operand
@@ -1446,7 +1446,7 @@ public final class Fnn {
     /**
      * Returns a BinaryOperator that always returns the second of its two operands.
      * This operator ignores the first operand and returns the second operand unchanged.
-     * 
+     *
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
      * @return a BinaryOperator that returns the second operand
@@ -1464,7 +1464,7 @@ public final class Fnn {
     /**
      * Returns a BinaryOperator that returns the minimum of two Comparable values.
      * The comparison is performed using the natural ordering of the Comparable type.
-     * 
+     *
      * @param <T> the type of the Comparable operands and result
      * @param <E> the type of the exception that may be thrown
      * @return a BinaryOperator that returns the smaller of two Comparable values
@@ -1478,7 +1478,7 @@ public final class Fnn {
     /**
      * Returns a BinaryOperator that returns the minimum of two values according to the specified Comparator.
      * If the comparator indicates the values are equal, the first value is returned.
-     * 
+     *
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
      * @param comparator the Comparator to use for comparing values
@@ -1495,7 +1495,7 @@ public final class Fnn {
     /**
      * Returns a BinaryOperator that returns the minimum of two values by comparing the results of applying a key extractor function.
      * The key extractor function is applied to both operands and the resulting Comparable values are compared.
-     * 
+     *
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
      * @param keyExtractor the function to extract a Comparable key from each operand
@@ -1574,7 +1574,7 @@ public final class Fnn {
     /**
      * Returns a BinaryOperator that returns the maximum of two Comparable values.
      * The comparison is performed using the natural ordering of the Comparable type.
-     * 
+     *
      * @param <T> the type of the Comparable operands and result
      * @param <E> the type of the exception that may be thrown
      * @return a BinaryOperator that returns the larger of two Comparable values
@@ -1588,7 +1588,7 @@ public final class Fnn {
     /**
      * Returns a BinaryOperator that returns the maximum of two values according to the specified Comparator.
      * If the comparator indicates the values are equal, the first value is returned.
-     * 
+     *
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
      * @param comparator the Comparator to use for comparing values
@@ -1605,7 +1605,7 @@ public final class Fnn {
     /**
      * Returns a BinaryOperator that returns the maximum of two values by comparing the results of applying a key extractor function.
      * The key extractor function is applied to both operands and the resulting Comparable values are compared.
-     * 
+     *
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
      * @param keyExtractor the function to extract a Comparable key from each operand
@@ -1629,7 +1629,7 @@ public final class Fnn {
     /**
      * Returns a BinaryOperator that returns the maximum of two Map.Entry objects by comparing their keys.
      * The keys must be Comparable and are compared using their natural ordering.
-     * 
+     *
      * @param <K> the type of the Comparable key
      * @param <V> the type of the value
      * @param <E> the type of the exception that may be thrown
@@ -1650,7 +1650,7 @@ public final class Fnn {
     /**
      * Returns a BinaryOperator that returns the maximum of two Map.Entry objects by comparing their values.
      * The values must be Comparable and are compared using their natural ordering.
-     * 
+     *
      * @param <K> the type of the key
      * @param <V> the type of the Comparable value
      * @param <E> the type of the exception that may be thrown
@@ -1666,7 +1666,7 @@ public final class Fnn {
     /**
      * Returns a Predicate that represents the logical negation of the given predicate.
      * When evaluated, the returned predicate returns {@code true} if the given predicate returns {@code false}, and vice versa.
-     * 
+     *
      * @param <T> the type of the input to the predicate
      * @param <E> the type of the exception that may be thrown
      * @param predicate the predicate to negate
@@ -1683,7 +1683,7 @@ public final class Fnn {
     /**
      * Returns a BiPredicate that represents the logical negation of the given bi-predicate.
      * When evaluated, the returned bi-predicate returns {@code true} if the given bi-predicate returns {@code false}, and vice versa.
-     * 
+     *
      * @param <T> the type of the first argument to the predicate
      * @param <U> the type of the second argument to the predicate
      * @param <E> the type of the exception that may be thrown
@@ -1702,7 +1702,7 @@ public final class Fnn {
     /**
      * Returns a TriPredicate that represents the logical negation of the given tri-predicate.
      * When evaluated, the returned tri-predicate returns {@code true} if the given tri-predicate returns {@code false}, and vice versa.
-     * 
+     *
      * @param <A> the type of the first argument to the predicate
      * @param <B> the type of the second argument to the predicate
      * @param <C> the type of the third argument to the predicate
@@ -1720,10 +1720,10 @@ public final class Fnn {
 
     /**
      * Returns a stateful Predicate that returns {@code true} for at most the specified number of evaluations.
-     * The predicate maintains an internal counter that decrements with each test, returning {@code true} 
+     * The predicate maintains an internal counter that decrements with each test, returning {@code true}
      * while the counter is positive and {@code false} once it reaches zero. This predicate is thread-safe
      * and can be used in parallel streams.
-     * 
+     *
      * @param <T> the type of the input to the predicate
      * @param <E> the type of the exception that may be thrown
      * @param count the maximum number of times the predicate should return true
@@ -1748,7 +1748,7 @@ public final class Fnn {
     /**
      * Converts a standard Java Supplier to a Throwables.Supplier.
      * If the input is already a Throwables.Supplier, it is returned as-is.
-     * 
+     *
      * @param <T> the type of results supplied by the supplier
      * @param <E> the type of the exception that may be thrown
      * @param supplier the Java Supplier to convert
@@ -1764,7 +1764,7 @@ public final class Fnn {
     /**
      * Converts a standard Java IntFunction to a Throwables.IntFunction.
      * If the input is already a Throwables.IntFunction, it is returned as-is.
-     * 
+     *
      * @param <T> the type of the result of the function
      * @param <E> the type of the exception that may be thrown
      * @param func the Java IntFunction to convert
@@ -1780,7 +1780,7 @@ public final class Fnn {
     /**
      * Converts a standard Java Predicate to a Throwables.Predicate.
      * If the input is already a Throwables.Predicate, it is returned as-is.
-     * 
+     *
      * @param <T> the type of the input to the predicate
      * @param <E> the type of the exception that may be thrown
      * @param predicate the Java Predicate to convert
@@ -1796,7 +1796,7 @@ public final class Fnn {
     /**
      * Converts a standard Java BiPredicate to a Throwables.BiPredicate.
      * If the input is already a Throwables.BiPredicate, it is returned as-is.
-     * 
+     *
      * @param <T> the type of the first argument to the predicate
      * @param <U> the type of the second argument to the predicate
      * @param <E> the type of the exception that may be thrown
@@ -1813,7 +1813,7 @@ public final class Fnn {
     /**
      * Converts a standard Java Consumer to a Throwables.Consumer.
      * If the input is already a Throwables.Consumer, it is returned as-is.
-     * 
+     *
      * @param <T> the type of the input to the consumer
      * @param <E> the type of the exception that may be thrown
      * @param consumer the Java Consumer to convert
@@ -1829,7 +1829,7 @@ public final class Fnn {
     /**
      * Converts a standard Java BiConsumer to a Throwables.BiConsumer.
      * If the input is already a Throwables.BiConsumer, it is returned as-is.
-     * 
+     *
      * @param <T> the type of the first argument to the consumer
      * @param <U> the type of the second argument to the consumer
      * @param <E> the type of the exception that may be thrown
@@ -1846,7 +1846,7 @@ public final class Fnn {
     /**
      * Converts a standard Java Function to a Throwables.Function.
      * If the input is already a Throwables.Function, it is returned as-is.
-     * 
+     *
      * @param <T> the type of the input to the function
      * @param <R> the type of the result of the function
      * @param <E> the type of the exception that may be thrown
@@ -1863,7 +1863,7 @@ public final class Fnn {
     /**
      * Converts a standard Java BiFunction to a Throwables.BiFunction.
      * If the input is already a Throwables.BiFunction, it is returned as-is.
-     * 
+     *
      * @param <T> the type of the first argument to the function
      * @param <U> the type of the second argument to the function
      * @param <R> the type of the result of the function
@@ -3153,7 +3153,7 @@ public final class Fnn {
      * @param <T> the type of the input to the consumer/function
      * @param <E> the type of the checked exception that may be thrown
      * @param consumer the consumer to convert to a function
-     * @return a Throwables.Function that executes the consumer and returns null
+     * @return a Throwables.Function that executes the consumer and returns {@code null}
      * @throws IllegalArgumentException if consumer is null
      */
     @Beta
@@ -3207,7 +3207,7 @@ public final class Fnn {
      * @param <U> the type of the second argument to the consumer/function
      * @param <E> the type of the checked exception that may be thrown
      * @param biConsumer the BiConsumer to convert to a BiFunction
-     * @return a Throwables.BiFunction that executes the BiConsumer and returns null
+     * @return a Throwables.BiFunction that executes the BiConsumer and returns {@code null}
      * @throws IllegalArgumentException if biConsumer is null
      */
     @Beta
@@ -3258,7 +3258,7 @@ public final class Fnn {
      * @param <C> the type of the third argument to the consumer/function
      * @param <E> the type of the checked exception that may be thrown
      * @param triConsumer the TriConsumer to convert to a TriFunction
-     * @return a Throwables.TriFunction that executes the TriConsumer and returns null
+     * @return a Throwables.TriFunction that executes the TriConsumer and returns {@code null}
      * @throws IllegalArgumentException if triConsumer is null
      */
     @Beta
@@ -3424,7 +3424,7 @@ public final class Fnn {
      *
      * @param <E> the type of the checked exception that may be thrown
      * @param runnable the runnable to convert to a callable
-     * @return a Throwables.Callable that executes the runnable and returns null
+     * @return a Throwables.Callable that executes the runnable and returns {@code null}
      * @throws IllegalArgumentException if runnable is null
      */
     public static <E extends Throwable> Throwables.Callable<Void, E> r2c(final Throwables.Runnable<E> runnable) throws IllegalArgumentException {

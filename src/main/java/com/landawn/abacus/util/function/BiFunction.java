@@ -67,6 +67,7 @@ public interface BiFunction<T, U, R> extends Throwables.BiFunction<T, U, R, Runt
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed {@code BiFunction} that first applies this function and then applies the {@code after} function
+     * @throws NullPointerException if {@code after} is null
      */
     @Override
     default <V> BiFunction<T, U, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {

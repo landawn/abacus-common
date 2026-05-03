@@ -15,11 +15,13 @@
 package com.landawn.abacus.type;
 
 /**
- * The Abstract base class for primary types in the type system.
+ * The abstract base class for primary types in the type system.
  * <p>
- * Primary types are fundamental, immutable types that can be directly compared
- * and converted from objects. This includes primitive wrappers ({@code Integer}, {@code Double}, etc.),
- * {@code String}, {@code Character}, and other basic value types.
+ * Primary types are fundamental, immutable, comparable value types that can be directly
+ * converted from arbitrary objects. This includes primitive wrappers
+ * ({@code Integer}, {@code Long}, {@code Double}, etc.),
+ * {@code String}, {@code Character}, {@code Boolean}, and other basic value types.
+ * All primary types are both immutable and comparable by definition.
  * </p>
  *
  * @param <T> the primary type (e.g., {@code Integer}, {@code String}, {@code Boolean}, {@code Character})
@@ -36,13 +38,10 @@ public abstract class AbstractPrimaryType<T> extends AbstractType<T> {
     }
 
     /**
-     * Checks if this type is immutable.
-     * <p>
-     * Primary types are always immutable, meaning their values cannot be changed
-     * after creation. This includes all primitive wrappers and {@code String}.
-     * </p>
+     * Returns {@code true} because primary types are always immutable — their values
+     * cannot be changed after creation. This includes all primitive wrappers and {@code String}.
      *
-     * @return {@code true}, indicating that primary types are immutable
+     * @return {@code true}
      */
     @Override
     public boolean isImmutable() {
@@ -50,13 +49,11 @@ public abstract class AbstractPrimaryType<T> extends AbstractType<T> {
     }
 
     /**
-     * Checks if this type is comparable.
-     * <p>
-     * Primary types implement natural ordering and can be compared with each other.
-     * This allows them to be used in sorted collections and comparison operations.
-     * </p>
+     * Returns {@code true} because primary types implement natural ordering and can be
+     * compared with each other, allowing them to be used in sorted collections and
+     * comparison operations.
      *
-     * @return {@code true}, indicating that primary types support comparison
+     * @return {@code true}
      */
     @Override
     public boolean isComparable() {

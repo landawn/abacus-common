@@ -175,14 +175,14 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>{@code remove(..., value)} / {@code removeAll(..., values)} - removes elements by <b>value</b> (equality).</li>
  * </ul>
  *
- * <p><b>Usage Note:</b> This class provides null-safe static utility methods for arrays, collections, and maps.
- * While many methods have counterparts in JDK 8+ (e.g., {@link java.util.Collection#removeIf(java.util.function.Predicate)}),
- * the methods here are often preferred for:
+ * <p><b>Usage Note:</b> This class provides null-safe static utility methods for arrays, collections, and maps.</p>
+ * <p>While many methods have counterparts in JDK 8+ (e.g., {@link java.util.Collection#removeIf(java.util.function.Predicate)}),
+ * the methods here are often preferred for:</p>
  * <ul>
  *   <li>Enhanced null-safety (handling {@code null} inputs gracefully).</li>
  *   <li>Performance optimizations for specific data types.</li>
  *   <li>Support for primitive arrays which lack standard functional API support in the JDK.</li>
- * </ul></p>
+ * </ul>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -4157,7 +4157,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Flattens each element of the provided {@code Iterable} if it's an {@code Iterable} itself, otherwise just adds it to the result List.
-     * This method is marked as Beta and may be subject to changes or removal in a future versions.
+     * This method is marked as Beta and may be subject to changes or removal in a future version.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4181,7 +4181,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Flattens each element of the provided {@code Iterable} if it's an {@code Iterable} itself, otherwise just adds it to the result Collection.
-     * This method is marked as Beta and may be subject to changes or removal in a future versions.
+     * This method is marked as Beta and may be subject to changes or removal in a future version.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4356,7 +4356,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * int[] a = {1, 2, 2, 3, 4};
      * int[] b = {1, 2, 2, 2, 5, 6};
      * int[] result = intersection(a, b);   // result will be {1, 2, 2}
-     * 
+     *
      * int[] c = {1, 2, 3};
      * int[] d = {4, 5, 6};
      * int[] result2 = intersection(c, d);   // result will be {} (empty array)
@@ -4780,7 +4780,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *          {4, "Dave", 70000},
      *          {2, "Bob", 80000}  // different salary but same keys
      *     });
-     * 
+     *
      * Collection<String> keyColumns = Arrays.asList("id", "name");
      * Dataset result = N.intersection(dataset1, dataset2, keyColumns, false);
      * // Result contains {1, "Alice", "HR"} once and {2, "Bob", "Engineering"} twice (min of 2 and 3 occurrences)
@@ -6443,7 +6443,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <ul>
      *    <li>{@code subColl.size()} and {@code coll.size()} represent the
      *    total cardinality of <i>a</i> and <i>b</i>, resp. </li>
-     *    <li>{@code subColl.size() < Integer.MAXVALUE}</li>
+     *    <li>{@code subColl.size() < Integer.MAX_VALUE}</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -8039,7 +8039,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Creates a copy of the given array and sets all elements in the copy using the provided generator function.
      * If the specified array is {@code null}, returns {@code null}.
-     * If the specified array is empty, returns itself.
+     * If the specified array is empty, returns an empty clone of the array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -8077,7 +8077,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Creates a copy of the given array and sets all elements in the copy using the provided converter function.
      * If the specified array is {@code null}, returns {@code null}.
-     * If the specified array is empty, returns itself.
+     * If the specified array is empty, returns an empty clone of the array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -8117,7 +8117,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Creates a copy of the given array and replaces all elements in the copy using the provided {@code UnaryOperator}.
      * If the specified array is {@code null}, returns {@code null}.
-     * If the specified array is empty, returns itself.
+     * If the specified array is empty, returns an empty clone of the array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -8155,7 +8155,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Creates a copy of the given array and replaces all elements in the copy using the provided {@code UnaryOperator}.
      * If the specified array is {@code null}, returns {@code null}.
-     * If the specified array is empty, returns itself.
+     * If the specified array is empty, returns an empty clone of the array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -8770,7 +8770,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] words = {"apple", "banana"};
-     * String[] result = N.addAll(words, "cherry", "date"};
+     * String[] result = N.addAll(words, "cherry", "date");
      * // Returns {"apple", "banana", "cherry", "date"}
      * }</pre>
      *
@@ -8808,10 +8808,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * @param <T> the type of elements in the array.
-     * @param a the original array.
+     * @param a the original array (must not be {@code null}).
      * @param elementsToAdd the elements to be added to the array.
      * @return a new array containing the original elements and the added elements.
-     * @throws IllegalArgumentException if the input array <i>a</i> and <i>elementsToAdd</i> both are {@code null}.
+     * @throws IllegalArgumentException if the original array <i>a</i> is {@code null}.
      */
     @SafeVarargs
     public static <T> T[] addAll(@NotNull final T[] a, final T... elementsToAdd) throws IllegalArgumentException {
@@ -9454,6 +9454,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] data = {1, 2, 5, 6};
+     * byte[] result = N.insertAll(data, 2, (byte) 3, (byte) 4);
+     * // Returns {1, 2, 3, 4, 5, 6}
+     * }</pre>
+     *
      * @param a the original array
      * @param index the position in the array where the new elements should be inserted
      * @param elementsToInsert the elements to be inserted into the array
@@ -9488,6 +9495,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns a new array with elements copied from the specified array and the specified elements inserted at the specified index.
      * <br />
      * The original array remains unchanged.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] values = {10, 20, 50, 60};
+     * short[] result = N.insertAll(values, 2, (short) 30, (short) 40);
+     * // Returns {10, 20, 30, 40, 50, 60}
+     * }</pre>
      *
      * @param a the original array
      * @param index the position in the array where the new elements should be inserted
@@ -9524,6 +9538,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] numbers = {1, 2, 5, 6};
+     * int[] result = N.insertAll(numbers, 2, 3, 4);
+     * // Returns {1, 2, 3, 4, 5, 6}
+     * }</pre>
+     *
      * @param a the original array
      * @param index the position in the array where the new elements should be inserted
      * @param elementsToInsert the elements to be inserted into the array
@@ -9558,6 +9579,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns a new array with elements copied from the specified array and the specified elements inserted at the specified index.
      * <br />
      * The original array remains unchanged.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] ids = {100L, 200L, 500L, 600L};
+     * long[] result = N.insertAll(ids, 2, 300L, 400L);
+     * // Returns {100L, 200L, 300L, 400L, 500L, 600L}
+     * }</pre>
      *
      * @param a the original array
      * @param index the position in the array where the new elements should be inserted
@@ -9594,6 +9622,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] prices = {1.5f, 2.5f, 5.5f, 6.5f};
+     * float[] result = N.insertAll(prices, 2, 3.5f, 4.5f);
+     * // Returns {1.5f, 2.5f, 3.5f, 4.5f, 5.5f, 6.5f}
+     * }</pre>
+     *
      * @param a the original array
      * @param index the position in the array where the new elements should be inserted
      * @param elementsToInsert the elements to be inserted into the array
@@ -9629,6 +9664,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] values = {1.0, 2.0, 5.0, 6.0};
+     * double[] result = N.insertAll(values, 2, 3.0, 4.0);
+     * // Returns {1.0, 2.0, 3.0, 4.0, 5.0, 6.0}
+     * }</pre>
+     *
      * @param a the original array
      * @param index the position in the array where the new elements should be inserted
      * @param elementsToInsert the elements to be inserted into the array
@@ -9663,6 +9705,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns a new array with elements copied from the specified array and the specified elements inserted at the specified index.
      * <br />
      * The original array remains unchanged.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] words = {"A", "B", "E", "F"};
+     * String[] result = N.insertAll(words, 2, "C", "D");
+     * // Returns {"A", "B", "C", "D", "E", "F"}
+     * }</pre>
      *
      * @param a the original array
      * @param index the position in the array where the new elements should be inserted
@@ -9812,11 +9861,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
-     * <p><b>Naming Convention:</b>
+     * <p><b>Naming Convention:</b></p>
      * <ul>
      *   <li>{@link #removeAt(boolean[], int) removeAt}/{@link #removeRange(boolean[], int, int) removeRange} - removes elements by <b>index</b>.</li>
      *   <li>{@link #remove(boolean[], boolean) remove}/{@link #removeAll(boolean[], boolean...) removeAll} - removes elements by <b>value</b>.</li>
-     * </ul></p>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9859,17 +9908,26 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
-     * <p><b>Naming Convention:</b>
+     * <p><b>Naming Convention:</b></p>
      * <ul>
      *   <li>{@link #removeAt(boolean[], int) removeAt}/{@link #removeRange(boolean[], int, int) removeRange} - removes elements by <b>index</b>.</li>
      *   <li>{@link #remove(boolean[], boolean) remove}/{@link #removeAll(boolean[], boolean...) removeAll} - removes elements by <b>value</b>.</li>
-     * </ul></p>
+     * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] chars = {'a', 'b', 'c', 'd'};
+     * char[] result = N.removeAt(chars, 1);
+     * // Returns {'a', 'c', 'd'}
+     * }</pre>
      *
      * @param a the original char array
      * @param index the position of the element to be removed
      * @return a new char array containing the existing elements except the element at the specified index
      * @throws IllegalArgumentException if one of the arguments violates the method contract
      * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @see #remove(char[], char)
+     * @see #removeAt(char[], int...)
      */
     public static char[] removeAt(@NotNull final char[] a, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
         // checkArgNotNull(a, cs.a);
@@ -9897,11 +9955,26 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Naming Convention:</b></p>
+     * <ul>
+     *   <li>{@link #removeAt(boolean[], int) removeAt}/{@link #removeRange(boolean[], int, int) removeRange} - removes elements by <b>index</b>.</li>
+     *   <li>{@link #remove(boolean[], boolean) remove}/{@link #removeAll(boolean[], boolean...) removeAll} - removes elements by <b>value</b>.</li>
+     * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] bytes = {10, 20, 30, 40};
+     * byte[] result = N.removeAt(bytes, 1);
+     * // Returns {10, 30, 40}
+     * }</pre>
+     *
      * @param a the original byte array
      * @param index the position of the element to be removed
      * @return a new byte array containing the existing elements except the element at the specified index
      * @throws IllegalArgumentException if one of the arguments violates the method contract
      * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @see #remove(byte[], byte)
+     * @see #removeAt(byte[], int...)
      */
     public static byte[] removeAt(@NotNull final byte[] a, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
         // checkArgNotNull(a, cs.a);
@@ -9929,11 +10002,26 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Naming Convention:</b></p>
+     * <ul>
+     *   <li>{@link #removeAt(boolean[], int) removeAt}/{@link #removeRange(boolean[], int, int) removeRange} - removes elements by <b>index</b>.</li>
+     *   <li>{@link #remove(boolean[], boolean) remove}/{@link #removeAll(boolean[], boolean...) removeAll} - removes elements by <b>value</b>.</li>
+     * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] shorts = {10, 20, 30, 40};
+     * short[] result = N.removeAt(shorts, 1);
+     * // Returns {10, 30, 40}
+     * }</pre>
+     *
      * @param a the original short array
      * @param index the position of the element to be removed
      * @return a new short array containing the existing elements except the element at the specified index
      * @throws IllegalArgumentException if one of the arguments violates the method contract
      * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @see #remove(short[], short)
+     * @see #removeAt(short[], int...)
      */
     public static short[] removeAt(@NotNull final short[] a, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
         // checkArgNotNull(a, cs.a);
@@ -9961,11 +10049,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
-     * <p><b>Naming Convention:</b>
+     * <p><b>Naming Convention:</b></p>
      * <ul>
      *   <li>{@link #removeAt(boolean[], int) removeAt}/{@link #removeRange(boolean[], int, int) removeRange} - removes elements by <b>index</b>.</li>
      *   <li>{@link #remove(boolean[], boolean) remove}/{@link #removeAll(boolean[], boolean...) removeAll} - removes elements by <b>value</b>.</li>
-     * </ul></p>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -11365,17 +11453,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
-     * @param a the array from which the values should be removed.
-     * @param valuesToRemove the values to be removed from the array.
-     * @return a new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
-     * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] words = {"apple", "banana", "apple", "cherry", "banana"};
      * String[] result = N.removeAll(words, "apple", "banana");
      * // Returns {"cherry"}
      * }</pre>
-     * 
+     *
+     * @param a the array from which the values should be removed.
+     * @param valuesToRemove the values to be removed from the array.
+     * @return a new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
      * @see N#difference(int[], int[])
      */
     public static String[] removeAll(final String[] a, final String... valuesToRemove) {
@@ -11405,18 +11492,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
-     * @param <T> the type of elements in the array
-     * @param a the array from which the values should be removed.
-     * @param valuesToRemove the values to be removed from the array.
-     * @return a new array with all occurrences of the specified values removed. The input array itself is returned if the specified array is {@code null} or empty.
-     * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] numbers = {1, 2, 3, 2, 4, 1, 5};
      * Integer[] result = N.removeAll(numbers, 1, 2);
      * // Returns {3, 4, 5}
      * }</pre>
-     * 
+     *
+     * @param <T> the type of elements in the array
+     * @param a the array from which the values should be removed.
+     * @param valuesToRemove the values to be removed from the array.
+     * @return a new array with all occurrences of the specified values removed. The input array itself is returned if the specified array is {@code null} or empty.
      * @see N#difference(int[], int[])
      */
     @MayReturnNull
@@ -11445,17 +11531,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Removes all occurrences of the specified values from the given collection.
      *
-     * @param <T> the type of elements in the collection.
-     * @param c the collection from which the values should be removed.
-     * @param valuesToRemove the values to be removed from the collection.
-     * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = new ArrayList<>(Arrays.asList("A", "B", "A", "C"));
      * boolean changed = N.removeAll(list, "A", "B");
      * // changed = true, list = ["C"]
      * }</pre>
-     * 
+     *
+     * @param <T> the type of elements in the collection.
+     * @param c the collection from which the values should be removed.
+     * @param valuesToRemove the values to be removed from the collection.
      * @return {@code true} if the collection changed as a result of this call, {@code false} otherwise.
      */
     @SafeVarargs
@@ -11470,10 +11555,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Removes all occurrences of the specified values from the given collection.
      *
-     * @param <T> the type of elements in the collection.
-     * @param c the collection from which the values should be removed.
-     * @param valuesToRemove the collection of values to be removed from the collection.
-     * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> list = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5));
@@ -11481,7 +11562,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * boolean changed = N.removeAll(list, toRemove);
      * // changed = true, list = [1, 3, 5]
      * }</pre>
-     * 
+     *
+     * @param <T> the type of elements in the collection.
+     * @param c the collection from which the values should be removed.
+     * @param valuesToRemove the collection of values to be removed from the collection.
      * @return {@code true} if the collection changed as a result of this call, {@code false} otherwise.
      */
     public static <T> boolean removeAll(final Collection<T> c, final Iterable<?> valuesToRemove) {
@@ -11515,10 +11599,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Removes all occurrences of the specified values from the given collection.
      *
-     * @param <T> the type of elements in the collection.
-     * @param c the collection from which the elements should be removed.
-     * @param valuesToRemove the iterator of values to be removed from the collection.
-     * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = new ArrayList<>(Arrays.asList("x", "y", "z"));
@@ -11526,7 +11606,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * boolean changed = N.removeAll(list, toRemove);
      * // changed = true, list = ["y"]
      * }</pre>
-     * 
+     *
+     * @param <T> the type of elements in the collection.
+     * @param c the collection from which the elements should be removed.
+     * @param valuesToRemove the iterator of values to be removed from the collection.
      * @return {@code true} if the collection changed as a result of this call, {@code false} otherwise.
      */
     public static <T> boolean removeAll(final Collection<T> c, final Iterator<?> valuesToRemove) {
@@ -11592,16 +11675,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
-     * @param a the array from which the value should be removed.
-     * @param valueToRemove the value to be removed from the array.
-     * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] letters = {'a', 'b', 'a', 'c', 'a'};
      * char[] result = N.removeAllOccurrences(letters, 'a');
      * // Returns {'b', 'c'}
      * }</pre>
-     * 
+     *
+     * @param a the array from which the value should be removed.
+     * @param valueToRemove the value to be removed from the array.
      * @return a new array with all occurrences of the specified value removed. An empty array is returned if the specified array is {@code null} or empty.
      */
     public static char[] removeAllOccurrences(final char[] a, final char valueToRemove) {
@@ -11629,16 +11711,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
-     * @param a the array from which the value should be removed.
-     * @param valueToRemove the value to be removed from the array.
-     * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data = {1, 2, 1, 3, 1, 4};
      * byte[] result = N.removeAllOccurrences(data, (byte) 1);
      * // Returns {2, 3, 4}
      * }</pre>
-     * 
+     *
+     * @param a the array from which the value should be removed.
+     * @param valueToRemove the value to be removed from the array.
      * @return a new array with all occurrences of the specified value removed. An empty array is returned if the specified array is {@code null} or empty.
      */
     public static byte[] removeAllOccurrences(final byte[] a, final byte valueToRemove) {
@@ -11666,16 +11747,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
-     * @param a the array from which the value should be removed.
-     * @param valueToRemove the value to be removed from the array.
-     * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] values = {10, 20, 10, 30, 10};
      * short[] result = N.removeAllOccurrences(values, (short) 10);
      * // Returns {20, 30}
      * }</pre>
-     * 
+     *
+     * @param a the array from which the value should be removed.
+     * @param valueToRemove the value to be removed from the array.
      * @return a new array with all occurrences of the specified value removed. An empty array is returned if the specified array is {@code null} or empty.
      */
     public static short[] removeAllOccurrences(final short[] a, final short valueToRemove) {
@@ -11741,16 +11821,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
-     * @param a the array from which the value should be removed.
-     * @param valueToRemove the value to be removed from the array.
-     * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] ids = {100L, 200L, 100L, 300L};
      * long[] result = N.removeAllOccurrences(ids, 100L);
      * // Returns {200L, 300L}
      * }</pre>
-     * 
+     *
+     * @param a the array from which the value should be removed.
+     * @param valueToRemove the value to be removed from the array.
      * @return a new array with all occurrences of the specified value removed. An empty array is returned if the specified array is {@code null} or empty.
      */
     public static long[] removeAllOccurrences(final long[] a, final long valueToRemove) {
@@ -11778,16 +11857,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
-     * @param a the array from which the value should be removed.
-     * @param valueToRemove the value to be removed from the array.
-     * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] values = {1.5f, 2.5f, 1.5f, 3.5f};
      * float[] result = N.removeAllOccurrences(values, 1.5f);
      * // Returns {2.5f, 3.5f}
      * }</pre>
-     * 
+     *
+     * @param a the array from which the value should be removed.
+     * @param valueToRemove the value to be removed from the array.
      * @return a new array with all occurrences of the specified value removed. An empty array is returned if the specified array is {@code null} or empty.
      */
     public static float[] removeAllOccurrences(final float[] a, final float valueToRemove) {
@@ -11815,16 +11893,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
-     * @param a the array from which the value should be removed.
-     * @param valueToRemove the value to be removed from the array.
-     * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] prices = {10.99, 20.99, 10.99, 30.99};
      * double[] result = N.removeAllOccurrences(prices, 10.99);
      * // Returns {20.99, 30.99}
      * }</pre>
-     * 
+     *
+     * @param a the array from which the value should be removed.
+     * @param valueToRemove the value to be removed from the array.
      * @return a new array with all occurrences of the specified value removed. An empty array is returned if the specified array is {@code null} or empty.
      */
     public static double[] removeAllOccurrences(final double[] a, final double valueToRemove) {
@@ -11852,16 +11929,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
-     * @param a the array from which the value should be removed.
-     * @param valueToRemove the value to be removed from the array.
-     * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] words = {"apple", "banana", "apple", "cherry"};
      * String[] result = N.removeAllOccurrences(words, "apple");
      * // Returns {"banana", "cherry"}
      * }</pre>
-     * 
+     *
+     * @param a the array from which the value should be removed.
+     * @param valueToRemove the value to be removed from the array.
      * @return a new array with all occurrences of the specified value removed. An empty array is returned if the specified array is {@code null} or empty.
      */
     public static String[] removeAllOccurrences(final String[] a, final String valueToRemove) {
@@ -11889,17 +11965,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
-     * @param <T> the type of elements in the array
-     * @param a the array from which the value should be removed.
-     * @param valueToRemove the value to be removed from the array.
-     * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] numbers = {1, 2, 1, 3, 1, 4};
      * Integer[] result = N.removeAllOccurrences(numbers, 1);
      * // Returns {2, 3, 4}
      * }</pre>
-     * 
+     *
+     * @param <T> the type of elements in the array
+     * @param a the array from which the value should be removed.
+     * @param valueToRemove the value to be removed from the array.
      * @return a new array with all occurrences of the specified value removed. The input array itself is returned if the specified array is {@code null} or empty.
      */
     public static <T> T[] removeAllOccurrences(final T[] a, final T valueToRemove) {
@@ -11924,17 +11999,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Removes all occurrences of the specified value from the given collection.
      *
-     * @param <T> the type of elements in the collection.
-     * @param c the collection from which the value should be removed.
-     * @param valueToRemove the value to be removed from the collection.
-     * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = new ArrayList<>(Arrays.asList("a", "b", "a", "c"));
      * boolean changed = N.removeAllOccurrences(list, "a");
      * // changed = true, list = ["b", "c"]
      * }</pre>
-     * 
+     *
+     * @param <T> the type of elements in the collection.
+     * @param c the collection from which the value should be removed.
+     * @param valueToRemove the value to be removed from the collection.
      * @return {@code true} if the collection changed as a result of this call, {@code false} otherwise.
      */
     public static <T> boolean removeAllOccurrences(final Collection<T> c, final T valueToRemove) {
@@ -11971,7 +12045,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the boolean array from which duplicates should be removed.
      * @param fromIndex the initial index of the range to be considered for duplicate removal.
      * @param toIndex the final index of the range to be considered for duplicate removal.
-     * @return a new array with duplicate elements from the given array within the specified range
+     * @return a new array with distinct elements from the given array within the specified range
      * @throws IndexOutOfBoundsException if the range is out of the array bounds.
      * @deprecated Use {@link #distinct(boolean[], int, int)} instead.
      */
@@ -12976,14 +13050,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the initial index of the range to be deleted, inclusive
      * @param toIndex the final index of the range to be deleted, exclusive
      * @return a new array with the specified range of elements removed. An empty array is returned if the specified array is {@code null} or empty.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] flags = {true, false, true, false, true};
      * boolean[] result = N.removeRange(flags, 1, 3);
      * // result = {true, false, true} (deleted indices 1-2)
      * }</pre>
-     * 
+     *
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static boolean[] removeRange(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -13016,14 +13090,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the initial index of the range to be deleted, inclusive
      * @param toIndex the final index of the range to be deleted, exclusive
      * @return a new array with the specified range of elements removed. An empty array is returned if the specified array is {@code null} or empty.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] letters = {'a', 'b', 'c', 'd', 'e'};
      * char[] result = N.removeRange(letters, 1, 3);
      * // result = {'a', 'd', 'e'} (deleted 'b' and 'c')
      * }</pre>
-     * 
+     *
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static char[] removeRange(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -13056,14 +13130,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the initial index of the range to be deleted, inclusive
      * @param toIndex the final index of the range to be deleted, exclusive
      * @return a new array with the specified range of elements removed. An empty array is returned if the specified array is {@code null} or empty.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data = {1, 2, 3, 4, 5};
      * byte[] result = N.removeRange(data, 1, 3);
      * // result = {1, 4, 5} (deleted elements at indices 1-2)
      * }</pre>
-     * 
+     *
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static byte[] removeRange(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -13096,14 +13170,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the initial index of the range to be deleted, inclusive
      * @param toIndex the final index of the range to be deleted, exclusive
      * @return a new array with the specified range of elements removed. An empty array is returned if the specified array is {@code null} or empty.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] values = {10, 20, 30, 40, 50};
      * short[] result = N.removeRange(values, 1, 3);
      * // result = {10, 40, 50} (deleted elements at indices 1-2)
      * }</pre>
-     * 
+     *
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static short[] removeRange(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -13136,14 +13210,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the initial index of the range to be deleted, inclusive
      * @param toIndex the final index of the range to be deleted, exclusive
      * @return a new array with the specified range of elements removed. An empty array is returned if the specified array is {@code null} or empty.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] numbers = {1, 2, 3, 4, 5};
      * int[] result = N.removeRange(numbers, 1, 3);
      * // result = {1, 4, 5} (deleted 2 and 3)
      * }</pre>
-     * 
+     *
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static int[] removeRange(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -13176,14 +13250,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the initial index of the range to be deleted, inclusive
      * @param toIndex the final index of the range to be deleted, exclusive
      * @return a new array with the specified range of elements removed. An empty array is returned if the specified array is {@code null} or empty.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] ids = {100L, 200L, 300L, 400L, 500L};
      * long[] result = N.removeRange(ids, 1, 3);
      * // result = {100L, 400L, 500L} (deleted 200L and 300L)
      * }</pre>
-     * 
+     *
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static long[] removeRange(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -13216,14 +13290,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the initial index of the range to be deleted, inclusive
      * @param toIndex the final index of the range to be deleted, exclusive
      * @return a new array with the specified range of elements removed. An empty array is returned if the specified array is {@code null} or empty.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] values = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
      * float[] result = N.removeRange(values, 1, 3);
      * // result = {1.0f, 4.0f, 5.0f} (deleted 2.0f and 3.0f)
      * }</pre>
-     * 
+     *
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static float[] removeRange(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -13256,14 +13330,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the initial index of the range to be deleted, inclusive
      * @param toIndex the final index of the range to be deleted, exclusive
      * @return a new array with the specified range of elements removed. An empty array is returned if the specified array is {@code null} or empty.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] prices = {10.99, 20.99, 30.99, 40.99, 50.99};
      * double[] result = N.removeRange(prices, 1, 3);
      * // result = {10.99, 40.99, 50.99} (deleted 20.99 and 30.99)
      * }</pre>
-     * 
+     *
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static double[] removeRange(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -13412,7 +13486,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the final index of the range to be replaced, exclusive
      * @param replacement the array to replace the specified range in the original array
      * @return a new array with the specified range replaced by the replacement array
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] flags = {true, false, true, false, true};
@@ -13420,7 +13494,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * boolean[] result = N.replaceRange(flags, 1, 3, replacement);
      * // result = {true, false, false, false, true} (replaced indices 1-2 with two false values)
      * }</pre>
-     * 
+     *
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static boolean[] replaceRange(final boolean[] a, final int fromIndex, final int toIndex, final boolean[] replacement)
@@ -13460,7 +13534,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the final index of the range to be replaced, exclusive
      * @param replacement the array to replace the specified range in the original array
      * @return a new array with the specified range replaced by the replacement array
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] letters = {'a', 'b', 'c', 'd', 'e'};
@@ -13468,7 +13542,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * char[] result = N.replaceRange(letters, 1, 3, replacement);
      * // result = {'a', 'x', 'y', 'd', 'e'} (replaced 'b' and 'c' with 'x' and 'y')
      * }</pre>
-     * 
+     *
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static char[] replaceRange(final char[] a, final int fromIndex, final int toIndex, final char[] replacement) throws IndexOutOfBoundsException {
@@ -13507,7 +13581,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the final index of the range to be replaced, exclusive
      * @param replacement the array to replace the specified range in the original array
      * @return a new array with the specified range replaced by the replacement array
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data = {1, 2, 3, 4, 5};
@@ -13515,7 +13589,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * byte[] result = N.replaceRange(data, 1, 3, replacement);
      * // result = {1, 8, 9, 4, 5} (replaced indices 1-2)
      * }</pre>
-     * 
+     *
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static byte[] replaceRange(final byte[] a, final int fromIndex, final int toIndex, final byte[] replacement) throws IndexOutOfBoundsException {
@@ -13554,7 +13628,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the final index of the range to be replaced, exclusive
      * @param replacement the array to replace the specified range in the original array
      * @return a new array with the specified range replaced by the replacement array
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] values = {10, 20, 30, 40, 50};
@@ -13562,7 +13636,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * short[] result = N.replaceRange(values, 1, 3, replacement);
      * // result = {10, 80, 90, 40, 50} (replaced 20 and 30 with 80 and 90)
      * }</pre>
-     * 
+     *
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static short[] replaceRange(final short[] a, final int fromIndex, final int toIndex, final short[] replacement) throws IndexOutOfBoundsException {
@@ -13601,7 +13675,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the final index of the range to be replaced, exclusive
      * @param replacement the array to replace the specified range in the original array
      * @return a new array with the specified range replaced by the replacement array
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] numbers = {1, 2, 3, 4, 5};
@@ -13609,7 +13683,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * int[] result = N.replaceRange(numbers, 1, 3, replacement);
      * // result = {1, 8, 9, 4, 5} (replaced 2 and 3 with 8 and 9)
      * }</pre>
-     * 
+     *
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static int[] replaceRange(final int[] a, final int fromIndex, final int toIndex, final int[] replacement) throws IndexOutOfBoundsException {
@@ -13648,7 +13722,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the final index of the range to be replaced, exclusive
      * @param replacement the array to replace the specified range in the original array
      * @return a new array with the specified range replaced by the replacement array
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] ids = {100L, 200L, 300L, 400L, 500L};
@@ -13656,7 +13730,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * long[] result = N.replaceRange(ids, 1, 3, replacement);
      * // result = {100L, 800L, 900L, 400L, 500L} (replaced 200L and 300L)
      * }</pre>
-     * 
+     *
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static long[] replaceRange(final long[] a, final int fromIndex, final int toIndex, final long[] replacement) throws IndexOutOfBoundsException {
@@ -13695,7 +13769,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the final index of the range to be replaced, exclusive
      * @param replacement the array to replace the specified range in the original array
      * @return a new array with the specified range replaced by the replacement array
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] values = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
@@ -13703,7 +13777,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * float[] result = N.replaceRange(values, 1, 3, replacement);
      * // result = {1.0f, 8.0f, 9.0f, 4.0f, 5.0f} (replaced 2.0f and 3.0f)
      * }</pre>
-     * 
+     *
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static float[] replaceRange(final float[] a, final int fromIndex, final int toIndex, final float[] replacement) throws IndexOutOfBoundsException {
@@ -13742,7 +13816,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the final index of the range to be replaced, exclusive
      * @param replacement the array to replace the specified range in the original array
      * @return a new array with the specified range replaced by the replacement array
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] prices = {10.99, 20.99, 30.99, 40.99, 50.99};
@@ -13750,7 +13824,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * double[] result = N.replaceRange(prices, 1, 3, replacement);
      * // result = {10.99, 80.99, 90.99, 40.99, 50.99} (replaced indices 1-2)
      * }</pre>
-     * 
+     *
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static double[] replaceRange(final double[] a, final int fromIndex, final int toIndex, final double[] replacement) throws IndexOutOfBoundsException {
@@ -13828,7 +13902,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the final index of the range to be replaced, exclusive
      * @param replacement the array to replace the specified range in the original array
      * @return a new array with the specified range replaced by the replacement array
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] words = {"apple", "banana", "cherry", "date", "elderberry"};
@@ -13836,7 +13910,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * String[] result = N.replaceRange(words, 1, 3, replacement);
      * // result = {"apple", "kiwi", "lemon", "date", "elderberry"}
      * }</pre>
-     * 
+     *
      * @throws IllegalArgumentException if one of the arguments violates the method contract
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
@@ -13881,12 +13955,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * @param <T> the type of elements in the list and replacement collection
-     * @param c the original list to be modified
+     * @param c the original list to be modified (must not be {@code null})
      * @param fromIndex the initial index of the range to be replaced, inclusive
      * @param toIndex the final index of the range to be replaced, exclusive
      * @param replacement the collection to replace the specified range in the original list
      * @return a boolean indicating whether the list was modified
-     * @throws IllegalArgumentException if the replacement collection is {@code null}
+     * @throws IllegalArgumentException if the original list {@code c} is {@code null}
      * @throws IndexOutOfBoundsException if the range is out of the list bounds
      */
     public static <T> boolean replaceRange(@NotNull final List<T> c, final int fromIndex, final int toIndex, final Collection<? extends T> replacement)
@@ -13946,7 +14020,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the original array to be modified
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and lengthOfArray - lengthOfRange, inclusive.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the array
@@ -13980,7 +14054,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the original array to be modified
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and lengthOfArray - lengthOfRange, inclusive.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the array
@@ -14014,7 +14088,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the original array to be modified
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and lengthOfArray - lengthOfRange, inclusive.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the array
@@ -14048,7 +14122,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the original array to be modified
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and lengthOfArray - lengthOfRange, inclusive.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the array
@@ -14082,7 +14156,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the original array to be modified
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and lengthOfArray - lengthOfRange, inclusive.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the array
@@ -14116,7 +14190,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the original array to be modified
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and lengthOfArray - lengthOfRange, inclusive.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the array
@@ -14150,7 +14224,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the original array to be modified
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and lengthOfArray - lengthOfRange, inclusive.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the array
@@ -14184,7 +14258,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the original array to be modified
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and lengthOfArray - lengthOfRange, inclusive.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the array
@@ -14226,7 +14300,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the original array to be modified
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and lengthOfArray - lengthOfRange, inclusive.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the array
@@ -14317,7 +14391,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param str the original string to be modified
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and lengthOfString - lengthOfRange, inclusive.
      * @return a new string with the specified range moved to the new position. An empty String is returned if the specified String is {@code null} or empty.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
@@ -14501,17 +14575,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Checks if the given array has duplicate elements.
      *
-     * @param a the array to be checked for duplicates
-     * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] flags1 = {true, false, true};
      * boolean result1 = N.containsDuplicates(flags1);   // Returns true (two true values)
-     * 
+     *
      * boolean[] flags2 = {true, false};
      * boolean result2 = N.containsDuplicates(flags2);   // Returns false
      * }</pre>
-     * 
+     *
+     * @param a the array to be checked for duplicates
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
     public static boolean containsDuplicates(final boolean[] a) {
@@ -14546,17 +14619,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Checks if the given array has duplicate elements.
      *
-     * @param a the array to be checked for duplicates
-     * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] letters1 = {'a', 'b', 'c'};
      * boolean result1 = N.containsDuplicates(letters1);   // Returns false
-     * 
+     *
      * char[] letters2 = {'a', 'b', 'a'};
      * boolean result2 = N.containsDuplicates(letters2);   // Returns true
      * }</pre>
-     * 
+     *
+     * @param a the array to be checked for duplicates
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
     public static boolean containsDuplicates(final char[] a) {
@@ -14566,18 +14638,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Checks if the given array has duplicate elements.
      *
-     * @param a the array to be checked for duplicates
-     * @param isSorted a boolean that indicates if the array is sorted. If {@code true}, the algorithm will be faster.
-     * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] sorted = {'a', 'b', 'b', 'c'};
      * boolean result1 = N.containsDuplicates(sorted, true);   // Returns true (using optimized sorted check)
-     * 
+     *
      * char[] unsorted = {'c', 'a', 'b', 'a'};
      * boolean result2 = N.containsDuplicates(unsorted, false);   // Returns true
      * }</pre>
-     * 
+     *
+     * @param a the array to be checked for duplicates
+     * @param isSorted a boolean that indicates if the array is sorted. If {@code true}, the algorithm will be faster.
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
     public static boolean containsDuplicates(final char[] a, final boolean isSorted) {
@@ -14630,17 +14701,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Checks if the given array has duplicate elements.
      *
-     * @param a the array to be checked for duplicates
-     * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data1 = {1, 2, 3};
      * boolean result1 = N.containsDuplicates(data1);   // Returns false
-     * 
+     *
      * byte[] data2 = {1, 2, 1};
      * boolean result2 = N.containsDuplicates(data2);   // Returns true
      * }</pre>
-     * 
+     *
+     * @param a the array to be checked for duplicates
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
     public static boolean containsDuplicates(final byte[] a) {
@@ -14713,17 +14783,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Checks if the given array has duplicate elements.
      *
-     * @param a the array to be checked for duplicates
-     * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] values1 = {10, 20, 30};
      * boolean result1 = N.containsDuplicates(values1);   // Returns false
-     * 
+     *
      * short[] values2 = {10, 20, 10};
      * boolean result2 = N.containsDuplicates(values2);   // Returns true
      * }</pre>
-     * 
+     *
+     * @param a the array to be checked for duplicates
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
     public static boolean containsDuplicates(final short[] a) {
@@ -14796,17 +14865,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Checks if the given array has duplicate elements.
      *
-     * @param a the array to be checked for duplicates
-     * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] numbers1 = {1, 2, 3, 4};
      * boolean result1 = N.containsDuplicates(numbers1);   // Returns false
-     * 
+     *
      * int[] numbers2 = {1, 2, 3, 2};
      * boolean result2 = N.containsDuplicates(numbers2);   // Returns true
      * }</pre>
-     * 
+     *
+     * @param a the array to be checked for duplicates
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
     public static boolean containsDuplicates(final int[] a) {
@@ -14879,17 +14947,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Checks if the given array has duplicate elements.
      *
-     * @param a the array to be checked for duplicates
-     * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] ids1 = {100L, 200L, 300L};
      * boolean result1 = N.containsDuplicates(ids1);   // Returns false
-     * 
+     *
      * long[] ids2 = {100L, 200L, 100L};
      * boolean result2 = N.containsDuplicates(ids2);   // Returns true
      * }</pre>
-     * 
+     *
+     * @param a the array to be checked for duplicates
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
     public static boolean containsDuplicates(final long[] a) {
@@ -14962,17 +15029,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Checks if the given array has duplicate elements.
      *
-     * @param a the array to be checked for duplicates
-     * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] values1 = {1.5f, 2.5f, 3.5f};
      * boolean result1 = N.containsDuplicates(values1);   // Returns false
-     * 
+     *
      * float[] values2 = {1.5f, 2.5f, 1.5f};
      * boolean result2 = N.containsDuplicates(values2);   // Returns true
      * }</pre>
-     * 
+     *
+     * @param a the array to be checked for duplicates
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
     public static boolean containsDuplicates(final float[] a) {
@@ -15045,17 +15111,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Checks if the given array has duplicate elements.
      *
-     * @param a the array to be checked for duplicates
-     * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] prices1 = {10.99, 20.99, 30.99};
      * boolean result1 = N.containsDuplicates(prices1);   // Returns false
-     * 
+     *
      * double[] prices2 = {10.99, 20.99, 10.99};
      * boolean result2 = N.containsDuplicates(prices2);   // Returns true
      * }</pre>
-     * 
+     *
+     * @param a the array to be checked for duplicates
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
     public static boolean containsDuplicates(final double[] a) {
@@ -15128,18 +15193,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Checks if the given array has duplicate elements.
      *
-     * @param <T> the type of elements in the array
-     * @param a the array to be checked for duplicates
-     * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] words1 = {"apple", "banana", "cherry"};
      * boolean result1 = N.containsDuplicates(words1);   // Returns false
-     * 
+     *
      * String[] words2 = {"apple", "banana", "apple"};
      * boolean result2 = N.containsDuplicates(words2);   // Returns true
      * }</pre>
-     * 
+     *
+     * @param <T> the type of elements in the array
+     * @param a the array to be checked for duplicates
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
     public static <T> boolean containsDuplicates(final T[] a) {
@@ -15213,20 +15277,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Checks if the given collection has duplicate elements.
      *
-     * @param c the collection to be checked for duplicates
-     * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> list1 = Arrays.asList(1, 2, 3, 4);
      * boolean result1 = N.containsDuplicates(list1);   // Returns false
-     * 
+     *
      * List<Integer> list2 = Arrays.asList(1, 2, 3, 2);
      * boolean result2 = N.containsDuplicates(list2);   // Returns true
-     * 
+     *
      * Set<String> set = new HashSet<>(Arrays.asList("a", "b", "c"));
      * boolean result3 = N.containsDuplicates(set);   // Returns false (Sets can't have duplicates)
      * }</pre>
-     * 
+     *
+     * @param c the collection to be checked for duplicates
      * @return {@code true} if the collection has duplicates, {@code false} otherwise
      */
     public static boolean containsDuplicates(final Collection<?> c) {
@@ -16283,7 +16346,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array of elements to be summed.
      * @param func the function to convert each element to an integer.
      * @return the sum of all elements in the array as an integer.
-     * @throws IndexOutOfBoundsException if an index is out of bounds
      * @see Iterables#sumInt(Iterable, ToIntFunction)
      */
     public static <T> int sumInt(final T[] a, final ToIntFunction<? super T> func) throws IndexOutOfBoundsException {
@@ -16406,7 +16468,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Sums all elements in the given iterable of numbers and returns the result as a integer.
+     * Sums all elements in the given iterable of numbers and returns the result as an integer.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -16416,7 +16478,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the elements in the iterable, which must extend Number.
      * @param c the iterable of elements to be summed.
-     * @return the sum of all elements in the iterable as a integer.
+     * @return the sum of all elements in the iterable as an integer.
      * @see Iterables#sumInt(Iterable)
      */
     public static <T extends Number> int sumInt(final Iterable<? extends T> c) {
@@ -16512,7 +16574,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array of elements to be summed.
      * @param func the function to convert each element to a long.
      * @return the sum of all elements in the array as a long.
-     * @throws IndexOutOfBoundsException if an index is out of bounds
      * @see Iterables#sumLong(Iterable, ToLongFunction)
      */
     public static <T> long sumLong(final T[] a, final ToLongFunction<? super T> func) throws IndexOutOfBoundsException {
@@ -17601,9 +17662,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the smaller of two float values.
-     * Uses {@link Math#min(float, float)} which handles NaN values according to IEEE 754:
-     * if either value is NaN, then NaN is returned.
+     * Returns the smaller of two float values. If either value is NaN, then NaN is returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -17626,8 +17685,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the smaller of two double values.
-     * Uses {@link Math#min(double, double)} which handles NaN values according to IEEE 754:
-     * if either value is NaN, then NaN is returned.
+     * If either value is NaN, then NaN is returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -17823,8 +17881,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the smallest of three float values.
-     * Uses {@link Math#min(float, float)} which handles NaN values according to IEEE 754:
-     * if any value is NaN, then NaN is returned.
+     * If any value is NaN, then NaN is returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -17849,8 +17906,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the smallest of three double values.
-     * Uses {@link Math#min(double, double)} which handles NaN values according to IEEE 754:
-     * if any value is NaN, then NaN is returned.
+     * If any value is NaN, then NaN is returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18194,24 +18250,27 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the smallest value in the specified float array or varargs.
-     * NaN values are skipped; if all values are NaN, returns NaN.
+     * NaN propagates per {@link Math#min(float, float)}:
+     * if any element is NaN, the result is NaN.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * float min1 = N.min(1.5f, 2.3f, 0.5f);   // Returns 0.5f
+     * float min1 = N.min(1.5f, 2.3f, 0.5f);                     // Returns 0.5f
      *
      * float[] values = {10.5f, 20.3f, 5.1f};
-     * float min2 = N.min(values);   // Returns 5.1f
+     * float min2 = N.min(values);                               // Returns 5.1f
      *
-     * float withNaN = N.min(1.0f, Float.NaN, 2.0f);   // Returns 1.0f (NaN is skipped)
+     * float withNaN = N.min(1.0f, Float.NaN, 2.0f);             // Returns NaN
+     * float infsAndNaN = N.min(Float.NEGATIVE_INFINITY, Float.NaN); // Returns NaN
      * }</pre>
      *
      * @param a the array or varargs of float values, must not be {@code null} or empty
-     * @return the smallest value in the array; NaN if all values are NaN
+     * @return the smallest value in the array; NaN if any value is NaN
      * @throws IllegalArgumentException if the array is {@code null} or empty
      * @see #min(float[], int, int)
      * @see #max(float...)
-     * @see IEEE754rUtil#min(float[]) that handles NaN differently
+     * @see Math#min(float, float)
+     * @see IEEE754rUtil#min(float[]) that skips NaN per IEEE 754r
      */
     public static float min(final float... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
@@ -18221,16 +18280,28 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the smallest float value within the specified range in the array.
-     * NaN values are skipped; if all values in the range are NaN, returns NaN.
+     * NaN propagates per {@link Math#min(float, float)}:
+     * if any element in the range is NaN, the result is NaN.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] values = {1.0f, 2.0f, 3.0f};
+     * float min = N.min(values, 0, 3);                          // Returns 1.0f
+     *
+     * float[] withNaN = {1.0f, Float.NaN, 3.0f};
+     * float r = N.min(withNaN, 0, 3);                           // Returns NaN
+     * float skipNaN = N.min(withNaN, 0, 1);                     // Returns 1.0f (NaN excluded by range)
+     * }</pre>
      *
      * @param a the array of float values, must not be {@code null}
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
-     * @return the smallest float value within the specified range; NaN if all values in the range are NaN
+     * @return the smallest float value within the specified range; NaN if any value in the range is NaN
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
      * @see #min(float...)
      * @see #max(float[], int, int)
-     * @see IEEE754rUtil#min(float[]) that handles NaN differently
+     * @see Math#min(float, float)
+     * @see IEEE754rUtil#min(float[]) that skips NaN per IEEE 754r
      */
     public static float min(final float[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, a.length);
@@ -18242,13 +18313,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
         float min = a[fromIndex];
 
         for (int i = fromIndex + 1; i < toIndex; i++) {
-            if (Float.isNaN(a[i])) {
-                continue;
-            } else if (Float.isNaN(min)) {
-                min = a[i];
-            } else {
-                min = Math.min(min, a[i]);
-            }
+            // Math.min propagates NaN — once min is NaN it stays NaN for the rest of the loop.
+            min = Math.min(min, a[i]);
         }
 
         return min;
@@ -18256,24 +18322,27 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the smallest value in the specified double array or varargs.
-     * NaN values are skipped; if all values are NaN, returns NaN.
+     * NaN propagates per {@link Math#min(double, double)}:
+     * if any element is NaN, the result is NaN.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * double min1 = N.min(1.5, 2.3, 0.5);   // Returns 0.5
+     * double min1 = N.min(1.5, 2.3, 0.5);                      // Returns 0.5
      *
      * double[] values = {10.5, 20.3, 5.1};
-     * double min2 = N.min(values);   // Returns 5.1
+     * double min2 = N.min(values);                             // Returns 5.1
      *
-     * double withNaN = N.min(1.0, Double.NaN, 2.0);   // Returns 1.0 (NaN is skipped)
+     * double withNaN = N.min(1.0, Double.NaN, 2.0);            // Returns NaN
+     * double infsAndNaN = N.min(Double.NEGATIVE_INFINITY, Double.NaN); // Returns NaN
      * }</pre>
      *
      * @param a the array or varargs of double values, must not be {@code null} or empty
-     * @return the smallest value in the array; NaN if all values are NaN
+     * @return the smallest value in the array; NaN if any value is NaN
      * @throws IllegalArgumentException if the array is {@code null} or empty
      * @see #min(double[], int, int)
      * @see #max(double...)
-     * @see IEEE754rUtil#min(double[]) that handles NaN differently
+     * @see Math#min(double, double)
+     * @see IEEE754rUtil#min(double[]) that skips NaN per IEEE 754r
      */
     public static double min(final double... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
@@ -18283,16 +18352,28 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the smallest double value within the specified range in the array.
-     * NaN values are skipped; if all values in the range are NaN, returns NaN.
+     * NaN propagates per {@link Math#min(double, double)}:
+     * if any element in the range is NaN, the result is NaN.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] values = {1.0, 2.0, 3.0};
+     * double min = N.min(values, 0, 3);                        // Returns 1.0
+     *
+     * double[] withNaN = {1.0, Double.NaN, 3.0};
+     * double r = N.min(withNaN, 0, 3);                         // Returns NaN
+     * double skipNaN = N.min(withNaN, 0, 1);                   // Returns 1.0 (NaN excluded by range)
+     * }</pre>
      *
      * @param a the array of double values, must not be {@code null}
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
-     * @return the smallest double value within the specified range; NaN if all values in the range are NaN
+     * @return the smallest double value within the specified range; NaN if any value in the range is NaN
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
      * @see #min(double...)
      * @see #max(double[], int, int)
-     * @see IEEE754rUtil#min(double[]) that handles NaN differently
+     * @see Math#min(double, double)
+     * @see IEEE754rUtil#min(double[]) that skips NaN per IEEE 754r
      */
     public static double min(final double[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, a.length);
@@ -18303,13 +18384,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         double min = a[fromIndex];
         for (int i = fromIndex + 1; i < toIndex; i++) {
-            if (Double.isNaN(a[i])) {
-                continue;
-            } else if (Double.isNaN(min)) {
-                min = a[i];
-            } else {
-                min = Math.min(min, a[i]);
-            }
+            // Math.min propagates NaN — once min is NaN it stays NaN for the rest of the loop.
+            min = Math.min(min, a[i]);
         }
 
         return min;
@@ -18804,7 +18880,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * // Returns ["elephant"]
      * }</pre>
      *
-     * @param <T>the type of elements in the array.
+     * @param <T> the type of elements in the array.
      * @param a the array to fetch the smallest elements.
      * @param cmp the comparator to be used to compare the elements
      * @return a list containing the smallest elements in the array. If the array is {@code null} or empty, an empty list is returned.
@@ -19584,8 +19660,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the larger of two float values.
-     * Uses {@link Math#max(float, float)} which handles NaN values according to IEEE 754:
-     * if either value is NaN, then NaN is returned.
+     * If either value is NaN, then NaN is returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -19607,9 +19682,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the larger of two double values.
-     * Uses {@link Math#max(double, double)} which handles NaN values according to IEEE 754:
-     * if either value is NaN, then NaN is returned.
+     * Returns the larger of two double values. If either value is NaN, then NaN is returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -19802,7 +19875,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the largest of three float values.
-     * Handles NaN values according to IEEE 754: if any value is NaN, then NaN is returned.
+     * If any value is NaN, then NaN is returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -19824,8 +19897,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the largest of three double values.
-     * Handles NaN values according to IEEE 754: if any value is NaN, then NaN is returned.
+     * Returns the largest of three double values. If any value is NaN, then NaN is returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -20201,25 +20273,29 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the largest value in the specified float array or varargs.
-     * NaN values are skipped; if all values are NaN, returns NaN.
+     * NaN propagates per {@link Math#max(float, float)}:
+     * if any element is NaN, the result is NaN.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * float max1 = N.max(1.5f, 2.8f, 0.5f, 3.2f);   // Returns 3.2f
+     * float max1 = N.max(1.5f, 2.8f, 0.5f, 3.2f);              // Returns 3.2f
      *
      * float[] numbers = {1.0f, 2.0f, 0.5f, 3.0f};
-     * float max2 = N.max(numbers);   // Returns 3.0f
+     * float max2 = N.max(numbers);                             // Returns 3.0f
      *
-     * float single = N.max(4.2f);   // Returns 4.2f
+     * float single = N.max(4.2f);                              // Returns 4.2f
+     * float withNaN = N.max(1.0f, Float.NaN, 2.0f);            // Returns NaN
+     * float infsAndNaN = N.max(Float.POSITIVE_INFINITY, Float.NaN); // Returns NaN
      * }</pre>
      *
      * @param a the array or varargs of float values, must not be {@code null} or empty
-     * @return the largest value in the array; NaN if all values are NaN
+     * @return the largest value in the array; NaN if any value is NaN
      * @throws IllegalArgumentException if the array is {@code null} or empty
      * @see #max(float[], int, int)
      * @see #min(float...)
      * @see #median(float...)
-     * @see IEEE754rUtil#max(float[]) that handles NaN differently
+     * @see Math#max(float, float)
+     * @see IEEE754rUtil#max(float[]) that skips NaN per IEEE 754r
      */
     public static float max(final float... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
@@ -20229,22 +20305,28 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the largest value in the specified range of the float array.
-     * NaN values are skipped; if all values in the range are NaN, returns NaN.
+     * NaN propagates per {@link Math#max(float, float)}:
+     * if any element in the range is NaN, the result is NaN.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] numbers = {0.5f, 3.0f, 1.5f, 0.8f, 2.0f};
-     * float max = N.max(numbers, 1, 4);   // Returns 3.0f (from index 1 to 3)
+     * float max = N.max(numbers, 1, 4);                        // Returns 3.0f (from index 1 to 3)
+     *
+     * float[] withNaN = {1.0f, Float.NaN, 3.0f};
+     * float r = N.max(withNaN, 0, 3);                          // Returns NaN
+     * float skipNaN = N.max(withNaN, 2, 3);                    // Returns 3.0f (NaN excluded by range)
      * }</pre>
      *
      * @param a the array of float values, must not be {@code null} or empty
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
-     * @return the largest value in the specified range; NaN if all values in the range are NaN
+     * @return the largest value in the specified range; NaN if any value in the range is NaN
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
      * @see #max(float...)
      * @see #min(float[], int, int)
-     * @see IEEE754rUtil#max(float[]) that handles NaN differently
+     * @see Math#max(float, float)
+     * @see IEEE754rUtil#max(float[]) that skips NaN per IEEE 754r
      */
     public static float max(final float[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, a.length);
@@ -20256,13 +20338,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
         float max = a[fromIndex];
 
         for (int i = fromIndex + 1; i < toIndex; i++) {
-            if (Float.isNaN(a[i])) {
-                continue;
-            } else if (Float.isNaN(max)) {
-                max = a[i];
-            } else {
-                max = Math.max(max, a[i]);
-            }
+            // Math.max propagates NaN — once max is NaN it stays NaN for the rest of the loop.
+            max = Math.max(max, a[i]);
         }
 
         return max;
@@ -20270,25 +20347,29 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the largest value in the specified double array or varargs.
-     * NaN values are skipped; if all values are NaN, returns NaN.
+     * NaN propagates per {@link Math#max(double, double)}:
+     * if any element is NaN, the result is NaN.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * double max1 = N.max(1.5, 2.8, 0.5, 3.2);   // Returns 3.2
+     * double max1 = N.max(1.5, 2.8, 0.5, 3.2);                 // Returns 3.2
      *
      * double[] numbers = {1.0, 2.0, 0.5, 3.0};
-     * double max2 = N.max(numbers);   // Returns 3.0
+     * double max2 = N.max(numbers);                            // Returns 3.0
      *
-     * double single = N.max(4.2);   // Returns 4.2
+     * double single = N.max(4.2);                              // Returns 4.2
+     * double withNaN = N.max(1.0, Double.NaN, 2.0);            // Returns NaN
+     * double infsAndNaN = N.max(Double.POSITIVE_INFINITY, Double.NaN); // Returns NaN
      * }</pre>
      *
      * @param a the array or varargs of double values, must not be {@code null} or empty
-     * @return the largest value in the array; NaN if all values are NaN
+     * @return the largest value in the array; NaN if any value is NaN
      * @throws IllegalArgumentException if the array is {@code null} or empty
      * @see #max(double[], int, int)
      * @see #min(double...)
      * @see #median(double...)
-     * @see IEEE754rUtil#max(double[]) that handles NaN differently
+     * @see Math#max(double, double)
+     * @see IEEE754rUtil#max(double[]) that skips NaN per IEEE 754r
      */
     public static double max(final double... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
@@ -20298,22 +20379,28 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the largest value in the specified range of the double array.
-     * NaN values are skipped; if all values in the range are NaN, returns NaN.
+     * NaN propagates per {@link Math#max(double, double)}:
+     * if any element in the range is NaN, the result is NaN.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] numbers = {0.5, 3.0, 1.5, 0.8, 2.0};
-     * double max = N.max(numbers, 1, 4);   // Returns 3.0 (from index 1 to 3)
+     * double max = N.max(numbers, 1, 4);                       // Returns 3.0 (from index 1 to 3)
+     *
+     * double[] withNaN = {1.0, Double.NaN, 3.0};
+     * double r = N.max(withNaN, 0, 3);                         // Returns NaN
+     * double skipNaN = N.max(withNaN, 2, 3);                   // Returns 3.0 (NaN excluded by range)
      * }</pre>
      *
      * @param a the array of double values, must not be {@code null} or empty
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
-     * @return the largest value in the specified range; NaN if all values in the range are NaN
+     * @return the largest value in the specified range; NaN if any value in the range is NaN
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
      * @see #max(double...)
      * @see #min(double[], int, int)
-     * @see IEEE754rUtil#max(double[]) that handles NaN differently
+     * @see Math#max(double, double)
+     * @see IEEE754rUtil#max(double[]) that skips NaN per IEEE 754r
      */
     public static double max(final double[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, a.length);
@@ -20325,13 +20412,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
         double max = a[fromIndex];
 
         for (int i = fromIndex + 1; i < toIndex; i++) {
-            if (Double.isNaN(a[i])) {
-                continue;
-            } else if (Double.isNaN(max)) {
-                max = a[i];
-            } else {
-                max = Math.max(max, a[i]);
-            }
+            // Math.max propagates NaN — once max is NaN it stays NaN for the rest of the loop.
+            max = Math.max(max, a[i]);
         }
 
         return max;
@@ -20722,7 +20804,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] words = {"apple", "pie", "zoo"};
-     * String longest = N.maxBy(words, String::length);   // Returns "apple" (or "pie")
+     * String longest = N.maxBy(words, String::length);   // Returns "apple"
      *
      * Person[] people = {new Person("Alice", 30), new Person("Bob", 25)};
      * Person oldest = N.maxBy(people, Person::getAge);   // Returns Alice
@@ -20751,7 +20833,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> words = Arrays.asList("apple", "pie", "zoo");
-     * String longest = N.maxBy(words, String::length);   // Returns "apple" (or "pie")
+     * String longest = N.maxBy(words, String::length);   // Returns "apple"
      *
      * List<Person> people = Arrays.asList(new Person("Alice", 30), new Person("Bob", 25));
      * Person oldest = N.maxBy(people, Person::getAge);   // Returns Alice
@@ -20780,7 +20862,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> words = Arrays.asList("apple", "pie", "zoo").iterator();
-     * String longest = N.maxBy(words, String::length);   // Returns "apple" (or "pie")
+     * String longest = N.maxBy(words, String::length);   // Returns "apple"
      *
      * Iterator<Person> people = Arrays.asList(new Person("Alice", 30), new Person("Bob", 25)).iterator();
      * Person oldest = N.maxBy(people, Person::getAge);   // Returns Alice
@@ -22145,7 +22227,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the median value of all elements in the specified array.
-     * 
+     *
      * <p>The median is the middle value when the elements are sorted in ascending order. For array with
      * an odd number of elements, this is the exact middle element. For array with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
@@ -22191,7 +22273,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the median value of all elements in the specified array.
-     * 
+     *
      * <p>The median is the middle value when the elements are sorted in ascending order. For array with
      * an odd number of elements, this is the exact middle element. For array with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
@@ -22260,7 +22342,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the median value of all elements in the specified collection.
-     * 
+     *
      * <p>The median is the middle value when the elements are sorted in ascending order. For collection with
      * an odd number of elements, this is the exact middle element. For collection with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
@@ -22292,7 +22374,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c the collection of values to find the median of
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
      * @param toIndex the ending index (exclusive) of the range to calculate median for
-     * @return the median within the specified range in the input array
+     * @return the median within the specified range in the input collection
      * @throws IllegalArgumentException if the specified collection or range is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of the collection bounds
      * @see #median(int[])
@@ -22308,7 +22390,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the median value of all elements in the specified collection.
-     * 
+     *
      * <p>The median is the middle value when the elements are sorted in ascending order. For collection with
      * an odd number of elements, this is the exact middle element. For collection with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
@@ -22344,7 +22426,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
      * @param toIndex the ending index (exclusive) of the range to calculate median for
      * @param cmp the comparator to determine the order of the values
-     * @return the median within the specified range in the input array
+     * @return the median within the specified range in the input collection
      * @throws IllegalArgumentException if the specified collection or range is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of the collection bounds
      * @see #median(int[])
@@ -24608,9 +24690,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Map<Percentage, Byte> percentiles = N.percentilesOfSorted(scores);
      *
      * // Find percentile thresholds
-     * byte median = percentiles.get(Percentage.P50);   // Returns 50
-     * byte p95 = percentiles.get(Percentage.P95);      // Returns 95
-     * byte p99 = percentiles.get(Percentage.P99);      // Returns 99
+     * byte median = percentiles.get(Percentage.P50);   // Returns 60
+     * byte p90 = percentiles.get(Percentage.P90);      // Returns 100
      * }</pre>
      *
      * @param sortedArray the sorted array of bytes for which to calculate the percentiles
@@ -24685,7 +24766,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Calculates the percentiles of the provided sorted array of integers.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * final int[] sortedArray = Array.range(1, 101);
@@ -24730,7 +24811,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param sortedArray the sorted array of integers for which to calculate the percentiles.
      * @return a map where the keys are the percentiles and the values are the corresponding integers from the array.
-     * @throws IllegalArgumentException if the provided array is empty.
+     * @throws IllegalArgumentException if the provided array is {@code null} or empty.
      */
     public static Map<Percentage, Integer> percentilesOfSorted(final int[] sortedArray) throws IllegalArgumentException {
         checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty");
@@ -30903,7 +30984,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Merges two the input arrays into a list based where the order of the elements is determined by the given selector function.
+     * Merges the two input arrays into a list in which the order of the elements is determined by the given selector function.
      *
      * @param <T> the type of elements in the arrays
      * @param a the first array to merge
@@ -30937,7 +31018,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Merges two the input iterables into a list based where the order of the elements is determined by the given selector function.
+     * Merges the two input iterables into a list in which the order of the elements is determined by the given selector function.
      *
      * @param <T> the type of elements in the iterables
      * @param a the first iterable to merge
@@ -30952,7 +31033,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Merges multiple iterables into a list based where the order of the elements is determined by the given selector function.
+     * Merges multiple iterables into a list in which the order of the elements is determined by the given selector function.
      *
      * @param <T> the type of elements in the iterables
      * @param c the collection of iterable to merge
@@ -30966,7 +31047,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Merges multiple iterables into a list based where the order of the elements is determined by the given selector function.
+     * Merges multiple iterables into a list in which the order of the elements is determined by the given selector function.
      * The returned collection is created by the specified {@code supplier}.
      *
      * @param <T> the type of elements in the iterables
@@ -31176,7 +31257,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the first iterable to zip
      * @param b the second iterable to zip
      * @param zipFunction a function that combines elements from the two iterables
-     * @return a list containing the zipped elements (an empty list is returned if any input array is {@code null} or empty)
+     * @return a list containing the zipped elements (an empty list is returned if any input iterable is {@code null} or empty)
      * @see Fn#pair()
      * @see Fn#tuple2()
      */
@@ -31273,10 +31354,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <R> the type of elements in the resulting list
      * @param a the first array to zip
      * @param b the second array to zip
-     * @param valueForNoneA the default value to use if the first array is shorter
-     * @param valueForNoneB the default value to use if the second array is shorter
+     * @param valueForNoneA the default value to use if the first array is shorter (or {@code null})
+     * @param valueForNoneB the default value to use if the second array is shorter (or {@code null})
      * @param zipFunction a function that combines elements from the two arrays
-     * @return a list containing the zipped elements (an empty list is returned if any input array is {@code null} or empty)
+     * @return a list containing the zipped elements; the size equals {@code max(a.length, b.length)},
+     *         treating {@code null} arrays as length 0. Empty only when both arrays are {@code null} or empty.
      * @see Fn#pair()
      * @see Fn#tuple2()
      */
@@ -31304,10 +31386,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <R> the type of elements in the resulting list
      * @param a the first iterable to zip
      * @param b the second iterable to zip
-     * @param valueForNoneA the default value to use if the first iterable is shorter
-     * @param valueForNoneB the default value to use if the second iterable is shorter
+     * @param valueForNoneA the default value to use if the first iterable is shorter (or {@code null})
+     * @param valueForNoneB the default value to use if the second iterable is shorter (or {@code null})
      * @param zipFunction a function that combines elements from the two iterables
-     * @return a list containing the zipped elements (an empty list is returned if any input array is {@code null} or empty)
+     * @return a list containing the zipped elements; iteration continues until both inputs are exhausted,
+     *         using the corresponding default value once one side runs out. Empty only when both iterables
+     *         are {@code null} or yield no elements.
      * @see Fn#pair()
      * @see Fn#tuple2()
      */
@@ -31355,11 +31439,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the first array to zip
      * @param b the second array to zip
      * @param c the third array to zip
-     * @param valueForNoneA the default value to use if the first array is shorter
-     * @param valueForNoneB the default value to use if the second array is shorter
-     * @param valueForNoneC the default value to use if the third array is shorter
+     * @param valueForNoneA the default value to use if the first array is shorter (or {@code null})
+     * @param valueForNoneB the default value to use if the second array is shorter (or {@code null})
+     * @param valueForNoneC the default value to use if the third array is shorter (or {@code null})
      * @param zipFunction a function that combines elements from the three arrays
-     * @return a list containing the zipped elements (an empty list is returned if any input array is {@code null} or empty)
+     * @return a list containing the zipped elements; the size equals {@code max(a.length, b.length, c.length)},
+     *         treating {@code null} arrays as length 0. Empty only when all three arrays are {@code null} or empty.
      * @see Fn#triple()
      * @see Fn#tuple3()
      */
@@ -31390,11 +31475,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the first iterable to zip
      * @param b the second iterable to zip
      * @param c the third iterable to zip
-     * @param valueForNoneA the default value to use if the first iterable is shorter
-     * @param valueForNoneB the default value to use if the second iterable is shorter
-     * @param valueForNoneC the default value to use if the third iterable is shorter
+     * @param valueForNoneA the default value to use if the first iterable is shorter (or {@code null})
+     * @param valueForNoneB the default value to use if the second iterable is shorter (or {@code null})
+     * @param valueForNoneC the default value to use if the third iterable is shorter (or {@code null})
      * @param zipFunction a function that combines elements from the three iterables
-     * @return a list containing the zipped elements (an empty list is returned if any input iterable is {@code null} or empty)
+     * @return a list containing the zipped elements; iteration continues until all three inputs are exhausted,
+     *         using the corresponding default value once one side runs out. Empty only when all three iterables
+     *         are {@code null} or yield no elements.
      * @see Fn#triple()
      * @see Fn#tuple3()
      */
@@ -31636,7 +31723,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c the input iterable to unzip
      * @param unzip a function that takes an element from the input iterable and a pair, and populates the pair with the unzipped values
      * @param supplier a function that provides new instances of the output collections
-     * @return a pair of lists, where the first collection contains the first elements and the second collection contains the second elements
+     * @return a pair of collections, where the first collection contains the first elements and the second collection contains the second elements
      */
     public static <T, A, B, LC extends Collection<A>, RC extends Collection<B>> Pair<LC, RC> unzip(final Iterable<? extends T> c,
             final BiConsumer<? super T, Pair<A, B>> unzip, final IntFunction<? extends Collection<?>> supplier) {
@@ -33725,11 +33812,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
             configToReturn = config == null ? (C) (isJSON ? JsonDeserConfig.create() : XmlDeserConfig.create()) : config.copy();
 
             if (configToReturn.getMapKeyType() == null) {
-                configToReturn.setMapKeyType(targetType.parameterTypes()[0]);
+                configToReturn.setMapKeyType(targetType.parameterTypes().get(0));
             }
 
             if (configToReturn.getMapValueType() == null) {
-                configToReturn.setMapValueType(targetType.parameterTypes()[1]);
+                configToReturn.setMapValueType(targetType.parameterTypes().get(1));
             }
         }
 
@@ -35128,8 +35215,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c the iterable to iterate
      * @param elementConsumer the action to execute for each element
      * @param processThreadNum the number of threads for parallel processing
-     * @see #forEach(Iterable, Throwables.Consumer, int, Executor)
      * @throws RuntimeException if an error occurs during parallel execution
+     * @see #forEach(Iterable, Throwables.Consumer, int, Executor)
      */
     public static <T, E extends Exception> void forEach(final Iterable<? extends T> c, final Throwables.Consumer<? super T, E> elementConsumer,
             final int processThreadNum) {
@@ -35178,8 +35265,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param iter the iterator to iterate
      * @param elementConsumer the action to execute for each element
      * @param processThreadNum the number of threads for parallel processing
-     * @see #forEach(Iterator, Throwables.Consumer, int, Executor)
      * @throws RuntimeException if an error occurs during parallel execution
+     * @see #forEach(Iterator, Throwables.Consumer, int, Executor)
      */
     public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final Throwables.Consumer<? super T, E> elementConsumer,
             final int processThreadNum) {
@@ -35389,9 +35476,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] words = {"hello", "world"};
-     * N.forEach(words, 
-     *     s -> N.asList(s.toCharArray()), 
-     *     c -> N.asList((int)c), 
+     * N.forEach(words,
+     *     s -> N.asList(s.toCharArray()),
+     *     c -> N.asList((int)c),
      *     (s, c, i) -> System.out.println(s + " " + c + " " + i));
      * }</pre>
      *
@@ -36649,9 +36736,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c the iterable to iterate
      * @param action the action to execute, receiving index and element
      * @param processThreadNum the number of threads for parallel processing
+     * @throws RuntimeException if an error occurs during parallel execution
      * @see #forEachIndexed(Iterable, Throwables.IntObjConsumer, int, Executor)
      * @see #forEachIndexed(Iterable, Throwables.IntObjConsumer)
-     * @throws RuntimeException if an error occurs during parallel execution
      * @see #forEach(Iterable, Throwables.Consumer, int)
      */
     public static <T, E extends Exception> void forEachIndexed(final Iterable<? extends T> c, final Throwables.IntObjConsumer<? super T, E> action,
@@ -36677,8 +36764,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param action the action to execute, receiving index and element
      * @param processThreadNum the number of threads for parallel processing
      * @param executor the executor to use for parallel processing
-     * @see #forEachIndexed(Iterable, Throwables.IntObjConsumer, int)
      * @throws RuntimeException if an error occurs during parallel execution
+     * @see #forEachIndexed(Iterable, Throwables.IntObjConsumer, int)
      * @see #forEachIndexed(Iterator, Throwables.IntObjConsumer, int, Executor)
      */
     public static <T, E extends Exception> void forEachIndexed(final Iterable<? extends T> c, final Throwables.IntObjConsumer<? super T, E> action,
@@ -36704,8 +36791,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param iter the iterator to iterate
      * @param elementConsumer the action to execute, receiving index and element
      * @param processThreadNum the number of threads for parallel processing
-     * @see #forEachIndexed(Iterator, Throwables.IntObjConsumer, int, Executor)
      * @throws RuntimeException if an error occurs during parallel execution
+     * @see #forEachIndexed(Iterator, Throwables.IntObjConsumer, int, Executor)
      * @see #forEachIndexed(Iterator, Throwables.IntObjConsumer)
      */
     public static <T, E extends Exception> void forEachIndexed(final Iterator<? extends T> iter, final Throwables.IntObjConsumer<? super T, E> elementConsumer,
@@ -39092,7 +39179,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * @param cmd the command to execute uninterruptibly
-     * @throws IllegalArgumentException if cmd is {@code null}
      * @see #runUninterruptibly(Throwables.LongConsumer, long)
      */
     public static void runUninterruptibly(final Throwables.Runnable<InterruptedException> cmd) throws IllegalArgumentException {
@@ -39132,7 +39218,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param cmd the command to execute with remaining time in milliseconds
      * @param timeoutInMillis the maximum time to wait in milliseconds
-     * @throws IllegalArgumentException if cmd is {@code null}
      * @see #runUninterruptibly(Throwables.BiConsumer, long, TimeUnit)
      * @see #runUninterruptibly(Throwables.Runnable)
      */
@@ -39180,7 +39265,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param cmd the command to execute with remaining time and unit (nanoseconds)
      * @param timeout the maximum time to wait
      * @param unit the time unit of the timeout argument
-     * @throws IllegalArgumentException if cmd or unit is {@code null}
+     * @throws IllegalArgumentException if {@code unit} is {@code null}
      * @see #runUninterruptibly(Throwables.LongConsumer, long)
      * @see #runUninterruptibly(Throwables.Runnable)
      */
@@ -39230,7 +39315,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of result returned by the command
      * @param cmd the command to call uninterruptibly
      * @return the result of the command
-     * @throws IllegalArgumentException if cmd is {@code null}
      * @see #callUninterruptibly(Throwables.LongFunction, long)
      * @see #runUninterruptibly(Throwables.Runnable)
      */
@@ -39274,7 +39358,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param cmd the command to call with remaining time in milliseconds
      * @param timeoutInMillis the maximum time to wait in milliseconds
      * @return the result of the command
-     * @throws IllegalArgumentException if cmd is {@code null}
      * @see #callUninterruptibly(Throwables.BiFunction, long, TimeUnit)
      * @see #callUninterruptibly(Throwables.Callable)
      */
@@ -39822,7 +39905,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * // Rate limiting: ensure minimum delay between operations
      * N.sleepUninterruptibly(1);   // Always sleeps for 1 millisecond
-     * 
+     *
      * // Retry with fixed delay - won't be shortened by interrupts
      * int maxRetries = 2;
      * long retryDelayMs = 1L;
@@ -39839,7 +39922,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }
      * }</pre>
      *
-     * @param timeoutInMillis the time to sleep in milliseconds. If zero or negative, 
+     * @param timeoutInMillis the time to sleep in milliseconds. If zero or negative,
      *                       the method returns immediately without sleeping
      * @see #sleep(long)
      * @see #sleep(long, TimeUnit)
@@ -39894,10 +39977,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * // Sleep for 5 milliseconds regardless of interruptions
      * N.sleepUninterruptibly(5, TimeUnit.MILLISECONDS);
-     * 
+     *
      * // Micro-sleep for precise timing
      * N.sleepUninterruptibly(500, TimeUnit.MICROSECONDS);
-     * 
+     *
      * // Rate limiting with different time units
      * N.sleepUninterruptibly(2, TimeUnit.MILLISECONDS);   // 2 millisecond delay
      * }</pre>
@@ -39956,13 +40039,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *     System.out.println("Computing expensive data...");
      *     return loadDataFromDatabase();   // Only called once
      * });
-     * 
+     *
      * // First call triggers computation
      * List<String> data1 = expensiveData.get();   // Prints "Computing expensive data..."
-     * 
+     *
      * // Subsequent calls return cached result
      * List<String> data2 = expensiveData.get();   // No computation, returns cached value
-     * 
+     *
      * // Resource initialization
      * Supplier<DatabaseConnection> connection = N.lazyInit(() -> {
      *     return new DatabaseConnection(config);
@@ -40002,14 +40085,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *     System.out.println("Establishing database connection...");
      *     return DriverManager.getConnection(url, user, password);
      * });
-     * 
+     *
      * try {
      *     Connection conn1 = lazyConnection.get();   // May throw SQLException on first call
      *     Connection conn2 = lazyConnection.get();   // Returns cached connection, no exception
      * } catch (SQLException e) {
      *     // Handle connection error
      * }
-     * 
+     *
      * // File reading with lazy initialization
      * Throwables.Supplier<String, IOException> fileContent = N.lazyInitialize(() -> {
      *     return Files.readString(Paths.get("config.txt"));
@@ -40169,16 +40252,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *     .stream()
      *     .map(String::toUpperCase)
      *     .collect(toList());
-     * 
+     *
      * // Debug intermediate values
      * int value = N.println(calculateSomething());   // Prints the calculated value
-     * 
+     *
      * // Collection debugging
      * Map<String, Integer> map = new HashMap<>();
      * map.put("foo", 1);
      * map.put("bar", 2);
      * N.println(map);   // Prints: {foo=1, bar=2}
-     * 
+     *
      * // Array debugging
      * String[] array = {"hello", "world"};
      * N.println(array);   // Prints: [hello, world]
@@ -40224,19 +40307,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * // Simple string formatting
      * N.fprintln("Hello, %s!", "World");   // Prints: Hello, World!
-     * 
+     *
      * // Multiple arguments with different types
      * N.fprintln("User %s (ID: %d) has %.2f credits", "Alice", 123, 45.67);
      * // Prints: User Alice (ID: 123) has 45.67 credits
-     * 
+     *
      * // Numeric formatting
      * N.fprintln("Hexadecimal: %x, Binary: %8s", 255, Integer.toBinaryString(255));
      * // Prints: Hexadecimal: ff, Binary: 11111111
-     * 
+     *
      * // Date/time formatting
      * N.fprintln("Current time: %tF %tT", new Date(), new Date());
      * // Prints: Current time: 2023-12-25 14:30:45
-     * 
+     *
      * // Debugging with formatted output
      * N.fprintln("Processing item %d of %d: %s", current, total, item.getName());
      * }</pre>

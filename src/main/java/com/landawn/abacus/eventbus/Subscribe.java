@@ -22,15 +22,16 @@ import java.lang.annotation.Target;
 import com.landawn.abacus.util.ThreadMode;
 
 /**
- * Annotation to mark methods as event subscribers in the EventBus system.
- * Methods annotated with {@code @Subscribe} will receive events when registered with an {@link EventBus}.
+ * Marks a method as an event subscriber in the {@link EventBus} system.
+ * Methods annotated with {@code @Subscribe} will receive events when their containing object
+ * is registered with an {@link EventBus}.
  *
  * <p>The annotated method must meet the following requirements:</p>
  * <ul>
- *   <li>Must be {@code public}</li>
- *   <li>Must have exactly one parameter (the event type)</li>
- *   <li>Must not be {@code static}</li>
- *   <li>Should not throw checked exceptions</li>
+ *   <li>Must be {@code public}.</li>
+ *   <li>Must have exactly one parameter representing the event type.</li>
+ *   <li>Must not be {@code static}.</li>
+ *   <li>Should not throw checked exceptions (any thrown exceptions are caught and logged).</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
@@ -41,17 +42,6 @@ import com.landawn.abacus.util.ThreadMode;
  *         System.out.println("Received: " + event);
  *     }
  *
- *     @Subscribe(threadMode = ThreadMode.THREAD_POOL_EXECUTOR)
- *     public void onUserEvent(UserEvent event) {
- *         // Handle user event on background thread
- *         processUser(event.getUser());
- *     }
- * }
- * }</pre>
- *
- * <p><b>Usage Examples with all parameters:</b></p>
- * <pre>{@code
- * public class AdvancedHandler {
  *     @Subscribe(
  *         threadMode = ThreadMode.THREAD_POOL_EXECUTOR,
  *         eventId = "criticalEvents",
@@ -61,13 +51,9 @@ import com.landawn.abacus.util.ThreadMode;
  *         deduplicate = true
  *     )
  *     public void onCriticalEvent(CriticalEvent event) {
- *         // This method will:
- *         // - Run on a background thread
- *         // - Only receive events posted with "criticalEvents" ID
- *         // - Receive the most recent sticky event on registration
- *         // - Only accept exact CriticalEvent type (not subtypes)
- *         // - Ignore events within 1 second of the last one
- *         // - Ignore duplicate consecutive events
+ *         // Runs on background thread, receives only exact CriticalEvent type,
+ *         // picks up sticky events on registration, throttled to 1 per second,
+ *         // and ignores consecutive duplicate events.
  *     }
  * }
  * }</pre>

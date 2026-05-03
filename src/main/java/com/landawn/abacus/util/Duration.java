@@ -40,7 +40,7 @@ import java.time.temporal.TemporalUnit;
  *   <li><b>Memory Efficient:</b> Minimal memory footprint with single primitive field</li>
  * </ul>
  *
- * <p><b>⚠️ IMPORTANT - Immutable Design:</b>
+ * <p><b>IMPORTANT - Immutable Design:</b>
  * <ul>
  *   <li>This class implements {@link Immutable}, guaranteeing that instances cannot be modified after creation</li>
  *   <li>The internal milliseconds field is final and set only during construction</li>
@@ -114,7 +114,7 @@ import java.time.temporal.TemporalUnit;
  *
  * // Duration formatting for display
  * Duration uptime = Duration.ofDays(5).plusHours(3).plusMinutes(45);
- * String formatted = uptime.toString();   // "PT123H45M0S" (ISO 8601 format)
+ * String formatted = uptime.toString();   // "PT123H45M" (ISO 8601 format)
  *
  * // Interoperability with java.time.Duration
  * Duration customDuration = Duration.ofMinutes(90);
@@ -247,7 +247,7 @@ import java.time.temporal.TemporalUnit;
  *
  *     private PerformanceReport createSuccessReport(String operationName, long startTime) {
  *         Duration executionTime = Duration.ofMillis(System.currentTimeMillis() - startTime);
- *         
+ *
  *         PerformanceLevel level;
  *         if (executionTime.compareTo(ERROR_THRESHOLD) > 0) {
  *             level = PerformanceLevel.ERROR;
@@ -267,7 +267,7 @@ import java.time.temporal.TemporalUnit;
  *
  *         Duration total = executionTimes.stream()
  *             .reduce(Duration.ZERO, Duration::plus);
- *         
+ *
  *         return total.dividedBy(executionTimes.size());
  *     }
  * }
@@ -649,7 +649,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * Duration twoHalfDays = oneDay.plus(Duration.ofHours(12));  // 1.5 days
      * }</pre>
      *
-     * @param duration the duration to add, not null.
+     * @param duration the duration to add, not {@code null}.
      * @return a Duration based on this duration with the specified duration added.
      * @throws ArithmeticException if numeric overflow occurs.
      */
@@ -804,7 +804,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * Duration twentyTwoHours = oneDay.minus(Duration.ofHours(2));  // 22 hours
      * }</pre>
      *
-     * @param duration the duration to subtract, not null.
+     * @param duration the duration to subtract, not {@code null}.
      * @return a Duration based on this duration with the specified duration subtracted.
      * @throws ArithmeticException if numeric overflow occurs.
      */
@@ -1210,7 +1210,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * as this Duration. The conversion is straightforward as both use milliseconds precision.
      * This is useful for interoperability with Java's standard time API.
      * </p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Duration d = Duration.ofHours(2);
@@ -1231,7 +1231,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * regardless of whether the durations are positive or negative.
      * </p>
      *
-     * @param other the other duration to compare to, not null.
+     * @param other the other duration to compare to, not {@code null}.
      * @return the comparator value, negative if less, positive if greater, zero if equal.
      */
     @Override
@@ -1281,7 +1281,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      *   <li>T is the time designator that precedes the time components</li>
      *   <li>H represents hours and is shown only if non-zero</li>
      *   <li>M represents minutes and is shown only if non-zero</li>
-     *   <li>S represents seconds and is always shown (even if zero) unless both hours and minutes are present and seconds are zero</li>
+     *   <li>S represents seconds. The seconds component is omitted when seconds and milliseconds are both zero and at least one of hours or minutes has been emitted; otherwise it is shown (even if zero)</li>
      * </ul>
      * Examples:
      * <ul>
@@ -1293,7 +1293,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      *   <li>"PT-0.5S" - negative 500 milliseconds</li>
      * </ul>
      *
-     * @return an ISO-8601 representation of this duration, not null.
+     * @return an ISO-8601 representation of this duration, not {@code null}.
      */
     @Override
     public String toString() {
@@ -1301,14 +1301,24 @@ public final class Duration implements Comparable<Duration>, Immutable {
             return "PT0S";
         }
 
-        final long hours = milliseconds / MILLIS_PER_HOUR;
-        final int minutes = (int) ((milliseconds % MILLIS_PER_HOUR) / MILLIS_PER_MINUTE);
-        final int seconds = (int) ((milliseconds % MILLIS_PER_MINUTE) / MILLIS_PER_SECOND);
-        int millis = (int) (milliseconds % MILLIS_PER_SECOND);
+        // Use the absolute value for component decomposition so that each field
+        // is non-negative. We prefix the string with '-' when the duration is
+        // negative.  Without this, a duration like -90_500 ms would incorrectly
+        // produce "PT-1M-30.500S" (each component carrying its own sign) instead
+        // of the correct "PT-1M30.500S".
+        final long absMillis = Math.abs(milliseconds);
+        final long hours = absMillis / MILLIS_PER_HOUR;
+        final int minutes = (int) ((absMillis % MILLIS_PER_HOUR) / MILLIS_PER_MINUTE);
+        final int seconds = (int) ((absMillis % MILLIS_PER_MINUTE) / MILLIS_PER_SECOND);
+        int millis = (int) (absMillis % MILLIS_PER_SECOND);
 
         final StringBuilder sb = Objectory.createStringBuilder();
 
         sb.append("PT");
+
+        if (milliseconds < 0) {
+            sb.append('-');
+        }
 
         if (hours != 0) {
             sb.append(hours).append('H');
@@ -1324,13 +1334,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
             return result;
         }
 
-        if (seconds == 0 && millis < 0) {
-            sb.append("-0");
-        } else {
-            sb.append(seconds);
-        }
-
-        millis = Math.abs(millis);
+        sb.append(seconds);
 
         if (millis > 0) {
             sb.append('.');

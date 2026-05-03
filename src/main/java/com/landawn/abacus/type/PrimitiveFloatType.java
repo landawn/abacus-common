@@ -15,9 +15,8 @@
 package com.landawn.abacus.type;
 
 /**
- * Type handler for primitive float values.
- * This class handles the primitive float type specifically, as opposed to the Float wrapper class.
- * It provides type information and default value handling for float primitives.
+ * Type handler for the primitive {@code float} type, as opposed to the {@link Float} wrapper class.
+ * It provides type information and default value handling for {@code float} primitives.
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -45,6 +44,10 @@ public final class PrimitiveFloatType extends AbstractFloatType {
 
     private static final Float DEFAULT_VALUE = 0f;
 
+    /**
+     * Constructs a new PrimitiveFloatType instance.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
+     */
     PrimitiveFloatType() {
         super(FLOAT);
     }

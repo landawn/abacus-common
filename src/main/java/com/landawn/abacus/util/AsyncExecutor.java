@@ -37,28 +37,28 @@ import com.landawn.abacus.logging.LoggerFactory;
  * The AsyncExecutor class provides a convenient way to execute tasks asynchronously
  * using a configurable thread pool. It supports both Runnable and Callable tasks,
  * with additional features like retry mechanisms and batch execution.
- * 
+ *
  * <p>By default, the core pool size is the maximum of 8 and the number of available processors,
  * and the maximum pool size is the maximum of 16 and twice the number of available processors.
  * The default keep-alive time is 180 seconds.</p>
- * 
+ *
  * <p>The executor automatically registers a shutdown hook to ensure proper cleanup
  * when the JVM exits.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * AsyncExecutor executor = new AsyncExecutor();
- * 
+ *
  * // Execute a simple task
  * ContinuableFuture<Void> future = executor.execute(() -> {
  *     System.out.println("Task executed asynchronously");
  * });
- * 
+ *
  * // Execute a task that returns a result
  * ContinuableFuture<String> resultFuture = executor.execute(() -> {
  *     return "Task completed";
  * });
- * 
+ *
  * // Execute with retry
  * ContinuableFuture<String> retryFuture = executor.execute(
  *     () -> performNetworkCall(),
@@ -96,14 +96,14 @@ public class AsyncExecutor {
 
     /**
      * Constructs an AsyncExecutor with default configuration.
-     * 
+     *
      * <p>Default values:</p>
      * <ul>
      *   <li>Core pool size: max(8, number of CPU cores)</li>
      *   <li>Maximum pool size: max(16, 2 * number of CPU cores)</li>
      *   <li>Keep-alive time: 180 seconds</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AsyncExecutor executor = new AsyncExecutor();
@@ -145,10 +145,10 @@ public class AsyncExecutor {
 
     /**
      * Constructs an AsyncExecutor that wraps an existing Executor.
-     * 
+     *
      * <p>If the provided executor is a ThreadPoolExecutor, its configuration
      * parameters are extracted and used. Otherwise, default values are used.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ExecutorService customExecutor = Executors.newFixedThreadPool(5);

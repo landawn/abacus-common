@@ -29,14 +29,14 @@ import com.landawn.abacus.util.N;
  * Spring HTTP message converter for JSON serialization and deserialization using abacus-common JSON utilities.
  * This converter integrates Abacus's JSON processing capabilities with Spring's HTTP message conversion framework,
  * allowing seamless conversion between Java objects and JSON in Spring MVC/WebFlux applications.
- * 
+ *
  * <p>This converter extends Spring's {@link AbstractJsonHttpMessageConverter} and delegates the actual
  * JSON processing to Abacus's {@link N} utility class.</p>
- * 
+ *
  * <p>The converter supports reading JSON from HTTP requests and writing JSON to HTTP responses,
  * handling all standard Java types as well as custom POJOs. It automatically handles content type
  * negotiation for "application/json" and related media types.</p>
- * 
+ *
  * <p><b>Usage Examples in Spring Configuration:</b></p>
  * <pre>{@code
  * @Configuration
@@ -49,16 +49,16 @@ import com.landawn.abacus.util.N;
  *     }
  * }
  * }</pre>
- * 
+ *
  * <p><b>Usage Examples with RestTemplate:</b></p>
  * <pre>{@code
  * RestTemplate restTemplate = new RestTemplate();
  * restTemplate.getMessageConverters().add(0, new JsonHttpMessageConverter());
- * 
+ *
  * // Now the RestTemplate will use abacus-common for JSON processing
  * MyObject result = restTemplate.getForObject("https://api.example.com/data", MyObject.class);
  * }</pre>
- * 
+ *
  * <p><b>Key Features:</b></p>
  * <ul>
  *   <li>High-performance JSON processing using abacus-common utilities</li>
@@ -67,7 +67,7 @@ import com.landawn.abacus.util.N;
  *   <li>Automatic content type handling for JSON media types</li>
  *   <li>Thread-safe implementation suitable for singleton usage</li>
  * </ul>
- * 
+ *
  * @see AbstractJsonHttpMessageConverter
  * @see N#fromJson(Reader, JsonDeserConfig, com.landawn.abacus.type.Type)
  * @see N#toJson(Object, JsonSerConfig, Writer)

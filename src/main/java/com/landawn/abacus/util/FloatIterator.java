@@ -27,7 +27,7 @@ import com.landawn.abacus.util.stream.FloatStream;
  * A specialized iterator for primitive float values that avoids the overhead of boxing.
  * This abstract class provides a base implementation for iterating over float values
  * with additional functional operations like filtering, limiting, and skipping.
- * 
+ *
  * <p>FloatIterator is immutable and all transformation methods return new iterator instances.
  * It extends {@code ImmutableIterator<Float>} but provides primitive-specific methods
  * to avoid autoboxing.</p>
@@ -42,7 +42,7 @@ import com.landawn.abacus.util.stream.FloatStream;
  * // Convert to array
  * float[] array = filtered.toArray();   // [2.5f, 3.7f]
  * }</pre>
- * 
+ *
  * @see ObjIterator
  * @see BiIterator
  * @see TriIterator
@@ -600,8 +600,9 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * // Prints indices starting from 10, 11, 12...
      * }</pre>
      *
-     * @param startIndex the starting index value
+     * @param startIndex the starting index value, must be non-negative
      * @return an ObjIterator of IndexedFloat objects
+     * @throws IllegalArgumentException if {@code startIndex} is negative
      */
     @Beta
     public ObjIterator<IndexedFloat> indexed(final long startIndex) {

@@ -25,18 +25,8 @@ import com.landawn.abacus.exception.UncheckedSQLException;
 /**
  * Type handler for {@link NClob} (National Character Large Object) objects, providing
  * database interaction capabilities for handling large Unicode text data.
- *
- * <p><b>Usage Examples:</b></p>
- * <pre>{@code
- * Type<NClob> type = TypeFactory.getType(NClob.class);
- *
- * // Reading from database
- * NClob nclob = type.get(resultSet, 1);
- * String content = type.stringOf(nclob);   // Converts NClob to String
- *
- * // Writing to database
- * type.set(preparedStatement, 1, nclob);
- * }</pre>
+ * The {@link #stringOf(NClob)} method reads the entire NCLOB content into a {@link String}
+ * and then frees the NCLOB; {@link #valueOf(String)} is not supported.
  */
 public class NClobType extends AbstractType<NClob> {
 
@@ -45,15 +35,15 @@ public class NClobType extends AbstractType<NClob> {
     private final Class<NClob> clazz;
 
     /**
-     * Constructs an NClobType for the standard NClob class.
-     * This constructor initializes the type handler for NCLOB database objects.
+     * Package-private constructor for NClobType using the standard {@link NClob} class.
+     * This constructor is called by the TypeFactory to create NClob type instances.
      */
     NClobType() {
         this(NClob.class);
     }
 
     /**
-     * Constructs an NClobType for a specific NClob implementation class.
+     * Package-private constructor for NClobType for a specific NClob implementation class.
      * This constructor allows handling of custom NClob implementations.
      *
      * @param clazz the specific NClob class or subclass to handle
@@ -74,21 +64,13 @@ public class NClobType extends AbstractType<NClob> {
     }
 
     /**
-     * Converts an {@link NClob} object to its string representation.
-     * <p>
-     * This method extracts the entire content of the NClob as a string. The NClob is
-     * automatically freed after extraction. Note that this operation loads the entire
-     * NClob content into memory, which may not be suitable for very large objects.
-     * </p>
+     * Converts an {@link NClob} object to its string representation by extracting the full
+     * character content. The {@code NClob} is freed via {@link NClob#free()} after extraction.
+     * This operation loads the entire NCLOB content into memory and is therefore not suitable
+     * for very large objects.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * NClob nclob = resultSet.getNClob(1);
-     * String content = type.stringOf(nclob);   // Extracts full content and frees NClob
-     * }</pre>
-     *
-     * @param x the NClob object to convert
-     * @return the string content of the NClob, or {@code null} if the input is null
+     * @param x the {@code NClob} object to convert, may be {@code null}
+     * @return the string content of the {@code NClob}, or {@code null} if the input is {@code null}
      * @throws UncheckedSQLException if a database access error occurs during extraction or freeing
      * @throws UnsupportedOperationException if the NCLOB length exceeds {@link Integer#MAX_VALUE}
      */
@@ -98,6 +80,8 @@ public class NClobType extends AbstractType<NClob> {
             return null;
         }
 
+        RuntimeException primaryException = null;
+
         try {
             final long len = x.length();
             if (len > Integer.MAX_VALUE) {
@@ -105,12 +89,21 @@ public class NClobType extends AbstractType<NClob> {
             }
             return x.getSubString(1, (int) len);
         } catch (final SQLException e) {
-            throw new UncheckedSQLException(e);
+            primaryException = new UncheckedSQLException(e);
+            throw primaryException;
+        } catch (final RuntimeException e) {
+            primaryException = e;
+            throw primaryException;
         } finally {
             try {
                 x.free();
             } catch (final SQLException e) {
-                throw new UncheckedSQLException(e); //NOSONAR
+                final UncheckedSQLException freeException = new UncheckedSQLException(e);
+                if (primaryException != null) {
+                    primaryException.addSuppressed(freeException);
+                } else {
+                    throw freeException; //NOSONAR
+                }
             }
         }
     }
@@ -130,12 +123,12 @@ public class NClobType extends AbstractType<NClob> {
     }
 
     /**
-     * Retrieves an {@link NClob} value from a ResultSet at the specified column index.
+     * Retrieves an {@link NClob} value from the specified column in the {@link ResultSet}.
      *
-     * @param rs the ResultSet to read from
-     * @param columnIndex the column index (1-based) to retrieve the NCLOB from
-     * @return the NClob object from the ResultSet, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnIndex the 1-based index of the column to retrieve the {@code NClob} from
+     * @return the {@code NClob} object, or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public NClob get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -143,12 +136,12 @@ public class NClobType extends AbstractType<NClob> {
     }
 
     /**
-     * Retrieves an {@link NClob} value from a ResultSet using the specified column label.
+     * Retrieves an {@link NClob} value from the specified column in the {@link ResultSet}.
      *
-     * @param rs the ResultSet to read from
-     * @param columnName the label for the column specified with the SQL AS clause
-     * @return the NClob object from the ResultSet, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnName is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnName the label of the column to retrieve (as specified in the SQL AS clause)
+     * @return the {@code NClob} object, or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
     @Override
     public NClob get(final ResultSet rs, final String columnName) throws SQLException {
@@ -156,12 +149,12 @@ public class NClobType extends AbstractType<NClob> {
     }
 
     /**
-     * Sets a parameter in a PreparedStatement to an {@link NClob} value.
+     * Sets a parameter in a {@link PreparedStatement} at the specified index to an {@link NClob} value.
      *
-     * @param stmt the PreparedStatement to set the parameter on
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the NClob value to set, or {@code null} to set SQL NULL
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param columnIndex the 1-based index of the parameter to set
+     * @param x the {@code NClob} value to set, or {@code null} to set SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final NClob x) throws SQLException {
@@ -169,12 +162,12 @@ public class NClobType extends AbstractType<NClob> {
     }
 
     /**
-     * Sets a named parameter in a CallableStatement to an {@link NClob} value.
+     * Sets a parameter in a {@link CallableStatement} by name to an {@link NClob} value.
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
-     * @param x the NClob value to set, or {@code null} to set SQL NULL
-     * @throws SQLException if a database access error occurs or the parameterName is invalid
+     * @param x the {@code NClob} value to set, or {@code null} to set SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final NClob x) throws SQLException {

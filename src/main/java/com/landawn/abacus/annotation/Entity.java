@@ -73,8 +73,8 @@ public @interface Entity {
     /**
      * Deprecated alias for {@link #name()}.
      *
-     * @return the entity name value
-     * @deprecated use {@link #name()} to specify the entity name explicitly.
+     * @return the entity name
+     * @deprecated Use {@link #name()} to specify the entity name explicitly.
      */
     @Deprecated
     String value() default "";

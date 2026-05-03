@@ -20,7 +20,7 @@ import com.landawn.abacus.annotation.Beta;
  * A utility class that provides thread-safe synchronized operations on objects.
  * This class offers both static methods for one-time synchronized operations and instance methods
  * for repeated synchronized operations on the same object (mutex).
- * 
+ *
  * <p>The class is designed to simplify synchronized code blocks by providing a fluent API that handles
  * the synchronization mechanism internally. It supports various operation types including:
  * <ul>
@@ -30,15 +30,15 @@ import com.landawn.abacus.annotation.Beta;
  *   <li>Consumer operations (accepting the mutex as input)</li>
  *   <li>Function operations (transforming the mutex)</li>
  * </ul>
- * 
+ *
  * <p>All operations are synchronized on the provided mutex object, ensuring thread-safe execution.
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Static usage
  * List<String> list = new ArrayList<>();
  * Synchronized.run(list, () -> list.add("item"));
- * 
+ *
  * // Instance usage
  * Synchronized<List<String>> syncList = Synchronized.on(list);
  * syncList.run(() -> list.add("item"));
@@ -63,10 +63,10 @@ public final class Synchronized<T> {
      * Creates a new Synchronized instance for the provided mutex object.
      * This factory method is the primary way to create a Synchronized instance for repeated
      * synchronized operations on the same object.
-     * 
+     *
      * <p>The returned Synchronized instance provides instance methods to perform various
      * synchronized operations on the mutex object.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
@@ -90,11 +90,11 @@ public final class Synchronized<T> {
      * Executes the provided runnable command in a synchronized block on the specified mutex.
      * This method is useful for one-time synchronized operations where creating
      * a Synchronized instance would be unnecessary overhead.
-     * 
+     *
      * <p>The command is executed while holding the monitor lock on the mutex object,
      * ensuring thread-safe execution. Any exception thrown by the command is propagated
      * to the caller.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = new ArrayList<>();
@@ -124,11 +124,11 @@ public final class Synchronized<T> {
     /**
      * Executes the provided callable command in a synchronized block on the specified mutex and returns its result.
      * This method is useful for one-time synchronized operations that need to return a value.
-     * 
+     *
      * <p>The callable is executed while holding the monitor lock on the mutex object,
      * ensuring thread-safe execution. The result of the callable is returned to the caller,
      * and any exception thrown by the callable is propagated.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
@@ -162,10 +162,10 @@ public final class Synchronized<T> {
     /**
      * Tests the provided predicate in a synchronized block on the specified mutex.
      * The predicate receives the mutex as its argument and returns a boolean result.
-     * 
+     *
      * <p>This method is useful for performing synchronized conditional checks where the
      * predicate needs access to the mutex object itself.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = new ArrayList<>();
@@ -194,15 +194,15 @@ public final class Synchronized<T> {
     /**
      * Tests the provided bi-predicate in a synchronized block on the specified mutex.
      * The bi-predicate receives both the mutex and an additional argument.
-     * 
+     *
      * <p>This method is useful for performing synchronized conditional checks where the
      * predicate needs access to both the mutex object and an additional parameter.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("count", 5);
-     * boolean isGreater = Synchronized.test(map, 3, 
+     * boolean isGreater = Synchronized.test(map, 3,
      *     (m, threshold) -> m.get("count") > threshold);
      * }</pre>
      *
@@ -230,10 +230,10 @@ public final class Synchronized<T> {
     /**
      * Executes the provided consumer in a synchronized block on the specified mutex.
      * The consumer receives the mutex as its argument.
-     * 
+     *
      * <p>This method is useful for performing synchronized operations where the
      * consumer needs access to the mutex object itself.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = new StringBuilder();
@@ -260,10 +260,10 @@ public final class Synchronized<T> {
     /**
      * Executes the provided bi-consumer in a synchronized block on the specified mutex.
      * The bi-consumer receives both the mutex and an additional argument.
-     * 
+     *
      * <p>This method is useful for performing synchronized operations where the
      * consumer needs access to both the mutex object and an additional parameter.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, String> map = new HashMap<>();
@@ -293,10 +293,10 @@ public final class Synchronized<T> {
     /**
      * Applies the provided function in a synchronized block on the specified mutex and returns its result.
      * The function receives the mutex as its argument and transforms it to a result.
-     * 
+     *
      * <p>This method is useful for performing synchronized transformations where the
      * function needs access to the mutex object itself.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c");
@@ -326,15 +326,15 @@ public final class Synchronized<T> {
     /**
      * Applies the provided bi-function in a synchronized block on the specified mutex and returns its result.
      * The bi-function receives both the mutex and an additional argument.
-     * 
+     *
      * <p>This method is useful for performing synchronized transformations where the
      * function needs access to both the mutex object and an additional parameter.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("count", 10);
-     * Integer result = Synchronized.apply(map, 5, 
+     * Integer result = Synchronized.apply(map, 5,
      *     (m, increment) -> m.merge("count", increment, Integer::sum));
      * }</pre>
      *
@@ -363,10 +363,10 @@ public final class Synchronized<T> {
     /**
      * Executes the provided runnable command in a synchronized block on this instance's mutex.
      * This method is useful for repeated synchronized operations on the same object.
-     * 
+     *
      * <p>The command is executed while holding the monitor lock on the mutex object,
      * ensuring thread-safe execution.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = new ArrayList<>();
@@ -393,10 +393,10 @@ public final class Synchronized<T> {
     /**
      * Executes the provided callable command in a synchronized block on this instance's mutex and returns its result.
      * This method is useful for repeated synchronized operations on the same object that return values.
-     * 
+     *
      * <p>The callable is executed while holding the monitor lock on the mutex object,
      * ensuring thread-safe execution.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
@@ -453,7 +453,7 @@ public final class Synchronized<T> {
      *
      * <p>This method is useful for repeated synchronized operations on the same object
      * where the consumer needs access to the mutex.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = new StringBuilder();
@@ -479,7 +479,7 @@ public final class Synchronized<T> {
      * The function receives the mutex as its argument and transforms it to a result.
      *
      * <p>This method is useful for repeated synchronized transformations on the same object.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();

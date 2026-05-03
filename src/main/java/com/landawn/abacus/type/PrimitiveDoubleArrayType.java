@@ -16,17 +16,19 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for primitive double arrays (double[]).
- * Provides functionality for serialization, deserialization, and conversion between
- * double arrays and their string representations or collections.
+ * Type handler for primitive {@code double[]} arrays, providing serialization, deserialization,
+ * and conversion between double arrays and their string representations or collections.
+ * String representations use the format {@code [1.5, 2.7, 3.14]} with comma-separated elements
+ * enclosed in square brackets.
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<double[]> {
@@ -34,13 +36,17 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
     public static final String DOUBLE_ARRAY = double[].class.getSimpleName();
 
     private final Type<Double> elementType;
-    private final Type<Double>[] parameterTypes;
+    private final List<Type<?>> parameterTypes;
 
+    /**
+     * Constructs a new PrimitiveDoubleArrayType instance.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
+     */
     PrimitiveDoubleArrayType() {
         super(DOUBLE_ARRAY);
 
         elementType = TypeFactory.getType(double.class);
-        parameterTypes = new Type[] { elementType };
+        parameterTypes = List.of(elementType);
     }
 
     /**
@@ -66,11 +72,11 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
     /**
      * Returns the parameter types associated with this array type.
      *
-     * @return an array containing the Double Type that describes the elements of this array type
+     * @return an immutable list containing the Double Type that describes the elements of this array type
      * @see #elementType()
      */
     @Override
-    public Type<Double>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 

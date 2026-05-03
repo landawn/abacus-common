@@ -20,10 +20,12 @@ import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.landawn.abacus.AbstractTest;
 import com.landawn.abacus.annotation.Column;
-import com.landawn.abacus.annotation.JsonXmlConfig;
 import com.landawn.abacus.annotation.Id;
+import com.landawn.abacus.annotation.JsonXmlConfig;
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.annotation.Table;
 import com.landawn.abacus.entity.extendDirty.basic.Account;
@@ -41,8 +43,6 @@ import com.landawn.abacus.parser.entity.RecordB;
 import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
-import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Value;
 import lombok.experimental.Accessors;

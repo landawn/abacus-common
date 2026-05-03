@@ -357,7 +357,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
         }
 
         if (propInfo != null && propInfo.isJsonRawValue) {
-            strType.writeCharacter(bw, jsonParser.serialize(obj, getJSC(config)), config);
+            bw.write(jsonParser.serialize(obj, getJSC(config)));
             return;
         }
 
@@ -545,7 +545,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                 }
 
                 if (propInfo.isJsonRawValue) {
-                    strType.writeCharacter(bw, jsonParser.serialize(propValue, getJSC(config)), config);
+                    bw.write(jsonParser.serialize(propValue, getJSC(config)));
                 } else if (propInfo.jsonXmlType.isSerializable()) {
                     if (propInfo.jsonXmlType.isObjectArray() || propInfo.jsonXmlType.isCollection()) {
                         // jsonParser.serialize(bw, propValue);
@@ -1610,9 +1610,45 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
         return readByStreamParser(xmlReader, config, null, null, false, false, false, true, inputType, inputType);
     }
 
+    /** Maximum permitted XML element-nesting depth. Defends against StackOverflowError on hostile input. */
+    private static final int MAX_XML_NESTING_DEPTH = 1000;
+
+    /** Per-thread XML nesting depth counter. Single-element int[] used as a mutable holder. */
+    private static final ThreadLocal<int[]> XML_NESTING_DEPTH = ThreadLocal.withInitial(() -> new int[1]);
+
+    private static void enterXmlNesting() {
+        final int[] depth = XML_NESTING_DEPTH.get();
+        if (++depth[0] > MAX_XML_NESTING_DEPTH) {
+            depth[0]--;
+            throw new ParsingException("XML nesting depth exceeded " + MAX_XML_NESTING_DEPTH + " (defends against stack-overflow DoS)");
+        }
+    }
+
+    private static void exitXmlNesting() {
+        final int[] depth = XML_NESTING_DEPTH.get();
+        if (--depth[0] <= 0) {
+            depth[0] = 0;
+            XML_NESTING_DEPTH.remove();
+        }
+    }
+
+    @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NULL_VALUE")
+    <T> T readByStreamParser(final XMLStreamReader xmlReader, final XmlDeserConfig config, Type<?> propType, PropInfo propInfo, boolean checkedAttr,
+            boolean isTagByPropertyName, boolean ignoreTypeInfo, final boolean isFirstCall, Type<?> targetType, final Type<?> inputType)
+            throws XMLStreamException {
+
+        enterXmlNesting();
+        try {
+            return readByStreamParserBody(xmlReader, config, propType, propInfo, checkedAttr, isTagByPropertyName, ignoreTypeInfo, isFirstCall, targetType,
+                    inputType);
+        } finally {
+            exitXmlNesting();
+        }
+    }
+
     @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NULL_VALUE")
     @SuppressWarnings({ "null", "unused", "deprecation", "DataFlowIssue" })
-    <T> T readByStreamParser(final XMLStreamReader xmlReader, final XmlDeserConfig config, Type<?> propType, PropInfo propInfo, boolean checkedAttr,
+    private <T> T readByStreamParserBody(final XMLStreamReader xmlReader, final XmlDeserConfig config, Type<?> propType, PropInfo propInfo, boolean checkedAttr,
             boolean isTagByPropertyName, boolean ignoreTypeInfo, final boolean isFirstCall, Type<?> targetType, final Type<?> inputType)
             throws XMLStreamException {
 
@@ -1809,8 +1845,15 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                     if (sb == null) {
                                         sb = new StringBuilder(text.length() * 2);
                                         sb.append(text);
-                                    } else if (sb.isEmpty()) {
-                                        sb.append(text);
+                                    } else {
+                                        // Bug fix: sb may be non-null but also non-empty when reused across
+                                        // iterations (sb.setLength(0) clears it, but isEmpty() being false
+                                        // would silently drop the initial `text` fragment). Always append
+                                        // the first `text` chunk when sb is empty (regardless of how it got
+                                        // to empty — fresh allocation or cleared via setLength(0)).
+                                        if (sb.isEmpty()) {
+                                            sb.append(text);
+                                        }
                                     }
 
                                     sb.append(xmlReader.getText());
@@ -1883,10 +1926,10 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                 final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(Map.class);
                 Type<?> keyType = defaultKeyType;
 
-                if (propInfo != null && propInfo.jsonXmlType.parameterTypes().length == 2 && !propInfo.jsonXmlType.parameterTypes()[0].isObject()) {
-                    keyType = propInfo.jsonXmlType.parameterTypes()[0];
-                } else if (propType != null && propType.parameterTypes().length == 2 && propType.isMap() && !propType.parameterTypes()[0].isObject()) {
-                    keyType = propType.parameterTypes()[0];
+                if (propInfo != null && propInfo.jsonXmlType.parameterTypes().size() == 2 && !propInfo.jsonXmlType.parameterTypes().get(0).isObject()) {
+                    keyType = propInfo.jsonXmlType.parameterTypes().get(0);
+                } else if (propType != null && propType.parameterTypes().size() == 2 && propType.isMap() && !propType.parameterTypes().get(0).isObject()) {
+                    keyType = propType.parameterTypes().get(0);
                 } else {
                     if (config.getMapKeyType() != null && !config.getMapKeyType().isObject()) {
                         keyType = config.getMapKeyType();
@@ -1895,10 +1938,10 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
 
                 Type<?> valueType = defaultValueType;
 
-                if (propInfo != null && propInfo.jsonXmlType.parameterTypes().length == 2 && !propInfo.jsonXmlType.parameterTypes()[1].isObject()) {
-                    valueType = propInfo.jsonXmlType.parameterTypes()[1];
-                } else if (propType != null && propType.parameterTypes().length == 2 && propType.isMap() && !propType.parameterTypes()[1].isObject()) {
-                    valueType = propType.parameterTypes()[1];
+                if (propInfo != null && propInfo.jsonXmlType.parameterTypes().size() == 2 && !propInfo.jsonXmlType.parameterTypes().get(1).isObject()) {
+                    valueType = propInfo.jsonXmlType.parameterTypes().get(1);
+                } else if (propType != null && propType.parameterTypes().size() == 2 && propType.isMap() && !propType.parameterTypes().get(1).isObject()) {
+                    valueType = propType.parameterTypes().get(1);
                 } else {
                     if (config.getMapValueType() != null && !config.getMapValueType().isObject()) {
                         valueType = config.getMapValueType();
@@ -1955,8 +1998,10 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                             if (sb == null) {
                                                 sb = new StringBuilder(text.length() * 2);
                                                 sb.append(text);
-                                            } else if (sb.isEmpty()) {
-                                                sb.append(text);
+                                            } else {
+                                                if (sb.isEmpty()) {
+                                                    sb.append(text);
+                                                }
                                             }
 
                                             sb.append(xmlReader.getText());
@@ -2020,8 +2065,10 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                             if (sb == null) {
                                                 sb = new StringBuilder(text.length() * 2);
                                                 sb.append(text);
-                                            } else if (sb.isEmpty()) {
-                                                sb.append(text);
+                                            } else {
+                                                if (sb.isEmpty()) {
+                                                    sb.append(text);
+                                                }
                                             }
 
                                             sb.append(xmlReader.getText());
@@ -2143,8 +2190,10 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                                 if (sb == null) {
                                                     sb = new StringBuilder(text.length() * 2);
                                                     sb.append(text);
-                                                } else if (sb.isEmpty()) {
-                                                    sb.append(text);
+                                                } else {
+                                                    if (sb.isEmpty()) {
+                                                        sb.append(text);
+                                                    }
                                                 }
 
                                                 sb.append(xmlReader.getText());
@@ -2189,8 +2238,10 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                         if (sb == null) {
                                             sb = new StringBuilder(text.length() * 2);
                                             sb.append(text);
-                                        } else if (sb.isEmpty()) {
-                                            sb.append(text);
+                                        } else {
+                                            if (sb.isEmpty()) {
+                                                sb.append(text);
+                                            }
                                         }
 
                                         sb.append(xmlReader.getText());
@@ -2257,9 +2308,9 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
 
                 if (propInfo != null && propInfo.clazz.isArray() && !Object.class.equals(propInfo.clazz.getComponentType())) {
                     eleType = Type.of(propInfo.clazz.getComponentType());
-                } else if (propType != null && propType.parameterTypes().length == 1 && Collection.class.isAssignableFrom(propType.javaType())
-                        && !propType.parameterTypes()[0].isObject()) {
-                    eleType = propType.parameterTypes()[0];
+                } else if (propType != null && propType.parameterTypes().size() == 1 && Collection.class.isAssignableFrom(propType.javaType())
+                        && !propType.parameterTypes().get(0).isObject()) {
+                    eleType = propType.parameterTypes().get(0);
                 } else {
                     if (config.getElementType() != null && !config.getElementType().isObject()) {
                         eleType = config.getElementType();
@@ -2309,8 +2360,10 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                             if (sb == null) {
                                                 sb = new StringBuilder(text.length() * 2);
                                                 sb.append(text);
-                                            } else if (sb.isEmpty()) {
-                                                sb.append(text);
+                                            } else {
+                                                if (sb.isEmpty()) {
+                                                    sb.append(text);
+                                                }
                                             }
 
                                             sb.append(xmlReader.getText());
@@ -2354,8 +2407,10 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                     if (sb == null) {
                                         sb = new StringBuilder(text.length() * 2);
                                         sb.append(text);
-                                    } else if (sb.isEmpty()) {
-                                        sb.append(text);
+                                    } else {
+                                        if (sb.isEmpty()) {
+                                            sb.append(text);
+                                        }
                                     }
 
                                     sb.append(xmlReader.getText());
@@ -2412,10 +2467,20 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
         return readByDOMParser(node, configToUse, configToUse.getElementType(), false, false, false, true, targetType);
     }
 
-    @SuppressWarnings({ "deprecation" })
     <T> T readByDOMParser(final Node node, final XmlDeserConfig config, Type<?> propType, boolean checkedAttr, boolean isTagByPropertyName,
             boolean ignoreTypeInfo, final boolean isFirstCall, final Type<T> inputType) {
-        if (node.getNodeType() == Document.TEXT_NODE) {
+        enterXmlNesting();
+        try {
+            return readByDOMParserBody(node, config, propType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, isFirstCall, inputType);
+        } finally {
+            exitXmlNesting();
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private <T> T readByDOMParserBody(final Node node, final XmlDeserConfig config, Type<?> propType, boolean checkedAttr, boolean isTagByPropertyName,
+            boolean ignoreTypeInfo, final boolean isFirstCall, final Type<T> inputType) {
+        if (node.getNodeType() == Node.TEXT_NODE) {
             return null;
         }
 
@@ -2512,7 +2577,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                 for (int i = 0; i < propNodeLength; i++) {
                     propNode = propNodes.item(i);
 
-                    if (propNode.getNodeType() == Document.TEXT_NODE) {
+                    if (propNode.getNodeType() == Node.TEXT_NODE) {
                         continue;
                     }
 
@@ -2571,8 +2636,8 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                 final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(Map.class);
                 Type<?> keyType = defaultKeyType;
 
-                if (propType != null && propType.isMap() && !propType.parameterTypes()[0].isObject()) {
-                    keyType = propType.parameterTypes()[0];
+                if (propType != null && propType.isMap() && !propType.parameterTypes().get(0).isObject()) {
+                    keyType = propType.parameterTypes().get(0);
                 } else {
                     if (config.getMapKeyType() != null && !config.getMapKeyType().isObject()) {
                         keyType = config.getMapKeyType();
@@ -2583,8 +2648,8 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
 
                 Type<?> valueType = defaultValueType;
 
-                if (propType != null && propType.isMap() && !propType.parameterTypes()[1].isObject()) {
-                    valueType = propType.parameterTypes()[1];
+                if (propType != null && propType.isMap() && !propType.parameterTypes().get(1).isObject()) {
+                    valueType = propType.parameterTypes().get(1);
                 } else {
                     if (config.getMapValueType() != null && !config.getMapValueType().isObject()) {
                         valueType = config.getMapValueType();
@@ -2607,7 +2672,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                 for (int k = 0; k < entryNodes.getLength(); k++) {
                     entryNode = entryNodes.item(k);
 
-                    if (entryNode.getNodeType() == Document.TEXT_NODE) {
+                    if (entryNode.getNodeType() == Node.TEXT_NODE) {
                         continue;
                     }
 
@@ -2618,7 +2683,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     for (; index < subEntryNodes.getLength(); index++) {
                         propKeyNode = subEntryNodes.item(index);
 
-                        if (propKeyNode.getNodeType() == Document.ELEMENT_NODE) {
+                        if (propKeyNode.getNodeType() == Node.ELEMENT_NODE) {
                             index++;
 
                             break;
@@ -2628,7 +2693,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     for (; index < subEntryNodes.getLength(); index++) {
                         propValueNode = subEntryNodes.item(index);
 
-                        if (propValueNode.getNodeType() == Document.ELEMENT_NODE) {
+                        if (propValueNode.getNodeType() == Node.ELEMENT_NODE) {
                             break;
                         }
                     }
@@ -2731,7 +2796,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                         for (int k = 0; k < eleNodes.getLength(); k++) {
                             eleNode = eleNodes.item(k);
 
-                            if (eleNode.getNodeType() == Document.TEXT_NODE) {
+                            if (eleNode.getNodeType() == Node.TEXT_NODE) {
                                 continue;
                             }
 
@@ -2794,7 +2859,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                 for (int k = 0; k < eleNodes.getLength(); k++) {
                     eleNode = eleNodes.item(k);
 
-                    if (eleNode.getNodeType() == Document.TEXT_NODE) {
+                    if (eleNode.getNodeType() == Node.TEXT_NODE) {
                         continue;
                     }
 
@@ -2941,7 +3006,12 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
     }
 
     /**
-     * The Class XmlSAXHandler.
+     * SAX event handler for XML deserialization, supporting beans, arrays, collections, and maps.
+     *
+     * <p>This handler maintains parse state via stacks of node types, values, and property metadata
+     * as SAX events arrive. After parsing completes, the result is accessible through
+     * {@link #resultHolder}. Instances are pooled and re-used; call the package-private
+     * initialisation method before use and {@link #reset()} is invoked automatically on recycle.</p>
      *
      * @param <T> the target object type produced by this SAX handler
      */
@@ -3164,10 +3234,10 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                         targetClass = targetType.javaType();
                     }
 
-                    if (propInfo != null && propInfo.jsonXmlType.parameterTypes().length == 2 && !propInfo.jsonXmlType.parameterTypes()[0].isObject()) {
-                        keyType = propInfo.jsonXmlType.parameterTypes()[0];
-                    } else if (propType != null && propType.parameterTypes().length == 2 && propType.isMap() && !propType.parameterTypes()[0].isObject()) {
-                        keyType = propType.parameterTypes()[0];
+                    if (propInfo != null && propInfo.jsonXmlType.parameterTypes().size() == 2 && !propInfo.jsonXmlType.parameterTypes().get(0).isObject()) {
+                        keyType = propInfo.jsonXmlType.parameterTypes().get(0);
+                    } else if (propType != null && propType.parameterTypes().size() == 2 && propType.isMap() && !propType.parameterTypes().get(0).isObject()) {
+                        keyType = propType.parameterTypes().get(0);
                     } else {
                         if (config.getMapKeyType() != null && !config.getMapKeyType().isObject()) {
                             keyType = config.getMapKeyType();
@@ -3176,10 +3246,10 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                         }
                     }
 
-                    if (propInfo != null && propInfo.jsonXmlType.parameterTypes().length == 2 && !propInfo.jsonXmlType.parameterTypes()[1].isObject()) {
-                        valueType = propInfo.jsonXmlType.parameterTypes()[1];
-                    } else if (propType != null && propType.parameterTypes().length == 2 && propType.isMap() && !propType.parameterTypes()[1].isObject()) {
-                        valueType = propType.parameterTypes()[1];
+                    if (propInfo != null && propInfo.jsonXmlType.parameterTypes().size() == 2 && !propInfo.jsonXmlType.parameterTypes().get(1).isObject()) {
+                        valueType = propInfo.jsonXmlType.parameterTypes().get(1);
+                    } else if (propType != null && propType.parameterTypes().size() == 2 && propType.isMap() && !propType.parameterTypes().get(1).isObject()) {
+                        valueType = propType.parameterTypes().get(1);
                     } else {
                         if (config.getMapValueType() != null && !config.getMapValueType().isObject()) {
                             valueType = config.getMapValueType();
@@ -3266,11 +3336,11 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                         targetClass = targetType.javaType();
                     }
 
-                    if (propInfo != null && propInfo.jsonXmlType.parameterTypes().length == 1 && !propInfo.jsonXmlType.parameterTypes()[0].isObject()) {
-                        eleType = propInfo.jsonXmlType.parameterTypes()[0];
-                    } else if (propType != null && propType.parameterTypes().length == 1 && Collection.class.isAssignableFrom(propType.javaType())
-                            && !propType.parameterTypes()[0].isObject()) {
-                        eleType = propType.parameterTypes()[0];
+                    if (propInfo != null && propInfo.jsonXmlType.parameterTypes().size() == 1 && !propInfo.jsonXmlType.parameterTypes().get(0).isObject()) {
+                        eleType = propInfo.jsonXmlType.parameterTypes().get(0);
+                    } else if (propType != null && propType.parameterTypes().size() == 1 && Collection.class.isAssignableFrom(propType.javaType())
+                            && !propType.parameterTypes().get(0).isObject()) {
+                        eleType = propType.parameterTypes().get(0);
                     } else {
                         if (config.getElementType() != null && !config.getElementType().isObject()) {
                             eleType = config.getElementType();

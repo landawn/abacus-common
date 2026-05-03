@@ -161,7 +161,8 @@ public class WebUtilTest extends TestBase {
         String result = WebUtil.curlToHttpRequestCode(curl);
         assertNotNull(result);
         assertTrue(result.contains("String requestBody"));
-        assertTrue(result.contains(".body(requestBody)"));
+        assertFalse(result.contains(".body(requestBody)"));
+        assertTrue(result.contains("Request body omitted for DELETE"));
         assertTrue(result.contains(".delete();"));
     }
 
@@ -222,6 +223,37 @@ public class WebUtilTest extends TestBase {
     }
 
     @Test
+    public void testCurl2HttpRequestHeadOptionOverridesImplicitPost() {
+        String curl = "curl -I https://api.example.com/users -d '{}'";
+        String result = WebUtil.curlToHttpRequestCode(curl);
+
+        assertNotNull(result);
+        assertTrue(result.contains(".execute(HttpMethod.HEAD)"));
+        assertFalse(result.contains(".body(requestBody)"));
+        assertFalse(result.contains(".post();"));
+    }
+
+    @Test
+    public void testCurl2HttpRequestWithMultipleDataOptions() {
+        String curl = "curl https://api.example.com/users -d 'name=John' -d 'age=30'";
+        String result = WebUtil.curlToHttpRequestCode(curl);
+
+        assertNotNull(result);
+        assertTrue(result.contains("String requestBody = \"name=John&age=30\";"));
+        assertTrue(result.contains(".body(requestBody)"));
+        assertTrue(result.contains(".post();"));
+    }
+
+    @Test
+    public void testCurl2HttpRequestEscapesUrl() {
+        String curl = "curl \"https://api.example.com/users?q=\\\"quoted\\\"\"";
+        String result = WebUtil.curlToHttpRequestCode(curl);
+
+        assertNotNull(result);
+        assertTrue(result.contains("HttpRequest.url(\"https://api.example.com/users?q=\\\\\\\"quoted\\\\\\\"\")"));
+    }
+
+    @Test
     public void testCurl2HttpRequestWithNullThrows() {
         assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToHttpRequestCode(null));
     }
@@ -234,6 +266,11 @@ public class WebUtilTest extends TestBase {
     @Test
     public void testCurl2HttpRequestWithInvalidStartThrows() {
         assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToHttpRequestCode("wget https://example.com"));
+    }
+
+    @Test
+    public void testCurl2HttpRequestWithoutUrlThrows() {
+        assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToHttpRequestCode("curl -X POST -H \"Content-Type: application/json\""));
     }
 
     @Test
@@ -366,6 +403,39 @@ public class WebUtilTest extends TestBase {
     }
 
     @Test
+    public void testCurl2OkHttpRequestHeadOptionOverridesImplicitPost() {
+        String curl = "curl -I https://api.example.com/users -d '{}'";
+        String result = WebUtil.curlToOkHttpRequestCode(curl);
+
+        assertNotNull(result);
+        assertTrue(result.contains(".execute(HttpMethod.HEAD)"));
+        assertFalse(result.contains(".body(requestBody)"));
+        assertFalse(result.contains(".post();"));
+    }
+
+    @Test
+    public void testCurl2OkHttpRequestWithMultipleDataOptions() {
+        String curl = "curl -H \"Content-Type: application/x-www-form-urlencoded\" https://api.example.com/users -d 'name=John' -d 'age=30'";
+        String result = WebUtil.curlToOkHttpRequestCode(curl);
+
+        assertNotNull(result);
+        assertTrue(
+                result.contains("RequestBody requestBody = RequestBody.create(MediaType.parse(\"application/x-www-form-urlencoded\"), \"name=John&age=30\");"));
+        assertTrue(result.contains(".body(requestBody)"));
+        assertTrue(result.contains(".post();"));
+    }
+
+    @Test
+    public void testCurl2OkHttpRequestEscapesUrlAndMediaType() {
+        String curl = "curl \"https://api.example.com/users?q=\\\"quoted\\\"\" " + "-H \"Content-Type: multipart/form-data; boundary=\\\"abc\\\"\" -d test";
+        String result = WebUtil.curlToOkHttpRequestCode(curl);
+
+        assertNotNull(result);
+        assertTrue(result.contains("OkHttpRequest.url(\"https://api.example.com/users?q=\\\\\\\"quoted\\\\\\\"\")"));
+        assertTrue(result.contains("MediaType.parse(\"multipart/form-data; boundary=\\\\\\\"abc\\\\\\\"\")"));
+    }
+
+    @Test
     public void testCurl2OkHttpRequestWithNullThrows() {
         assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToOkHttpRequestCode(null));
     }
@@ -380,6 +450,11 @@ public class WebUtilTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToOkHttpRequestCode(""));
         assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToOkHttpRequestCode(null));
         assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToOkHttpRequestCode("not a curl command"));
+    }
+
+    @Test
+    public void testCurl2OkHttpRequestWithoutUrlThrows() {
+        assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToOkHttpRequestCode("curl -X POST -H \"Content-Type: application/json\""));
     }
 
     @Test
@@ -474,6 +549,14 @@ public class WebUtilTest extends TestBase {
 
         assertNotNull(result);
         assertTrue(result.contains("\"https://api.example.com/users\""));
+    }
+
+    @Test
+    public void testBuildCurlEscapesUrlQuotes() {
+        String result = WebUtil.buildCurl("GET", "https://api.example.com/o'hare?q='quoted'", null, null, null, '\'');
+
+        assertNotNull(result);
+        assertTrue(result.contains("'https://api.example.com/o\\'hare?q=\\'quoted\\''"));
     }
 
     @Test
@@ -595,6 +678,16 @@ public class WebUtilTest extends TestBase {
         assertNotNull(curl);
         assertTrue(curl.contains("-d"));
         // The body should be properly escaped
+    }
+
+    @Test
+    public void testBuildCurlWithNullHttpMethodThrows() {
+        assertThrows(IllegalArgumentException.class, () -> WebUtil.buildCurl(null, "https://api.example.com/users", null, null, null, '\''));
+    }
+
+    @Test
+    public void testBuildCurlWithNullUrlThrows() {
+        assertThrows(IllegalArgumentException.class, () -> WebUtil.buildCurl("GET", null, null, null, null, '\''));
     }
 
     @Test

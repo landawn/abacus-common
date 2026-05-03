@@ -10,8 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -1336,6 +1336,154 @@ public class EventBusTest extends TestBase {
         Assertions.assertTrue(bus.isSupportedThreadMode(null));
         Assertions.assertTrue(bus.isSupportedThreadMode(ThreadMode.DEFAULT));
         Assertions.assertTrue(bus.isSupportedThreadMode(ThreadMode.THREAD_POOL_EXECUTOR));
+    }
+
+    // ---- Bug fix: double-checked locking in post(String, Object) ----
+
+    /**
+     * Verifies that concurrent calls to {@code post(Object)} (no eventId) never deliver
+     * an event more than once per subscriber, even when the internal subscriber-list cache
+     * ({@code listOfSubEventSubs}) is being lazily initialised by competing threads.
+     *
+     * <p>Before the fix the missing re-read of {@code listOfSubEventSubs} inside the
+     * {@code synchronized} block allowed multiple threads to each build their own copy of
+     * the list and replace the shared reference, causing redundant—but not duplicate—
+     * deliveries only if both copies were used.  The real risk is that under the Java
+     * Memory Model a partially-constructed list could be observed by a thread that read
+     * the field between the {@code synchronized} block's exit on Thread A and the
+     * publication of the final reference on Thread B.  The fix adds the re-read so that
+     * at most one thread ever populates the cache.</p>
+     */
+    @Test
+    public void testConcurrentPostWithoutEventId_subscriberListCacheIsInitialisedOnce() throws InterruptedException {
+        final int THREAD_COUNT = 20;
+        final AtomicInteger deliveryCount = new AtomicInteger(0);
+
+        Object subscriber = new Object() {
+            @Subscribe
+            public void onEvent(String event) {
+                deliveryCount.incrementAndGet();
+            }
+        };
+        eventBus.register(subscriber);
+
+        // All threads race to call post() before the cache is warm.
+        CountDownLatch ready = new CountDownLatch(THREAD_COUNT);
+        CountDownLatch start = new CountDownLatch(1);
+        CountDownLatch done = new CountDownLatch(THREAD_COUNT);
+
+        for (int i = 0; i < THREAD_COUNT; i++) {
+            Thread t = new Thread(() -> {
+                ready.countDown();
+                try {
+                    start.await();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                eventBus.post("concurrent");
+                done.countDown();
+            });
+            t.start();
+        }
+
+        ready.await();
+        start.countDown();
+        Assertions.assertTrue(done.await(10, TimeUnit.SECONDS));
+
+        // Each of the THREAD_COUNT post() calls must deliver exactly once.
+        Assertions.assertEquals(THREAD_COUNT, deliveryCount.get(),
+                "Each concurrent post() must deliver to the subscriber exactly once");
+
+        eventBus.unregister(subscriber);
+    }
+
+    /**
+     * Verifies that concurrent calls to {@code post(String, Object)} (with eventId) never
+     * deliver an event more than once per subscriber, even when the per-eventId cache
+     * ({@code listOfEventIdSubMap}) is being lazily populated by multiple threads
+     * simultaneously.
+     *
+     * <p>Before the fix the inner DCL block checked {@code registeredEventIdSubMap}
+     * but never re-read the cache map ({@code listOfEventIdSubMap}) after acquiring the
+     * lock, so two threads could each insert their own snapshot into the map — wasting
+     * work but also violating the single-writer guarantee that makes the cache safe to
+     * read outside the lock.</p>
+     */
+    @Test
+    public void testConcurrentPostWithEventId_subscriberListCacheIsInitialisedOnce() throws InterruptedException {
+        final int THREAD_COUNT = 20;
+        final AtomicInteger deliveryCount = new AtomicInteger(0);
+
+        Object subscriber = new Object() {
+            @Subscribe(eventId = "concurrentId")
+            public void onEvent(String event) {
+                deliveryCount.incrementAndGet();
+            }
+        };
+        eventBus.register(subscriber);
+
+        CountDownLatch ready = new CountDownLatch(THREAD_COUNT);
+        CountDownLatch start = new CountDownLatch(1);
+        CountDownLatch done = new CountDownLatch(THREAD_COUNT);
+
+        for (int i = 0; i < THREAD_COUNT; i++) {
+            Thread t = new Thread(() -> {
+                ready.countDown();
+                try {
+                    start.await();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                eventBus.post("concurrentId", "concurrent");
+                done.countDown();
+            });
+            t.start();
+        }
+
+        ready.await();
+        start.countDown();
+        Assertions.assertTrue(done.await(10, TimeUnit.SECONDS));
+
+        Assertions.assertEquals(THREAD_COUNT, deliveryCount.get(),
+                "Each concurrent post(eventId, event) must deliver to the subscriber exactly once");
+
+        eventBus.unregister(subscriber);
+    }
+
+    /**
+     * Verifies that a concurrent register+post sequence does not deliver stale data.
+     * After a new subscriber is registered, concurrent posts must see that subscriber
+     * (the cache is invalidated on register).
+     */
+    @Test
+    public void testRegisterInvalidatesCacheForConcurrentPost() throws InterruptedException {
+        final AtomicInteger deliveryCount = new AtomicInteger(0);
+
+        // Warm the cache with a first subscriber.
+        Object warmupSubscriber = new Object() {
+            @Subscribe
+            public void onEvent(String event) {
+            }
+        };
+        eventBus.register(warmupSubscriber);
+        eventBus.post("warmup"); // populates listOfSubEventSubs cache
+
+        Object lateSubscriber = new Object() {
+            @Subscribe
+            public void onEvent(String event) {
+                deliveryCount.incrementAndGet();
+            }
+        };
+        eventBus.register(lateSubscriber); // must invalidate the cache
+
+        // The very next post must reach lateSubscriber.
+        eventBus.post("after register");
+
+        Assertions.assertEquals(1, deliveryCount.get(),
+                "Subscriber registered after cache warm-up must receive subsequent events");
+
+        eventBus.unregister(warmupSubscriber);
+        eventBus.unregister(lateSubscriber);
     }
 
 }

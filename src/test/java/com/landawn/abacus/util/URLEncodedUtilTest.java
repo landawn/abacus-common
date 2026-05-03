@@ -16,9 +16,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Supplier;
 
-import com.landawn.abacus.util.ListMultimap;
-import com.landawn.abacus.util.NamingPolicy;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -127,13 +124,13 @@ public class URLEncodedUtilTest extends AbstractTest {
         N.println(query);
 
         Account account2 = URLEncodedUtil.decode(query, Account.class);
-        N.println(CommonUtil.stringOf(account2));
+        N.println(N.stringOf(account2));
 
         query = URLEncodedUtil.encode(Beans.beanToMap(account));
         N.println(query);
 
         account2 = URLEncodedUtil.decode(query, Account.class);
-        N.println(CommonUtil.stringOf(account2));
+        N.println(N.stringOf(account2));
         assertNotNull(account2);
     }
 
@@ -584,7 +581,7 @@ public class URLEncodedUtilTest extends AbstractTest {
         Map<String, String[]> parameters = new HashMap<>();
 
         for (String propName : props.keySet()) {
-            parameters.put(propName, CommonUtil.asArray(CommonUtil.stringOf(props.get(propName))));
+            parameters.put(propName, N.asArray(N.stringOf(props.get(propName))));
         }
 
         Account account2 = URLEncodedUtil.convertToBean(parameters, Account.class);

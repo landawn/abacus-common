@@ -17,21 +17,21 @@ package com.landawn.abacus.util;
 /**
  * Represents gender as an enumeration with associated integer values.
  * This enum provides four states: BLANK (unknown/unspecified), FEMALE, MALE, and X.
- * 
- * <p>Each gender value has an associated integer representation that can be used 
+ *
+ * <p>Each gender value has an associated integer representation that can be used
  * for database storage or legacy system integration.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Get gender from integer value
  * Gender gender = Gender.valueOf(1);   // Returns FEMALE
- * 
+ *
  * // Get integer value from gender
  * int maleValue = Gender.MALE.intValue();   // Returns 2
  *
  * // Get integer value from gender
  * int xValue = Gender.X.intValue();   // Returns 3
- * 
+ *
  * // Use in switch statements
  * switch(gender) {
  *     case FEMALE:
@@ -86,7 +86,7 @@ public enum Gender {
 
     /**
      * Returns the Gender enum constant associated with the specified integer value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Gender female = Gender.valueOf(1);   // Returns FEMALE

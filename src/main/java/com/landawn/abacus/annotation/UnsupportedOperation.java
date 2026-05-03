@@ -27,13 +27,13 @@ import java.lang.annotation.Target;
  *
  * <p>Common use cases include:</p>
  * <ul>
- *   <li>Immutable collection implementations where modification methods are unsupported</li>
- *   <li>Read-only wrappers or views that prohibit state changes</li>
- *   <li>Interface implementations where certain operations are not applicable</li>
- *   <li>Abstract base classes with optional operations that subclasses may not support</li>
+ *   <li>Immutable collection implementations where modification methods are unsupported.</li>
+ *   <li>Read-only wrappers or views that prohibit state changes.</li>
+ *   <li>Interface implementations where certain operations are not applicable.</li>
+ *   <li>Abstract base classes with optional operations that subclasses may not support.</li>
  * </ul>
  *
- * <p>This annotation serves as documentation for API users, making it clear at compile-time
+ * <p>This annotation serves as documentation for API users, making it clear at the call site
  * which operations are not supported, rather than discovering it at runtime.</p>
  *
  * <p><b>Usage Examples:</b></p>

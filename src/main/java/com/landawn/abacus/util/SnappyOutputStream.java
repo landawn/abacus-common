@@ -21,11 +21,11 @@ import java.io.OutputStream;
  * A compression output stream that uses the Snappy compression algorithm.
  * This class wraps the Xerial Snappy library's SnappyOutputStream to provide
  * fast compression of data written to an underlying output stream.
- * 
+ *
  * <p>Snappy is a compression/decompression library that aims for very high speeds
  * and reasonable compression ratios. It is particularly effective for data that
  * contains repeated byte sequences.
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * try (FileOutputStream fos = new FileOutputStream("data.snappy");
@@ -33,9 +33,9 @@ import java.io.OutputStream;
  *     sos.write("Hello, World!".getBytes());
  * }
  * }</pre>
- * 
+ *
  * <p>Note: This class requires the Xerial Snappy library to be on the classpath.
- * 
+ *
  * @see SnappyInputStream
  * @see java.io.OutputStream
  */
@@ -46,7 +46,7 @@ public final class SnappyOutputStream extends OutputStream {
     /**
      * Creates a new SnappyOutputStream that compresses data written to the specified output stream.
      * Uses the default buffer size for compression.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * OutputStream compressed = new SnappyOutputStream(new FileOutputStream("data.snappy"));
@@ -62,7 +62,7 @@ public final class SnappyOutputStream extends OutputStream {
      * Creates a new SnappyOutputStream with the specified buffer size.
      * A larger buffer size may improve compression performance for large data sets
      * at the cost of increased memory usage.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Use a 64KB buffer for better performance with large files
@@ -79,7 +79,7 @@ public final class SnappyOutputStream extends OutputStream {
     /**
      * Writes a single byte of compressed data to the output stream.
      * The byte is written as the low-order byte of the integer value.
-     * 
+     *
      * <p>Note: Writing single bytes is generally less efficient than writing
      * arrays of bytes due to compression overhead.
      *
@@ -94,7 +94,7 @@ public final class SnappyOutputStream extends OutputStream {
     /**
      * Writes an array of bytes to the output stream after compression.
      * This is equivalent to calling {@code write(b, 0, b.length)}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data = "Hello, World!".getBytes();
@@ -112,7 +112,7 @@ public final class SnappyOutputStream extends OutputStream {
     /**
      * Writes a portion of a byte array to the output stream after compression.
      * Writes {@code len} bytes from the array {@code b}, starting at offset {@code off}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] buffer = new byte[1024];
@@ -135,7 +135,7 @@ public final class SnappyOutputStream extends OutputStream {
     /**
      * Flushes this output stream and forces any buffered output bytes to be written out.
      * This ensures that all data written so far is compressed and sent to the underlying stream.
-     * 
+     *
      * <p>Note: Calling flush() frequently may reduce compression efficiency as it forces
      * the compressor to output data that might otherwise be further compressed with
      * subsequent writes.
@@ -151,10 +151,10 @@ public final class SnappyOutputStream extends OutputStream {
      * Closes this output stream and releases any system resources associated with it.
      * This method will flush any remaining buffered data and write the final compressed
      * blocks before closing the underlying output stream.
-     * 
+     *
      * <p>Once closed, this stream cannot be used for further write operations.
      * Calling write methods after close() will result in an IOException.
-     * 
+     *
      * <p>This method is idempotent - multiple calls to close() have no additional effect.
      *
      * @throws IOException if an I/O error occurs during closing

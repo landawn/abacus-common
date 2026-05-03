@@ -1022,8 +1022,8 @@ public class TypeFactoryTest extends TestBase {
             }
 
             @Override
-            public Type<?>[] parameterTypes() {
-                return new Type[0];
+            public List<Type<?>> parameterTypes() {
+                return java.util.Collections.emptyList();
             }
 
             @Override
@@ -1333,8 +1333,8 @@ public class TypeFactoryTest extends TestBase {
             }
 
             @Override
-            public Type<?>[] parameterTypes() {
-                return new Type[0];
+            public List<Type<?>> parameterTypes() {
+                return java.util.Collections.emptyList();
             }
 
             @Override

@@ -19,22 +19,36 @@ package com.landawn.abacus.util;
  * This class is useful for operations where both the floating-point value and its
  * original position need to be preserved, such as when sorting or filtering numeric
  * collections while maintaining knowledge of the original indices.
- * 
+ *
  * <p>This class extends {@link AbstractIndexed} and provides factory methods for creating
  * instances with validated non-negative indices.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedFloat ifloat = IndexedFloat.of(3.14f, 2);
  * System.out.println(ifloat.value());   // prints: 3.14
  * System.out.println(ifloat.index());   // prints: 2
  * }</pre>
- * 
+ *
+ * @see Indexed
+ * @see IndexedBoolean
+ * @see IndexedByte
+ * @see IndexedChar
+ * @see IndexedShort
+ * @see IndexedInt
+ * @see IndexedLong
+ * @see IndexedDouble
  */
 public final class IndexedFloat extends AbstractIndexed {
 
     private final float value;
 
+    /**
+     * Constructs an IndexedFloat instance with the specified index and value.
+     *
+     * @param index the index position
+     * @param value the float value to be indexed
+     */
     IndexedFloat(final long index, final float value) {
         super(index);
         this.value = value;
@@ -42,7 +56,7 @@ public final class IndexedFloat extends AbstractIndexed {
 
     /**
      * Creates a new {@code IndexedFloat} instance with the specified value and index.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedFloat indexed = IndexedFloat.of(2.718f, 10);
@@ -63,7 +77,7 @@ public final class IndexedFloat extends AbstractIndexed {
      * Creates a new {@code IndexedFloat} instance with the specified value and long index.
      * This method is useful when working with large arrays or collections where the index
      * might exceed the range of an int.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedFloat indexed = IndexedFloat.of(1.414f, 1000000000L);
@@ -93,10 +107,10 @@ public final class IndexedFloat extends AbstractIndexed {
      * Returns a hash code value for this object. The hash code is computed
      * using both the index and the value to ensure proper distribution in
      * hash-based collections.
-     * 
+     *
      * <p>Note: The float value is cast to int for hash calculation, which may
      * result in hash collisions for values that differ only in their fractional parts.</p>
-     * 
+     *
      * @return a hash code value for this object
      */
     @Override
@@ -108,7 +122,7 @@ public final class IndexedFloat extends AbstractIndexed {
      * Indicates whether some other object is "equal to" this one.
      * Two {@code IndexedFloat} objects are considered equal if they have
      * the same index and the same value.
-     * 
+     *
      * <p>Float comparison is performed using the {@code N.equals} method,
      * which handles special float values (NaN, positive/negative infinity) correctly.</p>
      *
@@ -125,10 +139,10 @@ public final class IndexedFloat extends AbstractIndexed {
      * Returns a string representation of this {@code IndexedFloat}.
      * The string representation consists of the index in square brackets
      * followed by an equals sign and the float value.
-     * 
+     *
      * <p>For example, an {@code IndexedFloat} with index 7 and value 3.14f
      * would return the string {@code "[7]=3.14"}.</p>
-     * 
+     *
      * @return a string representation of this object
      */
     @Override

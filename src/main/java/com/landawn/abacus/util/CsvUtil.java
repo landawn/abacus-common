@@ -87,7 +87,7 @@ public final class CsvUtil {
     /**
      * Default CSV header parser function that uses the internal CsvParser.
      * This parser handles quoted fields and escape characters according to CSV standards.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] headers = CSV_HEADER_PARSER.apply("Name,Age,\"Address, City\"");
@@ -99,7 +99,7 @@ public final class CsvUtil {
     /**
      * Default CSV line parser that parses a line into an existing array.
      * This parser handles quoted fields and escape characters according to CSV standards.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] row = new String[3];
@@ -113,7 +113,7 @@ public final class CsvUtil {
      * CSV header parser that uses a simple splitter approach.
      * This parser splits by comma and removes surrounding quotes from fields.
      * It's faster but less robust than the default parser for standard CSV files.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] headers = CSV_HEADER_PARSER_BY_SPLITTER.apply("\"Name\",\"Age\",\"City\"");
@@ -139,7 +139,7 @@ public final class CsvUtil {
      * CSV line parser that uses a simple splitter approach.
      * This parser splits by comma and removes surrounding quotes from fields.
      * It's faster but less robust than the default parser for standard CSV files.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] row = new String[3];
@@ -163,7 +163,7 @@ public final class CsvUtil {
     /**
      * CSV header parser that expects JSON array format.
      * This parser treats each line as a JSON array of strings.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] headers = CSV_HEADER_PARSER_IN_JSON.apply("[\"Name\",\"Age\",\"City\"]");
@@ -175,7 +175,7 @@ public final class CsvUtil {
     /**
      * CSV line parser that expects JSON array format.
      * This parser treats each line as a JSON array of strings.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] row = new String[3];
@@ -209,8 +209,8 @@ public final class CsvUtil {
      * }
      * }</pre>
      *
-     * @param parser the Function to set as the CSV header parser, must not be null.
-     * @throws IllegalArgumentException if the parser is null.
+     * @param parser the Function to set as the CSV header parser, must not be {@code null}.
+     * @throws IllegalArgumentException if the parser is {@code null}.
      * @see #resetHeaderParser()
      * @see #getCurrentHeaderParser()
      * @see #setLineParser(BiConsumer)
@@ -237,8 +237,8 @@ public final class CsvUtil {
      * }
      * }</pre>
      *
-     * @param parser the BiConsumer to set as the CSV line parser, must not be null.
-     * @throws IllegalArgumentException if the parser is null.
+     * @param parser the BiConsumer to set as the CSV line parser, must not be {@code null}.
+     * @throws IllegalArgumentException if the parser is {@code null}.
      * @see #resetLineParser()
      * @see #getCurrentLineParser()
      * @see #setHeaderParser(Function)
@@ -337,7 +337,7 @@ public final class CsvUtil {
     /**
      * Sets the escape character to backslash for CSV writing operations in the current thread.
      * This affects how special characters are escaped when writing CSV data.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CsvUtil.setEscapeCharToBackSlashForWrite();
@@ -347,7 +347,7 @@ public final class CsvUtil {
      *     CsvUtil.resetEscapeCharForWrite();   // Reset to default
      * }
      * }</pre>
-     * 
+     *
      * @see #resetEscapeCharForWrite()
      */
     public static void setEscapeCharToBackSlashForWrite() {
@@ -357,7 +357,7 @@ public final class CsvUtil {
     /**
      * Resets the escape character setting for CSV writing to the default in the current thread.
      * After calling this method, the thread will use the default escape character behavior.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CsvUtil.setEscapeCharToBackSlashForWrite();
@@ -383,18 +383,18 @@ public final class CsvUtil {
     /**
      * Writes a single field value to a CSV writer with appropriate formatting and escaping.
      * This method handles {@code null} values, quotable types, and proper character escaping.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedCsvWriter writer = new BufferedCsvWriter(outputWriter);
      * CsvUtil.writeField(writer, Type.of(String.class), "Hello, World");
      * CsvUtil.writeField(writer, Type.of(Integer.class), 42);
-     * CsvUtil.writeField(writer, null, null);   // Writes NULL
+     * CsvUtil.writeField(writer, null, null);   // Writes the literal text "null"
      * }</pre>
-     * 
+     *
      * @param writer the BufferedCsvWriter to write to.
      * @param type the Type of the value, can be {@code null} (defaults to String type for {@code null} values).
-     * @param value the value to write, can be null.
+     * @param value the value to write, can be {@code null}.
      * @throws IOException if an I/O error occurs during writing.
      */
     public static void writeField(final BufferedCsvWriter writer, final Type<?> type, final Object value) throws IOException {
@@ -748,7 +748,7 @@ public final class CsvUtil {
      * @param source the File containing CSV data
      * @param beanClassForColumnType the bean class defining column types
      * @return a Dataset with typed columns
-     * @throws IllegalArgumentException if beanClassForColumnType is null
+     * @throws IllegalArgumentException if beanClassForColumnType is {@code null}
      * @throws UncheckedIOException if an I/O error occurs
      * @see #load(File)
      * @see #load(File, Collection, Class)
@@ -777,7 +777,7 @@ public final class CsvUtil {
      * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
      * @param beanClassForColumnType the bean class defining column types
      * @return a Dataset with typed columns
-     * @throws IllegalArgumentException if beanClassForColumnType is null
+     * @throws IllegalArgumentException if beanClassForColumnType is {@code null}
      * @throws UncheckedIOException if an I/O error occurs
      * @see #load(File, Class)
      * @see #load(File, Collection, long, long, Class)
@@ -809,7 +809,7 @@ public final class CsvUtil {
      * @param count the maximum number of rows to process
      * @param beanClassForColumnType the bean class defining column types
      * @return a Dataset with typed columns
-     * @throws IllegalArgumentException if offset/count are negative or beanClassForColumnType is null
+     * @throws IllegalArgumentException if offset/count are negative or beanClassForColumnType is {@code null}
      * @throws UncheckedIOException if an I/O error occurs
      * @see #load(File, Class)
      * @see #load(File, Collection, Class)
@@ -879,7 +879,7 @@ public final class CsvUtil {
      * @param source the Reader providing CSV data
      * @param beanClassForColumnType the bean class defining column types
      * @return a Dataset with typed columns
-     * @throws IllegalArgumentException if beanClassForColumnType is null
+     * @throws IllegalArgumentException if beanClassForColumnType is {@code null}
      * @throws UncheckedIOException if an I/O error occurs
      * @see #load(Reader)
      * @see #load(Reader, Collection, Class)
@@ -909,7 +909,7 @@ public final class CsvUtil {
      * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
      * @param beanClassForColumnType the bean class defining column types
      * @return a Dataset with typed columns
-     * @throws IllegalArgumentException if beanClassForColumnType is null
+     * @throws IllegalArgumentException if beanClassForColumnType is {@code null}
      * @throws UncheckedIOException if an I/O error occurs
      * @see #load(Reader, Class)
      * @see #load(Reader, Collection, long, long, Class)
@@ -1092,8 +1092,8 @@ public final class CsvUtil {
     /**
      * Loads CSV data from a file with all columns included and provided column-to-type mapping.
      * Columns present in {@code columnTypeMap} will be parsed into the specified {@link Type};
-     * all other columns default to {@link String}. 
-     * 
+     * all other columns default to {@link String}.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String,  ? extends Type<?>> typeMap = new HashMap<>();
@@ -1101,7 +1101,7 @@ public final class CsvUtil {
      * // typeMap.put("name", Type.of(String.class)); // String is default
      * typeMap.put("price", Type.of(Double.class));
      * typeMap.put("active", Type.of(Boolean.class));
-     * 
+     *
      * Dataset ds = CsvUtil.load(new File("products.csv"), typeMap);
      * }</pre>
      *
@@ -1119,8 +1119,8 @@ public final class CsvUtil {
     /**
      * Loads CSV data from a file with specified column selection and provided column-to-type mapping.
      * Columns present in {@code columnTypeMap} will be parsed into the specified {@link Type};
-     * Other columns default to {@link String}. 
-     * 
+     * Other columns default to {@link String}.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String,  ? extends Type<?>> typeMap = new HashMap<>();
@@ -1128,7 +1128,7 @@ public final class CsvUtil {
      * // typeMap.put("name", Type.of(String.class)); // String is default
      * typeMap.put("price", Type.of(Double.class));
      * typeMap.put("active", Type.of(Boolean.class));
-     * 
+     *
      * Dataset ds = CsvUtil.load(new File("products.csv"), Arrays.asList("id", "name", "price", "active"), 1000, 1000, typeMap);
      * }</pre>
      *
@@ -1150,8 +1150,8 @@ public final class CsvUtil {
     /**
      * Loads CSV data from a file with specified column selection, pagination, row filtering and provided column-to-type mapping.
      * Columns present in {@code columnTypeMap} will be parsed into the specified {@link Type};
-     * Other columns default to {@link String}. 
-     * 
+     * Other columns default to {@link String}.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String,  ? extends Type<?>> typeMap = new HashMap<>();
@@ -1159,7 +1159,7 @@ public final class CsvUtil {
      * // typeMap.put("name", Type.of(String.class)); // String is default
      * typeMap.put("price", Type.of(Double.class));
      * typeMap.put("active", Type.of(Boolean.class));
-     * 
+     *
      * // Load only products with active status
      * Predicate<String[]> activeFilter = row -> Boolean.parseBoolean(row[3]);
      * Dataset ds = CsvUtil.load(new File("products.csv"), Arrays.asList("id", "name", "price", "active"), 1000, 1000, activeFilter, typeMap);
@@ -1191,8 +1191,8 @@ public final class CsvUtil {
     /**
      * Loads CSV data from a Reader with all columns included and provided column-to-type mapping.
      * Columns present in {@code columnTypeMap} will be parsed into the specified {@link Type};
-     * all other columns default to {@link String}. 
-     * 
+     * all other columns default to {@link String}.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String,  ? extends Type<?>> typeMap = new HashMap<>();
@@ -1200,7 +1200,7 @@ public final class CsvUtil {
      * // typeMap.put("name", Type.of(String.class)); // String is default
      * typeMap.put("price", Type.of(Double.class));
      * typeMap.put("active", Type.of(Boolean.class));
-     * 
+     *
      * try (Reader reader = new FileReader("products.csv")) {
      *     // Load first 1000 products
      *     Dataset ds = CsvUtil.load(reader, typeMap);
@@ -1221,8 +1221,8 @@ public final class CsvUtil {
     /**
      * Loads CSV data from a Reader with specified column selection and provided column-to-type mapping.
      * Columns present in {@code columnTypeMap} will be parsed into the specified {@link Type};
-     * Other columns default to {@link String}. 
-     * 
+     * Other columns default to {@link String}.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String,  ? extends Type<?>> typeMap = new HashMap<>();
@@ -1230,7 +1230,7 @@ public final class CsvUtil {
      * // typeMap.put("name", Type.of(String.class)); // String is default
      * typeMap.put("price", Type.of(Double.class));
      * typeMap.put("active", Type.of(Boolean.class));
-     * 
+     *
      * try (Reader reader = new FileReader("products.csv")) {
      *     // Load first 1000 products
      *     Dataset ds = CsvUtil.load(reader, Arrays.asList("id", "name", "price", "active"), 1000, 1000, typeMap);
@@ -1255,8 +1255,8 @@ public final class CsvUtil {
     /**
      * Loads CSV data from a Reader with specified column selection, pagination, row filtering and provided column-to-type mapping.
      * Columns present in {@code columnTypeMap} will be parsed into the specified {@link Type};
-     * Other columns default to {@link String}. 
-     * 
+     * Other columns default to {@link String}.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String,  ? extends Type<?>> typeMap = new HashMap<>();
@@ -1264,14 +1264,14 @@ public final class CsvUtil {
      * // typeMap.put("name", Type.of(String.class)); // String is default
      * typeMap.put("price", Type.of(Double.class));
      * typeMap.put("active", Type.of(Boolean.class));
-     * 
+     *
      * // Load only products with active status
      * Predicate<String[]> activeFilter = row -> Boolean.parseBoolean(row[3]);
      *
      * try (Reader reader = new FileReader("products.csv")) {
      *      Dataset ds = CsvUtil.load(reader, Arrays.asList("id", "name", "price", "active"), 1000, 1000, activeFilter, typeMap);
      * }
-     * }</pre> 
+     * }</pre>
      *
      * @param source the Reader providing CSV data
      * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
@@ -1382,16 +1382,16 @@ public final class CsvUtil {
     /**
      * Loads CSV data from a file with custom row extraction logic.
      * The row extractor receives column names and row data to produce typed output.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * TriConsumer<List<String>, DisposableArray<String>, Object[]> extractor = 
+     * TriConsumer<List<String>, DisposableArray<String>, Object[]> extractor =
      *     (columns, row, output) -> {
      *         output[0] = row.get(0);   // name as String
      *         output[1] = Integer.parseInt(row.get(1));   // age as int
      *         output[2] = LocalDate.parse(row.get(2));   // date as LocalDate
      *     };
-     * 
+     *
      * Dataset ds = CsvUtil.load(new File("data.csv"), extractor);
      * }</pre>
      *
@@ -1408,16 +1408,16 @@ public final class CsvUtil {
     /**
      * Loads CSV data from a file with column selection and custom row extraction.
      * Only selected columns are passed to the row extractor.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * TriConsumer<List<String>, DisposableArray<String>, Object[]> extractor = 
+     * TriConsumer<List<String>, DisposableArray<String>, Object[]> extractor =
      *     (columns, row, output) -> {
      *         // Process only selected columns
      *         output[0] = row.get(0).toUpperCase();
      *         output[1] = Double.parseDouble(row.get(1)) * 1.1;  // Add 10%
      *     };
-     * 
+     *
      * Dataset ds = CsvUtil.load(
      *     new File("prices.csv"),
      *     Arrays.asList("product", "price"),
@@ -1439,16 +1439,16 @@ public final class CsvUtil {
     /**
      * Loads CSV data from a file with pagination and custom row extraction.
      * Allows processing a subset of rows with custom logic.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * TriConsumer<List<String>, DisposableArray<String>, Object[]> extractor = 
+     * TriConsumer<List<String>, DisposableArray<String>, Object[]> extractor =
      *     (columns, row, output) -> {
      *         // Custom parsing logic
      *         output[0] = parseCustomFormat(row.get(0));
      *         output[1] = validateAndConvert(row.get(1));
      *     };
-     * 
+     *
      * // Process rows 100-199
      * Dataset ds = CsvUtil.load(new File("large.csv"), 100, 100, extractor);
      * }</pre>
@@ -1599,7 +1599,7 @@ public final class CsvUtil {
      * @param count the maximum number of rows to process
      * @param rowFilter a Predicate to filter rows, only matching rows are included
      * @param rowExtractor a TriConsumer to extract the row data to the output array.
-     *      The first parameter is the column names, the second parameter is the row data, and the third parameter is the output array. 
+     *      The first parameter is the column names, the second parameter is the row data, and the third parameter is the output array.
      * @return a Dataset containing the loaded CSV data
      * @throws IllegalArgumentException if offset or count are negative, or if the size of {@code columnTypeList} is not equal to the size of columns in CSV.
      * @throws UncheckedIOException if an I/O error occurs
@@ -2173,7 +2173,7 @@ public final class CsvUtil {
      * @param rowMapper converts the row data to the target type.
      *                  First parameter is the column names, second parameter is the row data.
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if the rowMapper is null
+     * @throws IllegalArgumentException if the rowMapper is {@code null}
      * @throws UncheckedIOException if an I/O error occurs while reading the file
      * @see #stream(File, Collection, BiFunction)
      * @see #stream(File, Collection, long, long, Predicate, BiFunction)
@@ -2268,7 +2268,7 @@ public final class CsvUtil {
      * @param rowMapper converts the row data to the target type.
      *                  First parameter is the column names, second parameter is the row data.
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if offset or count are negative, or if the rowMapper is null
+     * @throws IllegalArgumentException if offset or count are negative, or if the rowMapper is {@code null}
      * @throws UncheckedIOException if an I/O error occurs while reading the file
      * @see #stream(File, BiFunction)
      * @see #stream(File, Collection, BiFunction)
@@ -2324,7 +2324,7 @@ public final class CsvUtil {
      *                  First parameter is the column names, second parameter is the row data.
      * @param closeReaderWhenStreamIsClosed {@code true} to close the reader when the stream is closed, {@code false} otherwise
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if the rowMapper is null
+     * @throws IllegalArgumentException if the rowMapper is {@code null}
      * @throws UncheckedIOException if an I/O error occurs while reading
      * @see #stream(Reader, Collection, BiFunction, boolean)
      * @see #stream(Reader, Collection, long, long, Predicate, BiFunction, boolean)
@@ -2428,7 +2428,7 @@ public final class CsvUtil {
      *                  First parameter is the column names, second parameter is the row data.
      * @param closeReaderWhenStreamIsClosed whether to close the Reader when the stream is closed
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if offset or count are negative, or if the rowMapper is null
+     * @throws IllegalArgumentException if offset or count are negative, or if the rowMapper is {@code null}
      * @throws UncheckedIOException if an I/O error occurs while reading
      * @see #stream(Reader, BiFunction, boolean)
      * @see #stream(Reader, Collection, BiFunction, boolean)
@@ -2558,18 +2558,19 @@ public final class CsvUtil {
      * Jane,25,Marketing
      * }</pre>
      *
-     * <p>Example JSON output:</p>
+     * <p>Example JSON output (the writer emits a compact array with one object per line
+     * and no indentation):</p>
      * <pre>{@code
      * [
-     *   {"Name":"John","Age":"30","Department":"Engineering"},
-     *   {"Name":"Jane","Age":"25","Department":"Marketing"}
+     * {"Name":"John","Age":"30","Department":"Engineering"},
+     * {"Name":"Jane","Age":"25","Department":"Marketing"}
      * ]
      * }</pre>
      *
      * @param csvFile the source CSV file to convert
      * @param jsonFile the destination JSON file to create
      * @return the number of rows written to the JSON file
-     * @throws IllegalArgumentException if csvFile or jsonFile is null
+     * @throws IllegalArgumentException if csvFile or jsonFile is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during file operations
      * @see #csvToJson(File, Collection, File)
      * @see #csvToJson(File, Collection, File, Class)
@@ -2604,20 +2605,21 @@ public final class CsvUtil {
      * Jane,25,Marketing,65000
      * }</pre>
      *
-     * <p>Example JSON output (with selected columns "Name", "Department"):</p>
+     * <p>Example JSON output (with selected columns "Name", "Department"); the writer
+     * emits a compact array with one object per line and no indentation:</p>
      * <pre>{@code
      * [
-     *   {"Name":"John","Department":"Engineering"},
-     *   {"Name":"Jane","Department":"Marketing"}
+     * {"Name":"John","Department":"Engineering"},
+     * {"Name":"Jane","Department":"Marketing"}
      * ]
      * }</pre>
      *
      * @param csvFile the source CSV file to convert
-     * @param selectColumnNames the collection of column names to include in JSON output, 
+     * @param selectColumnNames the collection of column names to include in JSON output,
      *                         {@code null} to include all columns
      * @param jsonFile the destination JSON file to create
      * @return the number of rows written to the JSON file
-     * @throws IllegalArgumentException if csvFile or jsonFile is null
+     * @throws IllegalArgumentException if csvFile or jsonFile is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during file operations
      * @see #csvToJson(File, File)
      * @see #csvToJson(File, Collection, File, Class)
@@ -2662,11 +2664,12 @@ public final class CsvUtil {
      * Jane,25,Marketing,65000
      * }</pre>
      *
-     * <p>Example JSON output (with selected columns and type conversion):</p>
+     * <p>Example JSON output (with selected columns and type conversion); the writer
+     * emits a compact array with one object per line and no indentation:</p>
      * <pre>{@code
      * [
-     *   {"name":"John","age":30,"department":"Engineering"},
-     *   {"name":"Jane","age":25,"department":"Marketing"}
+     * {"name":"John","age":30,"department":"Engineering"},
+     * {"name":"Jane","age":25,"department":"Marketing"}
      * ]
      * }</pre>
      *
@@ -2676,8 +2679,8 @@ public final class CsvUtil {
      * @param jsonFile the destination JSON file to create
      * @param beanClassForColumnTypeInference the bean class defining property types for conversion,
      *                               {@code null} to treat all values as strings
-     * @return the number of rows written to the JSON file                              
-     * @throws IllegalArgumentException if csvFile or jsonFile is null
+     * @return the number of rows written to the JSON file
+     * @throws IllegalArgumentException if csvFile or jsonFile is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during file operations
      * @see #csvToJson(File, File)
      * @see #csvToJson(File, Collection, File)
@@ -2863,12 +2866,12 @@ public final class CsvUtil {
      * without header selection.
      *
      * <p>The JSON file must contain an array of objects where each object represents a row.
-     * The first object's properties will be used as CSV headers.</p> 
+     * The first object's properties will be used as CSV headers.</p>
      *
      * @param jsonFile the source JSON file to convert
      * @param csvFile the destination CSV file to create
      * @return the number of rows written to the CSV file (including header row)
-     * @throws IllegalArgumentException if jsonFile or csvFile is null
+     * @throws IllegalArgumentException if jsonFile or csvFile is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during file operations or if the JSON format is invalid
      * @see #jsonToCsv(File, Collection, File)
      */
@@ -2916,7 +2919,7 @@ public final class CsvUtil {
      *                        {@code null} or empty to include all properties from the first object
      * @param csvFile the destination CSV file to create
      * @return the number of rows written to the CSV file (including header row)
-     * @throws IllegalArgumentException if jsonFile or csvFile is null
+     * @throws IllegalArgumentException if jsonFile or csvFile is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during file operations or if the JSON format is invalid
      * @see #jsonToCsv(File, File)
      */

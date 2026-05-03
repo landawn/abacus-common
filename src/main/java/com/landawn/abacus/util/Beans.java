@@ -130,8 +130,8 @@ import com.landawn.abacus.util.stream.Stream;
  * // Object merging with strategies
  * User source = new User("John", 30, "john@example.com");
  * User target = new User("Jane", 25, null);
- * Beans.copyInfo(source, target);   // Merge source into target
- * Beans.copyInfo(source, target, (sourceVal, targetVal) -> sourceVal);   // Custom merge function
+ * Beans.copyInto(source, target);   // Merge source into target
+ * Beans.copyInto(source, target, (sourceVal, targetVal) -> sourceVal);   // Custom merge function
  *
  * // Object comparison operations
  * boolean isEqual = Beans.equalsByProps(user1, user2, Arrays.asList("name"));   // Equality check by props
@@ -288,8 +288,8 @@ import com.landawn.abacus.util.stream.Stream;
  * User updates = new User();
  * updates.setName("Jane Doe");
  *
- * Beans.copyInfo(updates, user);   // Merge updates into user
- * Beans.copyInfo(updates, user, (source, target) ->
+ * Beans.copyInto(updates, user);   // Merge updates into user
+ * Beans.copyInto(updates, user, (source, target) ->
  *     source != null && !source.equals("") ? source : target);   // Custom merge logic
  *
  * // Validation and comparison
@@ -469,10 +469,10 @@ public final class Beans {
      *
      * <p>A class is considered a bean class if it:</p>
      * <ul>
-     *   <li>Is annotated with {@code @Entity}, or</li>
+     *   <li>Is annotated with {@code @Entity} (including {@code javax.persistence.Entity} or {@code jakarta.persistence.Entity}), or</li>
      *   <li>Is a record class (Java 14+) or annotated with {@code @Record}, or</li>
      *   <li>Has at least one property with getter/setter methods and is not a
-     *       {@link CharSequence}, {@link Number}, or {@link Map.Entry} implementation</li>
+     *       {@link CharSequence}, {@link Number}, {@link Map}, {@link Collection}, or {@link Map.Entry} implementation</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -578,7 +578,7 @@ public final class Beans {
 
     /**
      * Retrieves the builder information for the specified class.
-     * The builder information includes the builder class type, a supplier for creating builder instances, 
+     * The builder information includes the builder class type, a supplier for creating builder instances,
      * and a function to build the target object from the builder.
      *
      * <p>This method looks for common builder patterns:</p>
@@ -2201,8 +2201,8 @@ public final class Beans {
     }
 
     /**
-     * Sets the property value by invoking the getter method on the provided bean.
-     * The returned type of the get method should be {@code Collection} or {@code Map}. 
+     * Sets the property value returned by invoking the getter method on the provided bean.
+     * The returned type of the get method should be {@code Collection} or {@code Map}.
      * And the specified property value and the returned value must be the same type.
      * If {@code propValue} is {@code null}, this method does nothing.
      *
@@ -4019,46 +4019,71 @@ public final class Beans {
      */
     public static <M extends Map<String, Object>> void deepBeanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy, final M output) {
-        if (bean == null) {
+        // Cycle guard: if `bean` is already being converted higher up the call stack (e.g.
+        // bidirectional `parent <-> child` references), bail out instead of infinite-recursing
+        // into a StackOverflowError.
+        if ((bean == null) || !enterDeepBean(bean)) {
             return;
         }
+        try {
+            final boolean isCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.CAMEL_CASE == keyNamingPolicy
+                    || NamingPolicy.NO_CHANGE == keyNamingPolicy;
 
-        final boolean isCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.CAMEL_CASE == keyNamingPolicy
-                || NamingPolicy.NO_CHANGE == keyNamingPolicy;
+            final boolean hasIgnoredPropNames = N.notEmpty(ignoredPropNames);
+            final Class<?> beanClass = bean.getClass();
+            final ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
 
-        final boolean hasIgnoredPropNames = N.notEmpty(ignoredPropNames);
-        final Class<?> beanClass = bean.getClass();
-        final ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
+            String propName = null;
+            Object propValue = null;
 
-        String propName = null;
-        Object propValue = null;
+            for (final ParserUtil.PropInfo propInfo : beanInfo.propInfoList) {
+                propName = propInfo.name;
 
-        for (final ParserUtil.PropInfo propInfo : beanInfo.propInfoList) {
-            propName = propInfo.name;
-
-            if (hasIgnoredPropNames && ignoredPropNames.contains(propName)) {
-                continue;
-            }
-
-            propValue = propInfo.getPropValue(bean);
-
-            if (ignoreNullProperty && (propValue == null)) {
-                continue;
-            }
-
-            if ((propValue == null) || !propInfo.jsonXmlType.isBean()) {
-                if (isCamelCaseOrNoChange) {
-                    output.put(propName, propValue);
-                } else {
-                    output.put(keyNamingPolicy.convert(propName), propValue);
+                if (hasIgnoredPropNames && ignoredPropNames.contains(propName)) {
+                    continue;
                 }
-            } else {
-                if (isCamelCaseOrNoChange) {
-                    output.put(propName, deepBeanToMap(propValue, ignoreNullProperty, null, keyNamingPolicy));
+
+                propValue = propInfo.getPropValue(bean);
+
+                if (ignoreNullProperty && (propValue == null)) {
+                    continue;
+                }
+
+                if ((propValue == null) || !propInfo.jsonXmlType.isBean()) {
+                    if (isCamelCaseOrNoChange) {
+                        output.put(propName, propValue);
+                    } else {
+                        output.put(keyNamingPolicy.convert(propName), propValue);
+                    }
                 } else {
-                    output.put(keyNamingPolicy.convert(propName), deepBeanToMap(propValue, ignoreNullProperty, null, keyNamingPolicy));
+                    if (isCamelCaseOrNoChange) {
+                        output.put(propName, deepBeanToMap(propValue, ignoreNullProperty, null, keyNamingPolicy));
+                    } else {
+                        output.put(keyNamingPolicy.convert(propName), deepBeanToMap(propValue, ignoreNullProperty, null, keyNamingPolicy));
+                    }
                 }
             }
+        } finally {
+            exitDeepBean(bean);
+        }
+    }
+
+    /**
+     * Per-thread visited-bean set (identity-keyed) for {@link #deepBeanToMap} and
+     * {@link #beanToFlatMap}. Used to detect reference cycles in the bean graph.
+     */
+    private static final ThreadLocal<java.util.IdentityHashMap<Object, Boolean>> DEEP_BEAN_VISITED = ThreadLocal.withInitial(java.util.IdentityHashMap::new);
+
+    /** @return true if the bean was added (no cycle); false if it was already in progress. */
+    private static boolean enterDeepBean(final Object bean) {
+        return DEEP_BEAN_VISITED.get().putIfAbsent(bean, Boolean.TRUE) == null;
+    }
+
+    private static void exitDeepBean(final Object bean) {
+        final java.util.IdentityHashMap<Object, Boolean> visited = DEEP_BEAN_VISITED.get();
+        visited.remove(bean);
+        if (visited.isEmpty()) {
+            DEEP_BEAN_VISITED.remove();
         }
     }
 
@@ -4586,10 +4611,19 @@ public final class Beans {
 
     private static <M extends Map<String, Object>> void beanToFlatMap(final Object bean, final boolean ignoreNullProperty,
             final Collection<String> ignoredPropNames, final NamingPolicy keyNamingPolicy, final String parentPropName, final M output) {
-        if (bean == null) {
+        // Cycle guard — see deepBeanToMap.
+        if ((bean == null) || !enterDeepBean(bean)) {
             return;
         }
+        try {
+            beanToFlatMapBody(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, parentPropName, output);
+        } finally {
+            exitDeepBean(bean);
+        }
+    }
 
+    private static <M extends Map<String, Object>> void beanToFlatMapBody(final Object bean, final boolean ignoreNullProperty,
+            final Collection<String> ignoredPropNames, final NamingPolicy keyNamingPolicy, final String parentPropName, final M output) {
         final boolean isCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.CAMEL_CASE == keyNamingPolicy
                 || NamingPolicy.NO_CHANGE == keyNamingPolicy;
 
@@ -4664,7 +4698,7 @@ public final class Beans {
      * @throws IllegalArgumentException if the class is abstract or cannot be instantiated.
      */
     public static <T> T newBean(final Class<T> targetType) {
-        return CommonUtil.newInstance(targetType);
+        return N.newInstance(targetType);
     }
 
     private static final Set<Class<?>> notKryoCompatible = N.newConcurrentHashSet();
@@ -6051,10 +6085,25 @@ public final class Beans {
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
         final Object result = beanInfo.createBeanResult();
 
-        populateWithRandomValues(beanInfo, result, propNamesToFill);
+        // Track classes currently being filled in this thread so a self-referential bean
+        // (e.g. `class Node { Node parent; }`) doesn't infinitely recurse.
+        final java.util.Set<Class<?>> visited = NEW_RANDOM_VISITED.get();
+        final boolean topLevel = visited.isEmpty();
+        visited.add(beanClass);
+        try {
+            populateWithRandomValues(beanInfo, result, propNamesToFill);
+        } finally {
+            visited.remove(beanClass);
+            if (topLevel) {
+                NEW_RANDOM_VISITED.remove();
+            }
+        }
 
         return beanInfo.finishBeanResult(result);
     }
+
+    /** Per-thread visited-class set used by {@link #newRandom(Class, Collection)} to break cycles. */
+    private static final ThreadLocal<java.util.Set<Class<?>>> NEW_RANDOM_VISITED = ThreadLocal.withInitial(java.util.HashSet::new);
 
     /**
      * Creates multiple instances of the specified bean class, each filled with random values.
@@ -6166,7 +6215,13 @@ public final class Beans {
             } else if (java.util.Date.class.isAssignableFrom(parameterClass) || Calendar.class.isAssignableFrom(parameterClass)) {
                 propValue = type.valueOf(String.valueOf(System.currentTimeMillis()));
             } else if (Beans.isBeanClass(parameterClass)) {
-                propValue = newRandom(parameterClass);
+                // Skip recursion if we'd revisit a class already on this thread's call stack
+                // (cycle / self-reference). Leaves the property at its default (null) value.
+                if (NEW_RANDOM_VISITED.get().contains(parameterClass)) {
+                    propValue = type.defaultValue();
+                } else {
+                    propValue = newRandom(parameterClass);
+                }
             } else {
                 propValue = type.defaultValue();
             }

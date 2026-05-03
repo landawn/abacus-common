@@ -29,11 +29,8 @@ import com.landawn.abacus.util.function.IntFunction;
 import com.landawn.abacus.util.function.IntPredicate;
 import com.landawn.abacus.util.function.IntTernaryOperator;
 import com.landawn.abacus.util.function.IntToByteFunction;
-import com.landawn.abacus.util.function.IntToCharFunction;
 import com.landawn.abacus.util.function.IntToDoubleFunction;
-import com.landawn.abacus.util.function.IntToFloatFunction;
 import com.landawn.abacus.util.function.IntToLongFunction;
-import com.landawn.abacus.util.function.IntToShortFunction;
 import com.landawn.abacus.util.function.IntUnaryOperator;
 import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
 import com.landawn.abacus.util.stream.BaseStream.Splitor;
@@ -377,13 +374,30 @@ public class ParallelIteratorIntStreamTest extends TestBase {
         assertTrue(result.contains(3.5));
     }
 
-    // flatmap(IntFunction<int[]>) maps each element to a primitive array
+    // flatMapArray(IntFunction<int[]>) maps each element to a primitive array
     @Test
     public void testFlatmapPrimitiveArray() {
-        int[] result = createIntStream(1, 2, 3).flatmap(i -> new int[] { i, i * 10 }).sorted().toArray();
+        int[] result = createIntStream(1, 2, 3).flatMapArray(i -> new int[] { i, i * 10 }).sorted().toArray();
         assertEquals(6, result.length);
         assertEquals(1, result[0]);
         assertEquals(30, result[5]);
+    }
+
+    @Test
+    public void testFlatmapCollection() {
+        int[] r = createIntStream(1, 2, 3).flatmap(i -> Arrays.asList(i, i * 10)).sorted().toArray();
+        assertEquals(6, r.length);
+        assertEquals(1, r[0]);
+        assertEquals(30, r[5]);
+
+        // empty
+        assertEquals(0, createIntStream(new int[] {}).flatmap(i -> Arrays.asList((Integer) i)).count());
+        assertEquals(0, createIntStream(1, 2).flatmap(i -> java.util.Collections.<Integer> emptyList()).count());
+        assertEquals(0, createIntStream(1, 2).flatmap(i -> (java.util.Collection<Integer>) null).count());
+
+        // null elements -> 0
+        int[] withNulls = createIntStream(1).flatmap(i -> Arrays.asList((Integer) null, 9)).toArray();
+        assertHaveSameElements(new int[] { 0, 9 }, withNulls);
     }
 
     // flatMapToShort parallel path with large array

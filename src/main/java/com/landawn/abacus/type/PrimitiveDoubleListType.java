@@ -15,6 +15,7 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
+import java.util.List;
 
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
@@ -22,9 +23,11 @@ import com.landawn.abacus.util.DoubleList;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for DoubleList objects.
- * Provides functionality for serialization and deserialization of DoubleList instances
- * by delegating to the underlying double array type handler.
+ * Type handler for {@link DoubleList} objects, which is a primitive-backed list of {@code double} values.
+ * Provides serialization and deserialization of {@link DoubleList} instances by delegating to the
+ * underlying {@code double[]} array type handler.
+ * String representations use the format {@code [1.5, 2.7, 3.14]} with comma-separated elements
+ * enclosed in square brackets.
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<DoubleList> {
@@ -34,8 +37,13 @@ public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<Dou
     private final Type<double[]> arrayType = Type.of(double[].class);
 
     private final Type<Double> elementType = Type.of(double.class);
-    private final Type<Double>[] parameterTypes = new Type[] { elementType };
+    private final List<Type<?>> parameterTypes = List.of(elementType);
 
+    /**
+     * Constructs a new PrimitiveDoubleListType instance.
+     * This constructor is protected to allow subclassing while maintaining controlled instantiation
+     * through the TypeFactory.
+     */
     protected PrimitiveDoubleListType() {
         super(DOUBLE_LIST);
     }
@@ -63,11 +71,11 @@ public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<Dou
     /**
      * Returns the parameter types associated with this list type.
      *
-     * @return an array containing the Double Type that describes the elements of this list type
+     * @return an immutable list containing the Double Type that describes the elements of this list type
      * @see #elementType()
      */
     @Override
-    public Type<Double>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 

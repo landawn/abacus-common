@@ -15,6 +15,7 @@
 package com.landawn.abacus.type;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -44,62 +45,57 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
 
     private final String declaringName;
 
-    private final Type<?>[] parameterTypes;
+    private final List<Type<?>> parameterTypes;
 
     protected final JsonDeserConfig jdc;
 
     MultimapType(final Class<?> typeClass, final String keyTypeName, final String valueElementTypeName, final String valueTypeName) {
         super(getTypeName(typeClass, keyTypeName, valueElementTypeName, valueTypeName, false));
 
-        parameterTypes = Strings.isEmpty(valueElementTypeName) ? new Type[] { TypeFactory.getType(keyTypeName), TypeFactory.getType(valueTypeName) }
-                : (Strings.isEmpty(valueTypeName) ? new Type[] { TypeFactory.getType(keyTypeName), TypeFactory.getType(valueElementTypeName) }
-                        : new Type[] { TypeFactory.getType(keyTypeName), TypeFactory.getType(valueElementTypeName), TypeFactory.getType(valueTypeName) });
+        parameterTypes = Strings.isEmpty(valueElementTypeName) ? List.of(TypeFactory.getType(keyTypeName), TypeFactory.getType(valueTypeName))
+                : (Strings.isEmpty(valueTypeName) ? List.of(TypeFactory.getType(keyTypeName), TypeFactory.getType(valueElementTypeName))
+                        : List.of(TypeFactory.getType(keyTypeName), TypeFactory.getType(valueElementTypeName), TypeFactory.getType(valueTypeName)));
 
         this.typeClass = typeClass;
 
         declaringName = getTypeName(typeClass, keyTypeName, valueElementTypeName, valueTypeName, true);
 
-        jdc = JsonDeserConfig.create().setMapKeyType(parameterTypes[0]);
+        jdc = JsonDeserConfig.create().setMapKeyType(parameterTypes.get(0));
 
         if (Strings.isEmpty(valueElementTypeName)) {
-            if (!(parameterTypes[1] instanceof CollectionType)) {
+            if (!(parameterTypes.get(1) instanceof CollectionType)) {
                 throw new IllegalArgumentException("The value type of Multimap must be a collection type: " + valueTypeName);
             }
 
-            jdc.setMapValueType(parameterTypes[1]);
-            jdc.setElementType(parameterTypes[1].elementType());
+            jdc.setMapValueType(parameterTypes.get(1));
+            jdc.setElementType(parameterTypes.get(1).elementType());
         } else if (Strings.isEmpty(valueTypeName)) {
             if (ListMultimap.class.isAssignableFrom(typeClass)) {
-                jdc.setMapValueType(TypeFactory.getType("List<" + parameterTypes[1].name() + ">"));
+                jdc.setMapValueType(TypeFactory.getType("List<" + parameterTypes.get(1).name() + ">"));
             } else if (SetMultimap.class.isAssignableFrom(typeClass)) {
-                jdc.setMapValueType(TypeFactory.getType("Set<" + parameterTypes[1].name() + ">"));
+                jdc.setMapValueType(TypeFactory.getType("Set<" + parameterTypes.get(1).name() + ">"));
             } else {
                 throw new IllegalArgumentException("Unsupported Multimap type: " + typeClass);
             }
 
-            jdc.setElementType(parameterTypes[1]);
+            jdc.setElementType(parameterTypes.get(1));
         } else {
-            if (!(parameterTypes[2] instanceof CollectionType)) {
+            if (!(parameterTypes.get(2) instanceof CollectionType)) {
                 throw new IllegalArgumentException("The value type of Multimap must be a collection type: " + valueTypeName);
             }
 
-            jdc.setMapValueType(parameterTypes[2]);
-            jdc.setElementType(parameterTypes[1]);
+            jdc.setMapValueType(parameterTypes.get(2));
+            jdc.setElementType(parameterTypes.get(1));
         }
     }
 
     /**
-     * Returns the declaring name of this Multimap type.
-     * The declaring name includes the fully qualified class names of the key, element, and value types.
+     * Returns the declaring name of this {@code Multimap} type.
+     * The declaring name uses simple (non-fully-qualified) class names for the multimap class
+     * and its key, element, and value collection type parameters.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<ListMultimap<String, Integer>> type = TypeFactory.getType("ListMultimap<String, Integer>");
-     * String name = type.declaringName();
-     * // Returns: "ListMultimap<String, Integer>"
-     * }</pre>
-     *
-     * @return The declaring name in format "MultimapClass&lt;KeyDeclaringName[, ElementDeclaringName][, ValueDeclaringName]&gt;"
+     * @return the declaring name, e.g. {@code "ListMultimap<String, Integer>"}
+     *         or {@code "Multimap<String, Integer, List<Integer>>"}
      */
     @Override
     public String declaringName() {
@@ -107,16 +103,9 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
     }
 
     /**
-     * Returns the Class object representing the specific Multimap implementation type.
+     * Returns the {@link Class} object representing the specific {@link Multimap} implementation type.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<ListMultimap<String, Integer>> type = TypeFactory.getType("ListMultimap<String, Integer>");
-     * Class<?> clazz = type.javaType();
-     * // Returns: ListMultimap.class
-     * }</pre>
-     *
-     * @return The Class object for the Multimap implementation
+     * @return the class of the concrete {@code Multimap} implementation (e.g., {@code ListMultimap.class})
      */
     @SuppressWarnings({ "rawtypes" })
     @Override
@@ -125,32 +114,26 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
     }
 
     /**
-     * Gets the parameter types for this generic Multimap type.
-     * The array contains:
-     * - Two elements if either valueElementTypeName or valueTypeName was empty: [keyType, valueType/elementType]
-     * - Three elements if both were provided: [keyType, elementType, valueType]
+     * Returns the parameter types for this generic {@code Multimap} type.
+     * The returned list has either two or three elements depending on how the type was constructed:
+     * <ul>
+     *   <li>Two elements {@code [keyType, collectionType/elementType]} when only the key type and
+     *       either the element type or the collection value type are specified.</li>
+     *   <li>Three elements {@code [keyType, elementType, collectionType]} when all three are specified.</li>
+     * </ul>
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<ListMultimap<String, Integer>> type = TypeFactory.getType("ListMultimap<String, Integer>");
-     * Type<?>[] paramTypes = type.parameterTypes();
-     * // Returns: [StringType, IntegerType]
-     * // paramTypes[0] is the key type (String)
-     * // paramTypes[1] is the element type (Integer)
-     * }</pre>
-     *
-     * @return An array containing the parameter types
+     * @return an immutable list containing the parameter types
      */
     @Override
-    public Type<?>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 
     /**
-     * Indicates whether this is a generic type.
-     * For MultimapType, this always returns {@code true} since Multimap is parameterized with key and value types.
+     * Indicates whether this is a parameterized type.
+     * Always returns {@code true} because {@link Multimap} is parameterized with key, element, and value types.
      *
-     * @return {@code true}, indicating that Multimap is a generic type
+     * @return {@code true}
      */
     @Override
     public boolean isParameterizedType() {
@@ -158,10 +141,10 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
     }
 
     /**
-     * Indicates whether instances of this type can be serialized.
-     * Multimap objects can be serialized through this type handler.
+     * Indicates whether instances of this type support serialization.
+     * {@link Multimap} objects are serialized to and deserialized from JSON through this type handler.
      *
-     * @return {@code true}, indicating that Multimap is serializable through this type
+     * @return {@code true}
      */
     @Override
     public boolean isSerializable() {
@@ -169,27 +152,15 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
     }
 
     /**
-     * Converts a Multimap object to its JSON string representation.
-     * The Multimap is first converted to a Map where each key maps to a Collection of values,
-     * then serialized as JSON.
+     * Converts a {@link Multimap} object to its JSON string representation.
+     * The {@code Multimap} is first converted to a regular {@link java.util.Map} via
+     * {@link Multimap#toMap()}, where each key maps to its collection of values,
+     * and the resulting map is then serialized as JSON.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<ListMultimap<String, String>> type = TypeFactory.getType("ListMultimap<String, String>");
-     * ListMultimap<String, String> multimap = N.newLinkedListMultimap();
-     * multimap.put("colors", "red");
-     * multimap.put("colors", "blue");
-     * multimap.put("sizes", "large");
-     *
-     * String json = type.stringOf(multimap);
-     * // Returns: {"colors":["red","blue"],"sizes":["large"]}
-     *
-     * json = type.stringOf(null);
-     * // Returns: null
-     * }</pre>
-     *
-     * @param x The Multimap object to convert
-     * @return The JSON string representation of the Multimap, or {@code null} if the input is null
+     * @param x the {@code Multimap} object to convert, may be {@code null}
+     * @return the JSON string representation of the {@code Multimap}
+     *         (e.g., {@code {"colors":["red","blue"],"sizes":["large"]}}),
+     *         or {@code null} if the input is {@code null}
      */
     @Override
     public String stringOf(final T x) {
@@ -197,28 +168,15 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
     }
 
     /**
-     * Parses a JSON string to create a Multimap object.
-     * The string should represent a JSON object where each key maps to an array of values.
-     * The specific Multimap implementation (LinkedSetMultimap or LinkedListMultimap) is chosen
-     * based on whether the value type is a Set or not.
+     * Parses a JSON string to create a {@link Multimap} object.
+     * The JSON must be an object where each key maps to an array of values,
+     * e.g. {@code {"colors":["red","blue"],"sizes":["large"]}}.
+     * The concrete implementation returned ({@link com.landawn.abacus.util.SetMultimap SetMultimap}
+     * or {@link com.landawn.abacus.util.ListMultimap ListMultimap}) is chosen based on
+     * whether the configured value collection type is a {@link java.util.Set}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<ListMultimap<String, String>> type = TypeFactory.getType("ListMultimap<String, String>");
-     *
-     * ListMultimap<String, String> multimap = type.valueOf("{\"colors\":[\"red\",\"blue\"],\"sizes\":[\"large\"]}");
-     * // Returns: ListMultimap with "colors" -> ["red", "blue"] and "sizes" -> ["large"]
-     * // multimap.get("colors") returns ["red", "blue"]
-     *
-     * multimap = type.valueOf(null);
-     * // Returns: null
-     *
-     * multimap = type.valueOf("{}");
-     * // Returns: empty ListMultimap
-     * }</pre>
-     *
-     * @param str The JSON string to parse
-     * @return The parsed Multimap object, or {@code null} if the input is {@code null} or empty
+     * @param str the JSON string to parse; may be {@code null} or blank
+     * @return the parsed {@code Multimap} object, or {@code null} if the input is {@code null} or blank
      */
     @Override
     public T valueOf(final String str) {
@@ -232,8 +190,8 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
             return null; // NOSONAR
         }
 
-        // Determine the value collection type: use parameterTypes[2] if available, otherwise parameterTypes[1]
-        final Type<?> valueCollectionType = parameterTypes.length > 2 ? parameterTypes[2] : parameterTypes[1];
+        // Determine the value collection type: use parameterTypes.get(2) if available, otherwise parameterTypes.get(1)
+        final Type<?> valueCollectionType = parameterTypes.size() > 2 ? parameterTypes.get(2) : parameterTypes.get(1);
 
         if (Set.class.isAssignableFrom(valueCollectionType.javaType())) {
             final Multimap<K, E, V> multiMap = (Multimap<K, E, V>) N.newLinkedSetMultimap(map.size());
@@ -258,12 +216,12 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      * Generates the type name for a Multimap with the specified implementation class, key, element and value types.
      * This is an internal method used by the type system.
      *
-     * @param typeClass The Multimap implementation class
-     * @param keyTypeName The name of the key type
-     * @param valueElementTypeName The name of the element type (can be empty)
-     * @param valueTypeName The name of the value collection type (can be empty)
-     * @param isDeclaringName Whether to use declaring names (true) or regular names (false)
-     * @return The formatted type name string
+     * @param typeClass the Multimap implementation class
+     * @param keyTypeName the name of the key type
+     * @param valueElementTypeName the name of the element type (can be empty)
+     * @param valueTypeName the name of the value collection type (can be empty)
+     * @param isDeclaringName {@code true} to use declaring (simple) names; {@code false} for canonical names
+     * @return the formatted type name string
      */
     protected static String getTypeName(final Class<?> typeClass, final String keyTypeName, final String valueElementTypeName, final String valueTypeName,
             final boolean isDeclaringName) {

@@ -23,7 +23,7 @@ import com.landawn.abacus.type.Type;
  * This interface defines the low-level JSON parsing operations used by the JSON parser
  * implementation. It provides methods for tokenizing JSON input and reading values
  * according to their types.
- * 
+ *
  * <p>Token Constants:</p>
  * <ul>
  *   <li>{@link #EOF} - End of file/stream marker</li>
@@ -38,9 +38,9 @@ import com.landawn.abacus.type.Type;
  *   <li>{@link #COLON} - Colon ':' separator</li>
  *   <li>{@link #COMMA} - Comma ',' separator</li>
  * </ul>
- * 
+ *
  * <p>This is an internal interface and should not be used directly by application code.</p>
- * 
+ *
  */
 interface JsonReader {
     // < 32 = ' ' (Space) White space
@@ -132,10 +132,10 @@ interface JsonReader {
      * Reads and returns the next token identifier from the JSON input.
      * This method advances the reader position and identifies the next
      * structural token in the JSON stream.
-     * 
+     *
      * <p>The returned value will be one of the defined token constants,
      * or -1 if no next symbol is found (EOF).</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int token = reader.nextToken();
@@ -153,7 +153,7 @@ interface JsonReader {
      * Reads and returns the next token identifier of a specific type from the JSON input.
      * This method allows reading tokens that match a specific type,
      * which can be useful for parsing structured data.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Integer> intType = Type.of(Integer.class);
@@ -171,7 +171,7 @@ interface JsonReader {
      * Checks if the reader has text content available.
      * This is typically {@code true} after reading a string token or value token
      * (like numbers, booleans, or null).
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (reader.hasText()) {
@@ -188,7 +188,7 @@ interface JsonReader {
      * This method should only be called when {@link #hasText()} returns {@code true}.
      * The returned text represents the value of the last parsed token, such as
      * a string value, number, boolean, or {@code null}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int token = reader.nextToken();
@@ -206,7 +206,7 @@ interface JsonReader {
      * Reads and converts the current value according to the specified type.
      * This method reads the current token value and converts it to the
      * requested type using the type's conversion logic.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Integer> intType = Type.of(Integer.class);
@@ -226,7 +226,7 @@ interface JsonReader {
      * Reads property information using the provided symbol reader.
      * This method is used internally for efficient property name resolution
      * during object deserialization.
-     * 
+     *
      * <p>The symbol reader provides optimized property lookup based on
      * character buffers or strings.</p>
      *
@@ -239,7 +239,7 @@ interface JsonReader {
      * Closes the reader and releases any associated resources.
      * This method should be called when the reader is no longer needed
      * to ensure proper resource cleanup.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonReader reader = null;
@@ -261,7 +261,7 @@ interface JsonReader {
      * Interface for efficient property name resolution during JSON parsing.
      * This interface provides methods for looking up property information
      * based on property names, with optimizations for character buffer access.
-     * 
+     *
      * <p>This is an internal interface used for performance optimization
      * and should not be implemented by application code.</p>
      */
@@ -270,7 +270,7 @@ interface JsonReader {
          * Gets property information for the specified property name.
          * This method performs a lookup to find the property metadata
          * associated with the given name.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * PropInfo propInfo = symbolReader.getPropInfo("firstName");
@@ -288,10 +288,10 @@ interface JsonReader {
          * Reads property information from a character buffer.
          * This method provides optimized property lookup by reading directly
          * from a character buffer without creating intermediate strings.
-         * 
+         *
          * <p>This is a performance optimization for high-throughput parsing
          * scenarios where string allocation overhead should be minimized.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * char[] buffer = {'f', 'i', 'r', 's', 't', 'N', 'a', 'm', 'e'};

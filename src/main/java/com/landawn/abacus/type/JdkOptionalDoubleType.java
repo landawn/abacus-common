@@ -27,14 +27,18 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
 
     public static final String OPTIONAL_DOUBLE = "JdkOptionalDouble";
 
+    /**
+     * Package-private constructor for JdkOptionalDoubleType.
+     * This constructor is called by the TypeFactory to create OptionalDouble type instances.
+     */
     protected JdkOptionalDoubleType() {
         super(OPTIONAL_DOUBLE);
     }
 
     /**
-     * Returns the Class object representing the OptionalDouble type.
+     * Returns the Java class represented by this type handler.
      *
-     * @return OptionalDouble.class
+     * @return {@code OptionalDouble.class}
      */
     @Override
     public Class<OptionalDouble> javaType() {

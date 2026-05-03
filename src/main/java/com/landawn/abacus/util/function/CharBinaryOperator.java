@@ -37,8 +37,8 @@ public interface CharBinaryOperator extends Throwables.CharBinaryOperator<Runtim
      * CharBinaryOperator max = (a, b) -> a > b ? a : b;
      * char result = max.applyAsChar('A', 'Z');   // Returns 'Z'
      *
-     * CharBinaryOperator concatenateAsChar = (a, b) -> (char)(a + b);
-     * char sum = concatenateAsChar.applyAsChar('A', 'B');   // Returns char sum
+     * CharBinaryOperator min = (a, b) -> a < b ? a : b;
+     * char smallest = min.applyAsChar('A', 'Z');   // Returns 'A'
      * }</pre>
      *
      * @param a the first char operand

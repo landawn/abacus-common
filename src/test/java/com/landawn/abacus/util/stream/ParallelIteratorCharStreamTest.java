@@ -159,7 +159,7 @@ public class ParallelIteratorCharStreamTest extends TestBase {
     public void testFlatMapCharArray() {
         CharStream stream = createCharStream(new char[] { 'a', 'b' });
         CharFunction<char[]> mapper = c -> new char[] { c, (char) (c + 1) };
-        List<Character> result = stream.flatmap(mapper).toList();
+        List<Character> result = stream.flatMapArray(mapper).toList();
         assertEquals(4, result.size());
         assertTrue(result.contains('a'));
         assertTrue(result.contains('b'));
@@ -183,17 +183,47 @@ public class ParallelIteratorCharStreamTest extends TestBase {
 
     @Test
     public void testFlatmap_SequentialFallback() {
-        List<Character> result = createSingleThreadStream('a', 'b').flatmap(c -> new char[] { c, Character.toUpperCase(c) }).toList();
+        List<Character> result = createSingleThreadStream('a', 'b').flatMapArray(c -> new char[] { c, Character.toUpperCase(c) }).toList();
         assertHaveSameElements(Arrays.asList('a', 'A', 'b', 'B'), result);
+    }
+
+    @Test
+    public void testFlatmapCollection() {
+        List<Character> r = createCharStream(new char[] { 'a', 'b' }).flatmap(c -> Arrays.asList(c, Character.toUpperCase(c))).boxed().toList();
+        assertHaveSameElements(Arrays.asList('a', 'A', 'b', 'B'), r);
+
+        // empty stream
+        assertEquals(0, createCharStream(new char[] {}).flatmap(c -> Arrays.asList((Character) c)).count());
+
+        // empty / null collection
+        assertEquals(0, createCharStream(new char[] { 'a' }).flatmap(c -> java.util.Collections.<Character> emptyList()).count());
+        assertEquals(0, createCharStream(new char[] { 'a' }).flatmap(c -> (java.util.Collection<Character>) null).count());
+
+        // null elements -> (char) 0
+        char[] withNulls = createCharStream(new char[] { 'a' }).flatmap(c -> Arrays.asList((Character) null, 'z')).toArray();
+        assertEquals(2, withNulls.length);
+        assertEquals((char) 0, withNulls[0]);
+        assertEquals('z', withNulls[1]);
+    }
+
+    @Test
+    public void testFlatmapCollection_SequentialFallback() {
+        List<Character> result = createSingleThreadStream('a', 'b').flatmap(c -> Arrays.asList(c, Character.toUpperCase(c))).boxed().toList();
+        assertHaveSameElements(Arrays.asList('a', 'A', 'b', 'B'), result);
+
+        char[] withNulls = createSingleThreadStream('a').flatmap(c -> Arrays.asList((Character) null, c)).toArray();
+        assertEquals(2, withNulls.length);
+        assertEquals((char) 0, withNulls[0]);
+        assertEquals('a', withNulls[1]);
     }
 
     @Test
     public void testFlatMapToInt() {
         CharStream stream = createCharStream(new char[] { 'a', 'b' });
-        List<Integer> result = stream.flatMapToInt(c -> IntStream.of((int) c, (int) c + 1)).toList();
+        List<Integer> result = stream.flatMapToInt(c -> IntStream.of(c, c + 1)).toList();
         assertEquals(4, result.size());
         assertTrue(result.contains((int) 'a'));
-        assertTrue(result.contains((int) 'a' + 1));
+        assertTrue(result.contains('a' + 1));
     }
 
     @Test

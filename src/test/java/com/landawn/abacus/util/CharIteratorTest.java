@@ -10,14 +10,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.u.OptionalChar;
-import com.landawn.abacus.util.function.CharPredicate;
 import com.landawn.abacus.util.function.CharSupplier;
 import com.landawn.abacus.util.stream.CharStream;
 

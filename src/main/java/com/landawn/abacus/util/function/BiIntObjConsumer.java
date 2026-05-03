@@ -60,6 +60,7 @@ public interface BiIntObjConsumer<T> extends Throwables.BiIntObjConsumer<T, Runt
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code BiIntObjConsumer} that performs in sequence this operation followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     default BiIntObjConsumer<T> andThen(final BiIntObjConsumer<? super T> after) {
         return (i, j, t) -> {

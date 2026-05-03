@@ -23,8 +23,8 @@ import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -46,30 +46,31 @@ import com.landawn.abacus.util.ThreadMode;
 // DO NOT try to move me out of this project. Somebody tried and gave up then. I'm small. I'm stay here.
 
 /**
- * EventBus is a publish-subscribe event bus that simplifies communication between components.
- * It allows components to communicate with each other without requiring them to have explicit references to one another,
+ * A publish-subscribe event bus that simplifies communication between components.
+ * It allows components to communicate without requiring explicit references to one another,
  * thus promoting loose coupling.
  *
- * <p>The EventBus supports the following features:</p>
+ * <p>Supported features:</p>
  * <ul>
- *   <li>Event posting to subscribers based on event type hierarchy</li>
- *   <li>Sticky events that persist and are delivered to new subscribers</li>
- *   <li>Thread mode control for event delivery</li>
- *   <li>Event filtering by event ID</li>
- *   <li>Interval-based and deduplication filtering</li>
+ *   <li>Event delivery to subscribers matched by event type hierarchy.</li>
+ *   <li>Sticky events that persist and are delivered to newly registered subscribers.</li>
+ *   <li>Thread mode control for synchronous or asynchronous event delivery.</li>
+ *   <li>Event filtering by event ID.</li>
+ *   <li>Interval-based throttling and deduplication of consecutive identical events.</li>
  * </ul>
+ *
+ * <p>Subscribers can be registered in two ways:</p>
+ * <ol>
+ *   <li>By implementing the {@link Subscriber} interface (suitable for lambda expressions).</li>
+ *   <li>By annotating public instance methods with {@link Subscribe}.</li>
+ * </ol>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // Create a subscriber using the Subscriber interface
- * final Subscriber<String> strSubscriber = new Subscriber<String>() {
- *     @Override
- *     public void on(String event) {
- *         System.out.println("Received: " + event);
- *     }
- * };
+ * // Subscriber using the Subscriber interface (lambda-friendly)
+ * final Subscriber<String> strSubscriber = event -> System.out.println("Received: " + event);
  *
- * // Create a subscriber using @Subscribe annotation
+ * // Subscriber using the @Subscribe annotation
  * final Object annotatedSubscriber = new Object() {
  *     @Subscribe(threadMode = ThreadMode.THREAD_POOL_EXECUTOR)
  *     public void handleEvent(String event) {
@@ -77,19 +78,14 @@ import com.landawn.abacus.util.ThreadMode;
  *     }
  * };
  *
- * // Register subscribers
  * EventBus eventBus = EventBus.getDefault();
  * eventBus.register(strSubscriber, "myEventId");
  * eventBus.register(annotatedSubscriber);
  *
- * // Post events
  * eventBus.post("Hello World");
  * eventBus.post("myEventId", "Targeted Event");
- *
- * // Post sticky event
  * eventBus.postSticky("Sticky Message");
  *
- * // Unregister when done
  * eventBus.unregister(strSubscriber);
  * eventBus.unregister(annotatedSubscriber);
  * }</pre>
@@ -343,6 +339,8 @@ public class EventBus {
      * Registers a subscriber to receive events.
      * The subscriber must either implement the {@link Subscriber} interface or have methods annotated with {@link Subscribe}.
      * Events will be delivered on the default thread mode.
+     * Lambda-based subscribers cannot be registered with this method; use
+     * {@link #register(Subscriber, String)} or {@link #register(Subscriber, String, ThreadMode)} instead.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -358,7 +356,7 @@ public class EventBus {
      * @return this {@code EventBus} instance for method chaining
      * @throws NullPointerException if {@code subscriber} is {@code null}
      * @throws IllegalArgumentException if no subscriber methods are found in the subscriber class
-     * @throws IllegalStateException if registering a lambda subscriber without event ID
+     * @throws IllegalStateException if the subscriber is identified as a lambda subscriber (an event ID is required for lambda subscribers)
      */
     public EventBus register(final Object subscriber) {
         return register(subscriber, (ThreadMode) null);
@@ -375,11 +373,11 @@ public class EventBus {
      * }</pre>
      *
      * @param subscriber the subscriber to register
-     * @param eventId the event ID to filter events
+     * @param eventId the event ID to filter events; must be non-empty for lambda-based subscribers
      * @return this {@code EventBus} instance for method chaining
      * @throws NullPointerException if {@code subscriber} is {@code null}
      * @throws IllegalArgumentException if no subscriber methods are found in the subscriber class
-     * @throws IllegalStateException if registering a lambda subscriber without event ID
+     * @throws IllegalStateException if the subscriber is identified as a lambda subscriber and {@code eventId} is empty or {@code null}
      */
     public EventBus register(final Object subscriber, final String eventId) {
         return register(subscriber, eventId, null);
@@ -388,6 +386,8 @@ public class EventBus {
     /**
      * Registers a subscriber with a specific thread mode.
      * The thread mode determines on which thread the event will be delivered.
+     * Lambda-based subscribers cannot be registered with this method; use
+     * {@link #register(Subscriber, String, ThreadMode)} instead.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -396,11 +396,11 @@ public class EventBus {
      * }</pre>
      *
      * @param subscriber the subscriber to register
-     * @param threadMode the thread mode for event delivery
+     * @param threadMode the thread mode for event delivery, or {@code null} to use the default thread mode
      * @return this {@code EventBus} instance for method chaining
      * @throws NullPointerException if {@code subscriber} is {@code null}
      * @throws IllegalArgumentException if the thread mode is not supported or no subscriber methods are found in the subscriber class
-     * @throws IllegalStateException if registering a lambda subscriber without event ID
+     * @throws IllegalStateException if the subscriber is identified as a lambda subscriber (an event ID is required for lambda subscribers)
      */
     public EventBus register(final Object subscriber, final ThreadMode threadMode) {
         return register(subscriber, null, threadMode);
@@ -417,12 +417,12 @@ public class EventBus {
      * }</pre>
      *
      * @param subscriber the subscriber to register
-     * @param eventId the event ID to filter events, or {@code null} for no filtering
-     * @param threadMode the thread mode for event delivery, or {@code null} for default
+     * @param eventId the event ID to filter events; must be non-empty for lambda-based subscribers; {@code null} for no filtering otherwise
+     * @param threadMode the thread mode for event delivery, or {@code null} to use the default thread mode
      * @return this {@code EventBus} instance for method chaining
      * @throws NullPointerException if {@code subscriber} is {@code null}
      * @throws IllegalArgumentException if the thread mode is not supported or no subscriber methods are found in the subscriber class
-     * @throws IllegalStateException if registering a lambda subscriber without event ID
+     * @throws IllegalStateException if the subscriber is identified as a lambda subscriber and {@code eventId} is empty or {@code null}
      */
     public EventBus register(final Object subscriber, final String eventId, final ThreadMode threadMode) {
         Objects.requireNonNull(subscriber, "subscriber");
@@ -623,11 +623,11 @@ public class EventBus {
      *
      * @param <T> the type of events the subscriber will receive
      * @param subscriber the {@code Subscriber} implementation to register
-     * @param eventId the event ID to filter events (required for lambda subscribers)
+     * @param eventId the event ID to filter events; must be non-empty when the subscriber is identified as a lambda subscriber
      * @return this {@code EventBus} instance for method chaining
      * @throws NullPointerException if {@code subscriber} is {@code null}
      * @throws IllegalArgumentException if no subscriber methods are found
-     * @throws IllegalStateException if {@code eventId} is empty or {@code null} for lambda subscribers
+     * @throws IllegalStateException if the subscriber is identified as a lambda subscriber and {@code eventId} is empty or {@code null}
      */
     public <T> EventBus register(final Subscriber<T> subscriber, final String eventId) {
         return register(subscriber, eventId, null);
@@ -647,12 +647,12 @@ public class EventBus {
      *
      * @param <T> the type of events the subscriber will receive
      * @param subscriber the {@code Subscriber} implementation to register
-     * @param eventId the event ID to filter events (required for lambda subscribers)
-     * @param threadMode the thread mode for event delivery
+     * @param eventId the event ID to filter events; must be non-empty when the subscriber is identified as a lambda subscriber
+     * @param threadMode the thread mode for event delivery, or {@code null} to use the default thread mode
      * @return this {@code EventBus} instance for method chaining
      * @throws NullPointerException if {@code subscriber} is {@code null}
      * @throws IllegalArgumentException if the thread mode is not supported or no subscriber methods are found
-     * @throws IllegalStateException if {@code eventId} is empty or {@code null} for lambda subscribers
+     * @throws IllegalStateException if the subscriber is identified as a lambda subscriber and {@code eventId} is empty or {@code null}
      */
     public <T> EventBus register(final Subscriber<T> subscriber, final String eventId, final ThreadMode threadMode) {
         final Object tmp = subscriber;
@@ -663,6 +663,7 @@ public class EventBus {
      * Unregisters a previously registered subscriber.
      * All event subscriptions for this subscriber will be removed.
      * This method should be called when a subscriber is no longer needed to prevent memory leaks.
+     * If the subscriber was not previously registered, this method does nothing.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -712,7 +713,7 @@ public class EventBus {
     }
 
     /**
-     * Posts an event to all registered subscribers.
+     * Posts an event to subscribers that have no event ID filter.
      * The event will be delivered to all subscribers whose parameter type is assignable from the event's type
      * and who are registered without a specific event ID.
      *
@@ -731,17 +732,20 @@ public class EventBus {
     }
 
     /**
-     * Posts an event with a specific event ID.
-     * The event will only be delivered to subscribers registered with the same event ID,
-     * or to subscribers registered without an event ID whose methods are annotated with the matching event ID.
+     * Posts an event with an optional event ID.
+     * When {@code eventId} is non-null and non-empty, the event will only be delivered to subscribers
+     * associated with that event ID, including those registered with that ID directly and those whose
+     * {@link Subscribe} annotation specifies that event ID.
+     * When {@code eventId} is {@code null} or empty, the event is delivered to all subscribers that
+     * have no event ID filter (equivalent to calling {@link #post(Object)}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * eventBus.post("userEvents", new UserLoginEvent(userId));
-     * // Only subscribers registered with "userEvents" will receive this
+     * // Only subscribers associated with "userEvents" will receive this
      * }</pre>
      *
-     * @param eventId the event ID for filtering subscribers, or {@code null} for no filtering
+     * @param eventId the event ID for filtering subscribers, or {@code null} (or empty) to deliver to subscribers without a specific event ID
      * @param event the event to post
      * @return this {@code EventBus} instance for method chaining
      * @throws NullPointerException if {@code event} is {@code null}
@@ -757,8 +761,11 @@ public class EventBus {
         if (normalizedEventId == null) {
             if (subscriberLists == null) {
                 synchronized (registeredSubMap) {
-                    subscriberLists = new ArrayList<>(registeredSubMap.values()); // in case concurrent register/unregister.
-                    listOfSubEventSubs = subscriberLists;
+                    subscriberLists = listOfSubEventSubs; // re-read inside lock to avoid double initialisation
+                    if (subscriberLists == null) {
+                        subscriberLists = new ArrayList<>(registeredSubMap.values()); // in case concurrent register/unregister.
+                        listOfSubEventSubs = subscriberLists;
+                    }
                 }
             }
         } else {
@@ -766,13 +773,16 @@ public class EventBus {
 
             if (eventIdSubscribers == null) {
                 synchronized (registeredEventIdSubMap) {
-                    if (registeredEventIdSubMap.containsKey(normalizedEventId)) {
-                        eventIdSubscribers = new ArrayList<>(registeredEventIdSubMap.get(normalizedEventId)); // in case concurrent register/unregister.
-                    } else {
-                        eventIdSubscribers = N.emptyList();
-                    }
+                    eventIdSubscribers = listOfEventIdSubMap.get(normalizedEventId); // re-read inside lock to avoid double initialisation
+                    if (eventIdSubscribers == null) {
+                        if (registeredEventIdSubMap.containsKey(normalizedEventId)) {
+                            eventIdSubscribers = new ArrayList<>(registeredEventIdSubMap.get(normalizedEventId)); // in case concurrent register/unregister.
+                        } else {
+                            eventIdSubscribers = N.emptyList();
+                        }
 
-                    listOfEventIdSubMap.put(normalizedEventId, eventIdSubscribers);
+                        listOfEventIdSubMap.put(normalizedEventId, eventIdSubscribers);
+                    }
                 }
             }
 
@@ -1136,36 +1146,70 @@ public class EventBus {
 
     /**
      * Internal class representing a subscriber method and its configuration.
-     * This class holds all the metadata needed to deliver events to a subscriber.
+     * This class holds all the metadata needed to deliver events to a subscriber,
+     * including the method reference, parameter type, thread mode, filtering options,
+     * and runtime state such as the last post time and previous event for deduplication.
      */
     protected static final class SubIdentifier {
 
+        /** Cache for type-compatibility checks to avoid repeated {@code isAssignableFrom} calls. */
         final Map<Class<?>, Boolean> cachedClasses = new ConcurrentHashMap<>();
 
+        /** The subscriber object instance on which the method will be invoked. {@code null} for prototype entries. */
         final Object instance;
 
+        /** The subscriber method to invoke when a matching event is posted. */
         final Method method;
 
+        /** The event parameter type accepted by the subscriber method (primitives are auto-boxed). */
         final Class<?> parameterType;
 
+        /** The event ID filter; {@code null} means the subscriber accepts events posted without an ID. */
         final String eventId;
 
+        /** The thread mode that controls on which thread the event is delivered. */
         final ThreadMode threadMode;
 
+        /** If {@code true}, only events of the exact {@link #parameterType} are accepted; subtypes are excluded. */
         final boolean strictEventType;
 
+        /**
+         * If {@code true}, the subscriber should receive the most recent matching sticky event
+         * immediately upon registration.
+         */
         final boolean sticky;
 
+        /** Minimum interval in milliseconds between consecutive event deliveries; {@code 0} disables throttling. */
         final long intervalInMillis;
 
+        /**
+         * If {@code true}, consecutive duplicate events (as determined by {@code equals()}) are ignored
+         * and not delivered to the subscriber.
+         */
         final boolean deduplicate;
 
+        /**
+         * {@code true} if this subscriber is likely a lambda or anonymous implementation of
+         * {@link Subscriber} whose erased parameter type is {@code Object}, which requires an
+         * explicit event ID to distinguish events.
+         */
         final boolean isPossibleLambdaSubscriber;
 
+        /** The system time (in milliseconds) when the last event was delivered to this subscriber. */
         long lastPostTime = 0;
 
+        /** The most recently delivered event, used for deduplication when {@link #deduplicate} is {@code true}. */
         Object previousEvent = null;
 
+        /**
+         * Constructs a prototype {@code SubIdentifier} from a subscriber method.
+         * The resulting instance has no subscriber object ({@link #instance} is {@code null}) and
+         * is used as a template to create bound instances via
+         * {@link #SubIdentifier(SubIdentifier, Object, String, ThreadMode)}.
+         *
+         * @param method the subscriber method annotated with {@link Subscribe}, or the {@code on} method
+         *               of a {@link Subscriber} implementation
+         */
         SubIdentifier(final Method method) {
             final Subscribe subscribe = method.getAnnotation(Subscribe.class);
             instance = null;
@@ -1185,6 +1229,15 @@ public class EventBus {
             ClassUtil.setAccessible(method, true);
         }
 
+        /**
+         * Constructs a bound {@code SubIdentifier} by combining the metadata from a prototype entry
+         * with a concrete subscriber instance and registration-time overrides for the event ID and thread mode.
+         *
+         * @param sub       the prototype {@code SubIdentifier} carrying method-level defaults
+         * @param obj       the subscriber instance that will receive events
+         * @param eventId   the registration-level event ID override; if empty or {@code null}, the method-level ID is used
+         * @param threadMode the registration-level thread mode override; if {@code null}, the method-level mode is used
+         */
         SubIdentifier(final SubIdentifier sub, final Object obj, final String eventId, final ThreadMode threadMode) {
             instance = obj;
             method = sub.method;
@@ -1198,6 +1251,15 @@ public class EventBus {
             isPossibleLambdaSubscriber = sub.isPossibleLambdaSubscriber;
         }
 
+        /**
+         * Determines whether this subscriber should receive an event of the specified type and event ID.
+         * The event ID must match exactly (both {@code null} or both equal), and the event type must be
+         * compatible with this subscriber's {@link #parameterType}, respecting the {@link #strictEventType} flag.
+         *
+         * @param eventId   the event ID of the posted event, or {@code null} if posted without an ID
+         * @param eventType the runtime type of the posted event
+         * @return {@code true} if this subscriber is eligible to receive the event
+         */
         boolean isMyEvent(final String eventId, final Class<?> eventType) {
             if (!N.equals(this.eventId, eventId)) {
                 return false;

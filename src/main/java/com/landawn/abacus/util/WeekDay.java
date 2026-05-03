@@ -18,15 +18,15 @@ package com.landawn.abacus.util;
  * An enumeration representing the days of the week.
  * Each day is associated with an integer value from 0 (Sunday) to 6 (Saturday).
  * This enum provides a convenient way to work with weekdays in a type-safe manner.
- * 
+ *
  * <p>The integer values correspond to the day-of-week values used in many calendar systems,
  * where Sunday is traditionally the first day of the week (value 0).</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * WeekDay today = WeekDay.MONDAY;
  * int dayValue = today.intValue();   // Returns 1
- * 
+ *
  * WeekDay sunday = WeekDay.valueOf(0);   // Returns WeekDay.SUNDAY
  * }</pre>
  *
@@ -81,7 +81,7 @@ public enum WeekDay {
     /**
      * Returns the integer value associated with this weekday.
      * The values range from 0 (Sunday) to 6 (Saturday).
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int mondayValue = WeekDay.MONDAY.intValue();       // Returns 1
@@ -97,7 +97,7 @@ public enum WeekDay {
     /**
      * Returns the WeekDay enum constant corresponding to the specified integer value.
      * This method provides a way to convert from integer representation to the enum constant.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * WeekDay day = WeekDay.valueOf(1);       // Returns WeekDay.MONDAY

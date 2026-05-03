@@ -17,7 +17,7 @@ package com.landawn.abacus.util;
 /**
  * Enumeration of supported compression modes for data compression operations.
  * This enum defines the available compression algorithms that can be used throughout the framework.
- * 
+ *
  * <p>Supported compression modes:
  * <ul>
  *   <li>{@link #NONE} - No compression</li>
@@ -25,7 +25,7 @@ package com.landawn.abacus.util;
  *   <li>{@link #SNAPPY} - Google's Snappy compression (optimized for speed)</li>
  *   <li>{@link #GZIP} - GNU zip compression (better compression ratio)</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Select compression mode based on requirements
@@ -36,7 +36,7 @@ package com.landawn.abacus.util;
  *     // Apply GZIP compression
  * }
  * }</pre>
- * 
+ *
  * @see java.util.zip.GZIPOutputStream
  * @see java.util.zip.GZIPInputStream
  */

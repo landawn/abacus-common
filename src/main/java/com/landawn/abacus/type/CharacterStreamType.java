@@ -15,31 +15,26 @@
 package com.landawn.abacus.type;
 
 /**
- * Type handler for character stream values.
- * This class extends ReaderType to provide specific handling for character streams
- * in database operations and serialization contexts.
- * It serves as a semantic alias for ReaderType with a distinct type name.
+ * Type handler for character-stream ({@link java.io.Reader}) values registered under the
+ * type name {@code "CharacterStream"}.
+ *
+ * <p>This class extends {@link ReaderType} and acts as a named alias for it, allowing
+ * the type system to resolve the name {@code "CharacterStream"} to a {@link java.io.Reader}-based
+ * type handler. All database read/write operations are inherited from {@link ReaderType}.</p>
+ *
+ * @see ReaderType
+ * @see java.io.Reader
  */
 public class CharacterStreamType extends ReaderType {
 
     /**
-     * The type name constant for character stream type identification.
+     * The type name constant used for registration, equal to {@code "CharacterStream"}.
      */
     public static final String CHARACTER_STREAM = "CharacterStream";
 
     /**
-     * Package-private constructor for CharacterStreamType.
-     * This constructor is called by the TypeFactory to create CharacterStream type instances.
-     * CharacterStreamType provides database and serialization support for character streams
-     * accessed through Reader objects.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * // Obtained via TypeFactory
-     * Type<Reader> type = TypeFactory.getType("CharacterStream");
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * Reader stream = type.get(rs, "text_data");
-     * }</pre>
+     * Package-private constructor for {@code CharacterStreamType}.
+     * Instances are created by the {@code TypeFactory}.
      */
     CharacterStreamType() {
         super(CHARACTER_STREAM);

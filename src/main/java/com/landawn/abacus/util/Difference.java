@@ -50,7 +50,7 @@ import com.landawn.abacus.util.function.TriPredicate;
  * appears multiple times in either collection, each occurrence is considered separately, providing accurate
  * frequency-based difference analysis.</p>
  *
- * <p><b>⚠️ IMPORTANT - Sealed Class:</b>
+ * <p><b>IMPORTANT - Sealed Class:</b>
  * <ul>
  *   <li>This is a <b>sealed class</b> that only permits {@link KeyValueDifference} subclasses</li>
  *   <li>Specialized implementations include {@link MapDifference} and {@link BeanDifference}</li>
@@ -221,7 +221,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *   <li>Left only: boolean values that appear only in the first array</li>
      *   <li>Right only: boolean values that appear only in the second array</li>
      * </ul>
-     * 
+     *
      * <p>The comparison takes into account the number of occurrences of each value. For example,
      * if {@code true} appears twice in the first array and once in the second array, the result will
      * have one {@code true} in common and one {@code true} in left only.
@@ -246,7 +246,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *   <li>Left only: characters that appear only in the first array</li>
      *   <li>Right only: characters that appear only in the second array</li>
      * </ul>
-     * 
+     *
      * <p>The comparison takes into account the number of occurrences of each value. For example,
      * if {@code 'a'} appears twice in the first array and once in the second array, the result will
      * have one {@code 'a'} in common and one {@code 'a'} in left only.
@@ -271,7 +271,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *   <li>Left only: byte values that appear only in the first array</li>
      *   <li>Right only: byte values that appear only in the second array</li>
      * </ul>
-     * 
+     *
      * <p>The comparison takes into account the number of occurrences of each value. For example,
      * if {@code 1} appears twice in the first array and once in the second array, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
@@ -296,7 +296,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *   <li>Left only: short values that appear only in the first array</li>
      *   <li>Right only: short values that appear only in the second array</li>
      * </ul>
-     * 
+     *
      * <p>The comparison takes into account the number of occurrences of each value. For example,
      * if {@code 1} appears twice in the first array and once in the second array, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
@@ -321,7 +321,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *   <li>Left only: integer values that appear only in the first array</li>
      *   <li>Right only: integer values that appear only in the second array</li>
      * </ul>
-     * 
+     *
      * <p>The comparison takes into account the number of occurrences of each value. For example,
      * if {@code 1} appears twice in the first array and once in the second array, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
@@ -346,7 +346,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *   <li>Left only: long values that appear only in the first array</li>
      *   <li>Right only: long values that appear only in the second array</li>
      * </ul>
-     * 
+     *
      * <p>The comparison takes into account the number of occurrences of each value. For example,
      * if {@code 1} appears twice in the first array and once in the second array, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
@@ -364,11 +364,11 @@ public sealed class Difference<L, R> permits KeyValueDifference {
 
     /**
      * Compares two float arrays and identifies the differences between them.
-     * 
-     * <p>Float comparison uses standard equality (==). Special float values like NaN, positive
-     * infinity, and negative infinity are compared according to Java's float equality rules.
+     *
+     * <p>Float comparison uses {@link Float#equals(Object)} semantics (equivalent to {@link Float#compare(float, float)}).
+     * As a result, {@code NaN} is considered equal to {@code NaN}, and {@code -0.0f} is not considered equal to {@code +0.0f}.
      * The comparison accounts for the number of times each value appears.
-     * 
+     *
      * <p>
      * This method creates a {@code Difference} object that contains:
      * <ul>
@@ -376,7 +376,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *   <li>Left only: float values that appear only in the first array</li>
      *   <li>Right only: float values that appear only in the second array</li>
      * </ul>
-     * 
+     *
      * <p>The comparison takes into account the number of occurrences of each value. For example,
      * if {@code 1} appears twice in the first array and once in the second array, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
@@ -394,11 +394,11 @@ public sealed class Difference<L, R> permits KeyValueDifference {
 
     /**
      * Compares two double arrays and identifies the differences between them.
-     * 
-     * <p>Double comparison uses standard equality (==). Special double values like NaN, positive
-     * infinity, and negative infinity are compared according to Java's double equality rules.
+     *
+     * <p>Double comparison uses {@link Double#equals(Object)} semantics (equivalent to {@link Double#compare(double, double)}).
+     * As a result, {@code NaN} is considered equal to {@code NaN}, and {@code -0.0d} is not considered equal to {@code +0.0d}.
      * Multiple occurrences of the same value are tracked separately.
-     * 
+     *
      * <p>
      * This method creates a {@code Difference} object that contains:
      * <ul>
@@ -406,7 +406,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *   <li>Left only: double values that appear only in the first array</li>
      *   <li>Right only: double values that appear only in the second array</li>
      * </ul>
-     * 
+     *
      * <p>The comparison takes into account the number of occurrences of each value. For example,
      * if {@code 1} appears twice in the first array and once in the second array, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
@@ -424,11 +424,11 @@ public sealed class Difference<L, R> permits KeyValueDifference {
 
     /**
      * Compares two object arrays and identifies the differences between them.
-     * 
+     *
      * <p>The arrays can contain different types (T1 and T2), allowing for comparison of arrays
      * with related but different element types. Elements are compared using their {@code equals}
      * method. The comparison respects the number of occurrences of each element.
-     * 
+     *
      * <p>
      * This method creates a {@code Difference} object that contains:
      * <ul>
@@ -436,11 +436,11 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *   <li>Left only: elements that appear only in the first array</li>
      *   <li>Right only: elements that appear only in the second array</li>
      * </ul>
-     * 
+     *
      * <p>The comparison takes into account the number of occurrences of each value. For example,
      * if {@code "apple"} appears twice in the first array and once in the second array, the result will
      * have one {@code "apple"} in common and one {@code "apple"} in left only.
-     * 
+     *
      * <p>The returned lists maintain the order of elements as they appear in the original arrays.
      *
      * @param <T1> the element type of the first array
@@ -466,7 +466,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
 
     /**
      * Compares two collections and identifies the differences between them.
-     * 
+     *
      * <p>
      * This method creates a {@code Difference} object that contains:
      * <ul>
@@ -474,7 +474,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *   <li>Left only: elements that appear only in the first collection</li>
      *   <li>Right only: elements that appear only in the second collection</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Collection<String> c1 = Arrays.asList("a", "b", "b", "c");
@@ -485,7 +485,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * // onlyOnLeft: ["a", "c"]
      * // onlyOnRight: ["b", "d"]
      * }</pre>
-     * 
+     *
      * <p>The comparison takes into account the number of occurrences of each value. For example,
      * if {@code "apple"} appears twice in the first collection and once in the second collection, the result will
      * have one {@code "apple"} in common and one {@code "apple"} in left only.
@@ -556,7 +556,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *   <li>Left only: boolean values that appear only in the first list</li>
      *   <li>Right only: boolean values that appear only in the second list</li>
      * </ul>
-     * 
+     *
      * <p>The comparison takes into account the number of occurrences of each value. For example,
      * if {@code true} appears twice in the first list and once in the second list, the result will
      * have one {@code true} in common and one {@code true} in left only.
@@ -620,7 +620,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *   <li>Left only: characters that appear only in the first list</li>
      *   <li>Right only: characters that appear only in the second list</li>
      * </ul>
-     * 
+     *
      * <p>The comparison takes into account the number of occurrences of each value. For example,
      * if {@code 'a'} appears twice in the first list and once in the second list, the result will
      * have one {@code 'a'} in common and one {@code 'a'} in left only.
@@ -684,7 +684,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *   <li>Left only: byte values that appear only in the first list</li>
      *   <li>Right only: byte values that appear only in the second list</li>
      * </ul>
-     * 
+     *
      * <p>The comparison takes into account the number of occurrences of each value. For example,
      * if {@code 1} appears twice in the first list and once in the second list, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
@@ -748,7 +748,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *   <li>Left only: short values that appear only in the first list</li>
      *   <li>Right only: short values that appear only in the second list</li>
      * </ul>
-     * 
+     *
      * <p>The comparison takes into account the number of occurrences of each value. For example,
      * if {@code 1} appears twice in the first list and once in the second list, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
@@ -812,7 +812,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *   <li>Left only: integer values that appear only in the first list</li>
      *   <li>Right only: integer values that appear only in the second list</li>
      * </ul>
-     * 
+     *
      * <p>The comparison takes into account the number of occurrences of each value. For example,
      * if {@code 1} appears twice in the first list and once in the second list, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
@@ -876,7 +876,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *   <li>Left only: long values that appear only in the first list</li>
      *   <li>Right only: long values that appear only in the second list</li>
      * </ul>
-     * 
+     *
      * <p>The comparison takes into account the number of occurrences of each value. For example,
      * if {@code 1} appears twice in the first list and once in the second list, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
@@ -933,11 +933,12 @@ public sealed class Difference<L, R> permits KeyValueDifference {
 
     /**
      * Compares two FloatLists and identifies the differences between them.
-     * 
-     * <p>Float values are compared using standard equality. Special values (NaN, positive/negative
-     * infinity) are handled according to Java's float comparison rules. Each occurrence of a value
+     *
+     * <p>Float values are compared using {@link Float#equals(Object)} semantics (equivalent to
+     * {@link Float#compare(float, float)}). As a result, {@code NaN} is considered equal to {@code NaN},
+     * and {@code -0.0f} is not considered equal to {@code +0.0f}. Each occurrence of a value
      * is tracked separately for accurate difference calculation.
-     * 
+     *
      * <p>
      * This method creates a {@code Difference} object that contains:
      * <ul>
@@ -945,7 +946,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *   <li>Left only: float values that appear only in the first list</li>
      *   <li>Right only: float values that appear only in the second list</li>
      * </ul>
-     * 
+     *
      * <p>The comparison takes into account the number of occurrences of each value. For example,
      * if {@code 1} appears twice in the first list and once in the second list, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
@@ -1002,11 +1003,12 @@ public sealed class Difference<L, R> permits KeyValueDifference {
 
     /**
      * Compares two DoubleLists and identifies the differences between them.
-     * 
-     * <p>Double values are compared using standard equality. Special values (NaN, positive/negative
-     * infinity) are handled according to Java's double comparison rules. The method efficiently
+     *
+     * <p>Double values are compared using {@link Double#equals(Object)} semantics (equivalent to
+     * {@link Double#compare(double, double)}). As a result, {@code NaN} is considered equal to {@code NaN},
+     * and {@code -0.0d} is not considered equal to {@code +0.0d}. The method efficiently
      * processes both lists while maintaining the original order of elements.
-     * 
+     *
      * <p>
      * This method creates a {@code Difference} object that contains:
      * <ul>
@@ -1014,7 +1016,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *   <li>Left only: double values that appear only in the first list</li>
      *   <li>Right only: double values that appear only in the second list</li>
      * </ul>
-     * 
+     *
      * <p>The comparison takes into account the number of occurrences of each value. For example,
      * if {@code 1} appears twice in the first list and once in the second list, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
@@ -1076,7 +1078,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * The number of occurrences in the result corresponds to the minimum number of occurrences
      * in either collection. For example, if an element appears 3 times in the first collection
      * and 2 times in the second, it will appear 2 times in the common elements.
-     * 
+     *
      * <p>The returned collection maintains the order of elements as they appear in the first collection.
      *
      * @return a collection containing the common elements. The type L is typically a List or similar collection.
@@ -1092,7 +1094,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * or elements that appear more frequently in the first collection than in the second.
      * For example, if an element appears 5 times in the first collection and 2 times in the
      * second collection, it will appear 3 times in the left-only elements.
-     * 
+     *
      * <p>The returned collection maintains the order of elements as they appear in the first collection.
      *
      * @return a collection containing elements only in the left collection. The type L is typically a List or similar collection.
@@ -1108,7 +1110,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * or elements that appear more frequently in the second collection than in the first.
      * For example, if an element appears 2 times in the first collection and 5 times in the
      * second collection, it will appear 3 times in the right-only elements.
-     * 
+     *
      * <p>The returned collection maintains the order of elements as they appear in the second collection.
      *
      * @return a collection containing elements only in the right collection. The type R is typically a List or similar collection.
@@ -1125,7 +1127,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *   <li>Both onlyOnLeft and onlyOnRight collections are empty</li>
      *   <li>All elements from both input collections are in the common elements</li>
      * </ul>
-     * 
+     *
      * <p>Note that element order is not considered - only the presence and count of each element matters.
      * For example, [1, 2, 3] and [3, 2, 1] would be considered equal, but [1, 2, 2] and [1, 2, 3]
      * would not be equal.
@@ -1148,7 +1150,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *   <li>Left-only elements (compared using equals)</li>
      *   <li>Right-only elements (compared using equals)</li>
      * </ul>
-     * 
+     *
      * <p>This method properly handles {@code null} values and ensures type safety by checking
      * that the compared object is also a {@code Difference} instance.
      *
@@ -1175,7 +1177,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * left-only elements, and right-only elements. This ensures that two {@code Difference}
      * objects that are equal according to the {@link #equals(Object)} method will have
      * the same hash code.
-     * 
+     *
      * <p>The implementation uses a standard hash code calculation pattern with a prime
      * number (31) to combine the hash codes of the three components.
      *
@@ -1200,9 +1202,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *   <li>The left-only elements</li>
      *   <li>The right-only elements</li>
      * </ul>
-     * 
+     *
      * <p>Format: {@code {areEqual=<boolean>, common=<common>, onlyOnLeft=<onlyOnLeft>, onlyOnRight=<onlyOnRight>}}
-     * 
+     *
      * <p>This method is useful for debugging and logging purposes.
      *
      * @return a string representation of this {@code Difference} object
@@ -1218,7 +1220,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * <p>
      * In addition to the standard difference operations (common, left-only, right-only), this class
      * identifies entries/properties that exist in both structures but have different values.
-     * 
+     *
      * <p>This class serves as the base for:
      * <ul>
      *   <li>{@link MapDifference} - for comparing maps</li>
@@ -1257,13 +1259,13 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Keys are the common keys between both maps</li>
          *   <li>Values are {@link Pair} objects containing the values from the left and right maps</li>
          * </ul>
-         * 
+         *
          * <p>For beans, this returns a map where:
          * <ul>
          *   <li>Keys are the property names that exist in both beans</li>
          *   <li>Values are {@link Pair} objects containing the property values from the left and right beans</li>
          * </ul>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Map<String, Integer> map1 = Map.of("a", 1, "b", 2);
@@ -1287,7 +1289,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Both structures have no entries/properties that exist only in one structure (onlyOnLeft and onlyOnRight are empty)</li>
          *   <li>There are no entries/properties with different values (differentValues is empty)</li>
          * </ul>
-         * 
+         *
          * <p>This is a stricter equality check than the parent class's {@link #areEqual()} method,
          * as it also considers whether any entries/properties have different values.
          *
@@ -1361,7 +1363,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>The right-only entries/properties</li>
          *   <li>The entries/properties with different values</li>
          * </ul>
-         * 
+         *
          * <p>Format: {@code {areEqual=<boolean>, common=<common>, onlyOnLeft=<onlyOnLeft>, onlyOnRight=<onlyOnRight>, differentValues=<diffValues>}}
          *
          * @return a string representation of this {@code KeyValueDifference} object
@@ -1380,7 +1382,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * This class extends {@link KeyValueDifference} to provide map-specific comparison functionality.
      * It can compare maps with different key and value types, and supports custom value equivalence
      * predicates for flexible comparison logic.
-     * 
+     *
      * <p>The comparison results include:
      * <ul>
      *   <li>Common entries: Key-value pairs that exist in both maps with equal values</li>
@@ -1388,13 +1390,13 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *   <li>Right-only entries: Key-value pairs that exist only in the second map</li>
      *   <li>Different values: Keys that exist in both maps but with different values</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map1 = Map.of("a", 1, "b", 2, "c", 3);
      * Map<String, Integer> map2 = Map.of("b", 2, "c", 4, "d", 5);
      * MapDifference<...> diff = MapDifference.of(map1, map2);
-     * 
+     *
      * // diff.common() returns {"b": 2}
      * // diff.onlyOnLeft() returns {"a": 1}
      * // diff.onlyOnRight() returns {"d": 5}
@@ -1431,16 +1433,16 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Right-only entries: Key-value pairs present only in the second map</li>
          *   <li>Different values: Keys present in both maps but with different values</li>
          * </ul>
-         * 
+         *
          * <p>The comparison uses the standard {@code equals} method to compare values. Null values are
          * handled correctly - if both maps have a {@code null} value for the same key, it's considered a common entry.
-         * 
+         *
          * <p>The order of entries in the result maps depends on the input map types:
          * <ul>
          *   <li>If either input map is a {@link LinkedHashMap} or {@link SortedMap}, results use {@link LinkedHashMap}</li>
          *   <li>Otherwise, results use {@link HashMap}</li>
          * </ul>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Map<String, Integer> map1 = Map.of("a", 1, "b", 2, "c", 3);
@@ -1486,13 +1488,13 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Right-only entries: Key-value pairs for the specified keys that exist only in the second map</li>
          *   <li>Different values: Specified keys that exist in both maps but with different values</li>
          * </ul>
-         * 
+         *
          * <p>Only the keys present in the {@code keysToCompare} collection are considered for comparison.
          * Keys not in this collection are ignored, even if they exist in either or both maps.
-         * 
+         *
          * <p>If {@code keysToCompare} is {@code null}, all keys from both maps are compared (equivalent
          * to calling {@link #of(Map, Map)}).
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Map<String, Integer> map1 = Map.of("a", 1, "b", 2, "c", 3, "d", 4);
@@ -1541,22 +1543,22 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Right-only entries: Key-value pairs present only in the second map</li>
          *   <li>Different values: Keys present in both maps but with non-equivalent values</li>
          * </ul>
-         * 
+         *
          * <p>The {@code valueEquivalence} predicate allows for custom comparison logic. This is useful when:
          * <ul>
          *   <li>Values need fuzzy matching (e.g., floating-point comparison with tolerance)</li>
          *   <li>Only certain fields of complex objects should be compared</li>
          *   <li>Case-insensitive string comparison is needed</li>
          * </ul>
-         * 
+         *
          * <p>Example with custom equivalence:
-         * 
-         * 
+         *
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Map<String, Double> map1 = Map.of("a", 1.0, "b", 2.001);
          * Map<String, Double> map2 = Map.of("a", 1.0, "b", 2.0);
-         * 
+         *
          * // Compare with tolerance of 0.01
          * BiPredicate<Double, Double> approxEqual = (v1, v2) -> Math.abs(v1 - v2) < 0.01;
          * MapDifference<...> diff = MapDifference.of(map1, map2, approxEqual);
@@ -1605,35 +1607,35 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Right-only entries: Key-value pairs present only in the second map</li>
          *   <li>Different values: Keys present in both maps but with non-equivalent values</li>
          * </ul>
-         * 
+         *
          * <p>The {@code valueEquivalence} TriPredicate receives three parameters:
          * <ol>
          *   <li>The key from the first map</li>
          *   <li>The value from the first map</li>
          *   <li>The value from the second map</li>
          * </ol>
-         * 
+         *
          * <p>This allows for key-dependent comparison logic. For example:
          * <ul>
          *   <li>Different tolerance levels for different numeric keys</li>
          *   <li>Case-sensitive comparison for some keys, case-insensitive for others</li>
          *   <li>Ignoring certain fields based on the key</li>
          * </ul>
-         * 
+         *
          * <p>Example with key-dependent equivalence:
-         * 
-         * 
+         *
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Map<String, Double> prices1 = Map.of("apple", 1.99, "gold", 1850.50);
          * Map<String, Double> prices2 = Map.of("apple", 2.01, "gold", 1851.00);
-         * 
+         *
          * // Different tolerance for different items
          * TriPredicate<String, Double, Double> priceEqual = (key, v1, v2) -> {
          *     double tolerance = key.equals("gold") ? 5.0 : 0.1;
          *     return Math.abs(v1 - v2) <= tolerance;
          * };
-         * 
+         *
          * MapDifference<...> diff = MapDifference.of(prices1, prices2, priceEqual);
          * // Results in:
          * // common: {"gold": 1850.50} (within $5 tolerance)
@@ -1681,14 +1683,14 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Right-only entries: Key-value pairs for specified keys that exist only in the second map</li>
          *   <li>Different values: Specified keys that exist in both maps but with non-equivalent values</li>
          * </ul>
-         * 
+         *
          * <p>The comparison process:
          * <ol>
          *   <li>Only keys in {@code keysToCompare} are considered (if {@code null}, all keys are compared)</li>
          *   <li>For each key, values are compared using the {@code valueEquivalence} predicate</li>
          *   <li>The predicate receives the key and both values, allowing key-dependent comparison</li>
          * </ol>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Map<String, Object> config1 = Map.of(
@@ -1703,9 +1705,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     "debug", true,
          *     "proxy", "proxy.com"
          * );
-         * 
+         *
          * Collection<String> keysToCheck = Arrays.asList("timeout", "retries", "debug");
-         * 
+         *
          * // Custom equivalence that handles type differences
          * TriPredicate<String, Object, Object> configEqual = (key, v1, v2) -> {
          *     if (key.equals("timeout")) {
@@ -1713,7 +1715,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     }
          *     return Objects.equals(v1, v2);
          * };
-         * 
+         *
          * MapDifference<...> diff = MapDifference.of(config1, config2, keysToCheck, configEqual);
          * // Results in:
          * // common: {"timeout": 30, "debug": true}
@@ -1855,13 +1857,13 @@ public sealed class Difference<L, R> permits KeyValueDifference {
         }
 
         /**
-         * Compares two collections of maps with the same key and value types, identifying common maps, 
+         * Compares two collections of maps with the same key and value types, identifying common maps,
          * maps unique to each collection, and maps with different values.
          * <p>
          * This method is designed for comparing collections of maps where each map represents an entity
          * or record. Maps are matched between collections using the provided {@code idExtractor} function,
          * which extracts a unique identifier from each map.
-         * 
+         *
          * <p>The comparison results include:
          * <ul>
          *   <li>Common: Maps that exist in both collections with identical key-value pairs</li>
@@ -1869,7 +1871,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Right-only: Maps that exist only in the second collection</li>
          *   <li>Different values: Maps that exist in both collections (same ID) but have different values</li>
          * </ul>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * List<Map<String, Object>> users1 = Arrays.asList(
@@ -1880,7 +1882,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     Map.of("id", 1, "name", "John", "age", 31),  // age changed
          *     Map.of("id", 3, "name", "Bob", "age", 28)
          * );
-         * 
+         *
          * MapDifference<...> diff = MapDifference.of(users1, users2, map -> map.get("id"));
          * // Results in:
          * // common: [] (empty, no identical maps)
@@ -1912,14 +1914,14 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * This method extends the functionality of {@link #of(Collection, Collection, Function)} by allowing
          * you to specify which keys should be compared when determining if two maps with the same ID have
          * different values.
-         * 
+         *
          * <p>The comparison process:
          * <ol>
          *   <li>Maps are matched between collections using the {@code idExtractor}</li>
          *   <li>When comparing matched maps, only the keys in {@code keysToCompare} are considered</li>
          *   <li>Keys not in {@code keysToCompare} are ignored during value comparison</li>
          * </ol>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * List<Map<String, Object>> users1 = Arrays.asList(
@@ -1930,10 +1932,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     Map.of("id", 1, "name", "John", "age", 30, "lastLogin", "2024-02-01"),
          *     Map.of("id", 2, "name", "Jane", "age", 26, "lastLogin", "2024-02-02")
          * );
-         * 
+         *
          * // Only compare name and age, ignore lastLogin
          * Collection<String> keysToCompare = Arrays.asList("name", "age");
-         * MapDifference<...> diff = MapDifference.of(users1, users2, keysToCompare, 
+         * MapDifference<...> diff = MapDifference.of(users1, users2, keysToCompare,
          *                                            map -> map.get("id"));
          * // Results in:
          * // common: [{"id": 1, ...}] (John's record, since name and age match)
@@ -1966,10 +1968,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * This method is useful when comparing collections of maps that represent similar entities but
          * may have different structures. For example, comparing API responses from different versions
          * or comparing data from different sources.
-         * 
+         *
          * <p>The comparison matches maps between collections based on the IDs extracted by the respective
          * ID extractors. Maps with the same ID are compared to identify differences in their key-value pairs.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Collection A: Old API format
@@ -1977,13 +1979,13 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     Map.of("user_id", 1, "full_name", "John Doe"),
          *     Map.of("user_id", 2, "full_name", "Jane Smith")
          * );
-         * 
+         *
          * // Collection B: New API format
          * List<Map<String, Object>> newFormat = Arrays.asList(
          *     Map.of("id", 1, "firstName", "John", "lastName", "Doe"),
          *     Map.of("id", 3, "firstName", "Bob", "lastName", "Johnson")
          * );
-         * 
+         *
          * MapDifference<...> diff = MapDifference.of(
          *     oldFormat, newFormat,
          *     map -> map.get("user_id"),  // ID extractor for old format
@@ -2027,39 +2029,39 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Selective key comparison via {@code keysToCompare}</li>
          *   <li>Type flexibility with different key/value types for each collection</li>
          * </ul>
-         * 
+         *
          * <p>The comparison process:
          * <ol>
          *   <li>Maps from collection A are matched with maps from collection B using their extracted IDs</li>
          *   <li>For matched maps, only the keys specified in {@code keysToCompare} are compared</li>
-         *   <li>Maps are categorized as common (identical values for compared keys), left-only, 
+         *   <li>Maps are categorized as common (identical values for compared keys), left-only,
          *       right-only, or having different values</li>
          * </ol>
-         * 
+         *
          * <p>Example comparing different API versions with selective field comparison:
-         * 
-         * 
+         *
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Collection A: Version 1 API
          * List<Map<String, Object>> v1Data = Arrays.asList(
-         *     Map.of("userId", 1, "userName", "john_doe", "email", "john@old.com", 
+         *     Map.of("userId", 1, "userName", "john_doe", "email", "john@old.com",
          *            "createdAt", "2023-01-01"),
-         *     Map.of("userId", 2, "userName", "jane_smith", "email", "jane@old.com", 
+         *     Map.of("userId", 2, "userName", "jane_smith", "email", "jane@old.com",
          *            "createdAt", "2023-02-01")
          * );
-         * 
+         *
          * // Collection B: Version 2 API
          * List<Map<String, Object>> v2Data = Arrays.asList(
-         *     Map.of("id", 1, "username", "john_doe", "emailAddress", "john@new.com", 
+         *     Map.of("id", 1, "username", "john_doe", "emailAddress", "john@new.com",
          *            "created", "2023-01-01T00:00:00Z"),
-         *     Map.of("id", 3, "username", "bob_jones", "emailAddress", "bob@new.com", 
+         *     Map.of("id", 3, "username", "bob_jones", "emailAddress", "bob@new.com",
          *            "created", "2023-03-01T00:00:00Z")
          * );
-         * 
+         *
          * // Only compare username fields (note: different key names in each version)
          * Collection<String> keysToCompare = Arrays.asList("userName", "username");
-         * 
+         *
          * MapDifference<...> diff = MapDifference.of(
          *     v1Data, v2Data, keysToCompare,
          *     map -> map.get("userId"),  // V1 uses "userId"
@@ -2153,7 +2155,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * This class extends {@link KeyValueDifference} to provide bean-specific comparison functionality.
      * It uses reflection to compare bean properties and supports various comparison options including
      * custom value equivalence predicates and selective property comparison.
-     * 
+     *
      * <p>The comparison results include:
      * <ul>
      *   <li>Common properties: Properties that exist in both beans with equal values</li>
@@ -2161,14 +2163,14 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *   <li>Right-only properties: Properties that exist only in the second bean</li>
      *   <li>Different values: Properties that exist in both beans but with different values</li>
      * </ul>
-     * 
+     *
      * <p>Special handling:
      * <ul>
      *   <li>Properties annotated with {@code @DiffIgnore} are excluded from comparison</li>
      *   <li>When comparing all properties, {@code null} values in both beans are ignored</li>
      *   <li>When comparing specific properties, {@code null} values are included in the comparison</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class Person {
@@ -2177,10 +2179,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *     private String email;
      *     // getters and setters...
      * }
-     * 
+     *
      * Person person1 = new Person("John", 30, "john@old.com");
      * Person person2 = new Person("John", 31, "john@new.com");
-     * 
+     *
      * BeanDifference<...> diff = BeanDifference.of(person1, person2);
      * // diff.common() returns {"name": "John"}
      * // diff.onlyOnLeft() returns {} (empty)
@@ -2212,7 +2214,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Right-only properties: Properties present only in the second bean</li>
          *   <li>Different values: Properties present in both beans but with different values</li>
          * </ul>
-         * 
+         *
          * <p>Special behavior:
          * <ul>
          *   <li>Properties annotated with {@code @DiffIgnore} are excluded from comparison</li>
@@ -2220,7 +2222,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>The beans can be of different classes; only properties with matching names are compared</li>
          *   <li>Property values are compared using the standard {@code equals} method</li>
          * </ul>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * class User {
@@ -2230,10 +2232,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     private Date lastModified;
          *     // getters and setters...
          * }
-         * 
+         *
          * User user1 = new User("John", "john@old.com");
          * User user2 = new User("John", "john@new.com");
-         * 
+         *
          * BeanDifference<...> diff = BeanDifference.of(user1, user2);
          * // Results in:
          * // common: {"name": "John"}
@@ -2270,7 +2272,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * This method creates a {@code BeanDifference} object that contains comparison results
          * only for the properties specified in {@code propNamesToCompare}. Properties not in this
          * collection are completely ignored, even if they exist in one or both beans.
-         * 
+         *
          * <p>Key differences from {@link #of(Object, Object)}:
          * <ul>
          *   <li>Only properties in {@code propNamesToCompare} are examined</li>
@@ -2278,7 +2280,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>{@code @DiffIgnore} annotations are ignored when specific properties are requested</li>
          *   <li>If a specified property doesn't exist in a bean, it's treated as a missing property</li>
          * </ul>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * class Employee {
@@ -2288,10 +2290,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     private String department;
          *     // getters and setters...
          * }
-         * 
+         *
          * Employee emp1 = new Employee("E001", "John", 50000.0, "Sales");
          * Employee emp2 = new Employee("E001", "John", 55000.0, "Marketing");
-         * 
+         *
          * // Compare only id and name
          * Collection<String> propsToCompare = Arrays.asList("id", "name");
          * BeanDifference<...> diff = BeanDifference.of(emp1, emp2, propsToCompare);
@@ -2332,7 +2334,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * This method allows for custom comparison logic when determining if property values
          * are equal. The predicate receives both property values and should return {@code true}
          * if they are considered equivalent.
-         * 
+         *
          * <p>Use cases for custom equivalence:
          * <ul>
          *   <li>Comparing floating-point numbers with tolerance</li>
@@ -2340,7 +2342,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Comparing only certain fields of nested objects</li>
          *   <li>Ignoring whitespace or formatting differences</li>
          * </ul>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * class Product {
@@ -2349,10 +2351,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     private String description;
          *     // getters and setters...
          * }
-         * 
+         *
          * Product p1 = new Product("Widget", 10.99, "A useful widget");
          * Product p2 = new Product("WIDGET", 10.991, "A USEFUL WIDGET");
-         * 
+         *
          * // Case-insensitive comparison with price tolerance
          * BiPredicate<Object, Object> fuzzyEquals = (v1, v2) -> {
          *     if (v1 instanceof String && v2 instanceof String) {
@@ -2362,7 +2364,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     }
          *     return Objects.equals(v1, v2);
          * };
-         * 
+         *
          * BeanDifference<...> diff = BeanDifference.of(p1, p2, fuzzyEquals);
          * // Results in:
          * // common: {"name": "Widget", "price": 10.99, "description": "A useful widget"}
@@ -2402,7 +2404,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * This method provides the most flexible bean comparison, allowing the equivalence logic
          * to vary based on the property name. The TriPredicate receives the property name and
          * both values, enabling property-specific comparison rules.
-         * 
+         *
          * <p>Use cases:
          * <ul>
          *   <li>Different comparison rules for different property types</li>
@@ -2410,7 +2412,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Property-specific tolerance levels or formatting rules</li>
          *   <li>Complex business logic that depends on the property context</li>
          * </ul>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * class Account {
@@ -2420,10 +2422,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     private String status;
          *     // getters and setters...
          * }
-         * 
+         *
          * Account acc1 = new Account("ACC001", 1000.001, date1, "ACTIVE");
          * Account acc2 = new Account("ACC001", 1000.0, date2, "active");
-         * 
+         *
          * // Property-specific comparison rules
          * TriPredicate<String, Object, Object> smartEquals = (propName, v1, v2) -> {
          *     switch (propName) {
@@ -2440,14 +2442,14 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *             return Objects.equals(v1, v2);
          *     }
          * };
-         * 
+         *
          * BeanDifference<...> diff = BeanDifference.of(acc1, acc2, smartEquals);
          * // Results may show all properties as common if they meet the criteria
          * }</pre>
          *
          * @param bean1 the first bean to compare. Can be {@code null}.
          * @param bean2 the second bean to compare. Can be {@code null}.
-         * @param valueEquivalence the predicate to determine if values are equivalent for a given property. 
+         * @param valueEquivalence the predicate to determine if values are equivalent for a given property.
          *                         Receives (propertyName, value1, value2). Must not be {@code null}.
          * @return a {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if either bean is not a valid bean class, or if {@code valueEquivalence} is {@code null}
@@ -2474,7 +2476,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * <p>
          * This method combines selective property comparison with custom equivalence logic that can
          * vary by property name. It provides maximum control over the comparison process.
-         * 
+         *
          * <p>Behavior:
          * <ul>
          *   <li>Only properties in {@code propNamesToCompare} are examined</li>
@@ -2482,7 +2484,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>{@code null} values in both beans are included in comparison (unlike the default behavior)</li>
          *   <li>{@code @DiffIgnore} annotations are ignored when specific properties are requested</li>
          * </ul>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * class Customer {
@@ -2493,13 +2495,13 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     private String notes;
          *     // getters and setters...
          * }
-         * 
+         *
          * Customer c1 = new Customer("C001", "John Doe", "john@old.com", 5000.0, "VIP customer");
          * Customer c2 = new Customer("C001", "JOHN DOE", "john@new.com", 5000.01, "VIP Customer");
-         * 
+         *
          * // Compare only specific fields with custom logic
          * Collection<String> fieldsToCheck = Arrays.asList("name", "email", "creditLimit");
-         * 
+         *
          * TriPredicate<String, Object, Object> fieldEquals = (field, v1, v2) -> {
          *     switch (field) {
          *         case "name":
@@ -2512,7 +2514,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *             return Objects.equals(v1, v2);
          *     }
          * };
-         * 
+         *
          * BeanDifference<...> diff = BeanDifference.of(c1, c2, fieldsToCheck, fieldEquals);
          * // Results in:
          * // common: {"name": "John Doe", "creditLimit": 5000.0}
@@ -2688,7 +2690,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * This method uses the provided {@code idExtractor} function to identify matching beans between
          * the two collections. Beans with the same identifier are compared property by property to find
          * differences.
-         * 
+         *
          * <p>The comparison process:
          * <ol>
          *   <li>Each bean is identified using the {@code idExtractor} function</li>
@@ -2696,7 +2698,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>All properties are compared (except those marked with {@code @DiffIgnore})</li>
          *   <li>Results are categorized into common, left-only, right-only, and different beans</li>
          * </ol>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * class Employee {
@@ -2705,7 +2707,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     private String department;
          *     // getters and setters...
          * }
-         * 
+         *
          * List<Employee> team1 = Arrays.asList(
          *     new Employee("E001", "John", "Sales"),
          *     new Employee("E002", "Jane", "Marketing")
@@ -2714,7 +2716,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     new Employee("E001", "John", "Engineering"),  // Different department
          *     new Employee("E003", "Bob", "Sales")
          * );
-         * 
+         *
          * BeanDifference<...> diff = BeanDifference.of(team1, team2, emp -> emp.getId());
          * // Results in:
          * // common: [] (empty, as E001 has different department)
@@ -2743,14 +2745,14 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * This method combines collection-level comparison with selective property comparison.
          * Only the properties listed in {@code propNamesToCompare} are examined when comparing
          * matched beans.
-         * 
+         *
          * <p>Use cases:
          * <ul>
          *   <li>Comparing only business-critical properties while ignoring metadata</li>
          *   <li>Performance optimization by comparing only necessary fields</li>
          *   <li>Versioning scenarios where only certain fields should trigger differences</li>
          * </ul>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * class Product {
@@ -2761,7 +2763,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     private String internalNotes;
          *     // getters and setters...
          * }
-         * 
+         *
          * List<Product> catalog1 = Arrays.asList(
          *     new Product("SKU001", "Widget", 19.99, date1, "Check supplier"),
          *     new Product("SKU002", "Gadget", 29.99, date2, "Bestseller")
@@ -2770,11 +2772,11 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     new Product("SKU001", "Widget", 21.99, date3, "New supplier"),
          *     new Product("SKU003", "Tool", 39.99, date4, "New item")
          * );
-         * 
+         *
          * // Compare only name and price, ignoring dates and notes
          * Collection<String> propsToCompare = Arrays.asList("name", "price");
          * BeanDifference<...> diff = BeanDifference.of(
-         *     catalog1, catalog2, propsToCompare, 
+         *     catalog1, catalog2, propsToCompare,
          *     product -> product.getSku()
          * );
          * // Results show price difference for SKU001, ignoring other field changes
@@ -2805,10 +2807,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>The identifier extraction logic differs between the collections</li>
          *   <li>You need to map between different data models</li>
          * </ul>
-         * 
+         *
          * <p>Only properties with matching names between the bean types are compared. Properties
          * unique to either bean type are reported as left-only or right-only properties.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * class CustomerV1 {
@@ -2817,7 +2819,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     private String emailAddress;
          *     // getters and setters...
          * }
-         * 
+         *
          * class CustomerV2 {
          *     private String id;  // Changed from Long to String
          *     private String fullName;  // Same property name
@@ -2825,7 +2827,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     private String phoneNumber;  // New field
          *     // getters and setters...
          * }
-         * 
+         *
          * List<CustomerV1> oldCustomers = Arrays.asList(
          *     new CustomerV1(101L, "John Doe", "john@example.com"),
          *     new CustomerV1(102L, "Jane Smith", "jane@example.com")
@@ -2834,7 +2836,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     new CustomerV2("101", "John Doe", "john@newdomain.com", "555-1234"),
          *     new CustomerV2("103", "Bob Johnson", "bob@example.com", "555-5678")
          * );
-         * 
+         *
          * BeanDifference<...> diff = BeanDifference.of(
          *     oldCustomers, newCustomers,
          *     v1 -> v1.getCustomerId().toString(),  // Convert Long to String
@@ -2856,7 +2858,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param idExtractor1 the function to extract identifiers from beans in the first collection. Must not be {@code null}.
          * @param idExtractor2 the function to extract identifiers from beans in the second collection. Must not be {@code null}.
          * @return a {@code BeanDifference} object containing the comparison results
-         * @throws IllegalArgumentException if either {@code idExtractor1} or {@code idExtractor2} is {@code null}, 
+         * @throws IllegalArgumentException if either {@code idExtractor1} or {@code idExtractor2} is {@code null},
          *         or if the collections contain non-bean objects
          */
         public static <T1, T2, L extends List<T1>, R extends List<T2>, K> BeanDifference<L, R, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
@@ -2875,7 +2877,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Custom identifier extraction for each collection</li>
          *   <li>Selective property comparison</li>
          * </ul>
-         * 
+         *
          * <p>This is particularly useful for:
          * <ul>
          *   <li>Data migration scenarios between different versions</li>
@@ -2883,7 +2885,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Audit trails focusing on specific fields</li>
          *   <li>Performance-sensitive comparisons of large objects</li>
          * </ul>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * class Order {
@@ -2895,7 +2897,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     private String notes;
          *     // getters and setters...
          * }
-         * 
+         *
          * class OrderSummary {
          *     private Long id;
          *     private String customer;  // Maps to customerName
@@ -2905,20 +2907,20 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     private Map<String, Object> metadata;
          *     // getters and setters...
          * }
-         * 
+         *
          * List<Order> orders = Arrays.asList(
          *     new Order("ORD-001", "John Doe", 150.00, "SHIPPED", date1, "Rush delivery"),
          *     new Order("ORD-002", "Jane Smith", 75.50, "PENDING", date2, "Gift wrap")
          * );
-         * 
+         *
          * List<OrderSummary> summaries = Arrays.asList(
          *     new OrderSummary(1L, "John Doe", new BigDecimal("150.00"), "DELIVERED", localDate1, metadata1),
          *     new OrderSummary(3L, "Bob Johnson", new BigDecimal("200.00"), "PENDING", localDate3, metadata3)
          * );
-         * 
+         *
          * // Compare only status field (the only field with matching names)
          * Collection<String> propsToCompare = Arrays.asList("status");
-         * 
+         *
          * BeanDifference<...> diff = BeanDifference.of(
          *     orders, summaries, propsToCompare,
          *     order -> order.getOrderId().substring(4),  // Extract numeric part

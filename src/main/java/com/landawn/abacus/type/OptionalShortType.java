@@ -18,9 +18,11 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.u.OptionalShort;
 
 /**
- * Type handler for {@link OptionalShort} objects, providing serialization, deserialization,
- * and database interaction capabilities for optional short integer values. This handler manages
- * the conversion between database short values and OptionalShort wrapper objects.
+ * Type handler for {@link OptionalShort} objects from the {@code com.landawn.abacus.util.u} package,
+ * providing serialization, deserialization, and database interaction capabilities for optional short integer values.
+ * Note: this handles the abacus-specific {@code OptionalShort}, which has no direct JDK equivalent.
+ * This handler manages the conversion between database short values and {@link OptionalShort} wrapper objects,
+ * mapping to the SQL {@code SMALLINT} type.
  */
 public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
 
@@ -28,8 +30,7 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
 
     /**
      * Constructs a new OptionalShortType instance.
-     * This constructor is protected to allow subclassing while maintaining controlled instantiation
-     * through the TypeFactory.
+     * Instances are normally obtained via the TypeFactory rather than constructed directly.
      */
     protected OptionalShortType() {
         super(OPTIONAL_SHORT);

@@ -14,22 +14,19 @@
 
 package com.landawn.abacus.type;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.Writer;
 import java.lang.reflect.Array;
+import java.util.List;
 
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
-import com.landawn.abacus.util.BufferedXmlWriter;
 import com.landawn.abacus.util.CharacterWriter;
-import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Range;
 import com.landawn.abacus.util.Range.BoundType;
-import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Strings;
 
 /**
  * Type handler for Range objects containing comparable values.
@@ -65,7 +62,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
 
     private final Class<Range<T>> typeClass;
 
-    private final Type<T>[] parameterTypes;
+    private final List<Type<?>> parameterTypes;
 
     private final Type<T> elementType;
 
@@ -81,8 +78,8 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
 
         declaringName = RANGE + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + SK.GREATER_THAN;
         typeClass = (Class) Range.class;
-        parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
-        elementType = parameterTypes[0];
+        elementType = TypeFactory.getType(parameterTypeName);
+        parameterTypes = List.of(elementType);
     }
 
     /**
@@ -118,21 +115,21 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
     }
 
     /**
-     * Returns an array containing the Type instances for the parameter types of this Range.
-     * For Range, this returns a single-element array containing the element type.
+     * Returns an immutable list containing the Type instances for the parameter types of this Range.
+     * For Range, this returns a single-element list containing the element type.
      *
-     * @return an array with one Type instance representing the element type of the Range
+     * @return an immutable list with one Type instance representing the element type of the Range
      */
     @Override
-    public Type<T>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 
     /**
-     * Indicates whether this type is a generic type.
-     * RangeType is always generic as it is parameterized with a type T.
+     * Indicates whether this type is a parameterized type.
+     * {@code RangeType} is always parameterized as it carries a comparable element type parameter.
      *
-     * @return {@code true}, indicating this is a generic type
+     * @return {@code true}, indicating this is a parameterized type
      */
     @Override
     public boolean isParameterizedType() {
@@ -167,7 +164,21 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
             type = TypeFactory.getType(x.upperEndpoint().getClass());
         }
 
-        return prefix + type.stringOf(x.lowerEndpoint()) + ELEMENT_SEPARATOR + type.stringOf(x.upperEndpoint()) + postfix;
+        final BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
+
+        try {
+            bw.write(prefix);
+            type.writeCharacter(bw, x.lowerEndpoint(), Utils.jsc);
+            bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+            type.writeCharacter(bw, x.upperEndpoint(), Utils.jsc);
+            bw.write(postfix);
+
+            return bw.toString();
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        } finally {
+            Objectory.recycle(bw);
+        }
     }
 
     /**
@@ -228,49 +239,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            final BoundType boundType = x.boundType();
-            final String prefix = (boundType == BoundType.OPEN_OPEN || boundType == BoundType.OPEN_CLOSED) ? "(" : "[";
-            final String postfix = (boundType == BoundType.OPEN_OPEN || boundType == BoundType.CLOSED_OPEN) ? ")" : "]";
-            Type<T> type = elementType;
-
-            if (x.lowerEndpoint() != null) {
-                type = TypeFactory.getType(x.lowerEndpoint().getClass());
-            } else if (x.upperEndpoint() != null) {
-                type = TypeFactory.getType(x.upperEndpoint().getClass());
-            }
-
-            if (appendable instanceof Writer writer) {
-                final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
-                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
-
-                try {
-                    bw.write(prefix);
-
-                    type.appendTo(bw, x.lowerEndpoint());
-                    bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-                    type.appendTo(bw, x.upperEndpoint());
-
-                    bw.write(postfix);
-
-                    if (!isBufferedWriter) {
-                        bw.flush();
-                    }
-                } catch (final IOException e) {
-                    throw new UncheckedIOException(e);
-                } finally {
-                    if (!isBufferedWriter) {
-                        Objectory.recycle((BufferedWriter) bw);
-                    }
-                }
-            } else {
-                appendable.append(prefix);
-
-                type.appendTo(appendable, x.lowerEndpoint());
-                appendable.append(ELEMENT_SEPARATOR);
-                type.appendTo(appendable, x.upperEndpoint());
-
-                appendable.append(postfix);
-            }
+            appendable.append(stringOf(x));
         }
     }
 
@@ -289,37 +258,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            final BoundType boundType = x.boundType();
-            final String prefix = (boundType == BoundType.OPEN_OPEN || boundType == BoundType.OPEN_CLOSED) ? "(" : "[";
-            final String postfix = (boundType == BoundType.OPEN_OPEN || boundType == BoundType.CLOSED_OPEN) ? ")" : "]";
-            Type<T> type = elementType;
-
-            if (x.lowerEndpoint() != null) {
-                type = TypeFactory.getType(x.lowerEndpoint().getClass());
-            } else if (x.upperEndpoint() != null) {
-                type = TypeFactory.getType(x.upperEndpoint().getClass());
-            }
-
-            final boolean isBufferedJsonWriter = writer instanceof BufferedJsonWriter;
-            final CharacterWriter tmpWriter = isBufferedJsonWriter ? Objectory.createBufferedJsonWriter() : Objectory.createBufferedXmlWriter();
-
-            try {
-                tmpWriter.write(prefix);
-                type.writeCharacter(tmpWriter, x.lowerEndpoint(), config);
-                tmpWriter.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-                type.writeCharacter(tmpWriter, x.upperEndpoint(), config);
-                tmpWriter.write(postfix);
-
-                strType.writeCharacter(writer, tmpWriter.toString(), config);
-            } catch (final IOException e) {
-                throw new UncheckedIOException(e);
-            } finally {
-                if (isBufferedJsonWriter) {
-                    Objectory.recycle((BufferedJsonWriter) tmpWriter);
-                } else {
-                    Objectory.recycle((BufferedXmlWriter) tmpWriter);
-                }
-            }
+            strType.writeCharacter(writer, stringOf(x), config);
         }
     }
 }

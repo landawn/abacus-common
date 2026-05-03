@@ -2655,7 +2655,7 @@ public class LongListTest extends TestBase {
         // Test adding many elements beyond initial capacity
         LongList ll = new LongList(2);
         for (int i = 0; i < 100; i++) {
-            ll.add((long) i);
+            ll.add(i);
         }
         assertEquals(100, ll.size());
         assertEquals(0L, ll.get(0));

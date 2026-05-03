@@ -24,8 +24,8 @@ package com.landawn.abacus.util.function;
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.Function
- * @see java.util.function.DoubleToIntFunction
- * @see java.util.function.IntToDoubleFunction
+ * @see FloatToIntFunction
+ * @see FloatToLongFunction
  */
 @FunctionalInterface
 public interface FloatToDoubleFunction {

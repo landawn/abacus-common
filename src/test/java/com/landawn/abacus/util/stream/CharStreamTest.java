@@ -275,8 +275,36 @@ public class CharStreamTest extends TestBase {
     public void testFlatmap_WithCharArray() {
         CharStream stream = createCharStream('a', 'b');
         CharFunction<char[]> mapper = c -> new char[] { c, Character.toUpperCase(c) };
-        char[] result = stream.flatmap(mapper).toArray();
+        char[] result = stream.flatMapArray(mapper).toArray();
         assertArrayEquals(new char[] { 'a', 'A', 'b', 'B' }, result);
+    }
+
+    @Test
+    public void testFlatmapCollection() {
+        // multi-element
+        assertArrayEquals(new char[] { 'a', 'A', 'b', 'B' }, createCharStream('a', 'b').flatmap(c -> Arrays.asList(c, Character.toUpperCase(c))).toArray());
+
+        // single element
+        assertArrayEquals(new char[] { 'x', 'y' }, createCharStream('x').flatmap(c -> Arrays.asList(c, 'y')).toArray());
+
+        // empty stream
+        assertArrayEquals(new char[] {}, createCharStream(new char[] {}).flatmap(c -> Arrays.asList((Character) c)).toArray());
+
+        // empty collection
+        assertArrayEquals(new char[] {}, createCharStream('a', 'b').flatmap(c -> java.util.Collections.<Character> emptyList()).toArray());
+
+        // null collection
+        assertArrayEquals(new char[] {}, createCharStream('a').flatmap(c -> (java.util.Collection<Character>) null).toArray());
+
+        // null elements -> (char) 0
+        char[] withNulls = createCharStream('a').flatmap(c -> Arrays.asList((Character) null, 'z')).toArray();
+        assertEquals(2, withNulls.length);
+        assertEquals((char) 0, withNulls[0]);
+        assertEquals('z', withNulls[1]);
+
+        // mixed nulls and values
+        assertArrayEquals(new char[] { (char) 0, 'm', (char) 0 },
+                createCharStream('a').flatmap(c -> Arrays.asList((Character) null, 'm', (Character) null)).toArray());
     }
 
     @Test
@@ -2305,26 +2333,26 @@ public class CharStreamTest extends TestBase {
 
     @Test
     public void testStreamCreatedAfterFlatmapArray() {
-        assertEquals(6, CharStream.of((char) 1, (char) 2, (char) 3).flatmap(e -> new char[] { e, (char) (e + 10) }).count());
-        assertEquals(4, CharStream.of((char) 1, (char) 2, (char) 3).flatmap(e -> new char[] { e, (char) (e + 10) }).skip(2).count());
+        assertEquals(6, CharStream.of((char) 1, (char) 2, (char) 3).flatMapArray(e -> new char[] { e, (char) (e + 10) }).count());
+        assertEquals(4, CharStream.of((char) 1, (char) 2, (char) 3).flatMapArray(e -> new char[] { e, (char) (e + 10) }).skip(2).count());
         assertArrayEquals(new char[] { 1, 11, 2, 12, 3, 13 },
-                CharStream.of((char) 1, (char) 2, (char) 3).flatmap(e -> new char[] { e, (char) (e + 10) }).toArray());
+                CharStream.of((char) 1, (char) 2, (char) 3).flatMapArray(e -> new char[] { e, (char) (e + 10) }).toArray());
         assertArrayEquals(new char[] { 2, 12, 3, 13 },
-                CharStream.of((char) 1, (char) 2, (char) 3).flatmap(e -> new char[] { e, (char) (e + 10) }).skip(2).toArray());
+                CharStream.of((char) 1, (char) 2, (char) 3).flatMapArray(e -> new char[] { e, (char) (e + 10) }).skip(2).toArray());
         assertEquals(N.toList((char) 1, (char) 11, (char) 2, (char) 12, (char) 3, (char) 13),
-                CharStream.of((char) 1, (char) 2, (char) 3).flatmap(e -> new char[] { e, (char) (e + 10) }).toList());
+                CharStream.of((char) 1, (char) 2, (char) 3).flatMapArray(e -> new char[] { e, (char) (e + 10) }).toList());
         assertEquals(N.toList((char) 2, (char) 12, (char) 3, (char) 13),
-                CharStream.of((char) 1, (char) 2, (char) 3).flatmap(e -> new char[] { e, (char) (e + 10) }).skip(2).toList());
-        assertEquals(6, CharStream.of((char) 1, (char) 2, (char) 3).map(e -> e).flatmap(e -> new char[] { e, (char) (e + 10) }).count());
-        assertEquals(4, CharStream.of((char) 1, (char) 2, (char) 3).map(e -> e).flatmap(e -> new char[] { e, (char) (e + 10) }).skip(2).count());
+                CharStream.of((char) 1, (char) 2, (char) 3).flatMapArray(e -> new char[] { e, (char) (e + 10) }).skip(2).toList());
+        assertEquals(6, CharStream.of((char) 1, (char) 2, (char) 3).map(e -> e).flatMapArray(e -> new char[] { e, (char) (e + 10) }).count());
+        assertEquals(4, CharStream.of((char) 1, (char) 2, (char) 3).map(e -> e).flatMapArray(e -> new char[] { e, (char) (e + 10) }).skip(2).count());
         assertArrayEquals(new char[] { 1, 11, 2, 12, 3, 13 },
-                CharStream.of((char) 1, (char) 2, (char) 3).map(e -> e).flatmap(e -> new char[] { e, (char) (e + 10) }).toArray());
+                CharStream.of((char) 1, (char) 2, (char) 3).map(e -> e).flatMapArray(e -> new char[] { e, (char) (e + 10) }).toArray());
         assertArrayEquals(new char[] { 2, 12, 3, 13 },
-                CharStream.of((char) 1, (char) 2, (char) 3).map(e -> e).flatmap(e -> new char[] { e, (char) (e + 10) }).skip(2).toArray());
+                CharStream.of((char) 1, (char) 2, (char) 3).map(e -> e).flatMapArray(e -> new char[] { e, (char) (e + 10) }).skip(2).toArray());
         assertEquals(N.toList((char) 1, (char) 11, (char) 2, (char) 12, (char) 3, (char) 13),
-                CharStream.of((char) 1, (char) 2, (char) 3).map(e -> e).flatmap(e -> new char[] { e, (char) (e + 10) }).toList());
+                CharStream.of((char) 1, (char) 2, (char) 3).map(e -> e).flatMapArray(e -> new char[] { e, (char) (e + 10) }).toList());
         assertEquals(N.toList((char) 2, (char) 12, (char) 3, (char) 13),
-                CharStream.of((char) 1, (char) 2, (char) 3).map(e -> e).flatmap(e -> new char[] { e, (char) (e + 10) }).skip(2).toList());
+                CharStream.of((char) 1, (char) 2, (char) 3).map(e -> e).flatMapArray(e -> new char[] { e, (char) (e + 10) }).skip(2).toList());
     }
 
     @Test

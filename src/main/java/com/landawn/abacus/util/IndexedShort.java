@@ -16,12 +16,12 @@ package com.landawn.abacus.util;
 
 /**
  * Represents a primitive short value paired with an index position.
- * 
+ *
  * <p>This class is a specialized version of {@link Indexed} for primitive short values,
  * providing better performance by avoiding boxing/unboxing overhead.</p>
- * 
+ *
  * <p>The class is immutable and extends {@link AbstractIndexed}.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedShort indexedShort = IndexedShort.of((short)42, 5);
@@ -55,7 +55,7 @@ public final class IndexedShort extends AbstractIndexed {
 
     /**
      * Creates a new IndexedShort instance with the specified value and index.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedShort indexed = IndexedShort.of((short)42, 5);
@@ -74,9 +74,9 @@ public final class IndexedShort extends AbstractIndexed {
 
     /**
      * Creates a new IndexedShort instance with the specified value and index.
-     * 
+     *
      * <p>This overload accepts a long index for cases where the index might exceed Integer.MAX_VALUE.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedShort indexed = IndexedShort.of((short)42, 5000000000L);
@@ -95,7 +95,7 @@ public final class IndexedShort extends AbstractIndexed {
 
     /**
      * Returns the short value stored in this IndexedShort instance.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedShort indexed = IndexedShort.of((short)42, 5);
@@ -110,7 +110,7 @@ public final class IndexedShort extends AbstractIndexed {
 
     /**
      * Returns the hash code of this IndexedShort instance.
-     * 
+     *
      * <p>The hash code is computed based on both the index and the value.</p>
      *
      * @return the hash code
@@ -122,15 +122,15 @@ public final class IndexedShort extends AbstractIndexed {
 
     /**
      * Checks if this IndexedShort instance is equal to another object.
-     * 
+     *
      * <p>Two IndexedShort instances are equal if they have the same index and value.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedShort indexed1 = IndexedShort.of((short)42, 5);
      * IndexedShort indexed2 = IndexedShort.of((short)42, 5);
      * IndexedShort indexed3 = IndexedShort.of((short)43, 5);
-     * 
+     *
      * indexed1.equals(indexed2);   // true
      * indexed1.equals(indexed3);   // false
      * }</pre>
@@ -145,16 +145,16 @@ public final class IndexedShort extends AbstractIndexed {
 
     /**
      * Returns a string representation of this IndexedShort instance.
-     * 
-     * <p>The format is: [index]=value</p>
-     * 
+     *
+     * <p>The format is: {@code [index]=value}</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedShort indexed = IndexedShort.of((short)42, 5);
      * System.out.println(indexed);   // prints: [5]=42
      * }</pre>
      *
-     * @return a string representation in the format [index]=value
+     * @return a string representation in the format {@code [index]=value}
      */
     @Override
     public String toString() {

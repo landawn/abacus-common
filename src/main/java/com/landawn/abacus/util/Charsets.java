@@ -23,26 +23,26 @@ import java.util.Map;
 /**
  * A utility class providing convenient access to commonly used character encodings
  * and charset management functionality.
- * 
+ *
  * <p>This class provides static constants for standard charsets and a caching
  * mechanism for charset lookup by name. All standard charset constants are
  * guaranteed to be available on every implementation of the Java platform.</p>
- * 
+ *
  * <p>The class maintains an internal cache of charset instances to avoid the
  * overhead of repeated charset lookups. The cache is pre-populated with all
  * standard charsets and grows as new charsets are requested.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Using predefined constants
  * byte[] utf8Bytes = "Hello".getBytes(Charsets.UTF_8);
  * String text = new String(utf8Bytes, Charsets.UTF_8);
- * 
+ *
  * // Getting charset by name (cached)
  * Charset gbk = Charsets.get("GBK");
  * byte[] gbkBytes = "你好".getBytes(gbk);
  * }</pre>
- * 
+ *
  * @see java.nio.charset.Charset
  * @see java.nio.charset.StandardCharsets
  */
@@ -51,9 +51,9 @@ public final class Charsets {
     /**
      * Seven-bit ASCII, also known as ISO646-US, also known as the
      * Basic Latin block of the Unicode character set.
-     * 
+     *
      * <p>This charset is guaranteed to be available on all Java platforms.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] asciiBytes = "Hello".getBytes(Charsets.US_ASCII);
@@ -63,9 +63,9 @@ public final class Charsets {
 
     /**
      * ISO Latin Alphabet No. 1, also known as ISO-LATIN-1.
-     * 
+     *
      * <p>This charset is guaranteed to be available on all Java platforms.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] latinBytes = "Café".getBytes(Charsets.ISO_8859_1);
@@ -75,11 +75,11 @@ public final class Charsets {
 
     /**
      * Eight-bit UCS Transformation Format.
-     * 
+     *
      * <p>UTF-8 is the most widely used character encoding on the web and
      * is recommended for new applications. This charset is guaranteed to
      * be available on all Java platforms.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] utf8Bytes = "Hello 世界".getBytes(Charsets.UTF_8);
@@ -91,9 +91,9 @@ public final class Charsets {
     /**
      * Sixteen-bit UCS Transformation Format, byte order identified by an
      * optional byte-order mark.
-     * 
+     *
      * <p>This charset is guaranteed to be available on all Java platforms.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] utf16Bytes = "Hello".getBytes(Charsets.UTF_16);
@@ -103,9 +103,9 @@ public final class Charsets {
 
     /**
      * Sixteen-bit UCS Transformation Format, big-endian byte order.
-     * 
+     *
      * <p>This charset is guaranteed to be available on all Java platforms.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] utf16beBytes = "Hello".getBytes(Charsets.UTF_16BE);
@@ -115,9 +115,9 @@ public final class Charsets {
 
     /**
      * Sixteen-bit UCS Transformation Format, little-endian byte order.
-     * 
+     *
      * <p>This charset is guaranteed to be available on all Java platforms.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] utf16leBytes = "Hello".getBytes(Charsets.UTF_16LE);
@@ -127,11 +127,11 @@ public final class Charsets {
 
     /**
      * Returns the default charset of this Java virtual machine.
-     * 
+     *
      * <p>The default charset is determined during virtual-machine startup
      * and typically depends upon the locale and charset of the underlying
      * operating system.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Charset systemDefault = Charsets.DEFAULT;

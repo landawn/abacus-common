@@ -39,16 +39,16 @@ import com.landawn.abacus.util.Strings;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Convert Type to string
- * Type stringType = TypeFactory.getType(String.class);
- * TypeType typeHandler = new TypeType();
+ * Type<String> stringType = TypeFactory.getType(String.class);
+ * Type<Type> typeHandler = TypeFactory.getType(Type.class);
  * String typeName = typeHandler.stringOf(stringType);   // "String"
  *
  * // Convert string back to Type
- * Type reconstructed = typeHandler.valueOf("String");
+ * Type<?> reconstructed = typeHandler.valueOf("String");
  * assert reconstructed.equals(stringType);
  *
  * // Store type information in a map
- * Map<String, Type> typeRegistry = new HashMap<>();
+ * Map<String, Type<?>> typeRegistry = new HashMap<>();
  * typeRegistry.put("userType", TypeFactory.getType(User.class));
  * }</pre>
  *
@@ -80,13 +80,9 @@ public class TypeType extends AbstractType<Type> {
     }
 
     /**
-     * Returns the Class object representing the Type interface.
-     * <p>
-     * This method returns {@code Type.class}, which is the Class object for the
-     * {@link Type} interface that this TypeType handles.
-     * </p>
+     * Returns the {@link Class} object representing the {@link Type} interface.
      *
-     * @return the Class object for Type.class
+     * @return {@code Type.class}
      */
     @Override
     public Class<Type> javaType() {
@@ -94,13 +90,10 @@ public class TypeType extends AbstractType<Type> {
     }
 
     /**
-     * Checks if Type instances are immutable.
-     * <p>
-     * Type instances are considered immutable as they represent type metadata
-     * that should not change once created.
-     * </p>
+     * Returns {@code true} because {@code Type} instances are immutable — they represent
+     * type metadata that does not change after creation.
      *
-     * @return {@code true}, indicating that Type instances are immutable
+     * @return {@code true}
      */
     @Override
     public boolean isImmutable() {
@@ -108,14 +101,11 @@ public class TypeType extends AbstractType<Type> {
     }
 
     /**
-     * Converts a Type instance to its string representation.
-     * <p>
-     * This method returns the name of the Type instance by calling its {@code name()} method.
-     * If the input Type is {@code null}, this method returns {@code null}.
-     * </p>
+     * Returns the name of the given {@code Type} instance by calling {@link Type#name()},
+     * or {@code null} if the input is {@code null}.
      *
-     * @param x the Type instance to convert to string
-     * @return the name of the Type, or {@code null} if the input is null
+     * @param x the {@code Type} instance to convert to string, may be {@code null}
+     * @return the type name, or {@code null} if the input is {@code null}
      */
     @Override
     public String stringOf(final Type x) {
@@ -123,19 +113,19 @@ public class TypeType extends AbstractType<Type> {
     }
 
     /**
-     * Converts a string to a Type instance.
+     * Converts a string to a {@code Type} instance.
      * <p>
-     * This method retrieves a Type instance from the TypeFactory using the provided string
-     * as the type name. If the string is {@code null} or empty, this method returns {@code null}.
+     * This method retrieves a {@code Type} instance from the {@link TypeFactory} using the provided
+     * string as the type name. If the string is {@code null} or empty, this method returns {@code null}.
+     * For unrecognized type names, {@link TypeFactory} falls back to an {@code ObjectType} wrapper.
      * </p>
      * <p>
-     * The string should be a valid type name that has been registered with the TypeFactory,
-     * such as "String", "Integer", "List&lt;String&gt;", etc.
+     * The string should be a valid type name registered with the {@link TypeFactory},
+     * such as {@code "String"}, {@code "Integer"}, {@code "List<String>"}, etc.
      * </p>
      *
-     * @param str the type name string to convert to a Type instance
-     * @return the Type instance corresponding to the type name, or {@code null} if the string is empty
-     * @throws IllegalArgumentException if the type name is not recognized by TypeFactory
+     * @param str the type name string to convert to a {@code Type} instance
+     * @return the {@code Type} instance corresponding to the type name, or {@code null} if the string is {@code null} or empty
      */
     @Override
     public Type valueOf(final String str) {

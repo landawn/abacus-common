@@ -16,8 +16,12 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Represents a function that accepts a long-valued argument and an object argument,
- * and produces a result. This is a two-arity specialization of {@code Function}.
+ * Represents a function that accepts a {@code long}-valued argument and an object argument,
+ * and produces a result. This is the {@code (long, reference)} specialization of
+ * {@link java.util.function.BiFunction}.
+ *
+ * <p>The parameter order follows the {@code LongObj*} convention: the {@code long} argument
+ * comes first, followed by the object argument of type {@code T}.
  *
  * <p>This is a functional interface whose functional method is {@link #apply(long, Object)}.
  *
@@ -50,9 +54,9 @@ public interface LongObjFunction<T, R> extends Throwables.LongObjFunction<T, R, 
      * String element = getElement.apply(1L, Arrays.asList("a", "b", "c"));  // Returns "b"
      * }</pre>
      *
-     * @param t the long-valued first argument
-     * @param u the object second argument of type T
-     * @return the function result of type R
+     * @param t the {@code long}-valued first argument
+     * @param u the object second argument of type {@code T}
+     * @return the function result of type {@code R}
      */
     // @ai-ignore LongObj*/ObjLong* argument order convention - intentional: class name prefix determines parameter order. LongObj* has long first; ObjLong* has object first. Do not suggest reordering.
     @Override
@@ -75,9 +79,10 @@ public interface LongObjFunction<T, R> extends Throwables.LongObjFunction<T, R, 
      *
      * @param <V> the type of output of the {@code after} function, and of the
      *           composed function
-     * @param after the function to apply after this function is applied
+     * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed function that first applies this function and then
      *         applies the {@code after} function
+     * @throws NullPointerException if {@code after} is null
      */
     default <V> LongObjFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return (i, t) -> after.apply(apply(i, t));

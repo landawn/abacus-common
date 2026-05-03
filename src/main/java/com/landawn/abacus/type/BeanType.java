@@ -17,30 +17,18 @@ package com.landawn.abacus.type;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for JavaBean objects.
- * This class provides JSON-based serialization and deserialization for arbitrary JavaBean types,
- * enabling conversion between bean instances and their JSON string representations.
+ * Type handler for arbitrary JavaBean (POJO) types.
+ * Provides JSON-based serialization and deserialization, enabling conversion between
+ * bean instances and their JSON string representations.
  *
- * <p>BeanType instances are typically obtained through the TypeFactory and are used internally
- * by the serialization framework. Users rarely need to interact with BeanType directly,
- * as the framework automatically handles bean conversions.</p>
+ * <p>{@code BeanType} instances are created and cached by {@link TypeFactory} and are used
+ * internally by the serialization framework. Applications typically obtain a {@code BeanType}
+ * via {@code TypeFactory.getType(MyBean.class)} rather than constructing one directly.</p>
  *
- * <p><b>Usage Examples:</b></p>
- * <pre>{@code
- * // Get BeanType through TypeFactory
- * Type<User> userType = TypeFactory.getType(User.class);
+ * <p>Beans are classified as {@link SerializationType#ENTITY} and are <em>not</em> directly
+ * serializable in the primitive/scalar sense — they always go through JSON conversion.</p>
  *
- * // Serialize bean to string
- * User user = new User("John", "john@example.com");
- * String json = userType.stringOf(user);
- * // Result: {"name":"John","email":"john@example.com"}
- *
- * // Deserialize string to bean
- * String jsonInput = "{\"name\":\"Jane\",\"email\":\"jane@example.com\"}";
- * User parsedUser = userType.valueOf(jsonInput);
- * }</pre>
- *
- * @param <T> the JavaBean type this handler manages
+ * @param <T> the JavaBean type managed by this handler
  */
 @SuppressWarnings("java:S2160")
 public final class BeanType<T> extends AbstractType<T> {
@@ -49,12 +37,12 @@ public final class BeanType<T> extends AbstractType<T> {
     private final java.lang.reflect.Type javaType;
 
     /**
-     * Package-private constructor for BeanType.
-     * This constructor is called by the TypeFactory to create BeanType instances
-     * for arbitrary JavaBean classes.
+     * Package-private constructor for {@code BeanType}.
+     * Instances are created by {@link TypeFactory}; do not instantiate directly.
      *
-     * @param clazz the Class object representing the bean type
-     * @param javaType the Java reflection Type for the bean (may be {@code null} for simple classes)
+     * @param clazz the {@code Class} object representing the concrete bean type
+     * @param javaType the Java reflection {@code Type} for the bean (may be {@code null} for non-generic classes,
+     *                 in which case {@code clazz} is used as the reflection type)
      */
     BeanType(final Class<T> clazz, final java.lang.reflect.Type javaType) {
         super(javaType == null ? TypeFactory.getClassName(clazz) : TypeFactory.getJavaTypeName(javaType));
@@ -63,9 +51,9 @@ public final class BeanType<T> extends AbstractType<T> {
     }
 
     /**
-     * Returns the Class object representing the bean type.
+     * Returns the {@code Class} object representing the concrete bean type.
      *
-     * @return the Class object for the specific bean type T
+     * @return the {@code Class} for the bean type {@code T}
      */
     @Override
     public Class<T> javaType() {
@@ -73,9 +61,11 @@ public final class BeanType<T> extends AbstractType<T> {
     }
 
     /**
-     * Returns the Java reflection Type representation of the bean type.
+     * Returns the Java reflection {@code Type} for the bean type.
+     * For non-generic beans this is the same as {@link #javaType()};
+     * for generic beans it is the full parameterised type.
      *
-     * @return the Java reflection Type for the specific bean type T
+     * @return the reflection {@code Type} for the bean type {@code T}
      */
     @Override
     public java.lang.reflect.Type reflectType() {
@@ -83,10 +73,9 @@ public final class BeanType<T> extends AbstractType<T> {
     }
 
     /**
-     * Determines whether this type represents a JavaBean.
-     * Always returns {@code true} for BeanType instances.
+     * Indicates that this type represents a JavaBean (POJO).
      *
-     * @return {@code true} indicating this is a bean type
+     * @return {@code true} always, since this handler manages bean types
      */
     @Override
     public boolean isBean() {
@@ -94,10 +83,10 @@ public final class BeanType<T> extends AbstractType<T> {
     }
 
     /**
-     * Determines whether this bean type is directly serializable.
-     * Bean types require JSON conversion and are not directly serializable.
+     * Indicates that bean types are not directly serializable as scalar values.
+     * Bean instances are always serialized via JSON conversion.
      *
-     * @return {@code false} indicating beans are not directly serializable
+     * @return {@code false} always, since beans require JSON serialization
      */
     @Override
     public boolean isSerializable() {
@@ -105,10 +94,9 @@ public final class BeanType<T> extends AbstractType<T> {
     }
 
     /**
-     * Gets the serialization type classification for this bean type.
-     * Beans are classified as ENTITY types in the serialization system.
+     * Returns the serialization type classification for this bean type.
      *
-     * @return SerializationType.ENTITY indicating this is an entity type
+     * @return {@link SerializationType#ENTITY} indicating this handler manages entity (bean) types
      */
     @Override
     public SerializationType serializationType() {
@@ -116,11 +104,12 @@ public final class BeanType<T> extends AbstractType<T> {
     }
 
     /**
-     * Converts a bean instance to its JSON string representation.
-     * Uses the internal JSON parser to serialize the bean with default configuration.
+     * Serializes a bean instance to its JSON string representation.
+     * Uses the internal JSON parser with default serialization configuration.
      *
-     * @param x the bean instance to serialize
-     * @return the JSON string representation of the bean, or {@code null} if the input is null
+     * @param x the bean instance to serialize; may be {@code null}
+     * @return the JSON string representation of the bean,
+     *         or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final T x) {
@@ -128,12 +117,12 @@ public final class BeanType<T> extends AbstractType<T> {
     }
 
     /**
-     * Converts a JSON string representation back to a bean instance.
-     * Uses the internal JSON parser to deserialize the string into the bean type.
+     * Deserializes a JSON string into a new bean instance of type {@code T}.
+     * Uses the internal JSON parser targeting the reflection type of this handler.
      *
-     * @param str the JSON string to deserialize
-     * @return a new instance of the bean type populated from the JSON data,
-     *         or {@code null} if the input string is {@code null} or empty
+     * @param str the JSON string to deserialize; may be {@code null} or empty
+     * @return a new bean instance populated from the JSON data,
+     *         or {@code null} if {@code str} is {@code null} or empty
      */
     @Override
     public T valueOf(final String str) {

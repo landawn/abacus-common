@@ -17,17 +17,18 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.u.OptionalBoolean;
 
 /**
- * Type handler for {@link OptionalBoolean} objects, providing serialization, deserialization,
- * and database interaction capabilities for optional boolean values. This handler manages
- * the conversion between database boolean values and OptionalBoolean wrapper objects.
+ * Type handler for {@link OptionalBoolean} objects from the {@code com.landawn.abacus.util.u} package,
+ * providing serialization, deserialization, and database interaction capabilities for optional boolean values.
+ * Note: this handles the abacus-specific {@code OptionalBoolean}, not {@code java.util.OptionalInt} or similar JDK types.
+ * This handler manages the conversion between database boolean values and {@link OptionalBoolean} wrapper objects.
  */
 public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
 
     public static final String OPTIONAL_BOOLEAN = OptionalBoolean.class.getSimpleName();
 
     /**
-     * Constructs an OptionalBooleanType.
-     * This constructor initializes the type handler for OptionalBoolean objects.
+     * Package-private constructor for OptionalBooleanType.
+     * This constructor is called by the TypeFactory to create OptionalBoolean type instances.
      */
     protected OptionalBooleanType() {
         super(OPTIONAL_BOOLEAN);

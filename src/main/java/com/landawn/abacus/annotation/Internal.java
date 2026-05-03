@@ -22,33 +22,16 @@ import java.lang.annotation.Target;
 
 /**
  * Indicates that the annotated element is for internal use only and should not be used
- * by external code or client applications. Elements marked as internal are part of the
- * implementation details and not the public API contract.
+ * by external code or client applications. Elements marked as internal are implementation
+ * details and are not part of the public API contract.
  *
  * <p><b>Important considerations:</b></p>
  * <ul>
- *   <li>Internal APIs may change or be removed in any release without notice</li>
- *   <li>No deprecation period is provided for internal APIs</li>
- *   <li>Breaking changes can occur in minor or patch releases</li>
- *   <li>Documentation may be incomplete or focused on implementation details</li>
- *   <li>No compatibility guarantees are provided</li>
- * </ul>
- *
- * <p><b>This annotation can be applied to:</b></p>
- * <ul>
- *   <li>Classes and interfaces that are implementation details</li>
- *   <li>Constructors that should not be called externally</li>
- *   <li>Methods that are meant for framework use only</li>
- *   <li>Fields that should not be accessed directly</li>
- *   <li>Nested types used for internal organization</li>
- * </ul>
- *
- * <p><b>Tool support:</b></p>
- * <p>IDEs and build tools may use this annotation to:</p>
- * <ul>
- *   <li>Generate warnings when internal APIs are accessed</li>
- *   <li>Exclude internal elements from public API documentation</li>
- *   <li>Enforce access restrictions in modular systems</li>
+ *   <li>Internal APIs may change or be removed in any release without notice.</li>
+ *   <li>No deprecation period is provided for internal APIs.</li>
+ *   <li>Breaking changes can occur in minor or patch releases.</li>
+ *   <li>Documentation may be incomplete or focused on implementation details.</li>
+ *   <li>No compatibility guarantees are provided.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>

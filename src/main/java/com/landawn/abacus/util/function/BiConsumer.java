@@ -70,6 +70,7 @@ public interface BiConsumer<T, U> extends Throwables.BiConsumer<T, U, RuntimeExc
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code BiConsumer} that performs in sequence this operation followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     @Override
     default BiConsumer<T, U> andThen(final java.util.function.BiConsumer<? super T, ? super U> after) {

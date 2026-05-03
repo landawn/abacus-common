@@ -19,8 +19,10 @@ import com.landawn.abacus.util.Throwables;
  * Represents a predicate (boolean-valued function) of one {@code int}-valued and two object-valued arguments.
  * This is a three-arity specialization of {@link java.util.function.Predicate}.
  *
- * <p>This is a functional interface whose functional method is {@link #test(int, Object, Object)}.
+ * <p>The parameter order follows the {@code IntBiObj*} convention: the {@code int} argument comes
+ * first, followed by two object arguments of types {@code T} and {@code U}.
  *
+ * <p>This is a functional interface whose functional method is {@link #test(int, Object, Object)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
@@ -76,9 +78,10 @@ public interface IntBiObjPredicate<T, U> extends Throwables.IntBiObjPredicate<T,
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
      *
-     * @param other a predicate that will be logically-ANDed with this predicate
+     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and
      *         the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default IntBiObjPredicate<T, U> and(final IntBiObjPredicate<? super T, ? super U> other) {
         return (i, t, u) -> test(i, t, u) && other.test(i, t, u);
@@ -92,9 +95,10 @@ public interface IntBiObjPredicate<T, U> extends Throwables.IntBiObjPredicate<T,
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
      *
-     * @param other a predicate that will be logically-ORed with this predicate
+     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and
      *         the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default IntBiObjPredicate<T, U> or(final IntBiObjPredicate<? super T, ? super U> other) {
         return (i, t, u) -> test(i, t, u) || other.test(i, t, u);

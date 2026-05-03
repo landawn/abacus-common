@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.File;
 import java.io.Serializable;
 import java.lang.invoke.MethodHandle;
-import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -22,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -1793,9 +1791,9 @@ public class ClassUtilTest extends TestBase {
         assertDoesNotThrow(() -> {
             N.println(Beans.getPropNameList(Account.class));
 
-            N.println(Beans.getPropNames(Account.class, CommonUtil.toList("id", "gui")));
+            N.println(Beans.getPropNames(Account.class, N.toList("id", "gui")));
 
-            N.println(Beans.getPropNames(Account.class, CommonUtil.toSet("id", "gui")));
+            N.println(Beans.getPropNames(Account.class, N.toSet("id", "gui")));
         });
     }
 

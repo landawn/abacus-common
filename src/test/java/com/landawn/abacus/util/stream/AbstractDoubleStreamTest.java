@@ -71,6 +71,24 @@ public class AbstractDoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void testDebounce() {
+        double[] result = createDoubleStream(new double[] { 1.0, 2.0, 3.0, 4.0 }).debounce(2, Duration.ofHours(1)).toArray();
+        assertArrayEquals(new double[] { 1.0, 2.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testDebounce_EmptyInput() {
+        double[] result = createDoubleStream(new double[] {}).debounce(2, Duration.ofHours(1)).toArray();
+        assertArrayEquals(new double[] {}, result, 0.001);
+    }
+
+    @Test
+    public void testDebounce_ErrorPath() {
+        assertThrows(IllegalArgumentException.class, () -> createDoubleStream(new double[] { 1.0 }).debounce(0, Duration.ofHours(1)).toArray());
+        assertThrows(IllegalArgumentException.class, () -> createDoubleStream(new double[] { 1.0 }).debounce(1, Duration.ofMillis(0)).toArray());
+    }
+
+    @Test
     public void testSkipUntil() {
         stream = createDoubleStream(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 });
 
@@ -92,7 +110,7 @@ public class AbstractDoubleStreamTest extends TestBase {
     public void testFlatmapWithArray() {
         stream = createDoubleStream(new double[] { 1.0, 2.0 });
 
-        double[] result = stream.flatmap(d -> new double[] { d, d * 2 }).toArray();
+        double[] result = stream.flatMapArray(d -> new double[] { d, d * 2 }).toArray();
 
         assertArrayEquals(new double[] { 1.0, 2.0, 2.0, 4.0 }, result, 0.001);
     }

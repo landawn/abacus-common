@@ -16,8 +16,8 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Represents a function that accepts an int-valued argument and produces a
- * double-valued result. This is the {@code int}-to-{@code double} primitive
+ * Represents a function that accepts an {@code int}-valued argument and produces a
+ * {@code double}-valued result. This is the {@code int}-to-{@code double} primitive
  * specialization for {@link java.util.function.Function}.
  *
  * <p>This interface extends both {@link Throwables.IntToDoubleFunction} with
@@ -47,10 +47,10 @@ public interface IntToDoubleFunction extends Throwables.IntToDoubleFunction<Runt
     /**
      * Applies this function to the given argument.
      *
-     * <p>The function performs a conversion from an {@code int} value to a
-     * {@code double} value. This is a widening primitive conversion that
-     * preserves the numeric value. All int values can be exactly represented
-     * as double values, so this conversion is lossless.
+     * <p>The function performs a transformation from an {@code int} value to a
+     * {@code double} value. The default implementation provided by {@link #DEFAULT}
+     * performs a widening primitive conversion which is lossless, but other
+     * implementations may apply arbitrary computations.
      *
      * <p>Common use cases include:
      * <ul>
@@ -66,8 +66,7 @@ public interface IntToDoubleFunction extends Throwables.IntToDoubleFunction<Runt
      * }</pre>
      *
      * @param value the function argument, an int value to be converted to double
-     * @return the function result as a double value, which exactly represents
-     *         the input int value
+     * @return the function result as a double value
      */
     @Override
     double applyAsDouble(int value);

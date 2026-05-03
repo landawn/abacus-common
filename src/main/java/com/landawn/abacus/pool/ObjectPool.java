@@ -245,7 +245,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
     /**
      * Interface for measuring the memory size of objects in the pool.
      * This allows the pool to enforce memory-based capacity limits in addition to count-based limits.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with ByteBuffer wrapper
@@ -262,7 +262,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      *     measure
      * );
      * }</pre>
-     * 
+     *
      * @param <E> the type of objects being measured
      */
     interface MemoryMeasure<E> {
@@ -270,7 +270,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
         /**
          * Calculates the memory size of the given object in bytes.
          * The returned value is used to track total memory usage and enforce memory limits.
-         * 
+         *
          * @param element the object to measure, never {@code null} when called by the pool
          * @return the size of the object in bytes, should be non-negative
          */

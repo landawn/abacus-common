@@ -27,6 +27,7 @@ import java.io.StringWriter;
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +38,7 @@ import com.landawn.abacus.util.Tuple.Tuple3;
 
 public class Tuple3TypeTest extends TestBase {
 
-    private final Tuple3Type type = new Tuple3Type("String", "String", "String");
+    private final Tuple3Type<String, String, String> type = new Tuple3Type("String", "String", "String");
 
     @Test
     public void test_declaringName() {
@@ -53,9 +54,9 @@ public class Tuple3TypeTest extends TestBase {
 
     @Test
     public void test_parameterTypes() {
-        Type<?>[] params = type.parameterTypes();
+        List<Type<?>> params = type.parameterTypes();
         assertNotNull(params);
-        assertEquals(3, params.length);
+        assertEquals(3, params.size());
     }
 
     @Test
@@ -93,7 +94,7 @@ public class Tuple3TypeTest extends TestBase {
         Tuple3<String, String, String> t = Tuple.of("x", "y", "z");
         String json = type.stringOf(t);
         @SuppressWarnings("unchecked")
-        Tuple3<String, String, String> result = (Tuple3<String, String, String>) type.valueOf(json);
+        Tuple3<String, String, String> result = type.valueOf(json);
         assertNotNull(result);
         assertEquals("x", result._1);
         assertEquals("y", result._2);
@@ -102,9 +103,9 @@ public class Tuple3TypeTest extends TestBase {
 
     @Test
     public void test_valueOf_MixedTypes() {
-        Tuple3Type mixedType = new Tuple3Type("String", "Integer", "Boolean");
+        Tuple3Type<String, Integer, Boolean> mixedType = new Tuple3Type("String", "Integer", "Boolean");
         @SuppressWarnings("unchecked")
-        Tuple3<String, Integer, Boolean> result = (Tuple3<String, Integer, Boolean>) mixedType.valueOf("[\"hello\", 42, true]");
+        Tuple3<String, Integer, Boolean> result = mixedType.valueOf("[\"hello\", 42, true]");
         assertNotNull(result);
         assertEquals("hello", result._1);
         assertEquals(42, result._2);

@@ -16,6 +16,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -91,9 +92,9 @@ public class JdkOptionalTypeTest extends TestBase {
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = optionalStringType.parameterTypes();
+        List<Type<?>> paramTypes = optionalStringType.parameterTypes();
         assertNotNull(paramTypes);
-        assertEquals(1, paramTypes.length);
+        assertEquals(1, paramTypes.size());
     }
 
     @Test

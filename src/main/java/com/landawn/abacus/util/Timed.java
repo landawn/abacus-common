@@ -18,24 +18,24 @@ package com.landawn.abacus.util;
  * An immutable container that holds a value paired with a timestamp.
  * This class is useful for tracking when a value was created or last updated,
  * implementing caching mechanisms, or maintaining temporal data.
- * 
+ *
  * <p>The timestamp represents milliseconds since the Unix epoch (January 1, 1970 UTC).
  * Once created, both the value and timestamp are immutable.
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create a timed value with current timestamp
  * Timed<String> timedData = Timed.of("Hello World");
- * 
+ *
  * // Create a timed value with specific timestamp
  * long specificTime = System.currentTimeMillis() - 3600000;  // 1 hour ago
  * Timed<Integer> timedCount = Timed.of(42, specificTime);
- * 
+ *
  * // Access value and timestamp
  * String data = timedData.value();
  * long when = timedData.timestamp();
  * }</pre>
- * 
+ *
  * @param <T> the type of the value being timed
  */
 @com.landawn.abacus.annotation.Immutable
@@ -167,13 +167,13 @@ public final class Timed<T> implements Immutable {
      * Indicates whether some other object is "equal to" this one.
      * Two Timed instances are considered equal if they have the same timestamp
      * and their values are equal (or both null).
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Timed<String> t1 = Timed.of("hello", 1000L);
      * Timed<String> t2 = Timed.of("hello", 1000L);
      * Timed<String> t3 = Timed.of("hello", 2000L);
-     * 
+     *
      * assertTrue(t1.equals(t2));    // Same value and timestamp
      * assertFalse(t1.equals(t3));   // Same value, different timestamp
      * }</pre>

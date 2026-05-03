@@ -16,8 +16,8 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Represents a function that accepts an int-valued argument and produces a
- * long-valued result. This is the {@code int}-to-{@code long} primitive
+ * Represents a function that accepts an {@code int}-valued argument and produces a
+ * {@code long}-valued result. This is the {@code int}-to-{@code long} primitive
  * specialization for {@link java.util.function.Function}.
  *
  * <p>This interface extends both {@link Throwables.IntToLongFunction} with
@@ -47,10 +47,10 @@ public interface IntToLongFunction extends Throwables.IntToLongFunction<RuntimeE
     /**
      * Applies this function to the given argument.
      *
-     * <p>The function performs a conversion from an {@code int} value to a
-     * {@code long} value. This is a widening primitive conversion that
-     * preserves the numeric value and sign. All int values can be exactly
-     * represented as long values, so this conversion is lossless.
+     * <p>The function performs a transformation from an {@code int} value to a
+     * {@code long} value. The default implementation provided by {@link #DEFAULT}
+     * performs a widening primitive conversion which is lossless, but other
+     * implementations may apply arbitrary computations.
      *
      * <p>Common use cases include:
      * <ul>
@@ -74,8 +74,7 @@ public interface IntToLongFunction extends Throwables.IntToLongFunction<RuntimeE
      * }</pre>
      *
      * @param value the function argument, an int value to be converted to long
-     * @return the function result as a long value, which exactly represents
-     *         the input int value with the same sign and magnitude
+     * @return the function result as a long value
      */
     @Override
     long applyAsLong(int value);

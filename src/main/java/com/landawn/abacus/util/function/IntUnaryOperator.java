@@ -58,8 +58,8 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
      * int negated = negate.applyAsInt(10);   // Returns -10
      * }</pre>
      *
-     * @param operand the operand to which the operation is applied
-     * @return the operator result
+     * @param operand the {@code int} operand to which the operation is applied
+     * @return the {@code int}-valued result of applying this operator to the operand
      */
     @Override
     int applyAsInt(int operand);
@@ -85,6 +85,7 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
      *               Must not be {@code null}.
      * @return a composed operator that first applies the {@code before}
      *         operator and then applies this operator
+     * @throws NullPointerException if {@code before} is null
      *
      * @see #andThen(java.util.function.IntUnaryOperator)
      */
@@ -114,6 +115,7 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
      *              Must not be {@code null}.
      * @return a composed operator that first applies this operator and then
      *         applies the {@code after} operator
+     * @throws NullPointerException if {@code after} is null
      *
      * @see #compose(java.util.function.IntUnaryOperator)
      */

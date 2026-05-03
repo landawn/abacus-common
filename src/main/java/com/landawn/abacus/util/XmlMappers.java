@@ -37,7 +37,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
  * A high-performance utility class for XML serialization and deserialization based on Jackson's {@code XmlMapper}.
  * This class provides convenient static methods for converting between Java objects and XML representations,
  * with support for various input/output formats and configuration options.
- * 
+ *
  * <p>Features include:</p>
  * <ul>
  *   <li>Object pooling for XmlMapper instances to improve performance</li>
@@ -46,13 +46,13 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
  *   <li>Multiple input/output formats (String, File, Stream, Reader/Writer, etc.)</li>
  *   <li>TypeReference support for complex generic types</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Simple serialization
  * Person person = new Person("John", 30);
  * String xml = XmlMappers.toXml(person);
- * 
+ *
  * // Deserialization with TypeReference
  * String listXml = "<ArrayList><item>a</item><item>b</item></ArrayList>";
  * List<String> list = XmlMappers.fromXml(listXml, new TypeReference<List<String>>() {});
@@ -111,7 +111,7 @@ public final class XmlMappers {
 
     /**
      * Serializes the specified object to an XML string using default configuration.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("John", 30);
@@ -134,7 +134,7 @@ public final class XmlMappers {
     /**
      * Serializes the specified object to an XML string with optional pretty formatting.
      * When pretty format is enabled, the output XML will be indented for better readability.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("John", 30);
@@ -166,12 +166,12 @@ public final class XmlMappers {
     /**
      * Serializes the specified object to an XML string with custom serialization features.
      * This method allows fine-grained control over serialization behavior.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("John", null);
-     * String xml = XmlMappers.toXml(person, 
-     *     SerializationFeature.WRITE_NULL_MAP_VALUES,
+     * String xml = XmlMappers.toXml(person,
+     *     SerializationFeature.WRAP_ROOT_VALUE,
      *     SerializationFeature.INDENT_OUTPUT);
      * }</pre>
      *
@@ -188,7 +188,7 @@ public final class XmlMappers {
     /**
      * Serializes the specified object to an XML string using a custom serialization configuration.
      * This method provides maximum flexibility for controlling serialization behavior.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SerializationConfig config = XmlMappers.createSerializationConfig()
@@ -217,7 +217,7 @@ public final class XmlMappers {
     /**
      * Serializes the specified object to an XML file using default configuration.
      * The file will be created if it doesn't exist, or overwritten if it does.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("John", 30);
@@ -239,7 +239,7 @@ public final class XmlMappers {
 
     /**
      * Serializes the specified object to an XML file using a custom serialization configuration.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SerializationConfig config = XmlMappers.createSerializationConfig()
@@ -267,7 +267,7 @@ public final class XmlMappers {
     /**
      * Serializes the specified object to an XML output stream using default configuration.
      * The stream is not closed by this method.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("John", 30);
@@ -312,7 +312,7 @@ public final class XmlMappers {
     /**
      * Serializes the specified object to an XML writer using default configuration.
      * The writer is not closed by this method.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("John", 30);
@@ -393,7 +393,7 @@ public final class XmlMappers {
 
     /**
      * Deserializes XML from a byte array into an object of the specified type.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] xmlBytes = "<Person><name>John</name><age>30</age></Person>".getBytes();
@@ -438,7 +438,7 @@ public final class XmlMappers {
     /**
      * Deserializes an XML string into an object of the specified type.
      * This is one of the most commonly used methods for XML deserialization.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String xml = "<Person><name>John</name><age>30</age></Person>";
@@ -462,7 +462,7 @@ public final class XmlMappers {
 
     /**
      * Deserializes an XML string into an object of the specified type with custom deserialization features.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String xml = "<Person><name>John</name><unknownField>value</unknownField></Person>";
@@ -509,7 +509,7 @@ public final class XmlMappers {
 
     /**
      * Deserializes XML from a file into an object of the specified type.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File xmlFile = new File("person.xml");
@@ -557,7 +557,7 @@ public final class XmlMappers {
     /**
      * Deserializes XML from an input stream into an object of the specified type.
      * The stream is not closed by this method.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (FileInputStream fis = new FileInputStream("person.xml")) {
@@ -607,7 +607,7 @@ public final class XmlMappers {
     /**
      * Deserializes XML from a reader into an object of the specified type.
      * The reader is not closed by this method.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (StringReader reader = new StringReader(xmlString)) {
@@ -657,7 +657,7 @@ public final class XmlMappers {
     /**
      * Deserializes XML from a URL into an object of the specified type.
      * This method performs an HTTP request to fetch the XML content.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * URL xmlUrl = new URL("http://example.com/person.xml");
@@ -749,7 +749,7 @@ public final class XmlMappers {
     /**
      * Deserializes XML from a byte array into an object of the specified generic type.
      * Use this method when deserializing generic types like List&lt;String&gt; or Map&lt;String, Object&gt;.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] xmlBytes = "<ArrayList><item>a</item><item>b</item></ArrayList>".getBytes();
@@ -794,7 +794,7 @@ public final class XmlMappers {
     /**
      * Deserializes an XML string into an object of the specified generic type.
      * This is the most commonly used method for deserializing generic types from XML.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String xml = "<LinkedHashMap><key1>value1</key1><key2>value2</key2></LinkedHashMap>";
@@ -1072,7 +1072,7 @@ public final class XmlMappers {
     /**
      * Creates a new SerializationConfig instance with default settings.
      * This config can be customized and used with the toXml methods for fine-grained control over serialization.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SerializationConfig config = XmlMappers.createSerializationConfig()
@@ -1092,7 +1092,7 @@ public final class XmlMappers {
     /**
      * Creates a new {@link DeserializationConfig} instance with default settings.
      * This config can be customized and used with the fromXml methods for fine-grained control over deserialization.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DeserializationConfig config = XmlMappers.createDeserializationConfig()
@@ -1195,7 +1195,7 @@ public final class XmlMappers {
     /**
      * Wraps an XmlMapper instance to provide convenient serialization and deserialization methods.
      * This allows you to use a pre-configured XmlMapper with the same convenient API as the static methods.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XmlMapper customMapper = new XmlMapper();
@@ -1215,16 +1215,16 @@ public final class XmlMappers {
      * A wrapper class that provides convenient instance methods for XML serialization and deserialization
      * using a specific XmlMapper instance. This class mirrors the static methods of XmlMappers but uses
      * the wrapped XmlMapper for all operations.
-     * 
+     *
      * <p>This is useful when you need to use a customized XmlMapper repeatedly without having to
      * pass configuration objects to every method call.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XmlMapper mapper = new XmlMapper();
      * mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, true);
      * XmlMappers.One xmlMappers = XmlMappers.wrap(mapper);
-     * 
+     *
      * // Use the wrapped mapper for multiple operations
      * String xml1 = xmlMappers.toXml(object1);
      * String xml2 = xmlMappers.toXml(object2, true);   // with pretty print
@@ -1244,7 +1244,7 @@ public final class XmlMappers {
 
         /**
          * Serializes the specified object to an XML string using the wrapped XmlMapper.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Person person = new Person("John", 30);
@@ -1550,7 +1550,7 @@ public final class XmlMappers {
         /**
          * Deserializes an XML string into an object of the specified generic type
          * using the wrapped XmlMapper.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * String xml = "<ArrayList><item>a</item><item>b</item></ArrayList>";
@@ -1611,16 +1611,16 @@ public final class XmlMappers {
         }
 
         /**
-          * Deserializes XML from a reader into an object of the specified generic type
-          * using the wrapped XmlMapper. The reader is not closed by this method.
-          *
-          * @param <T> the type of the object to return
-          * @param xml the reader containing XML data
-          * @param targetType the type reference describing the target type, can be the {@code Type} of {@code Bean/Array/Collection/Map}
-          * @return the deserialized object
-          * @throws RuntimeException if deserialization fails
-          * @see com.fasterxml.jackson.core.type.TypeReference
-          */
+         * Deserializes XML from a reader into an object of the specified generic type
+         * using the wrapped XmlMapper. The reader is not closed by this method.
+         *
+         * @param <T> the type of the object to return
+         * @param xml the reader containing XML data
+         * @param targetType the type reference describing the target type, can be the {@code Type} of {@code Bean/Array/Collection/Map}
+         * @return the deserialized object
+         * @throws RuntimeException if deserialization fails
+         * @see com.fasterxml.jackson.core.type.TypeReference
+         */
         public <T> T fromXml(final Reader xml, final TypeReference<? extends T> targetType) {
             try {
                 return xmlMapper.readValue(xml, targetType);
@@ -1630,16 +1630,16 @@ public final class XmlMappers {
         }
 
         /**
-          * Deserializes XML from a URL into an object of the specified generic type
-          * using the wrapped XmlMapper.
-          *
-          * @param <T> the type of the object to return
-          * @param xml the URL pointing to XML data
-          * @param targetType the type reference describing the target type, can be the {@code Type} of {@code Bean/Array/Collection/Map}
-          * @return the deserialized object
-          * @throws RuntimeException if deserialization fails or URL cannot be accessed
-          * @see com.fasterxml.jackson.core.type.TypeReference
-          */
+         * Deserializes XML from a URL into an object of the specified generic type
+         * using the wrapped XmlMapper.
+         *
+         * @param <T> the type of the object to return
+         * @param xml the URL pointing to XML data
+         * @param targetType the type reference describing the target type, can be the {@code Type} of {@code Bean/Array/Collection/Map}
+         * @return the deserialized object
+         * @throws RuntimeException if deserialization fails or URL cannot be accessed
+         * @see com.fasterxml.jackson.core.type.TypeReference
+         */
         @SuppressWarnings("deprecation")
         public <T> T fromXml(final URL xml, final TypeReference<? extends T> targetType) {
             try {
@@ -1650,16 +1650,16 @@ public final class XmlMappers {
         }
 
         /**
-          * Deserializes XML from a DataInput into an object of the specified generic type
-          * using the wrapped XmlMapper.
-          *
-          * @param <T> the type of the object to return
-          * @param xml the DataInput containing XML data
-          * @param targetType the type reference describing the target type, can be the {@code Type} of {@code Bean/Array/Collection/Map}
-          * @return the deserialized object
-          * @throws RuntimeException if deserialization fails
-          * @see com.fasterxml.jackson.core.type.TypeReference
-          */
+         * Deserializes XML from a DataInput into an object of the specified generic type
+         * using the wrapped XmlMapper.
+         *
+         * @param <T> the type of the object to return
+         * @param xml the DataInput containing XML data
+         * @param targetType the type reference describing the target type, can be the {@code Type} of {@code Bean/Array/Collection/Map}
+         * @return the deserialized object
+         * @throws RuntimeException if deserialization fails
+         * @see com.fasterxml.jackson.core.type.TypeReference
+         */
         public <T> T fromXml(final DataInput xml, final TypeReference<? extends T> targetType) {
             try {
                 return xmlMapper.readValue(xml, xmlMapper.constructType(targetType));

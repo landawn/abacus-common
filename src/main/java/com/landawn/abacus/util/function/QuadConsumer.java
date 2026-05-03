@@ -21,9 +21,9 @@ import com.landawn.abacus.util.Throwables;
  * A functional interface that represents an operation that accepts four input arguments
  * and returns no result. This is the four-arity specialization of {@link java.util.function.Consumer}.
  *
- * <p>This interface extends the standard Java functional interfaces to support operations
- * with four parameters, which is useful for more complex operations that require multiple
- * inputs without producing a return value.
+ * <p>This interface generalizes the standard Java functional consumer interfaces to support
+ * operations with four parameters, which is useful for more complex operations that require
+ * multiple inputs without producing a return value.
  *
  * <p>This is a functional interface whose functional method is {@link #accept(Object, Object, Object, Object)}.
  *
@@ -103,6 +103,7 @@ public interface QuadConsumer<A, B, C, D> extends Throwables.QuadConsumer<A, B, 
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code QuadConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     default QuadConsumer<A, B, C, D> andThen(final QuadConsumer<? super A, ? super B, ? super C, ? super D> after) {
         return (a, b, c, d) -> {

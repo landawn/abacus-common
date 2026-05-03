@@ -19,36 +19,29 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for {@link MutableFloat} objects. This class provides serialization,
- * deserialization, and database operations for MutableFloat instances, which are
- * mutable wrappers around primitive float values.
+ * Type handler for {@link com.landawn.abacus.util.MutableFloat} objects, providing
+ * serialization, deserialization, and database interaction capabilities for
+ * mutable float wrapper objects.
+ *
+ * @see com.landawn.abacus.util.MutableFloat
+ * @see NumberType
  */
 public class MutableFloatType extends NumberType<MutableFloat> {
 
-    /**
-     * The type name identifier for MutableFloat type.
-     */
     public static final String MUTABLE_FLOAT = MutableFloat.class.getSimpleName();
 
     /**
-     * Constructs a MutableFloatType.
-     * This constructor initializes the type handler for MutableFloat objects.
+     * Package-private constructor for MutableFloatType.
+     * This constructor is called by subclasses to create MutableFloat type instances.
      */
     protected MutableFloatType() {
         super(MUTABLE_FLOAT);
     }
 
     /**
-     * Returns the Class object representing the MutableFloat type.
+     * Returns the {@link Class} object representing the {@link MutableFloat} type.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableFloat> type = TypeFactory.getType(MutableFloat.class);
-     * Class<MutableFloat> clazz = type.javaType();
-     * // clazz equals MutableFloat.class
-     * }</pre>
-     *
-     * @return the Class object for MutableFloat
+     * @return {@code MutableFloat.class}
      */
     @Override
     public Class<MutableFloat> javaType() {
@@ -56,22 +49,10 @@ public class MutableFloatType extends NumberType<MutableFloat> {
     }
 
     /**
-     * Converts a MutableFloat object to its string representation.
-     * Returns the string representation of the wrapped float value.
+     * Converts a {@link MutableFloat} object to its decimal string representation.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableFloat> type = TypeFactory.getType(MutableFloat.class);
-     * MutableFloat mf = MutableFloat.of(3.14f);
-     * String str = type.stringOf(mf);
-     * // str equals "3.14"
-     *
-     * String nullStr = type.stringOf(null);
-     * // nullStr equals null
-     * }</pre>
-     *
-     * @param x the MutableFloat object to convert
-     * @return the string representation of the float value, or {@code null} if x is null
+     * @param x the {@code MutableFloat} object to convert, may be {@code null}
+     * @return the string representation of the float value, or {@code null} if the input is {@code null}
      */
     @Override
     public String stringOf(final MutableFloat x) {
@@ -79,24 +60,11 @@ public class MutableFloatType extends NumberType<MutableFloat> {
     }
 
     /**
-     * Creates a MutableFloat object from its string representation.
-     * Parses the string as a float value and wraps it in a MutableFloat.
+     * Parses a string to create a {@link MutableFloat} object.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableFloat> type = TypeFactory.getType(MutableFloat.class);
-     * MutableFloat mf = type.valueOf("123.45");
-     * // mf.value() equals 123.45f
-     *
-     * MutableFloat nullMf = type.valueOf(null);
-     * // nullMf equals null
-     *
-     * MutableFloat emptyMf = type.valueOf("");
-     * // emptyMf equals null
-     * }</pre>
-     *
-     * @param str the string to parse
-     * @return a MutableFloat containing the parsed value, or {@code null} if str is empty
+     * @param str the string to parse, may be {@code null} or empty
+     * @return a {@code MutableFloat} containing the parsed float value,
+     *         or {@code null} if the input is {@code null} or empty
      * @throws NumberFormatException if the string cannot be parsed as a float
      */
     @Override
@@ -105,23 +73,15 @@ public class MutableFloatType extends NumberType<MutableFloat> {
     }
 
     /**
-     * Retrieves a MutableFloat value from the specified column in the ResultSet.
-     * Reads a float value from the database and wraps it in a MutableFloat object.
+     * Retrieves a float value from the specified column in the {@link ResultSet}
+     * and wraps it in a {@link MutableFloat}.
+     * Returns {@code null} if the column value is SQL {@code NULL} (detected via {@link ResultSet#wasNull()}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableFloat> type = TypeFactory.getType(MutableFloat.class);
-     * ResultSet rs = statement.executeQuery("SELECT price FROM products");
-     * if (rs.next()) {
-     *     MutableFloat price = type.get(rs, 1);
-     *     // price contains the float value from the first column
-     * }
-     * }</pre>
-     *
-     * @param rs the ResultSet containing the query results
-     * @param columnIndex the index of the column to retrieve (1-based)
-     * @return a MutableFloat containing the retrieved float value
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnIndex the 1-based index of the column to retrieve
+     * @return a {@code MutableFloat} wrapping the retrieved value,
+     *         or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public MutableFloat get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -131,23 +91,15 @@ public class MutableFloatType extends NumberType<MutableFloat> {
     }
 
     /**
-     * Retrieves a MutableFloat value from the specified column in the ResultSet.
-     * Reads a float value from the database and wraps it in a MutableFloat object.
+     * Retrieves a float value from the specified column in the {@link ResultSet}
+     * and wraps it in a {@link MutableFloat}.
+     * Returns {@code null} if the column value is SQL {@code NULL} (detected via {@link ResultSet#wasNull()}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableFloat> type = TypeFactory.getType(MutableFloat.class);
-     * ResultSet rs = statement.executeQuery("SELECT price FROM products");
-     * if (rs.next()) {
-     *     MutableFloat price = type.get(rs, "price");
-     *     // price contains the float value from the "price" column
-     * }
-     * }</pre>
-     *
-     * @param rs the ResultSet containing the query results
-     * @param columnName the label of the column to retrieve
-     * @return a MutableFloat containing the retrieved float value
-     * @throws SQLException if a database access error occurs or the columnName is not found
+     * @param rs the {@code ResultSet} to read from
+     * @param columnName the label of the column to retrieve (as specified in the SQL AS clause)
+     * @return a {@code MutableFloat} wrapping the retrieved value,
+     *         or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
     @Override
     public MutableFloat get(final ResultSet rs, final String columnName) throws SQLException {
@@ -157,27 +109,14 @@ public class MutableFloatType extends NumberType<MutableFloat> {
     }
 
     /**
-     * Sets a MutableFloat value at the specified parameter index in the PreparedStatement.
-     * Extracts the float value from the MutableFloat and sets it in the statement.
-     * If the MutableFloat is {@code null}, SQL NULL is set.
+     * Sets a {@link MutableFloat} parameter in a {@link PreparedStatement} at the specified index.
+     * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#FLOAT}) is set;
+     * otherwise the wrapped float value is stored.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableFloat> type = TypeFactory.getType(MutableFloat.class);
-     * PreparedStatement stmt = conn.prepareStatement("INSERT INTO products (price) VALUES (?)");
-     * MutableFloat price = MutableFloat.of(99.99f);
-     * type.set(stmt, 1, price);
-     * stmt.executeUpdate();
-     *
-     * // For null value
-     * type.set(stmt, 1, null);
-     * // This sets the parameter to SQL NULL
-     * }</pre>
-     *
-     * @param stmt the PreparedStatement to set the parameter on
-     * @param columnIndex the index of the parameter to set (1-based)
-     * @param x the MutableFloat value to set, may be null
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param columnIndex the 1-based index of the parameter to set
+     * @param x the {@code MutableFloat} value to set, or {@code null} to set SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final MutableFloat x) throws SQLException {
@@ -189,27 +128,14 @@ public class MutableFloatType extends NumberType<MutableFloat> {
     }
 
     /**
-     * Sets a MutableFloat value for the specified parameter name in the CallableStatement.
-     * Extracts the float value from the MutableFloat and sets it in the statement.
-     * If the MutableFloat is {@code null}, SQL NULL is set.
+     * Sets a {@link MutableFloat} parameter in a {@link CallableStatement} by name.
+     * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#FLOAT}) is set;
+     * otherwise the wrapped float value is stored.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableFloat> type = TypeFactory.getType(MutableFloat.class);
-     * CallableStatement cstmt = conn.prepareCall("{call update_price(?, ?)}");
-     * MutableFloat newPrice = MutableFloat.of(199.99f);
-     * type.set(cstmt, "price", newPrice);
-     * cstmt.execute();
-     *
-     * // For null value
-     * type.set(cstmt, "price", null);
-     * // This sets the parameter to SQL NULL
-     * }</pre>
-     *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
-     * @param x the MutableFloat value to set, may be null
-     * @throws SQLException if a database access error occurs or the parameterName is not found
+     * @param x the {@code MutableFloat} value to set, or {@code null} to set SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final MutableFloat x) throws SQLException {
@@ -221,25 +147,11 @@ public class MutableFloatType extends NumberType<MutableFloat> {
     }
 
     /**
-     * Appends the string representation of a MutableFloat to the given Appendable.
-     * Writes "null" if the MutableFloat is {@code null}, otherwise writes the string
-     * representation of the float value.
+     * Appends the decimal string representation of a {@link MutableFloat} to an {@link Appendable}.
+     * Writes {@code "null"} when {@code x} is {@code null}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableFloat> type = TypeFactory.getType(MutableFloat.class);
-     * StringBuilder sb = new StringBuilder();
-     * MutableFloat mf = MutableFloat.of(42.5f);
-     * type.appendTo(sb, mf);
-     * // sb.toString() equals "42.5"
-     *
-     * StringBuilder sb2 = new StringBuilder();
-     * type.appendTo(sb2, null);
-     * // sb2.toString() equals "null"
-     * }</pre>
-     *
-     * @param appendable the Appendable to write to
-     * @param x the MutableFloat value to append
+     * @param appendable the target to write to
+     * @param x the {@code MutableFloat} to append, may be {@code null}
      * @throws IOException if an I/O error occurs during the append operation
      */
     @Override
@@ -252,25 +164,13 @@ public class MutableFloatType extends NumberType<MutableFloat> {
     }
 
     /**
-     * Writes the character representation of a MutableFloat to the given CharacterWriter.
-     * This method is used for JSON/XML serialization. Writes {@code null} characters if the
-     * MutableFloat is {@code null}, otherwise writes the float value directly.
+     * Writes the float value of a {@link MutableFloat} to a {@link CharacterWriter}.
+     * Writes the {@code NULL_CHAR_ARRAY} when {@code x} is {@code null}.
+     * The {@code config} parameter is not used for float values.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableFloat> type = TypeFactory.getType(MutableFloat.class);
-     * CharacterWriter writer = new CharacterWriter();
-     * MutableFloat mf = MutableFloat.of(3.14159f);
-     * type.writeCharacter(writer, mf, null);
-     * // Writes: 3.14159
-     *
-     * type.writeCharacter(writer, null, null);
-     * // Writes: null
-     * }</pre>
-     *
-     * @param writer the CharacterWriter to write to
-     * @param x the MutableFloat value to write
-     * @param config the serialization configuration (may be used for formatting)
+     * @param writer the {@code CharacterWriter} to write to
+     * @param x the {@code MutableFloat} to write, may be {@code null}
+     * @param config the serialization configuration (unused for float values)
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override

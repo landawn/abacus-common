@@ -27,29 +27,40 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for BigDecimal operations.
- * This class provides serialization/deserialization and database operations
- * for java.math.BigDecimal instances with unlimited precision.
+ * Type handler for {@link java.math.BigDecimal} values.
+ * Provides serialization, deserialization, and JDBC operations for {@code BigDecimal} instances
+ * with unlimited precision ({@link java.math.MathContext#UNLIMITED}).
+ *
+ * <p>String representation: produced by {@link java.math.BigDecimal#toString()}, which may use
+ * scientific notation. Plain string format (no scientific notation) can be requested via
+ * {@link com.landawn.abacus.parser.JsonXmlSerConfig#isWriteBigDecimalAsPlain()} in
+ * {@link #writeCharacter(CharacterWriter, BigDecimal, com.landawn.abacus.parser.JsonXmlSerConfig)}.</p>
+ * <p>JDBC mapping: stored and retrieved using
+ * {@link java.sql.PreparedStatement#setBigDecimal(int, java.math.BigDecimal)} /
+ * {@link java.sql.ResultSet#getBigDecimal(int)}.</p>
+ *
+ * @see java.math.BigDecimal
  */
 public final class BigDecimalType extends NumberType<BigDecimal> {
 
     /**
-     * The type name constant for BigDecimal type identification.
+     * The type name constant used to identify this type within the type system
+     * (value: {@code "BigDecimal"}).
      */
     public static final String BIG_DECIMAL = BigDecimal.class.getSimpleName();
 
     /**
-     * Package-private constructor for BigDecimalType.
-     * This constructor is called by the TypeFactory to create BigDecimal type instances.
+     * Package-private constructor for {@code BigDecimalType}.
+     * Instances are created by {@link TypeFactory}; do not instantiate directly.
      */
     BigDecimalType() {
         super(BIG_DECIMAL);
     }
 
     /**
-     * Returns the Class object representing the BigDecimal class.
+     * Returns the Java class represented by this type handler.
      *
-     * @return the Class object for BigDecimal.class
+     * @return {@code BigDecimal.class}
      */
     @Override
     public Class<BigDecimal> javaType() {
@@ -57,18 +68,13 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
     }
 
     /**
-     * Converts a BigDecimal value to its string representation.
-     * Uses the standard toString() method which may use scientific notation.
+     * Converts a {@link java.math.BigDecimal} to its string representation.
+     * Delegates to {@link java.math.BigDecimal#toString()}, which may use scientific notation
+     * for very large or very small values.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<BigDecimal> type = TypeFactory.getType(BigDecimal.class);
-     * String result = type.stringOf(new BigDecimal("123.45"));   // returns "123.45"
-     * String nullResult = type.stringOf(null);                   // returns null
-     * }</pre>
-     *
-     * @param x the BigDecimal value to convert, may be {@code null}
-     * @return the string representation of the BigDecimal, or {@code null} if input is {@code null}
+     * @param x the {@code BigDecimal} to convert; may be {@code null}
+     * @return the string representation of the value (potentially in scientific notation),
+     *         or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final BigDecimal x) {
@@ -76,21 +82,14 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
     }
 
     /**
-     * Converts a string representation to a BigDecimal value.
-     * Creates a BigDecimal with unlimited precision from the string.
+     * Parses a string and returns a new {@link java.math.BigDecimal} with unlimited precision.
+     * Leading and trailing whitespace is trimmed before parsing.
+     * Parsing uses {@link java.math.MathContext#UNLIMITED}, so no rounding occurs.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<BigDecimal> type = TypeFactory.getType(BigDecimal.class);
-     * BigDecimal result = type.valueOf("123.456");   // returns BigDecimal with value 123.456
-     * BigDecimal nullResult = type.valueOf(null);    // returns null
-     * BigDecimal emptyResult = type.valueOf("");     // returns null
-     * }</pre>
-     *
-     * @param str the string to parse as a BigDecimal, may be {@code null}
-     * @return a new BigDecimal parsed from the string with unlimited precision,
-     *         or {@code null} if str is {@code null} or empty
-     * @throws NumberFormatException if the string cannot be parsed as a valid BigDecimal
+     * @param str the string to parse; may be {@code null} or empty
+     * @return a new {@code BigDecimal} with unlimited precision,
+     *         or {@code null} if {@code str} is {@code null} or empty
+     * @throws NumberFormatException if {@code str} cannot be parsed as a valid {@code BigDecimal}
      */
     @Override
     public BigDecimal valueOf(final String str) {
@@ -98,24 +97,15 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
     }
 
     /**
-     * Creates a BigDecimal from a character array subset.
-     * Constructs a new BigDecimal from the specified subset of the character array
-     * with unlimited precision.
+     * Parses a sub-sequence of a character array and returns a new {@link java.math.BigDecimal}
+     * with unlimited precision ({@link java.math.MathContext#UNLIMITED}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<BigDecimal> type = TypeFactory.getType(BigDecimal.class);
-     * char[] chars = "123.45".toCharArray();
-     * BigDecimal result = type.valueOf(chars, 0, 6);    // returns BigDecimal with value 123.45
-     * BigDecimal zeroLen = type.valueOf(chars, 0, 0);   // returns null
-     * }</pre>
-     *
-     * @param cbuf the character array containing the digits, must not be {@code null}
-     * @param offset the starting position in the character array (0-based)
-     * @param len the number of characters to use
-     * @return a new BigDecimal created from the specified characters with unlimited precision,
-     *         or {@code null} if len is 0
-     * @throws NumberFormatException if the character sequence cannot be parsed as a valid BigDecimal
+     * @param cbuf the character array containing the decimal digits; may be {@code null}
+     * @param offset the 0-based start position within {@code cbuf}
+     * @param len the number of characters to parse
+     * @return a new {@code BigDecimal} constructed from the specified characters,
+     *         or {@code null} if {@code cbuf} is {@code null} or {@code len} is {@code 0}
+     * @throws NumberFormatException if the character sequence cannot be parsed as a valid {@code BigDecimal}
      */
     @Override
     public BigDecimal valueOf(final char[] cbuf, final int offset, final int len) {
@@ -123,19 +113,13 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
     }
 
     /**
-     * Retrieves a BigDecimal value from a ResultSet at the specified column index.
+     * Retrieves a {@link java.math.BigDecimal} from a {@link java.sql.ResultSet} at the specified column index.
+     * Delegates to {@link java.sql.ResultSet#getBigDecimal(int)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<BigDecimal> type = TypeFactory.getType(BigDecimal.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * BigDecimal price = type.get(rs, 1);   // retrieves BigDecimal from column 1
-     * }</pre>
-     *
-     * @param rs the ResultSet to retrieve the value from, must not be {@code null}
-     * @param columnIndex the column index (1-based) of the BigDecimal value
-     * @return the BigDecimal value at the specified column, or {@code null} if the value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnIndex the 1-based index of the column containing the decimal value
+     * @return the {@code BigDecimal} value at the specified column, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
      */
     @Override
     public BigDecimal get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -143,20 +127,13 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
     }
 
     /**
-     * Retrieves a BigDecimal value from a ResultSet using the specified column label.
+     * Retrieves a {@link java.math.BigDecimal} from a {@link java.sql.ResultSet} using the specified column label.
+     * Delegates to {@link java.sql.ResultSet#getBigDecimal(String)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<BigDecimal> type = TypeFactory.getType(BigDecimal.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * BigDecimal price = type.get(rs, "price");   // retrieves BigDecimal from "price" column
-     * }</pre>
-     *
-     * @param rs the ResultSet to retrieve the value from, must not be {@code null}
-     * @param columnName the label for the column specified with the SQL AS clause,
-     *                    or the column name if no AS clause was specified, must not be {@code null}
-     * @return the BigDecimal value in the specified column, or {@code null} if the value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnName is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnName the column label as specified in the SQL AS clause, or the column name if no AS clause was used
+     * @return the {@code BigDecimal} value in the specified column, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
     @Override
     public BigDecimal get(final ResultSet rs, final String columnName) throws SQLException {
@@ -164,19 +141,13 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
     }
 
     /**
-     * Sets a BigDecimal parameter in a PreparedStatement at the specified position.
+     * Sets a {@link java.math.BigDecimal} parameter on a {@link java.sql.PreparedStatement} at the specified position.
+     * Delegates to {@link java.sql.PreparedStatement#setBigDecimal(int, java.math.BigDecimal)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<BigDecimal> type = TypeFactory.getType(BigDecimal.class);
-     * PreparedStatement stmt = conn.prepareStatement("UPDATE products SET price = ? WHERE id = ?");
-     * type.set(stmt, 1, new BigDecimal("99.99"));   // sets parameter 1 to 99.99
-     * }</pre>
-     *
-     * @param stmt the PreparedStatement to set the parameter on, must not be {@code null}
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the BigDecimal value to set, may be {@code null}
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param stmt the {@code PreparedStatement} on which to set the parameter
+     * @param columnIndex the 1-based parameter index to set
+     * @param x the {@code BigDecimal} value to set; may be {@code null}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final BigDecimal x) throws SQLException {
@@ -184,19 +155,13 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
     }
 
     /**
-     * Sets a named BigDecimal parameter in a CallableStatement.
+     * Sets a named {@link java.math.BigDecimal} parameter on a {@link java.sql.CallableStatement}.
+     * Delegates to {@link java.sql.CallableStatement#setBigDecimal(String, java.math.BigDecimal)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<BigDecimal> type = TypeFactory.getType(BigDecimal.class);
-     * CallableStatement stmt = conn.prepareCall("{call updatePrice(?, ?)}");
-     * type.set(stmt, "price", new BigDecimal("99.99"));   // sets named parameter "price"
-     * }</pre>
-     *
-     * @param stmt the CallableStatement to set the parameter on, must not be {@code null}
-     * @param parameterName the name of the parameter to set, must not be {@code null}
-     * @param x the BigDecimal value to set, may be {@code null}
-     * @throws SQLException if a database access error occurs or the parameter name is invalid
+     * @param stmt the {@code CallableStatement} on which to set the parameter
+     * @param parameterName the name of the parameter to set
+     * @param x the {@code BigDecimal} value to set; may be {@code null}
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final BigDecimal x) throws SQLException {
@@ -204,23 +169,17 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
     }
 
     /**
-     * Writes a BigDecimal value to a CharacterWriter with optional plain string formatting.
-     * Can write the value either in standard notation (which may use scientific notation)
-     * or in plain string format based on the configuration.
+     * Writes a {@link java.math.BigDecimal} value to a {@link CharacterWriter}.
+     * Writes the literal {@code "null"} character array if {@code x} is {@code null}.
+     * When {@code config} is non-{@code null} and
+     * {@link com.landawn.abacus.parser.JsonXmlSerConfig#isWriteBigDecimalAsPlain()} returns {@code true},
+     * the value is written using {@link java.math.BigDecimal#toPlainString()} (no scientific notation);
+     * otherwise {@link java.math.BigDecimal#toString()} is used.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<BigDecimal> type = TypeFactory.getType(BigDecimal.class);
-     * CharacterWriter writer = new CharacterWriter();
-     * type.writeCharacter(writer, new BigDecimal("123.45"), null);   // writes "123.45"
-     * type.writeCharacter(writer, null, null);                       // writes "null"
-     * }</pre>
-     *
-     * @param writer the CharacterWriter to write to, must not be {@code null}
-     * @param x the BigDecimal value to write, may be {@code null}
-     * @param config the serialization configuration that may specify to write BigDecimal
-     *               values in plain format (without scientific notation), may be {@code null}
-     * @throws IOException if an I/O error occurs during the write operation
+     * @param writer the {@code CharacterWriter} to write to
+     * @param x the {@code BigDecimal} value to write; may be {@code null}
+     * @param config the serialization configuration controlling output format; may be {@code null}
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final BigDecimal x, final JsonXmlSerConfig<?> config) throws IOException {

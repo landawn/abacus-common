@@ -76,6 +76,7 @@ public interface CharNConsumer {
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code CharNConsumer} that performs in sequence this operation
      *         followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     default CharNConsumer andThen(final CharNConsumer after) {
         return args -> {

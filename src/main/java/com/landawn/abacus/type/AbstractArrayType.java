@@ -22,10 +22,15 @@ import com.landawn.abacus.util.SK;
 
 /**
  * The abstract base class for array types in the type system.
- * This class provides common functionality for handling array types,
- * including serialization and conversion operations.
+ * <p>
+ * This class provides common functionality for handling object array types,
+ * including serialization, conversion, and collection interoperability operations.
+ * Concrete subclasses handle specific array element types
+ * (e.g., {@code String[]}, {@code Integer[]}, {@code Object[]}).
+ * </p>
  *
- * @param <T> the type of the array
+ * @param <T> the array type this handler represents (e.g., {@code String[]}, {@code Integer[]})
+ * @see AbstractPrimitiveArrayType
  */
 public abstract class AbstractArrayType<T> extends AbstractType<T> {
 
@@ -61,29 +66,17 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
     }
 
     /**
-     * Converts the specified array to a collection of the given collection class.
+     * Converts the specified array to a new collection of the given collection class.
+     * <p>
+     * Each element from the array is added to a newly created collection instance of
+     * the specified type. If the input array is {@code null}, {@code null} is returned.
+     * </p>
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * String[] array = {"apple", "banana", "cherry"};
-     * Type<String[]> type = Type.of(String[].class);
-     * List<String> list = type.arrayToCollection(array, ArrayList.class);
-     * // list contains: ["apple", "banana", "cherry"]
-     *
-     * Integer[] numbers = {1, 2, 3, 4, 5};
-     * Type<Integer[]> intType = Type.of(Integer[].class);
-     * Set<Integer> set = intType.arrayToCollection(numbers, HashSet.class);
-     * // set contains: [1, 2, 3, 4, 5]
-     *
-     * // Handling null arrays
-     * List<String> result = type.arrayToCollection(null, ArrayList.class);
-     * // result is null
-     * }</pre>
-     *
-     * @param <E> the element type of the collection
+     * @param <E> the element type of the resulting collection
      * @param array the array to convert, may be {@code null}
-     * @param collClass the class of the collection to create
-     * @return a new collection containing all elements from the array, or {@code null} if the input array is {@code null}
+     * @param collClass the class of the collection to create (e.g., {@code ArrayList.class}, {@code HashSet.class})
+     * @return a new collection containing all elements from the array,
+     *         or {@code null} if the input array is {@code null}
      * @throws IllegalArgumentException if the collection class cannot be instantiated
      */
     @Override
@@ -102,28 +95,15 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
 
     /**
      * Splits the specified string into an array of substrings using predefined delimiters.
-     * This method first attempts to split using {@link #ELEMENT_SEPARATOR}, and if that
-     * results in a single element and the string contains commas, it splits by comma instead.
-     * If the resulting array has elements, it also strips square brackets from the
-     * first and last elements if they exist.
+     * <p>
+     * This method first attempts to split using the {@code ELEMENT_SEPARATOR}. If that
+     * results in a single element and the string contains a comma, it falls back to
+     * splitting by comma. Leading {@code [} and trailing {@code ]} brackets are stripped
+     * from the first and last elements respectively, if present.
+     * </p>
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * // Split with element separator
-     * String[] result1 = split("1, 2, 3");
-     * // result1: ["1", "2", "3"]
-     *
-     * // Split with square brackets
-     * String[] result2 = split("[apple, banana, cherry]");
-     * // result2: ["apple", " banana", " cherry"] (brackets removed)
-     *
-     * // Split with comma only
-     * String[] result3 = split("red,green,blue");
-     * // result3: ["red", "green", "blue"]
-     * }</pre>
-     *
-     * @param str the string to split
-     * @return an array of substrings after splitting and processing
+     * @param str the string to split; must not be {@code null}
+     * @return an array of trimmed substrings after splitting and bracket-stripping
      */
     protected static String[] split(final String str) {
         String[] elements = str.split(ELEMENT_SEPARATOR); // NOSONAR

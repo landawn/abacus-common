@@ -16,8 +16,11 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Represents a predicate (boolean-valued function) of a long-valued argument and an object argument.
- * This is a two-arity specialization of {@code Predicate}.
+ * Represents a predicate (boolean-valued function) of a {@code long}-valued argument and an object argument.
+ * This is the {@code (long, reference)} specialization of {@link java.util.function.BiPredicate}.
+ *
+ * <p>The parameter order follows the {@code LongObj*} convention: the {@code long} argument
+ * comes first, followed by the object argument of type {@code T}.
  *
  * <p>This is a functional interface whose functional method is {@link #test(long, Object)}.
  *
@@ -49,8 +52,8 @@ public interface LongObjPredicate<T> extends Throwables.LongObjPredicate<T, Runt
      * boolean found = containsLongValue.test(3L, Arrays.asList(1, 2, 3));  // Returns true
      * }</pre>
      *
-     * @param t the long-valued first argument
-     * @param u the object second argument of type T
+     * @param t the {@code long}-valued first argument
+     * @param u the object second argument of type {@code T}
      * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
      */
     // @ai-ignore LongObj*/ObjLong* argument order convention - intentional: class name prefix determines parameter order. LongObj* has long first; ObjLong* has object first. Do not suggest reordering.
@@ -95,9 +98,10 @@ public interface LongObjPredicate<T> extends Throwables.LongObjPredicate<T, Runt
      * // both.test(3L, "hello") returns true (3 > 0 AND "hello".length() > 3)
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate
+     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default LongObjPredicate<T> and(final LongObjPredicate<T> other) {
         return (i, t) -> test(i, t) && other.test(i, t);
@@ -123,9 +127,10 @@ public interface LongObjPredicate<T> extends Throwables.LongObjPredicate<T, Runt
      * // either.test(5L, "") returns true (string is empty)
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate
+     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default LongObjPredicate<T> or(final LongObjPredicate<T> other) {
         return (i, t) -> test(i, t) || other.test(i, t);

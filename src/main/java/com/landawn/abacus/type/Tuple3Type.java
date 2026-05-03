@@ -14,21 +14,12 @@
 
 package com.landawn.abacus.type;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.Writer;
+import java.util.List;
 
-import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.parser.JsonXmlSerConfig;
-import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
-import com.landawn.abacus.util.IOUtil;
-import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Objectory;
-import com.landawn.abacus.util.Strings;
+import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple3;
-import com.landawn.abacus.util.SK;
 
 /**
  * Type handler for {@link Tuple3} objects.
@@ -40,20 +31,7 @@ import com.landawn.abacus.util.SK;
  * @param <T3> the type of the third element in the tuple
  */
 @SuppressWarnings("java:S2160")
-public class Tuple3Type<T1, T2, T3> extends AbstractType<Tuple3<T1, T2, T3>> {
-
-    private final String declaringName;
-
-    @SuppressWarnings("rawtypes")
-    private final Class<Tuple3<T1, T2, T3>> typeClass = (Class) Tuple3.class; //NOSONAR
-
-    private final Type<T1> type1;
-
-    private final Type<T2> type2;
-
-    private final Type<T3> type3;
-
-    private final Type<?>[] parameterTypes;
+public class Tuple3Type<T1, T2, T3> extends AbstractTupleType<Tuple3<T1, T2, T3>> {
 
     /**
      * Constructs a Tuple3Type instance with the specified element types.
@@ -63,197 +41,16 @@ public class Tuple3Type<T1, T2, T3> extends AbstractType<Tuple3<T1, T2, T3>> {
      * @param t2TypeName the name of the second element type
      * @param t3TypeName the name of the third element type
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     Tuple3Type(final String t1TypeName, final String t2TypeName, final String t3TypeName) {
-        super(getTypeName(t1TypeName, t2TypeName, t3TypeName, false));
-
-        declaringName = getTypeName(t1TypeName, t2TypeName, t3TypeName, true);
-
-        type1 = TypeFactory.getType(t1TypeName);
-        type2 = TypeFactory.getType(t2TypeName);
-        type3 = TypeFactory.getType(t3TypeName);
-        parameterTypes = new Type[] { type1, type2, type3 };
+        super(getTypeName(t1TypeName, t2TypeName, t3TypeName, false), getTypeName(t1TypeName, t2TypeName, t3TypeName, true), (Class) Tuple3.class,
+                List.of(TypeFactory.getType(t1TypeName), TypeFactory.getType(t2TypeName), TypeFactory.getType(t3TypeName)));
     }
 
-    /**
-     * Returns the declaring name of this type, which includes simple class names.
-     * For example: "Tuple3&lt;String, Integer, Double&gt;" instead of the fully qualified name.
-     *
-     * @return the declaring name of this Tuple3 type
-     */
-    @Override
-    public String declaringName() {
-        return declaringName;
-    }
-
-    /**
-     * Returns the Java class that this type handler manages.
-     *
-     * @return {@code Tuple3.class}
-     */
-    @Override
-    public Class<Tuple3<T1, T2, T3>> javaType() {
-        return typeClass;
-    }
-
-    /**
-     * Returns the parameter types of this tuple type.
-     * The returned array contains the types of the first, second, and third elements in order.
-     *
-     * @return an array containing the types of the tuple elements
-     */
-    @Override
-    public Type<?>[] parameterTypes() {
-        return parameterTypes;
-    }
-
-    /**
-     * Indicates whether this is a generic type.
-     * Tuple3Type is always a generic type as it has type parameters.
-     *
-     * @return {@code true} always, as Tuple3 is a parameterized type
-     */
-    @Override
-    public boolean isParameterizedType() {
-        return true;
-    }
-
-    /**
-     * Converts the given Tuple3 object to its string representation.
-     * The tuple is serialized as a JSON array containing its three elements.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Tuple3<String, Integer, Double>> type = TypeFactory.getType("Tuple3<String, Integer, Double>");
-     * Tuple3<String, Integer, Double> tuple = Tuple.of("Bob", 25, 175.5);
-     * String str = type.stringOf(tuple);   // Returns ["Bob", 25, 175.5]
-     * }</pre>
-     *
-     * @param x the Tuple3 object to convert
-     * @return a JSON string representation of the tuple, or {@code null} if x is null
-     */
-    @Override
-    public String stringOf(final Tuple3<T1, T2, T3> x) {
-        return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x._1, x._2, x._3), Utils.jsc);
-    }
-
-    /**
-     * Parses the given string into a Tuple3 object.
-     * The string should be a JSON array representation with exactly three elements.
-     * Each element will be converted to the appropriate type based on the tuple's type parameters.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Tuple3<String, Integer, Double>> type = TypeFactory.getType("Tuple3<String, Integer, Double>");
-     * Tuple3<String, Integer, Double> tuple = type.valueOf("[\"Bob\", 25, 175.5]");
-     * // tuple._1 = "Bob", tuple._2 = 25, tuple._3 = 175.5
-     * }</pre>
-     *
-     * @param str the JSON string to parse
-     * @return a Tuple3 object parsed from the string, or {@code null} if str is empty
-     */
     @SuppressWarnings("unchecked")
     @Override
-    public Tuple3<T1, T2, T3> valueOf(final String str) {
-        if (Strings.isEmpty(str)) {
-            return null; // NOSONAR
-        }
-
-        final Object[] a = Utils.jsonParser.deserialize(str, Utils.jdc, Object[].class);
-
-        if (a == null || a.length < 3) {
-            throw new IllegalArgumentException("Invalid Tuple3 format. Expected array with at least 3 elements but got: " + str);
-        }
-
-        final T1 t1 = a[0] == null ? null : ((T1) (type1.javaType().isAssignableFrom(a[0].getClass()) ? a[0] : N.convert(a[0], type1)));
-        final T2 t2 = a[1] == null ? null : ((T2) (type2.javaType().isAssignableFrom(a[1].getClass()) ? a[1] : N.convert(a[1], type2)));
-        final T3 t3 = a[2] == null ? null : ((T3) (type3.javaType().isAssignableFrom(a[2].getClass()) ? a[2] : N.convert(a[2], type3)));
-
-        return Tuple.of(t1, t2, t3);
-    }
-
-    /**
-     * Appends the string representation of the Tuple3 to the given Appendable.
-     * The output format is: [element1, element2, element3]
-     * Special handling is provided for Writer instances to improve performance.
-     *
-     * @param appendable the Appendable to write to
-     * @param x the Tuple3 object to append
-     * @throws IOException if an I/O error occurs during the append operation
-     */
-    @Override
-    public void appendTo(final Appendable appendable, final Tuple3<T1, T2, T3> x) throws IOException {
-        if (x == null) {
-            appendable.append(NULL_STRING);
-        } else {
-            if (appendable instanceof Writer writer) {
-                final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
-                final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
-
-                try {
-                    bw.write(SK._BRACKET_L);
-
-                    type1.appendTo(bw, x._1);
-                    bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-                    type2.appendTo(bw, x._2);
-                    bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-                    type3.appendTo(bw, x._3);
-
-                    bw.write(SK._BRACKET_R);
-
-                    if (!isBufferedWriter) {
-                        bw.flush();
-                    }
-                } catch (final IOException e) {
-                    throw new UncheckedIOException(e);
-                } finally {
-                    if (!isBufferedWriter) {
-                        Objectory.recycle((BufferedWriter) bw);
-                    }
-                }
-            } else {
-                appendable.append(SK._BRACKET_L);
-
-                type1.appendTo(appendable, x._1);
-                appendable.append(ELEMENT_SEPARATOR);
-                type2.appendTo(appendable, x._2);
-                appendable.append(ELEMENT_SEPARATOR);
-                type3.appendTo(appendable, x._3);
-
-                appendable.append(SK._BRACKET_R);
-            }
-        }
-    }
-
-    /**
-     * Writes the character representation of the Tuple3 to the given CharacterWriter.
-     * The output format is: [element1, element2, element3]
-     * This method is optimized for character-based output streams.
-     *
-     * @param writer the CharacterWriter to write to
-     * @param x the Tuple3 object to write
-     * @param config the serialization configuration
-     * @throws IOException if an I/O error occurs during the write operation
-     */
-    @Override
-    public void writeCharacter(final CharacterWriter writer, final Tuple3<T1, T2, T3> x, final JsonXmlSerConfig<?> config) throws IOException {
-        if (x == null) {
-            writer.write(NULL_CHAR_ARRAY);
-        } else {
-            try {
-                writer.write(SK._BRACKET_L);
-
-                type1.writeCharacter(writer, x._1, config);
-                writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-                type2.writeCharacter(writer, x._2, config);
-                writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-                type3.writeCharacter(writer, x._3, config);
-
-                writer.write(SK._BRACKET_R);
-
-            } catch (final IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        }
+    protected Tuple3<T1, T2, T3> fromArray(final Object[] converted) {
+        return Tuple.of((T1) converted[0], (T2) converted[1], (T3) converted[2]);
     }
 
     /**

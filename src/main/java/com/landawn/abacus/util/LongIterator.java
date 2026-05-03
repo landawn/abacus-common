@@ -26,10 +26,10 @@ import com.landawn.abacus.util.stream.LongStream;
 /**
  * A specialized iterator for primitive long values. This class provides an efficient way to iterate over
  * long values without the overhead of boxing/unboxing that comes with using Iterator&lt;Long&gt;.
- * 
+ *
  * <p>This abstract class extends ImmutableIterator to ensure that the remove() operation is not supported,
  * making all LongIterator instances immutable in terms of structural modification.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * LongIterator iter = LongIterator.of(1L, 2L, 3L, 4L, 5L);
@@ -558,7 +558,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
 
     /**
      * Returns an iterator of IndexedLong objects, where each element is paired with its index
-     * starting from the specified startIndex. This is useful when you need both the value and 
+     * starting from the specified startIndex. This is useful when you need both the value and
      * its position with a custom starting index.
      *
      * <p><b>Usage Examples:</b></p>
@@ -610,8 +610,8 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     * Performs the given action for each remaining element. The action is performed in the order
-     * of iteration, if that order is specified.
+     * Performs the given action for each remaining element without boxing overhead.
+     * The action is performed in the order of iteration.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -620,7 +620,8 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * }</pre>
      *
      * @param <E> the type of exception that the action may throw
-     * @param action the action to be performed for each element
+     * @param action the action to be performed for each element, must not be {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachRemaining(final Throwables.LongConsumer<E> action) throws E {//NOSONAR
@@ -635,9 +636,12 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * Performs the given action for each remaining element, providing both the element's index
      * and value. The index starts from 0 and increments for each element.
      *
+     * <p>This method consumes the iterator. After calling this method, the iterator
+     * will be empty ({@code hasNext()} returns {@code false}).</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LongIterator.of(10L, 20L, 30L).foreachIndexed((index, value) -> 
+     * LongIterator.of(10L, 20L, 30L).foreachIndexed((index, value) ->
      *     System.out.println("Index: " + index + ", Value: " + value)
      * );
      * // Prints:
@@ -647,8 +651,10 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * }</pre>
      *
      * @param <E> the type of exception that the action may throw
-     * @param action the action to be performed for each element, accepting index and value
-     * @throws IllegalArgumentException if action is null
+     * @param action the action to be performed for each element, accepting index and value; must not be {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalStateException if the iterator contains more than {@link Integer#MAX_VALUE} elements,
+     *         causing the index to overflow
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntLongConsumer<E> action) throws IllegalArgumentException, E {

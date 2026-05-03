@@ -234,8 +234,10 @@ public final class Profiler {
      *
      * <p>This method is ideal for quick performance benchmarks where you need to assess how code
      * performs under concurrent load. The multi-round approach helps eliminate JVM warmup effects
-     * and provides more stable, statistically significant results. Each round's results are printed
-     * automatically to the console, and the final round's statistics are returned for further analysis.
+     * and provides more stable, statistically significant results. Intermediate rounds' results
+     * are printed automatically to the console; the final round's statistics are returned for
+     * further analysis (and are NOT auto-printed — call {@code printResult()} on the returned
+     * object if needed).
      *
      * <p><b>Performance Considerations:</b>
      * <ul>
@@ -561,7 +563,7 @@ public final class Profiler {
 
     /**
      * Run performance test for the specified {@code method} with the specified {@code threadNum} and {@code loopNum} for each thread.
-     * The performance test will be repeatedly executedd times specified by {@code roundNum}.
+     * The performance test will be repeatedly executed times specified by {@code roundNum}.
      *
      * @param instance the instance on which to invoke the method, may be {@code null} for static methods
      * @param method the method to be profiled
@@ -598,7 +600,7 @@ public final class Profiler {
      * @param tearDownForLoop the teardown method to be executed after each loop iteration, may be {@code null}
      * @param threadNum the number of threads to use for the performance test
      * @param threadDelay the delay in milliseconds between starting each thread
-     * @param loopNum loops run by each thread.
+     * @param loopNum the number of loops run by each thread
      * @param loopDelay the delay in milliseconds between each loop iteration
      * @param roundNum the number of rounds to repeat the entire performance test
      * @return the performance statistics from multiple loop executions

@@ -28,21 +28,21 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * An immutable, thread-safe implementation of the NavigableSet interface.
  * This class extends ImmutableSortedSet and provides additional navigation methods
  * for accessing elements based on their ordering.
- * 
+ *
  * <p>A NavigableSet extends SortedSet with navigation methods returning the closest
  * matches for given search targets. Methods like {@link #lower}, {@link #floor},
  * {@link #ceiling}, and {@link #higher} return elements respectively less than,
  * less than or equal, greater than or equal, and greater than a given element,
  * returning {@code null} if there is no such element.</p>
- * 
+ *
  * <p>All mutating operations will throw UnsupportedOperationException. The set maintains
  * elements in sorted order according to their natural ordering or by a Comparator provided
  * at creation time.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 3, 5, 7, 9);
- * 
+ *
  * System.out.println(set.floor(6));   // 5
  * System.out.println(set.higher(5));   // 7
  * System.out.println(set.descendingSet());   // [9, 7, 5, 3, 1]
@@ -68,7 +68,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      * Returns an empty ImmutableNavigableSet. This method always returns the same cached instance,
      * making it memory efficient for representing empty navigable sets.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<String> emptySet = ImmutableNavigableSet.empty();
@@ -85,7 +85,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     //    /**
     //     * Returns an ImmutableNavigableSet containing a single element.
     //     * The element must implement Comparable to determine its natural ordering.
-    //     * 
+    //     *
     //     * <p><b>Usage Examples:</b></p>
     //     * <pre>{@code
     //     * ImmutableNavigableSet<Integer> singletonSet = ImmutableNavigableSet.just(42);
@@ -104,13 +104,13 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     //    }
 
     /**
-     * Returns an ImmutableNavigableSet containing a single element.
-     * This method exists for API consistency with other immutable collection factories.
+     * Returns an ImmutableNavigableSet containing a single element in sorted order.
+     * The element must implement {@link Comparable} to determine its natural ordering.
      *
      * @param <E> the type of element, must extend Comparable
      * @param e1 the element to be contained in the set
      * @return an ImmutableNavigableSet containing only the specified element
-     * @see #of(Comparable, Comparable)
+     * @see #of(Object, Object)
      */
     public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1) {
         return new ImmutableNavigableSet<>(new TreeSet<>(Collections.singletonList(e1)));
@@ -120,7 +120,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * Returns an ImmutableNavigableSet containing exactly two elements in sorted order.
      * The elements must implement Comparable to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<String> set = ImmutableNavigableSet.of("beta", "alpha");
@@ -293,10 +293,10 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * If the provided collection is already an instance of ImmutableNavigableSet, it is directly returned.
      * If the provided collection is {@code null} or empty, an empty ImmutableNavigableSet is returned.
      * Otherwise, a new ImmutableNavigableSet is created with the elements of the provided collection.
-     * 
+     *
      * <p>The elements are sorted according to their natural ordering if they implement Comparable,
      * or a ClassCastException will be thrown if they don't.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("charlie", "alpha", "beta");
@@ -322,16 +322,16 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * Wraps the provided NavigableSet into an ImmutableNavigableSet. Changes to the specified 
+     * Wraps the provided NavigableSet into an ImmutableNavigableSet. Changes to the specified
      * NavigableSet will be reflected in the ImmutableNavigableSet.
      * If the provided NavigableSet is already an instance of ImmutableNavigableSet, it is directly returned.
      * If the provided NavigableSet is {@code null}, an empty ImmutableNavigableSet is returned.
      * Otherwise, returns a new ImmutableNavigableSet backed by provided NavigableSet.
-     * 
+     *
      * <p><b>Warning:</b> This method does not create a defensive copy. Changes to the underlying
      * NavigableSet will be visible through the returned ImmutableNavigableSet, which violates the
      * immutability contract. Use {@link #copyOf(Collection)} for a {@code true} immutable copy.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * NavigableSet<String> mutableSet = new TreeSet<>();
@@ -356,7 +356,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
 
     /**
      * This method is deprecated and will throw an UnsupportedOperationException if used.
-     * Use {@link #wrap(NavigableSet)} for NavigableSet or {@link ImmutableSortedSet#wrap(SortedSet)} 
+     * Use {@link #wrap(NavigableSet)} for NavigableSet or {@link ImmutableSortedSet#wrap(SortedSet)}
      * for regular SortedSets.
      *
      * @param <E> the type of elements
@@ -373,7 +373,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      * Returns the greatest element in this set strictly less than the given element,
      * or {@code null} if there is no such element.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 3, 5, 7, 9);
@@ -395,7 +395,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      * Returns the greatest element in this set less than or equal to the given element,
      * or {@code null} if there is no such element.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 3, 5, 7, 9);
@@ -417,7 +417,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      * Returns the least element in this set greater than or equal to the given element,
      * or {@code null} if there is no such element.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 3, 5, 7, 9);
@@ -439,7 +439,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      * Returns the least element in this set strictly greater than the given element,
      * or {@code null} if there is no such element.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 3, 5, 7, 9);
@@ -490,7 +490,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * Returns a reverse order view of the elements contained in this set.
      * The descending set is backed by this set, so it remains immutable.
      * The returned set has an ordering equivalent to Collections.reverseOrder(comparator()).
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 3, 5, 7, 9);
@@ -508,7 +508,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      * Returns an iterator over the elements in this set, in descending order.
      * The iterator provides read-only access and does not support the remove() operation.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<String> set = ImmutableNavigableSet.of("a", "b", "c");
@@ -530,7 +530,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * If {@code fromInclusive} is {@code true}, the returned set includes {@code fromElement} if present.
      * If {@code toInclusive} is {@code true}, the returned set includes {@code toElement} if present.
      * The returned set is backed by this set, so it remains immutable.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 2, 3, 4, 5);
@@ -554,7 +554,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      * Returns a view of the portion of this set whose elements are less than (or equal to, if {@code inclusive} is true) {@code toElement}.
      * The returned set is backed by this set, so it remains immutable.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 2, 3, 4, 5);
@@ -576,7 +576,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      * Returns a view of the portion of this set whose elements are greater than (or equal to, if {@code inclusive} is true) {@code fromElement}.
      * The returned set is backed by this set, so it remains immutable.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 2, 3, 4, 5);

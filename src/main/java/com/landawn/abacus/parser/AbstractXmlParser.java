@@ -23,7 +23,6 @@ import java.util.Map;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
 
-import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.Attributes;
@@ -147,21 +146,19 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
     }
 
     /**
-     * Deserializes XML content from a file into an object using default deserialization configuration.
-     * This method is not supported in the abstract base class and should be implemented by subclasses.
+     * Deserializes XML content from a file into an object, using a map of XML element names to types
+     * for dynamic type resolution during parsing.
      *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * File xmlFile = new File("data.xml");
-     * MyObject obj = parser.deserialize(xmlFile, config, nodeTypes);
-     * }</pre>
+     * <p>This default implementation throws {@link UnsupportedOperationException}. Concrete subclasses
+     * that support node-typed deserialization must override this method.</p>
      *
      * @param <T> the type of the target object
-     * @param source the file containing XML content
-     * @param config the XML deserialization configuration
-     * @param nodeTypes a map of node type definitions for deserialization
-     * @return an instance of the target type populated with data from the XML content
-     * @throws UnsupportedOperationException always thrown in this abstract implementation
+     * @param source the file containing XML content to deserialize
+     * @param config the XML deserialization configuration; may be {@code null} for default settings
+     * @param nodeTypes a map of XML element names to their corresponding {@link Type} descriptors,
+     *        used to resolve the concrete type for each element encountered during parsing
+     * @return an instance of the resolved target type populated with data from the XML content
+     * @throws UnsupportedOperationException always thrown by this base-class implementation
      */
     @Override
     public <T> T deserialize(final File source, final XmlDeserConfig config, final Map<String, Type<?>> nodeTypes) throws UnsupportedOperationException {
@@ -169,21 +166,19 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
     }
 
     /**
-     * Deserializes XML content from an input stream into an object using default deserialization configuration.
-     * This method is not supported in the abstract base class and should be implemented by subclasses.
+     * Deserializes XML content from an input stream into an object, using a map of XML element names
+     * to types for dynamic type resolution during parsing.
      *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * InputStream inputStream = new FileInputStream("data.xml");
-     * MyObject obj = parser.deserialize(inputStream, config, nodeTypes);
-     * }</pre>
+     * <p>This default implementation throws {@link UnsupportedOperationException}. Concrete subclasses
+     * that support node-typed deserialization must override this method.</p>
      *
      * @param <T> the type of the target object
-     * @param source the input stream containing XML content
-     * @param config the XML deserialization configuration
-     * @param nodeTypes a map of node type definitions for deserialization
-     * @return an instance of the target type populated with data from the XML content
-     * @throws UnsupportedOperationException always thrown in this abstract implementation
+     * @param source the input stream containing XML content to deserialize
+     * @param config the XML deserialization configuration; may be {@code null} for default settings
+     * @param nodeTypes a map of XML element names to their corresponding {@link Type} descriptors,
+     *        used to resolve the concrete type for each element encountered during parsing
+     * @return an instance of the resolved target type populated with data from the XML content
+     * @throws UnsupportedOperationException always thrown by this base-class implementation
      */
     @Override
     public <T> T deserialize(final InputStream source, final XmlDeserConfig config, final Map<String, Type<?>> nodeTypes) throws UnsupportedOperationException {
@@ -191,21 +186,19 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
     }
 
     /**
-     * Deserializes XML content from a reader into an object using default deserialization configuration.
-     * This method is not supported in the abstract base class and should be implemented by subclasses.
+     * Deserializes XML content from a reader into an object, using a map of XML element names to types
+     * for dynamic type resolution during parsing.
      *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * Reader reader = new FileReader("data.xml");
-     * MyObject obj = parser.deserialize(reader, config, nodeTypes);
-     * }</pre>
+     * <p>This default implementation throws {@link UnsupportedOperationException}. Concrete subclasses
+     * that support node-typed deserialization must override this method.</p>
      *
      * @param <T> the type of the target object
-     * @param source the reader containing XML content
-     * @param config the XML deserialization configuration
-     * @param nodeTypes a map of node type definitions for deserialization
-     * @return an instance of the target type populated with data from the XML content
-     * @throws UnsupportedOperationException always thrown in this abstract implementation
+     * @param source the reader containing XML content to deserialize
+     * @param config the XML deserialization configuration; may be {@code null} for default settings
+     * @param nodeTypes a map of XML element names to their corresponding {@link Type} descriptors,
+     *        used to resolve the concrete type for each element encountered during parsing
+     * @return an instance of the resolved target type populated with data from the XML content
+     * @throws UnsupportedOperationException always thrown by this base-class implementation
      */
     @Override
     public <T> T deserialize(final Reader source, final XmlDeserConfig config, final Map<String, Type<?>> nodeTypes) throws UnsupportedOperationException {
@@ -213,22 +206,19 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
     }
 
     /**
-     * Deserializes XML content from a DOM node into an object using default deserialization configuration.
-     * This method is not supported in the abstract base class and should be implemented by subclasses.
+     * Deserializes an XML DOM node into an object, using a map of XML element names to types for
+     * dynamic type resolution during parsing.
      *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * Document doc = XmlUtil.parse(xmlString);
-     * Node node = doc.getDocumentElement();
-     * MyObject obj = parser.deserialize(node, config, nodeTypes);
-     * }</pre>
+     * <p>This default implementation throws {@link UnsupportedOperationException}. Concrete subclasses
+     * that support node-typed deserialization must override this method.</p>
      *
      * @param <T> the type of the target object
      * @param source the XML DOM node to deserialize
-     * @param config the XML deserialization configuration
-     * @param nodeTypes a map of node type definitions for deserialization
-     * @return an instance of the target type populated with data from the XML node
-     * @throws UnsupportedOperationException always thrown in this abstract implementation
+     * @param config the XML deserialization configuration; may be {@code null} for default settings
+     * @param nodeTypes a map of XML element names to their corresponding {@link Type} descriptors,
+     *        used to resolve the concrete type for each element encountered during parsing
+     * @return an instance of the resolved target type populated with data from the XML node
+     * @throws UnsupportedOperationException always thrown by this base-class implementation
      */
     @Override
     public <T> T deserialize(final Node source, final XmlDeserConfig config, final Map<String, Type<?>> nodeTypes) throws UnsupportedOperationException {
@@ -312,6 +302,16 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
         return config == null ? defaultXmlDeserConfig : config;
     }
 
+    /**
+     * Creates a new instance of a property class, using type information from an XML node's attributes if needed.
+     * This method attempts to instantiate the property class directly. If instantiation fails or
+     * the property class is abstract, it falls back to the type specified in the node's {@code type} attribute.
+     *
+     * @param <T> the type of the property instance to create
+     * @param propClass the class to instantiate, or {@code null} to use type from the node attribute
+     * @param node the XML node that may contain a {@code type} attribute specifying the concrete class
+     * @return a new instance of the property class, or {@code null} if instantiation fails
+     */
     @SuppressWarnings("unchecked")
     protected static <T> T newPropInstance(final Class<?> propClass, final Node node) {
         if ((propClass != null) && !Modifier.isAbstract(propClass.getModifiers())) {
@@ -484,6 +484,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * Node node = doc.getElementsByTagName("item").item(0);
      * Class<?> concreteClass = getConcreteClass(node, Collection.class);
      * }</pre>
+     *
      * @param node the XML node that may contain type attribute information
      * @param targetType the expected target class for deserialization
      * @return the concrete class to instantiate, either from the type attribute or the target class
@@ -507,8 +508,9 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * Attributes attrs = getAttributes();
      * Class<?> concreteClass = getConcreteClass(attrs, List.class);
      * }</pre>
+     *
      * @param attrs the XML attributes that may contain type information
-     * @param targetType the expected target class for deserialization 
+     * @param targetType the expected target class for deserialization
      * @return the concrete class to instantiate, either from the type attribute or the target class
      */
     protected static Class<?> getConcreteClass(final Attributes attrs, final Class<?> targetType) {
@@ -530,6 +532,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * XMLStreamReader reader = createXMLStreamReader(inputReader);
      * Class<?> concreteClass = getConcreteClass(reader, Map.class);
      * }</pre>
+     *
      * @param xmlReader the XML stream reader positioned at an element with attributes
      * @param targetType the expected target class for deserialization
      * @return the concrete class to instantiate, either from the type attribute or the target class
@@ -562,24 +565,26 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
         final NodeList subEleNodes = eleNode.getChildNodes();
         Node subEleNode = null;
 
-        if (subEleNodes.getLength() == 1) {
-            subEleNode = subEleNodes.item(0);
-        } else {
-            for (int j = 0; j < subEleNodes.getLength(); j++) {
-                //noinspection StatementWithEmptyBody
-                if (subEleNodes.item(j).getNodeType() == Document.TEXT_NODE) {
-                    //NOSONAR
-                } else if (subEleNode == null) {
-                    subEleNode = subEleNodes.item(j);
-                } else {
-                    throw new ParsingException("Only one child node is supported");
-                }
+        for (int j = 0; j < subEleNodes.getLength(); j++) {
+            //noinspection StatementWithEmptyBody
+            if (subEleNodes.item(j).getNodeType() == Node.TEXT_NODE) {
+                //NOSONAR
+            } else if (subEleNode == null) {
+                subEleNode = subEleNodes.item(j);
+            } else {
+                throw new ParsingException("Only one child node is supported");
             }
         }
 
         return subEleNode;
     }
 
+    /**
+     * Returns the number of nodes in the given {@link NodeList}, or {@code 0} if the list is {@code null}.
+     *
+     * @param nodeList the node list to measure; may be {@code null}
+     * @return the number of nodes in {@code nodeList}, or {@code 0} if {@code nodeList} is {@code null}
+     */
     protected static int getNodeLength(final NodeList nodeList) {
         return (nodeList == null) ? 0 : nodeList.getLength();
     }

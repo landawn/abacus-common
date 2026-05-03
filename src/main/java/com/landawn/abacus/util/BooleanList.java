@@ -166,7 +166,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <ul>
  *   <li><b>Not Thread-Safe:</b> This implementation is not synchronized</li>
  *   <li><b>External Synchronization:</b> Required for concurrent access</li>
- *   <li><b>Fail-Fast Iterators:</b> Detect concurrent modifications</li>
+ *   <li><b>Iterators:</b> Not fail-fast; concurrent modification yields undefined results</li>
  *   <li><b>Read-Only Access:</b> Multiple threads can safely read simultaneously</li>
  * </ul>
  *
@@ -249,16 +249,16 @@ import com.landawn.abacus.util.stream.Stream;
  * BooleanList a = BooleanList.of(true, false, true, false);
  * BooleanList b = BooleanList.of(false, true, true, false);
  *
- * // AND operation: intersection finds positions where both are true
- * BooleanList and = a.intersection(b);   // [false, false, true, false]
+ * // Multiset-style intersection: pairs each element of a with one matching element of b
+ * BooleanList and = a.intersection(b);   // [true, false, true, false]
  *
  * // OR operation: combine all true positions
  * BooleanList or = a.copy();
  * or.addAll(b);
- * or = or.distinct();   // [true, false, true, false, true]
+ * or = or.distinct();   // [true, false] (only the unique boolean values)
  *
- * // XOR operation: symmetric difference
- * BooleanList xor = a.symmetricDifference(b);   // [true, true, false, false]
+ * // Multiset-style symmetric difference: elements left over after pairing
+ * BooleanList xor = a.symmetricDifference(b);   // [] (a and b have the same multiset of values)
  * }</pre>
  *
  * @see PrimitiveList
@@ -298,7 +298,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Constructs an empty BooleanList with the specified initial capacity.
-     * 
+     *
      * <p>This constructor is useful when the approximate size of the list is known in advance,
      * as it can help avoid multiple array reallocations during element additions.</p>
      *
@@ -407,7 +407,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Creates a new BooleanList with the specified element repeated a given number of times.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.repeat(true, 5);   // [true, true, true, true, true]
@@ -424,10 +424,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Creates a new BooleanList with random boolean values.
-     * 
+     *
      * <p>Each element in the list has an equal probability of being {@code true} or {@code false}.
      * The random values are generated using a secure random number generator.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList randomList = BooleanList.random(10);   // list with 10 random boolean values
@@ -503,7 +503,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Appends the specified element to the end of this list.
-     * 
+     *
      * <p>This method runs in amortized constant time. If the internal array needs to be
      * resized to accommodate the new element, all existing elements will be copied to
      * a new, larger array.</p>
@@ -704,9 +704,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Removes all occurrences of the specified element from this list.
      * The list is compacted after removal, maintaining the relative order of remaining elements.
-     * 
+     *
      * <p>This method runs in linear time and performs at most one pass through the list.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false, true);
@@ -828,10 +828,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Removes duplicate elements from this list, keeping only distinct values.
-     * 
+     *
      * <p>For boolean lists, this method will result in a list containing at most two elements:
      * one {@code true} and one {@code false}, preserving their first occurrence order.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false, true);
@@ -1038,10 +1038,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Removes a range of elements from this list.
      * The removal range is from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
-     * 
+     *
      * <p>Shifts any subsequent elements to the left (reduces their indices by
      * {@code toIndex - fromIndex}).</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false, true);
@@ -1079,7 +1079,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * The elements from fromIndex (inclusive) to toIndex (exclusive) are moved
      * so that the element originally at fromIndex will be at newPositionAfterMove.
      * Other elements are shifted as necessary to accommodate the move.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false, true);
@@ -1089,23 +1089,24 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and size() - lengthOfRange, inclusive.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the list
      */
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
+        N.checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, size);
         N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
     }
 
     /**
      * Replaces a range of elements in this list with the elements from the specified BooleanList.
      * The range to be replaced is from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
-     * 
+     *
      * <p>If the replacement list has a different size than the range being replaced,
      * the list will be resized accordingly, and subsequent elements will be shifted.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false, true);
@@ -1159,7 +1160,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Replaces a range of elements in this list with the elements from the specified array.
      * The range to be replaced is from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
-     * 
+     *
      * <p>This method is equivalent to {@code replaceRange(fromIndex, toIndex, BooleanList.of(replacement))}.</p>
      *
      * @param fromIndex the index of the first element to be replaced (inclusive)
@@ -1206,9 +1207,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Replaces all occurrences of the specified value with the new value in this list.
-     * 
+     *
      * <p>This method runs in linear time, making a single pass through the list.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false);
@@ -1291,7 +1292,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Replaces all elements in this list with the specified value.
-     * 
+     *
      * <p>This method is equivalent to {@code fill(0, size(), val)}.</p>
      *
      * @param val the value to be stored in all elements of the list
@@ -1304,7 +1305,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * Replaces each element in the specified range of this list with the specified value.
      * The range to be filled extends from {@code fromIndex} (inclusive) to
      * {@code toIndex} (exclusive).
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, true, true, true, true);
@@ -1340,7 +1341,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Returns {@code true} if this list contains any of the elements in the specified BooleanList.
-     * 
+     *
      * <p>This method runs in O(n*m) time in the worst case, where n is the size of this list
      * and m is the size of the specified list. However, it may use more efficient algorithms
      * based on the relative sizes of the lists.</p>
@@ -1360,7 +1361,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Returns {@code true} if this list contains any of the elements in the specified array.
-     * 
+     *
      * <p>This method is equivalent to {@code containsAny(BooleanList.of(a))}.</p>
      *
      * @param a the array to be checked for containment in this list
@@ -1378,7 +1379,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Returns {@code true} if this list contains all of the elements in the specified BooleanList.
-     * 
+     *
      * <p>This method runs in O(n*m) time in the worst case, where n is the size of this list
      * and m is the size of the specified list. However, it may use more efficient set-based
      * algorithms when beneficial.</p>
@@ -1416,7 +1417,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Returns {@code true} if this list contains all of the elements in the specified array.
-     * 
+     *
      * <p>This method is equivalent to {@code containsAll(BooleanList.of(a))}.</p>
      *
      * @param a the array to be checked for containment in this list
@@ -1436,7 +1437,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Returns {@code true} if this list and the specified BooleanList have no elements in common.
-     * 
+     *
      * <p>Two lists are disjoint if they share no common elements. Empty lists are disjoint
      * with all lists, including other empty lists.</p>
      *
@@ -1471,7 +1472,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Returns {@code true} if this list and the specified array have no elements in common.
-     * 
+     *
      * <p>This method is equivalent to {@code disjoint(BooleanList.of(b))}.</p>
      *
      * @param b the array to be checked for disjointness with this list
@@ -1490,11 +1491,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Returns a new BooleanList containing all elements that appear in both this list and
      * the specified BooleanList, respecting the frequency of elements.
-     * 
+     *
      * <p>The intersection preserves the order of elements from this list. If an element
      * appears multiple times in both lists, it will appear in the result the minimum
      * number of times it appears in either list.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list1 = BooleanList.of(true, false, true, false);
@@ -1529,7 +1530,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Returns a new BooleanList containing all elements that appear in both this list and
      * the specified array, respecting the frequency of elements.
-     * 
+     *
      * <p>This method is equivalent to {@code intersection(BooleanList.of(b))}.</p>
      *
      * @param b the array to intersect with this list
@@ -1548,11 +1549,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Returns a new BooleanList containing the elements that are in this list but not in
      * the specified BooleanList, considering the frequency of elements.
-     * 
+     *
      * <p>If an element appears n times in this list and m times in the specified list,
      * it will appear max(0, n-m) times in the result. The order of elements from this
      * list is preserved.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list1 = BooleanList.of(true, true, false, true);
@@ -1587,7 +1588,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Returns a new BooleanList containing the elements that are in this list but not in
      * the specified array, considering the frequency of elements.
-     * 
+     *
      * <p>This method is equivalent to {@code difference(BooleanList.of(b))}.</p>
      *
      * @param b the array whose elements will be subtracted from this list
@@ -1608,10 +1609,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * Returns a new BooleanList containing the symmetric difference between this list and
      * the specified BooleanList. The symmetric difference consists of elements that are
      * in either list but not in both, considering the frequency of elements.
-     * 
+     *
      * <p>The result contains all elements that appear in exactly one of the two lists,
      * or elements that appear a different number of times in each list.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list1 = BooleanList.of(true, true, false);
@@ -1658,7 +1659,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * Returns a new BooleanList containing the symmetric difference between this list and
      * the specified array. The symmetric difference consists of elements that are
      * in either the list or array but not in both, considering the frequency of elements.
-     * 
+     *
      * <p>This method is equivalent to {@code symmetricDifference(BooleanList.of(b))}.</p>
      *
      * @param b the array to compute symmetric difference with
@@ -1678,9 +1679,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Returns the number of times the specified value appears in this list.
-     * 
+     *
      * <p>This method runs in linear time, examining each element once.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false, true);
@@ -1709,7 +1710,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Returns the index of the first occurrence of the specified element in this list,
      * or {@code -1} if this list does not contain the element.
-     * 
+     *
      * <p>This method runs in linear time.</p>
      *
      * @param valueToFind the element to search for
@@ -1723,7 +1724,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Returns the index of the first occurrence of the specified element in this list,
      * searching forwards from the specified index, or {@code -1} if the element is not found.
-     * 
+     *
      * <p>This method runs in linear time relative to the distance between {@code fromIndex}
      * and the end of the list.</p>
      *
@@ -1751,7 +1752,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Returns the index of the last occurrence of the specified element in this list,
      * or {@code -1} if this list does not contain the element.
-     * 
+     *
      * <p>This method runs in linear time, searching backwards from the end of the list.</p>
      *
      * @param valueToFind the element to search for
@@ -1765,7 +1766,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Returns the index of the last occurrence of the specified element in this list,
      * searching backwards from the specified index, or {@code -1} if the element is not found.
-     * 
+     *
      * <p>The search begins at {@code startIndexFromBack} (inclusive) and proceeds backwards
      * towards index 0.</p>
      *
@@ -1803,7 +1804,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Performs the given action for each element in the specified range of this list.
      * The action is performed on elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
-     * 
+     *
      * <p>If {@code fromIndex} is greater than {@code toIndex}, the elements are processed in reverse order,
      * from {@code fromIndex} (inclusive) down to {@code toIndex} (exclusive). If {@code toIndex} is -1,
      * it is treated as 0 when {@code fromIndex > toIndex}.</p>
@@ -1908,7 +1909,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Sorts this list in ascending order. For boolean values, this means all {@code false} values
      * will be placed before all {@code true} values. The relative order of equal elements is not preserved.
-     * 
+     *
      * <p>This operation modifies the list in-place and has O(n) time complexity.</p>
      */
     @Override
@@ -1936,7 +1937,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * Sorts this list in descending order. For boolean values, this means all {@code true} values
      * will be placed before all {@code false} values. This is equivalent to calling {@link #sort()}
      * followed by {@link #reverse()}.
-     * 
+     *
      * <p>This operation modifies the list in-place and has O(n) time complexity.</p>
      */
     @Override
@@ -1950,7 +1951,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Reverses the order of all elements in this list. The first element becomes the last,
      * the second becomes second to last, and so on.
-     * 
+     *
      * <p>This operation modifies the list in-place and has O(n/2) time complexity.</p>
      */
     @Override
@@ -1981,8 +1982,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Rotates all elements in this list by the specified distance.
      * After calling rotate(distance), the element at index i will be moved to
-     * index (i + distance) % size. 
-     * 
+     * index (i + distance) % size.
+     *
      * <p>Positive values of distance rotate elements towards higher indices (right rotation),
      * while negative values rotate towards lower indices (left rotation).
      * The list is modified in place.</p>
@@ -2001,7 +2002,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Randomly shuffles the elements in this list using the default random number generator.
      * Each possible permutation occurs with approximately equal probability.
-     * 
+     *
      * <p>This operation modifies the list in-place and has O(n) time complexity.</p>
      */
     @Override
@@ -2074,7 +2075,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Returns a new {@code BooleanList} containing elements from the specified range of this list,
      * sampled at regular intervals defined by the step parameter.
-     * 
+     *
      * <p>If {@code fromIndex < toIndex} and {@code step > 0}, elements are sampled from low to high indices.
      * If {@code fromIndex > toIndex} and {@code step < 0}, elements are sampled from high to low indices.
      * The first element sampled is at {@code fromIndex}, then {@code fromIndex + step}, and so on.</p>
@@ -2099,7 +2100,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * Splits this list into consecutive chunks of the specified size and returns them as a
      * list of {@code BooleanList} objects. The final chunk may be smaller than the specified
      * size if the range doesn't divide evenly.
-     * 
+     *
      * <p>For example, splitting a list of 10 elements with chunk size 3 will produce
      * chunks of sizes [3, 3, 3, 1].</p>
      *
@@ -2129,7 +2130,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Trims the capacity of this list to be the list's current size. This operation
      * minimizes the memory footprint of the list by removing any unused capacity.
-     * 
+     *
      * <p>If the capacity is already equal to the size, this method does nothing.
      * This method can be used to minimize the storage of a {@code BooleanList} instance.</p>
      *
@@ -2180,7 +2181,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Returns a {@code List<Boolean>} containing all elements of this list.
      * Each primitive boolean value is boxed into a {@code Boolean} object.
-     * 
+     *
      * <p>The returned list is independent of this list, so changes to the returned
      * list will not affect this list and vice versa.</p>
      *
@@ -2194,7 +2195,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Returns a {@code List<Boolean>} containing the elements in the specified range
      * of this list. Each primitive boolean value is boxed into a {@code Boolean} object.
-     * 
+     *
      * <p>The returned list is independent of this list, so changes to the returned
      * list will not affect this list and vice versa.</p>
      *
@@ -2325,7 +2326,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Returns the first element in this list.
-     * 
+     *
      * <p>This method provides direct access to the first element without creating an Optional.</p>
      *
      * @return the first boolean value in the list
@@ -2339,7 +2340,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Returns the last element in this list.
-     * 
+     *
      * <p>This method provides direct access to the last element without creating an Optional.</p>
      *
      * @return the last boolean value in the list
@@ -2354,7 +2355,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Inserts the specified element at the beginning of this list. All existing elements
      * are shifted to the right (their indices are incremented by one).
-     * 
+     *
      * <p>This operation has O(n) time complexity due to the need to shift existing elements.</p>
      *
      * @param e the boolean value to insert at the beginning of the list
@@ -2365,7 +2366,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Appends the specified element to the end of this list.
-     * 
+     *
      * <p>This operation has amortized O(1) time complexity.</p>
      *
      * @param e the boolean value to append to the list
@@ -2377,7 +2378,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Removes and returns the first element from this list. All remaining elements
      * are shifted to the left (their indices are decremented by one).
-     * 
+     *
      * <p>This operation has O(n) time complexity due to the need to shift remaining elements.</p>
      *
      * @return the first boolean value that was removed from the list
@@ -2391,7 +2392,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Removes and returns the last element from this list.
-     * 
+     *
      * <p>This operation has O(1) time complexity.</p>
      *
      * @return the last boolean value that was removed from the list
@@ -2406,9 +2407,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Returns a hash code value for this list. The hash code is calculated based on
      * the elements in the list and their order.
-     * 
+     *
      * <p>The hash code is defined to be the result of the following calculation:
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int hashCode = 1;

@@ -142,7 +142,7 @@ import com.landawn.abacus.util.stream.Stream;
  * operations, exception handling, synchronization, and data transformation tasks that would
  * otherwise require verbose lambda expressions or custom implementations.</p>
  *
- * <p><b>Key Features:</b>
+ * <p><b>Key Features:</b></p>
  * <ul>
  *   <li><b>Comprehensive Predicate Factory:</b> Null checking, equality testing, range validation, and collection testing</li>
  *   <li><b>Type-Safe Function Factory:</b> Type conversion, parsing, formatting, and data extraction operations</li>
@@ -154,8 +154,8 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Primitive Specializations:</b> Optimized operations for primitive types avoiding boxing overhead</li>
  * </ul>
  *
- * <p><b>Naming Convention for Shorthand Abbreviations:</b>
- * This class provides concise shorthand methods for creating functional interfaces:
+ * <p><b>Naming Convention for Shorthand Abbreviations:</b></p>
+ * <p>This class provides concise shorthand methods for creating functional interfaces:</p>
  * <ul>
  *   <li>{@link #s(Supplier) s} / {@link #ss(Throwables.Supplier) ss} - <b>S</b>upplier / Throwable-safe <b>S</b>upplier</li>
  *   <li>{@link #p(Predicate) p} / {@link #pp(Throwables.Predicate) pp} - <b>P</b>redicate / Throwable-safe <b>P</b>redicate</li>
@@ -163,9 +163,9 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>{@link #f(Function) f} / {@link #ff(Throwables.Function) ff} - <b>F</b>unction / Throwable-safe <b>F</b>unction</li>
  *   <li>{@link #o(UnaryOperator) o} - <b>O</b>perator (Unary or Binary)</li>
  * </ul>
- * These shorthands are particularly useful in stream pipelines and functional compositions to reduce boilerplate.</p>
+ * <p>These shorthands are particularly useful in stream pipelines and functional compositions to reduce boilerplate.</p>
  *
- * <p><b>IMPORTANT - Final Class & Usage Notes:</b>
+ * <p><b>IMPORTANT - Final Class &amp; Usage Notes:</b></p>
  * <ul>
  *   <li>This is a <b>final class</b> that cannot be extended for API stability</li>
  *   <li>All methods are static - no instance creation needed or allowed</li>
@@ -174,7 +174,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>Some methods marked with {@code @Stateful} return stateful functions requiring careful concurrent usage</li>
  * </ul>
  *
- * <p><b>Common Use Cases:</b>
+ * <p><b>Common Use Cases:</b></p>
  * <ul>
  *   <li><b>Stream Processing:</b> Filtering, mapping, and reducing operations in stream pipelines</li>
  *   <li><b>Collection Manipulation:</b> Sorting, grouping, and transforming collections with functional operations</li>
@@ -236,10 +236,10 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Functional Interface Categories:</b>
  * <ul>
- *   <li><b>Predicates:</b> {@code isNull()}, {@code notNull()}, {@code equal()}, {@code in()}, {@code ge()}, {@code le()}</li>
- *   <li><b>Functions:</b> {@code identity()}, {@code constant()}, {@code toStr()}, {@code parseInt()}, {@code length()}</li>
+ *   <li><b>Predicates:</b> {@code isNull()}, {@code notNull()}, {@code equal()}, {@code in()}, {@code greaterThan()}, {@code lessThan()}, {@code geAndLe()}</li>
+ *   <li><b>Functions:</b> {@code identity()}, {@code toStr()}, {@code parseInt()}, {@code length()}</li>
  *   <li><b>Consumers:</b> {@code doNothing()}, {@code acceptIfNotNull()}, {@code println()}</li>
- *   <li><b>Suppliers:</b> {@code supply()}, {@code random()}, {@code uuid()}</li>
+ *   <li><b>Suppliers:</b> {@code memoize()}, {@code memoizeWithExpiration()}</li>
  *   <li><b>Binary Operators:</b> {@code min()}, {@code max()}, {@code selectFirst()}, {@code selectSecond()}</li>
  *   <li><b>Conversion:</b> {@code c2f()}, {@code f2c()}, {@code pp()}, {@code ff()}, {@code cc()}</li>
  * </ul>
@@ -597,23 +597,23 @@ public final class Fn {
 
     /**
      * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
-     * 
+     *
      * Creates a memoizing supplier that caches the result of the delegate supplier and automatically
      * expires the cached value after a specified duration. This implementation is thread-safe and
      * provides automatic cache invalidation based on time.
-     * 
+     *
      * <p>This method is particularly useful for expensive computations or I/O operations that:
      * <ul>
      *   <li>Have results that remain valid for a known period of time</li>
      *   <li>Are called frequently enough to benefit from caching</li>
      *   <li>Need automatic expiration without manual cache management</li>
      * </ul>
-     * 
+     *
      * <p><b>Thread Safety:</b> The returned supplier is fully thread-safe. Multiple threads can
      * safely call {@code get()} concurrently. The implementation uses double-checked locking to
      * ensure that the delegate supplier is called at most once per expiration period, even under
      * concurrent access.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Cache database query results for 5 minutes
@@ -621,17 +621,17 @@ public final class Fn {
      *     () -> database.getAllUsers(),
      *     5, TimeUnit.MINUTES
      * );
-     * 
+     *
      * // First call queries the database
      * List<User> users1 = cachedUsers.get();
-     * 
+     *
      * // Subsequent calls within 5 minutes return cached value
      * List<User> users2 = cachedUsers.get();   // No database query
-     * 
+     *
      * // After 5 minutes, the next call will query database again
      * // and cache the new result
      * }</pre>
-     * 
+     *
      * <p><b>Typical Use Cases:</b>
      * <pre>{@code
      * // Configuration values that might change periodically
@@ -639,7 +639,7 @@ public final class Fn {
      *     () -> loadConfigFromFile(),
      *     30, TimeUnit.SECONDS
      * );
-     * 
+     *
      * // API responses with known freshness requirements
      * Supplier<WeatherData> weather = Fn.memoizeWithExpiration(
      *     () -> weatherApi.getCurrentWeather(),
@@ -707,12 +707,12 @@ public final class Fn {
     /**
      * Creates a memoizing supplier that caches the result of the delegate supplier and automatically
      * expires the cached value after the specified duration. This is a convenience method that accepts
-     * a {@link Duration} object instead of separate duration and time unit parameters. 
+     * a {@link Duration} object instead of separate duration and time unit parameters.
      *
      * <p><b>Thread Safety:</b> The returned supplier is fully thread-safe. Multiple threads can
      * safely call {@code get()} concurrently. The implementation uses double-checked locking to
      * ensure that the delegate supplier is called at most once per expiration period, even under
-     * concurrent access. 
+     * concurrent access.
      *
      * @param <T> the type of object returned by the supplier
      * @param supplier the delegate supplier whose results should be cached. Must not be {@code null}.
@@ -921,7 +921,7 @@ public final class Fn {
      *
      * @param c the collection of AutoCloseable resources to close
      * @return a Runnable that closes all resources when executed
-     * @see IOUtil#closeAll(Iterable) 
+     * @see IOUtil#closeAll(Iterable)
      */
     public static Runnable closeAll(final Collection<? extends AutoCloseable> c) {
         return new Runnable() {
@@ -947,7 +947,7 @@ public final class Fn {
 
     /**
      * Returns a Runnable that quietly closes the specified AutoCloseable resource.
-     * Any exceptions thrown during closing are suppressed. The returned Runnable 
+     * Any exceptions thrown during closing are suppressed. The returned Runnable
      * ensures the resource is closed only once, even if called multiple times.
      *
      * @param closeable the AutoCloseable resource to close quietly
@@ -978,7 +978,7 @@ public final class Fn {
 
     /**
      * Returns a Runnable that quietly closes all specified AutoCloseable resources.
-     * Any exceptions thrown during closing are suppressed. The returned Runnable 
+     * Any exceptions thrown during closing are suppressed. The returned Runnable
      * ensures all resources are closed only once, even if called multiple times.
      *
      * @param a the array of AutoCloseable resources to close quietly
@@ -1009,12 +1009,12 @@ public final class Fn {
 
     /**
      * Returns a Runnable that quietly closes all AutoCloseable resources in the specified collection.
-     * Any exceptions thrown during closing are suppressed. The returned Runnable 
+     * Any exceptions thrown during closing are suppressed. The returned Runnable
      * ensures all resources are closed only once, even if called multiple times.
      *
      * @param c the collection of AutoCloseable resources to close quietly
      * @return a Runnable that closes all resources quietly when executed
-     * @see IOUtil#closeAllQuietly(Iterable) 
+     * @see IOUtil#closeAllQuietly(Iterable)
      */
     public static Runnable closeAllQuietly(final Collection<? extends AutoCloseable> c) {
         return new Runnable() {
@@ -1311,7 +1311,7 @@ public final class Fn {
 
     /**
      * Returns a Function that converts its input to a String using String.valueOf().
-     * 
+     *
      * @param <T> the type of the input
      * @return a Function that converts its input to String
      * @see String#valueOf(Object)
@@ -4224,7 +4224,7 @@ public final class Fn {
 
     /**
      * Returns a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
-     * 
+     *
      * <p>The predicate allows elements to pass for a specified duration.
      * After the time limit expires, all subsequent elements will fail the test.
      *
@@ -4243,7 +4243,7 @@ public final class Fn {
 
     /**
      * Returns a stateful {@code Function}. Don't save or cache for reuse or use it in parallel stream.
-     * 
+     *
      * <p>The function wraps each element with its index, starting from 0.
      * This is useful for tracking the position of elements during stream operations.
      *
@@ -4266,7 +4266,7 @@ public final class Fn {
 
     /**
      * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
-     * 
+     *
      * <p>The predicate tests elements along with their index position using the provided IntObjPredicate.
      * The index starts from 0 and increments for each element tested.
      *
@@ -4430,7 +4430,7 @@ public final class Fn {
 
     /**
      * Returns a BinaryOperator for Map.Entry that finds the entry with the minimum key.
-     * 
+     *
      * <p>Keys must be Comparable. Null keys are considered greater than {@code non-null} keys.
      *
      * @param <K> the type of the Comparable keys
@@ -4444,7 +4444,7 @@ public final class Fn {
 
     /**
      * Returns a BinaryOperator for Map.Entry that finds the entry with the minimum value.
-     * 
+     *
      * <p>Values must be Comparable. Null values are considered greater than {@code non-null} values.
      *
      * @param <K> the type of the keys
@@ -4535,7 +4535,7 @@ public final class Fn {
 
     /**
      * Returns a BinaryOperator for Map.Entry that finds the entry with the maximum key.
-     * 
+     *
      * <p>Keys must be Comparable. Null keys are considered less than {@code non-null} keys.
      *
      * @param <K> the type of the Comparable keys
@@ -4549,7 +4549,7 @@ public final class Fn {
 
     /**
      * Returns a BinaryOperator for Map.Entry that finds the entry with the maximum value.
-     * 
+     *
      * <p>Values must be Comparable. Null values are considered less than {@code non-null} values.
      *
      * @param <K> the type of the keys
@@ -4593,7 +4593,7 @@ public final class Fn {
 
     /**
      * Returns a Function that compares its input to the target value using the specified Comparator.
-     * 
+     *
      * <p>The function returns a negative integer, zero, or a positive integer as the input
      * is less than, equal to, or greater than the target according to the comparator.
      *
@@ -4612,7 +4612,7 @@ public final class Fn {
 
     /**
      * Returns a BiFunction that compares two Comparable values.
-     * 
+     *
      * <p>The function returns a negative integer, zero, or a positive integer as the first
      * argument is less than, equal to, or greater than the second.
      *
@@ -4626,7 +4626,7 @@ public final class Fn {
 
     /**
      * Returns a BiFunction that compares two values using the specified Comparator.
-     * 
+     *
      * <p>The function returns a negative integer, zero, or a positive integer as the first
      * argument is less than, equal to, or greater than the second according to the comparator.
      *
@@ -4682,7 +4682,7 @@ public final class Fn {
 
     /**
      * Returns a Function that gets the result from a Future.
-     * 
+     *
      * <p>If the Future throws an InterruptedException or ExecutionException, the function
      * will wrap it in a RuntimeException and throw it.
      *
@@ -4697,7 +4697,7 @@ public final class Fn {
 
     /**
      * Converts a java.util.function.Supplier to a Supplier, preserving the instance if already a Supplier.
-     * 
+     *
      * <p>This method is useful for ensuring type compatibility while avoiding unnecessary wrapping.
      *
      * @param <T> the type of results supplied by the supplier
@@ -4712,7 +4712,7 @@ public final class Fn {
 
     /**
      * Converts a java.util.function.IntFunction to an IntFunction, preserving the instance if already an IntFunction.
-     * 
+     *
      * <p>This method is useful for ensuring type compatibility while avoiding unnecessary wrapping.
      *
      * @param <T> the type of the result of the function
@@ -4727,7 +4727,7 @@ public final class Fn {
 
     /**
      * Converts a java.util.function.Predicate to a Predicate, preserving the instance if already a Predicate.
-     * 
+     *
      * <p>This method is useful for ensuring type compatibility while avoiding unnecessary wrapping.
      *
      * @param <T> the type of the input to the predicate
@@ -4742,7 +4742,7 @@ public final class Fn {
 
     /**
      * Converts a java.util.function.BiPredicate to a BiPredicate, preserving the instance if already a BiPredicate.
-     * 
+     *
      * <p>This method is useful for ensuring type compatibility while avoiding unnecessary wrapping.
      *
      * @param <T> the type of the first input to the predicate
@@ -4758,7 +4758,7 @@ public final class Fn {
 
     /**
      * Converts a java.util.function.Consumer to a Consumer, preserving the instance if already a Consumer.
-     * 
+     *
      * <p>This method is useful for ensuring type compatibility while avoiding unnecessary wrapping.
      *
      * @param <T> the type of the input to the consumer
@@ -4773,7 +4773,7 @@ public final class Fn {
 
     /**
      * Converts a java.util.function.BiConsumer to a BiConsumer, preserving the instance if already a BiConsumer.
-     * 
+     *
      * <p>This method is useful for ensuring type compatibility while avoiding unnecessary wrapping.
      *
      * @param <T> the type of the first input to the consumer
@@ -4789,7 +4789,7 @@ public final class Fn {
 
     /**
      * Converts a java.util.function.Function to a Function, preserving the instance if already a Function.
-     * 
+     *
      * <p>This method is useful for ensuring type compatibility while avoiding unnecessary wrapping.
      *
      * @param <T> the type of the input to the function
@@ -4805,7 +4805,7 @@ public final class Fn {
 
     /**
      * Converts a java.util.function.BiFunction to a BiFunction, preserving the instance if already a BiFunction.
-     * 
+     *
      * <p>This method is useful for ensuring type compatibility while avoiding unnecessary wrapping.
      *
      * @param <T> the type of the first input to the function
@@ -4822,7 +4822,7 @@ public final class Fn {
 
     /**
      * Converts a java.util.function.UnaryOperator to a UnaryOperator, preserving the instance if already a UnaryOperator.
-     * 
+     *
      * <p>This method is useful for ensuring type compatibility while avoiding unnecessary wrapping.
      *
      * @param <T> the type of the operand and result of the operator
@@ -4837,7 +4837,7 @@ public final class Fn {
 
     /**
      * Converts a java.util.function.BinaryOperator to a BinaryOperator, preserving the instance if already a BinaryOperator.
-     * 
+     *
      * <p>This method is useful for ensuring type compatibility while avoiding unnecessary wrapping.
      *
      * @param <T> the type of the operands and result of the operator
@@ -4856,7 +4856,7 @@ public final class Fn {
      *
      * <p>This method serves as a shorthand convenience method that can help with type inference
      * in certain contexts. See {@link #p(Predicate)} for the full list of shorthand abbreviations.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Instead of explicitly typing:
@@ -4957,7 +4957,7 @@ public final class Fn {
      * // Create a predicate that checks if a string contains a specific substring
      * String searchText = "error";
      * Predicate<String> containsError = Fn.p(searchText, String::contains);
-     * 
+     *
      * boolean result = containsError.test("runtime error occurred");   // Returns true
      * boolean result2 = containsError.test("success");                 // Returns false
      * }</pre>
@@ -4988,7 +4988,7 @@ public final class Fn {
      * <pre>{@code
      * // Create a predicate that checks if a substring appears between two indices
      * String text = "error message";
-     * Predicate<Integer> containsErrorBetween = 
+     * Predicate<Integer> containsErrorBetween =
      *     Fn.p(text, 0, (str, start, end) -> str.substring(start, end).contains("error"));
      *
      * boolean result = containsErrorBetween.test(5);     // Returns true
@@ -5049,7 +5049,7 @@ public final class Fn {
      * <pre>{@code
      * // Create a bi-predicate that checks if a substring appears between two indices
      * String text = "error message";
-     * BiPredicate<Integer, Integer> containsErrorBetween = 
+     * BiPredicate<Integer, Integer> containsErrorBetween =
      *     Fn.p(text, (str, start, end) -> str.substring(start, end).contains("error"));
      *
      * boolean result = containsErrorBetween.test(0, 5);     // Returns true
@@ -5083,10 +5083,10 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Instead of explicitly typing:
-     * TriPredicate<String, Integer, Boolean> triPredicate = 
+     * TriPredicate<String, Integer, Boolean> triPredicate =
      *     (str, len, flag) -> flag && str.length() > len;
      * // You can use:
-     * var triPredicate = Fn.p((String str, Integer len, Boolean flag) -> 
+     * var triPredicate = Fn.p((String str, Integer len, Boolean flag) ->
      *     flag && str.length() > len);
      * }</pre>
      *
@@ -5175,7 +5175,7 @@ public final class Fn {
      * // Create a consumer that logs messages with a specific prefix and suffix
      * String prefix = "Log: ";
      * String suffix = " [end]";
-     * Consumer<String> logWithPrefixAndSuffix = Fn.c(prefix, suffix, (p, s, msg) -> 
+     * Consumer<String> logWithPrefixAndSuffix = Fn.c(prefix, suffix, (p, s, msg) ->
      *     System.out.println(p + msg + s));
      *
      * logWithPrefixAndSuffix.accept("Hello");   // Prints: Log: Hello [end]
@@ -5227,7 +5227,7 @@ public final class Fn {
 
     /**
      * Creates a bi-consumer that applies inputs along with a fixed value to the provided tri-consumer.
-     * 
+     *
      * <p>This method implements partial application by binding the first parameter of the tri-consumer
      * to a fixed value, resulting in a bi-consumer that only requires the second and third parameters.
      * This is useful for creating bi-consumers that incorporate a reference value in their logic.</p>
@@ -5251,7 +5251,7 @@ public final class Fn {
 
     /**
      * Returns the provided tri-consumer as is - a shorthand identity method for tri-consumers.
-     * 
+     *
      * <p>This method serves as a shorthand convenience method that can help with type inference
      * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
      * and {@code p()} for Predicate and BiPredicate.</p>
@@ -5280,7 +5280,7 @@ public final class Fn {
      * @param <R> the type of the result of the function
      * @param function the function to return
      * @return the function unchanged
-     * @see #f(Object, java.util.function.BiFunction) 
+     * @see #f(Object, java.util.function.BiFunction)
      * @see #f(Object, Object, TriFunction)
      */
     @Beta
@@ -5290,7 +5290,7 @@ public final class Fn {
 
     /**
      * Creates a function that applies the given argument to the provided bi-function.
-     * 
+     *
      * <p>This method implements partial application by binding the first parameter of the bi-function
      * to a fixed value, resulting in a function that only requires the second parameter. This is useful
      * for creating functions that incorporate a reference value in their computation logic.</p>
@@ -5314,7 +5314,7 @@ public final class Fn {
 
     /**
      * Creates a function that applies the given arguments to the provided tri-function.
-     * 
+     *
      * <p>This method implements partial application by binding the first two parameters of the tri-function
      * to fixed values, resulting in a function that only requires the third parameter. This is useful
      * for creating functions that incorporate two reference values in their computation logic.</p>
@@ -5329,7 +5329,7 @@ public final class Fn {
      * @return a function that applies the input as the third argument to the tri-function
      * @throws IllegalArgumentException if the triFunction is null
      * @see #f(Function)
-     * @see #f(Object, java.util.function.BiFunction) 
+     * @see #f(Object, java.util.function.BiFunction)
      */
     @Beta
     public static <A, B, T, R> Function<T, R> f(final A a, final B b, final TriFunction<A, B, T, R> triFunction) throws IllegalArgumentException {
@@ -5340,7 +5340,7 @@ public final class Fn {
 
     /**
      * Returns the provided bi-function as is - a shorthand identity method for bi-functions.
-     * 
+     *
      * <p>This method serves as a shorthand convenience method that can help with type inference
      * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
      * and {@code p()} for Predicate.</p>
@@ -5360,9 +5360,9 @@ public final class Fn {
 
     /**
      * Creates a bi-function that applies the given argument to the provided tri-function.
-     * 
+     *
      * <p>This method implements partial application by binding the first parameter of the tri-function
-     * to a fixed value, resulting in a bi-function that only requires the second and third parameters. 
+     * to a fixed value, resulting in a bi-function that only requires the second and third parameters.
      * This is useful for creating bi-functions that incorporate a reference value in their computation logic.</p>
      *
      * @param <A> the type of the fixed first argument to the tri-function
@@ -5385,7 +5385,7 @@ public final class Fn {
 
     /**
      * Returns the provided tri-function as is - a shorthand identity method for tri-functions.
-     * 
+     *
      * <p>This method serves as a shorthand convenience method that can help with type inference
      * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
      * and {@code p()} for Predicate and BiPredicate.</p>
@@ -5406,7 +5406,7 @@ public final class Fn {
 
     /**
      * Returns the provided unary operator as is - a shorthand identity method for unary operators.
-     * 
+     *
      * <p>This method serves as a shorthand convenience method that can help with type inference
      * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
      * and {@code p()} for Predicate.</p>
@@ -5426,7 +5426,7 @@ public final class Fn {
 
     /**
      * Returns the provided binary operator as is - a shorthand identity method for binary operators.
-     * 
+     *
      * <p>This method serves as a shorthand convenience method that can help with type inference
      * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
      * and {@code p()} for Predicate.</p>
@@ -5481,7 +5481,7 @@ public final class Fn {
 
     /**
      * Returns a supplier that wraps a throwable supplier, converting checked exceptions to runtime exceptions.
-     * 
+     *
      * <p>This method is useful for converting suppliers that throw checked exceptions into standard suppliers
      * that can be used in functional programming contexts without the need for explicit exception handling.</p>
      *
@@ -5506,7 +5506,7 @@ public final class Fn {
 
     /**
      * Creates a supplier that applies the given argument to the provided throwable function.
-     * 
+     *
      * <p>This method implements partial application by binding the parameter of the function
      * to a fixed value, resulting in a supplier that requires no parameters.
      * Any checked exceptions thrown by the function will be converted to runtime exceptions.</p>
@@ -5534,7 +5534,7 @@ public final class Fn {
 
     /**
      * Returns a predicate that wraps a throwable predicate, converting checked exceptions to runtime exceptions.
-     * 
+     *
      * <p>This method is useful for converting predicates that throw checked exceptions into standard predicates
      * that can be used in functional programming contexts without the need for explicit exception handling.</p>
      *
@@ -5560,9 +5560,9 @@ public final class Fn {
 
     /**
      * Creates a predicate that applies the given argument to the provided throwable bi-predicate.
-     * 
+     *
      * <p>This method implements partial application by binding the first parameter of the bi-predicate
-     * to a fixed value, resulting in a predicate that only requires the second parameter. 
+     * to a fixed value, resulting in a predicate that only requires the second parameter.
      * Any checked exceptions thrown by the bi-predicate will be converted to runtime exceptions.</p>
      *
      * @param <A> the type of the fixed first argument to the bi-predicate
@@ -5589,7 +5589,7 @@ public final class Fn {
 
     /**
      * Creates a predicate that applies inputs along with two fixed values to the provided throwable tri-predicate.
-     * 
+     *
      * <p>This method implements partial application by binding the first two parameters of the tri-predicate
      * to fixed values, resulting in a predicate that only requires the third parameter.
      * Any checked exceptions thrown by the tri-predicate will be converted to runtime exceptions.</p>
@@ -5621,7 +5621,7 @@ public final class Fn {
 
     /**
      * Creates a bi-predicate that safely wraps a throwable bi-predicate by converting any checked exceptions into runtime exceptions.
-     * 
+     *
      * <p>This utility method simplifies functional programming by allowing the use of operations that might throw checked exceptions
      * without explicit try-catch blocks. Any checked exception thrown by the bi-predicate will be caught and
      * wrapped in a runtime exception.</p>
@@ -5650,7 +5650,7 @@ public final class Fn {
 
     /**
      * Creates a bi-predicate that applies the given argument to the provided throwable tri-predicate.
-     * 
+     *
      * <p>This method implements partial application by binding the first parameter of the tri-predicate
      * to a fixed value, resulting in a bi-predicate that only requires the second and third parameters.
      * Any checked exceptions thrown by the tri-predicate will be converted to runtime exceptions.</p>
@@ -5681,7 +5681,7 @@ public final class Fn {
 
     /**
      * Creates a tri-predicate that safely wraps a throwable tri-predicate by converting any checked exceptions into runtime exceptions.
-     * 
+     *
      * <p>This utility method simplifies functional programming by allowing the use of operations that might throw checked exceptions
      * without explicit try-catch blocks. Any checked exception thrown by the tri-predicate will be caught and
      * wrapped in a runtime exception.</p>
@@ -5710,7 +5710,7 @@ public final class Fn {
 
     /**
      * Returns a consumer that wraps a throwable consumer, converting checked exceptions to runtime exceptions.
-     * 
+     *
      * <p>This method is useful for converting consumers that throw checked exceptions into standard consumers
      * that can be used in functional programming contexts without the need for explicit exception handling.</p>
      *
@@ -5736,7 +5736,7 @@ public final class Fn {
 
     /**
      * Creates a consumer that applies the given argument to the provided throwable bi-consumer.
-     * 
+     *
      * <p>This method implements partial application by binding the first parameter of the bi-consumer
      * to a fixed value, resulting in a consumer that only requires the second parameter.
      * Any checked exceptions thrown by the bi-consumer will be converted to runtime exceptions.</p>
@@ -5765,7 +5765,7 @@ public final class Fn {
 
     /**
      * Creates a consumer that applies inputs along with two fixed values to the provided throwable tri-consumer.
-     * 
+     *
      * <p>This method implements partial application by binding the first two parameters of the tri-consumer
      * to fixed values, resulting in a consumer that only requires the third parameter.
      * Any checked exceptions thrown by the tri-consumer will be converted to runtime exceptions.</p>
@@ -5797,7 +5797,7 @@ public final class Fn {
 
     /**
      * Returns a bi-consumer that wraps a throwable bi-consumer, converting checked exceptions to runtime exceptions.
-     * 
+     *
      * <p>This method is useful for converting bi-consumers that throw checked exceptions into standard bi-consumers
      * that can be used in functional programming contexts without the need for explicit exception handling.</p>
      *
@@ -5824,7 +5824,7 @@ public final class Fn {
 
     /**
      * Creates a bi-consumer that applies the given argument to the provided throwable tri-consumer.
-     * 
+     *
      * <p>This method implements partial application by binding the first parameter of the tri-consumer
      * to a fixed value, resulting in a bi-consumer that only requires the second and third parameters.
      * Any checked exceptions thrown by the tri-consumer will be converted to runtime exceptions.</p>
@@ -5855,7 +5855,7 @@ public final class Fn {
 
     /**
      * Returns a tri-consumer that wraps a throwable tri-consumer, converting checked exceptions to runtime exceptions.
-     * 
+     *
      * <p>This method is useful for converting tri-consumers that throw checked exceptions into standard tri-consumers
      * that can be used in functional programming contexts without the need for explicit exception handling.</p>
      *
@@ -5883,7 +5883,7 @@ public final class Fn {
 
     /**
      * Returns a function that wraps a throwable function, converting checked exceptions to runtime exceptions.
-     * 
+     *
      * <p>This method is useful for converting functions that throw checked exceptions into standard functions
      * that can be used in functional programming contexts without the need for explicit exception handling.</p>
      *
@@ -5910,7 +5910,7 @@ public final class Fn {
 
     /**
      * Creates a function that safely wraps a throwable function by returning a default value if the function throws an exception.
-     * 
+     *
      * <p>This utility method simplifies functional programming by allowing the use of operations that might throw checked exceptions
      * without explicit try-catch blocks. Any checked exception thrown by the function will be caught and the provided
      * default value will be returned instead.</p>
@@ -5941,7 +5941,7 @@ public final class Fn {
 
     /**
      * Creates a function that applies the given argument to the provided throwable bi-function.
-     * 
+     *
      * <p>This method implements partial application by binding the first parameter of the bi-function
      * to a fixed value, resulting in a function that only requires the second parameter.
      * Any checked exceptions thrown by the bi-function will be converted to runtime exceptions.</p>
@@ -5971,7 +5971,7 @@ public final class Fn {
 
     /**
      * Creates a function that applies inputs along with two fixed values to the provided throwable tri-function.
-     * 
+     *
      * <p>This method implements partial application by binding the first two parameters of the tri-function
      * to fixed values, resulting in a function that only requires the third parameter.
      * Any checked exceptions thrown by the tri-function will be converted to runtime exceptions.</p>
@@ -6004,7 +6004,7 @@ public final class Fn {
 
     /**
      * Returns a bi-function that wraps a throwable bi-function, converting checked exceptions to runtime exceptions.
-     * 
+     *
      * <p>This method is useful for converting bi-functions that throw checked exceptions into standard bi-functions
      * that can be used in functional programming contexts without the need for explicit exception handling.</p>
      *
@@ -6032,7 +6032,7 @@ public final class Fn {
 
     /**
      * Creates a bi-function that safely wraps a throwable bi-function by returning a default value if the function throws an exception.
-     * 
+     *
      * <p>This utility method simplifies functional programming by allowing the use of operations that might throw checked exceptions
      * without explicit try-catch blocks. Any checked exception thrown by the bi-function will be caught and the provided
      * default value will be returned instead.</p>
@@ -6063,7 +6063,7 @@ public final class Fn {
 
     /**
      * Creates a bi-function that applies the given argument to the provided throwable tri-function.
-     * 
+     *
      * <p>This method implements partial application by binding the first parameter of the tri-function
      * to a fixed value, resulting in a bi-function that only requires the second and third parameters.
      * Any checked exceptions thrown by the tri-function will be converted to runtime exceptions.</p>
@@ -6095,7 +6095,7 @@ public final class Fn {
 
     /**
      * Returns a tri-function that wraps a throwable tri-function, converting checked exceptions to runtime exceptions.
-     * 
+     *
      * <p>This method is useful for converting tri-functions that throw checked exceptions into standard tri-functions
      * that can be used in functional programming contexts without the need for explicit exception handling.</p>
      *
@@ -6125,7 +6125,7 @@ public final class Fn {
 
     /**
      * Creates a tri-function that safely wraps a throwable tri-function by returning a default value if the function throws an exception.
-     * 
+     *
      * <p>This utility method simplifies functional programming by allowing the use of operations that might throw checked exceptions
      * without explicit try-catch blocks. Any checked exception thrown by the tri-function will be caught and the provided
      * default value will be returned instead.</p>
@@ -6157,7 +6157,7 @@ public final class Fn {
 
     /**
      * Creates a synchronized predicate that safely wraps a standard predicate by ensuring all tests are performed within a synchronized block.
-     * 
+     *
      * <p>This utility method provides thread safety for predicates that might be accessed concurrently. Any test operation
      * will be performed while holding the lock on the provided mutex object, ensuring thread-safe evaluation of the predicate.</p>
      *
@@ -6183,7 +6183,7 @@ public final class Fn {
 
     /**
      * Creates a synchronized predicate that applies the given argument to the provided bi-predicate within a synchronized block.
-     * 
+     *
      * <p>This method combines partial application with synchronization. It binds the first parameter of the bi-predicate
      * to a fixed value and ensures thread-safe execution by synchronizing on the provided mutex object.</p>
      *
@@ -6194,7 +6194,7 @@ public final class Fn {
      * @param biPredicate the bi-predicate to apply with the fixed first argument
      * @return a synchronized predicate that applies the input as the second argument to the bi-predicate
      * @throws IllegalArgumentException if the mutex or biPredicate is null
-     * @see #sp(Object, java.util.function.Predicate) 
+     * @see #sp(Object, java.util.function.Predicate)
      */
     @Beta
     public static <A, T> Predicate<T> sp(final Object mutex, final A a, final java.util.function.BiPredicate<A, T> biPredicate)
@@ -6211,7 +6211,7 @@ public final class Fn {
 
     /**
      * Creates a synchronized bi-predicate that safely wraps a standard bi-predicate by ensuring all tests are performed within a synchronized block.
-     * 
+     *
      * <p>This utility method provides thread safety for bi-predicates that might be accessed concurrently. Any test operation
      * will be performed while holding the lock on the provided mutex object.</p>
      *
@@ -6237,7 +6237,7 @@ public final class Fn {
 
     /**
      * Creates a synchronized tri-predicate that safely wraps a tri-predicate by ensuring all tests are performed within a synchronized block.
-     * 
+     *
      * <p>This utility method provides thread safety for tri-predicates that might be accessed concurrently. Any test operation
      * will be performed while holding the lock on the provided mutex object.</p>
      *
@@ -6248,7 +6248,7 @@ public final class Fn {
      * @param triPredicate the tri-predicate to be wrapped with synchronization
      * @return a tri-predicate that delegates to the given tri-predicate within a synchronized block on the mutex
      * @throws IllegalArgumentException if the mutex or triPredicate is null
-     * @see #sp(Object, java.util.function.Predicate) 
+     * @see #sp(Object, java.util.function.Predicate)
      * @see #sp(Object, java.util.function.BiPredicate)
      */
     @Beta
@@ -6265,7 +6265,7 @@ public final class Fn {
 
     /**
      * Creates a synchronized consumer that safely wraps a standard consumer by ensuring all accept operations are performed within a synchronized block.
-     * 
+     *
      * <p>This utility method provides thread safety for consumers that might be accessed concurrently. Any accept operation
      * will be performed while holding the lock on the provided mutex object, ensuring thread-safe execution.</p>
      *
@@ -6291,7 +6291,7 @@ public final class Fn {
 
     /**
      * Creates a synchronized consumer that applies the given argument to the provided bi-consumer within a synchronized block.
-     * 
+     *
      * <p>This method combines partial application with synchronization. It binds the first parameter of the bi-consumer
      * to a fixed value and ensures thread-safe execution by synchronizing on the provided mutex object.</p>
      *
@@ -6318,7 +6318,7 @@ public final class Fn {
 
     /**
      * Creates a synchronized bi-consumer that safely wraps a standard bi-consumer by ensuring all accept operations are performed within a synchronized block.
-     * 
+     *
      * <p>This utility method provides thread safety for bi-consumers that might be accessed concurrently. Any accept operation
      * will be performed while holding the lock on the provided mutex object.</p>
      *
@@ -6344,7 +6344,7 @@ public final class Fn {
 
     /**
      * Creates a synchronized tri-consumer that safely wraps a tri-consumer by ensuring all accept operations are performed within a synchronized block.
-     * 
+     *
      * <p>This utility method provides thread safety for tri-consumers that might be accessed concurrently. Any accept operation
      * will be performed while holding the lock on the provided mutex object.</p>
      *
@@ -6352,11 +6352,11 @@ public final class Fn {
      * @param <B> the type of the second input to the tri-consumer
      * @param <C> the type of the third input to the tri-consumer
      * @param mutex the object to synchronize on when accepting values
-     * @param triConsumer the tri-consumer to be wrapped with synchronization  
+     * @param triConsumer the tri-consumer to be wrapped with synchronization
      * @return a tri-consumer that delegates to the given tri-consumer within a synchronized block on the mutex
      * @throws IllegalArgumentException if the mutex or triConsumer is null
-     * @see #sc(Object, java.util.function.Consumer) 
-     * @see #sc(Object, java.util.function.BiConsumer) 
+     * @see #sc(Object, java.util.function.Consumer)
+     * @see #sc(Object, java.util.function.BiConsumer)
      */
     @Beta
     public static <A, B, C> TriConsumer<A, B, C> sc(final Object mutex, final TriConsumer<A, B, C> triConsumer) throws IllegalArgumentException {
@@ -6372,7 +6372,7 @@ public final class Fn {
 
     /**
      * Creates a synchronized function that safely wraps a standard function by ensuring all apply operations are performed within a synchronized block.
-     * 
+     *
      * <p>This utility method provides thread safety for functions that might be accessed concurrently. Any apply operation
      * will be performed while holding the lock on the provided mutex object, ensuring thread-safe execution.</p>
      *
@@ -6399,7 +6399,7 @@ public final class Fn {
 
     /**
      * Creates a synchronized function that applies the given argument to the provided bi-function within a synchronized block.
-     * 
+     *
      * <p>This method combines partial application with synchronization. It binds the first parameter of the bi-function
      * to a fixed value and ensures thread-safe execution by synchronizing on the provided mutex object.</p>
      *
@@ -6411,7 +6411,7 @@ public final class Fn {
      * @param biFunction the bi-function to apply with the fixed first argument
      * @return a synchronized function that applies the input as the second argument to the bi-function
      * @throws IllegalArgumentException if the mutex or biFunction is null
-     * @see #sf(Object, java.util.function.Function) 
+     * @see #sf(Object, java.util.function.Function)
      */
     @Beta
     public static <A, T, R> Function<T, R> sf(final Object mutex, final A a, final java.util.function.BiFunction<A, T, R> biFunction)
@@ -6428,7 +6428,7 @@ public final class Fn {
 
     /**
      * Creates a synchronized bi-function that safely wraps a standard bi-function by ensuring all apply operations are performed within a synchronized block.
-     * 
+     *
      * <p>This utility method provides thread safety for bi-functions that might be accessed concurrently. Any apply operation
      * will be performed while holding the lock on the provided mutex object.</p>
      *
@@ -6439,7 +6439,7 @@ public final class Fn {
      * @param biFunction the bi-function to be wrapped with synchronization
      * @return a bi-function that delegates to the given bi-function within a synchronized block on the mutex
      * @throws IllegalArgumentException if the mutex or biFunction is null
-     * @see #sf(Object, java.util.function.Function) 
+     * @see #sf(Object, java.util.function.Function)
      * @see #sf(Object, TriFunction)
      */
     @Beta
@@ -6457,7 +6457,7 @@ public final class Fn {
 
     /**
      * Creates a synchronized tri-function that safely wraps a tri-function by ensuring all apply operations are performed within a synchronized block.
-     * 
+     *
      * <p>This utility method provides thread safety for tri-functions that might be accessed concurrently. Any apply operation
      * will be performed while holding the lock on the provided mutex object.</p>
      *
@@ -6468,8 +6468,8 @@ public final class Fn {
      * @param mutex the object to synchronize on when applying the function
      * @param triFunction the tri-function to be wrapped with synchronization
      * @return a tri-function that delegates to the given tri-function within a synchronized block on the mutex
-     * @see #sf(Object, java.util.function.Function) 
-     * @see #sf(Object, java.util.function.BiFunction) 
+     * @see #sf(Object, java.util.function.Function)
+     * @see #sf(Object, java.util.function.BiFunction)
      */
     @Beta
     public static <A, B, C, R> TriFunction<A, B, C, R> sf(final Object mutex, final TriFunction<A, B, C, R> triFunction) {
@@ -6485,7 +6485,7 @@ public final class Fn {
 
     /**
      * Converts a consumer to a function that returns void (null) after executing the consumer.
-     * 
+     *
      * <p>This method is useful when you need to use a consumer in a context that requires a function,
      * such as in stream map operations where you want side effects but also need to continue the stream.</p>
      *
@@ -6508,7 +6508,7 @@ public final class Fn {
 
     /**
      * Converts a consumer to a function that returns a specified value after executing the consumer.
-     * 
+     *
      * <p>This method is useful when you need to use a consumer in a context that requires a function
      * and want to return a specific value after the consumer executes, such as for chaining operations.</p>
      *
@@ -6518,8 +6518,8 @@ public final class Fn {
      * @param valueToReturn the value to return after the consumer executes
      * @return a function that executes the consumer and returns the specified value
      * @throws IllegalArgumentException if the action is null
-     * @see #c2f(java.util.function.Consumer) 
-     * @see #f2c(java.util.function.Function) 
+     * @see #c2f(java.util.function.Consumer)
+     * @see #f2c(java.util.function.Function)
      */
     @Beta
     public static <T, R> Function<T, R> c2f(final java.util.function.Consumer<? super T> action, final R valueToReturn) throws IllegalArgumentException {
@@ -6533,7 +6533,7 @@ public final class Fn {
 
     /**
      * Converts a bi-consumer to a bi-function that returns void (null) after executing the bi-consumer.
-     * 
+     *
      * <p>This method is useful when you need to use a bi-consumer in a context that requires a bi-function,
      * allowing you to perform side effects while maintaining functional composition.</p>
      *
@@ -6542,8 +6542,8 @@ public final class Fn {
      * @param action the bi-consumer to convert to a bi-function
      * @return a bi-function that executes the bi-consumer and returns null
      * @throws IllegalArgumentException if the action is null
-     * @see #c2f(java.util.function.BiConsumer, Object) 
-     * @see #f2c(java.util.function.Function) 
+     * @see #c2f(java.util.function.BiConsumer, Object)
+     * @see #f2c(java.util.function.Function)
      */
     @Beta
     public static <T, U> BiFunction<T, U, Void> c2f(final java.util.function.BiConsumer<? super T, ? super U> action) throws IllegalArgumentException {
@@ -6557,7 +6557,7 @@ public final class Fn {
 
     /**
      * Converts a bi-consumer to a bi-function that returns a specified value after executing the bi-consumer.
-     * 
+     *
      * <p>This method is useful when you need to use a bi-consumer in a context that requires a bi-function
      * and want to return a specific value after the bi-consumer executes.</p>
      *
@@ -6568,8 +6568,8 @@ public final class Fn {
      * @param valueToReturn the value to return after the bi-consumer executes
      * @return a bi-function that executes the bi-consumer and returns the specified value
      * @throws IllegalArgumentException if the action is null
-     * @see #c2f(java.util.function.Consumer) 
-     * @see #f2c(java.util.function.BiFunction) 
+     * @see #c2f(java.util.function.Consumer)
+     * @see #f2c(java.util.function.BiFunction)
      */
     @Beta
     public static <T, U, R> BiFunction<T, U, R> c2f(final java.util.function.BiConsumer<? super T, ? super U> action, final R valueToReturn)
@@ -6584,7 +6584,7 @@ public final class Fn {
 
     /**
      * Converts a tri-consumer to a tri-function that returns void (null) after executing the tri-consumer.
-     * 
+     *
      * <p>This method is useful when you need to use a tri-consumer in a context that requires a tri-function,
      * allowing you to perform side effects while maintaining functional composition.</p>
      *
@@ -6609,7 +6609,7 @@ public final class Fn {
 
     /**
      * Converts a tri-consumer to a tri-function that returns a specified value after executing the tri-consumer.
-     * 
+     *
      * <p>This method is useful when you need to use a tri-consumer in a context that requires a tri-function
      * and want to return a specific value after the tri-consumer executes.</p>
      *
@@ -6637,7 +6637,7 @@ public final class Fn {
 
     /**
      * Converts a function to a consumer by discarding the function's return value.
-     * 
+     *
      * <p>This method is useful when you have a function but need a consumer, and you don't care about
      * the return value. The function will still be executed for its side effects.</p>
      *
@@ -6645,7 +6645,7 @@ public final class Fn {
      * @param func the function to convert to a consumer
      * @return a consumer that executes the function and discards its return value
      * @throws IllegalArgumentException if the func is null
-     * @see #c2f(java.util.function.Consumer) 
+     * @see #c2f(java.util.function.Consumer)
      */
     @Beta
     public static <T> Consumer<T> f2c(final java.util.function.Function<? super T, ?> func) throws IllegalArgumentException {
@@ -6656,7 +6656,7 @@ public final class Fn {
 
     /**
      * Converts a bi-function to a bi-consumer by discarding the bi-function's return value.
-     * 
+     *
      * <p>This method is useful when you have a bi-function but need a bi-consumer, and you don't care about
      * the return value. The bi-function will still be executed for its side effects.</p>
      *
@@ -6665,7 +6665,7 @@ public final class Fn {
      * @param func the bi-function to convert to a bi-consumer
      * @return a bi-consumer that executes the bi-function and discards its return value
      * @throws IllegalArgumentException if the func is null
-     * @see #c2f(java.util.function.BiConsumer) 
+     * @see #c2f(java.util.function.BiConsumer)
      */
     @Beta
     public static <T, U> BiConsumer<T, U> f2c(final java.util.function.BiFunction<? super T, ? super U, ?> func) throws IllegalArgumentException {
@@ -6676,7 +6676,7 @@ public final class Fn {
 
     /**
      * Converts a tri-function to a tri-consumer by discarding the tri-function's return value.
-     * 
+     *
      * <p>This method is useful when you have a tri-function but need a tri-consumer, and you don't care about
      * the return value. The tri-function will still be executed for its side effects.</p>
      *
@@ -6827,7 +6827,7 @@ public final class Fn {
      * @param runnable the runnable to convert to a callable
      * @return a callable that executes the runnable and returns null
      * @throws IllegalArgumentException if the runnable is null
-     * @see #r2c(java.lang.Runnable, Object) 
+     * @see #r2c(java.lang.Runnable, Object)
      * @see #c2r(Callable)
      */
     public static Callable<Void> r2c(final java.lang.Runnable runnable) throws IllegalArgumentException {
@@ -6841,7 +6841,7 @@ public final class Fn {
 
     /**
      * Converts a runnable to a callable that returns a specified value.
-     * 
+     *
      * <p>This method is useful when you need to use a runnable in a context that requires a callable
      * and want to return a specific value after the runnable executes.</p>
      *
@@ -6850,7 +6850,7 @@ public final class Fn {
      * @param valueToReturn the value to return after the runnable executes
      * @return a callable that executes the runnable and returns the specified value
      * @throws IllegalArgumentException if the runnable is null
-     * @see #r2c(java.lang.Runnable) 
+     * @see #r2c(java.lang.Runnable)
      * @see #c2r(Callable)
      */
     public static <R> Callable<R> r2c(final java.lang.Runnable runnable, final R valueToReturn) throws IllegalArgumentException {
@@ -6874,7 +6874,7 @@ public final class Fn {
      * @param callable the callable to convert to a runnable
      * @return a runnable that executes the callable and discards its return value
      * @throws IllegalArgumentException if the callable is null
-     * @see #r2c(java.lang.Runnable) 
+     * @see #r2c(java.lang.Runnable)
      */
     public static <R> Runnable c2r(final Callable<R> callable) throws IllegalArgumentException {
         N.checkArgNotNull(callable);
@@ -6946,7 +6946,7 @@ public final class Fn {
      * @param callable the Java callable to convert to a runnable
      * @return a Java runnable that executes the callable and discards its return value
      * @throws IllegalArgumentException if the callable is null
-     * @see #r2c(java.lang.Runnable) 
+     * @see #r2c(java.lang.Runnable)
      */
     public static Runnable jc2r(final java.util.concurrent.Callable<?> callable) throws IllegalArgumentException {
         N.checkArgNotNull(callable);
@@ -6962,7 +6962,7 @@ public final class Fn {
 
     /**
      * Returns a BinaryOperator that always throws an exception when attempting to merge duplicate keys.
-     * 
+     *
      * <p>This operator is useful in collectors and map operations where duplicate keys should be
      * treated as an error condition rather than being silently merged.</p>
      *
@@ -7127,11 +7127,11 @@ public final class Fn {
 
     /**
      * Returns a stateful BiFunction that alternates between returning MergeResult.TAKE_FIRST and MergeResult.TAKE_SECOND.
-     * 
+     *
      * <p>This function maintains internal state and alternates its result with each call. It starts by returning
      * TAKE_FIRST, then TAKE_SECOND, then TAKE_FIRST again, and so on. This is useful for implementing
      * alternating merge strategies in stream operations.</p>
-     * 
+     *
      * <p><b>Warning:</b> This is a stateful function. Don't save or cache it for reuse, and don't use it in parallel streams.</p>
      *
      * @param <T> the type of the input elements
@@ -7166,7 +7166,7 @@ public final class Fn {
 
         /**
          * Returns a LongSupplier that supplies the current time in milliseconds.
-         * 
+         *
          * <p>This supplier returns the current time in milliseconds since the Unix epoch
          * (January 1, 1970, 00:00:00 GMT) each time it is called.</p>
          *

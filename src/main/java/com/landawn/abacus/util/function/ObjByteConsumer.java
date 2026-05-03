@@ -25,9 +25,6 @@ import com.landawn.abacus.util.Throwables;
  * <p>The interface extends {@code Throwables.ObjByteConsumer} with {@code RuntimeException} as the exception type,
  * making it suitable for use in contexts where checked exceptions are not required.
  *
- * <p>Note: Unlike some other primitive specializations, this interface does not provide default methods
- * for composition as the JDK does not provide a standard ObjByteConsumer interface.
- *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ObjByteConsumer<ByteBuffer> putByte = (buffer, value) -> buffer.put(value);
@@ -76,4 +73,23 @@ public interface ObjByteConsumer<T> extends Throwables.ObjByteConsumer<T, Runtim
     // @ai-ignore Obj* argument order convention - intentional: class name prefix determines parameter order. ObjByte* has object first, byte second. Do not suggest reordering.
     @Override
     void accept(T t, byte value);
+
+    /**
+     * Returns a composed {@code ObjByteConsumer} that performs, in sequence, this
+     * operation followed by the {@code after} operation. If performing either
+     * operation throws an exception, it is relayed to the caller of the
+     * composed operation. If performing this operation throws an exception,
+     * the {@code after} operation will not be performed.
+     *
+     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @return a composed {@code ObjByteConsumer} that performs in sequence this
+     *         operation followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
+     */
+    default ObjByteConsumer<T> andThen(final ObjByteConsumer<? super T> after) {
+        return (t, value) -> {
+            accept(t, value);
+            after.accept(t, value);
+        };
+    }
 }

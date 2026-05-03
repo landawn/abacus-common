@@ -1,11 +1,10 @@
 package com.landawn.abacus.util.stream;
 
-import com.landawn.abacus.TestBase;
-
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.Fnn;
 import com.landawn.abacus.util.N;

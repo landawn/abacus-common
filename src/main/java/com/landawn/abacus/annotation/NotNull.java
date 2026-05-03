@@ -27,29 +27,29 @@ import java.lang.annotation.Target;
  *
  * <p><b>When applied to parameters:</b></p>
  * <ul>
- *   <li>The parameter must not be {@code null} when the method/constructor is called.</li>
- *   <li>Passing {@code null} will likely result in {@code NullPointerException} or {@code IllegalArgumentException}.</li>
- *   <li>Callers should validate {@code non-null} before invoking.</li>
+ *   <li>The parameter must not be {@code null} when the method or constructor is called.</li>
+ *   <li>Passing {@code null} will likely result in a {@link NullPointerException} or {@link IllegalArgumentException}.</li>
+ *   <li>Callers should ensure a non-{@code null} value before invoking.</li>
  * </ul>
  *
  * <p><b>When applied to methods:</b></p>
  * <ul>
  *   <li>The method guarantees it will never return {@code null}.</li>
  *   <li>Callers can safely use the return value without {@code null} checks.</li>
- *   <li>The method must ensure a {@code non-null} return value in all code paths.</li>
+ *   <li>The method must ensure a non-{@code null} return value in all code paths.</li>
  * </ul>
  *
  * <p><b>When applied to constructors:</b></p>
  * <ul>
  *   <li>Documents null-safety requirements for constructor parameters.</li>
- *   <li>May indicate that the constructor validates against {@code null} inputs.</li>
+ *   <li>Indicates that the constructor validates against {@code null} inputs.</li>
  * </ul>
  *
  * <p><b>Tool support:</b></p>
  * <ul>
- *   <li>IDEs can warn about potential {@code null} pointer issues.</li>
+ *   <li>IDEs can warn about potential null pointer issues.</li>
  *   <li>Static analysis tools can verify null-safety contracts.</li>
- *   <li>Some frameworks may perform runtime {@code null} checks.</li>
+ *   <li>Some frameworks may perform runtime {@code null} checks based on this annotation.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>

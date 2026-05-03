@@ -24,22 +24,22 @@ import java.util.Set;
  * A generic Properties class that implements the Map interface.
  * This class provides a type-safe wrapper around a Map with additional convenience methods
  * for retrieving values with type conversion and default values.
- * 
+ *
  * <p>Unlike {@link java.util.Properties}, this class is generic and can store any type of objects,
  * not just strings. It also provides methods to retrieve values converted to specific types.</p>
- * 
+ *
  * <p>All arguments to all task methods must be {@code non-null}.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Properties<String, Object> props = new Properties<>();
  * props.set("timeout", 30);
  * props.set("url", "https://example.com");
- * 
+ *
  * // Type-safe retrieval
  * int timeout = props.get("timeout", Integer.class);
  * String url = props.get("url", String.class);
- * 
+ *
  * // With default values
  * boolean debug = props.getOrDefault("debug", false, Boolean.class);
  * }</pre>
@@ -121,7 +121,7 @@ public class Properties<K, V> implements Map<K, V> {
      *
      * int age = props.get("age", Integer.class);             // Returns 25
      * boolean active = props.get("active", Boolean.class);   // Returns true
-     * double salary = props.get("salary", Double.class);     // Returns 0.0 (default for double)
+     * Double salary = props.get("salary", Double.class);     // Returns null (default of Double wrapper)
      * }</pre>
      *
      * @param <T> the type to which the value should be converted
@@ -254,11 +254,11 @@ public class Properties<K, V> implements Map<K, V> {
      * <pre>{@code
      * Properties<String, Object> props1 = new Properties<>();
      * props1.put("a", 1);
-     * 
+     *
      * Map<String, Object> map = new HashMap<>();
      * map.put("b", 2);
      * map.put("c", 3);
-     * 
+     *
      * props1.putAll(map);   // props1 now contains: a=1, b=2, c=3
      * }</pre>
      *
@@ -276,7 +276,7 @@ public class Properties<K, V> implements Map<K, V> {
      * <pre>{@code
      * Properties<String, String> props = new Properties<>();
      * props.put("name", "John");
-     * 
+     *
      * String v1 = props.putIfAbsent("name", "Jane");   // Returns "John", doesn't change value
      * String v2 = props.putIfAbsent("age", "30");      // Returns null, adds age=30
      * }</pre>
@@ -322,7 +322,7 @@ public class Properties<K, V> implements Map<K, V> {
      * <pre>{@code
      * Properties<String, String> props = new Properties<>();
      * props.put("status", "active");
-     * 
+     *
      * boolean removed1 = props.remove("status", "inactive");   // Returns false
      * boolean removed2 = props.remove("status", "active");     // Returns true
      * }</pre>
@@ -352,7 +352,7 @@ public class Properties<K, V> implements Map<K, V> {
      * <pre>{@code
      * Properties<String, Integer> props = new Properties<>();
      * props.put("version", 1);
-     * 
+     *
      * Integer old = props.replace("version", 2);    // Returns 1
      * Integer none = props.replace("missing", 3);   // Returns null, no change
      * }</pre>
@@ -381,7 +381,7 @@ public class Properties<K, V> implements Map<K, V> {
      * <pre>{@code
      * Properties<String, String> props = new Properties<>();
      * props.put("status", "draft");
-     * 
+     *
      * boolean replaced1 = props.replace("status", "published", "approved");   // Returns false
      * boolean replaced2 = props.replace("status", "draft", "published");      // Returns true
      * }</pre>
@@ -411,7 +411,7 @@ public class Properties<K, V> implements Map<K, V> {
      * <pre>{@code
      * Properties<String, Object> props = new Properties<>();
      * props.put("name", "John");
-     * 
+     *
      * boolean hasName = props.containsKey("name");   // Returns true
      * boolean hasAge = props.containsKey("age");     // Returns false
      * }</pre>
@@ -432,7 +432,7 @@ public class Properties<K, V> implements Map<K, V> {
      * Properties<String, String> props = new Properties<>();
      * props.put("host", "localhost");
      * props.put("backup", "localhost");
-     * 
+     *
      * boolean hasLocalhost = props.containsValue("localhost");   // Returns true
      * }</pre>
      *
@@ -510,7 +510,7 @@ public class Properties<K, V> implements Map<K, V> {
      * <pre>{@code
      * Properties<String, Object> props = new Properties<>();
      * boolean empty1 = props.isEmpty();   // Returns true
-     * 
+     *
      * props.put("key", "value");
      * boolean empty2 = props.isEmpty();   // Returns false
      * }</pre>
@@ -565,7 +565,7 @@ public class Properties<K, V> implements Map<K, V> {
      * <pre>{@code
      * Properties<String, Object> original = new Properties<>();
      * original.put("key", "value");
-     * 
+     *
      * Properties<String, Object> copy = original.copy();
      * copy.put("key2", "value2");   // Doesn't affect original
      * }</pre>

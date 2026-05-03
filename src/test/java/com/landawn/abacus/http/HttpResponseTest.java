@@ -5,10 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -284,6 +286,46 @@ public class HttpResponseTest extends TestBase {
         byte[] body = response.body(byteArrayType);
         assertNotNull(body);
         assertArrayEquals(testBody.getBytes(StandardCharsets.UTF_8), body);
+    }
+
+    @Test
+    public void testBodyReturnsDefensiveCopies() {
+        byte[] rawBody = "test response body".getBytes(StandardCharsets.UTF_8);
+        HttpResponse response = new HttpResponse("http://example.com", 1000L, 2000L, 200, "OK", new HashMap<>(), rawBody, ContentFormat.NONE,
+                StandardCharsets.UTF_8);
+
+        rawBody[0] = 'X';
+        assertEquals("test response body", response.body(String.class));
+
+        byte[] body = response.body();
+        body[0] = 'Y';
+        assertEquals("test response body", response.body(String.class));
+
+        byte[] bodyByClass = response.body(byte[].class);
+        byte[] bodyByType = response.body(Type.of(byte[].class));
+
+        assertNotSame(bodyByClass, bodyByType);
+        assertArrayEquals("test response body".getBytes(StandardCharsets.UTF_8), bodyByClass);
+        assertArrayEquals("test response body".getBytes(StandardCharsets.UTF_8), bodyByType);
+    }
+
+    @Test
+    public void testHeadersReturnDefensiveCopy() {
+        Map<String, List<String>> headers = new HashMap<>();
+        List<String> contentTypes = new ArrayList<>();
+        contentTypes.add("application/json");
+        headers.put("Content-Type", contentTypes);
+
+        HttpResponse response = new HttpResponse("http://example.com", 1000L, 2000L, 200, "OK", headers, "test".getBytes(StandardCharsets.UTF_8),
+                ContentFormat.JSON, StandardCharsets.UTF_8);
+
+        contentTypes.set(0, "text/plain");
+        headers.put("X-Added", Collections.singletonList("new"));
+
+        assertEquals(1, response.headers().size());
+        assertEquals("application/json", response.headers().get("Content-Type").get(0));
+        assertThrows(UnsupportedOperationException.class, () -> response.headers().put("X-Test", Collections.singletonList("value")));
+        assertThrows(UnsupportedOperationException.class, () -> response.headers().get("Content-Type").add("text/xml"));
     }
 
     @Test

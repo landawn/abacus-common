@@ -20,11 +20,11 @@ import com.google.common.hash.Funnel;
 import com.google.common.hash.HashCode;
 
 /**
- * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
- * 
  * A hash function is a collision-averse pure function that maps an arbitrary block of
  * data to a fixed-size number called a hash code. This interface defines the contract
  * for all hash functions in this library.
+ *
+ * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
  *
  * <p><b>Core Properties</b></p>
  * <ul>
@@ -97,10 +97,10 @@ public interface HashFunction {
      * Creates a new {@link Hasher} instance for incremental hashing. The returned hasher
      * is stateful and collects data through its various put methods before generating
      * a final hash code.
-     * 
+     *
      * <p>Each hasher instance should be used for exactly one hash computation. After
      * calling {@link Hasher#hash()}, the hasher should not be used again.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashFunction hf = Hashing.sha256();
@@ -143,10 +143,10 @@ public interface HashFunction {
     /**
      * Computes the hash code for a single integer value. This is a convenience method
      * equivalent to {@code newHasher().putInt(input).hash()}.
-     * 
+     *
      * <p>The integer is interpreted in little-endian byte order. The implementation may
      * be optimized compared to using a Hasher.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode hash = Hashing.murmur3_32().hash(42);
@@ -160,10 +160,10 @@ public interface HashFunction {
     /**
      * Computes the hash code for a single long value. This is a convenience method
      * equivalent to {@code newHasher().putLong(input).hash()}.
-     * 
+     *
      * <p>The long is interpreted in little-endian byte order. The implementation may
      * be optimized compared to using a Hasher.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode hash = Hashing.sha256().hash(System.currentTimeMillis());
@@ -177,11 +177,11 @@ public interface HashFunction {
     /**
      * Computes the hash code for a byte array. This is a convenience method equivalent
      * to {@code newHasher().putBytes(input).hash()}.
-     * 
+     *
      * <p>This is one of the most commonly used methods, as many data types can be
      * converted to byte arrays. The implementation may be optimized compared to using
      * a Hasher.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data = "Hello, World!".getBytes(StandardCharsets.UTF_8);
@@ -219,15 +219,15 @@ public interface HashFunction {
     /**
      * Computes the hash code for a character sequence without encoding. This is a
      * convenience method equivalent to {@code newHasher().putUnencodedChars(input).hash()}.
-     * 
+     *
      * <p>Each character is hashed directly by hashing its low byte followed by its high
      * byte (little-endian order). No character encoding is performed, making this method
      * fast and consistent across Java versions.
-     * 
+     *
      * <p><b>Warning:</b> This method produces different output than most other languages
      * when hashing strings. For cross-language compatibility, use {@link #hash(CharSequence, Charset)}
      * with UTF-8 encoding instead.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode hash = Hashing.murmur3_128().hash("fast hash");
@@ -242,11 +242,11 @@ public interface HashFunction {
      * Computes the hash code for a character sequence using the specified character
      * encoding. This is a convenience method equivalent to
      * {@code newHasher().putString(input, charset).hash()}.
-     * 
+     *
      * <p>The characters are first encoded to bytes using the specified charset, then
      * those bytes are hashed. This method is useful for cross-language compatibility
      * as it produces consistent results when the same encoding is used.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String text = "Hello 世界";
@@ -293,7 +293,7 @@ public interface HashFunction {
     /**
      * Returns the number of bits in each hash code produced by this hash function.
      * This value is constant for a given hash function instance.
-     * 
+     *
      * <p>Common bit lengths include:
      * <ul>
      *   <li>32 bits: CRC32, Adler32, Murmur3_32</li>
@@ -303,7 +303,7 @@ public interface HashFunction {
      *   <li>256 bits: SHA-256</li>
      *   <li>512 bits: SHA-512</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashFunction sha256 = Hashing.sha256();

@@ -95,8 +95,8 @@ public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeExcep
      * boolean result = sumGreaterThan100.test(50L, 60L);   // Returns true
      * }</pre>
      *
-     * @param a the first input argument
-     * @param b the second input argument
+     * @param a the first {@code long} input argument
+     * @param b the second {@code long} input argument
      * @return {@code true} if the input arguments match the predicate, {@code false} otherwise
      */
     @Override
@@ -136,6 +136,7 @@ public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeExcep
      *              Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default LongBiPredicate and(final LongBiPredicate other) {
         return (a, b) -> test(a, b) && other.test(a, b);
@@ -163,6 +164,7 @@ public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeExcep
      *              Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default LongBiPredicate or(final LongBiPredicate other) {
         return (a, b) -> test(a, b) || other.test(a, b);

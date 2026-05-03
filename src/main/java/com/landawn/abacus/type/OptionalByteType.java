@@ -18,17 +18,18 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.u.OptionalByte;
 
 /**
- * Type handler for {@link OptionalByte} objects, providing serialization, deserialization,
- * and database interaction capabilities for optional byte values. This handler manages
- * the conversion between database byte/numeric values and OptionalByte wrapper objects.
+ * Type handler for {@link OptionalByte} objects from the {@code com.landawn.abacus.util.u} package,
+ * providing serialization, deserialization, and database interaction capabilities for optional byte values.
+ * Note: this handles the abacus-specific {@code OptionalByte}, which has no direct JDK equivalent.
+ * This handler manages the conversion between database byte/numeric values and {@link OptionalByte} wrapper objects.
  */
 public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
 
     public static final String OPTIONAL_BYTE = OptionalByte.class.getSimpleName();
 
     /**
-     * Constructs an OptionalByteType.
-     * This constructor initializes the type handler for OptionalByte objects.
+     * Package-private constructor for OptionalByteType.
+     * This constructor is called by the TypeFactory to create OptionalByte type instances.
      */
     protected OptionalByteType() {
         super(OPTIONAL_BYTE);

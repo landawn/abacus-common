@@ -15,6 +15,7 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
+import java.util.List;
 
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharList;
@@ -22,9 +23,11 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for CharList objects.
- * Provides functionality for serialization and deserialization of CharList instances
- * by delegating to the underlying char array type handler.
+ * Type handler for {@link CharList} objects, which is a primitive-backed list of {@code char} values.
+ * Provides serialization and deserialization of {@link CharList} instances by delegating to the
+ * underlying {@code char[]} array type handler.
+ * String representations use the format {@code ['a', 'b', 'c']} with single-quoted, comma-separated
+ * characters enclosed in square brackets.
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveCharListType extends AbstractPrimitiveListType<CharList> {
@@ -34,8 +37,13 @@ public final class PrimitiveCharListType extends AbstractPrimitiveListType<CharL
     private final Type<char[]> arrayType = Type.of(char[].class);
 
     private final Type<Character> elementType = Type.of(char.class);
-    private final Type<Character>[] parameterTypes = new Type[] { elementType };
+    private final List<Type<?>> parameterTypes = List.of(elementType);
 
+    /**
+     * Constructs a new PrimitiveCharListType instance.
+     * This constructor is protected to allow subclassing while maintaining controlled instantiation
+     * through the TypeFactory.
+     */
     protected PrimitiveCharListType() {
         super(CHAR_LIST);
     }
@@ -63,11 +71,11 @@ public final class PrimitiveCharListType extends AbstractPrimitiveListType<CharL
     /**
      * Returns the parameter types associated with this list type.
      *
-     * @return an array containing the Character Type that describes the elements of this list type
+     * @return an immutable list containing the Character Type that describes the elements of this list type
      * @see #elementType()
      */
     @Override
-    public Type<Character>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 

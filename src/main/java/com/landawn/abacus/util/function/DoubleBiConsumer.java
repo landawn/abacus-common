@@ -65,8 +65,9 @@ public interface DoubleBiConsumer extends Throwables.DoubleBiConsumer<RuntimeExc
      * combined.accept(1.5, 2.5);   // Logs then validates
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation
      * @return a composed {@code DoubleBiConsumer} that performs in sequence this operation followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     default DoubleBiConsumer andThen(final DoubleBiConsumer after) {
         return (a, b) -> {

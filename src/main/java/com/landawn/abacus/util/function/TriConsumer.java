@@ -77,8 +77,9 @@ public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, Ru
      * // Notify: Error occurred
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation
      * @return a composed {@code TriConsumer} that performs in sequence this operation followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     default TriConsumer<A, B, C> andThen(final TriConsumer<? super A, ? super B, ? super C> after) {
         return (a, b, c) -> {

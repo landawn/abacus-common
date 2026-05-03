@@ -1,7 +1,5 @@
 package com.landawn.abacus.util;
 
-import com.landawn.abacus.TestBase;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -32,6 +30,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import com.landawn.abacus.TestBase;
 
 public class ClazzTest extends TestBase {
 

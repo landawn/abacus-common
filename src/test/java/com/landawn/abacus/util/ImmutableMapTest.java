@@ -419,7 +419,7 @@ public class ImmutableMapTest extends TestBase {
         ImmutableMap<String, Integer> map = ImmutableMap.<String, Integer> builder()
                 .put("one", 1)
                 .put("two", 2)
-                .putAll(CommonUtil.asMap("three", 3, "four", 4))
+                .putAll(N.asMap("three", 3, "four", 4))
                 .build();
 
         Assertions.assertEquals(4, map.size());

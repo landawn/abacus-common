@@ -27,6 +27,7 @@ import java.io.StringWriter;
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +38,8 @@ import com.landawn.abacus.util.Tuple.Tuple8;
 
 public class Tuple8TypeTest extends TestBase {
 
-    private final Tuple8Type type = new Tuple8Type("String", "String", "String", "String", "String", "String", "String", "String");
+    private final Tuple8Type<String, String, String, String, String, String, String, String> type = new Tuple8Type("String", "String", "String", "String",
+            "String", "String", "String", "String");
 
     @Test
     public void test_declaringName() {
@@ -53,9 +55,9 @@ public class Tuple8TypeTest extends TestBase {
 
     @Test
     public void test_parameterTypes() {
-        Type<?>[] params = type.parameterTypes();
+        List<Type<?>> params = type.parameterTypes();
         assertNotNull(params);
-        assertEquals(8, params.length);
+        assertEquals(8, params.size());
     }
 
     @Test
@@ -92,8 +94,7 @@ public class Tuple8TypeTest extends TestBase {
         Tuple8<String, String, String, String, String, String, String, String> t = Tuple.of("a", "b", "c", "d", "e", "f", "g", "h");
         String json = type.stringOf(t);
         @SuppressWarnings("unchecked")
-        Tuple8<String, String, String, String, String, String, String, String> result = (Tuple8<String, String, String, String, String, String, String, String>) type
-                .valueOf(json);
+        Tuple8<String, String, String, String, String, String, String, String> result = type.valueOf(json);
         assertNotNull(result);
         assertEquals("a", result._1);
         assertEquals("h", result._8);

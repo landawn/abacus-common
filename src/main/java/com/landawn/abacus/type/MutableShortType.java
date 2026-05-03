@@ -19,32 +19,29 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for {@link MutableShort} objects, providing serialization, deserialization,
- * and database interaction capabilities for mutable short wrapper objects.
+ * Type handler for {@link com.landawn.abacus.util.MutableShort} objects, providing
+ * serialization, deserialization, and database interaction capabilities for
+ * mutable short wrapper objects.
+ *
+ * @see com.landawn.abacus.util.MutableShort
+ * @see NumberType
  */
 public class MutableShortType extends NumberType<MutableShort> {
 
     public static final String MUTABLE_SHORT = MutableShort.class.getSimpleName();
 
     /**
-     * Constructs a MutableShortType.
-     * This constructor initializes the type handler for MutableShort objects.
+     * Package-private constructor for MutableShortType.
+     * This constructor is called by subclasses to create MutableShort type instances.
      */
     protected MutableShortType() {
         super(MUTABLE_SHORT);
     }
 
     /**
-     * Returns the Java class type that this type handler manages.
+     * Returns the {@link Class} object representing the {@link MutableShort} type.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableShort> type = TypeFactory.getType(MutableShort.class);
-     * Class<MutableShort> clazz = type.javaType();
-     * // clazz equals MutableShort.class
-     * }</pre>
-     *
-     * @return the {@link MutableShort} class object
+     * @return {@code MutableShort.class}
      */
     @Override
     public Class<MutableShort> javaType() {
@@ -52,21 +49,10 @@ public class MutableShortType extends NumberType<MutableShort> {
     }
 
     /**
-     * Converts a {@link MutableShort} object to its string representation.
+     * Converts a {@link MutableShort} object to its decimal string representation.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableShort> type = TypeFactory.getType(MutableShort.class);
-     * MutableShort ms = MutableShort.of((short) 12345);
-     * String str = type.stringOf(ms);
-     * // str equals "12345"
-     *
-     * String nullStr = type.stringOf(null);
-     * // nullStr equals null
-     * }</pre>
-     *
-     * @param x the MutableShort object to convert
-     * @return the string representation of the short value, or {@code null} if the input is null
+     * @param x the {@code MutableShort} object to convert, may be {@code null}
+     * @return the string representation of the short value, or {@code null} if the input is {@code null}
      */
     @Override
     public String stringOf(final MutableShort x) {
@@ -74,23 +60,11 @@ public class MutableShortType extends NumberType<MutableShort> {
     }
 
     /**
-     * Converts a string representation to a {@link MutableShort} object.
+     * Parses a string to create a {@link MutableShort} object.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableShort> type = TypeFactory.getType(MutableShort.class);
-     * MutableShort ms = type.valueOf("12345");
-     * // ms.value() equals (short) 12345
-     *
-     * MutableShort nullMs = type.valueOf(null);
-     * // nullMs equals null
-     *
-     * MutableShort emptyMs = type.valueOf("");
-     * // emptyMs equals null
-     * }</pre>
-     *
-     * @param str the string to convert
-     * @return a MutableShort containing the parsed short value, or {@code null} if the input string is empty or null
+     * @param str the string to parse, may be {@code null} or empty
+     * @return a {@code MutableShort} containing the parsed short value,
+     *         or {@code null} if the input is {@code null} or empty
      * @throws NumberFormatException if the string cannot be parsed as a short
      */
     @Override
@@ -99,22 +73,15 @@ public class MutableShortType extends NumberType<MutableShort> {
     }
 
     /**
-     * Retrieves a {@link MutableShort} value from a ResultSet at the specified column index.
+     * Retrieves a short value from the specified column in the {@link ResultSet}
+     * and wraps it in a {@link MutableShort}.
+     * Returns {@code null} if the column value is SQL {@code NULL} (detected via {@link ResultSet#wasNull()}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableShort> type = TypeFactory.getType(MutableShort.class);
-     * ResultSet rs = statement.executeQuery("SELECT age FROM users");
-     * if (rs.next()) {
-     *     MutableShort age = type.get(rs, 1);
-     *     // age contains the short value from the first column
-     * }
-     * }</pre>
-     *
-     * @param rs the ResultSet to read from
-     * @param columnIndex the column index (1-based) to retrieve the value from
-     * @return a MutableShort containing the short value from the ResultSet
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnIndex the 1-based index of the column to retrieve
+     * @return a {@code MutableShort} wrapping the retrieved value,
+     *         or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public MutableShort get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -124,22 +91,15 @@ public class MutableShortType extends NumberType<MutableShort> {
     }
 
     /**
-     * Retrieves a {@link MutableShort} value from a ResultSet using the specified column label.
+     * Retrieves a short value from the specified column in the {@link ResultSet}
+     * and wraps it in a {@link MutableShort}.
+     * Returns {@code null} if the column value is SQL {@code NULL} (detected via {@link ResultSet#wasNull()}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableShort> type = TypeFactory.getType(MutableShort.class);
-     * ResultSet rs = statement.executeQuery("SELECT age FROM users");
-     * if (rs.next()) {
-     *     MutableShort age = type.get(rs, "age");
-     *     // age contains the short value from the "age" column
-     * }
-     * }</pre>
-     *
-     * @param rs the ResultSet to read from
-     * @param columnName the label for the column specified with the SQL AS clause
-     * @return a MutableShort containing the short value from the ResultSet
-     * @throws SQLException if a database access error occurs or the columnName is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnName the label of the column to retrieve (as specified in the SQL AS clause)
+     * @return a {@code MutableShort} wrapping the retrieved value,
+     *         or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
     @Override
     public MutableShort get(final ResultSet rs, final String columnName) throws SQLException {
@@ -149,25 +109,14 @@ public class MutableShortType extends NumberType<MutableShort> {
     }
 
     /**
-     * Sets a parameter in a PreparedStatement to the value of a {@link MutableShort}.
+     * Sets a {@link MutableShort} parameter in a {@link PreparedStatement} at the specified index.
+     * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#SMALLINT}) is set;
+     * otherwise the wrapped short value is stored.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableShort> type = TypeFactory.getType(MutableShort.class);
-     * PreparedStatement stmt = conn.prepareStatement("UPDATE users SET age = ? WHERE id = ?");
-     * MutableShort age = MutableShort.of((short) 25);
-     * type.set(stmt, 1, age);
-     * stmt.executeUpdate();
-     *
-     * // For null value
-     * type.set(stmt, 1, null);
-     * // This sets the parameter to SQL NULL
-     * }</pre>
-     *
-     * @param stmt the PreparedStatement to set the parameter on
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the MutableShort value to set, or {@code null} (SQL NULL will be set)
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param columnIndex the 1-based index of the parameter to set
+     * @param x the {@code MutableShort} value to set, or {@code null} to set SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final MutableShort x) throws SQLException {
@@ -179,25 +128,14 @@ public class MutableShortType extends NumberType<MutableShort> {
     }
 
     /**
-     * Sets a named parameter in a CallableStatement to the value of a {@link MutableShort}.
+     * Sets a {@link MutableShort} parameter in a {@link CallableStatement} by name.
+     * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#SMALLINT}) is set;
+     * otherwise the wrapped short value is stored.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableShort> type = TypeFactory.getType(MutableShort.class);
-     * CallableStatement cstmt = conn.prepareCall("{call update_user(?, ?)}");
-     * MutableShort age = MutableShort.of((short) 25);
-     * type.set(cstmt, "age", age);
-     * cstmt.execute();
-     *
-     * // For null value
-     * type.set(cstmt, "age", null);
-     * // This sets the parameter to SQL NULL
-     * }</pre>
-     *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
-     * @param x the MutableShort value to set, or {@code null} (SQL NULL will be set)
-     * @throws SQLException if a database access error occurs or the parameterName is invalid
+     * @param x the {@code MutableShort} value to set, or {@code null} to set SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final MutableShort x) throws SQLException {
@@ -209,23 +147,11 @@ public class MutableShortType extends NumberType<MutableShort> {
     }
 
     /**
-     * Appends the string representation of a {@link MutableShort} to an Appendable.
+     * Appends the decimal string representation of a {@link MutableShort} to an {@link Appendable}.
+     * Writes {@code "null"} when {@code x} is {@code null}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableShort> type = TypeFactory.getType(MutableShort.class);
-     * StringBuilder sb = new StringBuilder();
-     * MutableShort ms = MutableShort.of((short) 32767);
-     * type.appendTo(sb, ms);
-     * // sb.toString() equals "32767"
-     *
-     * StringBuilder sb2 = new StringBuilder();
-     * type.appendTo(sb2, null);
-     * // sb2.toString() equals "null"
-     * }</pre>
-     *
-     * @param appendable the Appendable to write to
-     * @param x the MutableShort value to append
+     * @param appendable the target to write to
+     * @param x the {@code MutableShort} to append, may be {@code null}
      * @throws IOException if an I/O error occurs during the append operation
      */
     @Override
@@ -238,24 +164,13 @@ public class MutableShortType extends NumberType<MutableShort> {
     }
 
     /**
-     * Writes the character representation of a {@link MutableShort} to a CharacterWriter.
-     * This method is typically used for JSON/XML serialization.
+     * Writes the short value of a {@link MutableShort} to a {@link CharacterWriter}.
+     * Writes the {@code NULL_CHAR_ARRAY} when {@code x} is {@code null}.
+     * The {@code config} parameter is not used for short values.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableShort> type = TypeFactory.getType(MutableShort.class);
-     * CharacterWriter writer = new CharacterWriter();
-     * MutableShort ms = MutableShort.of((short) 12345);
-     * type.writeCharacter(writer, ms, null);
-     * // Writes: 12345
-     *
-     * type.writeCharacter(writer, null, null);
-     * // Writes: null
-     * }</pre>
-     *
-     * @param writer the CharacterWriter to write to
-     * @param x the MutableShort value to write
-     * @param config the serialization configuration
+     * @param writer the {@code CharacterWriter} to write to
+     * @param x the {@code MutableShort} to write, may be {@code null}
+     * @param config the serialization configuration (unused for short values)
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override

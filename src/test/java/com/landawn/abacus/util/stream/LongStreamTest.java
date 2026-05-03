@@ -255,34 +255,59 @@ public class LongStreamTest extends TestBase {
     @Test
     public void testFlatmap() {
         LongStream stream = LongStream.of(1L, 2L, 3L);
-        long[] result = stream.flatmap(n -> new long[] { n, n + 10 }).toArray();
+        long[] result = stream.flatMapArray(n -> new long[] { n, n + 10 }).toArray();
         assertArrayEquals(new long[] { 1L, 11L, 2L, 12L, 3L, 13L }, result);
     }
 
     @Test
+    public void testFlatmapCollection() {
+        // multi
+        assertArrayEquals(new long[] { 1L, 10L, 2L, 20L }, LongStream.of(1L, 2L).flatmap(n -> Arrays.asList(n, n * 10L)).toArray());
+
+        // single
+        assertArrayEquals(new long[] { 7L, 9L }, LongStream.of(7L).flatmap(n -> Arrays.asList(n, 9L)).toArray());
+
+        // empty stream
+        assertArrayEquals(new long[] {}, LongStream.empty().flatmap(n -> Arrays.asList((Long) n)).toArray());
+
+        // empty collection
+        assertArrayEquals(new long[] {}, LongStream.of(1L, 2L).flatmap(n -> java.util.Collections.<Long> emptyList()).toArray());
+
+        // null collection
+        assertArrayEquals(new long[] {}, LongStream.of(1L).flatmap(n -> (java.util.Collection<Long>) null).toArray());
+
+        // null elements -> 0L
+        assertArrayEquals(new long[] { 0L, 5L, 0L }, LongStream.of(1L).flatmap(n -> Arrays.asList((Long) null, 5L, (Long) null)).toArray());
+
+        assertEquals(4, LongStream.of(1L, 2L).flatmap(n -> Arrays.asList((Long) null, n)).count());
+    }
+
+    @Test
     public void testFlatmapArray() {
-        assertEquals(9, LongStream.of(1, 2, 3).flatmap(e -> new long[] { e, e + 10, e + 20 }).count());
-        assertEquals(8, LongStream.of(1, 2, 3).flatmap(e -> new long[] { e, e + 10, e + 20 }).skip(1).count());
-        assertArrayEquals(new long[] { 1, 11, 21, 2, 12, 22, 3, 13, 23 }, LongStream.of(1, 2, 3).flatmap(e -> new long[] { e, e + 10, e + 20 }).toArray());
-        assertArrayEquals(new long[] { 11, 21, 2, 12, 22, 3, 13, 23 }, LongStream.of(1, 2, 3).flatmap(e -> new long[] { e, e + 10, e + 20 }).skip(1).toArray());
-        assertEquals(Arrays.asList(1L, 11L, 21L, 2L, 12L, 22L, 3L, 13L, 23L), LongStream.of(1, 2, 3).flatmap(e -> new long[] { e, e + 10, e + 20 }).toList());
-        assertEquals(Arrays.asList(11L, 21L, 2L, 12L, 22L, 3L, 13L, 23L),
-                LongStream.of(1, 2, 3).flatmap(e -> new long[] { e, e + 10, e + 20 }).skip(1).toList());
-        assertEquals(9, LongStream.of(1, 2, 3).map(e -> e).flatmap(e -> new long[] { e, e + 10, e + 20 }).count());
-        assertEquals(8, LongStream.of(1, 2, 3).map(e -> e).flatmap(e -> new long[] { e, e + 10, e + 20 }).skip(1).count());
-        assertArrayEquals(new long[] { 1, 11, 21, 2, 12, 22, 3, 13, 23 },
-                LongStream.of(1, 2, 3).map(e -> e).flatmap(e -> new long[] { e, e + 10, e + 20 }).toArray());
+        assertEquals(9, LongStream.of(1, 2, 3).flatMapArray(e -> new long[] { e, e + 10, e + 20 }).count());
+        assertEquals(8, LongStream.of(1, 2, 3).flatMapArray(e -> new long[] { e, e + 10, e + 20 }).skip(1).count());
+        assertArrayEquals(new long[] { 1, 11, 21, 2, 12, 22, 3, 13, 23 }, LongStream.of(1, 2, 3).flatMapArray(e -> new long[] { e, e + 10, e + 20 }).toArray());
         assertArrayEquals(new long[] { 11, 21, 2, 12, 22, 3, 13, 23 },
-                LongStream.of(1, 2, 3).map(e -> e).flatmap(e -> new long[] { e, e + 10, e + 20 }).skip(1).toArray());
+                LongStream.of(1, 2, 3).flatMapArray(e -> new long[] { e, e + 10, e + 20 }).skip(1).toArray());
         assertEquals(Arrays.asList(1L, 11L, 21L, 2L, 12L, 22L, 3L, 13L, 23L),
-                LongStream.of(1, 2, 3).map(e -> e).flatmap(e -> new long[] { e, e + 10, e + 20 }).toList());
+                LongStream.of(1, 2, 3).flatMapArray(e -> new long[] { e, e + 10, e + 20 }).toList());
         assertEquals(Arrays.asList(11L, 21L, 2L, 12L, 22L, 3L, 13L, 23L),
-                LongStream.of(1, 2, 3).map(e -> e).flatmap(e -> new long[] { e, e + 10, e + 20 }).skip(1).toList());
+                LongStream.of(1, 2, 3).flatMapArray(e -> new long[] { e, e + 10, e + 20 }).skip(1).toList());
+        assertEquals(9, LongStream.of(1, 2, 3).map(e -> e).flatMapArray(e -> new long[] { e, e + 10, e + 20 }).count());
+        assertEquals(8, LongStream.of(1, 2, 3).map(e -> e).flatMapArray(e -> new long[] { e, e + 10, e + 20 }).skip(1).count());
+        assertArrayEquals(new long[] { 1, 11, 21, 2, 12, 22, 3, 13, 23 },
+                LongStream.of(1, 2, 3).map(e -> e).flatMapArray(e -> new long[] { e, e + 10, e + 20 }).toArray());
+        assertArrayEquals(new long[] { 11, 21, 2, 12, 22, 3, 13, 23 },
+                LongStream.of(1, 2, 3).map(e -> e).flatMapArray(e -> new long[] { e, e + 10, e + 20 }).skip(1).toArray());
+        assertEquals(Arrays.asList(1L, 11L, 21L, 2L, 12L, 22L, 3L, 13L, 23L),
+                LongStream.of(1, 2, 3).map(e -> e).flatMapArray(e -> new long[] { e, e + 10, e + 20 }).toList());
+        assertEquals(Arrays.asList(11L, 21L, 2L, 12L, 22L, 3L, 13L, 23L),
+                LongStream.of(1, 2, 3).map(e -> e).flatMapArray(e -> new long[] { e, e + 10, e + 20 }).skip(1).toList());
     }
 
     @Test
     public void testFlatmap_HappyPath2() {
-        long[] result = LongStream.of(1, 2, 3).flatmap(i -> new long[] { i, i * 10 }).toArray();
+        long[] result = LongStream.of(1, 2, 3).flatMapArray(i -> new long[] { i, i * 10 }).toArray();
         assertArrayEquals(new long[] { 1, 10, 2, 20, 3, 30 }, result);
     }
 
@@ -375,7 +400,7 @@ public class LongStreamTest extends TestBase {
 
     @Test
     public void testFlatMapToFloat_HappyPath() {
-        float[] result = LongStream.of(1, 2).flatMapToFloat(l -> FloatStream.of((float) l, (float) (l * 10))).toArray();
+        float[] result = LongStream.of(1, 2).flatMapToFloat(l -> FloatStream.of(l, l * 10)).toArray();
         assertEquals(4, result.length);
         assertEquals(1.0f, result[0], 0.001f);
         assertEquals(10.0f, result[1], 0.001f);
@@ -1321,7 +1346,7 @@ public class LongStreamTest extends TestBase {
     // TODO: mapToDouble(LongToDoubleFunction) is abstract - tested via concrete implementations above
     // TODO: mapToObj(LongFunction) is abstract - tested via concrete implementations above
     // TODO: flatMap(LongFunction) is abstract - tested via concrete implementations above
-    // TODO: flatmap(LongFunction<long[]>) is abstract - tested via concrete implementations above
+    // TODO: flatMapArray(LongFunction<long[]>) is abstract - tested via concrete implementations above
     // TODO: flatMapToInt(LongFunction) is abstract - tested via concrete implementations above
     // TODO: flatMapToFloat(LongFunction) is abstract - tested via concrete implementations above
     // TODO: flatMapToDouble(LongFunction) is abstract - tested via concrete implementations above
@@ -4400,7 +4425,7 @@ public class LongStreamTest extends TestBase {
 
     @Test
     public void testMergeCollection_Empty() {
-        assertEquals(0L, LongStream.merge(new ArrayList<LongStream>(), (x, y) -> MergeResult.TAKE_FIRST).count());
+        assertEquals(0L, LongStream.merge(new ArrayList<>(), (x, y) -> MergeResult.TAKE_FIRST).count());
     }
 
     @Test

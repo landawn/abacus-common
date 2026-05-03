@@ -332,7 +332,7 @@ public class ParallelArrayShortStreamTest extends TestBase {
     public void testFlatMapShortArray() {
         ShortStream stream = createShortStream(new short[] { 1, 2 });
         ShortFunction<short[]> mapper = s -> new short[] { s, (short) (s + 1) };
-        List<Short> result = stream.flatmap(mapper).toList();
+        List<Short> result = stream.flatMapArray(mapper).toList();
         assertEquals(4, result.size());
         assertTrue(result.contains((short) 1));
         assertTrue(result.contains((short) 2));
@@ -348,13 +348,13 @@ public class ParallelArrayShortStreamTest extends TestBase {
     @Test
     @DisplayName("Test flatmap with array method")
     public void testFlatmapArray() {
-        ShortStream flattened = parallelStream.flatmap(s -> new short[] { s, (short) (s * 2) });
+        ShortStream flattened = parallelStream.flatMapArray(s -> new short[] { s, (short) (s * 2) });
         short[] result = flattened.sorted().toArray();
 
         assertEquals(20, result.length);
 
         parallelStream = createShortStream(new short[] { 1, 2, 3 });
-        flattened = parallelStream.flatmap(s -> s % 2 == 0 ? new short[] { s } : new short[0]);
+        flattened = parallelStream.flatMapArray(s -> s % 2 == 0 ? new short[] { s } : new short[0]);
         assertArrayEquals(new short[] { 2 }, flattened.toArray());
     }
 
@@ -366,8 +366,33 @@ public class ParallelArrayShortStreamTest extends TestBase {
 
     @Test
     public void testFlatmap_ParallelPath() {
-        long count = createShortStream(TEST_ARRAY).flatmap(s -> new short[] { s, (short) (s * 2) }).count();
+        long count = createShortStream(TEST_ARRAY).flatMapArray(s -> new short[] { s, (short) (s * 2) }).count();
         assertEquals(52, count);
+    }
+
+    @Test
+    public void testFlatmapCollection_ParallelPath() {
+        long count = createShortStream(TEST_ARRAY).flatmap(s -> Arrays.asList((Short) s, (short) (s * 2))).count();
+        assertEquals(TEST_ARRAY.length * 2L, count);
+    }
+
+    @Test
+    public void testFlatmapCollection() {
+        // sequential fallback
+        short[] r = createShortStream(new short[] { 1, 2 }).flatmap(s -> Arrays.asList((Short) s, (short) (s * 10))).toArray();
+        java.util.Arrays.sort(r);
+        assertArrayEquals(new short[] { 1, 2, 10, 20 }, r);
+
+        // empty
+        assertEquals(0, createShortStream(new short[] {}).flatmap(s -> Arrays.asList((Short) s)).count());
+        assertEquals(0, createShortStream(TEST_ARRAY).flatmap(s -> java.util.Collections.<Short> emptyList()).count());
+        assertEquals(0, createShortStream(TEST_ARRAY).flatmap(s -> (java.util.Collection<Short>) null).count());
+
+        // null elements -> (short) 0
+        short[] withNulls = createShortStream(new short[] { 1, 2 }).flatmap(s -> Arrays.asList((Short) null, s)).toArray();
+        assertEquals(4, withNulls.length);
+        java.util.Arrays.sort(withNulls);
+        assertArrayEquals(new short[] { 0, 0, 1, 2 }, withNulls);
     }
 
     @Test
@@ -380,7 +405,7 @@ public class ParallelArrayShortStreamTest extends TestBase {
 
     @Test
     public void testFlatmap_SequentialFallback() {
-        List<Short> result = createShortStream(new short[] { (short) 1 }).flatmap(s -> new short[] { s, (short) (s + 10) }).toList();
+        List<Short> result = createShortStream(new short[] { (short) 1 }).flatMapArray(s -> new short[] { s, (short) (s + 10) }).toList();
         assertEquals(2, result.size());
     }
 

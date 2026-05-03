@@ -27,18 +27,18 @@ import java.util.TreeSet;
 /**
  * Represents a column value in HBase with its associated version (timestamp).
  * This class provides a type-safe wrapper for HBase column values along with their version information.
- * 
+ *
  * <p>The class is immutable and implements {@link Comparable} based on version timestamps.
  * It provides various factory methods for creating instances and converting them to different collection types.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create a column with current timestamp
  * HBaseColumn<String> col1 = HBaseColumn.valueOf("value");
- * 
+ *
  * // Create a column with specific version
  * HBaseColumn<String> col2 = HBaseColumn.valueOf("value", 12345L);
- * 
+ *
  * // Get value and version
  * String value = col2.value();
  * long version = col2.version();
@@ -411,13 +411,15 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
 
     /**
      * Compares this HBaseColumn with another for ordering.
-     * The comparison is primarily done in ascending order of versions.
-     * If versions are equal, value comparison is used as a tie-breaker to keep
-     * {@code compareTo} consistent with {@link #equals(Object)}.
+     * The primary comparison is ascending order of versions. If the versions are equal,
+     * a value-based tie-break is used so that {@code compareTo} stays consistent with
+     * {@link #equals(Object)}: nulls come first, then {@link Comparable#compareTo} when
+     * applicable, then class-name, hash-code, string-form, and finally identity-hash-code.
      *
      * @param o the HBaseColumn to compare with
-     * @return a negative integer, zero, or a positive integer as this column's version
-     *         is less than, equal to, or greater than the specified column's version
+     * @return a negative integer, zero, or a positive integer as this column is
+     *         considered less than, equal to, or greater than the specified column
+     *         under the ordering described above
      */
     @Override
     public int compareTo(final HBaseColumn<T> o) {

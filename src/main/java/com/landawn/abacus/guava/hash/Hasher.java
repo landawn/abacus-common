@@ -21,11 +21,11 @@ import com.google.common.hash.Funnel;
 import com.google.common.hash.HashCode;
 
 /**
- * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
- * 
  * A stateful object for computing hash codes incrementally. Hasher instances are created
  * by {@link HashFunction#newHasher()} and accumulate data through their various put methods
  * before generating a final {@link HashCode}.
+ *
+ * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
  *
  * <p><b>Usage Pattern</b></p>
  * <ol>
@@ -50,10 +50,10 @@ import com.google.common.hash.HashCode;
  * <ul>
  *   <li><b>Single use:</b> Each Hasher instance should be used for exactly one hash computation</li>
  *   <li><b>Order matters:</b> Data must be added in a consistent order for reproducible results</li>
- *   <li><b>No delimiters:</b> Consecutive put operations are not delimited. {@code putBytes(new byte[] {1, 2})} 
- *       followed by {@code putBytes(new byte[] {3, 4})} produces the same result as 
+ *   <li><b>No delimiters:</b> Consecutive put operations are not delimited. {@code putBytes(new byte[] {1, 2})}
+ *       followed by {@code putBytes(new byte[] {3, 4})} produces the same result as
  *       {@code putBytes(new byte[] {1, 2, 3, 4})}</li>
- *   <li><b>Multibyte values:</b> All multibyte values (int, long, etc.) are interpreted in 
+ *   <li><b>Multibyte values:</b> All multibyte values (int, long, etc.) are interpreted in
  *       little-endian order</li>
  * </ul>
  *
@@ -69,7 +69,7 @@ import com.google.common.hash.HashCode;
  * // To avoid this, consider adding delimiters:
  * hasher3.put("foo", StandardCharsets.UTF_8).put('\0').put("bar", StandardCharsets.UTF_8).hash();
  * }</pre>
- * 
+ *
  * <p><b>Warning:</b> The result of calling any methods after {@link #hash()} is undefined.
  * Do not reuse a Hasher instance after calling hash().
  *
@@ -380,13 +380,13 @@ public interface Hasher {
      * Computes and returns the final hash code based on all data that has been added
      * to this hasher. After calling this method, the hasher instance should not be used
      * again.
-     * 
+     *
      * <p>The returned {@link HashCode} contains the computed hash value and provides
      * various methods to access it (as bytes, as int, as long, as hex string, etc.).
-     * 
+     *
      * <p><b>Warning:</b> The behavior of calling any methods on this hasher after
      * calling hash() is undefined. Create a new hasher for each hash computation.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long timestamp = System.currentTimeMillis();

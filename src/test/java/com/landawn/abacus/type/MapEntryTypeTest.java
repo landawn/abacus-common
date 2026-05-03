@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.AbstractMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;
@@ -43,9 +44,9 @@ public class MapEntryTypeTest extends TestBase {
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = mapEntryType.parameterTypes();
+        List<Type<?>> paramTypes = mapEntryType.parameterTypes();
         Assertions.assertNotNull(paramTypes);
-        assertEquals(2, paramTypes.length);
+        assertEquals(2, paramTypes.size());
     }
 
     @Test

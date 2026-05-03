@@ -28,8 +28,14 @@ import com.landawn.abacus.util.Strings;
 
 /**
  * The abstract base class for {@code Character} types in the type system.
- * This class provides common functionality for handling {@code Character} values,
- * including conversion, database operations, and serialization.
+ * <p>
+ * This class provides common functionality for handling {@code char}/{@code Character} values,
+ * including string conversion (single-character strings or numeric char-code strings),
+ * JDBC read/write operations (stored as {@code VARCHAR}), and JSON/XML serialization
+ * with optional character quotation support.
+ * </p>
+ *
+ * @see CharacterType
  */
 public abstract class AbstractCharacterType extends AbstractPrimaryType<Character> {
 

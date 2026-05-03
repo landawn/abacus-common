@@ -283,7 +283,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * Set<String> categorySet = Iterables.toSet(categories);
  *
  * // Finding operations with Optional safety
- * Optional<String> expensiveCategory = Iterables.findFirst(categories, cat -> 
+ * Optional<String> expensiveCategory = Iterables.findFirst(categories, cat ->
  *     Iterables.max(prices).orElse(0) > 300);
  *
  * // Indexing and position
@@ -325,7 +325,7 @@ public final class Iterables {
     }
 
     // Not sure if it is needed. and also, it is not consistent with the other methods which mostly return Optional.
-    // Moved from Class CommonUtil/N to Iterables to avoid ambiguity with CommonUtil.copy(Object, Collection<String>).
+    // Moved from Class CommonUtil/N to Iterables to avoid ambiguity with N.copy(Object, Collection<String>).
     /**
      * Returns the first {@code non-null} element from the provided two elements.
      * If both are {@code null}, it returns {@code null}.
@@ -740,17 +740,24 @@ public final class Iterables {
 
     /**
      * Returns the minimum value from the provided array of floats.
+     * NaN propagates per {@link Math#min(float, float)}:
+     * if any element is NaN, the contained value is NaN.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalFloat}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] array = {1.0f, 2.0f, 3.0f};
-     * OptionalFloat result = Iterables.min(array);   // OptionalFloat[1.0]
+     * OptionalFloat result = Iterables.min(array);          // OptionalFloat[1.0]
+     *
+     * float[] withNaN = {1.0f, Float.NaN, 3.0f};
+     * OptionalFloat nan = Iterables.min(withNaN);           // OptionalFloat[NaN]
+     * OptionalFloat empty = Iterables.min(new float[0]);    // OptionalFloat.empty()
      * }</pre>
      *
      * @param a the array of floats to evaluate.
-     * @return an {@code OptionalFloat} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalFloat}.
+     * @return an {@code OptionalFloat} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalFloat}; NaN if any element is NaN.
      * @see N#min(float...)
+     * @see Math#min(float, float)
      */
     public static OptionalFloat min(final float... a) {
         return a == null || a.length == 0 ? OptionalFloat.empty() : OptionalFloat.of(N.min(a));
@@ -758,17 +765,24 @@ public final class Iterables {
 
     /**
      * Returns the minimum value from the provided array of doubles.
+     * NaN propagates per {@link Math#min(double, double)}:
+     * if any element is NaN, the contained value is NaN.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] array = {1.0, 2.0, 3.0};
-     * OptionalDouble result = Iterables.min(array);   // OptionalDouble[1.0]
+     * OptionalDouble result = Iterables.min(array);          // OptionalDouble[1.0]
+     *
+     * double[] withNaN = {1.0, Double.NaN, 3.0};
+     * OptionalDouble nan = Iterables.min(withNaN);           // OptionalDouble[NaN]
+     * OptionalDouble empty = Iterables.min(new double[0]);   // OptionalDouble.empty()
      * }</pre>
      *
      * @param a the array of doubles to evaluate.
-     * @return an {@code OptionalDouble} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
+     * @return an {@code OptionalDouble} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalDouble}; NaN if any element is NaN.
      * @see N#min(double...)
+     * @see Math#min(double, double)
      */
     public static OptionalDouble min(final double... a) {
         return a == null || a.length == 0 ? OptionalDouble.empty() : OptionalDouble.of(N.min(a));
@@ -1365,17 +1379,24 @@ public final class Iterables {
 
     /**
      * Returns the maximum value from the provided array of floats.
+     * NaN propagates per {@link Math#max(float, float)}:
+     * if any element is NaN, the contained value is NaN.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalFloat}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] array = {1.0f, 2.0f, 3.0f};
-     * OptionalFloat result = Iterables.max(array);   // OptionalFloat[3.0]
+     * OptionalFloat result = Iterables.max(array);          // OptionalFloat[3.0]
+     *
+     * float[] withNaN = {1.0f, Float.NaN, 3.0f};
+     * OptionalFloat nan = Iterables.max(withNaN);           // OptionalFloat[NaN]
+     * OptionalFloat empty = Iterables.max(new float[0]);    // OptionalFloat.empty()
      * }</pre>
      *
      * @param a the array of floats to evaluate.
-     * @return an {@code OptionalFloat} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalFloat}.
+     * @return an {@code OptionalFloat} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalFloat}; NaN if any element is NaN.
      * @see N#max(float...)
+     * @see Math#max(float, float)
      */
     public static OptionalFloat max(final float... a) {
         return a == null || a.length == 0 ? OptionalFloat.empty() : OptionalFloat.of(N.max(a));
@@ -1383,17 +1404,24 @@ public final class Iterables {
 
     /**
      * Returns the maximum value from the provided array of doubles.
+     * NaN propagates per {@link Math#max(double, double)}:
+     * if any element is NaN, the contained value is NaN.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] array = {1.0, 2.0, 3.0};
-     * OptionalDouble result = Iterables.max(array);   // OptionalDouble[3.0]
+     * OptionalDouble result = Iterables.max(array);          // OptionalDouble[3.0]
+     *
+     * double[] withNaN = {1.0, Double.NaN, 3.0};
+     * OptionalDouble nan = Iterables.max(withNaN);           // OptionalDouble[NaN]
+     * OptionalDouble empty = Iterables.max(new double[0]);   // OptionalDouble.empty()
      * }</pre>
      *
      * @param a the array of doubles to evaluate.
-     * @return an {@code OptionalDouble} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
+     * @return an {@code OptionalDouble} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalDouble}; NaN if any element is NaN.
      * @see N#max(double...)
+     * @see Math#max(double, double)
      */
     public static OptionalDouble max(final double... a) {
         return a == null || a.length == 0 ? OptionalDouble.empty() : OptionalDouble.of(N.max(a));
@@ -2027,7 +2055,7 @@ public final class Iterables {
 
     /**
      * Returns the median value of all elements in the specified array.
-     * 
+     *
      * <p>The median is the middle value when the elements are sorted in ascending order. For array with
      * an odd number of elements, this is the exact middle element. For array with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
@@ -2054,7 +2082,7 @@ public final class Iterables {
 
     /**
      * Returns the median value of all elements in the specified array.
-     * 
+     *
      * <p>The median is the middle value when the elements are sorted in ascending order. For array with
      * an odd number of elements, this is the exact middle element. For array with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
@@ -2082,7 +2110,7 @@ public final class Iterables {
 
     /**
      * Returns the median value of all elements in the specified collection.
-     * 
+     *
      * <p>The median is the middle value when the elements are sorted in ascending order. For collection with
      * an odd number of elements, this is the exact middle element. For collection with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
@@ -2109,7 +2137,7 @@ public final class Iterables {
 
     /**
      * Returns the median value of all elements in the specified collection.
-     * 
+     *
      * <p>The median is the middle value when the elements are sorted in ascending order. For collection with
      * an odd number of elements, this is the exact middle element. For collection with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
@@ -2259,7 +2287,13 @@ public final class Iterables {
             return OptionalInt.empty();
         }
 
-        return OptionalInt.of(N.sumInt(c, func));
+        // Iterate the same iterator we already advanced; calling c.iterator() again breaks
+        // single-use iterables (e.g., stream::iterator).
+        int sum = 0;
+        do {
+            sum += func.applyAsInt(iter.next());
+        } while (iter.hasNext());
+        return OptionalInt.of(sum);
     }
 
     /**
@@ -2304,7 +2338,11 @@ public final class Iterables {
             return OptionalLong.empty();
         }
 
-        return OptionalLong.of(N.sumIntToLong(c, func));
+        long sum = 0;
+        do {
+            sum += func.applyAsInt(iter.next());
+        } while (iter.hasNext());
+        return OptionalLong.of(sum);
     }
 
     /**
@@ -2349,7 +2387,11 @@ public final class Iterables {
             return OptionalLong.empty();
         }
 
-        return OptionalLong.of(N.sumLong(c, func));
+        long sum = 0;
+        do {
+            sum += func.applyAsLong(iter.next());
+        } while (iter.hasNext());
+        return OptionalLong.of(sum);
     }
 
     /**
@@ -2394,7 +2436,11 @@ public final class Iterables {
             return OptionalDouble.empty();
         }
 
-        return OptionalDouble.of(N.sumDouble(c, func));
+        double sum = 0d;
+        do {
+            sum += func.applyAsDouble(iter.next());
+        } while (iter.hasNext());
+        return OptionalDouble.of(sum);
     }
 
     /**
@@ -2438,7 +2484,14 @@ public final class Iterables {
             return Optional.empty();
         }
 
-        return Optional.of(N.sumBigInteger(c, func));
+        BigInteger sum = BigInteger.ZERO;
+        do {
+            final BigInteger v = func.apply(iter.next());
+            if (v != null) {
+                sum = sum.add(v);
+            }
+        } while (iter.hasNext());
+        return Optional.of(sum);
     }
 
     /**
@@ -2482,7 +2535,14 @@ public final class Iterables {
             return Optional.empty();
         }
 
-        return Optional.of(N.sumBigDecimal(c, func));
+        BigDecimal sum = BigDecimal.ZERO;
+        do {
+            final BigDecimal v = func.apply(iter.next());
+            if (v != null) {
+                sum = sum.add(v);
+            }
+        } while (iter.hasNext());
+        return Optional.of(sum);
     }
 
     /**
@@ -3263,7 +3323,7 @@ public final class Iterables {
      * @param a the array of elements to evaluate.
      * @param predicateForFirst the predicate to test for the first element.
      * @param predicateForLast the predicate to test for the last element.
-     * @return the first element satisfying {@code predicateForFirst} if found, otherwise the index of the last element satisfying {@code predicateForLast} if found, otherwise an empty {@code OptionalInt}.
+     * @return the index of the first element satisfying {@code predicateForFirst} if found, otherwise the index of the last element satisfying {@code predicateForLast} if found, otherwise an empty {@code OptionalInt}.
      * @see N#findFirstIndex(Object[], Predicate)
      * @see N#findLastIndex(Object[], Predicate)
      */
@@ -3286,7 +3346,7 @@ public final class Iterables {
      * @param c the collection of elements to evaluate.
      * @param predicateForFirst the predicate to test for the first element.
      * @param predicateForLast the predicate to test for the last element.
-     * @return the first element satisfying {@code predicateForFirst} if found, otherwise the index of the last element satisfying {@code predicateForLast} if found, otherwise an empty {@code OptionalInt}.
+     * @return the index of the first element satisfying {@code predicateForFirst} if found, otherwise the index of the last element satisfying {@code predicateForLast} if found, otherwise an empty {@code OptionalInt}.
      * @see N#findFirstIndex(Collection, Predicate)
      * @see N#findLastIndex(Collection, Predicate)
      */
@@ -3308,7 +3368,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
      * @param predicate the predicate to test for the first and last elements.
-     * @return the first element satisfying {@code predicateForFirst} if found, otherwise a {@code Pair} of empty {@code Nullable} objects.
+     * @return a {@code Pair} whose first value is the first element matching {@code predicate} (or empty {@code Nullable}) and whose second value is the last element matching {@code predicate} (or empty {@code Nullable}).
      * @see #findFirstAndLast(Object[], Predicate, Predicate)
      * @see #findFirstOrLast(Object[], Predicate, Predicate)
      * @see N#findFirst(Object[], Predicate)
@@ -3326,7 +3386,7 @@ public final class Iterables {
      * @param a the array of elements to evaluate.
      * @param predicateForFirst the predicate to test for the first element.
      * @param predicateForLast the predicate to test for the last element.
-     * @return the first element satisfying {@code predicateForFirst} if found, otherwise a {@code Pair} of empty {@code Nullable} objects.
+     * @return a {@code Pair} whose first value is the first element matching {@code predicateForFirst} (or empty {@code Nullable}) and whose second value is the last element matching {@code predicateForLast} (or empty {@code Nullable}).
      * @see #findFirstAndLast(Object[], Predicate)
      * @see #findFirstOrLast(Object[], Predicate, Predicate)
      * @see N#findFirst(Object[], Predicate)
@@ -3348,7 +3408,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param c the collection of elements to evaluate.
      * @param predicate the predicate to test for the first and last elements.
-     * @return the first element satisfying {@code predicateForFirst} if found, otherwise a {@code Pair} of empty {@code Nullable} objects.
+     * @return a {@code Pair} whose first value is the first element matching {@code predicate} (or empty {@code Nullable}) and whose second value is the last element matching {@code predicate} (or empty {@code Nullable}).
      * @see #findFirstAndLast(Collection, Predicate, Predicate)
      * @see #findFirstOrLast(Collection, Predicate, Predicate)
      * @see N#findFirst(Iterable, Predicate)
@@ -3366,7 +3426,7 @@ public final class Iterables {
      * @param c the collection of elements to evaluate.
      * @param predicateForFirst the predicate to test for the first element.
      * @param predicateForLast the predicate to test for the last element.
-     * @return the first element satisfying {@code predicateForFirst} if found, otherwise a {@code Pair} of empty {@code Nullable} objects.
+     * @return a {@code Pair} whose first value is the first element matching {@code predicateForFirst} (or empty {@code Nullable}) and whose second value is the last element matching {@code predicateForLast} (or empty {@code Nullable}).
      * @see #findFirstAndLast(Collection, Predicate)
      * @see #findFirstOrLast(Collection, Predicate, Predicate)
      * @see N#findFirst(Iterable, Predicate)
@@ -3388,7 +3448,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
      * @param predicate the predicate to test for the first and last elements.
-     * @return the first element satisfying {@code predicateForFirst} if found, otherwise a {@code Pair} of empty {@code OptionalInt} objects.
+     * @return a {@code Pair} whose first value is the index of the first element matching {@code predicate} (or empty {@code OptionalInt}) and whose second value is the index of the last element matching {@code predicate} (or empty {@code OptionalInt}).
      * @see #findFirstAndLastIndex(Object[], Predicate, Predicate)
      * @see #findFirstOrLastIndex(Object[], Predicate, Predicate)
      * @see N#findFirstIndex(Object[], Predicate)
@@ -3406,7 +3466,7 @@ public final class Iterables {
      * @param a the array of elements to evaluate.
      * @param predicateForFirst the predicate to test for the first element.
      * @param predicateForLast the predicate to test for the last element.
-     * @return the first element satisfying {@code predicateForFirst} if found, otherwise a {@code Pair} of empty {@code OptionalInt} objects.
+     * @return a {@code Pair} whose first value is the index of the first element matching {@code predicateForFirst} (or empty {@code OptionalInt}) and whose second value is the index of the last element matching {@code predicateForLast} (or empty {@code OptionalInt}).
      * @see #findFirstAndLastIndex(Object[], Predicate)
      * @see #findFirstOrLastIndex(Object[], Predicate, Predicate)
      * @see N#findFirstIndex(Object[], Predicate)
@@ -3428,7 +3488,7 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param c the collection of elements to evaluate.
      * @param predicate the predicate to test for the first and last elements.
-     * @return the first element satisfying {@code predicateForFirst} if found, otherwise a {@code Pair} of empty {@code OptionalInt} objects.
+     * @return a {@code Pair} whose first value is the index of the first element matching {@code predicate} (or empty {@code OptionalInt}) and whose second value is the index of the last element matching {@code predicate} (or empty {@code OptionalInt}).
      * @see #findFirstAndLastIndex(Collection, Predicate, Predicate)
      * @see #findFirstOrLastIndex(Collection, Predicate, Predicate)
      * @see N#findFirstIndex(Collection, Predicate)
@@ -3446,7 +3506,7 @@ public final class Iterables {
      * @param c the collection of elements to evaluate.
      * @param predicateForFirst the predicate to test for the first element.
      * @param predicateForLast the predicate to test for the last element.
-     * @return the first element satisfying {@code predicateForFirst} if found, otherwise a {@code Pair} of empty {@code OptionalInt} objects.
+     * @return a {@code Pair} whose first value is the index of the first element matching {@code predicateForFirst} (or empty {@code OptionalInt}) and whose second value is the index of the last element matching {@code predicateForLast} (or empty {@code OptionalInt}).
      * @see #findFirstAndLastIndex(Collection, Predicate)
      * @see #findFirstOrLastIndex(Collection, Predicate, Predicate)
      * @see N#findFirstIndex(Collection, Predicate)
@@ -3602,8 +3662,11 @@ public final class Iterables {
                     list.set(i, supplier.get());
                 }
             } else {
+                // Pad the [size, fromIndex) gap with supplier values too. Inserting hard-coded
+                // nulls for that range silently corrupts collections that don't tolerate null,
+                // and surprises callers expecting "all newly-extended slots come from supplier".
                 for (int i = size; i < fromIndex; i++) {
-                    list.add(null);
+                    list.add(supplier.get());
                 }
             }
 
@@ -3657,7 +3720,7 @@ public final class Iterables {
      * @see N#copy(Object[], int, Object[], int, int)
      */
     public static <T> void copyInto(final List<? extends T> src, final List<? super T> dest) {
-        if (CommonUtil.isEmpty(src)) {
+        if (N.isEmpty(src)) {
             return;
         }
 
@@ -3668,7 +3731,7 @@ public final class Iterables {
         Collections.copy(dest, src);
     }
 
-    // Moved from Class CommonUtil/N to Iterables to avoid ambiguity with CommonUtil.copy(Object, Collection<String>).
+    // Moved from Class CommonUtil/N to Iterables to avoid ambiguity with N.copy(Object, Collection<String>).
     /**
      * Copies a portion of one list into another. The portion to be copied begins at the index srcPos in the source list and spans length elements.
      * The elements are copied into the destination list starting at position destPos. Both source and destination positions are zero-based.
@@ -3699,10 +3762,10 @@ public final class Iterables {
      */
     public static <T> void copyRange(final List<? extends T> src, final int srcPos, final List<? super T> dest, final int destPos, final int length)
             throws IndexOutOfBoundsException {
-        CommonUtil.checkFromToIndex(srcPos, srcPos + length, CommonUtil.size(src));
-        CommonUtil.checkFromToIndex(destPos, destPos + length, CommonUtil.size(dest));
+        N.checkFromToIndex(srcPos, srcPos + length, N.size(src));
+        N.checkFromToIndex(destPos, destPos + length, N.size(dest));
 
-        if (CommonUtil.isEmpty(src) && srcPos == 0 && length == 0) {
+        if (N.isEmpty(src) && srcPos == 0 && length == 0) {
             return;
         }
 
@@ -4338,31 +4401,31 @@ public final class Iterables {
     /**
      * Returns an unmodifiable <b>view</b> of the symmetric difference of two sets. The returned set contains
      * all elements that are contained in either {@code set1} or {@code set2} but not in both.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Set<String> set1 = new HashSet<>(Arrays.asList("a", "b", "c"));
      * Set<String> set2 = new HashSet<>(Arrays.asList("b", "c", "d"));
-     * 
+     *
      * SetView<String> symDiff = Iterables.symmetricDifference(set1, set2);
      * // symDiff contains: "a", "d"
-     * 
+     *
      * // The view can be copied to a new set if needed
      * Set<String> symDiffCopy = symDiff.copyInto(new HashSet<>());
      * }</pre>
-     * 
+     *
      * <p>The iteration order of the returned set is undefined.
      * The returned view is backed by the input sets, so changes in the original sets may be reflected in the view.
-     * 
+     *
      * <p>Results are undefined if {@code set1} and {@code set2} are sets based on different
      * equivalence relations (as {@link HashSet}, {@link TreeSet}, and the keySet of an
      * {@code IdentityHashMap} all are).
-     * 
+     *
      * @param <E> the type of the elements.
      * @param set1 the first set to find elements not present in the other set.
      * @param set2 the second set to find elements not present in the other set.
      * @return a SetView containing elements in either set1 or set2 but not in both.
-     * @see N#symmetricDifference(Collection, Collection) 
+     * @see N#symmetricDifference(Collection, Collection)
      * @see N#symmetricDifference(int[], int[])
      * @see N#difference(Collection, Collection)
      * @see #difference(Set, Set)
@@ -4493,7 +4556,7 @@ public final class Iterables {
 
     /**
      * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
-     * 
+     *
      *
      * Returns the set of all possible subsets of {@code set}. For example,
      * {@code powerSet(ImmutableSet.of(1, 2))} returns the set {@code {{},
@@ -4612,13 +4675,13 @@ public final class Iterables {
 
     /**
      * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
-     * 
+     *
      * Returns a {@link Collection} of all the permutations of the specified
      * {@link Iterable} using the specified {@link Comparator} for establishing
      * the lexicographical ordering.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
-     * <pre>{@code 
+     * <pre>{@code
      *   for (List<String> perm : orderedPermutations(asList("b", "c", "a"))) {
      *     println(perm);
      *   }

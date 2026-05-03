@@ -1068,11 +1068,16 @@ public interface Type<T> {
     }
 
     /**
-     * Checks if values of this type can be serialized directly to JSON/XML string.
-     * Primitive types, arrays, wrappers, dates, etc. are serializable.
-     * Object Arrays, Collections, Maps, and Beans typically are not.
+     * Checks if values of this type can be serialized to a simple string representation.
+     * Primitive types, wrappers, dates, and other scalar types are typically serializable.
+     * Object arrays, collections, maps, and beans are not serializable in this sense.
      *
-     * @return {@code true} if this type is serializable
+     * <p>Note: the default interface implementation returns {@code false}; however,
+     * {@link AbstractType} overrides this to return {@code true} as the base-class default,
+     * so most concrete types inherit a {@code true} return value unless they explicitly
+     * override it.</p>
+     *
+     * @return {@code true} if this type is directly serializable to a string
      */
     default boolean isSerializable() {
         return false; // Default implementation, can be overridden by specific types
@@ -1137,12 +1142,12 @@ public interface Type<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<?> mapType = Type.ofMap(String.class, Integer.class);
-     * Type<?>[] parameterTypes = mapType.parameterTypes();
+     * List<Type<?>> parameterTypes = mapType.parameterTypes();
      * }</pre>
      *
-     * @return an array of parameter types, or an empty array if this type is not parameterized
+     * @return an immutable list of parameter types, or an empty list if this type is not parameterized
      */
-    Type<?>[] parameterTypes(); //NOSONAR
+    List<Type<?>> parameterTypes();
 
     /**
      * Returns the default value for this type.

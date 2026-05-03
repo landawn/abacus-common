@@ -116,6 +116,7 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      * @param other a predicate that will be logically-ANDed with this predicate
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default FloatPredicate and(final FloatPredicate other) {
         return t -> test(t) && other.test(t);
@@ -132,6 +133,7 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      * @param other a predicate that will be logically-ORed with this predicate
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default FloatPredicate or(final FloatPredicate other) {
         return t -> test(t) || other.test(t);

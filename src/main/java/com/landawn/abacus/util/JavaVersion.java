@@ -19,17 +19,17 @@ package com.landawn.abacus.util;
 /**
  * An enumeration representing all versions of the Java specification.
  * <p>
- * This enum provides a comprehensive list of Java versions from Java 0.9 (Android) through Java 25,
+ * This enum provides a comprehensive list of Java versions from Java 0.9 (Android) through Java 39,
  * plus a special JAVA_RECENT constant that represents the most recent Java version detected at runtime.
  * The enum mirrors values available from the {@code java.specification.version} system property.
  * </p>
- * 
+ *
  * <p>
  * Each enum constant contains both a float value for numerical comparisons and a string name
  * that matches the official version designation. The class provides utility methods for version
  * comparison and parsing version strings.
  * </p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Check if current Java version is at least Java 8
@@ -37,12 +37,12 @@ package com.landawn.abacus.util;
  * if (current.atLeast(JavaVersion.JAVA_1_8)) {
  *     // Use Java 8 features
  * }
- * 
+ *
  * // Parse a version string
  * JavaVersion version = JavaVersion.of("11");
  * System.out.println(version);   // Prints: 11
  * }</pre>
- * 
+ *
  * <p>
  * Note: This class includes codes copied from Apache Commons Lang, under the Apache License 2.0.
  * </p>
@@ -415,7 +415,7 @@ public enum JavaVersion {
      * This method performs a numerical comparison of version values to determine if this
      * version is equal to or greater than the required version.
      * </p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JavaVersion current = JavaVersion.JAVA_11;
@@ -440,7 +440,7 @@ public enum JavaVersion {
      * This method performs a numerical comparison of version values to determine if this
      * version is equal to or less than the specified version.
      * </p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JavaVersion current = JavaVersion.JAVA_1_7;
@@ -458,13 +458,12 @@ public enum JavaVersion {
     }
 
     /**
-     * Transforms the given string with a Java version number to the
-     * corresponding constant of this enumeration class. This method is used
-     * internally.
+     * Returns the {@code JavaVersion} constant corresponding to the given version string.
+     * This method is a package-private helper intended for static import use.
      *
-     * @param nom the Java version as string
-     * @return the corresponding enumeration constant or <b>null</b> if the
-     * version is unknown
+     * @param nom the Java version string (e.g., "1.8", "11")
+     * @return the corresponding {@code JavaVersion} enum constant
+     * @throws IllegalArgumentException if the version string is {@code null}, empty, or unrecognized
      */
     // helper for static importing
     static JavaVersion getJavaVersion(final String nom) {
@@ -613,17 +612,17 @@ public enum JavaVersion {
      * </p>
      * <ul>
      *   <li>Old format with "1." prefix: "1.5", "1.8" → JAVA_1_5, JAVA_1_8</li>
-     *   <li>Android format: "0.9" → JAVA_0_9</li>
+     *   <li>Android format: "0.9" → JAVA_ANDROID_0_9</li>
      *   <li>Modern format: "9", "11", "17" → JAVA_9, JAVA_11, JAVA_17</li>
      *   <li>With minor versions: "11.0.2" → JAVA_11 (ignores minor/patch versions)</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JavaVersion v1 = JavaVersion.of("1.8");      // Returns JAVA_1_8
      * JavaVersion v2 = JavaVersion.of("11");       // Returns JAVA_11
      * JavaVersion v3 = JavaVersion.of("17.0.1");   // Returns JAVA_17
-     * 
+     *
      * // Get current Java version
      * JavaVersion current = JavaVersion.of(System.getProperty("java.specification.version"));
      * }</pre>
@@ -662,11 +661,11 @@ public enum JavaVersion {
      * </p>
      * <ul>
      *   <li>For Java 8 and earlier: "1.1", "1.2", ..., "1.8"</li>
-     *   <li>For Java 9 and later: "9", "10", "11", ..., "25"</li>
+     *   <li>For Java 9 and later: "9", "10", "11", ..., "39"</li>
      *   <li>For Android: "0.9"</li>
      *   <li>For JAVA_RECENT: the detected version number as a string</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * System.out.println(JavaVersion.JAVA_1_8);   // Prints: 1.8
@@ -699,16 +698,16 @@ public enum JavaVersion {
      * Handles version strings in different formats:
      * </p>
      * <ul>
-     *   <li>Dotted format: "1.8" → 1.8, "11.0.2" → 11.0</li>
-     *   <li>Simple format: "17" → 17.0</li>
+     *   <li>Dotted format: {@code "1.8"} → {@code 1.8}, {@code "11.0.2"} → {@code 11.0}</li>
+     *   <li>Simple format: {@code "17"} → {@code 17.0}</li>
      * </ul>
-     * 
-     * <p>For dotted versions, only the first two components are used.
-     * Returns -1 if the version string cannot be parsed.</p>
+     *
+     * <p>For dotted version strings, only the first two dot-separated components are used.
+     * Returns {@code -1} if the string cannot be parsed as a number.</p>
      *
      * @param value the version string to convert
-     * @return the float representation of the version, or -1 if parsing fails
-     * @throws IllegalArgumentException if the version string format is completely invalid
+     * @return the float representation of the version, or {@code -1} if parsing fails
+     * @throws IllegalArgumentException if the version string is not a valid number
      */
     private static float toFloatVersion(final String value) {
         try {

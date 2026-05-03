@@ -50,7 +50,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      */
     CharPredicate ALWAYS_FALSE = value -> false;
     /**
-     * A predicate that tests if the char value is equal to the {@code null} character ('\0').
+     * A predicate that tests if the char value is equal to the NUL character ({@code '\0'}, Unicode U+0000).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -60,7 +60,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      */
     CharPredicate IS_ZERO = value -> value == 0;
     /**
-     * A predicate that tests if the char value is not equal to the {@code null} character ('\0').
+     * A predicate that tests if the char value is not equal to the NUL character ({@code '\0'}, Unicode U+0000).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -131,8 +131,9 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      * CharPredicate isUpperCaseLetter = isLetter.and(isUpperCase);
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate
+     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default CharPredicate and(final CharPredicate other) {
         return t -> test(t) && other.test(t);
@@ -151,8 +152,9 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      * CharPredicate isAlphanumeric = isDigit.or(isLetter);
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate
+     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default CharPredicate or(final CharPredicate other) {
         return t -> test(t) || other.test(t);

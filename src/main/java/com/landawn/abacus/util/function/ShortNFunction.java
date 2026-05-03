@@ -43,7 +43,7 @@ public interface ShortNFunction<R> extends Throwables.ShortNFunction<R, RuntimeE
      * Integer result1 = sum.apply((short) 1, (short) 2, (short) 3);   // returns 6
      *
      * ShortNFunction<Short> max = args -> {
-     *     if (args.length == 0) return 0;
+     *     if (args.length == 0) return (short) 0;
      *     short maxVal = args[0];
      *     for (short v : args) if (v > maxVal) maxVal = v;
      *     return maxVal;
@@ -74,8 +74,9 @@ public interface ShortNFunction<R> extends Throwables.ShortNFunction<R, RuntimeE
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function
-     * @param after the function to apply after this function is applied. Must not be {@code null}.
+     * @param after the function to apply after this function is applied
      * @return a composed function that first applies this function and then applies the {@code after} function
+     * @throws NullPointerException if {@code after} is null
      */
     @Override
     default <V> ShortNFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {

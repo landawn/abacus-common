@@ -3153,8 +3153,8 @@ public class CharListTest extends TestBase {
         list.add('B');
         IntList il = list.toIntList();
         assertEquals(2, il.size());
-        assertEquals((int) 'A', il.get(0));
-        assertEquals((int) 'B', il.get(1));
+        assertEquals('A', il.get(0));
+        assertEquals('B', il.get(1));
     }
 
     @Test

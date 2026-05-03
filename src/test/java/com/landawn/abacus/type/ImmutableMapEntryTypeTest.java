@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.AbstractMap;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,9 +52,9 @@ public class ImmutableMapEntryTypeTest extends TestBase {
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = immutableMapEntryType.parameterTypes();
+        List<Type<?>> paramTypes = immutableMapEntryType.parameterTypes();
         assertNotNull(paramTypes);
-        assertEquals(2, paramTypes.length);
+        assertEquals(2, paramTypes.size());
     }
 
     @Test

@@ -220,7 +220,7 @@ public class ParallelIteratorShortStreamTest extends TestBase {
     public void testFlatMapShortArray() {
         ShortStream stream = createShortStream(new short[] { 1, 2 });
         ShortFunction<short[]> mapper = s -> new short[] { s, (short) (s + 1) };
-        List<Short> result = stream.flatmap(mapper).toList();
+        List<Short> result = stream.flatMapArray(mapper).toList();
         assertEquals(4, result.size());
         assertTrue(result.contains((short) 1));
         assertTrue(result.contains((short) 2));
@@ -235,8 +235,36 @@ public class ParallelIteratorShortStreamTest extends TestBase {
 
     @Test
     public void testFlatmap_SequentialFallback() {
-        List<Short> result = createSingleThreadStream((short) 1, (short) 2).flatmap(s -> new short[] { s, (short) (s + 10) }).toList();
+        List<Short> result = createSingleThreadStream((short) 1, (short) 2).flatMapArray(s -> new short[] { s, (short) (s + 10) }).toList();
         assertHaveSameElements(Arrays.asList((short) 1, (short) 11, (short) 2, (short) 12), result);
+    }
+
+    @Test
+    public void testFlatmapCollection() {
+        List<Short> r = createShortStream(new short[] { 1, 2 }).flatmap(s -> Arrays.asList((Short) s, (short) (s * 10))).boxed().toList();
+        assertHaveSameElements(Arrays.asList((short) 1, (short) 10, (short) 2, (short) 20), r);
+
+        // empty
+        assertEquals(0, createShortStream(new short[] {}).flatmap(s -> Arrays.asList((Short) s)).count());
+        assertEquals(0, createShortStream(new short[] { 1 }).flatmap(s -> java.util.Collections.<Short> emptyList()).count());
+        assertEquals(0, createShortStream(new short[] { 1 }).flatmap(s -> (java.util.Collection<Short>) null).count());
+
+        // null elements -> (short) 0
+        short[] withNulls = createShortStream(new short[] { 1 }).flatmap(s -> Arrays.asList((Short) null, (short) 9)).toArray();
+        assertEquals(2, withNulls.length);
+        assertEquals((short) 0, withNulls[0]);
+        assertEquals((short) 9, withNulls[1]);
+    }
+
+    @Test
+    public void testFlatmapCollection_SequentialFallback() {
+        List<Short> r = createSingleThreadStream((short) 1, (short) 2).flatmap(s -> Arrays.asList((Short) s, (short) (s + 10))).boxed().toList();
+        assertHaveSameElements(Arrays.asList((short) 1, (short) 11, (short) 2, (short) 12), r);
+
+        short[] withNulls = createSingleThreadStream((short) 1).flatmap(s -> Arrays.asList((Short) null, s)).toArray();
+        assertEquals(2, withNulls.length);
+        assertEquals((short) 0, withNulls[0]);
+        assertEquals((short) 1, withNulls[1]);
     }
 
     @Test

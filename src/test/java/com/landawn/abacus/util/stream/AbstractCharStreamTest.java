@@ -86,6 +86,24 @@ public class AbstractCharStreamTest extends TestBase {
     }
 
     @Test
+    public void testDebounce() {
+        char[] result = createCharStream(new char[] { 'a', 'b', 'c', 'd' }).debounce(2, Duration.ofHours(1)).toArray();
+        assertArrayEquals(new char[] { 'a', 'b' }, result);
+    }
+
+    @Test
+    public void testDebounce_EmptyInput() {
+        char[] result = createCharStream(new char[] {}).debounce(2, Duration.ofHours(1)).toArray();
+        assertArrayEquals(new char[] {}, result);
+    }
+
+    @Test
+    public void testDebounce_ErrorPath() {
+        assertThrows(IllegalArgumentException.class, () -> createCharStream(new char[] { 'a' }).debounce(0, Duration.ofHours(1)).toArray());
+        assertThrows(IllegalArgumentException.class, () -> createCharStream(new char[] { 'a' }).debounce(1, Duration.ofMillis(0)).toArray());
+    }
+
+    @Test
     public void testSkipUntil() {
         char[] data = { 'a', 'b', 'c', 'd', 'e' };
         CharStream s = createCharStream(data);
@@ -113,10 +131,10 @@ public class AbstractCharStreamTest extends TestBase {
 
     @Test
     public void testFlatmapCharArray() {
-        List<Character> result = createCharStream(new char[] { 'a', 'b' }).flatmap(c -> new char[] { c, Character.toUpperCase(c) }).boxed().toList();
+        List<Character> result = createCharStream(new char[] { 'a', 'b' }).flatMapArray(c -> new char[] { c, Character.toUpperCase(c) }).boxed().toList();
         assertEquals(Arrays.asList('a', 'A', 'b', 'B'), result);
 
-        result = createCharStream(new char[] {}).flatmap(c -> new char[] { c }).boxed().toList();
+        result = createCharStream(new char[] {}).flatMapArray(c -> new char[] { c }).boxed().toList();
         assertEquals(0, result.size());
     }
 
@@ -124,7 +142,7 @@ public class AbstractCharStreamTest extends TestBase {
     public void testFlatmapWithCharArray() {
         CharStream stream = createCharStream(new char[] { 'a', 'b' });
         CharFunction<char[]> mapper = c -> new char[] { c, Character.toUpperCase(c) };
-        char[] result = stream.flatmap(mapper).toArray();
+        char[] result = stream.flatMapArray(mapper).toArray();
         assertArrayEquals(new char[] { 'a', 'A', 'b', 'B' }, result);
     }
 

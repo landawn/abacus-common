@@ -312,16 +312,8 @@ public class TypeBean {
                 || !Objects.equals(byteListType, other.byteListType)) {
             return false;
         }
-        if (byteType != other.byteType) {
-            return false;
-        }
-        if (!Arrays.equals(charArrayType, other.charArrayType)) {
-            return false;
-        }
-        if (charType != other.charType) {
-            return false;
-        }
-        if (!Objects.equals(characterListType, other.characterListType)) {
+        if ((byteType != other.byteType) || !Arrays.equals(charArrayType, other.charArrayType) || (charType != other.charType)
+                || !Objects.equals(characterListType, other.characterListType)) {
             return false;
         }
         if (!Arrays.equals(dateArrayType, other.dateArrayType)) {

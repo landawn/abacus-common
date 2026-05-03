@@ -23,8 +23,9 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for ListMultimap serialization and deserialization.
- * This type handles conversion between ListMultimap instances and their JSON string representations.
+ * Type handler for {@link com.landawn.abacus.util.ListMultimap} serialization and deserialization.
+ * This type handles conversion between {@code ListMultimap} instances and their JSON string
+ * representations, treating the multimap as a {@code Map<K, List<E>>} structure.
  *
  * @param <K> the key type of the multimap
  * @param <E> the element type stored in the lists of the multimap
@@ -108,7 +109,7 @@ public class ListMultimapType<K, E> extends MultimapType<K, E, List<E>, ListMult
      * }</pre>
      *
      * @param str the JSON string to parse
-     * @return a ListMultimap instance populated with the parsed data, or {@code null} if the string is empty or null
+     * @return a ListMultimap instance populated with the parsed data, or {@code null} if the string is {@code null}, empty, or blank
      * @throws IllegalArgumentException if the JSON string is malformed
      */
     @SuppressWarnings("unchecked")

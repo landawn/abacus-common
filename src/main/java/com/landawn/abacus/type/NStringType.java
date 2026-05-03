@@ -30,31 +30,21 @@ public class NStringType extends AbstractStringType {
     public static final String NSTRING = "NString";
 
     /**
-     * Constructs an NStringType.
-     * This constructor initializes the type handler for national character string objects.
+     * Package-private constructor for NStringType.
+     * This constructor is called by the TypeFactory to create NString type instances.
      */
     NStringType() {
         super(NSTRING);
     }
 
     /**
-     * Retrieves a national character string value from a ResultSet at the specified column index.
-     * This method is designed to handle Unicode strings stored in national character columns.
+     * Retrieves a national character string from the specified column in the {@link ResultSet}
+     * using {@link ResultSet#getNString(int)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<String> type = TypeFactory.getType("NString");
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     *
-     * // Reading Unicode text from NVARCHAR column
-     * String name = type.get(rs, 1);
-     * // Returns: "こんにちは" (Japanese text) or other Unicode content
-     * }</pre>
-     *
-     * @param rs the ResultSet to read from
-     * @param columnIndex the column index (1-based) to retrieve the string from
-     * @return the national string value from the ResultSet, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnIndex the 1-based index of the column to retrieve
+     * @return the national character string, or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public String get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -62,23 +52,13 @@ public class NStringType extends AbstractStringType {
     }
 
     /**
-     * Retrieves a national character string value from a ResultSet using the specified column label.
-     * This method is designed to handle Unicode strings stored in national character columns.
+     * Retrieves a national character string from the specified column in the {@link ResultSet}
+     * using {@link ResultSet#getNString(String)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<String> type = TypeFactory.getType("NString");
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     *
-     * // Reading Unicode text by column name
-     * String description = type.get(rs, "description");
-     * // Returns: "中文" (Chinese text) or other Unicode content
-     * }</pre>
-     *
-     * @param rs the ResultSet to read from
-     * @param columnName the label for the column specified with the SQL AS clause
-     * @return the national string value from the ResultSet, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnName is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnName the label of the column to retrieve (as specified in the SQL AS clause)
+     * @return the national character string, or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
     @Override
     public String get(final ResultSet rs, final String columnName) throws SQLException {
@@ -86,24 +66,13 @@ public class NStringType extends AbstractStringType {
     }
 
     /**
-     * Sets a parameter in a PreparedStatement to a national character string value.
-     * This method ensures the string is stored using the database's national character set.
+     * Sets a parameter in a {@link PreparedStatement} at the specified index to a national
+     * character string value using {@link PreparedStatement#setNString(int, String)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<String> type = TypeFactory.getType("NString");
-     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
-     *
-     * // Setting Unicode text to NVARCHAR column
-     * String productName = "产品名称";  // Chinese: "Product Name"
-     * type.set(stmt, 2, productName);
-     * stmt.executeUpdate();
-     * }</pre>
-     *
-     * @param stmt the PreparedStatement to set the parameter on
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the national string value to set, or {@code null} to set SQL NULL
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param columnIndex the 1-based index of the parameter to set
+     * @param x the national character string to set, or {@code null} to set SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final String x) throws SQLException {
@@ -111,24 +80,13 @@ public class NStringType extends AbstractStringType {
     }
 
     /**
-     * Sets a named parameter in a CallableStatement to a national character string value.
-     * This method ensures the string is stored using the database's national character set.
+     * Sets a parameter in a {@link CallableStatement} by name to a national character string value
+     * using {@link CallableStatement#setNString(String, String)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<String> type = TypeFactory.getType("NString");
-     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
-     *
-     * // Setting Unicode text using named parameter
-     * String description = "日本語の説明";  // Japanese: "Japanese description"
-     * type.set(stmt, "p_description", description);
-     * stmt.execute();
-     * }</pre>
-     *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
-     * @param x the national string value to set, or {@code null} to set SQL NULL
-     * @throws SQLException if a database access error occurs or the parameterName is invalid
+     * @param x the national character string to set, or {@code null} to set SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final String x) throws SQLException {

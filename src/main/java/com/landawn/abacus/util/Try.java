@@ -21,37 +21,37 @@ import java.util.function.Supplier;
 
 /**
  * A utility class that provides enhanced try-with-resources functionality and exception handling mechanisms.
- * 
+ *
  * <p>This class offers two main capabilities:</p>
  * <ul>
  *   <li>Static methods for executing code that may throw checked exceptions, converting them to runtime exceptions</li>
  *   <li>Instance methods for managing AutoCloseable resources with automatic cleanup and optional final actions</li>
  * </ul>
- * 
+ *
  * <p><b>Static usage examples:</b></p>
  * <pre>{@code
  * // Execute code that throws checked exceptions
  * Try.run(() -> {
  *     Thread.sleep(1000);   // throws InterruptedException
  * });
- * 
+ *
  * // Call code with return value and default on exception
  * String result = Try.call(() -> readFile("config.txt"), "default content");
- * 
+ *
  * // Handle exceptions with custom logic
  * Try.run(() -> riskyOperation(), ex -> logger.error("Operation failed", ex));
  * }</pre>
- * 
+ *
  * <p><b>Resource management examples:</b></p>
  * <pre>{@code
  * // Basic try-with-resources
  * Try.with(new FileInputStream("file.txt"))
  *    .run(stream -> processStream(stream));
- * 
+ *
  * // With final action
  * Try.with(connection, () -> connectionPool.returnConnection(connection))
  *    .call(conn -> conn.executeQuery("SELECT * FROM users"));
- * 
+ *
  * // With lazy resource initialization
  * Try.with(() -> new FileWriter("output.txt"))
  *    .run(writer -> writer.write("Hello, World!"));
@@ -72,10 +72,10 @@ public final class Try<T extends AutoCloseable> {
 
     /**
      * Creates a new Try instance with the specified AutoCloseable resource.
-     * 
+     *
      * <p>The resource will be automatically closed after the operation completes,
      * whether it succeeds or throws an exception.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Try.with(new FileInputStream("data.txt"))
@@ -99,10 +99,10 @@ public final class Try<T extends AutoCloseable> {
 
     /**
      * Creates a new Try instance with the specified resource and a final action to execute after resource cleanup.
-     * 
+     *
      * <p>The final action is executed after the resource has been closed, regardless of whether
      * the main operation succeeded or failed. This is useful for additional cleanup or logging.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Connection conn = dataSource.getConnection();
@@ -128,11 +128,11 @@ public final class Try<T extends AutoCloseable> {
 
     /**
      * Creates a new Try instance with a supplier that provides the AutoCloseable resource.
-     * 
+     *
      * <p>The resource is created lazily when the operation is executed. This is useful
      * when resource creation itself might throw an exception or when you want to delay
      * resource creation until it's actually needed.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Try.with(() -> new FileWriter("output.txt"))
@@ -156,10 +156,10 @@ public final class Try<T extends AutoCloseable> {
 
     /**
      * Creates a new Try instance with a resource supplier and a final action.
-     * 
+     *
      * <p>Combines lazy resource creation with a final cleanup action. The resource is created
      * when needed, and the final action is executed after the resource is closed.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Try.with(
@@ -184,15 +184,15 @@ public final class Try<T extends AutoCloseable> {
 
     /**
      * Executes the provided runnable, converting any checked exception to a RuntimeException.
-     * 
+     *
      * <p>This method is useful for working with lambda expressions or method references that
      * throw checked exceptions in contexts where only unchecked exceptions are allowed.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Instead of handling InterruptedException
      * Try.run(() -> Thread.sleep(1000));
-     * 
+     *
      * // Working with I/O operations
      * Try.run(() -> {
      *     Files.write(path, data);
@@ -216,17 +216,17 @@ public final class Try<T extends AutoCloseable> {
 
     /**
      * Executes the provided runnable and handles any exception with the specified error handler.
-     * 
+     *
      * <p>Instead of propagating exceptions, this method allows you to handle them with custom logic,
      * such as logging, recovery, or graceful degradation.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Try.run(
      *     () -> sendEmail(recipient, message),
      *     ex -> logger.error("Failed to send email to " + recipient, ex)
      * );
-     * 
+     *
      * // With recovery logic
      * Try.run(
      *     () -> primaryService.process(data),
@@ -251,15 +251,15 @@ public final class Try<T extends AutoCloseable> {
 
     /**
      * Executes the provided callable and returns its result, converting any checked exception to a RuntimeException.
-     * 
+     *
      * <p>This method enables the use of lambda expressions that throw checked exceptions in
      * contexts that expect unchecked behavior, while still returning the computed value.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Read file content without explicit exception handling
      * String content = Try.call(() -> Files.readString(Path.of("config.txt")));
-     * 
+     *
      * // Parse JSON that might throw checked exception
      * Config config = Try.call(() -> objectMapper.readValue(json, Config.class));
      * }</pre>
@@ -282,10 +282,10 @@ public final class Try<T extends AutoCloseable> {
 
     /**
      * Executes the provided callable and returns its result, or applies the error function if an exception occurs.
-     * 
+     *
      * <p>This method provides a way to transform exceptions into valid return values, enabling
      * graceful error recovery and functional error handling patterns.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Return null on error
@@ -293,7 +293,7 @@ public final class Try<T extends AutoCloseable> {
      *     () -> userService.findById(userId),
      *     ex -> null
      * );
-     * 
+     *
      * // Transform exception to error response
      * Response response = Try.call(
      *     () -> processRequest(request),
@@ -320,10 +320,10 @@ public final class Try<T extends AutoCloseable> {
 
     /**
      * Executes the provided callable and returns its result, or returns the value from the supplier if an exception occurs.
-     * 
+     *
      * <p>This method allows for lazy evaluation of the fallback value, which is only computed
      * if an exception actually occurs.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Lazy default value computation
@@ -331,7 +331,7 @@ public final class Try<T extends AutoCloseable> {
      *     () -> loadConfigFromFile(),
      *     () -> createDefaultConfig()
      * );
-     * 
+     *
      * // With expensive fallback
      * Data data = Try.call(
      *     () -> fetchFromCache(key),
@@ -358,15 +358,15 @@ public final class Try<T extends AutoCloseable> {
 
     /**
      * Executes the provided callable and returns its result, or returns the default value if an exception occurs.
-     * 
+     *
      * <p>This is the simplest form of exception handling with a fallback value, useful when
      * you have a known default that should be used in case of any error.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Parse with default
      * int value = Try.call(() -> Integer.parseInt(userInput), 0);
-     * 
+     *
      * // Load optional configuration
      * String setting = Try.call(
      *     () -> properties.getProperty("advanced.setting"),
@@ -393,10 +393,10 @@ public final class Try<T extends AutoCloseable> {
 
     /**
      * Executes the callable with conditional exception handling based on a predicate.
-     * 
+     *
      * <p>If an exception occurs and the predicate returns {@code true}, the supplier provides the return value.
      * If the predicate returns {@code false}, the exception is rethrown as a RuntimeException.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Only handle specific exceptions
@@ -405,7 +405,7 @@ public final class Try<T extends AutoCloseable> {
      *     ex -> ex instanceof IOException,
      *     () -> "default for IO errors"
      * );
-     * 
+     *
      * // Retry on timeout
      * Data data = Try.call(
      *     () -> fetchWithTimeout(),
@@ -440,10 +440,10 @@ public final class Try<T extends AutoCloseable> {
 
     /**
      * Executes the callable with conditional exception handling and a default value.
-     * 
+     *
      * <p>Similar to {@link #call(java.util.concurrent.Callable, Predicate, Supplier)} but with an immediate default value
      * instead of a supplier.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Return -1 only for NumberFormatException
@@ -452,7 +452,7 @@ public final class Try<T extends AutoCloseable> {
      *     ex -> ex instanceof NumberFormatException,
      *     -1
      * );
-     * 
+     *
      * // Return null only for specific database errors
      * User user = Try.call(
      *     () -> userDao.findById(id),
@@ -488,7 +488,7 @@ public final class Try<T extends AutoCloseable> {
 
     /**
      * Executes the provided consumer with the managed resource.
-     * 
+     *
      * <p>The resource is automatically closed after the consumer completes, and any final action
      * is executed. Checked exceptions are converted to RuntimeExceptions.</p>
      *
@@ -520,10 +520,10 @@ public final class Try<T extends AutoCloseable> {
 
     /**
      * Executes the provided consumer with the managed resource and custom exception handling.
-     * 
+     *
      * <p>Instead of throwing exceptions, this method allows you to handle them with custom logic.
      * The resource is still automatically closed and any final action is executed.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Try.with(new Socket("server.com", 8080))
@@ -550,7 +550,7 @@ public final class Try<T extends AutoCloseable> {
 
     /**
      * Executes the provided function with the managed resource and returns the result.
-     * 
+     *
      * <p>The resource is automatically closed after the function completes, and any final action
      * is executed. Checked exceptions are converted to RuntimeExceptions.</p>
      *
@@ -582,10 +582,10 @@ public final class Try<T extends AutoCloseable> {
 
     /**
      * Executes the provided function with the managed resource and custom exception handling.
-     * 
+     *
      * <p>If an exception occurs, the error function is applied to produce a return value instead
      * of throwing an exception. The resource is still automatically closed.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonNode config = Try.with(() -> new FileInputStream("config.json"))
@@ -615,10 +615,10 @@ public final class Try<T extends AutoCloseable> {
 
     /**
      * Executes the provided function with the managed resource, using a supplier for the fallback value.
-     * 
+     *
      * <p>If an exception occurs, the supplier is invoked to provide a return value. This allows
      * for lazy evaluation of the fallback value.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties props = Try.with(() -> new FileInputStream("app.properties"))
@@ -647,9 +647,9 @@ public final class Try<T extends AutoCloseable> {
 
     /**
      * Executes the provided function with the managed resource, returning a default value on exception.
-     * 
+     *
      * <p>This is the simplest form of error handling with a known fallback value.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int lineCount = Try.with(Files.newBufferedReader(path))
@@ -680,10 +680,10 @@ public final class Try<T extends AutoCloseable> {
 
     /**
      * Executes the function with conditional exception handling based on a predicate.
-     * 
+     *
      * <p>If an exception occurs and the predicate returns {@code true}, the supplier provides the return value.
      * If the predicate returns {@code false}, the exception is rethrown as a RuntimeException.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = Try.with(databaseConnection)
@@ -720,10 +720,10 @@ public final class Try<T extends AutoCloseable> {
 
     /**
      * Executes the function with conditional exception handling and a default value.
-     * 
+     *
      * <p>Similar to {@link #call(Throwables.Function, Predicate, Supplier)} but with an immediate
      * default value instead of a supplier.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String content = Try.with(new FileInputStream(file))

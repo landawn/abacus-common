@@ -18,7 +18,6 @@ import java.security.Key;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.zip.Adler32;
 import java.util.zip.CRC32;
@@ -28,13 +27,13 @@ import com.google.common.hash.HashCode;
 import com.landawn.abacus.util.N;
 
 /**
- * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
- * 
  * Utility class providing static factory methods to obtain various {@link HashFunction} instances
  * and other hashing-related utilities. This class serves as the main entry point for accessing
- * different hashing algorithms including cryptographic (SHA, MD5) and non-cryptographic 
+ * different hashing algorithms including cryptographic (SHA, MD5) and non-cryptographic
  * (Murmur3, CRC32) hash functions.
- * 
+ *
+ * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
+ *
  * <p>This class is a wrapper around Google Guava's hashing utilities, providing a convenient
  * API for common hashing operations. It includes support for:
  * <ul>
@@ -181,10 +180,10 @@ public final class Hashing {
     /**
      * Returns a hash function implementing the 32-bit Murmur3 algorithm (x86 variant) with
      * a seed value of zero. This is equivalent to calling {@code murmur3_32(0)}.
-     * 
+     *
      * <p>This is a convenient method for when you don't need a specific seed value.
      * The zero seed is commonly used as a default.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode hash = Hashing.murmur3_32().hash("data".getBytes());
@@ -221,7 +220,7 @@ public final class Hashing {
     /**
      * Returns a hash function implementing the 128-bit Murmur3 algorithm (x64 variant) with
      * a seed value of zero. This is equivalent to calling {@code murmur3_128(0)}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode hash128 = Hashing.murmur3_128().hash("data".getBytes());
@@ -238,10 +237,10 @@ public final class Hashing {
      * Returns a hash function implementing the 64-bit SipHash-2-4 algorithm using a default
      * seed value of {@code k = 00 01 02 ...}. SipHash is a cryptographically strong
      * pseudo-random function optimized for short inputs.
-     * 
+     *
      * <p>SipHash-2-4 refers to 2 compression rounds and 4 finalization rounds. It provides
      * a good balance between security and performance.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode sipHash = Hashing.sipHash24().hash("secure data".getBytes());
@@ -278,12 +277,12 @@ public final class Hashing {
     /**
      * Returns a hash function implementing the MD5 hash algorithm (128 hash bits).
      * MD5 is a widely used cryptographic hash function that produces a 128-bit hash value.
-     * 
+     *
      * <p><b>Warning:</b> MD5 is deprecated for security purposes as it is vulnerable to
      * collision attacks. Use this method only for compatibility with legacy systems.
      * For new applications, prefer {@link #sha256()} for security or {@link #goodFastHash(int)}
      * for performance.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode md5Hash = Hashing.md5().hash("legacy data".getBytes());
@@ -301,11 +300,11 @@ public final class Hashing {
     /**
      * Returns a hash function implementing the SHA-1 algorithm (160 hash bits).
      * SHA-1 is a cryptographic hash function that produces a 160-bit hash value.
-     * 
+     *
      * <p><b>Warning:</b> SHA-1 is deprecated for security purposes as practical collision
      * attacks have been demonstrated. Use this method only for compatibility with legacy systems.
      * For new applications, prefer {@link #sha256()} or higher.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode sha1Hash = Hashing.sha1().hash("legacy data".getBytes());
@@ -324,10 +323,10 @@ public final class Hashing {
      * Returns a hash function implementing the SHA-256 algorithm (256 hash bits).
      * SHA-256 is part of the SHA-2 family and is widely used for cryptographic applications.
      * It provides a good balance between security and performance.
-     * 
+     *
      * <p>This implementation delegates to the SHA-256 {@link MessageDigest} provided by
      * the Java security framework.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode sha256Hash = Hashing.sha256().hash("secure data".getBytes());
@@ -344,10 +343,10 @@ public final class Hashing {
      * Returns a hash function implementing the SHA-384 algorithm (384 hash bits).
      * SHA-384 is part of the SHA-2 family and provides higher security than SHA-256
      * at the cost of increased computation time and hash size.
-     * 
+     *
      * <p>This implementation delegates to the SHA-384 {@link MessageDigest} provided by
      * the Java security framework.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode sha384Hash = Hashing.sha384().hash("high security data".getBytes());
@@ -363,10 +362,10 @@ public final class Hashing {
      * Returns a hash function implementing the SHA-512 algorithm (512 hash bits).
      * SHA-512 is part of the SHA-2 family and provides the highest level of security
      * among the standard SHA-2 variants, producing a 512-bit hash value.
-     * 
+     *
      * <p>This implementation delegates to the SHA-512 {@link MessageDigest} provided by
      * the Java security framework.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode sha512Hash = Hashing.sha512().hash("maximum security data".getBytes());
@@ -382,7 +381,7 @@ public final class Hashing {
      * Returns a hash function implementing the HMAC (Hash-based Message Authentication Code)
      * algorithm using MD5 as the underlying hash function (128 hash bits). HMAC provides
      * message authentication using a secret key.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Key secretKey = new SecretKeySpec("secret".getBytes(), "HmacMD5");
@@ -422,7 +421,7 @@ public final class Hashing {
     /**
      * Returns a hash function implementing the HMAC algorithm using SHA-1 as the underlying
      * hash function (160 hash bits). Provides better security than HMAC-MD5.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Key secretKey = new SecretKeySpec("secret".getBytes(), "HmacSHA1");
@@ -460,7 +459,7 @@ public final class Hashing {
      * Returns a hash function implementing the HMAC algorithm using SHA-256 as the underlying
      * hash function (256 hash bits). This provides strong message authentication and is
      * recommended for new applications.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Key secretKey = new SecretKeySpec("secret".getBytes(), "HmacSHA256");
@@ -499,7 +498,7 @@ public final class Hashing {
      * Returns a hash function implementing the HMAC algorithm using SHA-512 as the underlying
      * hash function (512 hash bits). This provides the highest level of security among the
      * HMAC variants offered.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Key secretKey = new SecretKeySpec("topsecret".getBytes(), "HmacSHA512");
@@ -539,12 +538,12 @@ public final class Hashing {
      * Returns a hash function implementing the CRC32C checksum algorithm (32 hash bits).
      * CRC32C uses the Castagnoli polynomial and is used in various storage systems and
      * network protocols for error detection.
-     * 
+     *
      * <p>CRC32C generally has better error detection properties than the standard CRC32
      * and is optimized for modern CPU architectures with hardware support.
-     * 
+     *
      * <p>As described by RFC 3720, Section 12.1.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode checksum = Hashing.crc32c().hash("data to check".getBytes());
@@ -560,13 +559,13 @@ public final class Hashing {
     /**
      * Returns a hash function implementing the standard CRC-32 checksum algorithm (32 hash bits).
      * This implementation delegates to the {@link CRC32} {@link Checksum} class.
-     * 
+     *
      * <p>CRC32 is commonly used for error detection in network communications and file storage.
      * Note that CRC32 is not cryptographically secure and should not be used for security purposes.
-     * 
+     *
      * <p>To get the {@code long} value equivalent to {@link Checksum#getValue()} for a
      * {@code HashCode} produced by this function, use {@link HashCode#padToLong()}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode crc = Hashing.crc32().hash("file contents".getBytes());
@@ -582,13 +581,13 @@ public final class Hashing {
     /**
      * Returns a hash function implementing the Adler-32 checksum algorithm (32 hash bits).
      * This implementation delegates to the {@link Adler32} {@link Checksum} class.
-     * 
+     *
      * <p>Adler-32 is a checksum algorithm that is faster than CRC32 but provides weaker
      * error detection. It is used in the zlib compression library.
-     * 
+     *
      * <p>To get the {@code long} value equivalent to {@link Checksum#getValue()} for a
      * {@code HashCode} produced by this function, use {@link HashCode#padToLong()}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode adler = Hashing.adler32().hash("compressed data".getBytes());
@@ -604,16 +603,16 @@ public final class Hashing {
     /**
      * Returns a hash function implementing FarmHash's Fingerprint64, an open-source
      * algorithm designed for generating persistent fingerprints of strings.
-     * 
+     *
      * <p>FarmHash Fingerprint64 produces high-quality 64-bit hash values with fewer
      * collisions than many alternatives. While not cryptographically secure, it is
      * suitable for hash tables, checksums, and fingerprinting.
-     * 
+     *
      * <p>The hash values generated are byte-wise identical to those created using the
      * C++ version of FarmHash. Note that this implementation uses unsigned integers
      * (see {@link com.google.common.primitives.UnsignedInts}), which should be considered
      * when comparing with signed integer implementations.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode fingerprint = Hashing.farmHashFingerprint64()
@@ -630,15 +629,15 @@ public final class Hashing {
      * Returns a hash function that computes its hash code by concatenating the hash codes
      * of two underlying hash functions. This is useful when you need a hash code of a
      * specific length that is not directly available.
-     * 
+     *
      * <p>The resulting hash function will have a bit length equal to the sum of the bit
      * lengths of the input functions.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a 512-bit hash function by combining two SHA-256 functions
      * HashFunction hash512 = Hashing.concatenating(
-     *     Hashing.sha256(), 
+     *     Hashing.sha256(),
      *     Hashing.sha256()
      * );
      * }</pre>
@@ -655,7 +654,7 @@ public final class Hashing {
     /**
      * Returns a hash function that computes its hash code by concatenating the hash codes
      * of three underlying hash functions.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a 384-bit hash by combining three 128-bit functions
@@ -700,12 +699,9 @@ public final class Hashing {
      * @throws IllegalArgumentException if {@code hashFunctions} is empty
      */
     public static HashFunction concatenating(final Iterable<HashFunction> hashFunctions) {
-        final Iterator<HashFunction> iterator = hashFunctions.iterator();
         final List<com.google.common.hash.HashFunction> guavaHashFunctions = new ArrayList<>();
 
-        while (iterator.hasNext()) {
-            final HashFunction hashFunction = iterator.next();
-
+        for (HashFunction hashFunction : hashFunctions) {
             if (hashFunction instanceof GuavaHashFunction guavaHashFunction) {
                 guavaHashFunctions.add(guavaHashFunction.gHashFunction);
             } else {
@@ -766,12 +762,12 @@ public final class Hashing {
      * Returns a hash code that combines the information from multiple hash codes in an
      * ordered fashion. The resulting hash code has the same bit length as each of the
      * input hash codes.
-     * 
+     *
      * <p>This method is designed such that if two equal hash codes are produced by two
      * calls to this method, it is as likely as possible that each was computed from the
      * same input hash codes in the same order. This makes it suitable for scenarios where
      * the order of inputs matters.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<HashCode> hashes = new ArrayList<>();
@@ -839,12 +835,12 @@ public final class Hashing {
      * Returns a hash code that combines the information from multiple hash codes in an
      * unordered fashion. The resulting hash code has the same bit length as each of the
      * input hash codes.
-     * 
+     *
      * <p>This method is designed such that if two equal hash codes are produced by two
      * calls to this method, it is as likely as possible that each was computed from the
      * same set of input hash codes, regardless of order. This makes it suitable for
      * combining hash codes of set elements or other unordered collections.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Set<String> items = new HashSet<>(Arrays.asList("x", "y", "z"));

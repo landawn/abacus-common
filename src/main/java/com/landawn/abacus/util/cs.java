@@ -23,24 +23,28 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * String constants utility class providing commonly used parameter names, field names, and SQL keywords.
  * This class centralizes string constants to avoid hardcoding strings throughout the codebase,
  * improving maintainability and reducing typos.
- * 
+ *
+ * <p>Each public field is a {@code String} constant whose name matches its value exactly
+ * (e.g., {@code cs.columnName} equals {@code "columnName"}). Individual fields are intentionally
+ * left without separate JavaDoc comments because their names are self-documenting.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Instead of hardcoding strings
  * map.put("columnName", value);
- * 
+ *
  * // Use constants from cs class
  * map.put(cs.columnName, value);
- * 
+ *
  * // In method signatures and calls
  * void processData(String columnName) { ... }
  * processData(cs.columnName);
  * }</pre>
- * 
- * <p><strong>Note:</strong> This class is marked as {@link Beta} and {@link Internal}, 
- * indicating it's experimental and intended for internal framework use only. 
+ *
+ * <p><strong>Note:</strong> This class is marked as {@link Beta} and {@link Internal},
+ * indicating it's experimental and intended for internal framework use only.
  * External code should not depend on this class as it may change without notice.</p>
- * 
+ *
  */
 @Beta // Not sure if it's a good idea or not.
 @Internal

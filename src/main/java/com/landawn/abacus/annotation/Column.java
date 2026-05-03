@@ -68,8 +68,8 @@ public @interface Column {
     /**
      * Deprecated alias for {@link #name()}.
      *
-     * @return the column name value
-     * @deprecated use {@link #name()} to specify the column name explicitly.
+     * @return the column name
+     * @deprecated Use {@link #name()} to specify the column name explicitly.
      */
     @Deprecated
     String value() default "";
@@ -78,21 +78,13 @@ public @interface Column {
      * The name of the database column this field maps to.
      * If not specified (empty string), the field name is used as the column name.
      *
-     * <p>Column names should follow the naming conventions of your database system.
-     * Common conventions include:</p>
-     * <ul>
-     *   <li>snake_case for PostgreSQL and MySQL</li>
-     *   <li>UPPER_CASE for Oracle (default for unquoted identifiers)</li>
-     *   <li>PascalCase or mixed case for SQL Server</li>
-     * </ul>
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * @Column(name = "created_date")
      * private LocalDateTime createdDate;
      * }</pre>
      *
-     * @return the column name, or empty string to use the field name as default
+     * @return the column name, or an empty string to use the field name as default
      */
     String name() default "";
 }

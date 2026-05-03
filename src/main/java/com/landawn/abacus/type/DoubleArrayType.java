@@ -19,44 +19,41 @@ import java.io.IOException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for Double array (Double[]) values.
- * This class provides serialization, deserialization, and output operations for Double arrays.
- * It handles proper formatting with brackets, separators, and {@code null} value representation.
+ * Type handler for boxed-double array ({@code Double[]}) values.
+ * This class provides serialization, deserialization, and output operations for {@code Double[]} arrays.
+ *
+ * <p>The canonical string format is a bracket-enclosed, comma-separated list where null elements
+ * are written as the literal {@code null} (e.g., {@code [1.5, null, 3.14, -0.5]}).
+ *
+ * @see ObjectArrayType
  */
 public final class DoubleArrayType extends ObjectArrayType<Double> {
 
     /**
-     * Package-private constructor for DoubleArrayType.
-     * This constructor is called by the TypeFactory to create Double[] type instances.
+     * Package-private constructor for {@code DoubleArrayType}.
+     * Instances are created by the {@code TypeFactory}.
      */
     DoubleArrayType() {
         super(Double[].class);
     }
 
     /**
-     * Converts a Double array to its string representation.
-     * The output format is: [element1, element2, ...]
-     * - Null elements are represented as "null"
-     * - Empty arrays return "[]"
-     * - Uses efficient string joining for performance
+     * Converts a {@code Double[]} to its canonical string representation.
+     * The output is a bracket-enclosed, comma-separated list; null elements appear as {@code null}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Double[]> type = TypeFactory.getType(Double[].class);
-     * Double[] array = {1.5, null, 3.14, -0.5};
-     * String result = type.stringOf(array);
-     * // result: "[1.5, null, 3.14, -0.5]"
+     * <p>Examples:
+     * <ul>
+     *   <li>{@code [1.5, null, 3.14, -0.5]} for {@code new Double[]{1.5, null, 3.14, -0.5}}</li>
+     *   <li>{@code []} for an empty array</li>
+     *   <li>{@code null} if the input is {@code null}</li>
+     * </ul>
      *
-     * String empty = type.stringOf(new Double[0]);
-     * // empty: "[]"
-     * }</pre>
-     *
-     * @param x the Double array to convert. Can be {@code null}.
-     * @return A string representation of the array, or {@code null} if input is null
+     * @param x the {@code Double[]} to convert; may be {@code null}
+     * @return the string representation, or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final Double[] x) {
@@ -70,24 +67,18 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
     }
 
     /**
-     * Converts a string representation back to a Double array.
-     * Expects format: [element1, element2, ...]
-     * - "null" strings (4 characters) are converted to {@code null} elements
-     * - Empty string or "[]" returns empty array
-     * - Individual elements are parsed as Double values
+     * Parses a string representation back into a {@code Double[]} array.
+     * The expected format is a bracket-enclosed, comma-separated list as produced by {@link #stringOf}.
+     * The literal {@code null} (4 characters) is converted to a {@code null} array element.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Double[]> type = TypeFactory.getType(Double[].class);
-     * Double[] result = type.valueOf("[1.5, null, 3.14, -0.5]");
-     * // result: {1.5, null, 3.14, -0.5}
+     * <p>Special cases:
+     * <ul>
+     *   <li>{@code null}, blank, or empty string returns {@code null}</li>
+     *   <li>{@code "[]"} returns an empty array</li>
+     * </ul>
      *
-     * Double[] empty = type.valueOf("[]");
-     * // empty: {} (empty array)
-     * }</pre>
-     *
-     * @param str the string to parse. Can be {@code null}.
-     * @return A Double array parsed from the string, or {@code null} if input is null
+     * @param str the string to parse; may be {@code null}
+     * @return the parsed {@code Double[]}, or {@code null} if {@code str} is {@code null} or blank
      */
     @Override
     public Double[] valueOf(final String str) {
@@ -115,13 +106,13 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
     }
 
     /**
-     * Appends a Double array to an Appendable output.
-     * The output format is: [element1, element2, ...]
-     * Null elements are represented as "null".
-     * Uses toString() for Double values to ensure proper formatting.
+     * Appends a {@code Double[]} to an {@link Appendable}.
+     * The output format is a bracket-enclosed, comma-separated list.
+     * Null elements are written as {@code null}; non-null values use {@link Double#toString()}.
+     * If {@code x} is {@code null}, the literal {@code null} is appended.
      *
-     * @param appendable the Appendable to write to
-     * @param x the Double array to append. Can be {@code null}.
+     * @param appendable the {@link Appendable} to write to
+     * @param x          the {@code Double[]} to append; may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
@@ -148,14 +139,14 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
     }
 
     /**
-     * Writes a Double array to a CharacterWriter.
-     * The output format is: [element1, element2, ...]
-     * Null elements are represented as "null".
-     * Uses optimized numeric writing for Double values.
+     * Writes a {@code Double[]} to a {@link CharacterWriter}.
+     * The output format is a bracket-enclosed, comma-separated list.
+     * Null elements are written as {@code null}; non-null values use the writer's optimized numeric
+     * double-write method. If {@code x} is {@code null}, the literal {@code null} is written.
      *
-     * @param writer the CharacterWriter to write to
-     * @param x the Double array to write. Can be {@code null}.
-     * @param config the serialization configuration (currently unused for Double arrays)
+     * @param writer the {@link CharacterWriter} to write to
+     * @param x      the {@code Double[]} to write; may be {@code null}
+     * @param config serialization configuration (not used for {@code Double} arrays); may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override

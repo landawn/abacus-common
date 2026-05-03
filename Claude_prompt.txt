@@ -7,18 +7,32 @@ Use multiple agents to fix all javadoc issues reported by running: mvn javadoc:j
 
 Review all public methods in the classes located under foler: ./src/main/java/ for naming convention consistency, and provide suggestions for design and method naming improvements. 
 
-Perform a thorough deep line by line review for javadocs in all the classes under folder: ./src/main/java to improve/correct existing javadocs
+-- ==========================================================
 
-Perform a thorough deep line by line review for javadocs in all the classes in package com.landawn.abacus.type under folder: ./src/main/java to improve/correct existing javadocs
+Use multiple agents to perform a thorough deep line by line review for all the classes under folder: ./src/main/java to find bugs and fix them, and unit tests for the fixes.
 
-Perform a thorough deep line by line review for javadocs in Multiset.java to improve/correct existing javadocs
+Use multiple agents to perform a thorough deep line by line review for all the classes in packages: com.landawn.abacus.util.stream and com.landawn.abacus.util.function under folder: ./src/main/java to find bugs and fix them, and unit tests for the fixes.
 
 
-Perform a thorough deep line by line review for all the classes under folder: ./src/main/java to find bugs and fix them, and unit tests for the fixes
+Use multiple agents to perform a thorough deep line by line review for all the classes in package: com.landawn.abacus.util under folder: ./src/main/java to find bugs and fix them, and unit tests for the fixes.
 
-Perform a thorough deep line by line review for all the classes in package com.landawn.abacus.util under folder: ./src/main/java to find bugs and fix them, and unit tests for the fixes
+Use multiple agents to perform a thorough deep line by line review for all the classes under folder: ./src/main/java to find bugs and fix them, and unit tests for the fixes. Exclude the classes in package: com.landawn.abacus.util and its sub packages.
+
+
 
 Are you sure you have identified and fixed all the bugs? Perform a thorough deep review again.
+
+-- ==========================================================
+
+Use multiple agents to perform a thorough deep line by line review for javadocs in all the classes under folder: ./src/main/java to improve/correct existing javadocs
+
+Use multiple agents to perform a thorough deep line by line review for javadocs in all the classes in packages: com.landawn.abacus.util.stream and com.landawn.abacus.util.function under folder: ./src/main/java to improve/correct existing javadocs. For classes in package com.landawn.abacus.util.stream, only review javadoc for public methods in BaseStream/Stream/EntryStream/Char/Byte/Short/Int/Long/Float/DoubleStream and Collectors, don't review javadoc for other classes in package: com.landawn.abacus.util.stream.
+
+
+Use multiple agents to perform a thorough deep line by line review for javadocs in all the classes in package com.landawn.abacus.util under folder: ./src/main/java to improve/correct existing javadocs
+
+
+Use multiple agents to perform a thorough deep line by line review for javadocs in all the classes under folder: ./src/main/java to improve/correct existing javadocs. Exclude the classes in package: com.landawn.abacus.util and its sub packages.
 
 
 -- ==========================================================

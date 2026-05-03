@@ -27,13 +27,16 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
 /**
- * The Abstract base class for {@code double} types in the type system.
+ * The abstract base class for {@code double} types in the type system.
  * <p>
  * This class provides common functionality for handling {@code double} values,
- * including conversion, database operations, and serialization.
- * Note that this class uses {@code Number} as its generic type to allow for both
- * primitive {@code double} and {@code Double} wrapper handling.
+ * including string conversion, JDBC read/write operations, and serialization.
+ * This class uses {@code Number} as its generic type parameter so that both the primitive
+ * {@code double} type and the {@code Double} wrapper type can share this implementation.
+ * Concrete subclasses cover each of those two variants.
  * </p>
+ *
+ * @see DoubleType
  */
 public abstract class AbstractDoubleType extends NumberType<Number> {
 
@@ -73,20 +76,11 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      * <ul>
      *   <li>Empty or {@code null} strings return the default value</li>
      *   <li>Strings ending with 'l', 'L', 'f', 'F', 'd', or 'D' have the suffix stripped before parsing</li>
-     *   <li>Valid numeric strings are parsed to {@code double} values</li>
+     *   <li>Valid numeric strings are parsed to {@code Double} values</li>
      * </ul>
      *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * Type<Double> type = TypeFactory.getType(Double.class);
-     * Double value1 = type.valueOf("3.14159");   // returns 3.14159
-     * Double value2 = type.valueOf("100.5D");    // returns 100.5 (suffix stripped)
-     * Double value3 = type.valueOf("42.0f");     // returns 42.0 (suffix stripped)
-     * Double value4 = type.valueOf("");          // returns default value
-     * }</pre>
-     *
      * @param str the string to convert
-     * @return the {@code Double} value
+     * @return the {@code Double} value, or the default value if {@code str} is empty or {@code null}
      * @throws NumberFormatException if the string cannot be parsed as a {@code double}
      */
     @Override
@@ -112,21 +106,9 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
     }
 
     /**
-     * Checks if this type represents a {@code double} type.
-     * <p>
-     * This method always returns {@code true} for {@code double} types.
-     * </p>
+     * Returns {@code true} because this type represents a {@code double} type.
      *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * Type<Double> type = TypeFactory.getType(Double.class);
-     * if (type.isDouble()) {
-     *     // Handle double type specific logic
-     *     System.out.println("This is a double type");
-     * }
-     * }</pre>
-     *
-     * @return {@code true}, indicating this is a {@code double} type
+     * @return {@code true}
      */
     @Override
     public boolean isDouble() {
@@ -135,25 +117,12 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
 
     /**
      * Retrieves a {@code double} value from a {@code ResultSet} at the specified column index.
-     * <p>
-     * This method uses {@code rs.getDouble()} which returns {@code 0.0} for SQL {@code NULL} values.
+     * Uses {@link java.sql.ResultSet#getDouble(int)} which returns {@code 0.0} for SQL {@code NULL} values.
      * Subclasses may override this to return {@code null} for SQL {@code NULL} values.
-     * </p>
-     *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * // For primitive double types
-     * Type<Double> type = TypeFactory.getType(double.class);
-     * double value = type.get(rs, 1);   // Returns 0.0 for SQL NULL
-     *
-     * // For wrapper Double types
-     * Type<Double> type = TypeFactory.getType(Double.class);
-     * Double value = type.get(rs, 1);   // Returns null for SQL NULL (overridden in subclass)
-     * }</pre>
      *
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the column index (1-based)
-     * @return the {@code double} value at the specified column; returns {@code 0.0} if SQL {@code NULL} (may be overridden by subclasses to return {@code null})
+     * @return the {@code double} value at the specified column, or {@code 0.0} if SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the {@code columnIndex} is invalid
      */
     @Override
@@ -163,25 +132,12 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
 
     /**
      * Retrieves a {@code double} value from a {@code ResultSet} using the specified column label.
-     * <p>
-     * This method uses {@code rs.getDouble()} which returns {@code 0.0} for SQL {@code NULL} values.
+     * Uses {@link java.sql.ResultSet#getDouble(String)} which returns {@code 0.0} for SQL {@code NULL} values.
      * Subclasses may override this to return {@code null} for SQL {@code NULL} values.
-     * </p>
-     *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * // For primitive double types
-     * Type<Double> type = TypeFactory.getType(double.class);
-     * double value = type.get(rs, "price");   // Returns 0.0 for SQL NULL
-     *
-     * // For wrapper Double types
-     * Type<Double> type = TypeFactory.getType(Double.class);
-     * Double value = type.get(rs, "price");   // Returns null for SQL NULL (overridden in subclass)
-     * }</pre>
      *
      * @param rs the {@code ResultSet} to read from
      * @param columnName the column label
-     * @return the {@code double} value at the specified column; returns {@code 0.0} if SQL {@code NULL} (may be overridden by subclasses to return {@code null})
+     * @return the {@code double} value at the specified column, or {@code 0.0} if SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the {@code columnName} is not found
      */
     @Override
@@ -233,10 +189,8 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
 
     /**
      * Appends the string representation of a {@code double} value to an {@code Appendable}.
-     * <p>
      * Writes "null" if the value is {@code null}, otherwise writes the numeric value
      * using its {@code toString()} representation.
-     * </p>
      *
      * @param appendable the {@code Appendable} to write to
      * @param x the {@code Number} value to append as {@code double}

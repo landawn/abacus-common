@@ -176,9 +176,9 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     }
 
     /**
-     * Constructs a new instance of ListMultimap with the specified initial capacity.
+     * Constructs a new instance of ListMultimap with the specified initial capacity for the backing map.
      *
-     * @param initialCapacity the initial capacity of the ListMultimap.
+     * @param initialCapacity the initial capacity of the backing {@link java.util.HashMap}.
      */
     ListMultimap(final int initialCapacity) {
         this(N.newHashMap(initialCapacity), ArrayList.class);
@@ -608,7 +608,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param keyExtractor the function to generate keys for the ListMultimap
      * @param valueExtractor the function to extract values for the ListMultimap
      * @return a new instance of ListMultimap with keys and values from the specified collection
-     * @throws IllegalArgumentException if the keyExtractor is {@code null} or if the valueExtractor is null
+     * @throws IllegalArgumentException if the keyExtractor is {@code null} or if the valueExtractor is {@code null}
      * @see #fromCollection(Collection, Function)
      * @see #fromMap(Map)
      */

@@ -19,29 +19,29 @@ package com.landawn.abacus.util;
 
 /**
  * Utility class for converting between byte arrays and hexadecimal string representations.
- * 
+ *
  * <p>This class provides methods to encode byte arrays into hexadecimal character arrays
  * or strings, and to decode hexadecimal strings back into byte arrays. All methods are
  * thread-safe as they operate on immutable data and don't maintain any state.</p>
- * 
+ *
  * <p>Hexadecimal encoding represents each byte as two hexadecimal characters. For example,
  * the byte value 255 (0xFF) is represented as "FF" or "ff" depending on the case setting.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Encoding bytes to hex
  * byte[] data = {0x48, 0x65, 0x6C, 0x6C, 0x6F};  // "Hello" in ASCII
  * String hexString = Hex.encodeToString(data);   // returns "48656c6c6f"
  * String hexUpper = Hex.encodeToString(data, false);   // returns "48656C6C6F"
- * 
+ *
  * // Decoding hex to bytes
  * byte[] decoded = Hex.decode("48656c6c6f");   // returns original byte array
  * }</pre>
- * 
+ *
  * <p><b>Attribution:</b>
- * This class includes code adapted from Apache Commons Lang under the Apache License 2.0. 
+ * This class includes code adapted from Apache Commons Lang under the Apache License 2.0.
  * Methods from these libraries may have been modified for consistency, performance optimization, and null-safety enhancement.
- * 
+ *
  * @version $Id: Hex.java 1619948 2014-08-22 22:53:55Z ggregory $
  */
 public final class Hex {

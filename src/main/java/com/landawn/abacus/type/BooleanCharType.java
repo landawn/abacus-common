@@ -24,10 +24,14 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 /**
- * Type handler for Boolean values represented as single characters.
- * This class maps Boolean values to 'Y' (true) and 'N' (false) characters,
- * providing compatibility with database systems that store boolean flags
- * as character fields.
+ * Type handler for {@link Boolean} values that are stored as single-character strings
+ * ({@code 'Y'}/{@code 'N'}) in the database.
+ * Maps {@code Boolean.TRUE} to the string {@code "Y"} and {@code Boolean.FALSE} / {@code null}
+ * to the string {@code "N"}, providing compatibility with legacy database schemas that
+ * represent boolean flags as {@code CHAR(1)} or {@code VARCHAR(1)} columns.
+ *
+ * <p>JDBC mapping: values are read and written as {@code VARCHAR} strings
+ * ({@link java.sql.Types#VARCHAR}). SQL NULL values are read back as {@code Boolean.FALSE}.</p>
  */
 @SuppressWarnings("java:S2160")
 public final class BooleanCharType extends AbstractType<Boolean> {
@@ -37,17 +41,17 @@ public final class BooleanCharType extends AbstractType<Boolean> {
     private static final String N = "N";
 
     /**
-     * Package-private constructor for BooleanCharType.
-     * This constructor is called by the TypeFactory to create BooleanChar type instances.
+     * Package-private constructor for {@code BooleanCharType}.
+     * Instances are created by {@link TypeFactory}; do not instantiate directly.
      */
     BooleanCharType() {
         super(typeName);
     }
 
     /**
-     * Returns the Class object representing the Boolean class.
+     * Returns the Java class represented by this type handler.
      *
-     * @return the Class object for Boolean.class
+     * @return {@code Boolean.class}
      */
     @Override
     public Class<Boolean> javaType() {
@@ -55,9 +59,9 @@ public final class BooleanCharType extends AbstractType<Boolean> {
     }
 
     /**
-     * Returns the default value for this type.
+     * Returns the default value for the {@code BooleanChar} type.
      *
-     * @return {@code Boolean.FALSE}
+     * @return {@link Boolean#FALSE}
      */
     @Override
     public Boolean defaultValue() {
@@ -65,10 +69,10 @@ public final class BooleanCharType extends AbstractType<Boolean> {
     }
 
     /**
-     * Indicates whether values of this type require quoting in CSV format.
-     * Boolean character values ({@code 'Y'}/{@code 'N'}) are self-delimiting and do not require quotes.
+     * Indicates whether values of this type require quoting in CSV output.
+     * Single-character {@code Y}/{@code N} values do not require quoting.
      *
-     * @return {@code false}, as boolean character values do not require quoting in CSV format
+     * @return {@code false} always
      */
     @Override
     public boolean isCsvQuoteRequired() {
@@ -76,19 +80,11 @@ public final class BooleanCharType extends AbstractType<Boolean> {
     }
 
     /**
-     * Converts a Boolean value to its character string representation.
-     * Maps {@code true} to "Y" and false/null to "N".
+     * Converts a {@link Boolean} to its single-character string representation.
+     * Maps {@code true} to {@code "Y"} and {@code false} / {@code null} to {@code "N"}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Boolean> type = TypeFactory.getType("BooleanChar");
-     * String result = type.stringOf(true);         // returns "Y"
-     * String falseResult = type.stringOf(false);   // returns "N"
-     * String nullResult = type.stringOf(null);     // returns "N"
-     * }</pre>
-     *
-     * @param b the Boolean value to convert
-     * @return "Y" if b is {@code true}, "N" if b is {@code false} or null
+     * @param b the {@code Boolean} value to convert; may be {@code null}
+     * @return {@code "Y"} if {@code b} is {@code Boolean.TRUE}, {@code "N"} otherwise
      */
     @Override
     public String stringOf(final Boolean b) {
@@ -96,11 +92,13 @@ public final class BooleanCharType extends AbstractType<Boolean> {
     }
 
     /**
-     * Converts a string representation to a Boolean value.
-     * Case-insensitive parsing where "Y" maps to {@code true}, all other values to {@code false}.
+     * Parses a string to a {@link Boolean} using the {@code Y}/{@code N} convention.
+     * The comparison is case-insensitive; {@code "Y"} or {@code "y"} yields {@code true}.
+     * Any other value (including {@code null}) yields {@code false}.
      *
-     * @param str the string to parse (typically "Y" or "N")
-     * @return Boolean.TRUE if str equals "Y" (case-insensitive), Boolean.FALSE otherwise
+     * @param str the string to parse; may be {@code null}
+     * @return {@link Boolean#TRUE} if {@code str} equals {@code "Y"} (case-insensitive),
+     *         {@link Boolean#FALSE} otherwise
      */
     @Override
     public Boolean valueOf(final String str) {
@@ -108,13 +106,16 @@ public final class BooleanCharType extends AbstractType<Boolean> {
     }
 
     /**
-     * Converts a character array subset to a Boolean value.
-     * Checks if the single character is 'Y' or 'y' for {@code true}.
+     * Parses a character array sub-sequence to a {@link Boolean}.
+     * Returns {@link Boolean#TRUE} only if {@code len} is {@code 1} and the character at
+     * {@code cbuf[offset]} is {@code 'Y'} or {@code 'y'}; returns {@link Boolean#FALSE} otherwise,
+     * including when {@code cbuf} is {@code null} or {@code len} is {@code 0}.
      *
-     * @param cbuf the character array containing the character
-     * @param offset the starting position in the character array
-     * @param len the number of characters to examine (should be 1)
-     * @return Boolean.TRUE if the single character is 'Y' or 'y', Boolean.FALSE otherwise
+     * @param cbuf the character array; may be {@code null}
+     * @param offset the 0-based start position within {@code cbuf}
+     * @param len the number of characters to examine
+     * @return {@link Boolean#TRUE} if the single character is {@code 'Y'} or {@code 'y'},
+     *         {@link Boolean#FALSE} otherwise
      */
     @Override
     public Boolean valueOf(final char[] cbuf, final int offset, final int len) {
@@ -122,20 +123,15 @@ public final class BooleanCharType extends AbstractType<Boolean> {
     }
 
     /**
-     * Retrieves a Boolean value from a ResultSet at the specified column index.
-     * Reads a string value and converts it using the Y/N mapping.
+     * Retrieves a {@link Boolean} from a {@link java.sql.ResultSet} at the specified column index.
+     * The column value is read as a {@code VARCHAR} string and converted via {@link #valueOf(String)}.
+     * SQL NULL values are treated as {@code Boolean.FALSE}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Boolean> type = TypeFactory.getType("BooleanChar");
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * Boolean isActive = type.get(rs, 1);   // retrieves Boolean from column 1 ('Y' -> true, 'N' -> false)
-     * }</pre>
-     *
-     * @param rs the ResultSet containing the data, must not be {@code null}
-     * @param columnIndex the column index (1-based) to retrieve the value from
-     * @return Boolean.TRUE if the column value is "Y" (case-insensitive), Boolean.FALSE otherwise (including SQL NULL)
-     * @throws SQLException if a database access error occurs or the column index is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnIndex the 1-based index of the column containing the Y/N value
+     * @return {@link Boolean#TRUE} if the column value is {@code "Y"} (case-insensitive),
+     *         {@link Boolean#FALSE} for any other value including SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
      */
     @Override
     public Boolean get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -143,20 +139,15 @@ public final class BooleanCharType extends AbstractType<Boolean> {
     }
 
     /**
-     * Retrieves a Boolean value from a ResultSet using the specified column label.
-     * Reads a string value and converts it using the Y/N mapping.
+     * Retrieves a {@link Boolean} from a {@link java.sql.ResultSet} using the specified column label.
+     * The column value is read as a {@code VARCHAR} string and converted via {@link #valueOf(String)}.
+     * SQL NULL values are treated as {@code Boolean.FALSE}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Boolean> type = TypeFactory.getType("BooleanChar");
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * Boolean isActive = type.get(rs, "is_active");   // retrieves Boolean from "is_active" column
-     * }</pre>
-     *
-     * @param rs the ResultSet containing the data, must not be {@code null}
-     * @param columnName the label of the column to retrieve the value from, must not be {@code null}
-     * @return Boolean.TRUE if the column value is "Y" (case-insensitive), Boolean.FALSE otherwise (including SQL NULL)
-     * @throws SQLException if a database access error occurs or the columnName is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnName the column label as specified in the SQL AS clause, or the column name if no AS clause was used
+     * @return {@link Boolean#TRUE} if the column value is {@code "Y"} (case-insensitive),
+     *         {@link Boolean#FALSE} for any other value including SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
     @Override
     public Boolean get(final ResultSet rs, final String columnName) throws SQLException {
@@ -164,22 +155,14 @@ public final class BooleanCharType extends AbstractType<Boolean> {
     }
 
     /**
-     * Sets a Boolean parameter in a PreparedStatement at the specified position.
-     * Converts the Boolean to "Y" (true) or "N" (false) before setting.
-     * Null values are set as SQL NULL with VARCHAR type.
+     * Sets a {@link Boolean} parameter on a {@link java.sql.PreparedStatement} at the specified position.
+     * Converts {@code true} to the string {@code "Y"} and {@code false} to {@code "N"}.
+     * A {@code null} value is stored as SQL NULL ({@link java.sql.Types#VARCHAR}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Boolean> type = TypeFactory.getType("BooleanChar");
-     * PreparedStatement stmt = conn.prepareStatement("UPDATE users SET is_active = ? WHERE id = ?");
-     * type.set(stmt, 1, true);   // sets parameter 1 to 'Y'
-     * stmt.executeUpdate();
-     * }</pre>
-     *
-     * @param stmt the PreparedStatement to set the parameter on, must not be {@code null}
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the Boolean value to set, may be {@code null}
-     * @throws SQLException if a database access error occurs or the column index is invalid
+     * @param stmt the {@code PreparedStatement} on which to set the parameter
+     * @param columnIndex the 1-based parameter index to set
+     * @param x the {@code Boolean} value to set; {@code null} is stored as SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Boolean x) throws SQLException {
@@ -191,14 +174,14 @@ public final class BooleanCharType extends AbstractType<Boolean> {
     }
 
     /**
-     * Sets a named Boolean parameter in a CallableStatement.
-     * Converts the Boolean to "Y" (true) or "N" (false) before setting.
-     * Null values are set as SQL NULL with VARCHAR type.
+     * Sets a named {@link Boolean} parameter on a {@link java.sql.CallableStatement}.
+     * Converts {@code true} to the string {@code "Y"} and {@code false} to {@code "N"}.
+     * A {@code null} value is stored as SQL NULL ({@link java.sql.Types#VARCHAR}).
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param stmt the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the Boolean value to set, may be null
-     * @throws SQLException if a database access error occurs or the parameter name is invalid
+     * @param x the {@code Boolean} value to set; {@code null} is stored as SQL NULL
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Boolean x) throws SQLException {
@@ -210,11 +193,13 @@ public final class BooleanCharType extends AbstractType<Boolean> {
     }
 
     /**
-     * Appends a Boolean value to an Appendable object as a Y/N character.
+     * Appends a {@link Boolean} value to an {@link Appendable} as a Y/N string.
+     * Appends {@code "Y"} if {@code x} is {@code true}; appends {@code "N"} otherwise
+     * (including when {@code x} is {@code null}).
      *
-     * @param appendable the Appendable object to append to
-     * @param x the Boolean value to append
-     * @throws IOException if an I/O error occurs during the append operation
+     * @param appendable the target {@code Appendable}
+     * @param x the {@code Boolean} value to append; may be {@code null}
+     * @throws IOException if an I/O error occurs during appending
      */
     @Override
     public void appendTo(final Appendable appendable, final Boolean x) throws IOException {
@@ -222,13 +207,16 @@ public final class BooleanCharType extends AbstractType<Boolean> {
     }
 
     /**
-     * Writes a Boolean value to a CharacterWriter as a Y/N character.
-     * Applies optional character quotation based on the configuration.
+     * Writes a {@link Boolean} value to a {@link CharacterWriter} as a Y/N string.
+     * If {@code config} specifies a non-zero character quotation character, the value is wrapped
+     * in that quotation character; otherwise the raw {@code "Y"} or {@code "N"} string is written.
      *
-     * @param writer the CharacterWriter to write to
-     * @param x the Boolean value to write
-     * @param config the serialization configuration that may specify character quotation
-     * @throws IOException if an I/O error occurs during the write operation
+     * @param writer the {@code CharacterWriter} to write to
+     * @param x the {@code Boolean} value to write; may be {@code null}
+     * @param config the serialization configuration; if non-{@code null} and its
+     *               {@link com.landawn.abacus.parser.JsonXmlSerConfig#getCharQuotation()} is non-zero,
+     *               the value is wrapped in that character; may be {@code null}
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final Boolean x, final JsonXmlSerConfig<?> config) throws IOException {

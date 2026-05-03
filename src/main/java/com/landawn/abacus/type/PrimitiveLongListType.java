@@ -15,6 +15,7 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
+import java.util.List;
 
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
@@ -22,7 +23,11 @@ import com.landawn.abacus.util.LongList;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for {@link LongList} objects, providing serialization and deserialization support.
+ * Type handler for {@link LongList} objects, which is a primitive-backed list of {@code long} values.
+ * Provides serialization and deserialization of {@link LongList} instances by delegating to the
+ * underlying {@code long[]} array type handler.
+ * String representations use the format {@code [1, 2, 3]} with comma-separated elements
+ * enclosed in square brackets.
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongList> {
@@ -32,8 +37,13 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
     private final Type<long[]> arrayType = Type.of(long[].class);
 
     private final Type<Long> elementType = Type.of(long.class);
-    private final Type<Long>[] parameterTypes = new Type[] { elementType };
+    private final List<Type<?>> parameterTypes = List.of(elementType);
 
+    /**
+     * Constructs a new PrimitiveLongListType instance.
+     * This constructor is protected to allow subclassing while maintaining controlled instantiation
+     * through the TypeFactory.
+     */
     protected PrimitiveLongListType() {
         super(LONG_LIST);
     }
@@ -79,16 +89,16 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<LongList> type = TypeFactory.getType(LongList.class);
-     * Type<Long>[] paramTypes = type.parameterTypes();
-     * System.out.println(paramTypes.length);      // Output: 1
-     * System.out.println(paramTypes[0].name());   // Output: long
+     * List<Type<?>> paramTypes = type.parameterTypes();
+     * System.out.println(paramTypes.size());        // Output: 1
+     * System.out.println(paramTypes.get(0).name()); // Output: long
      * }</pre>
      *
-     * @return an array containing the Long Type that describes the elements of this list type
+     * @return an immutable list containing the Long Type that describes the elements of this list type
      * @see #elementType()
      */
     @Override
-    public Type<Long>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 

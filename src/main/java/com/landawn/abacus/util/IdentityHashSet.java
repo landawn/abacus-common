@@ -20,18 +20,18 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 
 /**
- * A Set implementation that uses reference-equality (==) instead of object-equality (equals()) 
+ * A Set implementation that uses reference-equality (==) instead of object-equality (equals())
  * when comparing elements. This set is backed by an {@link IdentityHashMap}, which means that
  * two elements e1 and e2 are considered equal if and only if (e1==e2).
- * 
+ *
  * <p>This class is useful when you need to track object instances rather than logical equality.
  * For example, it can be used to detect circular references or to maintain a collection of
  * unique object instances regardless of their equals() implementation.</p>
- * 
+ *
  * <p>This implementation is not synchronized. If multiple threads access an identity hash set
  * concurrently, and at least one of the threads modifies the set, it must be synchronized
  * externally.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IdentityHashSet<String> set = new IdentityHashSet<>();
@@ -54,7 +54,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
 
     /**
      * Constructs a new, empty identity hash set with the default initial capacity (21).
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IdentityHashSet<Object> set = new IdentityHashSet<>();
@@ -404,7 +404,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
 
     /**
      * Removes all of the elements from this set. The set will be empty after this call returns.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IdentityHashSet<String> set = new IdentityHashSet<>();

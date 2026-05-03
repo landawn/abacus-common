@@ -69,6 +69,7 @@ public interface ByteTriFunction<R> extends Throwables.ByteTriFunction<R, Runtim
      * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed function that first applies this function and then applies the
      *         {@code after} function
+     * @throws NullPointerException if {@code after} is null
      */
     default <V> ByteTriFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return (a, b, c) -> after.apply(apply(a, b, c));

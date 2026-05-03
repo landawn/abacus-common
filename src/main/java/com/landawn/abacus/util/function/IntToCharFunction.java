@@ -14,8 +14,8 @@
 package com.landawn.abacus.util.function;
 
 /**
- * Represents a function that accepts an int-valued argument and produces a
- * char-valued result. This is the {@code int}-to-{@code char} primitive
+ * Represents a function that accepts an {@code int}-valued argument and produces a
+ * {@code char}-valued result. This is the {@code int}-to-{@code char} primitive
  * specialization for {@link java.util.function.Function}.
  *
  * <p>This is a functional interface whose functional method is
@@ -62,9 +62,7 @@ public interface IntToCharFunction {
      *
      * @param value the function argument, an int value to be converted to char.
      *              This is typically a Unicode code point value
-     * @return the function result as a char value. If the input value is outside
-     *         the valid char range (0 to 65,535), the result will be the lower
-     *         16 bits of the input value (equivalent to {@code (char) value})
+     * @return the function result as a char value
      */
     char applyAsChar(int value);
 }

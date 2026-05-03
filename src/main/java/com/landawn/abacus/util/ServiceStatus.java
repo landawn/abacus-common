@@ -16,11 +16,11 @@ package com.landawn.abacus.util;
 
 /**
  * Enumeration representing various states of a service lifecycle.
- * 
+ *
  * <p>This enum provides a standardized way to track and manage service states throughout
  * their lifecycle, from initial default state through various operational and terminal states.
  * Each status has an associated integer value for efficient storage and comparison.</p>
- * 
+ *
  * <p><b>Status progression example:</b></p>
  * <pre>{@code
  * ServiceStatus status = ServiceStatus.BLANK;
@@ -28,12 +28,12 @@ package com.landawn.abacus.util;
  * status = ServiceStatus.ACTIVE;
  * // Service expires
  * status = ServiceStatus.EXPIRED;
- * 
+ *
  * // Convert from stored integer
  * int storedValue = 2;
  * ServiceStatus restoredStatus = ServiceStatus.fromCode(storedValue);   // SUSPENDED
  * }</pre>
- * 
+ *
  * @see AccountStatus
  * @see UnifiedStatus
  * @see WeekDay
@@ -96,10 +96,10 @@ public enum ServiceStatus {
 
     /**
      * Returns the integer value associated with this service status.
-     * 
+     *
      * <p>This value can be used for efficient storage in databases or for
      * transmission over networks where integer representation is preferred.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ServiceStatus status = ServiceStatus.ACTIVE;
@@ -107,7 +107,7 @@ public enum ServiceStatus {
      * // Store in database
      * database.saveStatus(serviceId, value);
      * }</pre>
-     * 
+     *
      * @return the integer value of this status
      */
     public int code() {
@@ -116,17 +116,17 @@ public enum ServiceStatus {
 
     /**
      * Returns the ServiceStatus corresponding to the specified integer value.
-     * 
+     *
      * <p>This method provides a way to reconstruct a ServiceStatus from its
      * integer representation, useful when retrieving status values from storage
      * or network protocols.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Retrieve from database
      * int storedValue = database.getStatus(serviceId);
      * ServiceStatus status = ServiceStatus.fromCode(storedValue);
-     * 
+     *
      * if (status == ServiceStatus.ACTIVE) {
      *     // Handle active service
      * }

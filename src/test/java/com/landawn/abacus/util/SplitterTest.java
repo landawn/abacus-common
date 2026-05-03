@@ -129,17 +129,17 @@ public class SplitterTest extends AbstractTest {
     public void test_01() {
         String source = "aaaaa";
         N.println(Splitter.with("aa").split(source));
-        assertTrue(CommonUtil.equals(Array.of("", "", "", "", "", ""), Splitter.with("a").splitToArray(source)));
-        assertTrue(CommonUtil.equals(CommonUtil.toList("", "", "", "", "", ""), com.google.common.base.Splitter.on("a").splitToList(source)));
+        assertTrue(N.equals(Array.of("", "", "", "", "", ""), Splitter.with("a").splitToArray(source)));
+        assertTrue(N.equals(N.toList("", "", "", "", "", ""), com.google.common.base.Splitter.on("a").splitToList(source)));
 
-        assertTrue(CommonUtil.equals(Array.of("", "", "a"), Splitter.with("aa").splitToArray(source)));
-        assertTrue(CommonUtil.equals(CommonUtil.toList("", "", "a"), com.google.common.base.Splitter.on("aa").splitToList(source)));
+        assertTrue(N.equals(Array.of("", "", "a"), Splitter.with("aa").splitToArray(source)));
+        assertTrue(N.equals(N.toList("", "", "a"), com.google.common.base.Splitter.on("aa").splitToList(source)));
 
-        assertTrue(CommonUtil.equals(Array.of("", "", "", "", "", ""), Splitter.pattern("a").splitToArray(source)));
-        assertTrue(CommonUtil.equals(CommonUtil.toList("", "", "", "", "", ""), com.google.common.base.Splitter.onPattern("a").splitToList(source)));
+        assertTrue(N.equals(Array.of("", "", "", "", "", ""), Splitter.pattern("a").splitToArray(source)));
+        assertTrue(N.equals(N.toList("", "", "", "", "", ""), com.google.common.base.Splitter.onPattern("a").splitToList(source)));
 
-        assertTrue(CommonUtil.equals(Array.of("", "", "a"), Splitter.pattern("aa").splitToArray(source)));
-        assertTrue(CommonUtil.equals(CommonUtil.toList("", "", "a"), com.google.common.base.Splitter.onPattern("aa").splitToList(source)));
+        assertTrue(N.equals(Array.of("", "", "a"), Splitter.pattern("aa").splitToArray(source)));
+        assertTrue(N.equals(N.toList("", "", "a"), com.google.common.base.Splitter.onPattern("aa").splitToList(source)));
 
         source = "a   b \t \n c \n \t \r d " + '\u0009' + '\u000B' + '\u000C' + " \re";
         N.println(source);
@@ -213,8 +213,8 @@ public class SplitterTest extends AbstractTest {
     @Test
     public void testMapSplitterSplitWithTypeAndSupplier() {
         Splitter.MapSplitter mapSplitter = Splitter.MapSplitter.with(",", "=");
-        Type<Integer> intType = CommonUtil.typeOf(Integer.class);
-        Type<Long> longType = CommonUtil.typeOf(Long.class);
+        Type<Integer> intType = N.typeOf(Integer.class);
+        Type<Long> longType = N.typeOf(Long.class);
         TreeMap<Integer, Long> result = mapSplitter.split("1=100,2=200", intType, longType, Suppliers.ofTreeMap());
         assertTrue(result instanceof TreeMap);
         assertEquals(2, result.size());
@@ -393,8 +393,8 @@ public class SplitterTest extends AbstractTest {
     @Test
     public void testMapSplitterSplitWithTypesAndSupplier() {
         Splitter.MapSplitter mapSplitter = Splitter.MapSplitter.with(",", "=");
-        Type<String> stringType = CommonUtil.typeOf(String.class);
-        Type<Integer> intType = CommonUtil.typeOf(Integer.class);
+        Type<String> stringType = N.typeOf(String.class);
+        Type<Integer> intType = N.typeOf(Integer.class);
         Map<String, Integer> result = mapSplitter.split("a=1,b=2,c=3", stringType, intType, Suppliers.ofLinkedHashMap());
         Map<String, Integer> expected = new LinkedHashMap<>();
         expected.put("a", 1);
@@ -926,8 +926,8 @@ public class SplitterTest extends AbstractTest {
     @Test
     public void testMapSplitterSplitWithType() {
         Splitter.MapSplitter mapSplitter = Splitter.MapSplitter.with(",", "=");
-        Type<Integer> intType = CommonUtil.typeOf(Integer.class);
-        Type<Long> longType = CommonUtil.typeOf(Long.class);
+        Type<Integer> intType = N.typeOf(Integer.class);
+        Type<Long> longType = N.typeOf(Long.class);
         Map<Integer, Long> result = mapSplitter.split("1=100,2=200", intType, longType);
         Map<Integer, Long> expected = new LinkedHashMap<>();
         expected.put(1, 100L);
@@ -966,8 +966,8 @@ public class SplitterTest extends AbstractTest {
     @Test
     public void testMapSplitterSplitToMapWithType() {
         Splitter.MapSplitter mapSplitter = Splitter.MapSplitter.with(",", "=");
-        Type<Integer> intType = CommonUtil.typeOf(Integer.class);
-        Type<Long> longType = CommonUtil.typeOf(Long.class);
+        Type<Integer> intType = N.typeOf(Integer.class);
+        Type<Long> longType = N.typeOf(Long.class);
         Map<Integer, Long> output = new HashMap<>();
         mapSplitter.split("1=100,2=200", intType, longType, output);
         assertEquals(2, output.size());
@@ -1051,8 +1051,8 @@ public class SplitterTest extends AbstractTest {
     @Test
     public void testMapSplitterSplitWithTypes() {
         Splitter.MapSplitter mapSplitter = Splitter.MapSplitter.with(",", "=");
-        Type<String> stringType = CommonUtil.typeOf(String.class);
-        Type<Integer> intType = CommonUtil.typeOf(Integer.class);
+        Type<String> stringType = N.typeOf(String.class);
+        Type<Integer> intType = N.typeOf(Integer.class);
         Map<String, Integer> result = mapSplitter.split("a=1,b=2,c=3", stringType, intType);
         Map<String, Integer> expected = new LinkedHashMap<>();
         expected.put("a", 1);
@@ -1097,8 +1097,8 @@ public class SplitterTest extends AbstractTest {
     @Test
     public void testMapSplitterSplitIntoMapWithTypes() {
         Splitter.MapSplitter mapSplitter = Splitter.MapSplitter.with(",", "=");
-        Type<String> stringType = CommonUtil.typeOf(String.class);
-        Type<Integer> intType = CommonUtil.typeOf(Integer.class);
+        Type<String> stringType = N.typeOf(String.class);
+        Type<Integer> intType = N.typeOf(Integer.class);
         Map<String, Integer> output = new HashMap<>();
         mapSplitter.split("a=1,b=2,c=3", stringType, intType, output);
         Map<String, Integer> expected = new HashMap<>();
@@ -1479,7 +1479,7 @@ public class SplitterTest extends AbstractTest {
     @Test
     public void testSplitWithTypeAndSupplier() {
         Splitter splitter = Splitter.with(',');
-        Type<Integer> intType = CommonUtil.typeOf(Integer.class);
+        Type<Integer> intType = N.typeOf(Integer.class);
         Set<Integer> result = splitter.split("1,2,3", intType, Suppliers.ofSet());
         assertEquals(new HashSet<>(Arrays.asList(1, 2, 3)), result);
     }
@@ -1573,7 +1573,7 @@ public class SplitterTest extends AbstractTest {
     public void test_splitToCount() {
         final int[] a = Array.rangeClosed(1, 7);
 
-        final IntBiFunction<int[]> func = (fromIndex, toIndex) -> CommonUtil.copyOfRange(a, fromIndex, toIndex);
+        final IntBiFunction<int[]> func = (fromIndex, toIndex) -> N.copyOfRange(a, fromIndex, toIndex);
 
         N.splitByChunkCount(7, 5, true, func).forEach(Fn.println());
         N.splitByChunkCount(7, 5, false, func).forEach(Fn.println());
@@ -1710,7 +1710,7 @@ public class SplitterTest extends AbstractTest {
     @Test
     public void testSplitWithType() {
         Splitter splitter = Splitter.with(',');
-        Type<Integer> intType = CommonUtil.typeOf(Integer.class);
+        Type<Integer> intType = N.typeOf(Integer.class);
         List<Integer> result = splitter.split("1,2,3", intType);
         assertEquals(Arrays.asList(1, 2, 3), result);
 
@@ -1741,7 +1741,7 @@ public class SplitterTest extends AbstractTest {
     @Test
     public void testSplitToCollectionWithType() {
         Splitter splitter = Splitter.with(',');
-        Type<Integer> intType = CommonUtil.typeOf(Integer.class);
+        Type<Integer> intType = N.typeOf(Integer.class);
         List<Integer> output = new ArrayList<>();
         splitter.split("1,2,3", intType, output);
         assertEquals(Arrays.asList(1, 2, 3), output);
@@ -1774,7 +1774,7 @@ public class SplitterTest extends AbstractTest {
     @Test
     public void testSplitIntoCollectionWithType() {
         Splitter splitter = Splitter.with(',');
-        Type<Integer> intType = CommonUtil.typeOf(Integer.class);
+        Type<Integer> intType = N.typeOf(Integer.class);
         List<Integer> output = new ArrayList<>();
         splitter.split("1,2,3", intType, output);
         assertEquals(Arrays.asList(1, 2, 3), output);

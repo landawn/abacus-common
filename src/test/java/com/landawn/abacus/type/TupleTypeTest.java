@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,9 +50,9 @@ public class TupleTypeTest extends TestBase {
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = tuple1Type.parameterTypes();
+        List<Type<?>> paramTypes = tuple1Type.parameterTypes();
         assertNotNull(paramTypes);
-        assertEquals(1, paramTypes.length);
+        assertEquals(1, paramTypes.size());
     }
 
     @Test

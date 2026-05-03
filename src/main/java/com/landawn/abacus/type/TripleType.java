@@ -17,6 +17,7 @@ package com.landawn.abacus.type;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.List;
 
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
@@ -25,9 +26,9 @@ import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.Triple;
-import com.landawn.abacus.util.SK;
 
 /**
  * Type handler for {@link Triple} objects. This class provides serialization and
@@ -52,7 +53,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
 
     private final Type<R> rightType;
 
-    private final Type<?>[] parameterTypes;
+    private final List<Type<?>> parameterTypes;
 
     /**
      * Constructs a TripleType instance with the specified element types.
@@ -70,7 +71,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
         leftType = TypeFactory.getType(leftTypeName);
         middleType = TypeFactory.getType(middleTypeName);
         rightType = TypeFactory.getType(rightTypeName);
-        parameterTypes = new Type[] { leftType, middleType, rightType };
+        parameterTypes = List.of(leftType, middleType, rightType);
     }
 
     /**
@@ -101,22 +102,28 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
 
     /**
      * Returns the parameter types of this generic type.
-     * For Triple, this is an array containing three elements: left type, middle type, and right type.
+     * For Triple, this is an immutable list containing three elements: left type, middle type, and right type.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Triple<String, Integer, Double>> type = TypeFactory.getType("Triple<String, Integer, Double>");
-     * Type<?>[] paramTypes = type.parameterTypes();
-     * // paramTypes[0] is Type<String>, paramTypes[1] is Type<Integer>, paramTypes[2] is Type<Double>
+     * List<Type<?>> paramTypes = type.parameterTypes();
+     * // paramTypes.get(0) is Type<String>, paramTypes.get(1) is Type<Integer>, paramTypes.get(2) is Type<Double>
      * }</pre>
      *
-     * @return an array containing the left, middle, and right types
+     * @return an immutable list containing the left, middle, and right types
      */
     @Override
-    public Type<?>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 
+    /**
+     * Indicates whether this type is a parameterized type.
+     * {@code TripleType} is always parameterized as it carries three type parameters.
+     *
+     * @return {@code true}, indicating this is a parameterized type
+     */
     @Override
     public boolean isParameterizedType() {
         return true;

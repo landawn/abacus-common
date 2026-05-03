@@ -17,29 +17,36 @@ package com.landawn.abacus.type;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for Base64-encoded byte arrays.
- * This class provides conversion between byte arrays and their Base64 string representations,
- * enabling storage and transmission of binary data as text.
+ * Type handler for {@code byte[]} values that are serialized as Base64-encoded strings.
+ * Converts between raw byte arrays and their standard Base64 string representations,
+ * enabling storage and transmission of binary data in text-based formats.
+ *
+ * <p>The underlying Java type is {@code byte[]}. Unlike {@link BytesType}, which also uses Base64
+ * encoding, this type is registered under the name {@code "Base64Encoded"} and treats a
+ * {@code null} input to {@link #stringOf(byte[])} as an empty string rather than {@code null}.</p>
+ *
+ * @see BytesType
  */
 public class Base64EncodedType extends AbstractType<byte[]> {
 
     /**
-     * The type name constant for Base64-encoded type identification.
+     * The type name constant used to identify this type within the type system
+     * (value: {@code "Base64Encoded"}).
      */
     public static final String BASE64_ENCODED = "Base64Encoded";
 
     /**
-     * Package-private constructor for Base64EncodedType.
-     * This constructor is called by the TypeFactory to create Base64Encoded type instances.
+     * Package-private constructor for {@code Base64EncodedType}.
+     * Instances are created by {@link TypeFactory}; do not instantiate directly.
      */
     Base64EncodedType() {
         super(BASE64_ENCODED);
     }
 
     /**
-     * Returns the Class object representing the byte array class.
+     * Returns the Java class represented by this type handler.
      *
-     * @return the Class object for byte[].class
+     * @return {@code byte[].class}
      */
     @Override
     public Class<byte[]> javaType() {
@@ -47,29 +54,16 @@ public class Base64EncodedType extends AbstractType<byte[]> {
     }
 
     /**
-     * Converts a byte array to its Base64-encoded string representation.
-     * Uses standard Base64 encoding to convert binary data to a text format
-     * suitable for storage or transmission in text-based protocols.
+     * Encodes a byte array as a standard Base64 string.
+     * Uses {@link com.landawn.abacus.util.Strings#base64Encode(byte[])} internally.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Base64EncodedType type = (Base64EncodedType) TypeFactory.getType(Base64EncodedType.BASE64_ENCODED);
+     * <p>If {@code x} is {@code null}, the behaviour is governed by
+     * {@code Strings.base64Encode} (typically returns an empty string).
+     * If {@code x} is an empty array, an empty string is returned.</p>
      *
-     * byte[] data = "Hello World".getBytes();
-     * String encoded = type.stringOf(data);
-     * // encoded: "SGVsbG8gV29ybGQ="
-     *
-     * byte[] empty = new byte[0];
-     * String emptyEncoded = type.stringOf(empty);
-     * // emptyEncoded: ""
-     *
-     * String nullEncoded = type.stringOf(null);
-     * // nullEncoded: ""
-     * }</pre>
-     *
-     * @param x the byte array to encode
-     * @return the Base64-encoded string representation of the byte array,
-     *         or an empty string if the input is null
+     * @param x the byte array to encode; may be {@code null}
+     * @return the Base64-encoded string representation of the byte array;
+     *         an empty string if {@code x} is {@code null} or empty
      */
     @Override
     public String stringOf(final byte[] x) {
@@ -77,28 +71,12 @@ public class Base64EncodedType extends AbstractType<byte[]> {
     }
 
     /**
-     * Converts a Base64-encoded string back to its original byte array.
-     * Decodes the Base64 string to recover the original binary data.
+     * Decodes a Base64-encoded string back to a byte array.
+     * Uses {@link com.landawn.abacus.util.Strings#base64Decode(String)} internally.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Base64EncodedType type = (Base64EncodedType) TypeFactory.getType(Base64EncodedType.BASE64_ENCODED);
-     *
-     * String encoded = "SGVsbG8gV29ybGQ=";
-     * byte[] decoded = type.valueOf(encoded);
-     * String text = new String(decoded);
-     * // text: "Hello World"
-     *
-     * byte[] emptyDecoded = type.valueOf("");
-     * // emptyDecoded: byte[0]
-     *
-     * byte[] nullDecoded = type.valueOf(null);
-     * // nullDecoded: byte[0]
-     * }</pre>
-     *
-     * @param base64String the Base64-encoded string to decode
-     * @return the decoded byte array, or an empty byte array if the input is null
-     * @throws IllegalArgumentException if the input string is not valid Base64
+     * @param base64String the Base64-encoded string to decode; may be {@code null} or empty
+     * @return the decoded byte array; an empty byte array if the input is {@code null} or empty
+     * @throws IllegalArgumentException if {@code base64String} contains characters outside the Base64 alphabet
      */
     @Override
     public byte[] valueOf(final String base64String) {

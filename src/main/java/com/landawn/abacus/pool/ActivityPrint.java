@@ -24,7 +24,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * Tracks the activity and lifecycle information for poolable objects.
  * This class maintains timestamps and counters to determine when an object should expire
  * from a pool based on age or inactivity.
- * 
+ *
  * <p>An ActivityPrint monitors:
  * <ul>
  *   <li>Creation time - when the object was created</li>
@@ -33,28 +33,28 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  *   <li>Last access time - when the object was last accessed</li>
  *   <li>Access count - number of times the object has been accessed</li>
  * </ul>
- * 
+ *
  * <p>Objects expire when either:
  * <ul>
  *   <li>Current time - creation time &gt; live time, or</li>
  *   <li>Current time - last access time &gt; max idle time</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create activity print with 1 hour lifetime, 10 minute max idle
  * ActivityPrint activity = new ActivityPrint(3600000, 600000);
- * 
+ *
  * // Update on access
  * activity.updateLastAccessTime();
  * activity.updateAccessCount();
- * 
+ *
  * // Check expiration
  * if (activity.isExpired()) {
  *     // Remove from pool
  * }
  * }</pre>
- * 
+ *
  * @see Poolable
  */
 public final class ActivityPrint implements Cloneable, Serializable {
@@ -92,7 +92,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
 
     /**
      * Creates a new ActivityPrint with the specified lifetime and idle time limits.
-     * 
+     *
      * @param liveTime maximum lifetime in milliseconds (must be positive)
      * @param maxIdleTime maximum idle time in milliseconds (must be positive)
      * @throws IllegalArgumentException if liveTime or maxIdleTime is not positive
@@ -135,7 +135,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
 
     /**
      * Returns the maximum lifetime for this activity print.
-     * 
+     *
      * @return the maximum lifetime in milliseconds
      */
     public long getLiveTime() {
@@ -166,7 +166,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
 
     /**
      * Returns the maximum idle time for this activity print.
-     * 
+     *
      * @return the maximum idle time in milliseconds
      */
     public long getMaxIdleTime() {
@@ -197,7 +197,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
 
     /**
      * Returns the creation time of the object associated with this activity print.
-     * 
+     *
      * @return the creation time in milliseconds since epoch
      */
     public long getCreatedTime() {
@@ -207,7 +207,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Sets the creation time for this activity print.
      * This method is package-private and typically used only for testing or special cases.
-     * 
+     *
      * @param createdTime the new creation time in milliseconds since epoch
      * @return this ActivityPrint instance for method chaining
      */
@@ -219,7 +219,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
 
     /**
      * Returns the last access time for the object associated with this activity print.
-     * 
+     *
      * @return the last access time in milliseconds since epoch
      */
     public long getLastAccessTime() {
@@ -229,7 +229,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Updates the last access time to the current system time.
      * This method should be called whenever the associated object is accessed from the pool.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * E pooledObject = pool.get();
@@ -244,7 +244,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
 
     /**
      * Returns the number of times the associated object has been accessed.
-     * 
+     *
      * @return the access count
      */
     public int getAccessCount() {
@@ -307,7 +307,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Creates and returns a copy of this ActivityPrint.
      * The clone will have the same values for all fields.
-     * 
+     *
      * @return a clone of this ActivityPrint
      */
     @Override
@@ -326,7 +326,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Returns a hash code value for this ActivityPrint.
      * The hash code is computed from all fields.
-     * 
+     *
      * @return a hash code value for this object
      */
     @Override
@@ -344,7 +344,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Indicates whether some other object is equal to this ActivityPrint.
      * Two ActivityPrint objects are equal if all their fields have the same values.
-     * 
+     *
      * @param obj the reference object with which to compare
      * @return {@code true} if this object is equal to the obj argument; {@code false} otherwise
      */
@@ -366,7 +366,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Returns a string representation of this ActivityPrint.
      * The string contains all field values in a readable format.
-     * 
+     *
      * @return a string representation of this object
      */
     @Override

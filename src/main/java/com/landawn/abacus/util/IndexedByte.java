@@ -19,22 +19,36 @@ package com.landawn.abacus.util;
  * This class is useful for operations where both the value and its original position
  * need to be preserved, such as when sorting or filtering collections while maintaining
  * knowledge of the original indices.
- * 
+ *
  * <p>This class extends {@link AbstractIndexed} and provides factory methods for creating
  * instances with validated non-negative indices.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedByte ib = IndexedByte.of((byte) 42, 5);
  * System.out.println(ib.value());   // prints: 42
  * System.out.println(ib.index());   // prints: 5
  * }</pre>
- * 
+ *
+ * @see Indexed
+ * @see IndexedBoolean
+ * @see IndexedChar
+ * @see IndexedShort
+ * @see IndexedInt
+ * @see IndexedLong
+ * @see IndexedFloat
+ * @see IndexedDouble
  */
 public final class IndexedByte extends AbstractIndexed {
 
     private final byte value;
 
+    /**
+     * Constructs an IndexedByte instance with the specified index and value.
+     *
+     * @param index the index position
+     * @param value the byte value to be indexed
+     */
     IndexedByte(final long index, final byte value) {
         super(index);
         this.value = value;
@@ -42,7 +56,7 @@ public final class IndexedByte extends AbstractIndexed {
 
     /**
      * Creates a new {@code IndexedByte} instance with the specified value and index.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedByte indexed = IndexedByte.of((byte) 10, 3);
@@ -63,7 +77,7 @@ public final class IndexedByte extends AbstractIndexed {
      * Creates a new {@code IndexedByte} instance with the specified value and long index.
      * This method is useful when working with large collections or arrays where the index
      * might exceed the range of an int.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedByte indexed = IndexedByte.of((byte) 25, 1000000000L);
@@ -93,7 +107,7 @@ public final class IndexedByte extends AbstractIndexed {
      * Returns a hash code value for this object. The hash code is computed
      * using both the index and the value to ensure proper distribution in
      * hash-based collections.
-     * 
+     *
      * @return a hash code value for this object
      */
     @Override
@@ -119,10 +133,10 @@ public final class IndexedByte extends AbstractIndexed {
      * Returns a string representation of this {@code IndexedByte}.
      * The string representation consists of the index in square brackets
      * followed by an equals sign and the value.
-     * 
+     *
      * <p>For example, an {@code IndexedByte} with index 5 and value 42
      * would return the string {@code "[5]=42"}.</p>
-     * 
+     *
      * @return a string representation of this object
      */
     @Override

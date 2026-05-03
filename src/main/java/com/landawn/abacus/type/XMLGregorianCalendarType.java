@@ -106,12 +106,12 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * Converts a string to an XMLGregorianCalendar instance.
      * <p>
      * This method handles several input formats:
+     * </p>
      * <ul>
      *   <li>null or empty string returns null</li>
      *   <li>"SYS_TIME" returns the current time as XMLGregorianCalendar</li>
      *   <li>Standard date/time strings are parsed using the Dates utility</li>
      * </ul>
-     * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -219,7 +219,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XMLGregorianCalendar cal = type.get(resultSet, "created_date");
-     * // Retrieves timestamp from <i>created_date</i> column
+     * // Retrieves timestamp from the "created_date" column
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -309,12 +309,14 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * Writes the character representation of an XMLGregorianCalendar to a CharacterWriter.
      * <p>
      * This method handles different date/time formats based on the provided configuration:
+     * </p>
      * <ul>
      *   <li>LONG format: writes the epoch milliseconds</li>
      *   <li>ISO_8601_DATE_TIME: writes in ISO 8601 date-time format</li>
      *   <li>ISO_8601_TIMESTAMP: writes in ISO 8601 timestamp format</li>
      *   <li>Default: uses the standard date format</li>
      * </ul>
+     * <p>
      * The output may be quoted based on the configuration settings.
      * </p>
      *

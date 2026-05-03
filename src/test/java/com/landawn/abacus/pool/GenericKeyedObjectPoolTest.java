@@ -224,23 +224,6 @@ public class GenericKeyedObjectPoolTest extends TestBase {
     }
 
     @Test
-    public void testPut_RemovesExistingValueBeforeRejectedReplacement() {
-        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> "reject".equals(v.getValue()) ? -1 : 1;
-        GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(3, 0, EvictionPolicy.LAST_ACCESS_TIME, 1000, measure);
-        TestPoolable original = new TestPoolable("original");
-
-        try {
-            assertTrue(memPool.put("key", original));
-            assertFalse(memPool.put("key", new TestPoolable("reject")));
-            assertEquals(0, memPool.size());
-            assertTrue(original.isDestroyed());
-            assertEquals(Poolable.Caller.REMOVE_REPLACE_CLEAR, original.getDestroyedByCaller());
-        } finally {
-            memPool.close();
-        }
-    }
-
-    @Test
     public void testPutWithAutoDestroy() {
         for (int i = 0; i < 10; i++) {
             pool.put("key" + i, new TestPoolable("value" + i));
@@ -991,5 +974,76 @@ public class GenericKeyedObjectPoolTest extends TestBase {
         PoolStats stats = pool.stats();
         assertEquals(1, stats.hitCount());
         assertEquals(1, stats.missCount());
+    }
+
+    /**
+     * Bug 1b: put() for a NEW key fails because pool is at capacity (autoBalance=false).
+     * The existing entry under a different key must be completely unaffected.
+     */
+    @Test
+    public void testBug1b_PutFailure_CapacityExceeded_ExistingEntryPreserved() {
+        GenericKeyedObjectPool<String, TestPoolable> capacityPool =
+                new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f);
+        try {
+            TestPoolable v1 = new TestPoolable("value1");
+            assertTrue(capacityPool.put("K1", v1));
+
+            boolean result = capacityPool.put("K2", new TestPoolable("value2"));
+
+            assertFalse(result, "Put must fail: pool at capacity and autoBalance=false");
+            assertFalse(v1.isDestroyed(),
+                    "Bug 1: v1 under K1 must NOT be destroyed by a failed put for K2");
+            assertTrue(capacityPool.containsKey("K1"));
+            assertEquals(1, capacityPool.size());
+        } finally {
+            capacityPool.close();
+        }
+    }
+
+    /**
+     * Bug 1c: Successful replacement must still destroy the old value (regression guard).
+     * The fix must not break the normal replace path.
+     */
+    @Test
+    public void testBug1c_PutSuccessfulReplacement_OldValueDestroyed() {
+        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> 50L;
+        GenericKeyedObjectPool<String, TestPoolable> memPool =
+                new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f, 1000, measure);
+        try {
+            TestPoolable original = new TestPoolable("original");
+            assertTrue(memPool.put("K", original));
+
+            TestPoolable replacement = new TestPoolable("replacement");
+            assertTrue(memPool.put("K", replacement), "Replacement must succeed");
+
+            assertTrue(original.isDestroyed(),
+                    "Old value MUST be destroyed on a successful replacement");
+            assertEquals(Poolable.Caller.REMOVE_REPLACE_CLEAR, original.getDestroyedByCaller());
+            assertEquals(replacement, memPool.get("K"));
+        } finally {
+            memPool.close();
+        }
+    }
+
+    /**
+     * Bug 1d: put() with memory limit exceeded for a new key (no existing entry).
+     * put() must return false and the pool must remain unchanged.
+     */
+    @Test
+    public void testBug1d_PutFailure_MemoryLimitExceeded_NewKey_PoolUnchanged() {
+        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> 100L;
+        GenericKeyedObjectPool<String, TestPoolable> memPool =
+                new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f, 150, measure);
+        try {
+            TestPoolable p1 = new TestPoolable("value1");
+            assertTrue(memPool.put("K1", p1), "First put must succeed (100 <= 150)");
+
+            boolean result = memPool.put("K2", new TestPoolable("value2"));
+            assertFalse(result, "Second put must fail: 100+100=200 > 150");
+            assertFalse(p1.isDestroyed(), "p1 under K1 must not be destroyed");
+            assertEquals(1, memPool.size(), "Pool size must remain 1");
+        } finally {
+            memPool.close();
+        }
     }
 }

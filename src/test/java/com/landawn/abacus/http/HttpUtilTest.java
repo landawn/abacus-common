@@ -137,12 +137,51 @@ public class HttpUtilTest extends TestBase {
 
     @Test
     public void testIsValidHttpHeaderWithLineFeed() {
-        // Valid: line feed followed by space or tab
-        assertTrue(HttpUtil.isValidHttpHeader("key", "value\n continuation"));
-        assertTrue(HttpUtil.isValidHttpHeader("key", "value\n\tcontinuation"));
+        // RFC 7230: only CRLF (\r\n) is a valid obs-fold separator; a bare LF (\n)
+        // must always be rejected to prevent header injection, even if followed by
+        // a continuation space or tab.
+        assertFalse(HttpUtil.isValidHttpHeader("key", "value\n continuation"));
+        assertFalse(HttpUtil.isValidHttpHeader("key", "value\n\tcontinuation"));
 
         // Invalid: line feed not followed by space or tab
         assertFalse(HttpUtil.isValidHttpHeader("key", "value\nnoSpace"));
+    }
+
+    @Test
+    public void testIsValidHttpHeaderWithCarriageReturn() {
+        assertTrue(HttpUtil.isValidHttpHeader("key", "value\r\n continuation"));
+        assertTrue(HttpUtil.isValidHttpHeader("key", "value\r\n\tcontinuation"));
+        assertFalse(HttpUtil.isValidHttpHeader("key", "value\r"));
+        assertFalse(HttpUtil.isValidHttpHeader("key", "value\rnext"));
+    }
+
+    // --- Bug fix: bare LF must be rejected to prevent header injection ---
+
+    @Test
+    public void testIsValidHttpHeader_bareLfRejected_securityFix() {
+        // A bare LF (\n) without a preceding \r is invalid per RFC 7230 and must be
+        // rejected even when followed by a continuation SP or HT, to prevent header injection.
+        assertFalse(HttpUtil.isValidHttpHeader("X-Inject", "value\n X-Evil: injected"));
+        assertFalse(HttpUtil.isValidHttpHeader("X-Inject", "value\n\tinjected"));
+        assertFalse(HttpUtil.isValidHttpHeader("X-Inject", "value\nnoSpace"));
+        // A lone LF at end of value must also be rejected.
+        assertFalse(HttpUtil.isValidHttpHeader("X-Inject", "value\n"));
+    }
+
+    @Test
+    public void testIsValidHttpHeader_crlfObsFoldAccepted() {
+        // CRLF obs-fold (CRLF followed by SP or HT) is still accepted.
+        assertTrue(HttpUtil.isValidHttpHeader("key", "long value\r\n continuation"));
+        assertTrue(HttpUtil.isValidHttpHeader("key", "long value\r\n\tcontinuation"));
+    }
+
+    @Test
+    public void testIsValidHttpHeader_crlfWithoutFoldRejected() {
+        // CRLF not followed by SP or HT is rejected.
+        assertFalse(HttpUtil.isValidHttpHeader("key", "value\r\nnoFold"));
+        // A bare CR is also rejected.
+        assertFalse(HttpUtil.isValidHttpHeader("key", "value\r"));
+        assertFalse(HttpUtil.isValidHttpHeader("key", "value\rX"));
     }
 
     @Test

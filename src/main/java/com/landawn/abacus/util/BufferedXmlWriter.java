@@ -21,7 +21,7 @@ import java.io.Writer;
  * A specialized writer for efficient XML output with automatic character escaping.
  * This class extends CharacterWriter and provides optimized writing of XML content
  * with proper escaping of special XML characters.
- * 
+ *
  * <p>The following characters are automatically escaped:</p>
  * <ul>
  *   <li>&amp; becomes &amp;amp;</li>
@@ -31,23 +31,27 @@ import java.io.Writer;
  *   <li>' becomes &amp;apos;</li>
  *   <li>Control characters (0x00-0x1F) are escaped as numeric character references</li>
  * </ul>
- * 
+ *
  * <p>This writer is designed for high-performance XML generation and automatically
  * handles character escaping to ensure valid XML output. It provides three modes
  * of operation: internal buffering, writing to an OutputStream, or writing to
  * another Writer.</p>
- * 
+ *
+ * <p>Note that escaping is performed only by the {@code writeCharacter(...)} methods
+ * inherited from {@link CharacterWriter}. The plain {@code write(...)} methods write
+ * their argument verbatim without escaping.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * try (BufferedXmlWriter writer = new BufferedXmlWriter()) {
- *     writer.write("<root>");
- *     writer.write("<item>Value with & special < > characters</item>");
- *     writer.write("</root>");
+ *     writer.write("<root><item>");
+ *     writer.writeCharacter("Value with & special < > characters");
+ *     writer.write("</item></root>");
  *     String xml = writer.toString();
- *     // Result: <root><item>Value with &amp; special < > characters</item></root>
+ *     // Result: <root><item>Value with &amp; special &lt; &gt; characters</item></root>
  * }
  * }</pre>
- * 
+ *
  * @see CharacterWriter
  */
 public final class BufferedXmlWriter extends CharacterWriter {
@@ -111,10 +115,10 @@ public final class BufferedXmlWriter extends CharacterWriter {
     /**
      * Creates a new BufferedXmlWriter with an internal buffer.
      * The content is stored in memory and can be retrieved using toString().
-     * 
+     *
      * <p>This constructor is package-private. Use factory methods or builder
      * patterns to create instances.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedXmlWriter writer = new BufferedXmlWriter();
@@ -129,11 +133,11 @@ public final class BufferedXmlWriter extends CharacterWriter {
     /**
      * Creates a new BufferedXmlWriter that writes to the specified OutputStream.
      * Characters are encoded using the default character encoding.
-     * 
+     *
      * <p>The writer will automatically escape XML special characters as they
      * are written to the output stream. The stream is not closed when the
      * writer is closed; this is the caller's responsibility.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (FileOutputStream fos = new FileOutputStream("output.xml");
@@ -151,11 +155,11 @@ public final class BufferedXmlWriter extends CharacterWriter {
 
     /**
      * Creates a new BufferedXmlWriter that writes to the specified Writer.
-     * 
+     *
      * <p>The writer will automatically escape XML special characters as they
      * are written. The underlying Writer is not closed when this writer
      * is closed; this is the caller's responsibility.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (FileWriter fw = new FileWriter("output.xml");
@@ -172,14 +176,15 @@ public final class BufferedXmlWriter extends CharacterWriter {
     }
 
     /**
-     * Returns the character used for quotation in XML attributes.
-     * This implementation always returns CHAR_ZERO (0) as XML doesn't require
-     * a specific quotation character for element content.
-     * 
+     * Returns the character used as the quotation delimiter in XML string serialization.
+     * This implementation always returns {@link SK#CHAR_ZERO} (the null character, {@code '\0'}),
+     * which signals to the serialization infrastructure that no explicit quotation character
+     * wrapping is required for XML element text content.
+     *
      * <p>This method is used internally by the writer infrastructure and
      * typically should not be called directly by client code.</p>
-     * 
-     * @return WD.CHAR_ZERO (the {@code null} character)
+     *
+     * @return {@link SK#CHAR_ZERO} (the null character {@code '\0'})
      */
     @SuppressWarnings("SameReturnValue")
     char getCharQuotation() {

@@ -52,6 +52,7 @@ public interface ByteUnaryOperator extends Throwables.ByteUnaryOperator<RuntimeE
      * @param before the operator to apply before this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies the {@code before} operator and then
      *         applies this operator
+     * @throws NullPointerException if {@code before} is null
      *
      * @see #andThen(ByteUnaryOperator)
      */
@@ -67,6 +68,7 @@ public interface ByteUnaryOperator extends Throwables.ByteUnaryOperator<RuntimeE
      * @param after the operator to apply after this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies this operator and then applies the
      *         {@code after} operator
+     * @throws NullPointerException if {@code after} is null
      *
      * @see #compose(ByteUnaryOperator)
      */

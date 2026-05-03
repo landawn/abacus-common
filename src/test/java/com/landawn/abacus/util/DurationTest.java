@@ -679,6 +679,49 @@ public class DurationTest extends TestBase {
         assertEquals("PT1.500S", secWithMillis.toString());
     }
 
+    /**
+     * Regression test for the negative sub-hour duration toString bug.
+     *
+     * Before the fix, Duration.toString() computed component values using Java's
+     * truncation-toward-zero remainder on the raw (negative) milliseconds value.
+     * For a duration like -90_500 ms (-1 minute -30.5 seconds), that yielded:
+     *   minutes = -1, seconds = -30, millis = -500
+     * and produced "PT-1M-30.500S" — each component carrying its own minus sign,
+     * which is invalid and confusing.
+     *
+     * After the fix, the components are derived from Math.abs(milliseconds) and a
+     * single '-' sign is placed directly after "PT" when the duration is negative:
+     *   "PT-1M30.500S"
+     */
+    @Test
+    public void testToString_negativeSubHour() {
+        // -90_500 ms = -(1 minute + 30 seconds + 500 ms)
+        // Bug: produced "PT-1M-30.500S"; fix: "PT-1M30.500S"
+        assertEquals("PT-1M30.500S", Duration.ofMillis(-90_500).toString());
+
+        // -90_000 ms = -(1 minute + 30 seconds), no fractional second
+        assertEquals("PT-1M30S", Duration.ofMillis(-90_000).toString());
+
+        // -1_500 ms = -(1 second + 500 ms)
+        // Bug: produced "PT-1.500S" (happened to look OK); fix preserves correctness
+        assertEquals("PT-1.500S", Duration.ofMillis(-1_500).toString());
+
+        // -3_661_000 ms = -(1 hour + 1 minute + 1 second)
+        assertEquals("PT-1H1M1S", Duration.ofMillis(-3_661_000).toString());
+
+        // positive control — must remain unchanged
+        assertEquals("PT1M30.500S", Duration.ofMillis(90_500).toString());
+
+        // -500 ms: only fractional second, zero whole-second part
+        assertEquals("PT-0.500S", Duration.ofMillis(-500).toString());
+
+        // -60_000 ms = exactly -1 minute, no seconds
+        assertEquals("PT-1M", Duration.ofMinutes(-1).toString());
+
+        // -3_600_000 ms = exactly -1 hour, no minutes/seconds
+        assertEquals("PT-1H", Duration.ofHours(-1).toString());
+    }
+
     // --- Integration / edge-case tests ---
 
     @Test

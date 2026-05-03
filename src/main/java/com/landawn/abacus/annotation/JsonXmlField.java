@@ -215,8 +215,8 @@ public @interface JsonXmlField {
      *     private String title;
      *
      *     @JsonXmlField(isJsonRawValue = true)
-     *     private String metadata;  // Contains: "{"key":"value"}"
-     *     // Result: {"title":"My Doc","metadata":{"key":"value"}}
+     *     private String metadata;  // Contains already-serialized JSON, e.g. {"key":"value"}
+     *     // Result:    {"title":"My Doc","metadata":{"key":"value"}}
      *     // Instead of: {"title":"My Doc","metadata":"{\"key\":\"value\"}"}
      * }
      * }</pre>
@@ -273,11 +273,8 @@ public @interface JsonXmlField {
     enum Direction {
         /**
          * The field participates in both serialization and deserialization operations.
-         * This is the standard behavior for most fields.
-         *
-         * @deprecated This is the default behavior; explicitly setting it to {@code BOTH} is unnecessary.
+         * This is the default behavior and is equivalent to not specifying a direction at all.
          */
-        @Deprecated
         BOTH,
 
         /**

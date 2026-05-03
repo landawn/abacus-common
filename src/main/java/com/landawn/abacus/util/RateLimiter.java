@@ -24,7 +24,7 @@ import com.landawn.abacus.util.SmoothRateLimiter.SmoothBursty;
 import com.landawn.abacus.util.SmoothRateLimiter.SmoothWarmingUp;
 
 /**
- * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p> 
+ * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
  *
  * A rate limiter. Conceptually, a rate limiter distributes permits at a configurable rate. Each
  * {@link #acquire()} blocks if necessary until a permit is available, and then takes it. Once
@@ -45,8 +45,8 @@ import com.landawn.abacus.util.SmoothRateLimiter.SmoothWarmingUp;
  * the permits issued each second steadily increase until it hits the stable rate.
  *
  * <p>As an example, imagine that we have a list of tasks to execute, but we don't want to submit
- * more than 2 per second: 
- * 
+ * more than 2 per second:
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  *  final RateLimiter rateLimiter = RateLimiter.create(2.0);   // rate is "2 permits per second"

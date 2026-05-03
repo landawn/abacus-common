@@ -55,14 +55,14 @@ public enum EvictionPolicy {
      * Least Recently Used (LRU) eviction policy.
      * Objects are evicted based on their last access time, with the least recently
      * accessed objects being evicted first.
-     * 
+     *
      * <p>This policy is ideal for:
      * <ul>
      *   <li>General-purpose caching where recent access indicates future use</li>
      *   <li>Scenarios where temporal locality is important</li>
      *   <li>Default choice when unsure which policy to use</li>
      * </ul>
-     * 
+     *
      * <p>Objects with the oldest {@link ActivityPrint#getLastAccessTime()} are evicted first.
      */
     LAST_ACCESS_TIME,
@@ -71,14 +71,14 @@ public enum EvictionPolicy {
      * Time-based eviction policy.
      * Objects are evicted based on their expiration time, with objects closest to
      * expiration being evicted first.
-     * 
+     *
      * <p>This policy is ideal for:
      * <ul>
      *   <li>Pools where objects have varying lifetimes</li>
      *   <li>Scenarios where you want to maximize object lifetime utilization</li>
      *   <li>Cases where objects become less valuable as they age</li>
      * </ul>
-     * 
+     *
      * <p>Objects with the earliest {@link ActivityPrint#getExpirationTime()} are evicted first.
      * This ensures objects are used for as much of their lifetime as possible.
      */
@@ -88,14 +88,14 @@ public enum EvictionPolicy {
      * Least Frequently Used (LFU) eviction policy.
      * Objects are evicted based on their access count, with the least frequently
      * accessed objects being evicted first.
-     * 
+     *
      * <p>This policy is ideal for:
      * <ul>
      *   <li>Scenarios where popular objects should remain cached</li>
      *   <li>Pools where access frequency is a good predictor of future use</li>
      *   <li>Long-running applications with stable access patterns</li>
      * </ul>
-     * 
+     *
      * <p>Objects with the lowest {@link ActivityPrint#getAccessCount()} are evicted first.
      * Note that this policy may keep old but frequently accessed objects indefinitely.
      */

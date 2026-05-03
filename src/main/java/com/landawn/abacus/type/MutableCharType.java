@@ -35,16 +35,9 @@ public class MutableCharType extends AbstractType<MutableChar> {
     }
 
     /**
-     * Returns the Class object representing the MutableChar type.
+     * Returns the {@link Class} object representing the {@link MutableChar} type.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableChar> type = TypeFactory.getType(MutableChar.class);
-     * Class<MutableChar> clazz = type.javaType();
-     * // clazz equals MutableChar.class
-     * }</pre>
-     *
-     * @return The Class object for MutableChar
+     * @return {@code MutableChar.class}
      */
     @Override
     public Class<MutableChar> javaType() {
@@ -52,22 +45,21 @@ public class MutableCharType extends AbstractType<MutableChar> {
     }
 
     /**
-     * Converts a MutableChar object to its string representation.
-     * The character value is converted to a single-character string.
+     * Indicates whether values of this type are comparable.
+     * {@link MutableChar} implements {@link Comparable}, so this returns {@code true}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableChar> type = TypeFactory.getType(MutableChar.class);
-     * MutableChar mc = MutableChar.of('A');
-     * String str = type.stringOf(mc);
-     * // str equals "A"
+     * @return {@code true}, indicating that MutableChar values can be compared
+     */
+    @Override
+    public boolean isComparable() {
+        return true;
+    }
+
+    /**
+     * Converts a {@link MutableChar} object to its single-character string representation.
      *
-     * String nullStr = type.stringOf(null);
-     * // nullStr equals null
-     * }</pre>
-     *
-     * @param x The MutableChar object to convert
-     * @return The string representation of the character, or {@code null} if the input is null
+     * @param x the {@code MutableChar} object to convert, may be {@code null}
+     * @return the single-character string representation, or {@code null} if the input is {@code null}
      */
     @Override
     public String stringOf(final MutableChar x) {
@@ -75,24 +67,12 @@ public class MutableCharType extends AbstractType<MutableChar> {
     }
 
     /**
-     * Parses a string to create a MutableChar object.
-     * The string is parsed to extract the first character.
+     * Parses a string to create a {@link MutableChar} object.
+     * The first character of the string is used as the value.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableChar> type = TypeFactory.getType(MutableChar.class);
-     * MutableChar mc = type.valueOf("A");
-     * // mc.value() equals 'A'
-     *
-     * MutableChar nullMc = type.valueOf(null);
-     * // nullMc equals null
-     *
-     * MutableChar emptyMc = type.valueOf("");
-     * // emptyMc equals null
-     * }</pre>
-     *
-     * @param str The string to parse
-     * @return A MutableChar containing the parsed character, or {@code null} if the input is {@code null} or empty
+     * @param str the string to parse, may be {@code null} or empty
+     * @return a {@code MutableChar} containing the parsed character,
+     *         or {@code null} if the input is {@code null} or empty
      */
     @Override
     public MutableChar valueOf(final String str) {
@@ -100,23 +80,15 @@ public class MutableCharType extends AbstractType<MutableChar> {
     }
 
     /**
-     * Retrieves a MutableChar value from a ResultSet at the specified column index.
-     * The database integer value is cast to char and wrapped in a MutableChar object.
+     * Retrieves an integer value from the specified column in the {@link ResultSet},
+     * casts it to {@code char}, and wraps it in a {@link MutableChar}.
+     * Returns {@code null} if the column value is SQL {@code NULL} (detected via {@link ResultSet#wasNull()}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableChar> type = TypeFactory.getType(MutableChar.class);
-     * ResultSet rs = statement.executeQuery("SELECT char_column FROM table");
-     * if (rs.next()) {
-     *     MutableChar mc = type.get(rs, 1);
-     *     // mc contains the character value from the first column
-     * }
-     * }</pre>
-     *
-     * @param rs The ResultSet containing the data
-     * @param columnIndex The column index (1-based) to retrieve the value from
-     * @return A MutableChar containing the retrieved character value
-     * @throws SQLException if a database access error occurs or the column index is invalid
+     * @param rs the {@code ResultSet} containing the data
+     * @param columnIndex the 1-based index of the column to retrieve
+     * @return a {@code MutableChar} wrapping the retrieved character value,
+     *         or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public MutableChar get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -126,23 +98,15 @@ public class MutableCharType extends AbstractType<MutableChar> {
     }
 
     /**
-     * Retrieves a MutableChar value from a ResultSet using the specified column label.
-     * The database integer value is cast to char and wrapped in a MutableChar object.
+     * Retrieves an integer value from the specified column in the {@link ResultSet},
+     * casts it to {@code char}, and wraps it in a {@link MutableChar}.
+     * Returns {@code null} if the column value is SQL {@code NULL} (detected via {@link ResultSet#wasNull()}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableChar> type = TypeFactory.getType(MutableChar.class);
-     * ResultSet rs = statement.executeQuery("SELECT char_col FROM table");
-     * if (rs.next()) {
-     *     MutableChar mc = type.get(rs, "char_col");
-     *     // mc contains the character value from the named column
-     * }
-     * }</pre>
-     *
-     * @param rs The ResultSet containing the data
-     * @param columnName The label of the column to retrieve the value from
-     * @return A MutableChar containing the retrieved character value
-     * @throws SQLException if a database access error occurs or the column label is not found
+     * @param rs the {@code ResultSet} containing the data
+     * @param columnName the label of the column to retrieve (as specified in the SQL AS clause)
+     * @return a {@code MutableChar} wrapping the retrieved character value,
+     *         or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
     @Override
     public MutableChar get(final ResultSet rs, final String columnName) throws SQLException {
@@ -152,26 +116,14 @@ public class MutableCharType extends AbstractType<MutableChar> {
     }
 
     /**
-     * Sets a MutableChar parameter in a PreparedStatement at the specified position.
-     * The character is stored as an integer value. If the MutableChar is {@code null}, SQL NULL is set.
+     * Sets a {@link MutableChar} parameter in a {@link PreparedStatement} at the specified index.
+     * The character is stored as an integer (SQL {@code INTEGER}) value.
+     * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#INTEGER}) is set.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableChar> type = TypeFactory.getType(MutableChar.class);
-     * PreparedStatement stmt = conn.prepareStatement("INSERT INTO table (char_col) VALUES (?)");
-     * MutableChar mc = MutableChar.of('A');
-     * type.set(stmt, 1, mc);
-     * stmt.executeUpdate();
-     *
-     * // For {@code null} value
-     * type.set(stmt, 1, null);
-     * // This sets the parameter to SQL NULL
-     * }</pre>
-     *
-     * @param stmt The PreparedStatement to set the parameter on
-     * @param columnIndex The parameter index (1-based) to set
-     * @param x The MutableChar value to set
-     * @throws SQLException if a database access error occurs or the parameter index is invalid
+     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param columnIndex the 1-based index of the parameter to set
+     * @param x the {@code MutableChar} value to set, or {@code null} to set SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final MutableChar x) throws SQLException {
@@ -183,26 +135,14 @@ public class MutableCharType extends AbstractType<MutableChar> {
     }
 
     /**
-     * Sets a MutableChar parameter in a CallableStatement using the specified parameter name.
-     * The character is stored as an integer value. If the MutableChar is {@code null}, SQL NULL is set.
+     * Sets a {@link MutableChar} parameter in a {@link CallableStatement} by name.
+     * The character is stored as an integer (SQL {@code INTEGER}) value.
+     * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#INTEGER}) is set.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableChar> type = TypeFactory.getType(MutableChar.class);
-     * CallableStatement stmt = conn.prepareCall("{call proc_name(?, ?)}");
-     * MutableChar mc = MutableChar.of('B');
-     * type.set(stmt, "charParam", mc);
-     * stmt.execute();
-     *
-     * // For {@code null} value
-     * type.set(stmt, "charParam", null);
-     * // This sets the parameter to SQL NULL
-     * }</pre>
-     *
-     * @param stmt The CallableStatement to set the parameter on
-     * @param parameterName The name of the parameter to set
-     * @param x The MutableChar value to set
-     * @throws SQLException if a database access error occurs or the parameter name is not found
+     * @param stmt the {@code CallableStatement} to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the {@code MutableChar} value to set, or {@code null} to set SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final MutableChar x) throws SQLException {
@@ -214,24 +154,11 @@ public class MutableCharType extends AbstractType<MutableChar> {
     }
 
     /**
-     * Appends the string representation of a MutableChar to an Appendable.
-     * The character is written directly or "null" if the value is {@code null}.
+     * Appends the character value of a {@link MutableChar} directly to an {@link Appendable}.
+     * Writes the literal string {@code "null"} when {@code x} is {@code null}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableChar> type = TypeFactory.getType(MutableChar.class);
-     * StringBuilder sb = new StringBuilder();
-     * MutableChar mc = MutableChar.of('C');
-     * type.appendTo(sb, mc);
-     * // sb.toString() equals "C"
-     *
-     * StringBuilder sb2 = new StringBuilder();
-     * type.appendTo(sb2, null);
-     * // sb2.toString() equals "null"
-     * }</pre>
-     *
-     * @param appendable The Appendable to write to
-     * @param x The MutableChar to append
+     * @param appendable the target to write to
+     * @param x the {@code MutableChar} to append, may be {@code null}
      * @throws IOException if an I/O error occurs while appending
      */
     @Override
@@ -244,33 +171,15 @@ public class MutableCharType extends AbstractType<MutableChar> {
     }
 
     /**
-     * Writes the character representation of a MutableChar to a CharacterWriter.
-     * The character may be quoted based on the configuration. If {@code null}, writes the {@code null} character array.
+     * Writes the character value of a {@link MutableChar} to a {@link CharacterWriter}.
+     * If {@code config} specifies a character quotation character (via
+     * {@link com.landawn.abacus.parser.JsonXmlSerConfig#getCharQuotation()}),
+     * the character is wrapped in that quotation character; otherwise it is written unquoted.
+     * Writes {@code NULL_CHAR_ARRAY} when {@code x} is {@code null}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableChar> type = TypeFactory.getType(MutableChar.class);
-     * CharacterWriter writer = new CharacterWriter();
-     * MutableChar mc = MutableChar.of('D');
-     *
-     * // Without quotation
-     * type.writeCharacter(writer, mc, null);
-     * // Writes: D
-     *
-     * // With quotation configured (using concrete subclass)
-     * JsonSerConfig config = JsonSerConfig.create();
-     * config.setCharQuotation('\'');
-     * type.writeCharacter(writer, mc, config);
-     * // Writes: 'D'
-     *
-     * // For null value
-     * type.writeCharacter(writer, null, null);
-     * // Writes: null
-     * }</pre>
-     *
-     * @param writer The CharacterWriter to write to
-     * @param x The MutableChar to write
-     * @param config The serialization configuration that may specify character quotation
+     * @param writer the {@code CharacterWriter} to write to
+     * @param x the {@code MutableChar} to write, may be {@code null}
+     * @param config the serialization configuration; may specify a character quotation character
      * @throws IOException if an I/O error occurs while writing
      */
     @Override

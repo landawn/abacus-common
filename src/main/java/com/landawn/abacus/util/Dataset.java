@@ -82,9 +82,9 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>API Data Processing:</b> Processing JSON/XML responses in structured format</li>
  * </ul>
  *
-* <p><b>Usage Examples:</b></p>
-* <pre>{@code
-* // Creating datasets
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Creating datasets
  * Dataset dataset = Dataset.rows(
  *     Arrays.asList("name", "age", "department", "salary", "year", "revenue"),
  *     new Object[][] {
@@ -93,39 +93,39 @@ import com.landawn.abacus.util.stream.Stream;
  *         {"Carol", 28, "Engineering", 85000.0, 2025, 130000.0}
  *     }
  * );
-* Dataset empty = Dataset.empty();
-* Dataset fromMap = N.newDataset(Map.of("name", List.of("Alice", "Bob"), "age", List.of(25, 30)));
-* Dataset fromCsv = CsvUtil.load(csvFile);
-*
-* // Basic operations
-* Dataset filtered = dataset.filter("age", age -> (Integer) age > 25);
+ * Dataset empty = Dataset.empty();
+ * Dataset fromMap = N.newDataset(Map.of("name", List.of("Alice", "Bob"), "age", List.of(25, 30)));
+ * Dataset fromCsv = CsvUtil.load(csvFile);
+ *
+ * // Basic operations
+ * Dataset filtered = dataset.filter("age", age -> (Integer) age > 25);
  * Dataset sorted = dataset.copy();
  * sorted.sortBy("name");
  * Dataset projected = dataset.slice(Arrays.asList("name", "department"));
-*
-* // Aggregation and grouping
+ *
+ * // Aggregation and grouping
  * Dataset grouped = dataset.groupBy("department", "salary", "avgSalary",
  *     Collectors.averagingDouble(val -> ((Number) val).doubleValue()));
  * Sheet<Integer, String, Double> pivot = dataset.pivot(
  *     "year", "department", "revenue",
  *     Collectors.summingDouble(val -> ((Number) val).doubleValue()));
-*
-* // Joins and set operations
-* Dataset joined = leftDataset.innerJoin(rightDataset, "id", "userId");
+ *
+ * // Joins and set operations
+ * Dataset joined = leftDataset.innerJoin(rightDataset, "id", "userId");
  * Dataset union = dataset.union(dataset.copy());
  * Dataset intersection = dataset.intersect(dataset.copy(), Arrays.asList("name", "age"));
  *
  * // Export operations
  * String json = dataset.toJson();
  * dataset.toCsv(outputFile);
-* dataset.toXml("record", xmlWriter);
-*
-* // Stream integration
+ * dataset.toXml("record", xmlWriter);
+ *
+ * // Stream integration
  * List<Person> people = dataset.stream(Arrays.asList("name", "age"), Person.class).collect(Collectors.toList());
-* Map<String, Integer> nameToAge = dataset.stream(Tuple.of("name", "age"), (name, age) -> 
-*     Pair.of((String) name, (Integer) age))
-*     .collect(Collectors.toMap(pair -> pair.left(), pair -> pair.right()));
-* }</pre>
+ * Map<String, Integer> nameToAge = dataset.stream(Tuple.of("name", "age"), (name, age) ->
+ *     Pair.of((String) name, (Integer) age))
+ *     .collect(Collectors.toMap(pair -> pair.left(), pair -> pair.right()));
+ * }</pre>
  *
  * <p><b>Data Types and Columns:</b>
  * <ul>
@@ -388,7 +388,7 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Returns the number of columns in this Dataset.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), data);
@@ -418,7 +418,7 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Returns the index of the specified column in the Dataset.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), data);
@@ -433,7 +433,7 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Returns an array of column indexes corresponding to the provided column names.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), data);
@@ -448,7 +448,7 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Checks if the specified column name exists in this Dataset.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
@@ -462,7 +462,7 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Checks if this {@code Dataset} contains all the specified columns.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), data);
@@ -476,7 +476,7 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Renames a column in the Dataset.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
@@ -491,7 +491,7 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Renames multiple columns in the Dataset.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), data);
@@ -502,7 +502,7 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param oldNewNames a map where the key is the current name of the column and the value is the new name for the column.
-     * @throws IllegalArgumentException if any of the specified old column names does not exist in the Dataset or any of the new column names already exists in the Dataset.
+     * @throws IllegalArgumentException if any of the specified old column names does not exist in the Dataset, if the new column names contain duplicates, or if any new column name already exists in the Dataset (and is not being itself renamed away).
      */
     void renameColumns(Map<String, String> oldNewNames) throws IllegalArgumentException;
 
@@ -515,7 +515,7 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Renames multiple columns in the Dataset using a function to determine the new names.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("first_name", "last_name"), data);
@@ -531,7 +531,7 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Renames all columns in the Dataset using a function to determine the new names.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("firstName", "lastName"), data);
@@ -544,8 +544,8 @@ public sealed interface Dataset permits RowDataset {
     void renameColumns(Function<? super String, String> func) throws IllegalArgumentException;
 
     /**
-     * Repositions a single column within the {@code Dataset} to a specified index.  
-     * 
+     * Repositions a single column within the {@code Dataset} to a specified index.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), data);
@@ -561,9 +561,9 @@ public sealed interface Dataset permits RowDataset {
     void moveColumn(String columnName, int newPosition) throws IllegalArgumentException, IndexOutOfBoundsException;
 
     /**
-     * Repositions multiple columns within the {@code Dataset} to a specified index.  
+     * Repositions multiple columns within the {@code Dataset} to a specified index.
      * <br />
-     * The relative order of the given columns is preserved in the move.  
+     * The relative order of the given columns is preserved in the move.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -581,7 +581,7 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Swaps the positions of two columns in the Dataset.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), data);
@@ -595,8 +595,8 @@ public sealed interface Dataset permits RowDataset {
     void swapColumns(String columnNameA, String columnNameB) throws IllegalArgumentException;
 
     /**
-     * Repositions a row within the {@code Dataset} from one index to another.  
-     * 
+     * Repositions a row within the {@code Dataset} from one index to another.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
@@ -611,10 +611,10 @@ public sealed interface Dataset permits RowDataset {
     void moveRow(int rowIndex, int newPosition) throws IndexOutOfBoundsException;
 
     /**
-     * Repositions a contiguous block of rows within the {@code Dataset} to a new index.  
+     * Repositions a contiguous block of rows within the {@code Dataset} to a new index.
      * <br />
-     * The block is defined by the range {@code fromRowIndex} through {@code toRowIndex},  
-     * and the relative order of rows within the block is preserved.  
+     * The block is defined by the range {@code fromRowIndex} through {@code toRowIndex},
+     * and the relative order of rows within the block is preserved.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -632,7 +632,7 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Swaps the positions of two rows in the Dataset.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
@@ -669,7 +669,7 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Sets the value at the specified row and column index in the Dataset.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
@@ -678,15 +678,15 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param rowIndex the index of the row.
      * @param columnIndex the index of the column.
-     * @param element the new value to be set at the specified row and column index.
+     * @param value the new value to be set at the specified row and column index.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IndexOutOfBoundsException if the specified row or column index is out of bounds.
      */
-    void set(int rowIndex, int columnIndex, Object element) throws IllegalStateException, IndexOutOfBoundsException;
+    void set(int rowIndex, int columnIndex, Object value) throws IllegalStateException, IndexOutOfBoundsException;
 
     /**
      * Checks if the value at the specified row and column index in the Dataset is {@code null}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
@@ -838,7 +838,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("flag"), new Object[][] {{(byte) 1}});
-     * byte flag = dataset.getByte("flag");
+     * byte flag = dataset.getByte(0);
      * }</pre>
      *
      * @param columnIndex the index of the column.
@@ -881,7 +881,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("level"), new Object[][] {{(short) 3}});
-     * short level = dataset.getShort("level");
+     * short level = dataset.getShort(0);
      * }</pre>
      *
      * @param columnIndex the index of the column.
@@ -1093,7 +1093,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, null}});
-     * boolean missing = dataset.isNull(0, 1);
+     * boolean missing = dataset.isNull(1);
      * }</pre>
      *
      * @param columnIndex the index of the column.
@@ -1124,11 +1124,11 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Sets the value at the specified column index in the Dataset for the current row.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * dataset.set(0, 1, "Bob");
+     * dataset.set(1, "Bob");
      * }</pre>
      *
      * @param columnIndex the index of the column.
@@ -1146,7 +1146,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * dataset.set(0, 1, "Bob");
+     * dataset.set("name", "Bob");
      * }</pre>
      *
      * @param columnName the name of the column.
@@ -1253,15 +1253,15 @@ public sealed interface Dataset permits RowDataset {
      * dataset.addColumn(1, "label", Arrays.asList("A", "B"));
      * }</pre>
      *
-     * @param newColumnPosition the position at which the new column should be added. It should be a valid index within the current column range.
+     * @param newColumnPosition the position at which the new column should be added. Must be in the range {@code [0, columnCount()]}; passing {@code columnCount()} appends.
      * @param newColumnName the name of the new column to be added. It should not be a name that already exists in the Dataset.
      * @param column the data for the new column. It should be a collection where each element represents a row in the column.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IndexOutOfBoundsException if the specified {@code newColumnPosition} is less than zero or bigger than column size or the new column name already exists in the Dataset,
-     * @throws IllegalArgumentException if the supplied arguments reference non-existent columns or otherwise violate dataset constraints
-     *                               or if the provided collection is not empty and its size does not match the number of rows in the Dataset, or the newColumnPosition is out of bounds.
+     * @throws IndexOutOfBoundsException if {@code newColumnPosition < 0} or {@code newColumnPosition > columnCount()}.
+     * @throws IllegalArgumentException if the new column name already exists in the Dataset, or if the provided collection is not empty and its size does not match the number of rows in the Dataset.
      */
-    void addColumn(int newColumnPosition, String newColumnName, Collection<?> column) throws IllegalStateException, IllegalArgumentException;
+    void addColumn(int newColumnPosition, String newColumnName, Collection<?> column)
+            throws IllegalStateException, IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
      * Adds a new column to the Dataset.
@@ -1297,15 +1297,16 @@ public sealed interface Dataset permits RowDataset {
      * dataset.addColumn(1, "ageGroup", "age", age -> (Integer) age >= 18 ? "Adult" : "Minor");
      * }</pre>
      *
-     * @param newColumnPosition the position at which the new column should be added. It should be a valid index within the current column range.
+     * @param newColumnPosition the position at which the new column should be added. Must be in the range {@code [0, columnCount()]}; passing {@code columnCount()} appends.
      * @param newColumnName the name of the new column to be added. It should not be a name that already exists in the Dataset.
      * @param fromColumnName the name of the existing column to be used as input for the function.
      * @param func the function to generate the values for the new column. It takes the value of the existing column for each row and returns the value for the new column for that row.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if the specified {@code newColumnPosition} is less than zero or bigger than column size or the new column name already exists in the Dataset, or if the existing column name does not exist in the Dataset.
+     * @throws IndexOutOfBoundsException if {@code newColumnPosition < 0} or {@code newColumnPosition > columnCount()}.
+     * @throws IllegalArgumentException if the new column name already exists in the Dataset, or if the existing column name does not exist in the Dataset.
      */
     void addColumn(int newColumnPosition, String newColumnName, String fromColumnName, Function<?, ?> func)
-            throws IllegalStateException, IllegalArgumentException;
+            throws IllegalStateException, IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
      * Adds a new column to the Dataset.
@@ -1317,7 +1318,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("firstName", "lastName"), data);
-     * dataset.addColumn("fullName", Arrays.asList("firstName", "lastName"), 
+     * dataset.addColumn("fullName", Arrays.asList("firstName", "lastName"),
      *     row -> row.get(0) + " " + row.get(1));
      * }</pre>
      *
@@ -1344,15 +1345,16 @@ public sealed interface Dataset permits RowDataset {
      *     row -> row.get(0) + " " + row.get(1));
      * }</pre>
      *
-     * @param newColumnPosition the position at which the new column should be added. It should be a valid index within the current column range.
+     * @param newColumnPosition the position at which the new column should be added. Must be in the range {@code [0, columnCount()]}; passing {@code columnCount()} appends.
      * @param newColumnName the name of the new column to be added. It should not be a name that already exists in the Dataset.
      * @param fromColumnNames the names of the existing columns to be used as input for the function.
      * @param func the function to generate the values for the new column. It takes the values of the existing columns for each row and returns the value for the new column for that row. The input to the function is a DisposableObjArray containing the values of the existing columns for a particular row.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if the specified {@code newColumnPosition} is less than zero or bigger than column size or the new column name already exists in the Dataset, or if any of the existing column names does not exist in the Dataset.
+     * @throws IndexOutOfBoundsException if {@code newColumnPosition < 0} or {@code newColumnPosition > columnCount()}.
+     * @throws IllegalArgumentException if the new column name already exists in the Dataset, or if any of the existing column names does not exist in the Dataset.
      */
     void addColumn(int newColumnPosition, String newColumnName, Collection<String> fromColumnNames, Function<? super DisposableObjArray, ?> func)
-            throws IllegalStateException, IllegalArgumentException;
+            throws IllegalStateException, IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
      * Adds a new column to the Dataset.
@@ -1391,15 +1393,16 @@ public sealed interface Dataset permits RowDataset {
      *     (first, last) -> first + " " + last);
      * }</pre>
      *
-     * @param newColumnPosition the position at which the new column should be added. It should be a valid index within the current column range.
+     * @param newColumnPosition the position at which the new column should be added. Must be in the range {@code [0, columnCount()]}; passing {@code columnCount()} appends.
      * @param newColumnName the name of the new column to be added. It should not be a name that already exists in the Dataset.
      * @param fromColumnNames a Tuple2 containing the names of the two existing columns to be used as input for the BiFunction.
      * @param func the BiFunction to generate the values for the new column. It takes the values of the two existing columns for each row and returns the value for the new column for that row.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if the specified {@code newColumnPosition} is less than zero or bigger than column size or the new column name already exists in the Dataset, or if any of the existing column names does not exist in the Dataset.
+     * @throws IndexOutOfBoundsException if {@code newColumnPosition < 0} or {@code newColumnPosition > columnCount()}.
+     * @throws IllegalArgumentException if the new column name already exists in the Dataset, or if any of the existing column names does not exist in the Dataset.
      */
     void addColumn(int newColumnPosition, String newColumnName, Tuple2<String, String> fromColumnNames, BiFunction<?, ?, ?> func)
-            throws IllegalStateException, IllegalArgumentException;
+            throws IllegalStateException, IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
      * Adds a new column to the Dataset.
@@ -1438,15 +1441,16 @@ public sealed interface Dataset permits RowDataset {
      *     (x, y, z) -> "(" + x + "," + y + "," + z + ")");
      * }</pre>
      *
-     * @param newColumnPosition the position at which the new column should be added. It should be a valid index within the current column range.
+     * @param newColumnPosition the position at which the new column should be added. Must be in the range {@code [0, columnCount()]}; passing {@code columnCount()} appends.
      * @param newColumnName the name of the new column to be added. It should not be a name that already exists in the Dataset.
      * @param fromColumnNames a Tuple3 containing the names of the three existing columns to be used as input for the TriFunction.
      * @param func the TriFunction to generate the values for the new column. It takes the values of the three existing columns for each row and returns the value for the new column for that row.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if the specified {@code newColumnPosition} is less than zero or bigger than column size or the new column name already exists in the Dataset, or if any of the existing column names does not exist in the Dataset.
+     * @throws IndexOutOfBoundsException if {@code newColumnPosition < 0} or {@code newColumnPosition > columnCount()}.
+     * @throws IllegalArgumentException if the new column name already exists in the Dataset, or if any of the existing column names does not exist in the Dataset.
      */
     void addColumn(int newColumnPosition, String newColumnName, Tuple3<String, String, String> fromColumnNames, TriFunction<?, ?, ?, ?> func)
-            throws IllegalStateException, IllegalArgumentException;
+            throws IllegalStateException, IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
      * Adds multiple columns to the Dataset.
@@ -1643,14 +1647,14 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     *  Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age", "salary"), 
+     *  Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age", "salary"),
      *          new Object[][] {
      *              {1, "Alice", 25, 50000.0},
      *              {2, "Bob", 30, 60000.0},
      *              {3, "Charlie", 35, 70000.0},
      *              {4, "Diana", 28, 55000.0}
      *          });
-     *          
+     *
      *  // +----+---------+-----+---------+
      *  // | id | name    | age | salary  |
      *  // +----+---------+-----+---------+
@@ -1659,9 +1663,9 @@ public sealed interface Dataset permits RowDataset {
      *  // | 3  | Charlie | 35  | 70000.0 |
      *  // | 4  | Diana   | 28  | 55000.0 |
      *  // +----+---------+-----+---------+
-     *  
+     *
      *  dataset.combineColumns(Arrays.asList("name", "age"), "nameAge", Map.class);
-     *  
+     *
      *  // +----+------------------------+---------+
      *  // | id | nameAge                | salary  |
      *  // +----+------------------------+---------+
@@ -1670,15 +1674,15 @@ public sealed interface Dataset permits RowDataset {
      *  // | 3  | {name=Charlie, age=35} | 70000.0 |
      *  // | 4  | {name=Diana, age=28}   | 55000.0 |
      *  // +----+------------------------+---------+
-     *  
+     *
      * }</pre>
      *
      * @param columnNames a collection containing the names of the columns to be combined. These should be names that exist in the Dataset and will be removed after combination.
      * @param newColumnName the name of the new column to be created. It should not be a name that already exists in the Dataset.
      * @param newColumnType the Class object representing the type of the new column. It must be Object[], Collection, Map, or a Bean class.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset, 
-     *                                  or {@code columnNames} is empty, 
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset,
+     *                                  or {@code columnNames} is empty,
      *                                  or the new column name already exists in the Dataset,
      *                                  or the specified column type is not Object[], Collection, Map, or a Bean class. It can't be string or other types.
      * @see #combineColumns(Collection, String, Function)
@@ -1691,7 +1695,7 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Combines multiple columns into a new column in the Dataset using a custom combining function.
      * <br />
-     * The new column is created by applying a function to the values of the specified columns for each row. 
+     * The new column is created by applying a function to the values of the specified columns for each row.
      * The function takes a DisposableObjArray of the values in the existing columns for a particular row and returns the value for the new column for that row.
      * <br />
      * The new column is added at the position of the smallest index among the specified columns.
@@ -1764,7 +1768,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("x", "y", "z"), data);
-     * dataset.combineColumns(Tuple.of("x", "y", "z"), "coordinates", 
+     * dataset.combineColumns(Tuple.of("x", "y", "z"), "coordinates",
      *     (x, y, z) -> "(" + x + "," + y + "," + z + ")");
      * // Creates a new "coordinates" column by combining x, y, z values
      * // The original "x", "y", and "z" columns are removed
@@ -1786,20 +1790,20 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Divides a column into multiple new columns in the Dataset.
      * <br />
-     * The division is performed by applying a function to each value in the specified column. 
+     * The division is performed by applying a function to each value in the specified column.
      * The function takes the current value and returns a List of new values, each of which will be a value in one of the new columns.
      * <br />
      * The new columns are added at the position of the original column, and the original column is removed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     *  Dataset ds = Dataset.rows(Arrays.asList("fullName"), 
+     *  Dataset ds = Dataset.rows(Arrays.asList("fullName"),
      *          new Object[][] { { "John_Doe" }, { "Jane_Smith" } });
      *
      *  ds.divideColumn("fullName", Arrays.asList("firstName", "lastName"),  (String full) -> Arrays.asList(full.split("_")));
      *  System.out.println(ds.columnCount());   // 2
      * System.out.println(ds.columnNameList());   // [firstName, lastName]
-     *  
+     *
      *  ds.println();
      *  // +-----------+----------+
      *  // | firstName | lastName |
@@ -1807,7 +1811,7 @@ public sealed interface Dataset permits RowDataset {
      *  // | John      | Doe      |
      *  // | Jane      | Smith    |
      *  // +-----------+----------+
-     *  
+     *
      * }</pre>
      *
      * @param columnName the name of the column to be divided. It should be a name that exists in the Dataset and will be removed after division.
@@ -1822,7 +1826,7 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Divides a column into multiple new columns in the Dataset using a BiConsumer.
      * <br />
-     * The division is performed by applying a BiConsumer to each value in the specified column. 
+     * The division is performed by applying a BiConsumer to each value in the specified column.
      * The BiConsumer takes the current value and an Object array, and it should populate the array with the new values for the new columns.
      * <br />
      * The new columns are added at the position of the original column, and the original column is removed.
@@ -1830,7 +1834,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("coordinates"), data);
-     * dataset.divideColumn("coordinates", Arrays.asList("x", "y", "z"), 
+     * dataset.divideColumn("coordinates", Arrays.asList("x", "y", "z"),
      *     (coord, output) -> {
      *         String[] parts = ((String) coord).split(",");
      *         output[0] = Double.parseDouble(parts[0]);
@@ -1845,8 +1849,8 @@ public sealed interface Dataset permits RowDataset {
      * @param newColumnNames a collection containing the names of the new columns to be created. These should not be names that already exist in the Dataset. The size of this collection determines the size of the Object array passed to the BiConsumer.
      * @param output the BiConsumer to be applied to each value in the column. It takes the current value and an Object array, and it should populate the array with the new values for the new columns. The array size matches the size of {@code newColumnNames}.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if the specified column name does not exist in the Dataset, 
-     *                                  or any of the new column names already exist in the Dataset, 
+     * @throws IllegalArgumentException if the specified column name does not exist in the Dataset,
+     *                                  or any of the new column names already exist in the Dataset,
      *                                  or {@code newColumnNames} is empty.
      * @see #divideColumn(String, Collection, Function)
      * @see #combineColumns(Collection, String, Function)
@@ -1990,12 +1994,13 @@ public sealed interface Dataset permits RowDataset {
      * dataset.addRow(new Object[] {2, "Bob"});
      * }</pre>
      *
-     * @param newRowPosition the position at which the new row should be added. It should be a valid index within the current row range.
+     * @param newRowPosition the position at which the new row should be added. Must be in the range {@code [0, size()]}; passing {@code size()} appends.
      * @param row the new row to be added to the Dataset. It can be an Object array, List, Map, or a Bean with getter/setter methods.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if the specified {@code newRowPosition} is less than zero or bigger than row size, or the structure of the row does not match the required type - Object array, List, Map, or Bean.
+     * @throws IndexOutOfBoundsException if {@code newRowPosition < 0} or {@code newRowPosition > size()}.
+     * @throws IllegalArgumentException if the structure of the row does not match the required type - Object array, List, Map, or Bean.
      */
-    void addRow(int newRowPosition, Object row) throws IllegalStateException, IllegalArgumentException;
+    void addRow(int newRowPosition, Object row) throws IllegalStateException, IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
      * Adds multiple new rows to the Dataset.
@@ -2030,12 +2035,13 @@ public sealed interface Dataset permits RowDataset {
      * dataset.addRows(Arrays.asList(new Object[] {2}, new Object[] {3}));
      * }</pre>
      *
-     * @param newRowPosition the position at which the new rows should be added. It should be a valid index within the current row range.
+     * @param newRowPosition the position at which the new rows should be added. Must be in the range {@code [0, size()]}; passing {@code size()} appends.
      * @param rows a collection of new rows to be added to the Dataset. Each row can be an Object array, List, Map, or a Bean with getter/setter methods.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if the specified {@code newRowPosition} is less than zero or bigger than row size, or if the structure of any row does not match the required type - Object array, List, Map, or Bean.
+     * @throws IndexOutOfBoundsException if {@code newRowPosition < 0} or {@code newRowPosition > size()}.
+     * @throws IllegalArgumentException if the structure of any row does not match the required type - Object array, List, Map, or Bean.
      */
-    void addRows(int newRowPosition, Collection<?> rows) throws IllegalStateException, IllegalArgumentException;
+    void addRows(int newRowPosition, Collection<?> rows) throws IllegalStateException, IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
      * Removes a row from the Dataset.
@@ -2099,7 +2105,7 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "department"), 
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "department"),
      *     new Object[][] {
      *         {1, "John", "IT"},
      *         {2, "Jane", "HR"},
@@ -2130,7 +2136,7 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "department"), 
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "department"),
      *     new Object[][] {
      *         {1, "John Doe", "IT"},
      *         {2, "Jane Smith", "HR"},
@@ -2162,7 +2168,7 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "department"), 
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "department"),
      *     new Object[][] {
      *         {1, "John", "IT"},
      *         {2, "Jane", "HR"},
@@ -2193,14 +2199,14 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "department"), 
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "department"),
      *     new Object[][] {
      *         {1, "John Doe", "IT"},
      *         {2, "Jane Smith", "HR"},
      *         {3, "Johnathan Doe", "IT"},  // Duplicate based on last name and department
      *         {4, "Bob Brown", "IT"}
      *     });
-     * dataset.removeDuplicateRowsBy(Arrays.asList("name", "department"), 
+     * dataset.removeDuplicateRowsBy(Arrays.asList("name", "department"),
      *     row -> ((String) row.get(0)).split(" ")[1] + "|" + row.get(1));   // Use last name and department as key
      * // Result: Only rows with id=1, id=2, and id=4 remain
      * // The row with id=3 is removed because ("Doe", "IT") already exists
@@ -2372,18 +2378,18 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name"), 
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name"),
      *     new Object[][] {
      *          {1, "Alice"},
      *          {2, "Bob"}
      *     });
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name"), 
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name"),
      *     new Object[][] {
      *          {3, "Charlie"},
      *          {4, "Diana"}
      *     });
-     * 
-     * dataset1.append(dataset2); 
+     *
+     * dataset1.append(dataset2);
      * // dataset1 now contains: {1, "Alice"}, {2, "Bob"}, {3, "Charlie"}, {4, "Diana"}
      * }</pre>
      *
@@ -2404,7 +2410,7 @@ public sealed interface Dataset permits RowDataset {
      * If there are columns in this Dataset that are not present in the other Dataset, they will also be included with {@code null} values for rows from the other Dataset.
      * Duplicated rows in the resulting Dataset will NOT be eliminated.
      * The properties from the other Dataset will also be merged into this Dataset, with the properties from the other Dataset taking precedence in case of conflicts.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
@@ -2441,7 +2447,7 @@ public sealed interface Dataset permits RowDataset {
      * If there are columns in this Dataset that are not present in the other Dataset, they will also be included with {@code null} values for rows from the other Dataset.
      * Duplicated rows in the resulting Dataset will NOT be eliminated.
      * The properties from the other Dataset will also be merged into this Dataset, with the properties from the other Dataset taking precedence in case of conflicts.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
@@ -2461,7 +2467,7 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param other the Dataset to merge with this Dataset. Must not be {@code null}.
-     * @param requiresSameColumns a boolean value that determines whether the merge operation requires both Datasets to have the same columns. 
+     * @param requiresSameColumns a boolean value that determines whether the merge operation requires both Datasets to have the same columns.
      *                           If {@code true}, both Datasets must have identical column structures. If {@code false}, columns from both Datasets are combined.
      * @throws IllegalStateException if this Dataset is frozen (read-only).
      * @throws IllegalArgumentException if the other Dataset is {@code null}, or if {@code requiresSameColumns} is {@code true} and the Datasets do not have the same columns.
@@ -2481,7 +2487,7 @@ public sealed interface Dataset permits RowDataset {
      * All rows from the other Dataset will be added to this Dataset, but only with values from the specified columns (other columns will have {@code null} values).
      * Duplicated rows in the resulting Dataset will NOT be eliminated.
      * The properties from the other Dataset will also be merged into this Dataset, with the properties from the other Dataset taking precedence in case of conflicts.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
@@ -2558,7 +2564,7 @@ public sealed interface Dataset permits RowDataset {
             throws IllegalStateException, IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
-     * Retrieves the current row number in the Dataset. 
+     * Retrieves the current row number in the Dataset.
      * {@code 0} is returned if {@code absolute(int)} has not been called yet.
      * <br />
      * This method is typically used when iterating over the rows in the Dataset.
@@ -3293,14 +3299,14 @@ public sealed interface Dataset permits RowDataset {
      * <pre>{@code
      * final List<String> columNames = N.asList("id", "name", "d.id", "d.model", "d.serialNumber");
      * final Dataset dataset = Dataset.rows(columNames,
-     *          new Object[][] { 
-     *              { 100, "Bob", 1, "iPhone", "abc123" }, 
-     *              { 100, "Bob", 2, "MacBook", "mmm123" }, 
+     *          new Object[][] {
+     *              { 100, "Bob", 1, "iPhone", "abc123" },
+     *              { 100, "Bob", 2, "MacBook", "mmm123" },
      *              { 200, "Alice", 3, "Android", "aaa223" }
      *          });
-     * 
+     *
      * dataset.println();
-     * 
+     *
      * # +-----+-------+------+---------+----------------+
      * # | id  | name  | d.id | d.model | d.serialNumber |
      * # +-----+-------+------+---------+----------------+
@@ -3308,9 +3314,9 @@ public sealed interface Dataset permits RowDataset {
      * # | 100 | Bob   | 2    | MacBook | mmm123         |
      * # | 200 | Alice | 3    | Android | aaa223         |
      * # +-----+-------+------+---------+----------------+
-     * 
+     *
      * dataset.toEntities(Map.of("d", "devices"), Account.class).forEach(e -> System.out.println(N.toJson(e)));
-     * 
+     *
      * // {"id": 100, "name": "Bob", "devices": [{"id": 1, "model": "iPhone", "serialNumber": "abc123"}]}
      * // {"id": 100, "name": "Bob", "devices": [{"id": 2, "model": "MacBook", "serialNumber": "mmm123"}]}
      * // {"id": 200, "name": "Alice", "devices": [{"id": 3, "model": "Android", "serialNumber": "aaa223"}]}
@@ -3405,19 +3411,19 @@ public sealed interface Dataset permits RowDataset {
      * Each unique ID in the Dataset corresponds to an instance of the specified type, where each property in the instance corresponds to a column in the row.
      * Rows with the same ID are merged into a single instance, with the properties of the instance being the union of the properties of the rows.
      * The resulting list of instances is in the same order as the unique IDs in the Dataset.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * final List<String> columNames = N.asList("id", "name", "devices.id", "devices.model", "devices.serialNumber");
      * final Dataset dataset = Dataset.rows(columNames,
-     *          new Object[][] { 
-     *              { 100, "Bob", 1, "iPhone", "abc123" }, 
-     *              { 100, "Bob", 2, "MacBook", "mmm123" }, 
+     *          new Object[][] {
+     *              { 100, "Bob", 1, "iPhone", "abc123" },
+     *              { 100, "Bob", 2, "MacBook", "mmm123" },
      *              { 200, "Alice", 3, "Android", "aaa223" }
      *          });
-     * 
+     *
      * dataset.println();
-     * 
+     *
      * # +-----+-------+------------+---------------+----------------------+
      * # | id  | name  | devices.id | devices.model | devices.serialNumber |
      * # +-----+-------+------------+---------------+----------------------+
@@ -3425,9 +3431,9 @@ public sealed interface Dataset permits RowDataset {
      * # | 100 | Bob   | 2          | MacBook       | mmm123               |
      * # | 200 | Alice | 3          | Android       | aaa223               |
      * # +-----+-------+------------+---------------+----------------------+
-     * 
+     *
      * dataset.toMergedEntities(Account.class).forEach(e -> System.out.println(N.toJson(e)));
-     * 
+     *
      * // {"id": 100, "name": "Bob", "devices": [{"id": 1, "model": "iPhone", "serialNumber": "abc123"}, {"id": 2, "model": "MacBook", "serialNumber": "mmm123"}]}
      * // {"id": 200, "name": "Alice", "devices": [{"id": 3, "model": "Android", "serialNumber": "aaa223"}]}
      * }</pre>
@@ -3445,7 +3451,7 @@ public sealed interface Dataset permits RowDataset {
      * This method is typically used when you need to export specific columns of data in the Dataset to a specific type of objects (entities), and the rows in the Dataset have duplicate IDs.
      * Each unique ID in the Dataset corresponds to an instance of the specified type, where each property in the instance corresponds to a column in the row.
      * Rows with the same ID are merged into a single instance, with the properties of the instance being the union of the properties of the rows.
-     * The resulting list of instances is in the same order as the unique IDs in the Dataset. 
+     * The resulting list of instances is in the same order as the unique IDs in the Dataset.
      *
      * @param <T> the target type of the row.
      * @param selectPropNames the collection of property names to be included in the instance.
@@ -3464,19 +3470,19 @@ public sealed interface Dataset permits RowDataset {
      * Each unique ID in the Dataset corresponds to an instance of the specified type, where each property in the instance corresponds to a column in the row.
      * Rows with the same ID are merged into a single instance, with the properties of the instance being the union of the properties of the rows.
      * The resulting list of instances is in the same order as the unique IDs in the Dataset.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * final List<String> columNames = N.asList("id", "name", "d.id", "d.model", "d.serialNumber");
      * final Dataset dataset = Dataset.rows(columNames,
-     *          new Object[][] { 
-     *              { 100, "Bob", 1, "iPhone", "abc123" }, 
-     *              { 100, "Bob", 2, "MacBook", "mmm123" }, 
+     *          new Object[][] {
+     *              { 100, "Bob", 1, "iPhone", "abc123" },
+     *              { 100, "Bob", 2, "MacBook", "mmm123" },
      *              { 200, "Alice", 3, "Android", "aaa223" }
      *          });
-     * 
+     *
      * dataset.println();
-     * 
+     *
      * # +-----+-------+------+---------+----------------+
      * # | id  | name  | d.id | d.model | d.serialNumber |
      * # +-----+-------+------+---------+----------------+
@@ -3484,9 +3490,9 @@ public sealed interface Dataset permits RowDataset {
      * # | 100 | Bob   | 2    | MacBook | mmm123         |
      * # | 200 | Alice | 3    | Android | aaa223         |
      * # +-----+-------+------+---------+----------------+
-     * 
+     *
      * dataset.toMergedEntities(Map.of("d", "devices"), Account.class).forEach(e -> System.out.println(N.toJson(e)));
-     * 
+     *
      * // {"id": 100, "name": "Bob", "devices": [{"id": 1, "model": "iPhone", "serialNumber": "abc123"}, {"id": 2, "model": "MacBook", "serialNumber": "mmm123"}]}
      * // {"id": 200, "name": "Alice", "devices": [{"id": 3, "model": "Android", "serialNumber": "aaa223"}]}
      * }</pre>
@@ -3506,19 +3512,19 @@ public sealed interface Dataset permits RowDataset {
      * Each unique ID in the Dataset corresponds to an instance of the specified type, where each property in the instance corresponds to a column in the row.
      * Rows with the same ID are merged into a single instance, with the properties of the instance being the union of the properties of the rows.
      * The resulting list of instances is in the same order as the unique IDs in the Dataset.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * final List<String> columNames = N.asList("id", "name", "devices.id", "devices.model", "devices.serialNumber");
      * final Dataset dataset = Dataset.rows(columNames,
-     *          new Object[][] { 
-     *              { 100, "Bob", 1, "iPhone", "abc123" }, 
-     *              { 100, "Bob", 2, "MacBook", "mmm123" }, 
+     *          new Object[][] {
+     *              { 100, "Bob", 1, "iPhone", "abc123" },
+     *              { 100, "Bob", 2, "MacBook", "mmm123" },
      *              { 200, "Alice", 3, "Android", "aaa223" }
      *          });
-     * 
+     *
      * dataset.println();
-     * 
+     *
      * # +-----+-------+------------+---------------+----------------------+
      * # | id  | name  | devices.id | devices.model | devices.serialNumber |
      * # +-----+-------+------------+---------------+----------------------+
@@ -3526,9 +3532,9 @@ public sealed interface Dataset permits RowDataset {
      * # | 100 | Bob   | 2          | MacBook       | mmm123               |
      * # | 200 | Alice | 3          | Android       | aaa223               |
      * # +-----+-------+------------+---------------+----------------------+
-     * 
+     *
      * dataset.toMergedEntities("id", Account.class).forEach(e -> System.out.println(N.toJson(e)));
-     * 
+     *
      * // {"id": 100, "name": "Bob", "devices": [{"id": 1, "model": "iPhone", "serialNumber": "abc123"}, {"id": 2, "model": "MacBook", "serialNumber": "mmm123"}]}
      * // {"id": 200, "name": "Alice", "devices": [{"id": 3, "model": "Android", "serialNumber": "aaa223"}]}
      * }</pre>
@@ -3587,7 +3593,7 @@ public sealed interface Dataset permits RowDataset {
      * This method is typically used when you need to export specific columns of data in the Dataset to a specific type of objects (entities), and the rows in the Dataset have duplicate IDs.
      * Each unique ID in the Dataset corresponds to an instance of the specified type, where each property in the instance corresponds to a column in the row.
      * Rows with the same IDs are merged into a single instance, with the properties of the instance being the union of the properties of the rows.
-     * The resulting list of instances is in the same order as the unique IDs in the Dataset. 
+     * The resulting list of instances is in the same order as the unique IDs in the Dataset.
      *
      * @param <T> the target type of the row.
      * @param idPropNames the collection of property names that are used as the IDs for merging rows. Rows with the same IDs will be merged into a single instance.
@@ -3608,7 +3614,7 @@ public sealed interface Dataset permits RowDataset {
      * Each unique combination of ID values in the Dataset corresponds to an instance of the specified type, where each property in the instance corresponds to a column in the row.
      * Rows with the same ID values are merged into a single instance, with the properties of the instance being the union of the properties of the rows.
      * The mapping between column names and field names is determined by the {@code prefixAndFieldNameMap}.
-     * The resulting list of instances is in the same order as the unique ID combinations in the Dataset. 
+     * The resulting list of instances is in the same order as the unique ID combinations in the Dataset.
      *
      * @param <T> the target type of the row.
      * @param idPropNames the collection of property names that are used as the composite IDs for merging rows. Rows with the same ID values will be merged into a single instance.
@@ -3630,22 +3636,22 @@ public sealed interface Dataset permits RowDataset {
      * This method is commonly used when exporting selected columns from a Dataset into a list of typed objects (entities),
      * especially when the Dataset contains multiple rows with the same ID values.
      * <p>
-     * Each unique combination of ID property values results in one merged instance of the target type. 
+     * Each unique combination of ID property values results in one merged instance of the target type.
      * The properties of each instance represent a union of the properties from all matching rows.
-     * The order of the resulting list corresponds to the order of unique IDs in the Dataset. 
-     * 
+     * The order of the resulting list corresponds to the order of unique IDs in the Dataset.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * final List<String> columNames = N.asList("id", "name", "d.id", "d.model", "d.serialNumber");
      * final Dataset dataset = Dataset.rows(columNames,
-     *          new Object[][] { 
-     *              { 100, "Bob", 1, "iPhone", "abc123" }, 
-     *              { 100, "Bob", 2, "MacBook", "mmm123" }, 
+     *          new Object[][] {
+     *              { 100, "Bob", 1, "iPhone", "abc123" },
+     *              { 100, "Bob", 2, "MacBook", "mmm123" },
      *              { 200, "Alice", 3, "Android", "aaa223" }
      *          });
-     * 
+     *
      * dataset.println();
-     * 
+     *
      * # +-----+-------+------+---------+----------------+
      * # | id  | name  | d.id | d.model | d.serialNumber |
      * # +-----+-------+------+---------+----------------+
@@ -3653,18 +3659,18 @@ public sealed interface Dataset permits RowDataset {
      * # | 100 | Bob   | 2    | MacBook | mmm123         |
      * # | 200 | Alice | 3    | Android | aaa223         |
      * # +-----+-------+------+---------+----------------+
-     * 
+     *
      * dataset.toMergedEntities(List.of("id"), dataset.columnNames(), Map.of("d", "devices"), Account.class).forEach(e -> System.out.println(N.toJson(e)));
-     * 
+     *
      * // {"id": 100, "name": "Bob", "devices": [{"id": 1, "model": "iPhone", "serialNumber": "abc123"}, {"id": 2, "model": "MacBook", "serialNumber": "mmm123"}]}
      * // {"id": 200, "name": "Alice", "devices": [{"id": 3, "model": "Android", "serialNumber": "aaa223"}]}
      * }</pre>
      *
      * @param <T> the target bean type.
-     * @param idPropNames the collection of property names used to identify and group rows. 
+     * @param idPropNames the collection of property names used to identify and group rows.
      *                    Rows with matching values for these properties will be merged into one instance.
      * @param selectPropNames the collection of property names to include in the resulting instances.
-     * @param prefixAndFieldNameMap an optional mapping of column name prefixes to field names in the bean. 
+     * @param prefixAndFieldNameMap an optional mapping of column name prefixes to field names in the bean.
      *                               This supports column headers that are prefixed.
      * @param beanClass the class representing the bean type. Must be a valid JavaBean.
      * @return a list of merged entities of the specified type, based on the Dataset content.
@@ -4410,7 +4416,7 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Converts the entire Dataset into a JSON string and writes it to the provided File.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
@@ -4425,7 +4431,7 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Converts a range of rows in the Dataset into a JSON string and writes it to the provided File.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
@@ -4468,7 +4474,7 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Converts the entire Dataset into a JSON string and writes it to the provided OutputStream.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
@@ -4483,7 +4489,7 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Converts a range of rows in the Dataset into a JSON string and writes it to the provided OutputStream.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
@@ -4584,7 +4590,7 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Converts the entire Dataset into an XML string, with each row represented as an XML element with the specified name, and returns it as a String.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
@@ -4816,7 +4822,7 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Converts a range of rows in the Dataset into an XML string, including only the specified columns, and writes it to the specified File.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
@@ -5180,7 +5186,7 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), 
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"),
      *              new Object[][] {
      *                     {1, "Alice"},
      *                     {2, "Bob\"s"}
@@ -5210,7 +5216,7 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), 
+     * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"),
      *              new Object[][] {
      *                     {1, "Alice"},
      *                     {2, "Bob\"s"}
@@ -5693,7 +5699,7 @@ public sealed interface Dataset permits RowDataset {
      * // | it         | Charlie  | 70000  | 7000  |
      * // | IT         | David    | 75000  | 8000  |
      * // +------------+----------+--------+-------+
-     * 
+     *
      * Dataset result = dataset.groupBy(
      *     "department",                           // group by department
      *     dept -> ((String) dept).toLowerCase(),  // normalize to lowercase
@@ -5761,7 +5767,7 @@ public sealed interface Dataset permits RowDataset {
      * // | IT         | Junior | Eve      | 55000  |
      * // | Sales      | Senior | Frank    | 78000  |
      * // +------------+--------+----------+--------+
-     * 
+     *
      * Dataset result = dataset.groupBy(Arrays.asList("department", "level"));
      *
      * // Result Dataset:
@@ -6028,7 +6034,7 @@ public sealed interface Dataset permits RowDataset {
      * // | IT         | Senior | David    | 80000  | 9000  |
      * // | Sales      | Junior | Eve      | 52000  | 5500  |
      * // +------------+--------+----------+--------+-------+
-     * 
+     *
      * Dataset result = dataset.groupBy(
      *     Arrays.asList("department", "level"),    // group by department and level
      *     row -> row.get(0) + "_" + row.get(1),   // create composite key: "Sales_Junior"
@@ -6996,7 +7002,7 @@ public sealed interface Dataset permits RowDataset {
      * // | North  | Canada  | 600   |
      * // | South  | Mexico  | 400   |
      * // +--------+---------+-------+
-     * 
+     *
      * Stream<Dataset> cubeResult = dataset.cube(Arrays.asList("region", "country"));
      * // Returns a stream of 4 datasets:
      * // Level 1: Grouped by region, country (most detailed)
@@ -7014,7 +7020,7 @@ public sealed interface Dataset permits RowDataset {
      * // | North  | 2     |
      * // | South  | 1     |
      * // +--------+-------+
-     * // Level 3: Grouped by country only  
+     * // Level 3: Grouped by country only
      * // +---------+-------+
      * // | country | count |
      * // +---------+-------+
@@ -7318,7 +7324,7 @@ public sealed interface Dataset permits RowDataset {
      * // | North  | USA     | 1000  |
      * // | North  | Canada  | 600   |
      * // | South  | Mexico  | 400   |
-     * // +--------+---------+-------+ 
+     * // +--------+---------+-------+
      *
      * Function<DisposableObjArray, String> keyExtractor = keyRow -> keyRow.join("-");
      * Function<DisposableObjArray, Double> rowMapper = row -> (Integer) row.get(0) * 1.1;
@@ -8817,8 +8823,7 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param other the other Dataset to union with
      * @return a new Dataset that is the result of the union operation with duplicates eliminated
-     * @throws IllegalArgumentException if the other Dataset is {@code null},
-     *                                  or if the Datasets do not have the same column structure
+     * @throws IllegalArgumentException if the other Dataset is {@code null}, or if the two Datasets have no common columns
      * @see #unionAll(Dataset)
      * @see #unionAll(Dataset, boolean)
      * @see #intersect(Dataset)
@@ -8975,7 +8980,7 @@ public sealed interface Dataset permits RowDataset {
      * The union all operation combines all rows from both Datasets into a new Dataset.
      * Unlike the union operation, union all includes duplicate rows detected by common columns in the resulting Dataset.
      * The resulting Dataset will contain the union of columns from both Datasets, with {@code null} values for columns that don't exist in one of the source Datasets.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
@@ -9064,18 +9069,18 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name"), 
+     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name"),
      *     new Object[][] {
-     *          {1, "Alice"}, 
+     *          {1, "Alice"},
      *          {2, "Bob"},
      *          {1, "Alice"}
      *     });
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name"), 
+     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name"),
      *     new Object[][] {
-     *          {1, "Alice"}, 
+     *          {1, "Alice"},
      *          {3, "Charlie"}
      *     });
-     * 
+     *
      * Dataset result = dataset1.intersect(dataset2);
      * // Result contains only: {1, "Alice"}
      * }</pre>
@@ -9324,7 +9329,7 @@ public sealed interface Dataset permits RowDataset {
      * @param other the other Dataset to intersect with
      * @param keyColumnNames the collection of column names to be used as keys for the intersection operation
      * @return a new Dataset that is the result of the intersection operation with duplicates preserved
-     * @throws IllegalArgumentException if the other Dataset is {@code null}, 
+     * @throws IllegalArgumentException if the other Dataset is {@code null},
      *                                  or if the keyColumnNames is {@code null} or empty,
      *                                  or if any of the specified key column names do not exist in either Dataset
      * @see #intersectAll(Dataset)
@@ -9360,7 +9365,7 @@ public sealed interface Dataset permits RowDataset {
      *     });
      *
      * Collection<String> keyColumns = Arrays.asList("id", "name");
-     * 
+     *
      * // Require same columns - will throw IllegalArgumentException
      * // Dataset result = dataset1.intersectAll(dataset2, keyColumns, true);
      *
@@ -9394,7 +9399,7 @@ public sealed interface Dataset permits RowDataset {
      * only the common columns will be used for the comparison.
      * Duplicated rows detected by common columns in the returned Dataset will be eliminated.
      * The resulting Dataset will have the same column structure as this Dataset.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
@@ -9478,7 +9483,7 @@ public sealed interface Dataset permits RowDataset {
      * The difference operation returns a new Dataset that includes rows that are in this Dataset but not in the provided Dataset.
      * Duplicated rows detected by common columns in the returned Dataset will be eliminated.
      * The resulting Dataset will have the same column structure as this Dataset.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
@@ -9538,7 +9543,7 @@ public sealed interface Dataset permits RowDataset {
      *     });
      *
      * Collection<String> keyColumns = Arrays.asList("id", "name");
-     * 
+     *
      * // Require same columns - will throw IllegalArgumentException
      * // Dataset result = dataset1.except(dataset2, keyColumns, true);
      *
@@ -9573,7 +9578,7 @@ public sealed interface Dataset permits RowDataset {
      * only the common columns will be used for the comparison.
      * Duplicated rows detected by common columns in the returned Dataset will NOT be eliminated.
      * The resulting Dataset will have the same column structure as this Dataset.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
@@ -9659,7 +9664,7 @@ public sealed interface Dataset permits RowDataset {
      * The difference operation returns a new Dataset that includes rows that are in this Dataset but not in the provided Dataset.
      * Duplicated rows detected by common columns in the returned Dataset will NOT be eliminated.
      * The resulting Dataset will have the same column structure as this Dataset.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "age"),
@@ -9757,7 +9762,7 @@ public sealed interface Dataset permits RowDataset {
     //     * For rows that appear multiple times, the result contains the minimum number of occurrences present in both Datasets.
     //     * Duplicated rows in the returned {@code Dataset} will NOT be eliminated.
     //     * The resulting Dataset will have the same column structure as this Dataset.
-    //     * 
+    //     *
     //     * <p><b>Usage Examples:</b></p>
     //     * <pre>{@code
     //     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name"),
@@ -9845,7 +9850,7 @@ public sealed interface Dataset permits RowDataset {
     //     * For rows that appear multiple times, the result contains the minimum number of occurrences present in both Datasets.
     //     * Duplicated rows in the returned {@code Dataset} will NOT be eliminated.
     //     * The resulting Dataset will have the same column structure as this Dataset.
-    //     * 
+    //     *
     //     * <p><b>Usage Examples:</b></p>
     //     * <pre>{@code
     //     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
@@ -9908,7 +9913,7 @@ public sealed interface Dataset permits RowDataset {
     //     *          {4, "Dave", 70000},
     //     *          {2, "Bob", 80000}  // different salary but same keys
     //     *     });
-    //     * 
+    //     *
     //     * Collection<String> keyColumns = Arrays.asList("id", "name");
     //     * Dataset result = dataset1.intersection(dataset2, keyColumns, false);
     //     * // Result contains {1, "Alice", "HR"} once and {2, "Bob", "Engineering"} twice (minimum of 2 and 3 occurrences)
@@ -10016,7 +10021,7 @@ public sealed interface Dataset permits RowDataset {
     //     * The comparison is performed on the specified key columns only between the two Datasets.
     //     * Duplicated rows in the returned Dataset will NOT be eliminated.
     //     * The resulting Dataset will have the same column structure as this Dataset.
-    //     * 
+    //     *
     //     * <p><b>Usage Examples:</b></p>
     //     * <pre>{@code
     //     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
@@ -10103,7 +10108,7 @@ public sealed interface Dataset permits RowDataset {
     //     * The comparison is performed on the common columns between the two Datasets.
     //     * Duplicated rows in the returned Dataset will NOT be eliminated.
     //     * The resulting Dataset will contain the union of columns from both Datasets, with {@code null} values for columns that don't exist in one of the source Datasets.
-    //     * 
+    //     *
     //     * <p><b>Usage Examples:</b></p>
     //     * <pre>{@code
     //     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
@@ -10191,7 +10196,7 @@ public sealed interface Dataset permits RowDataset {
     //     * The comparison is performed on the specified key columns only between the two Datasets.
     //     * Duplicated rows in the returned Dataset will NOT be eliminated.
     //     * The resulting Dataset will contain the union of columns from both Datasets, with {@code null} values for columns that don't exist in one of the source Datasets.
-    //     * 
+    //     *
     //     * <p><b>Usage Examples:</b></p>
     //     * <pre>{@code
     //     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
@@ -10528,10 +10533,11 @@ public sealed interface Dataset permits RowDataset {
     Dataset copy(int fromRowIndex, int toRowIndex, Collection<String> columnNames);
 
     /**
-     * Creates a deep copy of the current Dataset by performing Serialization/Deserialization.
+     * Creates a deep copy of the current Dataset using Kryo serialization.
      * <br />
      * This method ensures that the returned Dataset is a completely separate copy of the original Dataset, with no shared references.
-     * The frozen status of the copy will always be {@code false}, even if the original {@code Dataset} is frozen.
+     * The copy preserves the original's frozen state (i.e. if this Dataset is frozen, the returned copy is also frozen).
+     * Use {@link #clone(boolean)} to explicitly choose the frozen state of the copy.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -10540,23 +10546,25 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @return a new Dataset that is a deep copy of the current Dataset.
+     * @throws RuntimeException if the Kryo library is not available on the classpath.
      */
     @Beta
     Dataset clone(); //NOSONAR
 
     /**
-     * Creates a deep copy of the current Dataset by performing Serialization/Deserialization.
+     * Creates a deep copy of the current Dataset using Kryo serialization.
      * <br />
      * This method ensures that the returned Dataset is a completely separate copy of the original Dataset, with no shared references.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id"), new Object[][] {{1}});
-     * Dataset copy = dataset.clone();
+     * Dataset frozenCopy = dataset.clone(true);
      * }</pre>
      *
      * @param freeze a boolean value that indicates whether the returned Dataset should be frozen.
      * @return a new Dataset that is a deep copy of the current Dataset.
+     * @throws RuntimeException if the Kryo library is not available on the classpath.
      */
     @Beta
     Dataset clone(boolean freeze);
@@ -11261,7 +11269,7 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Checks if the Dataset is frozen.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id"), new Object[][] {{1}});
@@ -11381,7 +11389,7 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Prints the content of the Dataset to the standard output.
      * <br />
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
@@ -11403,12 +11411,12 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Prints the content of the Dataset to the standard output.
      * <br />
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
      * dataset.println("## ");   // Print entire Dataset to console with prefix "## "
-     * 
+     *
      * ## +----+---------+-----+---------+
      * ## | id | name    | age | salary  |
      * ## +----+---------+-----+---------+
@@ -11419,7 +11427,7 @@ public sealed interface Dataset permits RowDataset {
      * ## | 5  | Charlie | 40  | 80000.0 |
      * ## +----+---------+-----+---------+
      * }</pre>
-     * 
+     *
      * @param prefix the prefix string to be printed before each line of the Dataset output
      * @see #println()
      */
@@ -11466,7 +11474,7 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Prints the Dataset to the provided Writer.
      * <br />
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);

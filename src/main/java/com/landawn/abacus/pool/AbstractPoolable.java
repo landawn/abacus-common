@@ -18,20 +18,20 @@ package com.landawn.abacus.pool;
  * Abstract base class for implementing poolable objects.
  * This class provides a convenient base implementation of the {@link Poolable} interface,
  * managing the {@link ActivityPrint} for tracking object lifecycle and usage.
- * 
+ *
  * <p>Subclasses need only implement the {@link #destroy(Poolable.Caller)} method to define
  * their cleanup behavior when removed from a pool.
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * public class PooledConnection extends AbstractPoolable {
  *     private final Connection connection;
- *     
+ *
  *     public PooledConnection(Connection conn) {
  *         super(3600000, 300000);   // 1 hour lifetime, 5 minute max idle
  *         this.connection = conn;
  *     }
- *     
+ *
  *     @Override
  *     public void destroy(Caller caller) {
  *         try {
@@ -40,13 +40,13 @@ package com.landawn.abacus.pool;
  *             // log error
  *         }
  *     }
- *     
+ *
  *     public Connection getConnection() {
  *         return connection;
  *     }
  * }
  * }</pre>
- * 
+ *
  * @see Poolable
  * @see ActivityPrint
  * @see ObjectPool

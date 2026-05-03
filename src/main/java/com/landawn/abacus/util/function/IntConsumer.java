@@ -46,7 +46,7 @@ public interface IntConsumer extends Throwables.IntConsumer<RuntimeException>, j
      * collector.accept(10);
      * }</pre>
      *
-     * @param value the input argument
+     * @param value the {@code int} input argument
      */
     @Override
     void accept(int value);
@@ -67,6 +67,7 @@ public interface IntConsumer extends Throwables.IntConsumer<RuntimeException>, j
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code IntConsumer} that performs in sequence this operation followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     @Override
     default IntConsumer andThen(final java.util.function.IntConsumer after) {

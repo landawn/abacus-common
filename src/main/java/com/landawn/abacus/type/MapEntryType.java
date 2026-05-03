@@ -17,6 +17,7 @@ package com.landawn.abacus.type;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.List;
 import java.util.Map;
 
 import com.landawn.abacus.exception.UncheckedIOException;
@@ -31,8 +32,9 @@ import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for Map.Entry objects with generic key and value types.
- * This class handles serialization and deserialization of Map.Entry instances.
+ * Type handler for {@link java.util.Map.Entry} objects with generic key and value types.
+ * This class handles serialization and deserialization of {@code Map.Entry} instances,
+ * converting them to and from a single-entry JSON object representation (e.g., {@code {"key":value}}).
  *
  * @param <K> the key type
  * @param <V> the value type
@@ -49,7 +51,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
 
     private final Type<V> valueType;
 
-    private final Type<?>[] parameterTypes;
+    private final List<Type<?>> parameterTypes;
 
     private final JsonDeserConfig jdc;
 
@@ -59,22 +61,16 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
         declaringName = getTypeName(keyTypeName, valueTypeName, true);
         keyType = TypeFactory.getType(keyTypeName);
         valueType = TypeFactory.getType(valueTypeName);
-        parameterTypes = new Type[] { keyType, valueType };
+        parameterTypes = List.of(keyType, valueType);
         jdc = JsonDeserConfig.create().setMapKeyType(keyType).setMapValueType(valueType);
     }
 
     /**
-     * Returns the declaring name of this MapEntry type.
-     * The declaring name includes the fully qualified class names of the key and value types.
+     * Returns the declaring name of this {@code MapEntry} type.
+     * The declaring name uses simple (non-fully-qualified) class names for the key and value
+     * type parameters; the wrapper is rendered as {@code "Map.Entry"}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Map.Entry<String, Integer>> type = TypeFactory.getType("Map.Entry<String, Integer>");
-     * String name = type.declaringName();
-     * // Returns: "Map.Entry<String, Integer>"
-     * }</pre>
-     *
-     * @return The declaring name in format "Map.Entry&lt;KeyDeclaringName, ValueDeclaringName&gt;"
+     * @return the declaring name in the format {@code "Map.Entry<KeyDeclaringName, ValueDeclaringName>"}
      */
     @Override
     public String declaringName() {
@@ -82,16 +78,9 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
     }
 
     /**
-     * Returns the Class object representing the Map.Entry type.
+     * Returns the {@link Class} object representing the {@code Map.Entry} type.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Map.Entry<String, Integer>> type = TypeFactory.getType("Map.Entry<String, Integer>");
-     * Class<Map.Entry<String, Integer>> clazz = type.javaType();
-     * // Returns: Map.Entry.class
-     * }</pre>
-     *
-     * @return The Class object for Map.Entry
+     * @return {@code Map.Entry.class}
      */
     @Override
     public Class<Map.Entry<K, V>> javaType() {
@@ -99,37 +88,22 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
     }
 
     /**
-     * Gets the parameter types for this generic Map.Entry type.
-     * The array contains two elements: the key type at index 0 and the value type at index 1.
+     * Returns the parameter types for this generic {@code Map.Entry} type.
+     * The list always contains exactly two elements: the key type at index 0
+     * and the value type at index 1.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Map.Entry<String, Integer>> type = TypeFactory.getType("Map.Entry<String, Integer>");
-     * Type<?>[] paramTypes = type.parameterTypes();
-     * // Returns: [StringType, IntegerType]
-     * // paramTypes[0] is the key type (String)
-     * // paramTypes[1] is the value type (Integer)
-     * }</pre>
-     *
-     * @return An array containing the key type and value type
+     * @return an immutable two-element list containing the key type and the value type
      */
     @Override
-    public Type<?>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 
     /**
      * Indicates whether this is a parameterized type.
-     * For MapEntryType, this always returns {@code true} since Map.Entry is parameterized with key and value types.
+     * Always returns {@code true} because {@code Map.Entry} is parameterized with key and value types.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Map.Entry<String, Integer>> type = TypeFactory.getType("Map.Entry<String, Integer>");
-     * boolean isParameterized = type.isParameterizedType();
-     * // Returns: true
-     * }</pre>
-     *
-     * @return {@code true}, indicating that Map.Entry is a parameterized type
+     * @return {@code true}
      */
     @Override
     public boolean isParameterizedType() {
@@ -137,23 +111,11 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
     }
 
     /**
-     * Converts a Map.Entry object to its JSON string representation.
-     * The entry is serialized as a JSON object with a single key-value pair.
+     * Converts a {@link Map.Entry} object to its JSON string representation.
+     * The entry is serialized as a single-pair JSON object, e.g., {@code {"age":25}}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Map.Entry<String, Integer>> type = TypeFactory.getType("Map.Entry<String, Integer>");
-     * Map.Entry<String, Integer> entry = Map.entry("age", 25);
-     *
-     * String json = type.stringOf(entry);
-     * // Returns: "{\"age\":25}"
-     *
-     * json = type.stringOf(null);
-     * // Returns: null
-     * }</pre>
-     *
-     * @param x The Map.Entry object to convert
-     * @return The JSON string representation in format "{key:value}", or {@code null} if the input is null
+     * @param x the {@code Map.Entry} object to convert, may be {@code null}
+     * @return the JSON string representation of the entry, or {@code null} if the input is {@code null}
      */
     @Override
     public String stringOf(final Map.Entry<K, V> x) {
@@ -161,25 +123,14 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
     }
 
     /**
-     * Parses a JSON string to create a Map.Entry object.
-     * The string should represent a JSON object with exactly one key-value pair.
+     * Parses a JSON string to create a {@link Map.Entry} object.
+     * The string must represent a JSON object with exactly one key-value pair,
+     * for example {@code {"age":25}}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Map.Entry<String, Integer>> type = TypeFactory.getType("Map.Entry<String, Integer>");
-     *
-     * Map.Entry<String, Integer> entry = type.valueOf("{\"age\":25}");
-     * // Returns: Map.Entry with key="age" and value=25
-     *
-     * entry = type.valueOf(null);
-     * // Returns: null
-     *
-     * entry = type.valueOf("{}");
-     * // Returns: null
-     * }</pre>
-     *
-     * @param str The JSON string to parse
-     * @return The parsed Map.Entry object, or {@code null} if the input is {@code null}, empty, or represents an empty object "{}"
+     * @param str the JSON string to parse; may be {@code null}, empty, or {@code "{}"}
+     * @return the parsed {@code Map.Entry}, or {@code null} if the input is {@code null},
+     *         empty, or an empty JSON object ({@code "{}"})
+     * @throws IllegalArgumentException if the JSON object contains more than one entry
      */
     @Override
     public Map.Entry<K, V> valueOf(final String str) {
@@ -201,25 +152,15 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
     }
 
     /**
-     * Appends the string representation of a Map.Entry to an Appendable.
-     * The entry is formatted as a JSON object with the key and value properly serialized according to their types.
-     * If the Appendable is a Writer, buffering is used for better performance.
+     * Appends the JSON representation of a {@link Map.Entry} to an {@link Appendable}.
+     * The entry is formatted as a single-pair JSON object with the key and value
+     * serialized according to their respective type handlers.
+     * When the {@code Appendable} is a {@link java.io.Writer}, a buffered wrapper is used
+     * for better I/O performance.
+     * If the entry is {@code null}, the literal string {@code "null"} is appended.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Map.Entry<String, Integer>> type = TypeFactory.getType("Map.Entry<String, Integer>");
-     * Map.Entry<String, Integer> entry = Map.entry("age", 25);
-     * StringBuilder sb = new StringBuilder();
-     *
-     * type.appendTo(sb, entry);
-     * // sb now contains: {"age":25}
-     *
-     * type.appendTo(sb, null);
-     * // sb now contains: {"age":25}null
-     * }</pre>
-     *
-     * @param appendable The Appendable to write to
-     * @param x The Map.Entry to append
+     * @param appendable the target to write to
+     * @param x the {@code Map.Entry} to append, may be {@code null}
      * @throws IOException if an I/O error occurs while appending
      */
     @Override
@@ -263,27 +204,14 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
     }
 
     /**
-     * Writes the character representation of a Map.Entry to a CharacterWriter.
-     * The entry is formatted as a JSON object with the key and value properly serialized.
-     * This method is optimized for character-based writing.
+     * Writes the JSON representation of a {@link Map.Entry} to a {@link CharacterWriter}.
+     * The entry is formatted as a single-pair JSON object, with the key and value serialized
+     * using their respective type handlers and the provided configuration.
+     * If the entry is {@code null}, the literal {@code "null"} character array is written.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Map.Entry<String, Integer>> type = TypeFactory.getType("Map.Entry<String, Integer>");
-     * Map.Entry<String, Integer> entry = Map.entry("age", 25);
-     * CharacterWriter writer = CharacterWriter.of(new StringWriter());
-     * JsonXmlSerConfig<?> config = JsonXmlSerConfig.of();
-     *
-     * type.writeCharacter(writer, entry, config);
-     * // writer now contains: {"age":25}
-     *
-     * type.writeCharacter(writer, null, config);
-     * // writer now contains: {"age":25}null
-     * }</pre>
-     *
-     * @param writer The CharacterWriter to write to
-     * @param x The Map.Entry to write
-     * @param config The serialization configuration to use for formatting
+     * @param writer the {@code CharacterWriter} to write to
+     * @param x the {@code Map.Entry} to write, may be {@code null}
+     * @param config the serialization configuration used when writing the key and value
      * @throws IOException if an I/O error occurs while writing
      */
     @Override
@@ -307,13 +235,12 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
     }
 
     /**
-     * Generates the type name for a Map.Entry with the specified key and value types.
-     * This is an internal method used by the type system.
+     * Generates the type name for a {@code Map.Entry} with the specified key and value types.
      *
-     * @param keyTypeName The name of the key type
-     * @param valueTypeName The name of the value type
-     * @param isDeclaringName Whether to use declaring names (true) or regular names (false)
-     * @return The formatted type name string
+     * @param keyTypeName the name of the key type
+     * @param valueTypeName the name of the value type
+     * @param isDeclaringName {@code true} to use declaring (simple) names; {@code false} for canonical names
+     * @return the formatted type name string, e.g. {@code "Map.Entry<String, Integer>"}
      */
     protected static String getTypeName(final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {

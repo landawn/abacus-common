@@ -23,25 +23,25 @@ import com.landawn.abacus.annotation.MayReturnNull;
 /**
  * Represents a unique identifier for an entity, consisting of property names and their values.
  * This interface provides a flexible way to create and work with composite identifiers for entities.
- * 
+ *
  * <p>EntityId supports various creation patterns including single properties, multiple properties,
  * and extraction from existing entities. It's particularly useful for database operations where
  * entities may have composite keys.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Single property ID
  * EntityId id1 = EntityId.of("User.id", 12345);
- * 
+ *
  * // Multiple property ID
  * EntityId id2 = EntityId.of("Order.customerId", 100, "Order.orderId", 500);
- * 
+ *
  * // From a map
  * Map<String, Object> props = new HashMap<>();
  * props.put("productId", "ABC123");
  * props.put("warehouseId", 5);
  * EntityId id3 = EntityId.create("Product", props);
- * 
+ *
  * // Using builder
  * EntityId id4 = EntityId.builder("Customer")
  *     .put("customerId", 1000)
@@ -249,7 +249,7 @@ public interface EntityId {
      * product.setProductCode("ABC");
      * product.setWarehouseId(5);
      * product.setDescription("Example product");
-     * 
+     *
      * EntityId id = EntityId.create(product, Arrays.asList("productCode", "warehouseId"));
      * // Creates ID with only productCode and warehouseId
      * }</pre>
@@ -399,7 +399,7 @@ public interface EntityId {
      * <pre>{@code
      * EntityId id1 = EntityId.builder().build();
      * boolean empty1 = id1.isEmpty();   // Returns true
-     * 
+     *
      * EntityId id2 = EntityId.of("User.id", 100);
      * boolean empty2 = id2.isEmpty();   // Returns false
      * }</pre>
@@ -447,7 +447,7 @@ public interface EntityId {
 
     /**
      * Builder class for constructing EntityId instances fluently.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId complexId = EntityId.builder("Order")

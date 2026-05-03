@@ -69,7 +69,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Core Functional Categories:</b>
  * <ul>
- *   <li><b>Access Operations:</b> get, getFirst, getLast, elementAt with safe index handling</li>
+ *   <li><b>Access Operations:</b> getFirst, getLast, elementAt with safe index handling</li>
  *   <li><b>Search Operations:</b> find, findFirst, findLast, indexOf, contains with predicate support</li>
  *   <li><b>Transformation Operations:</b> map, flatMap, filter, distinct, reverse, shuffle</li>
  *   <li><b>Aggregation Operations:</b> reduce, fold, sum, average, min, max for various types</li>
@@ -95,9 +95,9 @@ import com.landawn.abacus.util.stream.Stream;
  * <pre>{@code
  * // Basic iterator access operations
  * Iterator<String> iter = Arrays.asList("A", "B", "C", "D").iterator();
- * Nullable<String> element = Iterators.get(iter, 2);     // Nullable["C"]
- * Nullable<String> first = Iterators.getFirst(iter);     // Nullable["A"]
- * Nullable<String> notFound = Iterators.get(iter, 10);   // Nullable.empty()
+ * Nullable<String> element = Iterators.elementAt(iter, 2);     // Nullable["C"]
+ * Nullable<String> first = Iterators.getFirst(iter);            // Nullable["A"]
+ * Nullable<String> notFound = Iterators.elementAt(iter, 10);    // Nullable.empty()
  *
  * // Search operations with predicates
  * Iterator<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5).iterator();
@@ -118,10 +118,10 @@ import com.landawn.abacus.util.stream.Stream;
  * // Parallel processing operations
  * ExecutorService executor = Executors.newFixedThreadPool(4);
  * Iterator<String> data = largeDataset.iterator();
- * 
+ *
  * // Parallel forEach processing
  * Iterators.forEach(data, executor, item -> processItem(item));
- * 
+ *
  * // Parallel map transformation
  * Iterator<String> processed = Iterators.map(data, executor, this::expensiveTransform);
  *
@@ -223,7 +223,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Common Patterns:</b>
  * <ul>
- *   <li><b>Safe Access:</b> {@code Nullable<T> result = Iterators.get(iterator, index);}</li>
+ *   <li><b>Safe Access:</b> {@code Nullable<T> result = Iterators.elementAt(iterator, index);}</li>
  *   <li><b>Parallel Processing:</b> {@code Iterators.forEach(iterator, executor, processor);}</li>
  *   <li><b>Stream Conversion:</b> {@code Stream<T> stream = Iterators.stream(iterator);}</li>
  *   <li><b>Functional Pipeline:</b> {@code Iterator<R> result = Iterators.map(Iterators.filter(iter, pred), mapper);}</li>
@@ -250,22 +250,22 @@ import com.landawn.abacus.util.stream.Stream;
  * try {
  *     // Parallel processing with memory-efficient streaming
  *     Iterator<ProcessedRecord> processed = Iterators.map(largeDataset, executor, this::expensiveTransform);
- *     
+ *
  *     // Filter and aggregate without loading all data into memory
  *     Iterator<ProcessedRecord> filtered = Iterators.filter(processed, record -> record.isValid());
- *     
+ *
  *     // Collect results efficiently
  *     List<ProcessedRecord> results = Iterators.toList(filtered);
- *     
+ *
  *     // Statistical analysis
  *     double averageScore = Iterators.average(
  *         Iterators.map(results.iterator(), ProcessedRecord::getScore)
  *     );
- *     
+ *
  *     // Find best performing records
- *     Nullable<ProcessedRecord> best = Iterators.max(results.iterator(), 
+ *     Nullable<ProcessedRecord> best = Iterators.max(results.iterator(),
  *         Comparator.comparing(ProcessedRecord::getScore));
- *         
+ *
  * } finally {
  *     executor.shutdown();
  * }
@@ -292,7 +292,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * // Grouping and final processing
  * Map<String, List<AnalyzedData>> grouped = Iterators.groupBy(analyzed, AnalyzedData::getCategory);
- * 
+ *
  * // Convert to final result format
  * Map<String, Summary> summaries = grouped.entrySet().stream()
  *     .collect(Collectors.toMap(
@@ -337,11 +337,11 @@ public final class Iterators {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("A", "B", "C", "D").iterator();
-     * Nullable<String> result = Iterators.get(iter, 2);
+     * Nullable<String> result = Iterators.elementAt(iter, 2);
      * // result.get() => "C"
      *
      * Iterator<Integer> iter2 = Arrays.asList(1, 2, 3).iterator();
-     * Nullable<Integer> result2 = Iterators.get(iter2, 10);
+     * Nullable<Integer> result2 = Iterators.elementAt(iter2, 10);
      * // result2.isPresent() => false
      * }</pre>
      *
@@ -726,10 +726,10 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the collection.
-     * @param c the collection whose elements are to be repeated; must not be empty if {@code n} > 0.
-     * @param n the number of times the collection's elements are to be repeated.
-     * @return an {@code ObjIterator} over the elements in the collection, repeated {@code n} times.
-     * @throws IllegalArgumentException if {@code c} is {@code null} or empty when {@code n} > 0, or if {@code n} is negative.
+     * @param c the collection whose elements are to be repeated, or {@code null}/empty to return an empty iterator.
+     * @param n the number of times the collection's elements are to be repeated. Must be non-negative.
+     * @return an {@code ObjIterator} over the elements in the collection, repeated {@code n} times, or an empty iterator if {@code c} is {@code null}/empty or {@code n} is {@code 0}.
+     * @throws IllegalArgumentException if {@code n} is negative.
      * @see #cycle(Object...)
      * @see #cycle(Iterable)
      * @see #repeatElementsToSize(Collection, long)
@@ -4047,11 +4047,12 @@ public final class Iterators {
     /**
      * Transforms the elements of the given {@code Iterable} into {@code Iterable}s using the provided {@code Function} and flattens the result into an {@code ObjIterator}.
      *
-     * <p><b>Naming Convention:</b> This library uses specific naming for {@code flatMap} variants in {@code Iterators} and {@code N}:
+     * <p><b>Naming Convention:</b></p>
+     * <p>This library uses specific naming for {@code flatMap} variants in {@code Iterators} and {@code N}:</p>
      * <ul>
      *   <li>{@link #flatMap(Iterable, Function) flatMap} (uppercase 'M') - transforms elements into an {@link java.lang.Iterable Iterable} or {@link java.util.Iterator Iterator}.</li>
      *   <li>{@link #flatmap(Iterable, Function) flatmap} (lowercase 'm') - transforms elements into an array.</li>
-     * </ul></p>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4140,11 +4141,12 @@ public final class Iterators {
     /**
      * Transforms the elements of the given {@code Iterable} into arrays using the provided {@code Function} and flattens the result into an {@code ObjIterator}.
      *
-     * <p><b>Naming Convention:</b> This library uses specific naming for {@code flatMap} variants in {@code Iterators} and {@code N}:
+     * <p><b>Naming Convention:</b></p>
+     * <p>This library uses specific naming for {@code flatMap} variants in {@code Iterators} and {@code N}:</p>
      * <ul>
      *   <li>{@link #flatMap(Iterable, Function) flatMap} (uppercase 'M') - transforms elements into an {@link java.lang.Iterable Iterable} or {@link java.util.Iterator Iterator}.</li>
      *   <li>{@link #flatmap(Iterable, Function) flatmap} (lowercase 'm') - transforms elements into an array.</li>
-     * </ul></p>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4611,9 +4613,9 @@ public final class Iterators {
      *     Arrays.asList(1, 2).iterator(),
      *     Arrays.asList(3, 4).iterator()
      * );
-     * 
+     *
      * // Parallel processing with 2 read threads and 4 process threads
-     * Iterators.forEach(iterators, 0, Long.MAX_VALUE, 2, 4, 100, 
+     * Iterators.forEach(iterators, 0, Long.MAX_VALUE, 2, 4, 100,
      *     item -> process(item),
      *     () -> System.out.println("Done")
      * );

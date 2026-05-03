@@ -148,9 +148,10 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
     }
 
     /**
-     * Returns the current value and then atomically sets it to the new value.
-     * This operation is useful for retrieving the old value while updating to a new one
-     * in a single operation (though not thread-safe without external synchronization).
+     * Returns the current value and then sets it to the new value.
+     *
+     * <p><strong>Note:</strong> this is not atomic; the read-then-write happens within
+     * a single method call but is not safe for concurrent use without external synchronization.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

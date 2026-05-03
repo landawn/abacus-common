@@ -15,9 +15,8 @@
 package com.landawn.abacus.type;
 
 /**
- * Type handler for primitive double values.
- * This class handles the primitive double type specifically, as opposed to the Double wrapper class.
- * It provides type information and default value handling for double primitives.
+ * Type handler for the primitive {@code double} type, as opposed to the {@link Double} wrapper class.
+ * It provides type information and default value handling for {@code double} primitives.
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -45,6 +44,10 @@ public final class PrimitiveDoubleType extends AbstractDoubleType {
 
     private static final Double DEFAULT_VALUE = 0d;
 
+    /**
+     * Constructs a new PrimitiveDoubleType instance.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
+     */
     PrimitiveDoubleType() {
         super(DOUBLE);
     }

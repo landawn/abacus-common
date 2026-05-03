@@ -25,27 +25,27 @@ import java.lang.annotation.Target;
  *
  * <p><b>When applied to types (classes/interfaces):</b></p>
  * <ul>
- *   <li>All fields should be final and initialized during construction</li>
- *   <li>No setter methods or other mutator methods should exist</li>
- *   <li>Methods should return new instances rather than modifying the current instance</li>
- *   <li>Any mutable fields should be properly encapsulated (defensive copying)</li>
- *   <li>The class should be final to prevent subclassing that could add mutability</li>
+ *   <li>All fields should be final and initialized during construction.</li>
+ *   <li>No setter methods or other mutator methods should exist.</li>
+ *   <li>Methods should return new instances rather than modifying the current instance.</li>
+ *   <li>Any mutable fields should be properly encapsulated (defensive copying).</li>
+ *   <li>The class should be final to prevent subclassing that could add mutability.</li>
  * </ul>
  *
  * <p><b>When applied to methods:</b></p>
  * <ul>
- *   <li>The method does not modify any instance fields</li>
- *   <li>The method does not call any mutating methods</li>
- *   <li>The method is essentially a pure function with no side effects</li>
+ *   <li>The method does not modify any instance fields.</li>
+ *   <li>The method does not call any mutating methods.</li>
+ *   <li>The method is essentially a pure function with no side effects.</li>
  * </ul>
  *
  * <p><b>Benefits of immutability:</b></p>
  * <ul>
- *   <li>Thread-safety without synchronization</li>
- *   <li>Safe to share between multiple contexts</li>
- *   <li>Easier to reason about and debug</li>
- *   <li>Can be cached and reused safely</li>
- *   <li>Ideal for use as Map keys or Set elements</li>
+ *   <li>Thread-safety without synchronization.</li>
+ *   <li>Safe to share between multiple contexts.</li>
+ *   <li>Easier to reason about and debug.</li>
+ *   <li>Can be cached and reused safely.</li>
+ *   <li>Ideal for use as Map keys or Set elements.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
@@ -68,7 +68,7 @@ import java.lang.annotation.Target;
  * }</pre>
  *
  * <p>This annotation serves as documentation and can be used by static analysis tools
- * to verify immutability constraints and detect potential violations.</p>
+ * to verify immutability constraints and detect potential violations at compile time.</p>
  *
  * @see Mutable
  */

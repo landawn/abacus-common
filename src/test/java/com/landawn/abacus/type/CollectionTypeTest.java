@@ -63,9 +63,9 @@ public class CollectionTypeTest extends TestBase {
 
     @Test
     public void testGetParameterTypes() {
-        Type<String>[] paramTypes = listType.parameterTypes();
+        List<Type<?>> paramTypes = listType.parameterTypes();
         Assertions.assertNotNull(paramTypes);
-        assertEquals(1, paramTypes.length);
+        assertEquals(1, paramTypes.size());
     }
 
     @Test

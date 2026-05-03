@@ -21,7 +21,6 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>This is a functional interface whose functional method is {@link #apply(boolean, boolean)}.
  *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <R> the type of the result of the function
@@ -58,6 +57,7 @@ public interface BooleanBiFunction<R> extends Throwables.BooleanBiFunction<R, Ru
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed function that first applies this function and then applies the {@code after} function
+     * @throws NullPointerException if {@code after} is null
      */
     default <V> BooleanBiFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return (a, b) -> after.apply(apply(a, b));

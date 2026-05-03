@@ -135,6 +135,24 @@ public class AbstractByteStreamTest extends TestBase {
     }
 
     @Test
+    public void testDebounce() {
+        byte[] result = createAbstractStream((byte) 1, (byte) 2, (byte) 3, (byte) 4).debounce(2, Duration.ofHours(1)).toArray();
+        assertArrayEquals(new byte[] { 1, 2 }, result);
+    }
+
+    @Test
+    public void testDebounce_EmptyInput() {
+        byte[] result = createAbstractStream().debounce(2, Duration.ofHours(1)).toArray();
+        assertArrayEquals(new byte[] {}, result);
+    }
+
+    @Test
+    public void testDebounce_ErrorPath() {
+        assertThrows(IllegalArgumentException.class, () -> createAbstractStream((byte) 1).debounce(0, Duration.ofHours(1)).toArray());
+        assertThrows(IllegalArgumentException.class, () -> createAbstractStream((byte) 1).debounce(1, Duration.ofMillis(0)).toArray());
+    }
+
+    @Test
     public void skipUntil() {
         byte[] result = stream.skipUntil(b -> b > 2).toArray();
         assertArrayEquals(new byte[] { 3, 4, 5 }, result);
@@ -183,19 +201,19 @@ public class AbstractByteStreamTest extends TestBase {
     }
 
     @Test
-    public void flatmap() {
-        byte[] result = stream.flatmap(b -> new byte[] { b, b }).toArray();
+    public void flatMapArray() {
+        byte[] result = stream.flatMapArray(b -> new byte[] { b, b }).toArray();
         assertArrayEquals(new byte[] { 1, 1, 2, 2, 3, 3, 4, 4, 5, 5 }, result);
     }
 
     @Test
     public void testFlatmap() {
         ByteFunction<byte[]> mapper = value -> new byte[] { value, (byte) (value * 2) };
-        byte[] result = stream.flatmap(mapper).toArray();
+        byte[] result = stream.flatMapArray(mapper).toArray();
         assertArrayEquals(new byte[] { 1, 2, 2, 4, 3, 6, 4, 8, 5, 10 }, result);
 
         stream = createByteStream(new byte[] { 1, 2 });
-        result = stream.flatmap(value -> new byte[0]).toArray();
+        result = stream.flatMapArray(value -> new byte[0]).toArray();
         assertArrayEquals(new byte[0], result);
     }
 

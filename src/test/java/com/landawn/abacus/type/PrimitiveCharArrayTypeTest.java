@@ -155,7 +155,7 @@ public class PrimitiveCharArrayTypeTest extends TestBase {
     @Test
     public void testValueOfObjectReader() throws IOException {
         java.io.StringReader reader = new java.io.StringReader("abc");
-        char[] result = type.valueOf((Object) reader);
+        char[] result = type.valueOf(reader);
         assertNotNull(result);
         assertArrayEquals(new char[] { 'a', 'b', 'c' }, result);
     }

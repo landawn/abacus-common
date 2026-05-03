@@ -23,30 +23,38 @@ import java.sql.SQLException;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for BigInteger operations.
- * This class provides serialization/deserialization and database operations
- * for java.math.BigInteger instances. BigInteger values are stored as strings
- * in the database to preserve precision.
+ * Type handler for {@link java.math.BigInteger} values.
+ * Provides serialization, deserialization, and JDBC operations for {@code BigInteger} instances.
+ *
+ * <p>String representation: the base-10 decimal string of the value, produced by
+ * {@link java.math.BigInteger#toString(int) BigInteger.toString(10)}.</p>
+ * <p>JDBC mapping: {@code BigInteger} values have no native SQL type with guaranteed precision,
+ * so they are stored and retrieved as {@code VARCHAR} strings via
+ * {@link java.sql.PreparedStatement#setString(int, String)} /
+ * {@link java.sql.ResultSet#getString(int)}, preserving full precision.</p>
+ *
+ * @see java.math.BigInteger
  */
 public final class BigIntegerType extends NumberType<BigInteger> {
 
     /**
-     * The type name constant for BigInteger type identification.
+     * The type name constant used to identify this type within the type system
+     * (value: {@code "BigInteger"}).
      */
     public static final String BIG_INTEGER = BigInteger.class.getSimpleName();
 
     /**
-     * Package-private constructor for BigIntegerType.
-     * This constructor is called by the TypeFactory to create BigInteger type instances.
+     * Package-private constructor for {@code BigIntegerType}.
+     * Instances are created by {@link TypeFactory}; do not instantiate directly.
      */
     BigIntegerType() {
         super(BIG_INTEGER);
     }
 
     /**
-     * Returns the Class object representing the BigInteger class.
+     * Returns the Java class represented by this type handler.
      *
-     * @return the Class object for BigInteger.class
+     * @return {@code BigInteger.class}
      */
     @Override
     public Class<BigInteger> javaType() {
@@ -54,19 +62,12 @@ public final class BigIntegerType extends NumberType<BigInteger> {
     }
 
     /**
-     * Converts a BigInteger value to its string representation in base 10.
+     * Converts a {@link java.math.BigInteger} to its base-10 decimal string representation.
+     * Delegates to {@link java.math.BigInteger#toString(int) BigInteger.toString(10)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<BigInteger> type = TypeFactory.getType(BigInteger.class);
-     * BigInteger value = new BigInteger("12345678901234567890");
-     * String str = type.stringOf(value);      // returns "12345678901234567890"
-     * String nullStr = type.stringOf(null);   // returns null
-     * }</pre>
-     *
-     * @param x the BigInteger value to convert
-     * @return the string representation of the BigInteger in decimal format,
-     *         or {@code null} if input is null
+     * @param x the {@code BigInteger} to convert; may be {@code null}
+     * @return the decimal string representation of the value,
+     *         or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final BigInteger x) {
@@ -74,20 +75,13 @@ public final class BigIntegerType extends NumberType<BigInteger> {
     }
 
     /**
-     * Converts a string representation to a BigInteger value.
-     * Parses the string as a base 10 integer.
+     * Parses a base-10 decimal string and returns a new {@link java.math.BigInteger}.
+     * Leading and trailing whitespace is trimmed before parsing.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<BigInteger> type = TypeFactory.getType(BigInteger.class);
-     * BigInteger value = type.valueOf("12345678901234567890");
-     * BigInteger nullValue = type.valueOf(null);   // returns null
-     * BigInteger emptyValue = type.valueOf("");    // returns null
-     * }</pre>
-     *
-     * @param str the string to parse as a BigInteger in decimal format
-     * @return a new BigInteger parsed from the string, or {@code null} if str is {@code null} or empty
-     * @throws NumberFormatException if the string cannot be parsed as a valid BigInteger
+     * @param str the decimal string to parse; may be {@code null} or empty
+     * @return a new {@code BigInteger} parsed from the string,
+     *         or {@code null} if {@code str} is {@code null} or empty
+     * @throws NumberFormatException if {@code str} cannot be parsed as a valid {@code BigInteger}
      */
     @Override
     public BigInteger valueOf(final String str) {
@@ -95,19 +89,15 @@ public final class BigIntegerType extends NumberType<BigInteger> {
     }
 
     /**
-     * Retrieves a BigInteger value from a ResultSet at the specified column index.
+     * Retrieves a {@link java.math.BigInteger} from a {@link java.sql.ResultSet} at the specified column index.
+     * The column value is read as a {@code VARCHAR} string and parsed as a decimal integer.
+     * Returns {@code null} if the column value is SQL NULL or an empty string.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<BigInteger> type = TypeFactory.getType(BigInteger.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * BigInteger largeId = type.get(rs, 1);   // retrieves BigInteger from column 1
-     * }</pre>
-     *
-     * @param rs the ResultSet containing the data, must not be {@code null}
-     * @param columnIndex the column index (1-based) to retrieve the value from
-     * @return the BigInteger value at the specified column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the column index is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnIndex the 1-based index of the column containing the integer value
+     * @return the {@code BigInteger} value at the specified column, or {@code null} if the column value is SQL NULL or empty
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
+     * @throws NumberFormatException if the column string value cannot be parsed as a valid {@code BigInteger}
      */
     @Override
     public BigInteger get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -117,19 +107,15 @@ public final class BigIntegerType extends NumberType<BigInteger> {
     }
 
     /**
-     * Retrieves a BigInteger value from a ResultSet using the specified column label.
+     * Retrieves a {@link java.math.BigInteger} from a {@link java.sql.ResultSet} using the specified column label.
+     * The column value is read as a {@code VARCHAR} string and parsed as a decimal integer.
+     * Returns {@code null} if the column value is SQL NULL or an empty string.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<BigInteger> type = TypeFactory.getType(BigInteger.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * BigInteger largeId = type.get(rs, "large_id");   // retrieves BigInteger from "large_id" column
-     * }</pre>
-     *
-     * @param rs the ResultSet containing the data, must not be {@code null}
-     * @param columnName the label of the column to retrieve the value from, must not be {@code null}
-     * @return the BigInteger value at the specified column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the column index is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnName the column label as specified in the SQL AS clause, or the column name if no AS clause was used
+     * @return the {@code BigInteger} value at the specified column, or {@code null} if the column value is SQL NULL or empty
+     * @throws SQLException if a database access error occurs or {@code columnName} is not found
+     * @throws NumberFormatException if the column string value cannot be parsed as a valid {@code BigInteger}
      */
     @Override
     public BigInteger get(final ResultSet rs, final String columnName) throws SQLException {
@@ -139,20 +125,15 @@ public final class BigIntegerType extends NumberType<BigInteger> {
     }
 
     /**
-     * Sets a BigInteger parameter in a PreparedStatement at the specified position.
+     * Sets a {@link java.math.BigInteger} parameter on a {@link java.sql.PreparedStatement} at the specified position.
+     * The value is stored as its decimal string representation via
+     * {@link java.sql.PreparedStatement#setString(int, String)}, preserving full precision.
+     * A {@code null} value sets the parameter to SQL NULL.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<BigInteger> type = TypeFactory.getType(BigInteger.class);
-     * PreparedStatement stmt = conn.prepareStatement("INSERT INTO large_nums (id, value) VALUES (?, ?)");
-     * type.set(stmt, 1, new BigInteger("12345678901234567890"));
-     * stmt.executeUpdate();
-     * }</pre>
-     *
-     * @param stmt the PreparedStatement to set the parameter on, must not be {@code null}
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the BigInteger value to set, may be {@code null}
-     * @throws SQLException if a database access error occurs or the column index is invalid
+     * @param stmt the {@code PreparedStatement} on which to set the parameter
+     * @param columnIndex the 1-based parameter index to set
+     * @param x the {@code BigInteger} value to set; {@code null} is stored as SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final BigInteger x) throws SQLException {
@@ -160,20 +141,15 @@ public final class BigIntegerType extends NumberType<BigInteger> {
     }
 
     /**
-     * Sets a named BigInteger parameter in a CallableStatement.
+     * Sets a named {@link java.math.BigInteger} parameter on a {@link java.sql.CallableStatement}.
+     * The value is stored as its decimal string representation via
+     * {@link java.sql.CallableStatement#setString(String, String)}, preserving full precision.
+     * A {@code null} value sets the parameter to SQL NULL.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<BigInteger> type = TypeFactory.getType(BigInteger.class);
-     * CallableStatement stmt = conn.prepareCall("{call processLargeNumber(?)}");
-     * type.set(stmt, "largeNum", new BigInteger("12345678901234567890"));
-     * stmt.execute();
-     * }</pre>
-     *
-     * @param stmt the CallableStatement to set the parameter on, must not be {@code null}
-     * @param parameterName the name of the parameter to set, must not be {@code null}
-     * @param x the BigInteger value to set, may be {@code null}
-     * @throws SQLException if a database access error occurs or the parameter name is invalid
+     * @param stmt the {@code CallableStatement} on which to set the parameter
+     * @param parameterName the name of the parameter to set
+     * @param x the {@code BigInteger} value to set; {@code null} is stored as SQL NULL
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final BigInteger x) throws SQLException {

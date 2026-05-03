@@ -16,12 +16,12 @@ package com.landawn.abacus.util;
 
 /**
  * Represents a primitive int value paired with an index position.
- * 
+ *
  * <p>This class is a specialized version of {@link Indexed} for primitive int values,
  * providing better performance by avoiding boxing/unboxing overhead.</p>
- * 
+ *
  * <p>The class is immutable and extends {@link AbstractIndexed}.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedInt indexedInt = IndexedInt.of(42, 5);
@@ -55,7 +55,7 @@ public final class IndexedInt extends AbstractIndexed {
 
     /**
      * Creates a new IndexedInt instance with the specified value and index.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedInt indexed = IndexedInt.of(42, 5);
@@ -74,9 +74,9 @@ public final class IndexedInt extends AbstractIndexed {
 
     /**
      * Creates a new IndexedInt instance with the specified value and index.
-     * 
+     *
      * <p>This overload accepts a long index for cases where the index might exceed Integer.MAX_VALUE.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedInt indexed = IndexedInt.of(42, 5000000000L);
@@ -95,7 +95,7 @@ public final class IndexedInt extends AbstractIndexed {
 
     /**
      * Returns the int value stored in this IndexedInt instance.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedInt indexed = IndexedInt.of(42, 5);
@@ -110,7 +110,7 @@ public final class IndexedInt extends AbstractIndexed {
 
     /**
      * Returns the hash code of this IndexedInt instance.
-     * 
+     *
      * <p>The hash code is computed based on both the index and the value.</p>
      *
      * @return the hash code
@@ -122,15 +122,15 @@ public final class IndexedInt extends AbstractIndexed {
 
     /**
      * Checks if this IndexedInt instance is equal to another object.
-     * 
+     *
      * <p>Two IndexedInt instances are equal if they have the same index and value.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedInt indexed1 = IndexedInt.of(42, 5);
      * IndexedInt indexed2 = IndexedInt.of(42, 5);
      * IndexedInt indexed3 = IndexedInt.of(43, 5);
-     * 
+     *
      * indexed1.equals(indexed2);   // true
      * indexed1.equals(indexed3);   // false
      * }</pre>
@@ -145,16 +145,16 @@ public final class IndexedInt extends AbstractIndexed {
 
     /**
      * Returns a string representation of this IndexedInt instance.
-     * 
-     * <p>The format is: [index]=value</p>
-     * 
+     *
+     * <p>The format is: {@code [index]=value}</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedInt indexed = IndexedInt.of(42, 5);
      * System.out.println(indexed);   // prints: [5]=42
      * }</pre>
      *
-     * @return a string representation in the format [index]=value
+     * @return a string representation in the format {@code [index]=value}
      */
     @Override
     public String toString() {

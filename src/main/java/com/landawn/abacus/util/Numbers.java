@@ -912,7 +912,10 @@ public final class Numbers {
         temp.put(short.class, it -> BigInteger.valueOf(it.shortValue()));
         temp.put(int.class, it -> BigInteger.valueOf(it.intValue()));
         temp.put(long.class, it -> BigInteger.valueOf(it.longValue()));
-        temp.put(float.class, it -> BigDecimal.valueOf(it.floatValue()).toBigInteger());
+        // BigDecimal.valueOf has no float overload; using floatValue() widens through double and
+        // produces the long-form double representation (e.g. 1.21f -> 1.2100000381469727). Use the
+        // canonical Float.toString form instead.
+        temp.put(float.class, it -> new BigDecimal(Float.toString(it.floatValue())).toBigInteger());
         temp.put(double.class, it -> BigDecimal.valueOf(it.doubleValue()).toBigInteger());
         temp.put(BigInteger.class, UnaryOperator.identity());
         temp.put(BigDecimal.class, it -> ((BigDecimal) it).toBigInteger());
@@ -926,7 +929,9 @@ public final class Numbers {
         temp.put(short.class, it -> BigDecimal.valueOf(it.shortValue()));
         temp.put(int.class, it -> BigDecimal.valueOf(it.intValue()));
         temp.put(long.class, it -> BigDecimal.valueOf(it.longValue()));
-        temp.put(float.class, it -> BigDecimal.valueOf(it.floatValue()));
+        // See note in BigInteger conversion above: route float through Float.toString to preserve
+        // the source precision rather than the widened-double representation.
+        temp.put(float.class, it -> new BigDecimal(Float.toString(it.floatValue())));
         temp.put(double.class, it -> BigDecimal.valueOf(it.doubleValue()));
         temp.put(BigInteger.class, it -> new BigDecimal((BigInteger) it));
         temp.put(BigDecimal.class, UnaryOperator.identity());
@@ -964,19 +969,19 @@ public final class Numbers {
 
     /**
      * Converts the given number to the specified target type with overflow checking.
-     * 
+     *
      * <p>This method supports conversion between all primitive number types (byte, short, int, long, float, double)
      * and their corresponding wrapper classes. It also supports conversion to and from BigInteger and BigDecimal.
      * If the conversion would result in an overflow, an ArithmeticException is thrown.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert a double to an int (throws ArithmeticException if outside int range)
      * Integer result = Numbers.convert(123.45, Integer.class);
-     * 
+     *
      * // Convert a BigInteger to a long (throws ArithmeticException if too large)
      * Long longValue = Numbers.convert(new BigInteger("9223372036854775807"), Long.class);
-     * 
+     *
      * // Null values return the default value for the target type
      * Byte byteValue = Numbers.convert(null, Byte.class);       // Returns null
      * byte primByteValue = Numbers.convert(null, byte.class);   // Returns 0
@@ -3220,7 +3225,7 @@ public final class Numbers {
      * {@code BigDecimal}.</p>
      *
      * <p>Integral values with a leading {@code 0} will be interpreted as octal;
-     * the returned number will be Integer, Long or BigDecimal as appropriate.</p>
+     * the returned number will be Integer, Long or BigInteger as appropriate.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4473,6 +4478,8 @@ public final class Numbers {
      * @param mode the rounding mode to apply
      * @return the base-10 logarithm of the specified value, rounded according to the specified rounding mode
      * @throws IllegalArgumentException if x is not positive
+     * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
+     *     is not a power of ten
      * @see #log10(long, RoundingMode)
      * @see #log10(double)
      * @see #log10(BigInteger, RoundingMode)
@@ -5254,6 +5261,10 @@ public final class Numbers {
         if (q == 0) {
             throw new ArithmeticException("/ by zero"); // for GWT
         }
+        // Integer.MIN_VALUE / -1 silently overflows back to Integer.MIN_VALUE in Java.
+        if (p == Integer.MIN_VALUE && q == -1) {
+            throw new ArithmeticException("integer overflow");
+        }
         final int div = p / q;
         final int rem = p - q * div; // equal to p % q
 
@@ -5680,7 +5691,7 @@ public final class Numbers {
      * <p>Special cases:
      * <ul>
      * <li>The invocations {@code Numbers.lcm(Integer.MIN_VALUE, n)} and {@code Numbers.lcm(n, Integer.MIN_VALUE)},
-     * where {@code Numbers.abs(n)} is a power of 2, throw an {@code ArithmeticException}, because the result
+     * where {@code Math.abs(n)} is a power of 2, throw an {@code ArithmeticException}, because the result
      * would be 2^31, which is too large for an int value.</li>
      * <li>The result of {@code Numbers.lcm(0, x)} and {@code Numbers.lcm(x, 0)} is {@code 0} for any {@code x}.</li>
      * </ul>
@@ -5729,7 +5740,7 @@ public final class Numbers {
      * <p>Special cases:
      * <ul>
      * <li>The invocations {@code Numbers.lcm(Long.MIN_VALUE, n)} and {@code Numbers.lcm(n, Long.MIN_VALUE)},
-     * where {@code Numbers.abs(n)} is a power of 2, throw an {@code ArithmeticException}, because the result
+     * where {@code Math.abs(n)} is a power of 2, throw an {@code ArithmeticException}, because the result
      * would be 2^63, which is too large for a long value.</li>
      * <li>The result of {@code Numbers.lcm(0L, x)} and {@code Numbers.lcm(x, 0L)} is {@code 0L} for any {@code x}.</li>
      * </ul>
@@ -5949,7 +5960,8 @@ public final class Numbers {
      * Numbers.powExact(10, 10);       // throws ArithmeticException (overflow)
      * Numbers.powExact(2, 31);        // throws ArithmeticException (overflow)
      * Numbers.powExact(-2, 30) = 1073741824
-     * Numbers.powExact(-2, 31);       // throws ArithmeticException (overflow)
+     * Numbers.powExact(-2, 31) = Integer.MIN_VALUE   // exactly representable
+     * Numbers.powExact(-2, 32);       // throws ArithmeticException (overflow)
      * }</pre>
      *
      * @param b the base integer
@@ -6014,7 +6026,8 @@ public final class Numbers {
      * Numbers.powExact(10L, 19);      // throws ArithmeticException (overflow)
      * Numbers.powExact(2L, 63);       // throws ArithmeticException (overflow)
      * Numbers.powExact(-2L, 62) = 4611686018427387904L
-     * Numbers.powExact(-2L, 63);      // throws ArithmeticException (overflow)
+     * Numbers.powExact(-2L, 63) = Long.MIN_VALUE   // exactly representable
+     * Numbers.powExact(-2L, 64);      // throws ArithmeticException (overflow)
      * }</pre>
      *
      * @param b the base long integer
@@ -6099,7 +6112,7 @@ public final class Numbers {
      * <p>This method performs addition with saturation arithmetic. If the {@code true} sum would exceed
      * {@code Long.MAX_VALUE}, the method returns {@code Long.MAX_VALUE}. If the {@code true} sum
      * would be less than {@code Long.MIN_VALUE}, the method returns {@code Long.MIN_VALUE}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.saturatedAdd(100L, 200L)              = 300L
@@ -6710,7 +6723,7 @@ public final class Numbers {
      * <pre>{@code
      * Numbers.binomialToLong(5, 0)      = 1L        // only one way to choose nothing
      * Numbers.binomialToLong(5, 1)      = 5L        // five ways to choose one item
-     * Numbers.binomialToLong(5, 2)      = 10L      
+     * Numbers.binomialToLong(5, 2)      = 10L
      * Numbers.binomialToLong(10, 5)     = 252L
      * Numbers.binomialToLong(52, 5)     = 2598960L  // poker hands from a deck
      * Numbers.binomialToLong(60, 30)    = 118264581564861424L
@@ -7161,10 +7174,14 @@ public final class Numbers {
         N.checkArgNotNegative(scale, cs.scale);
 
         if (scale == 0) {
-            return Math.round(x);
+            // Math.round(float)->int silently clamps at Integer.MAX_VALUE for values >= ~2.147e9.
+            // Widen the same float to double so Math.round returns long and avoids that clamp.
+            return Math.round((double) x);
         } else if (scale <= 6) {
             final long factor = pow(10, scale);
-            return ((float) Math.round(x * factor)) / factor; //NOSONAR
+            // Multiply in float precision (preserves the half-tie semantics callers depend on),
+            // then widen the float product to double for Math.round so we get a long without int saturation.
+            return ((float) Math.round((double) (x * factor))) / factor; //NOSONAR
         } else {
             return round(x, scale, RoundingMode.HALF_UP);
         }
@@ -7544,15 +7561,15 @@ public final class Numbers {
 
     /**
      * Compares two float values for approximate equality within a specified tolerance.
-     * 
+     *
      * <p>Technically speaking, this is equivalent to
      * {@code Math.abs(a - b) <= tolerance || Float.valueOf(a).equals(Float.valueOf(b))}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Returns true, the values are within tolerance
      * boolean result = Numbers.fuzzyEquals(1.0001f, 1.0002f, 0.001f);
-     * 
+     *
      * // Returns false, the values exceed the tolerance
      * boolean result = Numbers.fuzzyEquals(1.0f, 1.1f, 0.01f);
      * }</pre>
@@ -7941,9 +7958,9 @@ public final class Numbers {
     /**
      * Computes the inverse hyperbolic sine (arcsinh) of a number.
      *
-     * <p>The inverse hyperbolic sine is defined as: {@code Numbers.asinh(x) = Numbers.ln(x + Numbers.sqrt(x² + 1))}.
+     * <p>The inverse hyperbolic sine is defined as: {@code asinh(x) = ln(x + sqrt(x² + 1))}.
      * This function is the inverse of the hyperbolic sine function {@code sinh}, meaning
-     * {@code Numbers.sinh(Numbers.asinh(x)) = x} for all real {@code x}.
+     * {@code Math.sinh(Numbers.asinh(x)) = x} for all real {@code x}.
      *
      * <p>This implementation uses an efficient approximation based on Taylor series expansion
      * for small values, and the logarithmic formula for larger values.
@@ -8002,9 +8019,9 @@ public final class Numbers {
     /**
      * Computes the inverse hyperbolic cosine (arccosh) of a number.
      *
-     * <p>The inverse hyperbolic cosine is defined as: {@code Numbers.acosh(x) = Numbers.ln(x + Numbers.sqrt(x² - 1))}.
+     * <p>The inverse hyperbolic cosine is defined as: {@code acosh(x) = ln(x + sqrt(x² - 1))}.
      * This function is the inverse of the hyperbolic cosine function {@code cosh}, meaning
-     * {@code Numbers.cosh(Numbers.acosh(x)) = x} for all {@code x >= 1}.
+     * {@code Math.cosh(Numbers.acosh(x)) = x} for all {@code x >= 1}.
      *
      * <p>Mathematical properties:
      * <ul>
@@ -8034,9 +8051,9 @@ public final class Numbers {
     /**
      * Computes the inverse hyperbolic tangent (arctanh) of a number.
      *
-     * <p>The inverse hyperbolic tangent is defined as: {@code Numbers.atanh(x) = 0.5 * Numbers.ln((1 + x) / (1 - x))}.
+     * <p>The inverse hyperbolic tangent is defined as: {@code atanh(x) = 0.5 * ln((1 + x) / (1 - x))}.
      * This function is the inverse of the hyperbolic tangent function {@code tanh}, meaning
-     * {@code Numbers.tanh(Numbers.atanh(x)) = x} for all {@code -1 < x < 1}.
+     * {@code Math.tanh(Numbers.atanh(x)) = x} for all {@code -1 < x < 1}.
      *
      * <p>This implementation uses an efficient approximation based on Taylor series expansion
      * for small values, and the logarithmic formula for larger values.

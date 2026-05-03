@@ -11,6 +11,8 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -716,6 +718,45 @@ public class HttpSettingsTest extends TestBase {
         assertTrue(str.contains("5000"));
         assertTrue(str.contains("readTimeout"));
         assertTrue(str.contains("10000"));
+    }
+
+    // --- Bug fix: headers() lazy-init race condition ---
+
+    @Test
+    public void testHeaders_lazyInit_returnsSameInstance() {
+        // Single-threaded: calling headers() twice on a fresh settings must return
+        // the same HttpHeaders instance (double-checked locking must not create two).
+        final HttpSettings settings = new HttpSettings();
+        final HttpHeaders first = settings.headers();
+        final HttpHeaders second = settings.headers();
+        assertSame(first, second, "headers() must return the same instance on every call");
+    }
+
+    @Test
+    public void testHeaders_headerSetBeforeConcurrentRead_visible() throws InterruptedException {
+        // A header set on the settings object must be visible to concurrent readers.
+        final HttpSettings settings = new HttpSettings();
+        settings.header("X-Thread-Safe", "yes");
+
+        final int threadCount = 10;
+        final CountDownLatch done = new CountDownLatch(threadCount);
+        final AtomicInteger missingCount = new AtomicInteger(0);
+
+        for (int i = 0; i < threadCount; i++) {
+            new Thread(() -> {
+                try {
+                    final Object value = settings.headers().get("X-Thread-Safe");
+                    if (!"yes".equals(value)) {
+                        missingCount.incrementAndGet();
+                    }
+                } finally {
+                    done.countDown();
+                }
+            }).start();
+        }
+
+        done.await();
+        assertEquals(0, missingCount.get(), "All threads must see the header set before concurrent access");
     }
 
     // --- integration / chaining tests ---

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.AfterEach;
@@ -937,25 +938,69 @@ public class GenericObjectPoolTest extends TestBase {
     }
 
     @Test
+    public void testHashCodeMatchesEqualPools() {
+        GenericObjectPool<TestPoolable> pool1 = new GenericObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        GenericObjectPool<TestPoolable> pool2 = new GenericObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
+
+        try {
+            TestPoolable p1 = new TestPoolable("p1");
+            TestPoolable p2 = new TestPoolable("p2");
+
+            pool1.add(p1);
+            pool1.add(p2);
+
+            pool2.add(p1);
+            pool2.add(p2);
+
+            assertEquals(pool1.hashCode(), pool2.hashCode());
+        } finally {
+            pool1.close();
+            pool2.close();
+        }
+    }
+
+    @Test
     public void testEquals() {
         GenericObjectPool<TestPoolable> pool1 = new GenericObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
         GenericObjectPool<TestPoolable> pool2 = new GenericObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
 
         assertTrue(pool1.equals(pool1));
-        assertFalse(pool1.equals(pool2));
+        assertTrue(pool1.equals(pool2));
 
         TestPoolable p = new TestPoolable("p1");
         pool1.add(p);
         assertFalse(pool1.equals(pool2));
 
         pool2.add(p);
-        assertFalse(pool1.equals(pool2));
+        assertTrue(pool1.equals(pool2));
 
         assertFalse(pool1.equals(null));
         assertFalse(pool1.equals("not a pool"));
 
         pool1.close();
         pool2.close();
+    }
+
+    @Test
+    public void testEqualsReturnsFalseForDifferentOrder() {
+        GenericObjectPool<TestPoolable> pool1 = new GenericObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        GenericObjectPool<TestPoolable> pool2 = new GenericObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
+
+        try {
+            TestPoolable p1 = new TestPoolable("p1");
+            TestPoolable p2 = new TestPoolable("p2");
+
+            pool1.add(p1);
+            pool1.add(p2);
+
+            pool2.add(p2);
+            pool2.add(p1);
+
+            assertFalse(pool1.equals(pool2));
+        } finally {
+            pool1.close();
+            pool2.close();
+        }
     }
 
     @Test
@@ -985,5 +1030,93 @@ public class GenericObjectPoolTest extends TestBase {
         pool.add(new TestPoolable("p2"));
         pool.add(new TestPoolable("p3"));
         assertEquals(3, pool.stats().putCount());
+    }
+
+    // ===========================================================
+    // Bug-fix tests: take(timeout) spurious missCount (Bug 2)
+    // ===========================================================
+
+    /**
+     * Bug 2a: Normal timeout on an empty pool must count as exactly one miss.
+     */
+    @Test
+    public void testBug2a_NormalTimeout_ExactlyOneMiss() throws InterruptedException {
+        assertNull(pool.take(20, TimeUnit.MILLISECONDS));
+
+        PoolStats stats = pool.stats();
+        assertEquals(0, stats.hitCount(), "No hits on empty pool");
+        assertEquals(1, stats.missCount(), "Exactly one miss for timed-out take");
+    }
+
+    /**
+     * Bug 2b: Successful take(timeout) must count as exactly one hit with zero misses.
+     */
+    @Test
+    public void testBug2b_SuccessfulTake_ExactlyOneHit() throws InterruptedException {
+        pool.add(new TestPoolable("p1"));
+
+        assertNotNull(pool.take(100, TimeUnit.MILLISECONDS));
+
+        PoolStats stats = pool.stats();
+        assertEquals(1, stats.hitCount(), "Exactly one hit");
+        assertEquals(0, stats.missCount(), "No misses when take succeeds");
+    }
+
+    /**
+     * Bug 2d: Pool closed while a thread is blocked in take(timeout).
+     * The resulting IllegalStateException path must NOT be counted as a miss.
+     */
+    @Test
+    public void testBug2d_PoolClosedWhileWaiting_NoSpuriousMiss() throws InterruptedException {
+        CountDownLatch takingLatch = new CountDownLatch(1);
+        CountDownLatch doneLatch = new CountDownLatch(1);
+        AtomicBoolean gotIllegalState = new AtomicBoolean(false);
+
+        Thread taker = new Thread(() -> {
+            try {
+                takingLatch.countDown();
+                pool.take(10, TimeUnit.SECONDS);
+            } catch (IllegalStateException e) {
+                gotIllegalState.set(true);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } finally {
+                doneLatch.countDown();
+            }
+        });
+
+        taker.start();
+        assertTrue(takingLatch.await(2, TimeUnit.SECONDS));
+        Thread.sleep(50); // let taker reach awaitNanos
+
+        // Close the pool; this signals notEmpty.signalAll() which wakes the taker.
+        pool.close();
+
+        assertTrue(doneLatch.await(3, TimeUnit.SECONDS));
+        assertTrue(gotIllegalState.get(), "Taker must receive IllegalStateException on close");
+        // pool.stats() throws because pool is closed; we verify the exception path was taken
+        // which -- after the fix -- does NOT call missCount++.
+    }
+
+    /**
+     * Bug 2e: Multiple hits and misses accumulate correctly; no off-by-one errors.
+     */
+    @Test
+    public void testBug2e_MultipleHitsAndMisses_CorrectCounts() throws InterruptedException {
+        for (int i = 0; i < 3; i++) {
+            pool.add(new TestPoolable("p" + i));
+        }
+        // 3 successful takes -> 3 hits
+        for (int i = 0; i < 3; i++) {
+            assertNotNull(pool.take(50, TimeUnit.MILLISECONDS));
+        }
+        // 2 timed-out takes on empty pool -> 2 misses
+        assertNull(pool.take(20, TimeUnit.MILLISECONDS));
+        assertNull(pool.take(20, TimeUnit.MILLISECONDS));
+
+        PoolStats stats = pool.stats();
+        assertEquals(3, stats.hitCount());
+        assertEquals(2, stats.missCount());
+        assertEquals(5, stats.getCount(), "getCount must equal hitCount + missCount");
     }
 }

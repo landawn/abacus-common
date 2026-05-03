@@ -27,8 +27,8 @@ import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
-import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalBoolean;
@@ -421,7 +421,11 @@ class JsonStringReader extends AbstractJsonReader {
                 ch = saveChar(ch);
 
                 //noinspection ConstantValue
-                if (nextEvent > 0 && typeFlag == 0 && (ch == 'l' || ch == 'L' || ch == 'f' || ch == 'F' || ch == 'd' || ch == 'D')) {
+                // No `nextEvent > 0` guard: charEvents has no entry for L/D (only f/F), so
+                // requiring nextEvent>0 made the type-flag branch dead for `123L`/`1.5d`. Test
+                // for the suffix character directly; the structural-event check above already
+                // breaks the loop on real terminators.
+                if (typeFlag == 0 && (ch == 'l' || ch == 'L' || ch == 'f' || ch == 'F' || ch == 'd' || ch == 'D')) {
                     typeFlag = ch;
                 } else if (ch > 32) { // ignore <= 32 whitespace chars.
                     digitCount = -1; // TODO can't parse here. leave it Numbers.createNumber(...).
@@ -442,7 +446,10 @@ class JsonStringReader extends AbstractJsonReader {
 
                     ch = saveChar(ch);
 
-                    if (nextEvent > 0 && typeFlag == 0 && (ch == 'l' || ch == 'L' || ch == 'f' || ch == 'F' || ch == 'd' || ch == 'D')) {
+                    // No `nextEvent > 0` guard: charEvents has no entry for L/D (only f/F), so
+                    // requiring nextEvent>0 made the type-flag branch dead for `1e5L`/`1e5d`. Match
+                    // the first occurrence above (line 428) which has no such guard.
+                    if (typeFlag == 0 && (ch == 'l' || ch == 'L' || ch == 'f' || ch == 'F' || ch == 'd' || ch == 'D')) {
                         typeFlag = ch;
                     } else if (ch > 32) { // ignore <= 32 whitespace chars.
                         digitCount = -1; // TODO can't parse here. leave it Numbers.createNumber(...).
@@ -548,7 +555,10 @@ class JsonStringReader extends AbstractJsonReader {
     protected void saveToBuffer() {
         endIndexForText = strBeginIndex - 1;
 
-        if (endIndexForText - startIndexForText + 1 >= cbufLen) {
+        // Loop, not if: a single grow only multiplies cbuf by ~1.75. For tokens much larger than
+        // cbufLen (long quoted values containing an escape near the end) one grow is not enough
+        // and N.copy below would overflow the buffer.
+        while (endIndexForText - startIndexForText + 1 >= cbufLen) {
             enlargeCharBuffer();
         }
 

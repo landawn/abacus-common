@@ -20,24 +20,24 @@ import java.io.Serial;
 
 /**
  * A mutable wrapper for a {@code double} value, providing methods to modify the wrapped value.
- * 
+ *
  * <p>This class is useful in scenarios where you need to pass a double by reference,
  * accumulate double values in lambda expressions, or store frequently changing double values
  * in collections without creating new Double objects.</p>
- * 
+ *
  * <p><strong>Note: This class is NOT thread-safe.</strong> If multiple threads access a
  * MutableDouble instance concurrently, and at least one thread modifies it, external
  * synchronization is required.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * MutableDouble sum = MutableDouble.of(0.0);
  * prices.forEach(price -> sum.add(price));
  * System.out.println("Total: " + sum.value());
  * }</pre>
- * 
+ *
  * <p>Note: This class is adapted from Apache Commons Lang.</p>
- * 
+ *
  * @version $Id: MutableDouble.java 1669791 2015-03-28 15:22:59Z britter $
  * @see Double
  * @see Number
@@ -56,7 +56,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
 
     /**
      * Constructs a new MutableDouble with the default value of zero.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableDouble num = new MutableDouble();   // value is 0.0
@@ -67,12 +67,12 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
 
     /**
      * Constructs a new MutableDouble with the specified initial value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableDouble num = new MutableDouble(3.14159);   // value is 3.14159
      * }</pre>
-     * 
+     *
      * @param value the initial value to store
      */
     MutableDouble(final double value) {
@@ -82,12 +82,12 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     /**
      * Creates a new MutableDouble instance with the specified value.
      * This is a factory method that provides a more fluent way to create instances.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableDouble price = MutableDouble.of(19.99);
      * }</pre>
-     * 
+     *
      * @param value the initial value
      * @return a new MutableDouble instance containing the specified value
      */
@@ -97,13 +97,13 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
 
     /**
      * Returns the current double value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableDouble num = MutableDouble.of(42.5);
      * double val = num.value();   // returns 42.5
      * }</pre>
-     * 
+     *
      * @return the current double value
      */
     public double value() {
@@ -125,13 +125,13 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
 
     /**
      * Sets the value to the specified double.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableDouble num = MutableDouble.of(10.5);
      * num.setValue(20.7);   // value is now 20.7
      * }</pre>
-     * 
+     *
      * @param newValue the value to set
      */
     public void setValue(final double newValue) {
@@ -140,14 +140,17 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
 
     /**
      * Returns the current value and then sets the new value.
-     * This is an atomic-like operation for single-threaded use.
-     * 
+     *
+     * <p><strong>Note:</strong> this is not atomic; it simply returns the previous value
+     * and assigns the new one within a single method call. External synchronization is
+     * required for concurrent use.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableDouble num = MutableDouble.of(10.5);
      * double old = num.getAndSet(20.7);   // returns 10.5, value is now 20.7
      * }</pre>
-     * 
+     *
      * @param newValue the new value to set
      * @return the value before it was updated
      */
@@ -161,13 +164,13 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * Sets the value and then returns it.
      * This method first updates the internal value to the specified value,
      * then returns the newly set value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableDouble num = MutableDouble.of(10.5);
      * double newVal = num.setAndGet(20.7);   // returns 20.7, value is now 20.7
      * }</pre>
-     * 
+     *
      * @param newValue the new value to set
      * @return the newly set value
      */
@@ -179,14 +182,14 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     /**
      * Sets the value to newValue if the predicate returns {@code true} for the current value.
      * If the predicate returns {@code false}, the value remains unchanged.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableDouble num = MutableDouble.of(10.5);
      * boolean changed = num.setIf(val -> val < 15, 20.7);   // returns true, value becomes 20.7
      * changed = num.setIf(val -> val < 15, 5.0);            // returns false, value remains 20.7
      * }</pre>
-     * 
+     *
      * @param <E> the type of exception that the predicate may throw
      * @param predicate the predicate that tests the current value
      * @param newValue the new value to set if the condition is met
@@ -206,13 +209,13 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
 
     /**
      * Checks whether the double value is the special NaN (Not-a-Number) value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableDouble num = MutableDouble.of(Double.NaN);
      * boolean isNan = num.isNaN();   // returns true
      * }</pre>
-     * 
+     *
      * @return {@code true} if the value is NaN, {@code false} otherwise
      */
     public boolean isNaN() {
@@ -221,13 +224,13 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
 
     /**
      * Checks whether the double value is infinite (positive or negative infinity).
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableDouble num = MutableDouble.of(Double.POSITIVE_INFINITY);
      * boolean isInf = num.isInfinite();   // returns true
      * }</pre>
-     * 
+     *
      * @return {@code true} if the value is infinite, {@code false} otherwise
      */
     public boolean isInfinite() {
@@ -238,7 +241,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
 
     /**
      * Increments the value by 1.0.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableDouble num = MutableDouble.of(5.5);
@@ -251,7 +254,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
 
     /**
      * Decrements the value by 1.0.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableDouble num = MutableDouble.of(5.5);
@@ -266,13 +269,13 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
 
     /**
      * Adds the specified delta to the current value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableDouble num = MutableDouble.of(10.0);
      * num.add(5.5);   // value is now 15.5
      * }</pre>
-     * 
+     *
      * @param delta the value to add to the current value
      */
     public void add(final double delta) {
@@ -281,13 +284,13 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
 
     /**
      * Subtracts the specified delta from the current value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableDouble num = MutableDouble.of(10.0);
      * num.subtract(3.5);   // value is now 6.5
      * }</pre>
-     * 
+     *
      * @param delta the value to subtract from the current value
      */
     public void subtract(final double delta) {
@@ -296,13 +299,13 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
 
     /**
      * Returns the current value and then increments it by 1.0.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableDouble num = MutableDouble.of(5.0);
      * double old = num.getAndIncrement();   // returns 5.0, value is now 6.0
      * }</pre>
-     * 
+     *
      * @return the value before incrementing
      */
     public double getAndIncrement() {
@@ -311,13 +314,13 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
 
     /**
      * Returns the current value and then decrements it by 1.0.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableDouble num = MutableDouble.of(5.0);
      * double old = num.getAndDecrement();   // returns 5.0, value is now 4.0
      * }</pre>
-     * 
+     *
      * @return the value before decrementing
      */
     public double getAndDecrement() {
@@ -326,13 +329,13 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
 
     /**
      * Increments the value by 1.0 and then returns it.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableDouble num = MutableDouble.of(5.0);
      * double newVal = num.incrementAndGet();   // returns 6.0, value is now 6.0
      * }</pre>
-     * 
+     *
      * @return the value after incrementing
      */
     public double incrementAndGet() {
@@ -341,13 +344,13 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
 
     /**
      * Decrements the value by 1.0 and then returns it.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableDouble num = MutableDouble.of(5.0);
      * double newVal = num.decrementAndGet();   // returns 4.0, value is now 4.0
      * }</pre>
-     * 
+     *
      * @return the value after decrementing
      */
     public double decrementAndGet() {
@@ -356,13 +359,13 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
 
     /**
      * Returns the current value and then adds the given delta to it.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableDouble num = MutableDouble.of(10.0);
      * double old = num.getAndAdd(5.5);   // returns 10.0, value is now 15.5
      * }</pre>
-     * 
+     *
      * @param delta the value to add
      * @return the value before adding delta
      */
@@ -374,13 +377,13 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
 
     /**
      * Adds the given delta to the current value and then returns it.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableDouble num = MutableDouble.of(10.0);
      * double newVal = num.addAndGet(5.5);   // returns 15.5, value is now 15.5
      * }</pre>
-     * 
+     *
      * @param delta the value to add
      * @return the value after adding delta
      */
@@ -517,13 +520,13 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     /**
      * Returns a hash code for this MutableDouble.
      * The hash code is computed using {@link Double#hashCode(double)} on the wrapped value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableDouble num = MutableDouble.of(42.5);
      * int hash = num.hashCode();   // returns Double.hashCode(42.5)
      * }</pre>
-     * 
+     *
      * @return a hash code value for this object
      */
     @Override

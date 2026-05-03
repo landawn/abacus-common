@@ -20,29 +20,40 @@ import java.sql.SQLException;
 import com.landawn.abacus.util.Numbers;
 
 /**
- * Type handler for Byte (wrapper class) values.
- * This class provides database operations and type information for Byte objects.
- * It handles the conversion between database values and Java Byte objects, supporting {@code null} values.
+ * Type handler for {@link Byte} (boxed wrapper) values.
+ * Provides JDBC read operations for {@code Byte} objects, supporting {@code null} values
+ * (SQL NULL maps to Java {@code null}).
+ *
+ * <p>Retrieval reads the column as a generic {@link Object} via
+ * {@link java.sql.ResultSet#getObject(int)}: {@link Number} values are narrowed via
+ * {@link Number#byteValue()}, and non-numeric values are parsed from their string form
+ * using {@link com.landawn.abacus.util.Numbers#toByte(String)}.</p>
+ *
+ * <p>String serialization and JDBC write operations are inherited from
+ * {@link AbstractByteType}.</p>
+ *
+ * @see AbstractByteType
  */
 public final class ByteType extends AbstractByteType {
 
     /**
-     * The type name constant for Byte type identification.
+     * The type name constant used to identify this type within the type system
+     * (value: {@code "Byte"}).
      */
     public static final String BYTE = Byte.class.getSimpleName();
 
     /**
-     * Package-private constructor for ByteType.
-     * This constructor is called by the TypeFactory to create Byte type instances.
+     * Package-private constructor for {@code ByteType}.
+     * Instances are created by {@link TypeFactory}; do not instantiate directly.
      */
     ByteType() {
         super(BYTE);
     }
 
     /**
-     * Returns the Class object representing the Byte class.
+     * Returns the Java class represented by this type handler.
      *
-     * @return the Class object for Byte.class
+     * @return {@code Byte.class}
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
@@ -51,10 +62,9 @@ public final class ByteType extends AbstractByteType {
     }
 
     /**
-     * Indicates whether this type represents a primitive wrapper class.
-     * Byte is the wrapper class for the primitive byte type.
+     * Indicates that {@link Byte} is the wrapper class for the primitive {@code byte} type.
      *
-     * @return {@code true}, indicating Byte is a primitive wrapper
+     * @return {@code true} always
      */
     @Override
     public boolean isPrimitiveWrapper() {
@@ -62,21 +72,17 @@ public final class ByteType extends AbstractByteType {
     }
 
     /**
-     * Retrieves a Byte value from a ResultSet at the specified column index.
-     * This method handles various numeric types in the database and converts them to Byte.
+     * Retrieves a {@link Byte} from a {@link java.sql.ResultSet} at the specified column index.
+     * The column value is read via {@link java.sql.ResultSet#getObject(int)}: if the result is
+     * a {@link Number}, it is narrowed via {@link Number#byteValue()}; if it is a non-numeric object,
+     * its string representation is parsed using
+     * {@link com.landawn.abacus.util.Numbers#toByte(String)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Byte> type = TypeFactory.getType(Byte.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * Byte status = type.get(rs, 1);   // retrieves Byte from column 1
-     * }</pre>
-     *
-     * @param rs the ResultSet containing the data, must not be {@code null}
-     * @param columnIndex the column index (1-based) to retrieve the value from
-     * @return the Byte value at the specified column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs
-     * @throws NumberFormatException if a non-numeric value cannot be converted to Byte
+     * @param rs the {@code ResultSet} to read from
+     * @param columnIndex the 1-based index of the column containing the byte value
+     * @return the {@code Byte} value at the specified column, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
+     * @throws NumberFormatException if a non-numeric string value cannot be parsed as a {@code byte}
      */
     @Override
     public Byte get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -92,21 +98,17 @@ public final class ByteType extends AbstractByteType {
     }
 
     /**
-     * Retrieves a Byte value from a ResultSet using the specified column label.
-     * This method handles various numeric types in the database and converts them to Byte.
+     * Retrieves a {@link Byte} from a {@link java.sql.ResultSet} using the specified column label.
+     * The column value is read via {@link java.sql.ResultSet#getObject(String)}: if the result is
+     * a {@link Number}, it is narrowed via {@link Number#byteValue()}; if it is a non-numeric object,
+     * its string representation is parsed using
+     * {@link com.landawn.abacus.util.Numbers#toByte(String)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Byte> type = TypeFactory.getType(Byte.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * Byte status = type.get(rs, "status");   // retrieves Byte from "status" column
-     * }</pre>
-     *
-     * @param rs the ResultSet containing the data, must not be {@code null}
-     * @param columnName the label of the column to retrieve the value from, must not be {@code null}
-     * @return the Byte value in the specified column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs
-     * @throws NumberFormatException if a non-numeric value cannot be converted to Byte
+     * @param rs the {@code ResultSet} to read from
+     * @param columnName the column label as specified in the SQL AS clause, or the column name if no AS clause was used
+     * @return the {@code Byte} value in the specified column, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnName} is not found
+     * @throws NumberFormatException if a non-numeric string value cannot be parsed as a {@code byte}
      */
     @Override
     public Byte get(final ResultSet rs, final String columnName) throws SQLException {

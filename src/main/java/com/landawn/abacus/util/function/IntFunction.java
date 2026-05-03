@@ -49,7 +49,7 @@ public interface IntFunction<R> extends Throwables.IntFunction<R, RuntimeExcepti
      * Integer squared = square.apply(5);   // Returns 25
      * }</pre>
      *
-     * @param value the function argument
+     * @param value the {@code int} function argument
      * @return the function result
      */
     @Override
@@ -71,6 +71,7 @@ public interface IntFunction<R> extends Throwables.IntFunction<R, RuntimeExcepti
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed function that first applies this function and then applies the {@code after} function
+     * @throws NullPointerException if {@code after} is null
      */
     default <V> IntFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return t -> after.apply(apply(t));

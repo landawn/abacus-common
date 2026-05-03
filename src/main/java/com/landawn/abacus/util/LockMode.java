@@ -23,7 +23,7 @@ package com.landawn.abacus.util;
  * <li>{@code U} (Update) - Prevents others from modifying existing records</li>
  * <li>{@code D} (Delete) - Prevents others from deleting records</li>
  * </ul>
- * 
+ *
  * <p>Lock modes can be combined to create composite locks that restrict multiple operations.
  * For example, RU prevents both reading by ID and updating.</p>
  *
@@ -250,7 +250,7 @@ public enum LockMode {
      * LockMode currentLock = LockMode.R;
      * LockMode checkLock = LockMode.RU;
      * boolean isLocked = currentLock.isXLockOf(checkLock);   // Returns true
-     * 
+     *
      * LockMode currentLock2 = LockMode.UD;
      * LockMode checkLock2 = LockMode.R;
      * boolean isLocked2 = currentLock2.isXLockOf(checkLock2);   // Returns false

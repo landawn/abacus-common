@@ -19,10 +19,10 @@ import com.landawn.abacus.util.function.ShortConsumer;
  * A state object for collecting statistics such as count, min, max, sum, and average for {@code short} values.
  * This class is designed to work with streams of short values, providing a way to compute
  * multiple statistics in a single pass.
- * 
+ *
  * <p>This class is mutable and not thread-safe. It's designed to be used with sequential streams
  * or with proper synchronization in parallel contexts.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ShortSummaryStatistics stats = new ShortSummaryStatistics();
@@ -30,14 +30,14 @@ import com.landawn.abacus.util.function.ShortConsumer;
  * for (short value : values) {
  *     stats.accept(value);
  * }
- * 
+ *
  * System.out.println("Count: " + stats.getCount());   // 5
  * System.out.println("Sum: " + stats.getSum());   // 150
  * System.out.println("Min: " + stats.getMin());   // 10
  * System.out.println("Max: " + stats.getMax());   // 50
  * System.out.println("Average: " + stats.getAverage());   // 30.0
  * }</pre>
- * 
+ *
  * @see java.util.IntSummaryStatistics
  * @see java.util.LongSummaryStatistics
  * @see java.util.DoubleSummaryStatistics
@@ -55,6 +55,11 @@ public class ShortSummaryStatistics implements ShortConsumer {
     /**
      * Constructs an empty instance with zero count, zero sum,
      * {@code Short.MAX_VALUE} min, and {@code Short.MIN_VALUE} max.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortSummaryStatistics stats = new ShortSummaryStatistics();
+     * }</pre>
      */
     public ShortSummaryStatistics() {
     }
@@ -62,7 +67,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
     /**
      * Constructs a non-empty instance with the specified count, min, max, and sum.
      * This constructor is useful for creating a statistics object from pre-computed values.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create statistics from known values
@@ -73,7 +78,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
      * @param min the minimum value
      * @param max the maximum value
      * @param sum the sum of all values
-     * @throws IllegalArgumentException if count is negative or minimum is greater than maximum 
+     * @throws IllegalArgumentException if count is negative or minimum is greater than maximum
      */
     public ShortSummaryStatistics(final long count, final short min, final short max, final long sum) {
         if (count < 0) {
@@ -93,7 +98,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
     /**
      * Records a new short value into the summary information.
      * Updates the count, sum, min, and max values accordingly.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortSummaryStatistics stats = new ShortSummaryStatistics();
@@ -116,17 +121,17 @@ public class ShortSummaryStatistics implements ShortConsumer {
      * Combines the state of another {@code ShortSummaryStatistics} into this one.
      * This method is useful for combining statistics computed separately,
      * for example in parallel stream operations.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortSummaryStatistics stats1 = new ShortSummaryStatistics();
      * stats1.accept((short)10);
      * stats1.accept((short)20);
-     * 
+     *
      * ShortSummaryStatistics stats2 = new ShortSummaryStatistics();
      * stats2.accept((short)30);
      * stats2.accept((short)40);
-     * 
+     *
      * stats1.combine(stats2);
      * // stats1 now contains statistics for all four values
      * }</pre>
@@ -142,7 +147,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
 
     /**
      * Returns the minimum value recorded, or {@code Short.MAX_VALUE} if no values have been recorded.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortSummaryStatistics stats = new ShortSummaryStatistics();
@@ -159,7 +164,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
 
     /**
      * Returns the maximum value recorded, or {@code Short.MIN_VALUE} if no values have been recorded.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortSummaryStatistics stats = new ShortSummaryStatistics();
@@ -176,7 +181,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
 
     /**
      * Returns the count of values recorded.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortSummaryStatistics stats = new ShortSummaryStatistics();
@@ -193,14 +198,14 @@ public class ShortSummaryStatistics implements ShortConsumer {
 
     /**
      * Returns the sum of values recorded.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortSummaryStatistics stats = new ShortSummaryStatistics();
      * stats.accept((short)10);
      * stats.accept((short)20);
      * stats.accept((short)30);
-     * Long sum = stats.getSum();   // Returns 60
+     * long sum = stats.getSum();   // Returns 60
      * }</pre>
      *
      * @return the sum of values as a {@code long}
@@ -211,14 +216,14 @@ public class ShortSummaryStatistics implements ShortConsumer {
 
     /**
      * Returns the arithmetic mean of values recorded, or 0.0 if no values have been recorded.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortSummaryStatistics stats = new ShortSummaryStatistics();
      * stats.accept((short)10);
      * stats.accept((short)20);
      * stats.accept((short)30);
-     * Double avg = stats.getAverage();   // Returns 20.0
+     * double avg = stats.getAverage();   // Returns 20.0
      * }</pre>
      *
      * @return the arithmetic mean of values, or 0.0 if none
@@ -230,7 +235,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
     /**
      * Returns a string representation of this statistics object.
      * The format includes all computed statistics: min, max, count, sum, and average.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * {min=10, max=50, count=5, sum=150, average=30.000000}

@@ -82,8 +82,9 @@ public interface TriFunction<A, B, C, R> extends Throwables.TriFunction<A, B, C,
      * }</pre>
      *
      * @param <V> the type of output of the after function, and of the composed function
-     * @param after the function to apply after this function is applied. Must not be {@code null}.
+     * @param after the function to apply after this function is applied
      * @return a composed function that first applies this function and then applies the after function
+     * @throws NullPointerException if {@code after} is null
      */
     default <V> TriFunction<A, B, C, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return (a, b, c) -> after.apply(apply(a, b, c));

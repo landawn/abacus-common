@@ -171,23 +171,23 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * com.landawn.abacus.util.function.Predicate<String> predicate = s -> s.length() > 1;
  * com.landawn.abacus.util.function.Function<String, String> classifier = s -> s.substring(0, 1);
  * com.landawn.abacus.util.function.Function<String, String> converter = String::toUpperCase;
- * 
+ *
  * // Null-safe operations
  * boolean isEmpty = N.isEmpty(collection);
  * String safe = N.defaultIfNull(value, "default");
- * 
+ *
  * // Array operations
  * N.sort(array);   // array is now sorted
  * boolean contains = N.contains(array, element);
- * 
+ *
  * // Collection operations
  * List<String> filtered = N.filter(list, predicate);
  * Map<String, List<String>> grouped = N.groupBy(list, classifier);
- * 
+ *
  * // String operations
  * boolean valid = Strings.isNotBlank(text);
  * String trimmed = Strings.trim(text);
- * 
+ *
  * // Type conversions
  * int parsed = Numbers.toInt(value);   // Throws NumberFormatException if invalid
  * List<String> converted = N.map(list, converter);
@@ -266,24 +266,24 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * <pre>{@code
  * // Working with collections safely
  * List<String> names = Arrays.asList("Alice", null, "Bob", "", "Charlie");
- * 
+ *
  * // Filter out null and empty strings
  * List<String> validNames = N.filter(names, Strings::isNotBlank);
- * 
+ *
  * // Safe conversion and transformation
  * List<Integer> lengths = N.map(validNames, String::length);
- * 
+ *
  * // Group by length
  * Map<Integer, List<String>> grouped = N.groupBy(validNames, String::length);
- * 
+ *
  * // Find maximum length safely
  * com.landawn.abacus.util.u.OptionalInt maxLength = Iterables.maxInt(lengths, Integer::intValue);
- * 
+ *
  * // Array operations
  * String[] array = validNames.toArray(new String[0]);
  * boolean contains = N.contains(array, "Alice");
  * N.sort(array);   // array is now sorted
- * 
+ *
  * // Null-safe operations
  * String result = N.defaultIfNull(N.firstOrNullIfEmpty(validNames), "No names");
  * boolean isEmpty = N.isEmpty(validNames);
@@ -364,8 +364,8 @@ sealed class CommonUtil permits N {
     /**
      * The index value when an element is not found in a list or array:
      * {@code -1}. This value is returned by methods in this class and can also
-     * be used in comparisons with values returned by various method from
-     * {@link java.util.List} .
+     * be used in comparisons with values returned by various methods from
+     * {@link java.util.List}.
      */
     public static final int INDEX_NOT_FOUND = -1;
 
@@ -687,29 +687,29 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified range starting from {@code fromIndex} (inclusive) and ending with {@code toIndex} (exclusive)
      * is within the bounds of an array, collection, or string with the specified {@code length}.
-     * 
+     *
      * <p>This method performs three validation checks:
      * <ul>
      *   <li>{@code fromIndex} must not be negative</li>
      *   <li>{@code fromIndex} must not be greater than {@code toIndex}</li>
      *   <li>{@code toIndex} must not exceed the specified {@code length}</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {1, 2, 3, 4, 5};
-     * 
+     *
      * // Valid range checks - no exception thrown
      * checkFromToIndex(0, 5, array.length);    // Full array
      * checkFromToIndex(1, 4, array.length);    // Partial range
      * checkFromToIndex(2, 2, array.length);    // Empty range (valid)
-     * 
+     *
      * // Invalid range checks - throw IndexOutOfBoundsException
      * checkFromToIndex(-1, 3, array.length);   // Negative fromIndex
-     * checkFromToIndex(3, 2, array.length);    // fromIndex > toIndex  
+     * checkFromToIndex(3, 2, array.length);    // fromIndex > toIndex
      * checkFromToIndex(2, 6, array.length);    // toIndex > length
      * }</pre>
-     * 
+     *
      * @param fromIndex the starting index (inclusive) - must be non-negative and ≤ toIndex
      * @param toIndex the ending index (exclusive) - must be ≥ fromIndex and ≤ length
      * @param length the size of the array/collection/string - must be non-negative
@@ -735,37 +735,36 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified range starting from {@code fromIndex} (inclusive) with the specified {@code size}
      * is within the bounds of an array, collection, or string with the specified {@code length}.
-     * 
+     *
      * <p>This method performs three validation checks:
      * <ul>
      *   <li>{@code fromIndex} must not be negative</li>
      *   <li>{@code size} must not be negative</li>
      *   <li>The sum of {@code fromIndex} and {@code size} must not exceed the specified {@code length}</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {1, 2, 3, 4, 5};
-     * 
+     *
      * // Valid range checks - no exception thrown
      * checkFromIndexSize(0, 5, array.length);    // Full array
      * checkFromIndexSize(1, 3, array.length);    // Partial range
      * checkFromIndexSize(2, 0, array.length);    // Size zero (valid)
-     * 
+     *
      * // Invalid range checks - throw IndexOutOfBoundsException
      * checkFromIndexSize(-1, 3, array.length);   // Negative fromIndex
      * checkFromIndexSize(2, -1, array.length);   // throws IllegalArgumentException (negative size)
      * checkFromIndexSize(3, 3, array.length);    // fromIndex + size > length
      * }</pre>
-     * 
+     *
      * @param fromIndex the starting index (inclusive) - must be non-negative
      * @param size the number of elements in the range - must be non-negative
      * @param length the size of the array/collection/string - must be non-negative
      * @throws IllegalArgumentException if {@code size} or {@code length} is negative
-     * @throws IndexOutOfBoundsException if any of the following conditions are true:
+     * @throws IndexOutOfBoundsException if either of the following conditions are true (and {@code size}/{@code length} are non-negative):
      *         <ul>
      *           <li>{@code fromIndex < 0}</li>
-     *           <li>{@code size < 0}</li>
      *           <li>{@code fromIndex + size > length}</li>
      *         </ul>
      * @see #checkFromToIndex(int, int, int)
@@ -4037,10 +4036,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Compares two strings for equality.
+     * Compares two strings for equality. Two {@code null} arguments are considered equal.
      *
-     * @param a the first string
-     * @param b the second string
+     * @param a the first string, may be {@code null}
+     * @param b the second string, may be {@code null}
      * @return {@code true} if the strings are equal, {@code false} otherwise
      */
     public static boolean equals(final String a, final String b) {
@@ -4048,11 +4047,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Compares two strings for equality, ignoring case.
+     * Compares two strings for equality, ignoring case differences.
+     * Two {@code null} arguments are considered equal.
      *
-     * @param a the first string
-     * @param b the second string
-     * @return {@code true} if the strings are equal, {@code false} otherwise
+     * @param a the first string, may be {@code null}
+     * @param b the second string, may be {@code null}
+     * @return {@code true} if the strings are equal ignoring case, {@code false} otherwise
+     * @see String#equalsIgnoreCase(String)
      */
     public static boolean equalsIgnoreCase(final String a, final String b) {
         return (a == null) ? b == null : (a.equalsIgnoreCase(b));
@@ -4060,9 +4061,10 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two objects for equality. If the objects are arrays, the appropriate {@code Arrays.equals} method will be used.
+     * Two {@code null} arguments are considered equal.
      *
-     * @param a the first object
-     * @param b the second object
+     * @param a the first object, may be {@code null}
+     * @param b the second object, may be {@code null}
      * @return {@code true} if the objects are equal, {@code false} otherwise
      */
     public static boolean equals(final Object a, final Object b) {
@@ -4117,9 +4119,9 @@ sealed class CommonUtil permits N {
      * N.equals(a, 0, b, 0, 3);   // returns false
      * }</pre>
      *
-     * @param a the first boolean array; must not be null
+     * @param a the first boolean array; must not be {@code null}
      * @param fromIndexA the starting index in the first array, inclusive
-     * @param b the second boolean array; must not be null
+     * @param b the second boolean array; must not be {@code null}
      * @param fromIndexB the starting index in the second array, inclusive
      * @param len the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
@@ -4169,9 +4171,9 @@ sealed class CommonUtil permits N {
      * N.equals(a, 0, b, 0, 3);   // returns false
      * }</pre>
      *
-     * @param a the first char array; must not be null
+     * @param a the first char array; must not be {@code null}
      * @param fromIndexA the starting index in the first array, inclusive
-     * @param b the second char array, must not be null
+     * @param b the second char array, must not be {@code null}
      * @param fromIndexB the starting index in the second array, inclusive
      * @param len the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
@@ -4221,9 +4223,9 @@ sealed class CommonUtil permits N {
      * N.equals(a, 0, b, 0, 3);   // returns false
      * }</pre>
      *
-     * @param a the first byte array, must not be null
+     * @param a the first byte array, must not be {@code null}
      * @param fromIndexA the starting index in the first array, inclusive
-     * @param b the second byte array, must not be null
+     * @param b the second byte array, must not be {@code null}
      * @param fromIndexB the starting index in the second array, inclusive
      * @param len the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
@@ -4273,9 +4275,9 @@ sealed class CommonUtil permits N {
      * N.equals(a, 0, b, 0, 3);   // returns false
      * }</pre>
      *
-     * @param a the first short array, must not be null
+     * @param a the first short array, must not be {@code null}
      * @param fromIndexA the starting index in the first array, inclusive
-     * @param b the second short array, must not be null
+     * @param b the second short array, must not be {@code null}
      * @param fromIndexB the starting index in the second array, inclusive
      * @param len the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
@@ -4325,9 +4327,9 @@ sealed class CommonUtil permits N {
      * N.equals(a, 0, b, 0, 3);   // returns false
      * }</pre>
      *
-     * @param a the first int array, must not be null
+     * @param a the first int array, must not be {@code null}
      * @param fromIndexA the starting index in the first array, inclusive
-     * @param b the second int array, must not be null
+     * @param b the second int array, must not be {@code null}
      * @param fromIndexB the starting index in the second array, inclusive
      * @param len the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
@@ -4377,9 +4379,9 @@ sealed class CommonUtil permits N {
      * N.equals(a, 0, b, 0, 3);   // returns false
      * }</pre>
      *
-     * @param a the first long array, must not be null
+     * @param a the first long array, must not be {@code null}
      * @param fromIndexA the starting index in the first array, inclusive
-     * @param b the second long array, must not be null
+     * @param b the second long array, must not be {@code null}
      * @param fromIndexB the starting index in the second array, inclusive
      * @param len the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
@@ -4429,9 +4431,9 @@ sealed class CommonUtil permits N {
      * N.equals(a, 0, b, 0, 3);   // returns false
      * }</pre>
      *
-     * @param a the first float array, must not be null
+     * @param a the first float array, must not be {@code null}
      * @param fromIndexA the starting index in the first array, inclusive
-     * @param b the second float array, must not be null
+     * @param b the second float array, must not be {@code null}
      * @param fromIndexB the starting index in the second array, inclusive
      * @param len the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
@@ -4469,10 +4471,11 @@ sealed class CommonUtil permits N {
      * N.equals(a, b, 0.001f);   // returns false
      * }</pre>
      *
-     * @param a the first float array, must not be null
-     * @param b the second float array, must not be null
+     * @param a the first float array, may be {@code null}
+     * @param b the second float array, may be {@code null}
      * @param delta the maximum difference allowed for equality
-     * @return {@code true} if the arrays are equal within the specified delta, {@code false} otherwise
+     * @return {@code true} if the arrays are equal within the specified delta, {@code false} otherwise.
+     *         Two {@code null} or empty arrays are considered equal.
      */
     public static boolean equals(final float[] a, final float[] b, final float delta) {
         if (a == b || (isEmpty(a) && isEmpty(b))) {
@@ -4517,9 +4520,9 @@ sealed class CommonUtil permits N {
      * N.equals(a, 0, b, 0, 3);   // returns false
      * }</pre>
      *
-     * @param a the first double array, must not be null
+     * @param a the first double array, must not be {@code null}
      * @param fromIndexA the starting index in the first array, inclusive
-     * @param b the second double array, must not be null
+     * @param b the second double array, must not be {@code null}
      * @param fromIndexB the starting index in the second array, inclusive
      * @param len the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
@@ -4557,10 +4560,11 @@ sealed class CommonUtil permits N {
      * N.equals(a, b, 0.001);   // returns false
      * }</pre>
      *
-     * @param a the first double array, must not be null
-     * @param b the second double array, must not be null
+     * @param a the first double array, may be {@code null}
+     * @param b the second double array, may be {@code null}
      * @param delta the maximum difference allowed for equality
-     * @return {@code true} if the arrays are equal within the specified delta, {@code false} otherwise
+     * @return {@code true} if the arrays are equal within the specified delta, {@code false} otherwise.
+     *         Two {@code null} or empty arrays are considered equal.
      */
     public static boolean equals(final double[] a, final double[] b, final double delta) {
         if (a == b || (isEmpty(a) && isEmpty(b))) {
@@ -4609,9 +4613,9 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays for equality within the specified range.
      *
-     * @param a the first array, must not be null
+     * @param a the first array, must not be {@code null}
      * @param fromIndexA the starting index in the first array, inclusive
-     * @param b the second array, must not be null
+     * @param b the second array, must not be {@code null}
      * @param fromIndexB the starting index in the second array, inclusive
      * @param len the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
@@ -4650,8 +4654,8 @@ sealed class CommonUtil permits N {
      * If the objects are arrays, this method uses recursive comparison to check
      * all nested elements.
      *
-     * @param a the first object to compare, which may be null
-     * @param b the second object to compare, which may be null
+     * @param a the first object to compare, which may be {@code null}
+     * @param b the second object to compare, which may be {@code null}
      * @return {@code true} if the objects are deeply equal, {@code false} otherwise
      * @see Arrays#deepEquals(Object[], Object[])
      * @see #equals(Object, Object)
@@ -4722,9 +4726,9 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays for deep equality within the specified range.
      *
-     * @param a the first array, must not be null
+     * @param a the first array, must not be {@code null}
      * @param fromIndexA the starting index in the first array, inclusive
-     * @param b the second array, must not be null
+     * @param b the second array, must not be {@code null}
      * @param fromIndexB the starting index in the second array, inclusive
      * @param len the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
@@ -4754,9 +4758,9 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays of Strings, ignoring case considerations.
      *
-     * @param a the first array of Strings to compare, which may be null
-     * @param b the second array of Strings to compare, which may be null
-     * @return {@code true} if the arrays are equal, ignoring case considerations, or both are null; {@code false} otherwise
+     * @param a the first array of Strings to compare, which may be {@code null}
+     * @param b the second array of Strings to compare, which may be {@code null}
+     * @return {@code true} if the arrays are equal, ignoring case considerations, or both are {@code null}; {@code false} otherwise
      */
     public static boolean equalsIgnoreCase(final String[] a, final String[] b) {
         return (a == null || b == null) ? a == b : (a.length == b.length && equalsIgnoreCase(a, 0, b, 0, a.length));
@@ -4765,12 +4769,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays of Strings, ignoring case considerations, within the specified range.
      *
-     * @param a the first array of Strings to compare, which may be null
+     * @param a the first array of Strings to compare, which may be {@code null}
      * @param fromIndexA the starting index in the first array, inclusive
-     * @param b the second array of Strings to compare, which may be null
+     * @param b the second array of Strings to compare, which may be {@code null}
      * @param fromIndexB the starting index in the second array, inclusive
      * @param len the number of elements to compare
-     * @return {@code true} if the specified range of elements in both arrays are equal, ignoring case considerations, or both are null; {@code false} otherwise
+     * @return {@code true} if the specified range of elements in both arrays are equal, ignoring case considerations, or both are {@code null}; {@code false} otherwise
      * @throws IllegalArgumentException if the length is negative
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
@@ -4823,11 +4827,10 @@ sealed class CommonUtil permits N {
             return false;
         }
 
-        final Iterator<?> iterA = a.iterator();
         final Iterator<?> iterB = b.iterator();
 
-        while (iterA.hasNext()) {
-            if (!equals(iterA.next(), iterB.next())) {
+        for (Object element : a) {
+            if (!equals(element, iterB.next())) {
                 return false;
             }
         }
@@ -4887,9 +4890,9 @@ sealed class CommonUtil permits N {
      * Compares two maps for equality based on the specified keys.
      *
      * @param <K> the type of keys in the maps
-     * @param map1 the first map to compare, it can be null
-     * @param map2 the second map to compare, it can be null
-     * @param keysToCompare the collection of keys to compare, it must not be null
+     * @param map1 the first map to compare, it can be {@code null}
+     * @param map2 the second map to compare, it can be {@code null}
+     * @param keysToCompare the collection of keys to compare, it must not be {@code null}
      * @return {@code true} if the values associated with the specified keys in both maps are equal, {@code false} otherwise
      * @throws IllegalArgumentException if the {@code keysToCompare} is empty
      */
@@ -4921,12 +4924,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares the properties of two beans to determine if they are equal.
      *
-     * @param bean1 the first bean to compare, must not be null
-     * @param bean2 the second bean to compare, must not be null
+     * @param bean1 the first bean to compare, must not be {@code null}
+     * @param bean2 the second bean to compare, must not be {@code null}
      * @param propNamesToCompare the collection of property names to compare, must not be {@code null} or empty
      * @return {@code true} if all the specified properties of the beans are equal, {@code false} otherwise
      * @throws IllegalArgumentException if the {@code propNamesToCompare} is empty
-     * @deprecated Use {@link Beans#equalsByProps(Object,Object,Collection<String>)} instead
+     * @deprecated Use {@link Beans#equalsByProps(Object, Object, Collection)} instead
      */
     @Deprecated
     public static boolean equalsByProps(final Object bean1, final Object bean2, final Collection<String> propNamesToCompare) throws IllegalArgumentException {
@@ -4936,8 +4939,8 @@ sealed class CommonUtil permits N {
     /**
      * Compares the properties of two beans to determine if they are equal by common properties.
      *
-     * @param bean1 the first bean to compare, must not be null
-     * @param bean2 the second bean to compare, must not be null
+     * @param bean1 the first bean to compare, must not be {@code null}
+     * @param bean2 the second bean to compare, must not be {@code null}
      * @return {@code true} if all the common properties of the beans are equal, {@code false} otherwise
      * @throws IllegalArgumentException if no common property is found
      * @deprecated Use {@link Beans#equalsByCommonProps(Object,Object)} instead
@@ -4947,11 +4950,11 @@ sealed class CommonUtil permits N {
         return Beans.equalsByCommonProps(bean1, bean2);
     }
 
-    /** 
+    /**
      * Returns {@code true} if the given {@link Collection}s contain exactly the same elements with exactly the same cardinalities.
      *
-     * @param a the first collection to compare, which may be null
-     * @param b the second collection to compare, which may be null
+     * @param a the first collection to compare, which may be {@code null}
+     * @param b the second collection to compare, which may be {@code null}
      * @return {@code true} if the collections are equal, {@code false} otherwise
      * @throws UnsupportedOperationException if this method is called
      * @deprecated Use {@link N#isEqualCollection(Collection, Collection)} instead.
@@ -5061,10 +5064,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns the hash code for an object. If the object is an array, the appropriate {@code Arrays.hashCode} method will be used
+     * Returns the hash code for an object. If the object is an array, the appropriate {@code Arrays.hashCode} method will be used.
      *
      * @param obj the object for which the hash code is to be calculated
-     * @return the hash code of the object, or 0 if the object is null
+     * @return the hash code of the object, or {@code 0} if the object is {@code null}
      */
     public static int hashCode(final Object obj) {
         if (obj == null) {
@@ -5468,7 +5471,7 @@ sealed class CommonUtil permits N {
      * }</pre>
      *
      * @param obj the object for which the hash code is to be calculated
-     * @return the hash code of the object, or 0 if the object is null
+     * @return the hash code of the object, or {@code 0} if the object is {@code null}
      * @see Arrays#deepHashCode(Object[])
      */
     public static int deepHashCode(final Object obj) {
@@ -5773,7 +5776,7 @@ sealed class CommonUtil permits N {
      * toString(null);   // returns "null"
      * }</pre>
      *
-     * @param obj the object to be represented as a string
+     * @param obj the object to be represented as a string, may be {@code null}
      * @return the String representation of the object. If the object is {@code null}, the string {@code "null"} is returned.
      */
     public static String toString(final Object obj) {
@@ -5839,8 +5842,8 @@ sealed class CommonUtil permits N {
      * }</pre>
      *
      * @param obj the object to be represented as a string
-     * @param defaultIfNull the default value to be returned if the object is null
-     * @return the String representation of the object, or the default value if the object is null
+     * @param defaultIfNull the default value to be returned if the object is {@code null}
+     * @return the String representation of the object, or the default value if the object is {@code null}
      */
     public static String toString(final Object obj, final String defaultIfNull) {
         return obj == null ? defaultIfNull : toString(obj);
@@ -6611,7 +6614,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a string representation of the "deep contents" of the specified array. If the object is {@code null}, the specified default value is returned.
+     * Returns a string representation of the "deep contents" of the specified array.
+     * Nested arrays and other objects are recursively converted via {@link #deepToString(Object)}.
+     * Returns the literal {@code "null"} if {@code a} is {@code null}, and the empty-array string
+     * (typically {@code "[]"}) if {@code a} has zero length.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6620,8 +6626,9 @@ sealed class CommonUtil permits N {
      * }</pre>
      *
      * @param a the object array to be represented as a string, may be {@code null}
-     * @return the String representation of the object, or the default value if the object is null
+     * @return the deep string representation of the array
      * @see Arrays#deepToString(Object[])
+     * @see #deepToString(Object[], String)
      */
     public static String deepToString(final Object[] a) {
         if (a == null) {
@@ -6773,8 +6780,8 @@ sealed class CommonUtil permits N {
      * Returns a string representation of the "deep contents" of the specified array. If the object is {@code null}, the specified default value is returned.
      *
      * @param a the Object array to be represented as a string
-     * @param defaultIfNull the default value to be returned if the object is null
-     * @return the String representation of the object, or the default value if the object is null
+     * @param defaultIfNull the default value to be returned if the object is {@code null}
+     * @return the String representation of the object, or the default value if the object is {@code null}
      * @see Arrays#deepToString(Object[])
      */
     public static String deepToString(final Object[] a, final String defaultIfNull) {
@@ -7017,7 +7024,7 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * isEmpty(null);                  // returns true
      * isEmpty("");                    // returns true
-     * isEmpty("   ");                 // returns {@code false} (contains spaces)
+     * isEmpty("   ");                 // returns false (contains spaces)
      * isEmpty("abc");                 // returns false
      * isEmpty(new StringBuilder());   // returns true
      * }</pre>
@@ -7976,7 +7983,7 @@ sealed class CommonUtil permits N {
      * }</pre>
      *
      * @param css the CharSequences to check, may be {@code null} or empty
-     * @return {@code true} if any of the CharSequences are empty or null
+     * @return {@code true} if any of the CharSequences are empty or {@code null}
      * @see Strings#isAnyEmpty(CharSequence...)
      */
     public static boolean anyEmpty(final CharSequence... css) {
@@ -8354,7 +8361,7 @@ sealed class CommonUtil permits N {
      * }</pre>
      *
      * @param css the CharSequences to check, may be {@code null} or empty
-     * @return {@code true} if all the CharSequences are empty or null
+     * @return {@code true} if all the CharSequences are empty or {@code null}
      * @see Strings#isAllEmpty(CharSequence...)
      */
     public static boolean allEmpty(final CharSequence... css) {
@@ -8407,8 +8414,8 @@ sealed class CommonUtil permits N {
      * allEmpty(new Object[]{1}, new Object[0]);   // returns false
      * }</pre>
      *
-     * @param a the first object array to check, which may be null
-     * @param b the second object array to check, which may be null
+     * @param a the first object array to check, which may be {@code null}
+     * @param b the second object array to check, which may be {@code null}
      * @return {@code true} if both object arrays are empty or {@code null}, otherwise {@code false}
      */
     public static boolean allEmpty(final Object[] a, final Object[] b) {
@@ -8424,9 +8431,9 @@ sealed class CommonUtil permits N {
      * allEmpty(new Object[]{1}, new Object[0], new Object[0]);   // returns false
      * }</pre>
      *
-     * @param a the first object array to check, which may be null
-     * @param b the second object array to check, which may be null
-     * @param c the third object array to check, which may be null
+     * @param a the first object array to check, which may be {@code null}
+     * @param b the second object array to check, which may be {@code null}
+     * @param c the third object array to check, which may be {@code null}
      * @return {@code true} if all object arrays are empty or {@code null}, otherwise {@code false}
      */
     public static boolean allEmpty(final Object[] a, final Object[] b, final Object[] c) {
@@ -8442,8 +8449,8 @@ sealed class CommonUtil permits N {
      * allEmpty(Arrays.asList("a"), Collections.emptyList());   // returns false
      * }</pre>
      *
-     * @param a the first collection to check, which may be null
-     * @param b the second collection to check, which may be null
+     * @param a the first collection to check, which may be {@code null}
+     * @param b the second collection to check, which may be {@code null}
      * @return {@code true} if both collections are empty or {@code null}, otherwise {@code false}
      */
     public static boolean allEmpty(final Collection<?> a, final Collection<?> b) {
@@ -8459,9 +8466,9 @@ sealed class CommonUtil permits N {
      * allEmpty(Arrays.asList("a"), Collections.emptyList(), Collections.emptyList());   // returns false
      * }</pre>
      *
-     * @param a the first collection to check, which may be null
-     * @param b the second collection to check, which may be null
-     * @param c the third collection to check, which may be null
+     * @param a the first collection to check, which may be {@code null}
+     * @param b the second collection to check, which may be {@code null}
+     * @param c the third collection to check, which may be {@code null}
      * @return {@code true} if all collections are empty or {@code null}, otherwise {@code false}
      */
     public static boolean allEmpty(final Collection<?> a, final Collection<?> b, final Collection<?> c) {
@@ -8477,8 +8484,8 @@ sealed class CommonUtil permits N {
      * allEmpty(Collections.singletonMap("k", "v"), Collections.emptyMap());   // returns false
      * }</pre>
      *
-     * @param a the first map to check, which may be null
-     * @param b the second map to check, which may be null
+     * @param a the first map to check, which may be {@code null}
+     * @param b the second map to check, which may be {@code null}
      * @return {@code true} if both maps are empty or {@code null}, otherwise {@code false}
      */
     public static boolean allEmpty(final Map<?, ?> a, final Map<?, ?> b) {
@@ -8494,9 +8501,9 @@ sealed class CommonUtil permits N {
      * allEmpty(Collections.singletonMap("k", "v"), Collections.emptyMap(), Collections.emptyMap());   // returns false
      * }</pre>
      *
-     * @param a the first map to check, which may be null
-     * @param b the second map to check, which may be null
-     * @param c the third map to check, which may be null
+     * @param a the first map to check, which may be {@code null}
+     * @param b the second map to check, which may be {@code null}
+     * @param c the third map to check, which may be {@code null}
      * @return {@code true} if all maps are empty or {@code null}, otherwise {@code false}
      */
     public static boolean allEmpty(final Map<?, ?> a, final Map<?, ?> b, final Map<?, ?> c) {
@@ -9762,9 +9769,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfEmpty(Collections.emptyMap(), Collections.singletonMap("k", "v"))               ="v"}
-     * defaultIfEmpty(Collections.singletonMap("a", "b"), Collections.singletonMap("k", "v"))   ="b"}
-     * defaultIfEmpty(null, Collections.singletonMap("k", "v"))                                 ="v"}
+     * defaultIfEmpty(Collections.emptyMap(), Collections.singletonMap("k", "v"));               // returns {"k"="v"}
+     * defaultIfEmpty(Collections.singletonMap("a", "b"), Collections.singletonMap("k", "v"));   // returns {"a"="b"}
+     * defaultIfEmpty(null, Collections.singletonMap("k", "v"));                                 // returns {"k"="v"}
      * }</pre>
      *
      * @param <T> the type of Map
@@ -10029,7 +10036,7 @@ sealed class CommonUtil permits N {
      * Converts the given value to its corresponding String representation by {@code Type.stringOf(Object)}.
      *
      * @param obj the value to be converted.
-     * @return the String representation of the given value. {@code null} if the specified object is null
+     * @return the String representation of the given value, or {@code null} if the specified object is {@code null}
      * @see #valueOf(String, Class)
      * @see Type#stringOf(Object)
      */
@@ -10227,8 +10234,8 @@ sealed class CommonUtil permits N {
                 return Beans.mapToBean((Map<String, Object>) srcObj, targetType.javaType());
             }
         } else if (targetType.isMap()) {
-            if (srcType.isBean() && targetType.parameterTypes()[0].javaType().isAssignableFrom(String.class)
-                    && Object.class.equals(targetType.parameterTypes()[1].javaType())) {
+            if (srcType.isBean() && targetType.parameterTypes().get(0).javaType().isAssignableFrom(String.class)
+                    && Object.class.equals(targetType.parameterTypes().get(1).javaType())) {
                 try {
                     final Map<String, Object> result = newMap((Class<Map>) targetType.javaType());
                     Beans.beanToMap(srcObj, result);
@@ -10241,9 +10248,9 @@ sealed class CommonUtil permits N {
                 final Optional<Object> firstNonNullKeyOp = firstNonNull(srcMap.keySet());
                 final Optional<Object> firstNonNullValueOp = firstNonNull(srcMap.values());
 
-                if ((firstNonNullKeyOp.isEmpty() || targetType.parameterTypes()[0].javaType().isAssignableFrom(firstNonNullKeyOp.get().getClass()))
+                if ((firstNonNullKeyOp.isEmpty() || targetType.parameterTypes().get(0).javaType().isAssignableFrom(firstNonNullKeyOp.get().getClass()))
                         && (firstNonNullValueOp.isEmpty()
-                                || targetType.parameterTypes()[1].javaType().isAssignableFrom(firstNonNullValueOp.get().getClass()))) {
+                                || targetType.parameterTypes().get(1).javaType().isAssignableFrom(firstNonNullValueOp.get().getClass()))) {
                     final Map result = newMap((Class<Map>) targetType.javaType(), srcMap.size());
                     result.putAll(srcMap);
                     return (T) result;
@@ -10256,12 +10263,12 @@ sealed class CommonUtil permits N {
                 final Collection srcColl = (Collection) srcObj;
                 final Optional<Object> op = firstNonNull(srcColl);
 
-                if (op.isEmpty() || targetType.parameterTypes()[0].javaType().isAssignableFrom(op.get().getClass())) {
+                if (op.isEmpty() || targetType.parameterTypes().get(0).javaType().isAssignableFrom(op.get().getClass())) {
                     final Collection result = newCollection((Class<Collection>) targetType.javaType(), srcColl.size());
                     result.addAll(srcColl);
                     return (T) result;
                 }
-            } else if (srcType.isObjectArray() && targetType.parameterTypes()[0].javaType().isAssignableFrom(srcType.javaType().getComponentType())) {
+            } else if (srcType.isObjectArray() && targetType.parameterTypes().get(0).javaType().isAssignableFrom(srcType.javaType().getComponentType())) {
                 final Object[] srcArray = (Object[]) srcObj;
                 final Collection result = newCollection((Class<Collection>) targetType.javaType(), srcArray.length);
                 result.addAll(Arrays.asList(srcArray));
@@ -10441,7 +10448,7 @@ sealed class CommonUtil permits N {
      * Note that {@code null} can be assigned to any Object type except primitive types: boolean/char/byte/short/int/long/double.
      *
      * @param <T> the type of the target object after casting.
-     * @param val the object to be casted.
+     * @param val the object to be casted, may be {@code null}
      * @param targetType the class of the target type to which the object is to be casted.
      * @return a {@code Nullable} containing the casted object if the casting is successful, or an empty {@code Nullable} if the object is {@code null} or cannot be casted to the target type.
      */
@@ -10461,7 +10468,7 @@ sealed class CommonUtil permits N {
      * Note that {@code null} can be assigned to any Object type except primitive types: boolean/char/byte/short/int/long/double.
      *
      * @param <T> the type of the target object after casting.
-     * @param val the object to be casted.
+     * @param val the object to be casted, may be {@code null}
      * @param targetType the Type instance of the target type to which the object is to be casted.
      * @return a {@code Nullable} containing the casted object if the casting is successful, or an empty {@code Nullable} if the object is {@code null} or cannot be casted to the target type.
      */
@@ -10486,7 +10493,7 @@ sealed class CommonUtil permits N {
      * N.negate(null);            // null
      * }</pre>
      *
-     * @param bool the Boolean to negate, which may be null
+     * @param bool the Boolean to negate, which may be {@code null}
      * @return the negated Boolean, or {@code null} if {@code null} input
      * @see #isTrue(Boolean)
      * @see #isFalse(Boolean)
@@ -11431,13 +11438,13 @@ sealed class CommonUtil permits N {
      * @see java.lang.reflect.Proxy#newProxyInstance(ClassLoader, Class[], InvocationHandler)
      */
     public static <T> T newProxyInstance(final Class<?>[] interfaceClasses, final InvocationHandler h) {
-        ClassLoader classLoader = CommonUtil.class.getClassLoader();
+        ClassLoader classLoader = N.class.getClassLoader();
 
         if (interfaceClasses != null && interfaceClasses.length > 0) {
             classLoader = interfaceClasses[0].getClassLoader();
 
             if (classLoader == null) {
-                classLoader = CommonUtil.class.getClassLoader();
+                classLoader = N.class.getClassLoader();
             }
         }
 
@@ -11798,7 +11805,7 @@ sealed class CommonUtil permits N {
      * Creates a new instance of a LinkedHashSet.
      *
      * @param <T> the type of elements in the set
-     * @return a new instance of a HashSet
+     * @return a new instance of a LinkedHashSet
      */
     public static <T> Set<T> newLinkedHashSet() {
         return new LinkedHashSet<>();
@@ -13092,7 +13099,7 @@ sealed class CommonUtil permits N {
                     columnList.get(i).add(it.next());
                 }
             } else if (columnNames.size() == 1) {
-                columnList.get(0).add(row); // single column case 
+                columnList.get(0).add(row); // single column case
             } else {
                 throw new IllegalArgumentException(
                         "Unsupported row type: " + ClassUtil.getCanonicalClassName(row.getClass()) + ". Only array, collection, map and bean are supported");
@@ -13107,13 +13114,13 @@ sealed class CommonUtil permits N {
      *
      * The Dataset is a data structure that stores data in a tabular format, similar to a table in a database.
      * Each item in the <i>columnNames</i> collection represents a column in the Dataset.
-     * The <i>rowList</i> parameter is a two-dimensional array where each subarray represents a row in the Dataset.
+     * The <i>rows</i> parameter is a two-dimensional array where each subarray represents a row in the Dataset.
      * The order of elements in each row should correspond to the order of column names.
      *
      * @param columnNames a collection of strings representing the names of the columns in the Dataset.
      * @param rows a two-dimensional array of objects representing the data in the Dataset. Each subarray is a row.
      * @return a new Dataset with the specified column names and rows.
-     * @throws IllegalArgumentException if the length of <i>columnNames</i> is zero or not equal to the length of the subarrays in <i>rowList</i>.
+     * @throws IllegalArgumentException if the length of <i>columnNames</i> is zero or not equal to the length of the subarrays in <i>rows</i>.
      * @see Dataset#rows(Collection, Object[][])
      * @see Dataset#rows(Collection, Collection)
      * @see Dataset#columns(Collection, Object[][])
@@ -13850,6 +13857,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the starting (inclusive) index of the range to be converted
      * @param toIndex the ending (exclusive) index of the range to be converted
      * @return a boolean array containing the primitive boolean values from the specified range of the collection
+     * @throws IndexOutOfBoundsException if the specified indices are out of the collection's range
      */
     public static boolean[] toBooleanArray(final Collection<Boolean> c, final int fromIndex, final int toIndex) {
         return toBooleanArray(c, fromIndex, toIndex, false);
@@ -15213,7 +15221,7 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code LinkedList} with specified elements. And it's not backed by the specified array.
      * If the specified array is {@code null} or empty, an empty {@code List} is returned
-     * 
+     *
      * <p>This method creates a new {@code LinkedList} and populates it with all elements from the
      * provided array. Unlike {@link Arrays#asList(Object...)}, this method returns a fully
      * modifiable list that is not backed by the original array, meaning modifications to the returned
@@ -16370,11 +16378,13 @@ sealed class CommonUtil permits N {
      * extracted by applying the keyExtractor function to the element. If duplicate keys
      * are produced, the later value overwrites the earlier one.</p>
      *
+     * <p>If duplicate keys are produced, the later value overwrites the earlier one.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> names = N.toList("Alice", "Bob", "Charlie");
      * Map<Integer, String> lengthToName = N.toMap(names, String::length);
-     * // Result: {5=Alice (or Charlie), 3=Bob}
+     * // Result: {5=Alice, 3=Bob, 7=Charlie}
      *
      * List<User> users = N.toList(new User(1, "Alice"), new User(2, "Bob"));
      * Map<Integer, User> idToUser = N.toMap(users, User::getId);
@@ -17486,7 +17496,7 @@ sealed class CommonUtil permits N {
     //     public static Map<String, Object> asProps(final String propName, final Object propValue) {
     //         final Map<String, Object> props = newLinkedHashMap(1);
     //         props.put(propName, propValue);
-    // 
+    //
     //         return props;
     //     }
 
@@ -17503,7 +17513,7 @@ sealed class CommonUtil permits N {
     //         final Map<String, Object> props = newLinkedHashMap(2);
     //         props.put(propName1, propValue1);
     //         props.put(propName2, propValue2);
-    // 
+    //
     //         return props;
     //     }
 
@@ -17524,7 +17534,7 @@ sealed class CommonUtil permits N {
     //         props.put(propName1, propValue1);
     //         props.put(propName2, propValue2);
     //         props.put(propName3, propValue3);
-    // 
+    //
     //         return props;
     //     }
 
@@ -17548,7 +17558,7 @@ sealed class CommonUtil permits N {
     //         props.put(propName2, propValue2);
     //         props.put(propName3, propValue3);
     //         props.put(propName4, propValue4);
-    // 
+    //
     //         return props;
     //     }
 
@@ -17575,7 +17585,7 @@ sealed class CommonUtil permits N {
     //         props.put(propName3, propValue3);
     //         props.put(propName4, propValue4);
     //         props.put(propName5, propValue5);
-    // 
+    //
     //         return props;
     //     }
 
@@ -21072,10 +21082,11 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type of the elements in the iterable.
      * @param c the iterable to check.
-     * @param defaultValue the default value to return if the iterable is empty.
+     * @param defaultValue the default value to return if the iterable is empty; must not be {@code null}.
      * @return the first {@code non-null} element of the given iterable if it is not empty, otherwise the specified default value.
+     * @throws IllegalArgumentException if {@code defaultValue} is {@code null}
      * @see #firstNonNullOrDefault(Iterator, Object)
-     * @see #firstNonNull(Iterable) 
+     * @see #firstNonNull(Iterable)
      */
     public static <T> T firstNonNullOrDefault(final Iterable<? extends T> c, T defaultValue) {
         checkArgNotNull(defaultValue, cs.defaultValue);
@@ -21104,8 +21115,9 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type of the elements in the iterator.
      * @param iter the iterator to check.
-     * @param defaultValue the default value to return if the iterator is empty.
+     * @param defaultValue the default value to return if the iterator is empty; must not be {@code null}.
      * @return the first {@code non-null} element of the given iterator if it is not empty, otherwise the specified default value.
+     * @throws IllegalArgumentException if {@code defaultValue} is {@code null}
      * @see #firstNonNullOrDefault(Iterable, Object)
      * @see #firstNonNull(Iterator)
      */
@@ -21312,8 +21324,9 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type of the elements in the iterable.
      * @param c the iterable to check.
-     * @param defaultValue the default value to return if the iterable is empty.
+     * @param defaultValue the default value to return if the iterable is empty; must not be {@code null}.
      * @return the last {@code non-null} element of the given iterable if it is not empty, otherwise the specified default value.
+     * @throws IllegalArgumentException if {@code defaultValue} is {@code null}
      * @see #lastNonNullOrDefault(Iterator, Object)
      * @see #lastNonNull(Iterable)
      */
@@ -21339,8 +21352,9 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type of the elements in the iterator.
      * @param iter the iterator to check.
-     * @param defaultValue the default value to return if the iterator is empty.
+     * @param defaultValue the default value to return if the iterator is empty; must not be {@code null}.
      * @return the last {@code non-null} element of the given iterator if it is not empty, otherwise the specified default value.
+     * @throws IllegalArgumentException if {@code defaultValue} is {@code null}
      * @see #lastNonNullOrDefault(Iterable, Object)
      * @see #lastNonNull(Iterator)
      */
@@ -22332,7 +22346,7 @@ sealed class CommonUtil permits N {
      *   <li>They are both empty or null</li>
      *   <li>They contain exactly the same elements with the same frequencies in any order</li>
      * </ul>
-     * 
+     *
      * @param a the first boolean array to compare, may be {@code null}
      * @param b the second boolean array to compare, may be {@code null}
      * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
@@ -22372,7 +22386,7 @@ sealed class CommonUtil permits N {
      *   <li>They are both empty or null</li>
      *   <li>They contain exactly the same elements with the same frequencies in any order</li>
      * </ul>
-     * 
+     *
      * @param a the first char array to compare, may be {@code null}
      * @param b the second char array to compare, may be {@code null}
      * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
@@ -22412,7 +22426,7 @@ sealed class CommonUtil permits N {
      *   <li>They are both empty or null</li>
      *   <li>They contain exactly the same elements with the same frequencies in any order</li>
      * </ul>
-     * 
+     *
      * @param a the first byte array to compare, may be {@code null}
      * @param b the second byte array to compare, may be {@code null}
      * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
@@ -22452,7 +22466,7 @@ sealed class CommonUtil permits N {
      *   <li>They are both empty or null</li>
      *   <li>They contain exactly the same elements with the same frequencies in any order</li>
      * </ul>
-     * 
+     *
      * @param a the first short array to compare, may be {@code null}
      * @param b the second short array to compare, may be {@code null}
      * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
@@ -22492,24 +22506,24 @@ sealed class CommonUtil permits N {
      *   <li>They are both empty or null</li>
      *   <li>They contain exactly the same elements with the same frequencies in any order</li>
      * </ul>
-     * 
+     *
      * <p>For example:
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] a = {1, 2, 3, 2};
      * int[] b = {2, 1, 3, 2};
      * int[] c = {1, 2, 3};
      * int[] d = {1, 2, 2, 2};
-     * 
-     * containsSameElements(a, b);                     // returns {@code true} (same elements, different order)
-     * containsSameElements(a, c);                     // returns {@code false} (different lengths)
-     * containsSameElements(a, d);                     // returns {@code false} (different frequencies of element 2)
+     *
+     * containsSameElements(a, b);                     // returns true (same elements, different order)
+     * containsSameElements(a, c);                     // returns false (different lengths)
+     * containsSameElements(a, d);                     // returns false (different frequencies of element 2)
      * containsSameElements(null, null);               // returns true
      * containsSameElements(new int[0], new int[0]);   // returns true
      * }</pre>
-     * 
-     * 
+     *
+     *
      * @param a the first int array to compare, may be {@code null}
      * @param b the second int array to compare, may be {@code null}
      * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
@@ -22547,8 +22561,8 @@ sealed class CommonUtil permits N {
      *   <li>They are the same reference (a == b)</li>
      *   <li>They are both empty or null</li>
      *   <li>They contain exactly the same elements with the same frequencies in any order</li>
-     * </ul> 
-     * 
+     * </ul>
+     *
      * @param a the first long array to compare, may be {@code null}
      * @param b the second long array to compare, may be {@code null}
      * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
@@ -22588,7 +22602,7 @@ sealed class CommonUtil permits N {
      *   <li>They are both empty or null</li>
      *   <li>They contain exactly the same elements with the same frequencies in any order</li>
      * </ul>
-     * 
+     *
      * @param a the first float array to compare, may be {@code null}
      * @param b the second float array to compare, may be {@code null}
      * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
@@ -22628,7 +22642,7 @@ sealed class CommonUtil permits N {
      *   <li>They are both empty or null</li>
      *   <li>They contain exactly the same elements with the same frequencies in any order</li>
      * </ul>
-     * 
+     *
      * @param a the first double array to compare, may be {@code null}
      * @param b the second double array to compare, may be {@code null}
      * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
@@ -22668,7 +22682,7 @@ sealed class CommonUtil permits N {
      *   <li>They are both empty or null</li>
      *   <li>They contain exactly the same elements with the same frequencies in any order</li>
      * </ul>
-     * 
+     *
      * @param a the first object array to compare, may be {@code null}
      * @param b the second object array to compare, may be {@code null}
      * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
@@ -23619,11 +23633,11 @@ sealed class CommonUtil permits N {
 
     // ================================ get/find matched/mismatch element... ===========================================
 
-    // ================================ reverse/rotate/shuffle/swap/fill/pad/repeat... ================================== 
+    // ================================ reverse/rotate/shuffle/swap/fill/pad/repeat... ==================================
 
     /**
      * Reverses the order of elements in the specified boolean array in-place.
-     * 
+     *
      * <p>This method modifies the original array by reversing the order of all elements.
      * For example, the array {@code [true, false]} becomes {@code [false, true]}.
      * If the array is {@code null} or empty, this method does nothing.</p>
@@ -23641,13 +23655,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Reverses the order of elements in the specified range within a boolean array in-place.
-     * 
+     *
      * <p>This method modifies the original array by reversing the order of elements
      * between {@code fromIndex} (inclusive) and {@code toIndex} (exclusive).
      * Elements outside this range remain unchanged.</p>
-     * 
-     * <p>For example, reversing the range [1, 4) in the array {@code [true, false, {@code false}, true, true]}
-     * results in {@code [true, true, false, {@code false}, true]}.</p>
+     *
+     * <p>For example, reversing the range [1, 4) in the array {@code [true, false, false, true, true]}
+     * results in {@code [true, true, false, false, true]}.</p>
      *
      * @param a the boolean array containing the range to be reversed
      * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
@@ -23673,7 +23687,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Reverses the order of elements in the specified char array in-place.
-     * 
+     *
      * <p>This method modifies the original array by reversing the order of all elements.
      * For example, the array {@code ['a', 'b', 'c']} becomes {@code ['c', 'b', 'a']}.
      * If the array is {@code null} or empty, this method does nothing.</p>
@@ -23691,11 +23705,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Reverses the order of elements in the specified range within a char array in-place.
-     * 
+     *
      * <p>This method modifies the original array by reversing the order of elements
      * between {@code fromIndex} (inclusive) and {@code toIndex} (exclusive).
      * Elements outside this range remain unchanged.</p>
-     * 
+     *
      * <p>For example, reversing the range [1, 4) in the array {@code ['a', 'b', 'c', 'd', 'e']}
      * results in {@code ['a', 'd', 'c', 'b', 'e']}.</p>
      *
@@ -23723,7 +23737,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Reverses the order of elements in the specified byte array in-place.
-     * 
+     *
      * <p>This method modifies the original array by reversing the order of all elements.
      * For example, the array {@code [1, 2, 3]} becomes {@code [3, 2, 1]}.
      * If the array is {@code null} or empty, this method does nothing.</p>
@@ -23741,11 +23755,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Reverses the order of elements in the specified range within a byte array in-place.
-     * 
+     *
      * <p>This method modifies the original array by reversing the order of elements
      * between {@code fromIndex} (inclusive) and {@code toIndex} (exclusive).
      * Elements outside this range remain unchanged.</p>
-     * 
+     *
      * <p>For example, reversing the range [1, 4) in the array {@code [1, 2, 3, 4, 5]}
      * results in {@code [1, 4, 3, 2, 5]}.</p>
      *
@@ -23773,7 +23787,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Reverses the order of elements in the specified short array in-place.
-     * 
+     *
      * <p>This method modifies the original array by reversing the order of all elements.
      * For example, the array {@code [1, 2, 3]} becomes {@code [3, 2, 1]}.
      * If the array is {@code null} or empty, this method does nothing.</p>
@@ -23791,11 +23805,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Reverses the order of elements in the specified range within a short array in-place.
-     * 
+     *
      * <p>This method modifies the original array by reversing the order of elements
      * between {@code fromIndex} (inclusive) and {@code toIndex} (exclusive).
      * Elements outside this range remain unchanged.</p>
-     * 
+     *
      * <p>For example, reversing the range [1, 4) in the array {@code [1, 2, 3, 4, 5]}
      * results in {@code [1, 4, 3, 2, 5]}.</p>
      *
@@ -23823,7 +23837,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Reverses the order of elements in the specified int array in-place.
-     * 
+     *
      * <p>This method modifies the original array by reversing the order of all elements.
      * For example, the array {@code [1, 2, 3]} becomes {@code [3, 2, 1]}.
      * If the array is {@code null} or empty, this method does nothing.</p>
@@ -23841,11 +23855,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Reverses the order of elements in the specified range within an int array in-place.
-     * 
+     *
      * <p>This method modifies the original array by reversing the order of elements
      * between {@code fromIndex} (inclusive) and {@code toIndex} (exclusive).
      * Elements outside this range remain unchanged.</p>
-     * 
+     *
      * <p>For example, reversing the range [1, 4) in the array {@code [1, 2, 3, 4, 5]}
      * results in {@code [1, 4, 3, 2, 5]}.</p>
      *
@@ -23873,7 +23887,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Reverses the order of elements in the specified long array in-place.
-     * 
+     *
      * <p>This method modifies the original array by reversing the order of all elements.
      * For example, the array {@code [1L, 2L, 3L]} becomes {@code [3L, 2L, 1L]}.
      * If the array is {@code null} or empty, this method does nothing.</p>
@@ -23891,11 +23905,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Reverses the order of elements in the specified range within a long array in-place.
-     * 
+     *
      * <p>This method modifies the original array by reversing the order of elements
      * between {@code fromIndex} (inclusive) and {@code toIndex} (exclusive).
      * Elements outside this range remain unchanged.</p>
-     * 
+     *
      * <p>For example, reversing the range [1, 4) in the array {@code [1L, 2L, 3L, 4L, 5L]}
      * results in {@code [1L, 4L, 3L, 2L, 5L]}.</p>
      *
@@ -23923,7 +23937,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Reverses the order of elements in the specified float array in-place.
-     * 
+     *
      * <p>This method modifies the original array by reversing the order of all elements.
      * For example, the array {@code [1.0f, 2.0f, 3.0f]} becomes {@code [3.0f, 2.0f, 1.0f]}.
      * If the array is {@code null} or empty, this method does nothing.</p>
@@ -23941,11 +23955,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Reverses the order of elements in the specified range within a float array in-place.
-     * 
+     *
      * <p>This method modifies the original array by reversing the order of elements
      * between {@code fromIndex} (inclusive) and {@code toIndex} (exclusive).
      * Elements outside this range remain unchanged.</p>
-     * 
+     *
      * <p>For example, reversing the range [1, 4) in the array {@code [1.0f, 2.0f, 3.0f, 4.0f, 5.0f]}
      * results in {@code [1.0f, 4.0f, 3.0f, 2.0f, 5.0f]}.</p>
      *
@@ -23973,7 +23987,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Reverses the order of elements in the specified double array in-place.
-     * 
+     *
      * <p>This method modifies the original array by reversing the order of all elements.
      * For example, the array {@code [1.0, 2.0, 3.0]} becomes {@code [3.0, 2.0, 1.0]}.
      * If the array is {@code null} or empty, this method does nothing.</p>
@@ -23991,11 +24005,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Reverses the order of elements in the specified range within a double array in-place.
-     * 
+     *
      * <p>This method modifies the original array by reversing the order of elements
      * between {@code fromIndex} (inclusive) and {@code toIndex} (exclusive).
      * Elements outside this range remain unchanged.</p>
-     * 
+     *
      * <p>For example, reversing the range [1, 4) in the array {@code [1.0, 2.0, 3.0, 4.0, 5.0]}
      * results in {@code [1.0, 4.0, 3.0, 2.0, 5.0]}.</p>
      *
@@ -24023,7 +24037,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Reverses the order of elements in the specified object array in-place.
-     * 
+     *
      * <p>This method modifies the original array by reversing the order of all elements.
      * For example, the array {@code ["a", "b", "c"]} becomes {@code ["c", "b", "a"]}.
      * If the array is {@code null} or empty, this method does nothing.</p>
@@ -24041,11 +24055,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Reverses the order of elements in the specified range within an object array in-place.
-     * 
+     *
      * <p>This method modifies the original array by reversing the order of elements
      * between {@code fromIndex} (inclusive) and {@code toIndex} (exclusive).
      * Elements outside this range remain unchanged.</p>
-     * 
+     *
      * <p>For example, reversing the range [1, 4) in the array {@code ["a", "b", "c", "d", "e"]}
      * results in {@code ["a", "d", "c", "b", "e"]}.</p>
      *
@@ -24073,13 +24087,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Reverses the order of elements in the specified list in-place.
-     * 
+     *
      * <p>This method modifies the original list by reversing the order of all elements.
      * For {@link RandomAccess} lists, elements are swapped directly using index access.
      * For non-RandomAccess lists, {@link ListIterator}s are used for efficient reversal.</p>
-     * 
+     *
      * For example, the list {@code ["a", "b", "c"]} becomes {@code ["c", "b", "a"]}.
-     * 
+     *
      * <p>If the list is {@code null} or empty, this method does nothing.</p>
      *
      * @param list the list to be reversed. May be {@code null}.
@@ -24098,14 +24112,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Reverses the order of elements in the specified range within a list in-place.
-     * 
+     *
      * <p>This method modifies the original list by reversing the order of elements
      * between {@code fromIndex} (inclusive) and {@code toIndex} (exclusive).
      * Elements outside this range remain unchanged.</p>
-     * 
+     *
      * <p>For {@link RandomAccess} lists or small ranges, elements are swapped directly using index access.
      * For non-RandomAccess lists with larger ranges, {@link ListIterator}s are used for efficient reversal.</p>
-     * 
+     *
      * <p>For example, reversing the range [1, 4) in the list {@code ["a", "b", "c", "d", "e"]}
      * results in {@code ["a", "d", "c", "b", "e"]}.</p>
      *
@@ -24146,15 +24160,15 @@ sealed class CommonUtil permits N {
 
     /**
      * Reverses the order of elements in the specified collection in-place.
-     * 
+     *
      * <p>This method is designed for collections with a well-defined encounter order.
      * For {@link List} implementations, it delegates to {@link #reverse(List)}.
      * For other collections, it converts the collection to an array, reverses the array,
      * and then repopulates the collection with the reversed elements.</p>
-     * 
+     *
      * <p>If the collection is {@code null}, empty, or contains only one element,
      * this method does nothing.</p>
-     * 
+     *
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be replaced by
      * {@code SequencedCollection} functionality in JDK 21 or later.</p>
      *
@@ -24183,14 +24197,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new list containing the elements from the specified collection in reversed order.
-     * 
+     *
      * <p>This method does not modify the original collection. Instead, it creates a new
      * {@link ArrayList} containing all elements from the collection, then reverses the
      * order of elements in the new list.</p>
-     * 
+     *
      * <p>The input collection does not need to have a well-defined encounter order.
      * If the collection is {@code null} or empty, an empty list is returned.</p>
-     * 
+     *
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be replaced by
      * {@code SequencedCollection} functionality in JDK 21 or later.</p>
      *
@@ -24215,11 +24229,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements of the specified boolean array by the specified distance.
-     * 
+     *
      * <p>Rotation shifts elements circularly. A positive distance rotates elements to the right,
      * while a negative distance rotates to the left. For example, rotating {@code [true, false, true, false]}
      * by distance 1 results in {@code [false, true, false, true]}.</p>
-     * 
+     *
      * <p>The rotation is performed in-place, modifying the original array.
      * If the array is {@code null}, empty, or the effective rotation distance is 0,
      * this method does nothing.</p>
@@ -24234,11 +24248,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements in the specified range of a boolean array by the specified distance.
-     * 
+     *
      * <p>Rotation shifts elements circularly within the specified range. A positive distance
      * rotates elements to the right, while a negative distance rotates to the left.
      * Elements outside the specified range remain unchanged.</p>
-     * 
+     *
      * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
      * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
      *
@@ -24283,11 +24297,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements of the specified char array by the specified distance.
-     * 
+     *
      * <p>Rotation shifts elements circularly. A positive distance rotates elements to the right,
      * while a negative distance rotates to the left. For example, rotating {@code ['a', 'b', 'c', 'd']}
      * by distance 1 results in {@code ['d', 'a', 'b', 'c']}.</p>
-     * 
+     *
      * <p>The rotation is performed in-place, modifying the original array.
      * If the array is {@code null}, empty, or the effective rotation distance is 0,
      * this method does nothing.</p>
@@ -24302,11 +24316,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements in the specified range of a char array by the specified distance.
-     * 
+     *
      * <p>Rotation shifts elements circularly within the specified range. A positive distance
      * rotates elements to the right, while a negative distance rotates to the left.
      * Elements outside the specified range remain unchanged.</p>
-     * 
+     *
      * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
      * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
      *
@@ -24351,11 +24365,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements of the specified byte array by the specified distance.
-     * 
+     *
      * <p>Rotation shifts elements circularly. A positive distance rotates elements to the right,
      * while a negative distance rotates to the left. For example, rotating {@code [1, 2, 3, 4]}
      * by distance 1 results in {@code [4, 1, 2, 3]}.</p>
-     * 
+     *
      * <p>The rotation is performed in-place, modifying the original array.
      * If the array is {@code null}, empty, or the effective rotation distance is 0,
      * this method does nothing.</p>
@@ -24370,11 +24384,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements in the specified range of a byte array by the specified distance.
-     * 
+     *
      * <p>Rotation shifts elements circularly within the specified range. A positive distance
      * rotates elements to the right, while a negative distance rotates to the left.
      * Elements outside the specified range remain unchanged.</p>
-     * 
+     *
      * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
      * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
      *
@@ -24419,11 +24433,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements of the specified short array by the specified distance.
-     * 
+     *
      * <p>Rotation shifts elements circularly. A positive distance rotates elements to the right,
      * while a negative distance rotates to the left. For example, rotating {@code [1, 2, 3, 4]}
      * by distance 1 results in {@code [4, 1, 2, 3]}.</p>
-     * 
+     *
      * <p>The rotation is performed in-place, modifying the original array.
      * If the array is {@code null}, empty, or the effective rotation distance is 0,
      * this method does nothing.</p>
@@ -24438,11 +24452,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements in the specified range of a short array by the specified distance.
-     * 
+     *
      * <p>Rotation shifts elements circularly within the specified range. A positive distance
      * rotates elements to the right, while a negative distance rotates to the left.
      * Elements outside the specified range remain unchanged.</p>
-     * 
+     *
      * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
      * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
      *
@@ -24487,10 +24501,10 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements of the specified int array by the specified distance.
-     * 
+     *
      * <p>Rotation shifts elements circularly. A positive distance rotates elements to the right,
      * while a negative distance rotates to the left. For example: </p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Rotate an int array to the right by 2 positions
@@ -24505,7 +24519,7 @@ sealed class CommonUtil permits N {
      * int[] a = {1, 2, 3, 4, 5};
      * rotate(a, 7);   // a => [4, 5, 1, 2, 3], same as rotated(2) due to modulo operation
      * }</pre>
-     * 
+     *
      * <p>The rotation is performed in-place, modifying the original array.
      * If the array is {@code null}, empty, or the effective rotation distance is 0,
      * this method does nothing.</p>
@@ -24520,11 +24534,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements in the specified range of an int array by the specified distance.
-     * 
+     *
      * <p>Rotation shifts elements circularly within the specified range. A positive distance
      * rotates elements to the right, while a negative distance rotates to the left.
      * Elements outside the specified range remain unchanged.</p>
-     * 
+     *
      * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
      * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
      *
@@ -24569,11 +24583,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements of the specified long array by the specified distance.
-     * 
+     *
      * <p>Rotation shifts elements circularly. A positive distance rotates elements to the right,
      * while a negative distance rotates to the left. For example, rotating {@code [1L, 2L, 3L, 4L]}
      * by distance 1 results in {@code [4L, 1L, 2L, 3L]}.</p>
-     * 
+     *
      * <p>The rotation is performed in-place, modifying the original array.
      * If the array is {@code null}, empty, or the effective rotation distance is 0,
      * this method does nothing.</p>
@@ -24588,11 +24602,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements in the specified range of a long array by the specified distance.
-     * 
+     *
      * <p>Rotation shifts elements circularly within the specified range. A positive distance
      * rotates elements to the right, while a negative distance rotates to the left.
      * Elements outside the specified range remain unchanged.</p>
-     * 
+     *
      * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
      * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
      *
@@ -24637,11 +24651,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements of the specified float array by the specified distance.
-     * 
+     *
      * <p>Rotation shifts elements circularly. A positive distance rotates elements to the right,
      * while a negative distance rotates to the left. For example, rotating {@code [1.0f, 2.0f, 3.0f, 4.0f]}
      * by distance 1 results in {@code [4.0f, 1.0f, 2.0f, 3.0f]}.</p>
-     * 
+     *
      * <p>The rotation is performed in-place, modifying the original array.
      * If the array is {@code null}, empty, or the effective rotation distance is 0,
      * this method does nothing.</p>
@@ -24656,11 +24670,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements in the specified range of a float array by the specified distance.
-     * 
+     *
      * <p>Rotation shifts elements circularly within the specified range. A positive distance
      * rotates elements to the right, while a negative distance rotates to the left.
      * Elements outside the specified range remain unchanged.</p>
-     * 
+     *
      * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
      * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
      *
@@ -24705,11 +24719,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements of the specified double array by the specified distance.
-     * 
+     *
      * <p>Rotation shifts elements circularly. A positive distance rotates elements to the right,
      * while a negative distance rotates to the left. For example, rotating {@code [1.0, 2.0, 3.0, 4.0]}
      * by distance 1 results in {@code [4.0, 1.0, 2.0, 3.0]}.</p>
-     * 
+     *
      * <p>The rotation is performed in-place, modifying the original array.
      * If the array is {@code null}, empty, or the effective rotation distance is 0,
      * this method does nothing.</p>
@@ -24724,11 +24738,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements in the specified range of a double array by the specified distance.
-     * 
+     *
      * <p>Rotation shifts elements circularly within the specified range. A positive distance
      * rotates elements to the right, while a negative distance rotates to the left.
      * Elements outside the specified range remain unchanged.</p>
-     * 
+     *
      * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
      * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
      *
@@ -24773,11 +24787,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements of the specified object array by the specified distance.
-     * 
+     *
      * <p>Rotation shifts elements circularly. A positive distance rotates elements to the right,
      * while a negative distance rotates to the left. For example, rotating {@code ["a", "b", "c", "d"]}
      * by distance 1 results in {@code ["d", "a", "b", "c"]}.</p>
-     * 
+     *
      * <p>The rotation is performed in-place, modifying the original array.
      * If the array is {@code null}, empty, or the effective rotation distance is 0,
      * this method does nothing.</p>
@@ -24792,11 +24806,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements in the specified range of an object array by the specified distance.
-     * 
+     *
      * <p>Rotation shifts elements circularly within the specified range. A positive distance
      * rotates elements to the right, while a negative distance rotates to the left.
      * Elements outside the specified range remain unchanged.</p>
-     * 
+     *
      * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
      * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
      *
@@ -24841,11 +24855,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements of the specified list by the specified distance.
-     * 
+     *
      * <p>Rotation shifts elements circularly. A positive distance rotates elements to the right,
      * while a negative distance rotates to the left. For example, rotating {@code [a, b, c, d]}
      * by distance 1 results in {@code [d, a, b, c]}.</p>
-     * 
+     *
      * <p>This method delegates to {@link Collections#rotate(List, int)} for the actual rotation.
      * If the list is {@code null}, has size 1 or less, or the effective rotation distance is 0,
      * this method does nothing.</p>
@@ -24864,15 +24878,15 @@ sealed class CommonUtil permits N {
 
     /**
      * Rotates the elements of the specified collection by the specified distance.
-     * 
+     *
      * <p>This method is designed for collections with a well-defined encounter order.
      * For {@link List} implementations, it delegates to {@link #rotate(List, int)}.
      * For other collections, it converts the collection to an array, rotates the array,
      * and then repopulates the collection with the rotated elements.</p>
-     * 
+     *
      * <p>If the collection is {@code null} or has fewer than 2 elements,
      * this method does nothing.</p>
-     * 
+     *
      * <p><b>Note:</b> This method is marked as {@link Beta} and its behavior may change
      * in future versions.</p>
      *
@@ -24900,10 +24914,10 @@ sealed class CommonUtil permits N {
 
     /**
      * Shuffles the elements of the specified boolean array randomly.
-     * 
+     *
      * <p>This method uses a default {@link Random} instance to perform the shuffle.
      * The shuffling is performed in-place, meaning the original array is modified.
-     * 
+     *
      * <p>If the array is {@code null} or empty, this method does nothing.</p>
      *
      * @param a the boolean array to be shuffled. May be {@code null}.
@@ -24916,11 +24930,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Shuffles the elements in the specified range of a boolean array randomly.
-     * 
+     *
      * <p>This method uses a default {@link Random} instance to perform the shuffle.
      * Only elements within the specified range are shuffled; elements outside
      * this range remain in their original positions.</p>
-     * 
+     *
      * <p>The shuffle is performed in-place using the Fisher-Yates algorithm.</p>
      *
      * @param a the boolean array containing the range to be shuffled
@@ -24935,11 +24949,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Shuffles the elements of the specified boolean array using the provided random number generator.
-     * 
+     *
      * <p>The shuffle is performed in-place using the Fisher-Yates algorithm,
      * which ensures each permutation has equal probability when using a proper
      * random number generator.</p>
-     * 
+     *
      * <p>If the array is {@code null} or empty, this method does nothing.</p>
      *
      * @param a the boolean array to be shuffled. May be {@code null}.
@@ -24951,13 +24965,13 @@ sealed class CommonUtil permits N {
         shuffle(a, 0, len(a), rnd);
     }
 
-    /**     
+    /**
      * Shuffles the elements in the specified range of a boolean array using the provided random number generator.
-     * 
+     *
      * <p>Only elements within the specified range are shuffled; elements outside
      * this range remain in their original positions. The shuffle is performed
      * in-place using the Fisher-Yates algorithm.</p>
-     * 
+     *
      * <p>If the array is {@code null}, empty, or the range contains 1 or fewer elements,
      * this method does nothing.</p>
      *
@@ -25001,7 +25015,7 @@ sealed class CommonUtil permits N {
      * @param a the char array to be shuffled
      * @param fromIndex the starting index (inclusive) of the range to shuffle
      * @param toIndex the ending index (exclusive) of the range to shuffle
-     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of range.
      * @see #shuffle(char[], int, int, Random)
      */
     public static void shuffle(final char[] a, final int fromIndex, final int toIndex) {
@@ -25066,7 +25080,7 @@ sealed class CommonUtil permits N {
      * @param a the byte array to be shuffled
      * @param fromIndex the starting index (inclusive) of the range to shuffle
      * @param toIndex the ending index (exclusive) of the range to shuffle
-     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of range.
      * @see #shuffle(byte[], int, int, Random)
      */
     public static void shuffle(final byte[] a, final int fromIndex, final int toIndex) {
@@ -25131,7 +25145,7 @@ sealed class CommonUtil permits N {
      * @param a the short array to be shuffled
      * @param fromIndex the starting index (inclusive) of the range to shuffle
      * @param toIndex the ending index (exclusive) of the range to shuffle
-     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of  range.
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of range.
      * @see #shuffle(short[], int, int, Random)
      */
     public static void shuffle(final short[] a, final int fromIndex, final int toIndex) {
@@ -25151,7 +25165,7 @@ sealed class CommonUtil permits N {
         shuffle(a, 0, len(a), rnd);
     }
 
-    /**     
+    /**
      * Shuffles the elements of the specified short array within a specified range using the Fisher-Yates algorithm
      * with the specified random number generator.
      * The shuffling is performed in-place, meaning the original array is modified.
@@ -25216,7 +25230,7 @@ sealed class CommonUtil permits N {
         shuffle(a, 0, len(a), rnd);
     }
 
-    /**     
+    /**
      * Shuffles the elements of the specified int array within a specified range using the Fisher-Yates algorithm
      * with the specified random number generator.
      * The shuffling is performed in-place, meaning the original array is modified.
@@ -25281,7 +25295,7 @@ sealed class CommonUtil permits N {
         shuffle(a, 0, len(a), rnd);
     }
 
-    /**     
+    /**
      * Shuffles the elements of the specified long array within a specified range using the Fisher-Yates algorithm
      * with the specified random number generator.
      * The shuffling is performed in-place, meaning the original array is modified.
@@ -25346,7 +25360,7 @@ sealed class CommonUtil permits N {
         shuffle(a, 0, len(a), rnd);
     }
 
-    /**     
+    /**
      * Shuffles the elements of the specified float array within a specified range using the Fisher-Yates algorithm
      * with the specified random number generator.
      * The shuffling is performed in-place, meaning the original array is modified.
@@ -25411,7 +25425,7 @@ sealed class CommonUtil permits N {
         shuffle(a, 0, len(a), rnd);
     }
 
-    /**     
+    /**
      * Shuffles the elements of the specified double array within a specified range using the Fisher-Yates algorithm
      * with the specified random number generator.
      * The shuffling is performed in-place, meaning the original array is modified.
@@ -25476,7 +25490,7 @@ sealed class CommonUtil permits N {
         shuffle(a, 0, len(a), rnd);
     }
 
-    /**     
+    /**
      * Shuffles the elements of the specified object array within a specified range using the Fisher-Yates algorithm
      * with the specified random number generator.
      * The shuffling is performed in-place, meaning the original array is modified.
@@ -25504,7 +25518,7 @@ sealed class CommonUtil permits N {
      * Shuffles the elements of the specified list using the Fisher-Yates algorithm.
      * The shuffling is performed in-place, meaning the original list is modified.
      * This method uses the default random number generator.
-     * 
+     *
      * <p>This method runs in linear time for lists that implement {@link RandomAccess},
      * and may have degraded performance for lists that do not support constant-time
      * positional access.</p>
@@ -25521,7 +25535,7 @@ sealed class CommonUtil permits N {
      * Shuffles the elements of the specified list using the Fisher-Yates algorithm
      * with the specified random number generator.
      * The shuffling is performed in-place, meaning the original list is modified.
-     * 
+     *
      * <p>This method runs in linear time for lists that implement {@link RandomAccess},
      * and may have degraded performance for lists that do not support constant-time
      * positional access.</p>
@@ -25543,11 +25557,11 @@ sealed class CommonUtil permits N {
      * Shuffles the elements of the specified collection that has a well-defined encounter order.
      * The shuffling is performed in-place, meaning the original collection is modified.
      * This method uses the default random number generator.
-     * 
+     *
      * <p>For {@link List} implementations, this method delegates to {@link #shuffle(List)}.
      * For other collection types, the collection is converted to an array, shuffled, and then
      * the collection is cleared and repopulated with the shuffled elements.</p>
-     * 
+     *
      * <p><b>Note:</b> This method is marked as {@code @Beta} and may be subject to change in future versions.</p>
      *
      * @param c the collection to be shuffled. It should be a collection that has a well-defined encounter order
@@ -25578,11 +25592,11 @@ sealed class CommonUtil permits N {
      * Shuffles the elements of the specified collection that has a well-defined encounter order
      * using the specified random number generator.
      * The shuffling is performed in-place, meaning the original collection is modified.
-     * 
+     *
      * <p>For {@link List} implementations, this method delegates to {@link #shuffle(List, Random)}.
      * For other collection types, the collection is converted to an array, shuffled, and then
      * the collection is cleared and repopulated with the shuffled elements.</p>
-     * 
+     *
      * <p><b>Note:</b> This method is marked as {@code @Beta} and may be subject to change in future versions.</p>
      *
      * @param c the collection to be shuffled. It should be a collection that has a well-defined encounter order
@@ -27073,7 +27087,7 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new array containing a copy of the original array, truncated or padded with {@code null} (if necessary) so the copy has the specified length.
      *
-     * @param <T> the type of the elements in the array 
+     * @param <T> the type of the elements in the array
      * @param original the array to be copied
      * @param newLength the length of the copy to be returned
      * @param newType the class of the copy to be returned
@@ -27119,7 +27133,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a new boolean array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
-     * If step negative, the elements will be copied in reverse order.
+     * If step is negative, the elements will be copied in reverse order.
      *
      * @param original the array from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
@@ -27181,7 +27195,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a new char array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
-     * If step negative, the elements will be copied in reverse order.
+     * If step is negative, the elements will be copied in reverse order.
      *
      * @param original the array from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
@@ -27243,7 +27257,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a new byte array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
-     * If step negative, the elements will be copied in reverse order.
+     * If step is negative, the elements will be copied in reverse order.
      *
      * @param original the array from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
@@ -27305,7 +27319,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a new short array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
-     * If step negative, the elements will be copied in reverse order.
+     * If step is negative, the elements will be copied in reverse order.
      *
      * @param original the array from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
@@ -27442,7 +27456,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a new long array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
-     * If step negative, the elements will be copied in reverse order.
+     * If step is negative, the elements will be copied in reverse order.
      *
      * @param original the array from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
@@ -27504,7 +27518,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a new float array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
-     * If step negative, the elements will be copied in reverse order.
+     * If step is negative, the elements will be copied in reverse order.
      *
      * @param original the array from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
@@ -27566,7 +27580,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a new double array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
-     * If step negative, the elements will be copied in reverse order.
+     * If step is negative, the elements will be copied in reverse order.
      *
      * @param original the array from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
@@ -27626,7 +27640,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a new Object array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
-     * If step negative, the elements will be copied in reverse order.
+     * If step is negative, the elements will be copied in reverse order.
      *
      * @param <T> the type of the elements in the array
      * @param original the array from which a range is to be copied
@@ -27665,7 +27679,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a new array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
-     * If step negative, the elements will be copied in reverse order.
+     * If step is negative, the elements will be copied in reverse order.
      *
      * @param <T> the type of the elements in the new array
      * @param original the array from which a range is to be copied
@@ -27725,7 +27739,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a new list containing a copy of the specified range of the original list, with elements selected at intervals defined by the step parameter.
-     * If step negative, the elements will be copied in reverse order.
+     * If step is negative, the elements will be copied in reverse order.
      *
      * @param <T> the type of elements in the list
      * @param c the list from which a range is to be copied
@@ -27800,7 +27814,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a new string that is a substring of the specified string, with characters selected at intervals defined by the step parameter.
-     * If step negative, the characters will be copied in reverse order.
+     * If step is negative, the characters will be copied in reverse order.
      *
      * @param str the original string from which a range is to be copied
      * @param fromIndex the beginning index, inclusive
@@ -27821,11 +27835,7 @@ sealed class CommonUtil permits N {
             throw new IllegalArgumentException("The input parameter 'step' cannot be zero");
         }
 
-        if (str == null) {
-            return Strings.EMPTY;
-        }
-
-        if (fromIndex == toIndex || fromIndex < toIndex != step > 0) {
+        if ((str == null) || fromIndex == toIndex || fromIndex < toIndex != step > 0) {
             return Strings.EMPTY;
         }
 
@@ -28463,7 +28473,7 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified range of the char array is sorted in ascending order.
      *
-     * @param a the array to be checked
+     * @param a the char array to be checked
      * @param fromIndex the starting index (inclusive) of the range to be checked
      * @param toIndex the ending index (exclusive) of the range to be checked
      * @return {@code true} if the specified range of the array is sorted in ascending order, {@code false} otherwise
@@ -28514,7 +28524,7 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified range of the byte array is sorted in ascending order.
      *
-     * @param a the array to be checked
+     * @param a the byte array to be checked
      * @param fromIndex the starting index (inclusive) of the range to be checked
      * @param toIndex the ending index (exclusive) of the range to be checked
      * @return {@code true} if the specified range of the array is sorted in ascending order, {@code false} otherwise
@@ -28565,7 +28575,7 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified range of the short array is sorted in ascending order.
      *
-     * @param a the array to be checked
+     * @param a the short array to be checked
      * @param fromIndex the starting index (inclusive) of the range to be checked
      * @param toIndex the ending index (exclusive) of the range to be checked
      * @return {@code true} if the specified range of the array is sorted in ascending order, {@code false} otherwise
@@ -28628,7 +28638,7 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified range of the integer array is sorted in ascending order.
      *
-     * @param a the array to be checked
+     * @param a the int array to be checked
      * @param fromIndex the starting index (inclusive) of the range to be checked
      * @param toIndex the ending index (exclusive) of the range to be checked
      * @return {@code true} if the specified range of the array is sorted in ascending order, {@code false} otherwise
@@ -28679,7 +28689,7 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified range of the long array is sorted in ascending order.
      *
-     * @param a the array to be checked
+     * @param a the long array to be checked
      * @param fromIndex the starting index (inclusive) of the range to be checked
      * @param toIndex the ending index (exclusive) of the range to be checked
      * @return {@code true} if the specified range of the array is sorted in ascending order, {@code false} otherwise
@@ -28730,7 +28740,7 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified range of the float array is sorted in ascending order.
      *
-     * @param a the array to be checked
+     * @param a the float array to be checked
      * @param fromIndex the starting index (inclusive) of the range to be checked
      * @param toIndex the ending index (exclusive) of the range to be checked
      * @return {@code true} if the specified range of the array is sorted in ascending order, {@code false} otherwise
@@ -28781,7 +28791,7 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified range of the double array is sorted in ascending order.
      *
-     * @param a the array to be checked
+     * @param a the double array to be checked
      * @param fromIndex the starting index (inclusive) of the range to be checked
      * @param toIndex the ending index (exclusive) of the range to be checked
      * @return {@code true} if the specified range of the array is sorted in ascending order, {@code false} otherwise
@@ -29455,7 +29465,7 @@ sealed class CommonUtil permits N {
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param toIndex the index of the last element (exclusive) to be sorted
-     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      * @see Arrays#sort(Object[])
      * @see Arrays#sort(Object[], Comparator)
      * @see Arrays#sort(Object[], int, int, Comparator)
@@ -33007,13 +33017,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the indices of all minimum elements in the specified array.
-     * 
+     *
      * <p>This method finds all elements in the array that are equal to the minimum value
      * and returns their indices. The comparison is performed using the natural ordering
      * of the elements (their {@code compareTo} method).
      *
      * <p>If the array contains multiple elements with the same minimum value, all their
-     * indices will be included in the returned array. The indices are returned in 
+     * indices will be included in the returned array. The indices are returned in
      * ascending order.
      *
      * <p><b>Usage Examples:</b></p>

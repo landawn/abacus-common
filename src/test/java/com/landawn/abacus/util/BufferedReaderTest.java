@@ -42,7 +42,7 @@ public class BufferedReaderTest extends AbstractTest {
     @Test
     public void testConstructorWithReader() throws IOException {
         StringReader sr = new StringReader("Reader content\nLine two");
-        BufferedReader reader = new BufferedReader((java.io.Reader) sr);
+        BufferedReader reader = new BufferedReader(sr);
 
         assertEquals("Reader content", reader.readLine());
         assertEquals("Line two", reader.readLine());

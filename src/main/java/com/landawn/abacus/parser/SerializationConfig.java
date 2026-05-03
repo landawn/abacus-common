@@ -20,10 +20,10 @@ import com.landawn.abacus.util.N;
 /**
  * Abstract base class for serialization configuration that provides common settings
  * for controlling how objects are serialized.
- * 
+ *
  * <p>This class extends {@link ParserConfig} and provides additional serialization-specific
  * settings such as field exclusion and transient field handling.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * SerializationConfig config = new MySerializationConfig()
@@ -55,7 +55,7 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
 
     /**
      * Gets the current exclusion strategy for field serialization.
-     * 
+     *
      * <p>The exclusion strategy determines which fields should be excluded from serialization
      * based on their values or other criteria.</p>
      *
@@ -125,7 +125,7 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
 
     /**
      * Computes a hash code for this configuration based on its settings.
-     * 
+     *
      * <p>The hash code is computed using the ignored property names, exclusion strategy,
      * and skipTransientField setting.</p>
      *
@@ -141,7 +141,7 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
 
     /**
      * Determines whether this configuration is equal to another object.
-     * 
+     *
      * <p>Two SerializationConfig instances are considered equal if they have the same
      * ignored property names, exclusion strategy, and skipTransientField setting.</p>
      *
@@ -166,7 +166,7 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
 
     /**
      * Returns a string representation of this configuration.
-     * 
+     *
      * <p>The string includes the ignored property names, exclusion strategy,
      * and skipTransientField setting in a readable format.</p>
      *

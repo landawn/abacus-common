@@ -22,7 +22,8 @@ import com.landawn.abacus.util.Range;
 
 public class RangeTypeTest extends TestBase {
 
-    private final RangeType rangeType = new RangeType("Integer");
+    private final RangeType<Integer> rangeType = new RangeType("Integer");
+    private final RangeType<String> stringRangeType = new RangeType("String");
 
     @Test
     public void test_clazz() {
@@ -42,6 +43,13 @@ public class RangeTypeTest extends TestBase {
         assertNotNull(rangeType.stringOf(Range.openClosed(1, 10)));
         assertNotNull(rangeType.stringOf(Range.closedOpen(1, 10)));
         assertNotNull(rangeType.stringOf(Range.closed(1, 10)));
+    }
+
+    @Test
+    public void test_stringOf_StringEndpointsAreJsonSafe() {
+        final Range<String> range = Range.openClosed("a,b", "x\"y]");
+
+        assertEquals("(\"a,b\", \"x\\\"y]\"]", stringRangeType.stringOf(range));
     }
 
     @Test
@@ -67,6 +75,17 @@ public class RangeTypeTest extends TestBase {
         // CLOSED
         result = rangeType.valueOf("[1, 10]");
         assertNotNull(result);
+    }
+
+    @Test
+    public void test_valueOf_roundTripsQuotedStringEndpoints() {
+        final Range<String> range = Range.closedOpen("a,b", "x\"y]");
+        final String serialized = stringRangeType.stringOf(range);
+        final Range<String> result = stringRangeType.valueOf(serialized);
+
+        assertEquals(Range.BoundType.CLOSED_OPEN, result.boundType());
+        assertEquals("a,b", result.lowerEndpoint());
+        assertEquals("x\"y]", result.upperEndpoint());
     }
 
     @Test
@@ -131,6 +150,16 @@ public class RangeTypeTest extends TestBase {
     }
 
     @Test
+    public void test_appendTo_StringEndpointsMatchesStringOf() throws IOException {
+        final Range<String> range = Range.openClosed("a,b", "x\"y]");
+        final StringWriter sw = new StringWriter();
+
+        stringRangeType.appendTo(sw, range);
+
+        assertEquals(stringRangeType.stringOf(range), sw.toString());
+    }
+
+    @Test
     public void test_writeCharacter_AllBoundTypes() throws IOException {
         var writer = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
 
@@ -139,6 +168,17 @@ public class RangeTypeTest extends TestBase {
         assertDoesNotThrow(() -> rangeType.writeCharacter(writer, Range.closedOpen(1, 10), null));
         assertDoesNotThrow(() -> rangeType.writeCharacter(writer, Range.closed(1, 10), null));
         assertDoesNotThrow(() -> rangeType.writeCharacter(writer, null, null));
+    }
+
+    @Test
+    public void test_writeCharacter_StringEndpointsMatchesStringOf() throws IOException {
+        final var writer = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+        final Range<String> range = Range.closed("a,b", "x\"y]");
+
+        stringRangeType.writeCharacter(writer, range, null);
+
+        assertTrue(writer.toString().contains("\\\"a,b\\\""));
+        assertTrue(writer.toString().contains("\\\"x\\\\\\\"y]\\\""));
     }
 
     @Test

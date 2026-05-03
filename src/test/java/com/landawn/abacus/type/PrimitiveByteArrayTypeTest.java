@@ -142,6 +142,51 @@ public class PrimitiveByteArrayTypeTest extends TestBase {
         assertThrows(Exception.class, () -> type.valueOf(blob));
     }
 
+    /**
+     * Bug fix test: When blob.getBytes() succeeds but blob.free() throws,
+     * the successfully read bytes should still be returned (not discarded).
+     * Previously, the finally block would unconditionally re-throw the free() exception,
+     * discarding the successfully read byte array.
+     */
+    @Test
+    public void testValueOfObjectBlobFreeFails_shouldReturnBytesSuccessfully() throws SQLException {
+        Blob blob = mock(Blob.class);
+        byte[] expectedData = { 10, 20, 30, 40 };
+        when(blob.length()).thenReturn(4L);
+        when(blob.getBytes(1, 4)).thenReturn(expectedData);
+        // Simulate blob.free() throwing an exception
+        org.mockito.Mockito.doThrow(new SQLException("Free failed")).when(blob).free();
+
+        // After the fix: getBytes() succeeded, so the exception from free() should be thrown
+        // (as UncheckedSQLException, since there was no primary exception).
+        // This matches the behavior in PrimitiveCharArrayType's clob handling.
+        assertThrows(com.landawn.abacus.exception.UncheckedSQLException.class, () -> type.valueOf(blob));
+    }
+
+    /**
+     * Bug fix test: When blob.getBytes() throws AND blob.free() also throws,
+     * the free() exception should be suppressed (added to the primary exception),
+     * not thrown separately.
+     */
+    @Test
+    public void testValueOfObjectBlobBothGetBytesAndFreeThrow_primaryExceptionCarriesSuppressed() throws SQLException {
+        Blob blob = mock(Blob.class);
+        SQLException getBytesException = new SQLException("getBytes failed");
+        SQLException freeException = new SQLException("free failed");
+        when(blob.length()).thenReturn(5L);
+        when(blob.getBytes(1, 5)).thenThrow(getBytesException);
+        org.mockito.Mockito.doThrow(freeException).when(blob).free();
+
+        com.landawn.abacus.exception.UncheckedSQLException thrown = assertThrows(
+                com.landawn.abacus.exception.UncheckedSQLException.class,
+                () -> type.valueOf(blob));
+
+        // The primary exception should wrap getBytesException
+        assertEquals(getBytesException, thrown.getCause());
+        // The free exception should be suppressed
+        assertEquals(1, thrown.getSuppressed().length);
+    }
+
     @Test
     public void testGetElementType() {
         Type<Byte> elementType = type.elementType();

@@ -52,7 +52,7 @@ public class WSSecurityUtilTest extends TestBase {
 
         Assertions.assertNotNull(nonce1);
         Assertions.assertNotNull(nonce2);
-        Assertions.assertFalse(CommonUtil.equals(nonce1, nonce2), "Two consecutive nonces should be different");
+        Assertions.assertFalse(N.equals(nonce1, nonce2), "Two consecutive nonces should be different");
     }
 
     @Test
@@ -160,7 +160,7 @@ public class WSSecurityUtilTest extends TestBase {
         byte[] digest1 = WSSecurityUtil.generateDigest("input1".getBytes(StandardCharsets.UTF_8));
         byte[] digest2 = WSSecurityUtil.generateDigest("input2".getBytes(StandardCharsets.UTF_8));
 
-        Assertions.assertFalse(CommonUtil.equals(digest1, digest2), "Different inputs should produce different digests");
+        Assertions.assertFalse(N.equals(digest1, digest2), "Different inputs should produce different digests");
     }
 
     @Test
@@ -178,7 +178,7 @@ public class WSSecurityUtilTest extends TestBase {
         byte[] digest1 = WSSecurityUtil.generateDigest("input1".getBytes(StandardCharsets.UTF_8), "SHA-256");
         byte[] digest2 = WSSecurityUtil.generateDigest("input2".getBytes(StandardCharsets.UTF_8), "SHA-256");
 
-        Assertions.assertFalse(CommonUtil.equals(digest1, digest2), "Different inputs should produce different digests");
+        Assertions.assertFalse(N.equals(digest1, digest2), "Different inputs should produce different digests");
     }
 
     // ============================================================

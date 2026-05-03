@@ -18,9 +18,11 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.u.OptionalFloat;
 
 /**
- * Type handler for {@link OptionalFloat} objects, providing serialization, deserialization,
- * and database interaction capabilities for optional single-precision floating-point values.
- * This handler manages the conversion between database numeric values and OptionalFloat wrapper objects.
+ * Type handler for {@link OptionalFloat} objects from the {@code com.landawn.abacus.util.u} package,
+ * providing serialization, deserialization, and database interaction capabilities for optional
+ * single-precision floating-point values.
+ * Note: this handles the abacus-specific {@code OptionalFloat}, which has no direct JDK equivalent.
+ * This handler manages the conversion between database numeric values and {@link OptionalFloat} wrapper objects.
  */
 public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
 
@@ -28,8 +30,7 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
 
     /**
      * Constructs a new OptionalFloatType instance.
-     * This constructor is protected to allow subclassing while maintaining controlled instantiation
-     * through the TypeFactory.
+     * Instances are normally obtained via the TypeFactory rather than constructed directly.
      */
     protected OptionalFloatType() {
         super(OPTIONAL_FLOAT);

@@ -700,11 +700,11 @@ public class ParallelArrayStreamTest extends TestBase {
     }
 
     @Test
-    @DisplayName("flatmapToChar() should flatten to char arrays")
+    @DisplayName("flatMapArrayToChar() should flatten to char arrays")
     public void testFlatmapToChar() {
         Function<Integer, char[]> toCharArray = x -> new char[] { (char) (x + 64), (char) (x + 65) };
 
-        char[] result = stream.limit(2).flatmapToChar(toCharArray).sorted().toArray();
+        char[] result = stream.limit(2).flatMapArrayToChar(toCharArray).sorted().toArray();
 
         assertEquals(4, result.length);
         assertEquals('A', result[0]);
@@ -731,11 +731,11 @@ public class ParallelArrayStreamTest extends TestBase {
     }
 
     @Test
-    @DisplayName("flatmapToByte() should flatten to byte arrays")
+    @DisplayName("flatMapArrayToByte() should flatten to byte arrays")
     public void testFlatmapToByte() {
         Function<Integer, byte[]> toByteArray = x -> new byte[] { x.byteValue(), (byte) (x + 1) };
 
-        byte[] result = stream.limit(2).flatmapToByte(toByteArray).sorted().toArray();
+        byte[] result = stream.limit(2).flatMapArrayToByte(toByteArray).sorted().toArray();
 
         assertEquals(4, result.length);
         assertEquals((byte) 1, result[0]);
@@ -762,11 +762,11 @@ public class ParallelArrayStreamTest extends TestBase {
     }
 
     @Test
-    @DisplayName("flatmapToShort() should flatten to short arrays")
+    @DisplayName("flatMapArrayToShort() should flatten to short arrays")
     public void testFlatmapToShort() {
         Function<Integer, short[]> toShortArray = x -> new short[] { x.shortValue(), (short) (x + 1) };
 
-        short[] result = stream.limit(2).flatmapToShort(toShortArray).sorted().toArray();
+        short[] result = stream.limit(2).flatMapArrayToShort(toShortArray).sorted().toArray();
 
         assertEquals(4, result.length);
         assertEquals((short) 1, result[0]);
@@ -793,11 +793,11 @@ public class ParallelArrayStreamTest extends TestBase {
     }
 
     @Test
-    @DisplayName("flatmapToInt() should flatten to int arrays")
+    @DisplayName("flatMapArrayToInt() should flatten to int arrays")
     public void testFlatmapToInt() {
         Function<Integer, int[]> toIntArray = x -> new int[] { x, x + 1 };
 
-        int[] result = stream.limit(2).flatmapToInt(toIntArray).sorted().toArray();
+        int[] result = stream.limit(2).flatMapArrayToInt(toIntArray).sorted().toArray();
 
         assertEquals(4, result.length);
         assertEquals(1, result[0]);
@@ -826,11 +826,11 @@ public class ParallelArrayStreamTest extends TestBase {
     }
 
     @Test
-    @DisplayName("flatmapToLong() should flatten to long arrays")
+    @DisplayName("flatMapArrayToLong() should flatten to long arrays")
     public void testFlatmapToLong() {
         Function<Integer, long[]> toLongArray = x -> new long[] { x.longValue(), x + 1L };
 
-        long[] result = stream.limit(2).flatmapToLong(toLongArray).sorted().toArray();
+        long[] result = stream.limit(2).flatMapArrayToLong(toLongArray).sorted().toArray();
 
         assertEquals(4, result.length);
         assertEquals(1L, result[0]);
@@ -858,11 +858,11 @@ public class ParallelArrayStreamTest extends TestBase {
     }
 
     @Test
-    @DisplayName("flatmapToFloat() should flatten to float arrays")
+    @DisplayName("flatMapArrayToFloat() should flatten to float arrays")
     public void testFlatmapToFloat() {
         Function<Integer, float[]> toFloatArray = x -> new float[] { x.floatValue(), x + 1.0f };
 
-        float[] result = stream.limit(2).flatmapToFloat(toFloatArray).sorted().toArray();
+        float[] result = stream.limit(2).flatMapArrayToFloat(toFloatArray).sorted().toArray();
 
         assertEquals(4, result.length);
         assertEquals(1.0f, result[0]);
@@ -890,11 +890,11 @@ public class ParallelArrayStreamTest extends TestBase {
     }
 
     @Test
-    @DisplayName("flatmapToDouble() should flatten to double arrays")
+    @DisplayName("flatMapArrayToDouble() should flatten to double arrays")
     public void testFlatmapToDouble() {
         Function<Integer, double[]> toDoubleArray = x -> new double[] { x.doubleValue(), x + 1.0 };
 
-        double[] result = stream.limit(2).flatmapToDouble(toDoubleArray).sorted().toArray();
+        double[] result = stream.limit(2).flatMapArrayToDouble(toDoubleArray).sorted().toArray();
 
         assertEquals(4, result.length);
         assertEquals(1.0, result[0]);

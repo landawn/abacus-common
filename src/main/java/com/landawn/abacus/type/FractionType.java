@@ -18,30 +18,34 @@ import com.landawn.abacus.util.Fraction;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for Fraction objects.
- * This class provides serialization and deserialization capabilities for Fraction instances,
+ * Type handler for {@link Fraction} values.
+ * This class provides serialization and deserialization capabilities for {@link Fraction} instances,
  * which represent rational numbers as a ratio of two integers.
+ *
+ * <p>Fractions are serialized to and from their string form via {@link Fraction#toString()} and
+ * {@link Fraction#of(String)}, which supports decimal, fraction ({@code "Y/Z"}),
+ * mixed-number ({@code "X Y/Z"}), and plain integer formats.
+ *
+ * @see AbstractType
+ * @see Fraction
  */
 public class FractionType extends AbstractType<Fraction> {
 
     /** The type name constant for Fraction type identification. */
     public static final String FRACTION = Fraction.class.getSimpleName();
 
+    /**
+     * Package-private constructor for FractionType.
+     * This constructor is called by the TypeFactory to create Fraction type instances.
+     */
     FractionType() {
         super(FRACTION);
     }
 
     /**
-     * Returns the Class object representing the Fraction type.
+     * Returns the Java class represented by this type handler.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Fraction> type = TypeFactory.getType(Fraction.class);
-     * Class<Fraction> clazz = type.javaType();
-     * // Returns: Fraction.class
-     * }</pre>
-     *
-     * @return Fraction.class
+     * @return {@code Fraction.class}
      */
     @Override
     public Class<Fraction> javaType() {
@@ -50,16 +54,9 @@ public class FractionType extends AbstractType<Fraction> {
 
     /**
      * Indicates whether this type represents a numeric value.
-     * Fractions are mathematical representations of rational numbers, so this returns {@code true}.
+     * {@link Fraction} is a mathematical representation of a rational number.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Fraction> type = TypeFactory.getType(Fraction.class);
-     * boolean isNum = type.isNumber();
-     * // Returns: true
-     * }</pre>
-     *
-     * @return {@code true}, as Fraction represents numeric values
+     * @return {@code true}, always, because {@link Fraction} represents a rational number
      */
     @Override
     public boolean isNumber() {
@@ -68,16 +65,9 @@ public class FractionType extends AbstractType<Fraction> {
 
     /**
      * Indicates whether instances of this type are immutable.
-     * Fraction objects are immutable once created, so this returns {@code true}.
+     * {@link Fraction} objects are immutable once created.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Fraction> type = TypeFactory.getType(Fraction.class);
-     * boolean immutable = type.isImmutable();
-     * // Returns: true
-     * }</pre>
-     *
-     * @return {@code true}, as Fraction instances are immutable
+     * @return {@code true}, always, because {@link Fraction} instances are immutable
      */
     @Override
     public boolean isImmutable() {
@@ -85,17 +75,11 @@ public class FractionType extends AbstractType<Fraction> {
     }
 
     /**
-     * Indicates whether instances of this type implement the Comparable interface.
-     * Fraction implements Comparable&lt;Fraction&gt;, allowing fractions to be compared and sorted.
+     * Indicates whether instances of this type implement the {@link Comparable} interface.
+     * {@link Fraction} implements {@code Comparable<Fraction>}, allowing fractions to be compared
+     * and sorted.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Fraction> type = TypeFactory.getType(Fraction.class);
-     * boolean comparable = type.isComparable();
-     * // Returns: true
-     * }</pre>
-     *
-     * @return {@code true}, as Fraction implements Comparable
+     * @return {@code true}, always, because {@link Fraction} implements {@link Comparable}
      */
     @Override
     public boolean isComparable() {
@@ -104,9 +88,9 @@ public class FractionType extends AbstractType<Fraction> {
 
     /**
      * Indicates whether values of this type require quoting in CSV format.
-     * Fraction values are numeric and do not require quotes.
+     * {@link Fraction} values are stored as numeric strings and do not need quotes.
      *
-     * @return {@code false}, as fraction values do not require quoting in CSV format
+     * @return {@code false}, always, because fraction values are plain numbers in CSV
      */
     @Override
     public boolean isCsvQuoteRequired() {
@@ -114,28 +98,13 @@ public class FractionType extends AbstractType<Fraction> {
     }
 
     /**
-     * Converts a Fraction object to its string representation.
-     * The string format is determined by the Fraction's toString() method,
-     * typically in the form "numerator/denominator".
+     * Converts a {@link Fraction} to its string representation.
+     * Uses {@link Fraction#toString()}, which produces a string in the form
+     * {@code "numerator/denominator"} (e.g., {@code "3/4"}) or a plain integer if the
+     * denominator is 1.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Fraction> type = TypeFactory.getType(Fraction.class);
-     *
-     * Fraction fraction = Fraction.of(3, 4);
-     * String result = type.stringOf(fraction);
-     * // Returns: "3/4"
-     *
-     * fraction = Fraction.of(5, 1);
-     * result = type.stringOf(fraction);
-     * // Returns: "5/1"
-     *
-     * result = type.stringOf(null);
-     * // Returns: null
-     * }</pre>
-     *
-     * @param x the Fraction to convert to string
-     * @return the string representation of the fraction, or {@code null} if the input is null
+     * @param x the {@link Fraction} to convert; may be {@code null}
+     * @return the string representation of the fraction, or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final Fraction x) {
@@ -143,32 +112,18 @@ public class FractionType extends AbstractType<Fraction> {
     }
 
     /**
-     * Parses a string representation into a Fraction object.
-     * The string should be in a format that can be parsed by Fraction.of(),
-     * typically "numerator/denominator" or a decimal number.
+     * Parses a string representation into a {@link Fraction} object.
+     * Delegates to {@link Fraction#of(String)}, which accepts:
+     * <ul>
+     *   <li>Decimal format, e.g., {@code "0.5"}</li>
+     *   <li>Fraction format {@code "Y/Z"}, e.g., {@code "3/4"}</li>
+     *   <li>Mixed number format {@code "X Y/Z"}, e.g., {@code "1 1/2"}</li>
+     *   <li>Integer format, e.g., {@code "5"}</li>
+     * </ul>
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Fraction> type = TypeFactory.getType(Fraction.class);
-     *
-     * Fraction result = type.valueOf("3/4");
-     * // Returns: Fraction representing 3/4
-     *
-     * result = type.valueOf("0.5");
-     * // Returns: Fraction representing 1/2
-     *
-     * result = type.valueOf("5");
-     * // Returns: Fraction representing 5/1
-     *
-     * result = type.valueOf(null);
-     * // Returns: null
-     *
-     * result = type.valueOf("");
-     * // Returns: null
-     * }</pre>
-     *
-     * @param str the string to parse into a Fraction
-     * @return the parsed Fraction object, or {@code null} if the input string is {@code null} or empty
+     * @param str the string to parse; may be {@code null} or empty
+     * @return the parsed {@link Fraction}, or {@code null} if {@code str} is {@code null} or empty
+     * @throws NumberFormatException if the string is non-empty but cannot be parsed as a fraction
      */
     @Override
     public Fraction valueOf(final String str) {

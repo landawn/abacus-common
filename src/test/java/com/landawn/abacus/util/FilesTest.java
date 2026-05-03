@@ -387,7 +387,7 @@ public class FilesTest extends TestBase {
         filesToCleanup.add(file);
 
         CharSink sink = Files.asCharSink(file, StandardCharsets.UTF_8);
-        List<String> lines = CommonUtil.toList("Line 1", "Line 2", "Line 3");
+        List<String> lines = N.toList("Line 1", "Line 2", "Line 3");
         sink.writeLines(lines);
 
         String content = Files.readString(file);

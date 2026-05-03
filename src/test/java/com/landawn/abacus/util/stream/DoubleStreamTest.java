@@ -207,14 +207,39 @@ public class DoubleStreamTest extends TestBase {
     @Test
     public void testFlatmap() {
         DoubleStream stream = DoubleStream.of(1.0, 2.0);
-        double[] result = stream.flatmap(x -> new double[] { x, x * 2 }).toArray();
+        double[] result = stream.flatMapArray(x -> new double[] { x, x * 2 }).toArray();
         assertArrayEquals(new double[] { 1.0, 2.0, 2.0, 4.0 }, result, 0.0001);
     }
 
     @Test
     public void testFlatmap_HappyPath() {
-        double[] result = DoubleStream.of(1.0, 2.0, 3.0).flatmap(d -> new double[] { d, d * 10 }).toArray();
+        double[] result = DoubleStream.of(1.0, 2.0, 3.0).flatMapArray(d -> new double[] { d, d * 10 }).toArray();
         assertArrayEquals(new double[] { 1.0, 10.0, 2.0, 20.0, 3.0, 30.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testFlatmapCollection() {
+        // multi-element
+        assertArrayEquals(new double[] { 1.0, 10.0, 2.0, 20.0 }, DoubleStream.of(1.0, 2.0).flatmap(d -> Arrays.asList(d, d * 10)).toArray(), 0.0001);
+
+        // single
+        assertArrayEquals(new double[] { 7.0, 9.0 }, DoubleStream.of(7.0).flatmap(d -> Arrays.asList(d, 9.0)).toArray(), 0.0001);
+
+        // empty stream
+        assertArrayEquals(new double[] {}, DoubleStream.of(new double[] {}).flatmap(d -> Arrays.asList((Double) d)).toArray(), 0.0001);
+
+        // empty collection
+        assertArrayEquals(new double[] {}, DoubleStream.of(1.0, 2.0).flatmap(d -> java.util.Collections.<Double> emptyList()).toArray(), 0.0001);
+
+        // null collection
+        assertArrayEquals(new double[] {}, DoubleStream.of(1.0).flatmap(d -> (java.util.Collection<Double>) null).toArray(), 0.0001);
+
+        // null elements -> 0d
+        assertArrayEquals(new double[] { 0.0, 5.5, 0.0 }, DoubleStream.of(1.0).flatmap(d -> Arrays.asList((Double) null, 5.5, (Double) null)).toArray(),
+                0.0001);
+
+        // count with nulls included
+        assertEquals(4, DoubleStream.of(1.0, 2.0).flatmap(d -> Arrays.asList((Double) null, d)).count());
     }
 
     @Test
@@ -1090,7 +1115,7 @@ public class DoubleStreamTest extends TestBase {
     // TODO: mapToFloat(DoubleToFloatFunction) is abstract - tested via concrete implementations above
     // TODO: mapToObj(DoubleFunction) is abstract - tested via concrete implementations above
     // TODO: flatMap(DoubleFunction) is abstract - tested via concrete implementations above
-    // TODO: flatmap(DoubleFunction<double[]>) is abstract - tested via concrete implementations above
+    // TODO: flatMapArray(DoubleFunction<double[]>) is abstract - tested via concrete implementations above
     // TODO: flattMap(DoubleFunction<JDK DoubleStream>) is abstract - tested via concrete implementations above
     // TODO: flatMapToInt(DoubleFunction) is abstract - tested via concrete implementations above
     // TODO: flatMapToLong(DoubleFunction) is abstract - tested via concrete implementations above
@@ -1833,20 +1858,20 @@ public class DoubleStreamTest extends TestBase {
 
     @Test
     public void testStreamCreatedAfterFlatmap() {
-        assertEquals(6, DoubleStream.of(1, 2, 3).flatmap(d -> new double[] { d, d + 0.5 }).count());
-        assertEquals(4, DoubleStream.of(1, 2, 3).flatmap(d -> new double[] { d, d + 0.5 }).skip(2).count());
-        assertArrayEquals(new double[] { 1, 1.5, 2, 2.5, 3, 3.5 }, DoubleStream.of(1, 2, 3).flatmap(d -> new double[] { d, d + 0.5 }).toArray(), 0.0);
-        assertArrayEquals(new double[] { 2, 2.5, 3, 3.5 }, DoubleStream.of(1, 2, 3).flatmap(d -> new double[] { d, d + 0.5 }).skip(2).toArray(), 0.0);
-        assertEquals(N.toList(1.0, 1.5, 2.0, 2.5, 3.0, 3.5), DoubleStream.of(1, 2, 3).flatmap(d -> new double[] { d, d + 0.5 }).toList());
-        assertEquals(N.toList(2.0, 2.5, 3.0, 3.5), DoubleStream.of(1, 2, 3).flatmap(d -> new double[] { d, d + 0.5 }).skip(2).toList());
-        assertEquals(6, DoubleStream.of(1, 2, 3).map(e -> e).flatmap(d -> new double[] { d, d + 0.5 }).count());
-        assertEquals(4, DoubleStream.of(1, 2, 3).map(e -> e).flatmap(d -> new double[] { d, d + 0.5 }).skip(2).count());
-        assertArrayEquals(new double[] { 1, 1.5, 2, 2.5, 3, 3.5 }, DoubleStream.of(1, 2, 3).map(e -> e).flatmap(d -> new double[] { d, d + 0.5 }).toArray(),
-                0.0);
-        assertArrayEquals(new double[] { 2, 2.5, 3, 3.5 }, DoubleStream.of(1, 2, 3).map(e -> e).flatmap(d -> new double[] { d, d + 0.5 }).skip(2).toArray(),
-                0.0);
-        assertEquals(N.toList(1.0, 1.5, 2.0, 2.5, 3.0, 3.5), DoubleStream.of(1, 2, 3).map(e -> e).flatmap(d -> new double[] { d, d + 0.5 }).toList());
-        assertEquals(N.toList(2.0, 2.5, 3.0, 3.5), DoubleStream.of(1, 2, 3).map(e -> e).flatmap(d -> new double[] { d, d + 0.5 }).skip(2).toList());
+        assertEquals(6, DoubleStream.of(1, 2, 3).flatMapArray(d -> new double[] { d, d + 0.5 }).count());
+        assertEquals(4, DoubleStream.of(1, 2, 3).flatMapArray(d -> new double[] { d, d + 0.5 }).skip(2).count());
+        assertArrayEquals(new double[] { 1, 1.5, 2, 2.5, 3, 3.5 }, DoubleStream.of(1, 2, 3).flatMapArray(d -> new double[] { d, d + 0.5 }).toArray(), 0.0);
+        assertArrayEquals(new double[] { 2, 2.5, 3, 3.5 }, DoubleStream.of(1, 2, 3).flatMapArray(d -> new double[] { d, d + 0.5 }).skip(2).toArray(), 0.0);
+        assertEquals(N.toList(1.0, 1.5, 2.0, 2.5, 3.0, 3.5), DoubleStream.of(1, 2, 3).flatMapArray(d -> new double[] { d, d + 0.5 }).toList());
+        assertEquals(N.toList(2.0, 2.5, 3.0, 3.5), DoubleStream.of(1, 2, 3).flatMapArray(d -> new double[] { d, d + 0.5 }).skip(2).toList());
+        assertEquals(6, DoubleStream.of(1, 2, 3).map(e -> e).flatMapArray(d -> new double[] { d, d + 0.5 }).count());
+        assertEquals(4, DoubleStream.of(1, 2, 3).map(e -> e).flatMapArray(d -> new double[] { d, d + 0.5 }).skip(2).count());
+        assertArrayEquals(new double[] { 1, 1.5, 2, 2.5, 3, 3.5 },
+                DoubleStream.of(1, 2, 3).map(e -> e).flatMapArray(d -> new double[] { d, d + 0.5 }).toArray(), 0.0);
+        assertArrayEquals(new double[] { 2, 2.5, 3, 3.5 },
+                DoubleStream.of(1, 2, 3).map(e -> e).flatMapArray(d -> new double[] { d, d + 0.5 }).skip(2).toArray(), 0.0);
+        assertEquals(N.toList(1.0, 1.5, 2.0, 2.5, 3.0, 3.5), DoubleStream.of(1, 2, 3).map(e -> e).flatMapArray(d -> new double[] { d, d + 0.5 }).toList());
+        assertEquals(N.toList(2.0, 2.5, 3.0, 3.5), DoubleStream.of(1, 2, 3).map(e -> e).flatMapArray(d -> new double[] { d, d + 0.5 }).skip(2).toList());
     }
 
     @Test

@@ -16,8 +16,8 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Represents an operation upon three byte-valued operands and producing a byte-valued result.
- * This is the primitive type specialization of {@link TriFunction} for byte.
+ * Represents an operation upon three {@code byte}-valued operands and producing a {@code byte}-valued result.
+ * This is the three-arity primitive type specialization analogous to {@link ByteBinaryOperator}.
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsByte(byte, byte, byte)}.
  *

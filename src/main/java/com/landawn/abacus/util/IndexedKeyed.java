@@ -38,6 +38,14 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
 
     private final int index;
 
+    /**
+     * Constructs a new {@code IndexedKeyed} with the specified key, value, and index.
+     * This constructor has package-private visibility; use {@link #of(Object, Object, int)} to create instances.
+     *
+     * @param key the key component (can be {@code null})
+     * @param val the value component (can be {@code null})
+     * @param index the index component
+     */
     IndexedKeyed(final K key, final T val, final int index) {
         super(key, val);
         this.index = index;

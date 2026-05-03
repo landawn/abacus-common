@@ -410,7 +410,9 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
         final Kryo kryo = createKryo();
 
         try {
-            if (config != null && config.isWriteClass()) {
+            if (obj == null || (config != null && config.isWriteClass())) {
+                // writeClassAndObject handles null safely; writeObject does NOT allow null and
+                // throws NullPointerException when obj is null.
                 kryo.writeClassAndObject(output, obj);
             } else {
                 kryo.writeObject(output, obj);

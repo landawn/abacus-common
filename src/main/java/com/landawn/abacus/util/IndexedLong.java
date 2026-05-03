@@ -16,12 +16,12 @@ package com.landawn.abacus.util;
 
 /**
  * Represents a primitive long value paired with an index position.
- * 
+ *
  * <p>This class is a specialized version of {@link Indexed} for primitive long values,
  * providing better performance by avoiding boxing/unboxing overhead.</p>
- * 
+ *
  * <p>The class is immutable and extends {@link AbstractIndexed}.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedLong indexedLong = IndexedLong.of(123456789L, 5);
@@ -55,7 +55,7 @@ public final class IndexedLong extends AbstractIndexed {
 
     /**
      * Creates a new IndexedLong instance with the specified value and index.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedLong indexed = IndexedLong.of(123456789L, 5);
@@ -74,9 +74,9 @@ public final class IndexedLong extends AbstractIndexed {
 
     /**
      * Creates a new IndexedLong instance with the specified value and index.
-     * 
+     *
      * <p>This overload accepts a long index for cases where the index might exceed Integer.MAX_VALUE.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedLong indexed = IndexedLong.of(123456789L, 5000000000L);
@@ -95,7 +95,7 @@ public final class IndexedLong extends AbstractIndexed {
 
     /**
      * Returns the long value stored in this IndexedLong instance.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedLong indexed = IndexedLong.of(123456789L, 5);
@@ -110,7 +110,7 @@ public final class IndexedLong extends AbstractIndexed {
 
     /**
      * Returns the hash code of this IndexedLong instance.
-     * 
+     *
      * <p>The hash code is computed based on both the index and the value.</p>
      *
      * @return the hash code
@@ -122,15 +122,15 @@ public final class IndexedLong extends AbstractIndexed {
 
     /**
      * Checks if this IndexedLong instance is equal to another object.
-     * 
+     *
      * <p>Two IndexedLong instances are equal if they have the same index and value.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedLong indexed1 = IndexedLong.of(123456789L, 5);
      * IndexedLong indexed2 = IndexedLong.of(123456789L, 5);
      * IndexedLong indexed3 = IndexedLong.of(987654321L, 5);
-     * 
+     *
      * indexed1.equals(indexed2);   // true
      * indexed1.equals(indexed3);   // false
      * }</pre>
@@ -145,16 +145,16 @@ public final class IndexedLong extends AbstractIndexed {
 
     /**
      * Returns a string representation of this IndexedLong instance.
-     * 
-     * <p>The format is: [index]=value</p>
-     * 
+     *
+     * <p>The format is: {@code [index]=value}</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedLong indexed = IndexedLong.of(123456789L, 5);
      * System.out.println(indexed);   // prints: [5]=123456789
      * }</pre>
      *
-     * @return a string representation in the format [index]=value
+     * @return a string representation in the format {@code [index]=value}
      */
     @Override
     public String toString() {

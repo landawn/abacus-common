@@ -26,18 +26,18 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * High-performance reflection utility class that leverages ASM (bytecode manipulation) for faster
  * field access, method invocation, and object construction compared to standard Java reflection.
  * This class provides a fluent API for reflection operations while maintaining type safety through generics.
- * 
+ *
  * <p>ReflectASM uses the EsotericSoftware's ReflectASM library internally, which generates bytecode
  * at runtime to create direct field accessors and method invokers, avoiding the overhead of Java's
  * built-in reflection API. This results in significantly better performance for repeated operations.</p>
- * 
+ *
  * <p><b>Performance benefits:</b></p>
  * <ul>
  *   <li>Field access: 5-10x faster than standard reflection</li>
  *   <li>Method invocation: 5-10x faster than standard reflection</li>
  *   <li>Constructor calls: 3-5x faster than standard reflection</li>
  * </ul>
- * 
+ *
  * <p><b>Limitations:</b></p>
  * <ul>
  *   <li>Cannot access private fields or methods</li>
@@ -45,39 +45,39 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *   <li>Requires public no-argument constructor for instantiation</li>
  *   <li>Initial setup has overhead due to bytecode generation</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create instance and access fields/methods
  * public class Person {
  *     public String name;
  *     public int age;
- *     
+ *
  *     public void sayHello() {
  *         System.out.println("Hello, I'm " + name);
  *     }
- *     
+ *
  *     public int calculateBirthYear(int currentYear) {
  *         return currentYear - age;
  *     }
  * }
- * 
+ *
  * // Using ReflectASM
- * Person person = ReflectASM.on(Person.class)._new().get();
- * 
+ * Person person = ReflectASM.on(Person.class).newInstance().instance();
+ *
  * // Set fields
  * ReflectASM.on(person)
  *     .set("name", "John")
  *     .set("age", 30);
- * 
+ *
  * // Get field value
  * String name = ReflectASM.on(person).get("name");
- * 
+ *
  * // Invoke methods
  * ReflectASM.on(person).call("sayHello");
  * int birthYear = ReflectASM.on(person).invoke("calculateBirthYear", 2024);
  * }</pre>
- * 
+ *
  * @param <T> the type of the target class or object being reflected upon
  * @see FieldAccess
  * @see MethodAccess
@@ -105,26 +105,26 @@ final class ReflectASM<T> {
 
     /**
      * Creates a ReflectASM instance for the specified class name.
-     * The class is loaded using the default class loader.
-     * 
+     * The class is loaded via {@link ClassUtil#forName(String)}.
+     *
      * <p>This method is useful when you have the class name as a string, such as when
      * working with configuration files or dynamic class loading scenarios.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Load and instantiate a class by name
      * ReflectASM<?> reflect = ReflectASM.on("com.example.MyClass");
-     * Object instance = reflect._new().get();
-     * 
+     * Object instance = reflect.newInstance().instance();
+     *
      * // With known type
      * ReflectASM<MyClass> typedReflect = ReflectASM.on("com.example.MyClass");
-     * MyClass instance = typedReflect._new().get();
+     * MyClass instance = typedReflect.newInstance().instance();
      * }</pre>
      *
      * @param <T> the type of the class
      * @param clsName the fully qualified name of the class
      * @return a ReflectASM instance for the specified class
-     * @throws RuntimeException if the class cannot be found or loaded
+     * @throws IllegalArgumentException if the class cannot be located
      */
     public static <T> ReflectASM<T> on(final String clsName) {
         return on(ClassUtil.forName(clsName));
@@ -133,22 +133,22 @@ final class ReflectASM<T> {
     /**
      * Creates a ReflectASM instance for the specified class.
      * This is used when you want to create new instances or access static members of a class.
-     * 
+     *
      * <p>The returned ReflectASM instance can be used to create new instances of the class
      * using the {@link #newInstance()} method, or to access static fields and methods.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create new instance
-     * Person person = ReflectASM.on(Person.class)._new().get();
-     * 
+     * Person person = ReflectASM.on(Person.class).newInstance().instance();
+     *
      * // Chain operations on new instance
      * Person configured = ReflectASM.on(Person.class)
-     *     ._new()
+     *     .newInstance()
      *     .set("name", "Alice")
      *     .set("age", 25)
-     *     .get();
-     * 
+     *     .instance();
+     *
      * // Access static members (if supported by implementation)
      * ReflectASM<MyUtils> utils = ReflectASM.on(MyUtils.class);
      * }</pre>
@@ -167,24 +167,24 @@ final class ReflectASM<T> {
     /**
      * Creates a ReflectASM instance for the specified target object.
      * This is used when you want to perform reflection operations on an existing instance.
-     * 
+     *
      * <p>The class type is inferred from the target object's runtime type. This method
      * provides a convenient way to start reflection operations on an existing object.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person();
-     * 
+     *
      * // Fluent field access
      * ReflectASM.on(person)
      *     .set("name", "Bob")
      *     .set("age", 35)
      *     .call("updateProfile");
-     * 
+     *
      * // Get field values
      * String name = ReflectASM.on(person).get("name");
      * Integer age = ReflectASM.on(person).get("age");
-     * 
+     *
      * // Method invocation with return value
      * String info = ReflectASM.on(person).invoke("getInfo");
      * }</pre>
@@ -192,7 +192,7 @@ final class ReflectASM<T> {
      * @param <T> the type of the target object
      * @param instance the object instance to perform reflection on
      * @return a ReflectASM instance for the specified object
-     * @throws IllegalArgumentException if target is null
+     * @throws IllegalArgumentException if {@code instance} is {@code null}
      */
     public static <T> ReflectASM<T> on(final T instance) {
         N.checkArgNotNull(instance, "instance");
@@ -203,27 +203,27 @@ final class ReflectASM<T> {
     /**
      * Creates a new instance of the class associated with this ReflectASM object.
      * The class must have a public no-argument constructor.
-     * 
+     *
      * <p>This method uses bytecode generation for faster instantiation compared to
      * standard reflection. The generated constructor accessor is cached for reuse.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Simple instantiation
-     * Person person = ReflectASM.on(Person.class)._new().get();
-     * 
+     * Person person = ReflectASM.on(Person.class).newInstance().instance();
+     *
      * // Chained initialization
      * Person initialized = ReflectASM.on(Person.class)
-     *     ._new()
+     *     .newInstance()
      *     .set("name", "Charlie")
      *     .set("email", "charlie@example.com")
      *     .call("validate")
-     *     .get();
-     * 
+     *     .instance();
+     *
      * // Multiple instances
      * ReflectASM<Person> personReflect = ReflectASM.on(Person.class);
-     * Person person1 = personReflect._new().get();
-     * Person person2 = personReflect._new().get();
+     * Person person1 = personReflect.newInstance().instance();
+     * Person person2 = personReflect.newInstance().instance();
      * }</pre>
      *
      * @return a new ReflectASM instance wrapping the newly created object
@@ -253,10 +253,10 @@ final class ReflectASM<T> {
     /**
      * Retrieves the value of a field from the target object.
      * The field must be public and non-static.
-     * 
+     *
      * <p>This method uses bytecode-generated accessors for high-performance field access.
      * The returned value is cast to the specified type parameter.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * public class Product {
@@ -264,17 +264,17 @@ final class ReflectASM<T> {
      *     public double price;
      *     public List<String> tags;
      * }
-     * 
+     *
      * Product product = new Product();
      * product.name = "Laptop";
      * product.price = 999.99;
      * product.tags = Arrays.asList("electronics", "computers");
-     * 
+     *
      * // Get field values with automatic casting
      * String name = ReflectASM.on(product).get("name");
      * Double price = ReflectASM.on(product).get("price");
      * List<String> tags = ReflectASM.on(product).get("tags");
-     * 
+     *
      * // Can also get as Object
      * Object priceObj = ReflectASM.on(product).get("price");
      * }</pre>
@@ -294,10 +294,10 @@ final class ReflectASM<T> {
     /**
      * Sets the value of a field on the target object.
      * The field must be public, non-static, and non-final.
-     * 
+     *
      * <p>This method returns the same ReflectASM instance, allowing for method chaining
      * to set multiple fields in a fluent manner.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * public class Configuration {
@@ -306,22 +306,22 @@ final class ReflectASM<T> {
      *     public boolean ssl;
      *     public Map<String, String> properties;
      * }
-     * 
+     *
      * Configuration config = new Configuration();
-     * 
+     *
      * // Chain multiple field assignments
      * ReflectASM.on(config)
      *     .set("host", "api.example.com")
      *     .set("port", 443)
      *     .set("ssl", true)
      *     .set("properties", new HashMap<>());
-     * 
+     *
      * // Can be used after instantiation
      * Configuration newConfig = ReflectASM.on(Configuration.class)
-     *     ._new()
+     *     .newInstance()
      *     .set("host", "localhost")
      *     .set("port", 8080)
-     *     .get();
+     *     .instance();
      * }</pre>
      *
      * @param fieldName the name of the field to set
@@ -340,34 +340,34 @@ final class ReflectASM<T> {
     /**
      * Invokes a method on the target object and returns the result.
      * The method must be public and the correct number and types of arguments must be provided.
-     * 
+     *
      * <p>This method uses bytecode generation for high-performance method invocation.
      * If the method returns void, {@code null} is returned. Otherwise, the return value is
      * automatically cast to the specified type parameter.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * public class Calculator {
      *     public int add(int a, int b) {
      *         return a + b;
      *     }
-     *     
+     *
      *     public String format(String template, Object... args) {
      *         return String.format(template, args);
      *     }
-     *     
+     *
      *     public List<Integer> range(int start, int end) {
      *         return IntStream.range(start, end).boxed().collect(Collectors.toList());
      *     }
      * }
-     * 
+     *
      * Calculator calc = new Calculator();
-     * 
+     *
      * // Invoke with return value
      * Integer sum = ReflectASM.on(calc).invoke("add", 5, 3);
      * String formatted = ReflectASM.on(calc).invoke("format", "Result: %d", sum);
      * List<Integer> numbers = ReflectASM.on(calc).invoke("range", 1, 10);
-     * 
+     *
      * // Method with no arguments
      * String result = ReflectASM.on(calc).invoke("toString");
      * }</pre>
@@ -388,10 +388,10 @@ final class ReflectASM<T> {
     /**
      * Invokes a method on the target object without returning the result.
      * This is a convenience method for void methods or when the return value is not needed.
-     * 
+     *
      * <p>This method returns the same ReflectASM instance, allowing for method chaining
      * to perform multiple operations in sequence.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * public class Service {
@@ -400,22 +400,22 @@ final class ReflectASM<T> {
      *     public void start() { ... }
      *     public void process(String data) { ... }
      * }
-     * 
+     *
      * Service service = new Service();
-     * 
+     *
      * // Chain multiple method calls
      * ReflectASM.on(service)
      *     .call("initialize")
      *     .call("configure", "production.conf")
      *     .call("start");
-     * 
+     *
      * // Combined with field access
      * ReflectASM.on(service)
      *     .set("timeout", 5000)
      *     .call("initialize")
      *     .set("maxRetries", 3)
      *     .call("start");
-     * 
+     *
      * // Process data
      * ReflectASM.on(service).call("process", jsonData);
      * }</pre>

@@ -213,22 +213,12 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
     }
 
     /**
-     * Appends the string representation of a number to an Appendable.
-     * <p>
-     * If the number is {@code null}, appends the string "null". Otherwise, appends
-     * the number's string representation as returned by {@link #stringOf(Number)}.
-     * </p>
+     * Appends the string representation of a number to an {@link Appendable}.
+     * Writes {@code "null"} when {@code x} is {@code null}; otherwise appends the result
+     * of {@link #stringOf(Number)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * StringBuilder sb = new StringBuilder();
-     * NumberType<Integer> type = new NumberType<>(Integer.class);
-     * type.appendTo(sb, 42);     // Appends "42"
-     * type.appendTo(sb, null);   // Appends "null"
-     * }</pre>
-     *
-     * @param appendable the Appendable to write to
-     * @param x the number value to append
+     * @param appendable the target to write to
+     * @param x the number value to append, may be {@code null}
      * @throws IOException if an I/O error occurs during the append operation
      */
     @Override
@@ -241,12 +231,12 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
     }
 
     /**
-     * Writes the character representation of a number to a CharacterWriter.
-     * This method delegates to the appendTo method and is typically used for JSON/XML serialization.
+     * Writes the character representation of a number to a {@link CharacterWriter} by delegating
+     * to {@link #appendTo(Appendable, Object)}.
      *
-     * @param writer the CharacterWriter to write to
-     * @param x the number value to write
-     * @param config the serialization configuration
+     * @param writer the {@code CharacterWriter} to write to
+     * @param x the number value to write, may be {@code null}
+     * @param config the serialization configuration (unused for number values)
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override

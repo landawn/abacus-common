@@ -22,42 +22,40 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Type handler for CLOB character stream values.
- * This class provides database operations for handling Character Large Objects (CLOBs)
- * as character Readers. It extends ReaderType to handle CLOB data specifically
- * through character stream representations.
+ * Type handler for CLOB (Character Large Object) values accessed as character {@link Reader}s.
+ * This class extends {@link ReaderType} and overrides the JDBC accessors so that CLOB columns
+ * are read via {@link Clob#getCharacterStream()} and written via
+ * {@link java.sql.PreparedStatement#setClob(int, Reader) setClob}.
+ *
+ * @see ReaderType
+ * @see Clob
+ * @see Reader
  */
 public class ClobReaderType extends ReaderType {
 
     /**
-     * The type name constant for CLOB Reader type identification.
+     * The type name constant used for registration, equal to {@code "ClobReader"}.
      */
     public static final String CLOB_READER = "ClobReader";
 
     /**
-     * Package-private constructor for ClobReaderType.
-     * This constructor is called by the TypeFactory to create ClobReader type instances.
-     * ClobReaderType specializes in converting between SQL CLOB objects and character Readers.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * // Obtained via TypeFactory
-     * Type<Reader> type = TypeFactory.getType("ClobReader");
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * Reader clobReader = type.get(rs, "document");
-     * String content = IOUtil.readAllToString(clobReader);
-     * }</pre>
+     * Package-private constructor for {@code ClobReaderType}.
+     * Instances are created by the {@code TypeFactory}.
      */
     ClobReaderType() {
         super(CLOB_READER);
     }
 
     /**
-     * Retrieves a CLOB value as a character Reader from a ResultSet at the specified column index.
+     * Retrieves a CLOB column as a character {@link Reader} from a {@link java.sql.ResultSet}
+     * at the specified column index.
+     * The CLOB is obtained via {@link java.sql.ResultSet#getClob(int)} and its character stream
+     * is returned via {@link Clob#getCharacterStream()}.
      *
-     * @param rs the ResultSet containing the data
-     * @param columnIndex the column index (1-based) of the CLOB value
-     * @return A Reader containing the character stream of the CLOB, or {@code null} if the column value is SQL NULL
+     * @param rs          the {@link java.sql.ResultSet} to read from
+     * @param columnIndex the 1-based column index
+     * @return a {@link Reader} for the CLOB's character stream,
+     *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
@@ -67,11 +65,15 @@ public class ClobReaderType extends ReaderType {
     }
 
     /**
-     * Retrieves a CLOB value as a character Reader from a ResultSet using the specified column label.
+     * Retrieves a CLOB column as a character {@link Reader} from a {@link java.sql.ResultSet}
+     * using the specified column label.
+     * The CLOB is obtained via {@link java.sql.ResultSet#getClob(String)} and its character stream
+     * is returned via {@link Clob#getCharacterStream()}.
      *
-     * @param rs the ResultSet containing the data
-     * @param columnName the label of the column containing the CLOB value
-     * @return A Reader containing the character stream of the CLOB, or {@code null} if the column value is SQL NULL
+     * @param rs         the {@link java.sql.ResultSet} to read from
+     * @param columnName the label of the column to retrieve
+     * @return a {@link Reader} for the CLOB's character stream,
+     *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
@@ -80,12 +82,12 @@ public class ClobReaderType extends ReaderType {
     }
 
     /**
-     * Sets a Reader as a CLOB parameter in a PreparedStatement.
-     * The reader's content will be stored as CLOB data in the database.
+     * Sets a {@link Reader} as a CLOB parameter in a {@link java.sql.PreparedStatement}.
+     * The reader's content is bound via {@link java.sql.PreparedStatement#setClob(int, Reader)}.
      *
-     * @param stmt the PreparedStatement in which to set the parameter
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the Reader containing the character data. Can be {@code null}.
+     * @param stmt        the {@link java.sql.PreparedStatement} in which to set the parameter
+     * @param columnIndex the 1-based parameter index
+     * @param x           the {@link Reader} whose content will be stored as CLOB data; may be {@code null}
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
@@ -94,12 +96,12 @@ public class ClobReaderType extends ReaderType {
     }
 
     /**
-     * Sets a Reader as a named CLOB parameter in a CallableStatement.
-     * The reader's content will be stored as CLOB data in the database.
+     * Sets a {@link Reader} as a named CLOB parameter in a {@link java.sql.CallableStatement}.
+     * The reader's content is bound via {@link java.sql.CallableStatement#setClob(String, Reader)}.
      *
-     * @param stmt the CallableStatement in which to set the parameter
+     * @param stmt          the {@link java.sql.CallableStatement} in which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the Reader containing the character data. Can be {@code null}.
+     * @param x             the {@link Reader} whose content will be stored as CLOB data; may be {@code null}
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
@@ -108,13 +110,14 @@ public class ClobReaderType extends ReaderType {
     }
 
     /**
-     * Sets a Reader as a CLOB parameter in a PreparedStatement with a specified length.
-     * Only the specified number of characters will be read from the Reader and stored.
+     * Sets a {@link Reader} as a CLOB parameter in a {@link java.sql.PreparedStatement},
+     * specifying the number of characters to read.
+     * The reader's content is bound via {@link java.sql.PreparedStatement#setClob(int, Reader, long)}.
      *
-     * @param stmt the PreparedStatement in which to set the parameter
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the Reader containing the character data. Can be {@code null}.
-     * @param sqlTypeOrLength the number of characters to read from the Reader
+     * @param stmt            the {@link java.sql.PreparedStatement} in which to set the parameter
+     * @param columnIndex     the 1-based parameter index
+     * @param x               the {@link Reader} whose content will be stored as CLOB data; may be {@code null}
+     * @param sqlTypeOrLength the number of characters to read from the reader
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
@@ -123,13 +126,14 @@ public class ClobReaderType extends ReaderType {
     }
 
     /**
-     * Sets a Reader as a named CLOB parameter in a CallableStatement with a specified length.
-     * Only the specified number of characters will be read from the Reader and stored.
+     * Sets a {@link Reader} as a named CLOB parameter in a {@link java.sql.CallableStatement},
+     * specifying the number of characters to read.
+     * The reader's content is bound via {@link java.sql.CallableStatement#setClob(String, Reader, long)}.
      *
-     * @param stmt the CallableStatement in which to set the parameter
-     * @param parameterName the name of the parameter to set
-     * @param x the Reader containing the character data. Can be {@code null}.
-     * @param sqlTypeOrLength the number of characters to read from the Reader
+     * @param stmt            the {@link java.sql.CallableStatement} in which to set the parameter
+     * @param parameterName   the name of the parameter to set
+     * @param x               the {@link Reader} whose content will be stored as CLOB data; may be {@code null}
+     * @param sqlTypeOrLength the number of characters to read from the reader
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
@@ -138,11 +142,12 @@ public class ClobReaderType extends ReaderType {
     }
 
     /**
-     * Converts a CLOB to a character Reader.
-     * This is a utility method used internally to extract character streams from CLOB objects.
+     * Extracts a character {@link Reader} from a {@link Clob}.
+     * This is a package-private utility used by both {@code get} overloads.
      *
-     * @param clob the CLOB to convert. Can be {@code null}.
-     * @return A Reader for the CLOB's character stream, or {@code null} if the CLOB is null
+     * @param clob the {@link Clob} to read from; may be {@code null}
+     * @return a {@link Reader} for the CLOB's character stream,
+     *         or {@code null} if {@code clob} is {@code null}
      * @throws SQLException if a database access error occurs while accessing the CLOB
      */
     static Reader clobToReader(final Clob clob) throws SQLException {

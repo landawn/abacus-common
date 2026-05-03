@@ -25,15 +25,15 @@ import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.u.Optional;
 
 /**
- * A type-safe container for operation results that can either hold a successful value of type {@code T} 
- * or an exception of type {@code E}, providing a functional programming approach to error handling 
- * without throwing exceptions. This class serves as an alternative to traditional try-catch blocks 
- * by encapsulating both success and failure states in a single immutable object, enabling more 
+ * A type-safe container for operation results that can either hold a successful value of type {@code T}
+ * or an exception of type {@code E}, providing a functional programming approach to error handling
+ * without throwing exceptions. This class serves as an alternative to traditional try-catch blocks
+ * by encapsulating both success and failure states in a single immutable object, enabling more
  * explicit and composable error handling patterns.
  *
- * <p>The {@code Result} class follows the Railway-Oriented Programming pattern, where operations 
- * can be chained together and failures are propagated through the chain without interrupting 
- * the execution flow. This approach makes error handling more predictable and reduces the risk 
+ * <p>The {@code Result} class follows the Railway-Oriented Programming pattern, where operations
+ * can be chained together and failures are propagated through the chain without interrupting
+ * the execution flow. This approach makes error handling more predictable and reduces the risk
  * of unhandled exceptions while maintaining type safety through generic constraints.</p>
  *
  * <p><b>Key Features:</b>

@@ -19,32 +19,29 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for {@link MutableLong} objects, providing serialization, deserialization,
- * and database interaction capabilities for mutable long wrapper objects.
+ * Type handler for {@link com.landawn.abacus.util.MutableLong} objects, providing
+ * serialization, deserialization, and database interaction capabilities for
+ * mutable long wrapper objects.
+ *
+ * @see com.landawn.abacus.util.MutableLong
+ * @see NumberType
  */
 public class MutableLongType extends NumberType<MutableLong> {
 
     public static final String MUTABLE_LONG = MutableLong.class.getSimpleName();
 
     /**
-     * Constructs a MutableLongType.
-     * This constructor initializes the type handler for MutableLong objects.
+     * Package-private constructor for MutableLongType.
+     * This constructor is called by subclasses to create MutableLong type instances.
      */
     protected MutableLongType() {
         super(MUTABLE_LONG);
     }
 
     /**
-     * Returns the Java class type that this type handler manages.
+     * Returns the {@link Class} object representing the {@link MutableLong} type.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableLong> type = TypeFactory.getType(MutableLong.class);
-     * Class<MutableLong> clazz = type.javaType();
-     * // clazz equals MutableLong.class
-     * }</pre>
-     *
-     * @return the {@link MutableLong} class object
+     * @return {@code MutableLong.class}
      */
     @Override
     public Class<MutableLong> javaType() {
@@ -52,21 +49,10 @@ public class MutableLongType extends NumberType<MutableLong> {
     }
 
     /**
-     * Converts a {@link MutableLong} object to its string representation.
+     * Converts a {@link MutableLong} object to its decimal string representation.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableLong> type = TypeFactory.getType(MutableLong.class);
-     * MutableLong ml = MutableLong.of(9876543210L);
-     * String str = type.stringOf(ml);
-     * // str equals "9876543210"
-     *
-     * String nullStr = type.stringOf(null);
-     * // nullStr equals null
-     * }</pre>
-     *
-     * @param x the MutableLong object to convert
-     * @return the string representation of the long value, or {@code null} if the input is null
+     * @param x the {@code MutableLong} object to convert, may be {@code null}
+     * @return the string representation of the long value, or {@code null} if the input is {@code null}
      */
     @Override
     public String stringOf(final MutableLong x) {
@@ -74,23 +60,11 @@ public class MutableLongType extends NumberType<MutableLong> {
     }
 
     /**
-     * Converts a string representation to a {@link MutableLong} object.
+     * Parses a string to create a {@link MutableLong} object.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableLong> type = TypeFactory.getType(MutableLong.class);
-     * MutableLong ml = type.valueOf("9876543210");
-     * // ml.value() equals 9876543210L
-     *
-     * MutableLong nullMl = type.valueOf(null);
-     * // nullMl equals null
-     *
-     * MutableLong emptyMl = type.valueOf("");
-     * // emptyMl equals null
-     * }</pre>
-     *
-     * @param str the string to convert
-     * @return a MutableLong containing the parsed long value, or {@code null} if the input string is empty or null
+     * @param str the string to parse, may be {@code null} or empty
+     * @return a {@code MutableLong} containing the parsed long value,
+     *         or {@code null} if the input is {@code null} or empty
      * @throws NumberFormatException if the string cannot be parsed as a long
      */
     @Override
@@ -99,22 +73,15 @@ public class MutableLongType extends NumberType<MutableLong> {
     }
 
     /**
-     * Retrieves a {@link MutableLong} value from a ResultSet at the specified column index.
+     * Retrieves a long value from the specified column in the {@link ResultSet}
+     * and wraps it in a {@link MutableLong}.
+     * Returns {@code null} if the column value is SQL {@code NULL} (detected via {@link ResultSet#wasNull()}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableLong> type = TypeFactory.getType(MutableLong.class);
-     * ResultSet rs = statement.executeQuery("SELECT user_id FROM users");
-     * if (rs.next()) {
-     *     MutableLong userId = type.get(rs, 1);
-     *     // userId contains the long value from the first column
-     * }
-     * }</pre>
-     *
-     * @param rs the ResultSet to read from
-     * @param columnIndex the column index (1-based) to retrieve the value from
-     * @return a MutableLong containing the long value from the ResultSet
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnIndex the 1-based index of the column to retrieve
+     * @return a {@code MutableLong} wrapping the retrieved value,
+     *         or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public MutableLong get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -124,22 +91,15 @@ public class MutableLongType extends NumberType<MutableLong> {
     }
 
     /**
-     * Retrieves a {@link MutableLong} value from a ResultSet using the specified column label.
+     * Retrieves a long value from the specified column in the {@link ResultSet}
+     * and wraps it in a {@link MutableLong}.
+     * Returns {@code null} if the column value is SQL {@code NULL} (detected via {@link ResultSet#wasNull()}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableLong> type = TypeFactory.getType(MutableLong.class);
-     * ResultSet rs = statement.executeQuery("SELECT user_id FROM users");
-     * if (rs.next()) {
-     *     MutableLong userId = type.get(rs, "user_id");
-     *     // userId contains the long value from the "user_id" column
-     * }
-     * }</pre>
-     *
-     * @param rs the ResultSet to read from
-     * @param columnName the label for the column specified with the SQL AS clause
-     * @return a MutableLong containing the long value from the ResultSet
-     * @throws SQLException if a database access error occurs or the columnName is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnName the label of the column to retrieve (as specified in the SQL AS clause)
+     * @return a {@code MutableLong} wrapping the retrieved value,
+     *         or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
     @Override
     public MutableLong get(final ResultSet rs, final String columnName) throws SQLException {
@@ -149,25 +109,14 @@ public class MutableLongType extends NumberType<MutableLong> {
     }
 
     /**
-     * Sets a parameter in a PreparedStatement to the value of a {@link MutableLong}.
+     * Sets a {@link MutableLong} parameter in a {@link PreparedStatement} at the specified index.
+     * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#BIGINT}) is set;
+     * otherwise the wrapped long value is stored.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableLong> type = TypeFactory.getType(MutableLong.class);
-     * PreparedStatement stmt = conn.prepareStatement("UPDATE users SET user_id = ? WHERE email = ?");
-     * MutableLong userId = MutableLong.of(1234567890L);
-     * type.set(stmt, 1, userId);
-     * stmt.executeUpdate();
-     *
-     * // For null value
-     * type.set(stmt, 1, null);
-     * // This sets the parameter to SQL NULL
-     * }</pre>
-     *
-     * @param stmt the PreparedStatement to set the parameter on
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the MutableLong value to set, or null
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param columnIndex the 1-based index of the parameter to set
+     * @param x the {@code MutableLong} value to set, or {@code null} to set SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final MutableLong x) throws SQLException {
@@ -179,25 +128,14 @@ public class MutableLongType extends NumberType<MutableLong> {
     }
 
     /**
-     * Sets a named parameter in a CallableStatement to the value of a {@link MutableLong}.
+     * Sets a {@link MutableLong} parameter in a {@link CallableStatement} by name.
+     * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#BIGINT}) is set;
+     * otherwise the wrapped long value is stored.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableLong> type = TypeFactory.getType(MutableLong.class);
-     * CallableStatement cstmt = conn.prepareCall("{call update_user(?, ?)}");
-     * MutableLong userId = MutableLong.of(1234567890L);
-     * type.set(cstmt, "user_id", userId);
-     * cstmt.execute();
-     *
-     * // For null value
-     * type.set(cstmt, "user_id", null);
-     * // This sets the parameter to SQL NULL
-     * }</pre>
-     *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
-     * @param x the MutableLong value to set, or null
-     * @throws SQLException if a database access error occurs or the parameterName is invalid
+     * @param x the {@code MutableLong} value to set, or {@code null} to set SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final MutableLong x) throws SQLException {
@@ -209,23 +147,11 @@ public class MutableLongType extends NumberType<MutableLong> {
     }
 
     /**
-     * Appends the string representation of a {@link MutableLong} to an Appendable.
+     * Appends the decimal string representation of a {@link MutableLong} to an {@link Appendable}.
+     * Writes {@code "null"} when {@code x} is {@code null}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableLong> type = TypeFactory.getType(MutableLong.class);
-     * StringBuilder sb = new StringBuilder();
-     * MutableLong ml = MutableLong.of(999999999L);
-     * type.appendTo(sb, ml);
-     * // sb.toString() equals "999999999"
-     *
-     * StringBuilder sb2 = new StringBuilder();
-     * type.appendTo(sb2, null);
-     * // sb2.toString() equals "null"
-     * }</pre>
-     *
-     * @param appendable the Appendable to write to
-     * @param x the MutableLong value to append
+     * @param appendable the target to write to
+     * @param x the {@code MutableLong} to append, may be {@code null}
      * @throws IOException if an I/O error occurs during the append operation
      */
     @Override
@@ -238,24 +164,13 @@ public class MutableLongType extends NumberType<MutableLong> {
     }
 
     /**
-     * Writes the character representation of a {@link MutableLong} to a CharacterWriter.
-     * This method is typically used for JSON/XML serialization.
+     * Writes the long value of a {@link MutableLong} to a {@link CharacterWriter}.
+     * Writes the {@code NULL_CHAR_ARRAY} when {@code x} is {@code null}.
+     * The {@code config} parameter is not used for long values.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableLong> type = TypeFactory.getType(MutableLong.class);
-     * CharacterWriter writer = new CharacterWriter();
-     * MutableLong ml = MutableLong.of(123456789012345L);
-     * type.writeCharacter(writer, ml, null);
-     * // Writes: 123456789012345
-     *
-     * type.writeCharacter(writer, null, null);
-     * // Writes: null
-     * }</pre>
-     *
-     * @param writer the CharacterWriter to write to
-     * @param x the MutableLong value to write
-     * @param config the serialization configuration
+     * @param writer the {@code CharacterWriter} to write to
+     * @param x the {@code MutableLong} to write, may be {@code null}
+     * @param config the serialization configuration (unused for long values)
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override

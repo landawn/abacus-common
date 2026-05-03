@@ -51,9 +51,9 @@ public interface IntTriConsumer extends Throwables.IntTriConsumer<RuntimeExcepti
      * rgbPrinter.accept(255, 128, 0);
      * }</pre>
      *
-     * @param a the first input argument
-     * @param b the second input argument
-     * @param c the third input argument
+     * @param a the first {@code int} input argument
+     * @param b the second {@code int} input argument
+     * @param c the third {@code int} input argument
      */
     @Override
     void accept(int a, int b, int c);
@@ -80,6 +80,7 @@ public interface IntTriConsumer extends Throwables.IntTriConsumer<RuntimeExcepti
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code IntTriConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     default IntTriConsumer andThen(final IntTriConsumer after) {
         return (a, b, c) -> {

@@ -45,28 +45,7 @@ import com.landawn.abacus.util.Strings;
  *
  * <p>EnumType instances are typically obtained through the TypeFactory and support conversion
  * between enum values and their string/numeric representations. The type handler can be configured
- * to use either the enum's ordinal value or its name for serialization.</p>
- *
- * <p><b>Usage Examples:</b></p>
- * <pre>{@code
- * // Define an enum
- * enum Status { PENDING, ACTIVE, COMPLETED }
- *
- * // Get EnumType through TypeFactory
- * Type<Status> statusType = TypeFactory.getType(Status.class);
- *
- * // Convert enum to string (by name)
- * String str = statusType.stringOf(Status.ACTIVE);
- * // Result: "ACTIVE"
- *
- * // Convert string to enum
- * Status status = statusType.valueOf("COMPLETED");
- * // Result: Status.COMPLETED
- *
- * // Get enum by ordinal
- * Status firstStatus = statusType.valueOf("0");
- * // Result: Status.PENDING
- * }</pre>
+ * to use either the enum's ordinal value, its name, or a custom code for serialization.</p>
  *
  * @param <T> the enum type, must extend Enum&lt;T&gt;
  */
@@ -83,10 +62,24 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
 
     private boolean hasNull = false;
 
+    /**
+     * Package-private constructor for EnumType using the default NAME representation.
+     * This constructor is called by the TypeFactory when no explicit representation is specified.
+     *
+     * @param enumClassName the fully qualified class name of the enum type
+     */
     EnumType(final String enumClassName) {
         this(enumClassName, com.landawn.abacus.util.EnumType.NAME);
     }
 
+    /**
+     * Package-private constructor for EnumType with the specified enum representation.
+     * This constructor is called by the TypeFactory to create enum type instances.
+     *
+     * @param className the fully qualified class name of the enum type
+     * @param enumRepresentation the representation strategy to use ({@code NAME}, {@code ORDINAL}, or {@code CODE});
+     *                           if {@code null}, defaults to {@code NAME}
+     */
     @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE")
     EnumType(final String className, final com.landawn.abacus.util.EnumType enumRepresentation) {
         super(enumRepresentation == null ? className + "(NAME)" : className + "(" + enumRepresentation.name() + ")",
@@ -141,15 +134,8 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     }
 
     /**
-     * Returns the enumeration strategy used by this type handler.
-     * Indicates whether enums are stored by ordinal (numeric), name (string), or code (numeric).
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * EnumType<Status> statusType = (EnumType<Status>) TypeFactory.getType(Status.class);
-     * com.landawn.abacus.util.EnumType enumRep = statusType.enumerated();
-     * // Returns: com.landawn.abacus.util.EnumType.NAME (default), .ORDINAL, or .CODE
-     * }</pre>
+     * Returns the enumeration strategy used by this type handler:
+     * {@code NAME}, {@code ORDINAL}, or {@code CODE}.
      *
      * @return the configured enum representation
      */
@@ -225,23 +211,13 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
 
     /**
      * Converts an integer ordinal or code value to its corresponding enum constant.
-     * For CODE representation, the value is matched against the {@code code()} values; otherwise,
-     * it is matched against ordinal values. A value of 0 returns {@code null} when no constant
-     * is mapped to 0.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * // Given: enum Status { PENDING, ACTIVE, COMPLETED }
-     * EnumType<Status> statusType = (EnumType<Status>) TypeFactory.getType(Status.class);
-     *
-     * Status s0 = statusType.valueOf(0);  // Returns: Status.PENDING
-     * Status s1 = statusType.valueOf(1);  // Returns: Status.ACTIVE
-     * Status s2 = statusType.valueOf(2);  // Returns: Status.COMPLETED
-     * }</pre>
+     * For {@code CODE} representation, the value is matched against the {@code code()} values;
+     * otherwise it is matched against ordinal values.
+     * Returns {@code null} when {@code value} is {@code 0} and no constant is mapped to {@code 0}.
      *
      * @param value the ordinal or code value
-     * @return the enum constant for the specified value, or {@code null} if value is 0 and no constant maps to 0
-     * @throws IllegalArgumentException if no enum constant exists with the given value (except for 0)
+     * @return the enum constant for the specified value, or {@code null} if the value is {@code 0} and no constant maps to {@code 0}
+     * @throws IllegalArgumentException if no enum constant exists with the given value (and the value is not {@code 0})
      */
     public T valueOf(final int value) {
         final T result = numberEnum.get(value);
@@ -254,14 +230,16 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     }
 
     /**
-     * Retrieves an enum value from a ResultSet at the specified column index.
-     * The retrieval method depends on the enumRepresentation setting:
-     * - ORDINAL or CODE: reads as integer
-     * - NAME: reads as string
+     * Retrieves an enum value from a {@link ResultSet} at the specified column index.
+     * The retrieval method depends on the {@code enumRepresentation} setting:
+     * <ul>
+     *   <li>ORDINAL or CODE: reads the column as an integer and maps it to the enum constant</li>
+     *   <li>NAME: reads the column as a string and maps it to the enum constant by name</li>
+     * </ul>
      *
-     * @param rs the ResultSet containing the data
-     * @param columnIndex the column index (1-based) of the enum value
-     * @return the enum value at the specified column, or {@code null} if the column value is SQL NULL
+     * @param rs          the {@link ResultSet} containing the data
+     * @param columnIndex the 1-based column index of the enum value
+     * @return the enum value at the specified column, or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
@@ -279,14 +257,16 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     }
 
     /**
-     * Retrieves an enum value from a ResultSet using the specified column label.
-     * The retrieval method depends on the enumRepresentation setting:
-     * - ORDINAL or CODE: reads as integer
-     * - NAME: reads as string
+     * Retrieves an enum value from a {@link ResultSet} using the specified column label.
+     * The retrieval method depends on the {@code enumRepresentation} setting:
+     * <ul>
+     *   <li>ORDINAL or CODE: reads the column as an integer and maps it to the enum constant</li>
+     *   <li>NAME: reads the column as a string and maps it to the enum constant by name</li>
+     * </ul>
      *
-     * @param rs the ResultSet containing the data
+     * @param rs         the {@link ResultSet} containing the data
      * @param columnName the label of the column containing the enum value
-     * @return the enum value in the specified column, or {@code null} if the column value is SQL NULL
+     * @return the enum value in the specified column, or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
@@ -304,14 +284,16 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     }
 
     /**
-     * Sets an enum value as a parameter in a PreparedStatement.
-     * The storage method depends on the enumRepresentation setting:
-     * - ORDINAL or CODE: stores as integer (ordinal or code value)
-     * - NAME: stores as string (enum name)
+     * Sets an enum value as a parameter in a {@link PreparedStatement}.
+     * The storage method depends on the {@code enumRepresentation} setting:
+     * <ul>
+     *   <li>ORDINAL or CODE: stores as integer (ordinal or code value); SQL {@code NULL} when {@code x} is {@code null}</li>
+     *   <li>NAME: stores as string (enum constant name)</li>
+     * </ul>
      *
-     * @param stmt the PreparedStatement in which to set the parameter
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the enum value to set; may be {@code null}
+     * @param stmt        the {@link PreparedStatement} in which to set the parameter
+     * @param columnIndex the 1-based parameter index
+     * @param x           the enum value to set; may be {@code null}
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
@@ -332,14 +314,16 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     }
 
     /**
-     * Sets an enum value as a named parameter in a CallableStatement.
-     * The storage method depends on the enumRepresentation setting:
-     * - ORDINAL or CODE: stores as integer (ordinal or code value)
-     * - NAME: stores as string (enum name)
+     * Sets an enum value as a named parameter in a {@link CallableStatement}.
+     * The storage method depends on the {@code enumRepresentation} setting:
+     * <ul>
+     *   <li>ORDINAL or CODE: stores as integer (ordinal or code value); SQL {@code NULL} when {@code x} is {@code null}</li>
+     *   <li>NAME: stores as string (enum constant name)</li>
+     * </ul>
      *
-     * @param stmt the CallableStatement in which to set the parameter
+     * @param stmt          the {@link CallableStatement} in which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the enum value to set; may be {@code null}
+     * @param x             the enum value to set; may be {@code null}
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
@@ -360,14 +344,17 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     }
 
     /**
-     * Writes an enum value to a CharacterWriter with the specified serialization configuration.
-     * The output format depends on the enumRepresentation setting:
-     * - ORDINAL or CODE: writes the ordinal or code value as an integer
-     * - NAME: writes the JSON/XML field name (possibly quoted based on config)
+     * Writes an enum value to a {@link CharacterWriter} with the specified serialization configuration.
+     * The output format depends on the {@code enumRepresentation} setting:
+     * <ul>
+     *   <li>ORDINAL or CODE: writes the ordinal or code value as an unquoted integer</li>
+     *   <li>NAME: writes the JSON/XML field name, optionally quoted based on {@code config}</li>
+     * </ul>
+     * A {@code null} value writes the literal {@code null}.
      *
-     * @param writer the CharacterWriter to write to
-     * @param x the enum value to write; may be {@code null}
-     * @param config the serialization configuration for quotation settings
+     * @param writer the {@link CharacterWriter} to write to
+     * @param x      the enum value to write; may be {@code null}
+     * @param config the serialization configuration for quotation settings; may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
@@ -395,6 +382,16 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
         }
     }
 
+    /**
+     * Resolves the JSON/XML field name for the given enum constant.
+     * Checks for {@link com.landawn.abacus.annotation.JsonXmlField}, then
+     * {@code com.alibaba.fastjson2.annotation.JSONField}, then
+     * {@code com.fasterxml.jackson.annotation.JsonProperty}. If none of these annotations
+     * are present or their name is empty, the enum constant's natural name is returned.
+     *
+     * @param enumConstant the enum constant whose serialization name to resolve
+     * @return the JSON/XML name for the enum constant (never {@code null})
+     */
     private String getJsonXmlName(final T enumConstant) {
         try {
             final Field field = enumConstant.getClass().getField(enumConstant.name());
@@ -427,6 +424,16 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
         return enumConstant.name();
     }
 
+    /**
+     * Returns the enum class for the given class.
+     * If the class is itself an enum, it is returned directly. If the class is an inner class
+     * whose enclosing class is an enum (e.g., an anonymous subclass of an enum constant),
+     * the enclosing class is returned. Otherwise an exception is thrown.
+     *
+     * @param clazz the class to resolve as an enum class
+     * @return the enum class
+     * @throws IllegalArgumentException if {@code clazz} is not an enum and has no enclosing enum class
+     */
     private static Class<?> getEnumClass(final Class<?> clazz) {
         if (clazz.isEnum()) {
             return clazz;

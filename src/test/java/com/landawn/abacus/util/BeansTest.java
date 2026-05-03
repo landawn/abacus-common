@@ -32,9 +32,7 @@ import com.landawn.abacus.annotation.DiffIgnore;
 import com.landawn.abacus.annotation.Entity;
 import com.landawn.abacus.annotation.Record;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
-import com.landawn.abacus.util.ImmutableMap;
 import com.landawn.abacus.util.Tuple.Tuple3;
-import com.landawn.abacus.util.NamingPolicy;
 
 public class BeansTest extends TestBase {
 

@@ -22,15 +22,15 @@ import com.landawn.abacus.util.function.Consumer;
 /**
  * A state object for collecting statistics such as count, min, max, sum, and average
  * for a collection of BigInteger values.
- * 
+ *
  * <p>This class is designed to work with Java 8 streams and can be used as a
  * reduction target for a stream of BigInteger values. It maintains arbitrary
  * precision for all calculations by using BigInteger for sum, min, and max values.</p>
- * 
+ *
  * <p>This implementation is not thread-safe. However, it is safe to use
  * a BigIntegerSummaryStatistics instance concurrently from multiple threads
  * if it is not being modified.</p>
- * 
+ *
  * <p><b>Usage Examples with streams:</b></p>
  * <pre>{@code
  * List<BigInteger> numbers = Arrays.asList(
@@ -38,17 +38,17 @@ import com.landawn.abacus.util.function.Consumer;
  *     new BigInteger("2000000000000000000"),
  *     new BigInteger("3000000000000000000")
  * );
- * 
+ *
  * BigIntegerSummaryStatistics stats = numbers.stream()
  *     .collect(BigIntegerSummaryStatistics::new,
  *              BigIntegerSummaryStatistics::accept,
  *              BigIntegerSummaryStatistics::combine);
- * 
+ *
  * System.out.println("Count: " + stats.getCount());
  * System.out.println("Sum: " + stats.getSum());
  * System.out.println("Average: " + stats.getAverage());
  * }</pre>
- * 
+ *
  * @see BigDecimalSummaryStatistics
  * @see java.util.IntSummaryStatistics
  * @see java.util.LongSummaryStatistics
@@ -66,7 +66,7 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
     /**
      * Constructs an empty instance with zero count, zero sum,
      * and undefined min/max values.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BigIntegerSummaryStatistics stats = new BigIntegerSummaryStatistics();
@@ -78,11 +78,11 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
 
     /**
      * Constructs an instance with the specified count, min, max, and sum.
-     * 
+     *
      * <p>This constructor is useful for creating a summary statistics object
      * from pre-calculated values, such as when deserializing or combining
      * results from multiple sources.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BigIntegerSummaryStatistics stats = new BigIntegerSummaryStatistics(
@@ -97,7 +97,7 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
      * @param min the minimum value
      * @param max the maximum value
      * @param sum the sum of values
-     * @throws IllegalArgumentException if count is negative or minimum is greater than maximum 
+     * @throws IllegalArgumentException if count is negative or minimum is greater than maximum
      */
     public BigIntegerSummaryStatistics(final long count, final BigInteger min, final BigInteger max, final BigInteger sum) {
         if (count < 0) {
@@ -116,10 +116,10 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
 
     /**
      * Records a new BigInteger value into the summary information.
-     * 
+     *
      * <p>This method updates the count, sum, min, and max values based on
      * the provided value. Null values should not be passed to this method.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BigIntegerSummaryStatistics stats = new BigIntegerSummaryStatistics();
@@ -140,21 +140,21 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
 
     /**
      * Combines the state of another BigIntegerSummaryStatistics into this one.
-     * 
+     *
      * <p>This method is useful for parallel processing where multiple
      * summary statistics objects are created for different partitions
      * and need to be combined into a single result.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BigIntegerSummaryStatistics stats1 = new BigIntegerSummaryStatistics();
      * stats1.accept(new BigInteger("1000"));
      * stats1.accept(new BigInteger("2000"));
-     * 
+     *
      * BigIntegerSummaryStatistics stats2 = new BigIntegerSummaryStatistics();
      * stats2.accept(new BigInteger("3000"));
      * stats2.accept(new BigInteger("4000"));
-     * 
+     *
      * stats1.combine(stats2);
      * // stats1 now contains combined statistics of all four values
      * }</pre>
@@ -170,7 +170,7 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
 
     /**
      * Returns the minimum value recorded, or {@code null} if no values have been recorded.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BigIntegerSummaryStatistics stats = new BigIntegerSummaryStatistics();
@@ -187,7 +187,7 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
 
     /**
      * Returns the maximum value recorded, or {@code null} if no values have been recorded.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BigIntegerSummaryStatistics stats = new BigIntegerSummaryStatistics();
@@ -204,7 +204,7 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
 
     /**
      * Returns the count of values recorded.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BigIntegerSummaryStatistics stats = new BigIntegerSummaryStatistics();
@@ -221,7 +221,7 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
 
     /**
      * Returns the sum of values recorded, or zero if no values have been recorded.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BigIntegerSummaryStatistics stats = new BigIntegerSummaryStatistics();
@@ -238,10 +238,10 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
 
     /**
      * Returns the arithmetic mean of values recorded, or zero if no values have been recorded.
-     * 
+     *
      * <p>The average is calculated as a BigDecimal using MathContext.DECIMAL128 for precision.
      * This ensures accurate decimal representation of the average value.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BigIntegerSummaryStatistics stats = new BigIntegerSummaryStatistics();
@@ -259,10 +259,10 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
 
     /**
      * Returns a string representation of this summary statistics object.
-     * 
+     *
      * <p>The string representation includes min, max, count, sum, and average
      * values in a readable format.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * {min=10, max=30, count=3, sum=60, average=20.000000}

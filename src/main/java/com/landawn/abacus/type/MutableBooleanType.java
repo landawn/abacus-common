@@ -35,16 +35,9 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
     }
 
     /**
-     * Returns the Class object representing the MutableBoolean type.
+     * Returns the {@link Class} object representing the {@link MutableBoolean} type.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
-     * Class<MutableBoolean> clazz = type.javaType();
-     * // Returns: MutableBoolean.class
-     * }</pre>
-     *
-     * @return The Class object for MutableBoolean
+     * @return {@code MutableBoolean.class}
      */
     @Override
     public Class<MutableBoolean> javaType() {
@@ -53,16 +46,9 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
 
     /**
      * Indicates whether values of this type are comparable.
-     * MutableBoolean implements Comparable, so this returns {@code true}.
+     * {@link MutableBoolean} implements {@link Comparable}, so this always returns {@code true}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
-     * boolean comparable = type.isComparable();
-     * // Returns: true
-     * }</pre>
-     *
-     * @return {@code true}, indicating that MutableBoolean values can be compared
+     * @return {@code true}
      */
     @Override
     public boolean isComparable() {
@@ -70,27 +56,10 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
     }
 
     /**
-     * Converts a MutableBoolean object to its string representation.
-     * The boolean value is converted to "true" or "false".
+     * Converts a {@link MutableBoolean} object to its string representation ({@code "true"} or {@code "false"}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
-     *
-     * MutableBoolean mb = MutableBoolean.of(true);
-     * String result = type.stringOf(mb);
-     * // Returns: "true"
-     *
-     * mb = MutableBoolean.of(false);
-     * result = type.stringOf(mb);
-     * // Returns: "false"
-     *
-     * result = type.stringOf(null);
-     * // Returns: null
-     * }</pre>
-     *
-     * @param x The MutableBoolean object to convert
-     * @return The string representation ("true" or "false"), or {@code null} if the input is null
+     * @param x the {@code MutableBoolean} object to convert, may be {@code null}
+     * @return {@code "true"} or {@code "false"}, or {@code null} if the input is {@code null}
      */
     @Override
     public String stringOf(final MutableBoolean x) {
@@ -98,28 +67,11 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
     }
 
     /**
-     * Parses a string to create a MutableBoolean object.
-     * The string is parsed as a boolean value using standard boolean parsing rules.
+     * Parses a string to create a {@link MutableBoolean} object using standard boolean parsing rules.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
-     *
-     * MutableBoolean result = type.valueOf("true");
-     * // Returns: MutableBoolean with value true
-     *
-     * result = type.valueOf("false");
-     * // Returns: MutableBoolean with value false
-     *
-     * result = type.valueOf(null);
-     * // Returns: null
-     *
-     * result = type.valueOf("");
-     * // Returns: null
-     * }</pre>
-     *
-     * @param str The string to parse
-     * @return A MutableBoolean containing the parsed value, or {@code null} if the input is {@code null} or empty
+     * @param str the string to parse, may be {@code null} or empty
+     * @return a {@code MutableBoolean} containing the parsed value,
+     *         or {@code null} if the input is {@code null} or empty
      */
     @Override
     public MutableBoolean valueOf(final String str) {
@@ -127,27 +79,15 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
     }
 
     /**
-     * Retrieves a MutableBoolean value from a ResultSet at the specified column index.
-     * The database boolean value is wrapped in a MutableBoolean object.
+     * Retrieves a boolean value from the specified column in the {@link ResultSet}
+     * and wraps it in a {@link MutableBoolean}.
+     * Returns {@code null} if the column value is SQL {@code NULL} (detected via {@link ResultSet#wasNull()}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     *
-     * // Column contains boolean value true
-     * MutableBoolean mb = type.get(rs, 1);
-     * // Returns: MutableBoolean with value true
-     *
-     * // Column contains boolean value false
-     * mb = type.get(rs, 2);
-     * // Returns: MutableBoolean with value false
-     * }</pre>
-     *
-     * @param rs The ResultSet containing the data
-     * @param columnIndex The column index (1-based) to retrieve the value from
-     * @return A MutableBoolean containing the retrieved value
-     * @throws SQLException if a database access error occurs or the column index is invalid
+     * @param rs the {@code ResultSet} containing the data
+     * @param columnIndex the 1-based index of the column to retrieve
+     * @return a {@code MutableBoolean} wrapping the retrieved value,
+     *         or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public MutableBoolean get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -157,27 +97,15 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
     }
 
     /**
-     * Retrieves a MutableBoolean value from a ResultSet using the specified column label.
-     * The database boolean value is wrapped in a MutableBoolean object.
+     * Retrieves a boolean value from the specified column in the {@link ResultSet}
+     * and wraps it in a {@link MutableBoolean}.
+     * Returns {@code null} if the column value is SQL {@code NULL} (detected via {@link ResultSet#wasNull()}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     *
-     * // Column "is_active" contains boolean value true
-     * MutableBoolean mb = type.get(rs, "is_active");
-     * // Returns: MutableBoolean with value true
-     *
-     * // Column "is_deleted" contains boolean value false
-     * mb = type.get(rs, "is_deleted");
-     * // Returns: MutableBoolean with value false
-     * }</pre>
-     *
-     * @param rs The ResultSet containing the data
-     * @param columnName The label of the column to retrieve the value from
-     * @return A MutableBoolean containing the retrieved value
-     * @throws SQLException if a database access error occurs or the column label is not found
+     * @param rs the {@code ResultSet} containing the data
+     * @param columnName the label of the column to retrieve (as specified in the SQL AS clause)
+     * @return a {@code MutableBoolean} wrapping the retrieved value,
+     *         or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
     @Override
     public MutableBoolean get(final ResultSet rs, final String columnName) throws SQLException {
@@ -187,26 +115,14 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
     }
 
     /**
-     * Sets a MutableBoolean parameter in a PreparedStatement at the specified position.
-     * If the MutableBoolean is {@code null}, SQL NULL is set. Otherwise, the wrapped boolean value is stored.
+     * Sets a {@link MutableBoolean} parameter in a {@link PreparedStatement} at the specified index.
+     * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#BOOLEAN}) is set;
+     * otherwise the wrapped boolean value is stored.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
-     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
-     *
-     * MutableBoolean mb = MutableBoolean.of(true);
-     * type.set(stmt, 2, mb);
-     * // Sets parameter to true
-     *
-     * type.set(stmt, 2, null);
-     * // Sets parameter to SQL NULL
-     * }</pre>
-     *
-     * @param stmt The PreparedStatement to set the parameter on
-     * @param columnIndex The parameter index (1-based) to set
-     * @param x The MutableBoolean value to set
-     * @throws SQLException if a database access error occurs or the parameter index is invalid
+     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param columnIndex the 1-based index of the parameter to set
+     * @param x the {@code MutableBoolean} value to set, or {@code null} to set SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final MutableBoolean x) throws SQLException {
@@ -218,26 +134,14 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
     }
 
     /**
-     * Sets a MutableBoolean parameter in a CallableStatement using the specified parameter name.
-     * If the MutableBoolean is {@code null}, SQL NULL is set. Otherwise, the wrapped boolean value is stored.
+     * Sets a {@link MutableBoolean} parameter in a {@link CallableStatement} by name.
+     * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#BOOLEAN}) is set;
+     * otherwise the wrapped boolean value is stored.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
-     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
-     *
-     * MutableBoolean mb = MutableBoolean.of(true);
-     * type.set(stmt, "p_is_active", mb);
-     * // Sets parameter to true
-     *
-     * type.set(stmt, "p_is_deleted", null);
-     * // Sets parameter to SQL NULL
-     * }</pre>
-     *
-     * @param stmt The CallableStatement to set the parameter on
-     * @param parameterName The name of the parameter to set
-     * @param x The MutableBoolean value to set
-     * @throws SQLException if a database access error occurs or the parameter name is not found
+     * @param stmt the {@code CallableStatement} to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the {@code MutableBoolean} value to set, or {@code null} to set SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final MutableBoolean x) throws SQLException {
@@ -249,30 +153,11 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
     }
 
     /**
-     * Appends the string representation of a MutableBoolean to an Appendable.
-     * The value is written as "true", "false", or "null".
+     * Appends the string representation of a {@link MutableBoolean} to an {@link Appendable}.
+     * Writes {@code "true"}, {@code "false"}, or {@code "null"} (when {@code x} is {@code null}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
-     * StringBuilder sb = new StringBuilder();
-     *
-     * MutableBoolean mb = MutableBoolean.of(true);
-     * type.appendTo(sb, mb);
-     * // sb contains: "true"
-     *
-     * sb.setLength(0);
-     * mb = MutableBoolean.of(false);
-     * type.appendTo(sb, mb);
-     * // sb contains: "false"
-     *
-     * sb.setLength(0);
-     * type.appendTo(sb, null);
-     * // sb contains: "null"
-     * }</pre>
-     *
-     * @param appendable The Appendable to write to
-     * @param x The MutableBoolean to append
+     * @param appendable the target to write to
+     * @param x the {@code MutableBoolean} to append, may be {@code null}
      * @throws IOException if an I/O error occurs while appending
      */
     @Override
@@ -281,29 +166,13 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
     }
 
     /**
-     * Writes the character representation of a MutableBoolean to a CharacterWriter.
-     * The value is written as the character arrays for "true", "false", or "null".
-     * This method is optimized for character-based writing.
+     * Writes the character representation of a {@link MutableBoolean} to a {@link CharacterWriter}.
+     * Writes the pre-allocated {@code TRUE_CHAR_ARRAY}, {@code FALSE_CHAR_ARRAY}, or {@code NULL_CHAR_ARRAY}.
+     * The {@code config} parameter is not used for boolean values.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
-     * CharacterWriter writer = new CharacterWriter();
-     *
-     * MutableBoolean mb = MutableBoolean.of(true);
-     * type.writeCharacter(writer, mb, null);
-     * String result = writer.toString();
-     * // result: "true"
-     *
-     * writer.reset();
-     * type.writeCharacter(writer, null, null);
-     * result = writer.toString();
-     * // result: "null"
-     * }</pre>
-     *
-     * @param writer The CharacterWriter to write to
-     * @param x The MutableBoolean to write
-     * @param config The serialization configuration (currently unused for boolean values)
+     * @param writer the {@code CharacterWriter} to write to
+     * @param x the {@code MutableBoolean} to write, may be {@code null}
+     * @param config the serialization configuration (unused for boolean values)
      * @throws IOException if an I/O error occurs while writing
      */
     @Override

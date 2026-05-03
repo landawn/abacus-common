@@ -27,10 +27,13 @@ import com.landawn.abacus.util.Dates;
 
 /**
  * The abstract base class for {@code Calendar} types in the type system.
- * This class provides common functionality for handling {@code Calendar} objects,
- * including serialization, database operations, and date formatting.
+ * <p>
+ * This class provides common functionality for handling {@code java.util.Calendar} objects,
+ * including string formatting, JDBC write operations (storing as SQL {@code TIMESTAMP}),
+ * and JSON/XML serialization with configurable date-time formats.
+ * </p>
  *
- * @param <T> the specific {@code Calendar} type (e.g., {@code Calendar}, {@code GregorianCalendar})
+ * @param <T> the specific {@code Calendar} subtype (e.g., {@link java.util.Calendar}, {@link java.util.GregorianCalendar})
  */
 public abstract class AbstractCalendarType<T extends Calendar> extends AbstractType<T> {
 

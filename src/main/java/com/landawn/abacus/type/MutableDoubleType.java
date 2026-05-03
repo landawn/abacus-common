@@ -36,16 +36,9 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
     }
 
     /**
-     * Returns the Class object representing the MutableDouble type.
+     * Returns the {@link Class} object representing the {@link MutableDouble} type.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableDouble> type = TypeFactory.getType(MutableDouble.class);
-     * Class<MutableDouble> clazz = type.javaType();
-     * // clazz equals MutableDouble.class
-     * }</pre>
-     *
-     * @return The Class object for MutableDouble
+     * @return {@code MutableDouble.class}
      */
     @Override
     public Class<MutableDouble> javaType() {
@@ -53,22 +46,10 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
     }
 
     /**
-     * Converts a MutableDouble object to its string representation.
-     * The double value is converted to a decimal string representation.
+     * Converts a {@link MutableDouble} object to its decimal string representation.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableDouble> type = TypeFactory.getType(MutableDouble.class);
-     * MutableDouble md = MutableDouble.of(3.14);
-     * String str = type.stringOf(md);
-     * // str equals "3.14"
-     *
-     * String nullStr = type.stringOf(null);
-     * // nullStr equals null
-     * }</pre>
-     *
-     * @param x The MutableDouble object to convert
-     * @return The string representation of the double value, or {@code null} if the input is null
+     * @param x the {@code MutableDouble} object to convert, may be {@code null}
+     * @return the string representation of the double value, or {@code null} if the input is {@code null}
      */
     @Override
     public String stringOf(final MutableDouble x) {
@@ -76,24 +57,11 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
     }
 
     /**
-     * Parses a string to create a MutableDouble object.
-     * The string is parsed as a double value.
+     * Parses a string to create a {@link MutableDouble} object.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableDouble> type = TypeFactory.getType(MutableDouble.class);
-     * MutableDouble md = type.valueOf("123.45");
-     * // md.value() equals 123.45
-     *
-     * MutableDouble nullMd = type.valueOf(null);
-     * // nullMd equals null
-     *
-     * MutableDouble emptyMd = type.valueOf("");
-     * // emptyMd equals null
-     * }</pre>
-     *
-     * @param str The string to parse
-     * @return A MutableDouble containing the parsed value, or {@code null} if the input is {@code null} or empty
+     * @param str the string to parse, may be {@code null} or empty
+     * @return a {@code MutableDouble} containing the parsed double value,
+     *         or {@code null} if the input is {@code null} or empty
      * @throws NumberFormatException if the string cannot be parsed as a double
      */
     @Override
@@ -102,23 +70,15 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
     }
 
     /**
-     * Retrieves a MutableDouble value from a ResultSet at the specified column index.
-     * The database double value is wrapped in a MutableDouble object.
+     * Retrieves a double value from the specified column in the {@link ResultSet}
+     * and wraps it in a {@link MutableDouble}.
+     * Returns {@code null} if the column value is SQL {@code NULL} (detected via {@link ResultSet#wasNull()}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableDouble> type = TypeFactory.getType(MutableDouble.class);
-     * ResultSet rs = statement.executeQuery("SELECT price FROM products");
-     * if (rs.next()) {
-     *     MutableDouble price = type.get(rs, 1);
-     *     // price contains the double value from the first column
-     * }
-     * }</pre>
-     *
-     * @param rs The ResultSet containing the data
-     * @param columnIndex The column index (1-based) to retrieve the value from
-     * @return A MutableDouble containing the retrieved value
-     * @throws SQLException if a database access error occurs or the column index is invalid
+     * @param rs the {@code ResultSet} containing the data
+     * @param columnIndex the 1-based index of the column to retrieve
+     * @return a {@code MutableDouble} wrapping the retrieved value,
+     *         or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public MutableDouble get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -128,23 +88,15 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
     }
 
     /**
-     * Retrieves a MutableDouble value from a ResultSet using the specified column label.
-     * The database double value is wrapped in a MutableDouble object.
+     * Retrieves a double value from the specified column in the {@link ResultSet}
+     * and wraps it in a {@link MutableDouble}.
+     * Returns {@code null} if the column value is SQL {@code NULL} (detected via {@link ResultSet#wasNull()}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableDouble> type = TypeFactory.getType(MutableDouble.class);
-     * ResultSet rs = statement.executeQuery("SELECT price FROM products");
-     * if (rs.next()) {
-     *     MutableDouble price = type.get(rs, "price");
-     *     // price contains the double value from the named column
-     * }
-     * }</pre>
-     *
-     * @param rs The ResultSet containing the data
-     * @param columnName The label of the column to retrieve the value from
-     * @return A MutableDouble containing the retrieved value
-     * @throws SQLException if a database access error occurs or the column label is not found
+     * @param rs the {@code ResultSet} containing the data
+     * @param columnName the label of the column to retrieve (as specified in the SQL AS clause)
+     * @return a {@code MutableDouble} wrapping the retrieved value,
+     *         or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
     @Override
     public MutableDouble get(final ResultSet rs, final String columnName) throws SQLException {
@@ -154,26 +106,14 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
     }
 
     /**
-     * Sets a MutableDouble parameter in a PreparedStatement at the specified position.
-     * If the MutableDouble is {@code null}, SQL NULL is set. Otherwise, the wrapped double value is stored.
+     * Sets a {@link MutableDouble} parameter in a {@link PreparedStatement} at the specified index.
+     * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#DOUBLE}) is set;
+     * otherwise the wrapped double value is stored.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableDouble> type = TypeFactory.getType(MutableDouble.class);
-     * PreparedStatement stmt = conn.prepareStatement("INSERT INTO products (price) VALUES (?)");
-     * MutableDouble price = MutableDouble.of(99.99);
-     * type.set(stmt, 1, price);
-     * stmt.executeUpdate();
-     *
-     * // For {@code null} value
-     * type.set(stmt, 1, null);
-     * // This sets the parameter to SQL NULL
-     * }</pre>
-     *
-     * @param stmt The PreparedStatement to set the parameter on
-     * @param columnIndex The parameter index (1-based) to set
-     * @param x The MutableDouble value to set
-     * @throws SQLException if a database access error occurs or the parameter index is invalid
+     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param columnIndex the 1-based index of the parameter to set
+     * @param x the {@code MutableDouble} value to set, or {@code null} to set SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final MutableDouble x) throws SQLException {
@@ -185,26 +125,14 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
     }
 
     /**
-     * Sets a MutableDouble parameter in a CallableStatement using the specified parameter name.
-     * If the MutableDouble is {@code null}, SQL NULL is set. Otherwise, the wrapped double value is stored.
+     * Sets a {@link MutableDouble} parameter in a {@link CallableStatement} by name.
+     * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#DOUBLE}) is set;
+     * otherwise the wrapped double value is stored.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableDouble> type = TypeFactory.getType(MutableDouble.class);
-     * CallableStatement stmt = conn.prepareCall("{call calculate_total(?)}");
-     * MutableDouble amount = MutableDouble.of(250.75);
-     * type.set(stmt, "amount", amount);
-     * stmt.execute();
-     *
-     * // For {@code null} value
-     * type.set(stmt, "amount", null);
-     * // This sets the parameter to SQL NULL
-     * }</pre>
-     *
-     * @param stmt The CallableStatement to set the parameter on
-     * @param parameterName The name of the parameter to set
-     * @param x The MutableDouble value to set
-     * @throws SQLException if a database access error occurs or the parameter name is not found
+     * @param stmt the {@code CallableStatement} to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the {@code MutableDouble} value to set, or {@code null} to set SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final MutableDouble x) throws SQLException {
@@ -216,24 +144,11 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
     }
 
     /**
-     * Appends the string representation of a MutableDouble to an Appendable.
-     * The value is written as a decimal string or "null".
+     * Appends the decimal string representation of a {@link MutableDouble} to an {@link Appendable}.
+     * Writes {@code "null"} when {@code x} is {@code null}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableDouble> type = TypeFactory.getType(MutableDouble.class);
-     * StringBuilder sb = new StringBuilder();
-     * MutableDouble md = MutableDouble.of(42.5);
-     * type.appendTo(sb, md);
-     * // sb.toString() equals "42.5"
-     *
-     * StringBuilder sb2 = new StringBuilder();
-     * type.appendTo(sb2, null);
-     * // sb2.toString() equals "null"
-     * }</pre>
-     *
-     * @param appendable The Appendable to write to
-     * @param x The MutableDouble to append
+     * @param appendable the target to write to
+     * @param x the {@code MutableDouble} to append, may be {@code null}
      * @throws IOException if an I/O error occurs while appending
      */
     @Override
@@ -246,25 +161,13 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
     }
 
     /**
-     * Writes the character representation of a MutableDouble to a CharacterWriter.
-     * The value is written as numeric characters or the {@code null} character array.
-     * This method is optimized for character-based writing.
+     * Writes the double value of a {@link MutableDouble} to a {@link CharacterWriter}.
+     * Writes the {@code NULL_CHAR_ARRAY} when {@code x} is {@code null}.
+     * The {@code config} parameter is not used for double values.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableDouble> type = TypeFactory.getType(MutableDouble.class);
-     * CharacterWriter writer = new CharacterWriter();
-     * MutableDouble md = MutableDouble.of(3.14159);
-     * type.writeCharacter(writer, md, null);
-     * // Writes: 3.14159
-     *
-     * type.writeCharacter(writer, null, null);
-     * // Writes: null
-     * }</pre>
-     *
-     * @param writer The CharacterWriter to write to
-     * @param x The MutableDouble to write
-     * @param config The serialization configuration (currently unused for double values)
+     * @param writer the {@code CharacterWriter} to write to
+     * @param x the {@code MutableDouble} to write, may be {@code null}
+     * @param config the serialization configuration (unused for double values)
      * @throws IOException if an I/O error occurs while writing
      */
     @Override

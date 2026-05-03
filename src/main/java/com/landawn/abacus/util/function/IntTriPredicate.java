@@ -64,9 +64,9 @@ public interface IntTriPredicate extends Throwables.IntTriPredicate<RuntimeExcep
      * boolean result = isValidTriangle.test(3, 4, 5);   // Returns true
      * }</pre>
      *
-     * @param a the first input argument
-     * @param b the second input argument
-     * @param c the third input argument
+     * @param a the first {@code int} input argument
+     * @param b the second {@code int} input argument
+     * @param c the third {@code int} input argument
      * @return {@code true} if the input arguments match the predicate, {@code false} otherwise
      */
     @Override
@@ -113,6 +113,7 @@ public interface IntTriPredicate extends Throwables.IntTriPredicate<RuntimeExcep
      *              Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default IntTriPredicate and(final IntTriPredicate other) {
         return (a, b, c) -> test(a, b, c) && other.test(a, b, c);
@@ -140,6 +141,7 @@ public interface IntTriPredicate extends Throwables.IntTriPredicate<RuntimeExcep
      *              Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default IntTriPredicate or(final IntTriPredicate other) {
         return (a, b, c) -> test(a, b, c) || other.test(a, b, c);

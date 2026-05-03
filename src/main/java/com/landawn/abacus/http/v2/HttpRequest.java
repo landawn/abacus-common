@@ -45,10 +45,10 @@ import com.landawn.abacus.util.URLEncodedUtil;
  * A fluent HTTP request builder and executor based on Java 11+ HttpClient.
  * This class provides a convenient API for building and executing HTTP requests with various features
  * such as headers, query parameters, request bodies, authentication, and timeouts.
- * 
+ *
  * <p>This implementation uses the modern Java HttpClient introduced in Java 11, providing better performance
  * and support for HTTP/2 compared to older HTTP clients.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Simple GET request
@@ -156,7 +156,7 @@ public final class HttpRequest {
     /**
      * Creates a new HttpRequest instance with the specified URL and timeout settings.
      * A new HTTP client is created with the specified timeouts and will be closed after execution.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpRequest request = HttpRequest.url("http://localhost:18080/data", 5000, 30000);
@@ -289,7 +289,7 @@ public final class HttpRequest {
     /**
      * Sets the read timeout for this request.
      * The read timeout is the maximum time to wait for data to be read from the server.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpRequest.url("http://localhost:18080/slow-endpoint")
@@ -358,7 +358,7 @@ public final class HttpRequest {
 
     /**
      * Sets the Basic Authentication header for this request.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpRequest.url("http://localhost:18080/secure")
@@ -382,7 +382,7 @@ public final class HttpRequest {
     /**
      * Sets the HTTP header specified by {@code name/value}.
      * If this HttpRequest already has any headers with that name, they are all replaced.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpRequest.url("http://localhost:18080/data")
@@ -461,13 +461,13 @@ public final class HttpRequest {
     /**
      * Sets HTTP headers specified by the key/value entries from the provided Map.
      * If this HttpRequest already has any headers with those names, they are all replaced.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, String> headers = new HashMap<>();
      * headers.put("Accept", "application/json");
      * headers.put("Authorization", "Bearer token123");
-     * 
+     *
      * HttpRequest.url("http://localhost:18080/data")
      *     .headers(headers)
      *     .get();
@@ -512,7 +512,7 @@ public final class HttpRequest {
     //     * @see HttpHeaders.Names
     //     * @see HttpHeaders.Values
     //     * @see HttpHeaders#toMap()
-    //     * @deprecated use {@link #headers(Map)} instead. Due to limitations of java.net.http.HttpRequest.Builder, the existing headers in this HttpRequest can't be removed. 
+    //     * @deprecated use {@link #headers(Map)} instead. Due to limitations of java.net.http.HttpRequest.Builder, the existing headers in this HttpRequest can't be removed.
     //     *                  This is inconsistent with the similar methods {@link OkHttpRequest#headers(HttpHeaders)} and {@link com.landawn.abacus.http.HttpRequest#headers(HttpHeaders)}.
     //     */
     //    public HttpRequest headers(final HttpHeaders headers) {
@@ -526,7 +526,7 @@ public final class HttpRequest {
     /**
      * Sets query parameters for {@code GET} or {@code DELETE} request.
      * The query string will be appended to the URL.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpRequest.url("http://localhost:18080/search")
@@ -546,13 +546,13 @@ public final class HttpRequest {
     /**
      * Sets query parameters for {@code GET} or {@code DELETE} request.
      * The parameters will be URL-encoded and appended to the URL.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> params = new HashMap<>();
      * params.put("q", "java programming");
      * params.put("limit", 10);
-     * 
+     *
      * HttpRequest.url("http://localhost:18080/search")
      *     .query(params)
      *     .get();
@@ -569,7 +569,7 @@ public final class HttpRequest {
 
     /**
      * Sets the request body as JSON with Content-Type: application/json.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "{\"name\":\"John\",\"age\":30}";
@@ -592,7 +592,7 @@ public final class HttpRequest {
     /**
      * Sets the request body as JSON with Content-Type: application/json.
      * The object will be serialized to JSON using the default JSON serializer.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 30);
@@ -664,13 +664,13 @@ public final class HttpRequest {
     /**
      * Sets the request body as form data with Content-Type: application/x-www-form-urlencoded.
      * The map entries will be encoded as form fields.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, String> formData = new HashMap<>();
      * formData.put("username", "john_doe");
      * formData.put("password", "secret123");
-     * 
+     *
      * HttpRequest.url("http://localhost:18080/login")
      *     .formBody(formData)
      *     .post();
@@ -690,13 +690,13 @@ public final class HttpRequest {
     /**
      * Sets the request body as form data with Content-Type: application/x-www-form-urlencoded.
      * The bean properties will be encoded as form fields using getter methods.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LoginRequest login = new LoginRequest();
      * login.setUsername("john_doe");
      * login.setPassword("secret123");
-     * 
+     *
      * HttpRequest.url("http://localhost:18080/login")
      *     .formBody(login)
      *     .post();
@@ -743,13 +743,13 @@ public final class HttpRequest {
 
     /**
      * Executes a GET request and returns the response with a String body.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpResponse<String> response = HttpRequest.url("http://localhost:18080/users")
      *     .header("Accept", "application/json")
      *     .get();
-     * 
+     *
      * if (response.statusCode() == 200) {
      *     String body = response.body();
      * }
@@ -786,7 +786,7 @@ public final class HttpRequest {
 
     /**
      * Executes a GET request and returns the response body deserialized to the specified type.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<User> users = HttpRequest.url("http://localhost:18080/users")
@@ -806,7 +806,7 @@ public final class HttpRequest {
 
     /**
      * Executes a POST request and returns the response with a String body.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User newUser = new User("John", "Doe");
@@ -846,7 +846,7 @@ public final class HttpRequest {
 
     /**
      * Executes a POST request and returns the response body deserialized to the specified type.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User newUser = new User("John", "Doe");
@@ -1006,7 +1006,7 @@ public final class HttpRequest {
 
     /**
      * Executes a DELETE request and returns the response with a String body.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpResponse<String> response = HttpRequest.url("http://localhost:18080/users/123")
@@ -1207,18 +1207,25 @@ public final class HttpRequest {
 
     void doAfterExecution(final HttpClient httpClientUsed) {
         if (closeHttpClientAfterExecution && httpClientUsed != DEFAULT_HTTP_CLIENT) {
-            // Shutdown isn't necessary?
+            // Java 21+ HttpClient implements AutoCloseable; shut it down to release internal executor threads.
+            if (httpClientUsed instanceof AutoCloseable ac) {
+                try {
+                    ac.close();
+                } catch (final Exception e) {
+                    // ignore — best effort cleanup
+                }
+            }
         }
     }
 
     /**
      * Executes a GET request asynchronously and returns a CompletableFuture with a String body response.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CompletableFuture<HttpResponse<String>> future = HttpRequest.url("http://localhost:18080/users")
      *     .asyncGet();
-     * 
+     *
      * future.thenAccept(response -> {
      *     if (response.statusCode() == 200) {
      *         System.out.println(response.body());
@@ -1258,12 +1265,12 @@ public final class HttpRequest {
 
     /**
      * Executes a GET request asynchronously and returns the response body deserialized to the specified type.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CompletableFuture<List<User>> future = HttpRequest.url("http://localhost:18080/users")
      *     .asyncGet(new TypeToken<List<User>>(){}.getType());
-     * 
+     *
      * future.thenAccept(users -> {
      *     users.forEach(System.out::println);
      * });

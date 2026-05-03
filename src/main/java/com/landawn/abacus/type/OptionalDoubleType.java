@@ -18,9 +18,11 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.u.OptionalDouble;
 
 /**
- * Type handler for {@link OptionalDouble} objects, providing serialization, deserialization,
- * and database interaction capabilities for optional double-precision floating-point values.
- * This handler manages the conversion between database numeric values and OptionalDouble wrapper objects.
+ * Type handler for {@link OptionalDouble} objects from the {@code com.landawn.abacus.util.u} package,
+ * providing serialization, deserialization, and database interaction capabilities for optional
+ * double-precision floating-point values.
+ * Note: this handles the abacus-specific {@code OptionalDouble}, not {@code java.util.OptionalDouble}.
+ * This handler manages the conversion between database numeric values and {@link OptionalDouble} wrapper objects.
  */
 public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
 
@@ -28,8 +30,7 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
 
     /**
      * Constructs a new OptionalDoubleType instance.
-     * This constructor is protected to allow subclassing while maintaining controlled instantiation
-     * through the TypeFactory.
+     * Instances are normally obtained via the TypeFactory rather than constructed directly.
      */
     protected OptionalDoubleType() {
         super(OPTIONAL_DOUBLE);

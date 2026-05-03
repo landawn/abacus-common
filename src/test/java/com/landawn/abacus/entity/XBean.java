@@ -220,19 +220,8 @@ public class XBean {
             return false;
         }
 
-        if (!Objects.equals(typeLong2, other.typeLong2)) {
-            return false;
-        }
-
-        if (typeShort != other.typeShort) {
-            return false;
-        }
-
-        if (!Objects.equals(typeSqlDate, other.typeSqlDate)) {
-            return false;
-        }
-
-        if (!Objects.equals(typeSqlTimestamp, other.typeSqlTimestamp)) {
+        if (!Objects.equals(typeLong2, other.typeLong2) || (typeShort != other.typeShort) || !Objects.equals(typeSqlDate, other.typeSqlDate)
+                || !Objects.equals(typeSqlTimestamp, other.typeSqlTimestamp)) {
             return false;
         }
 

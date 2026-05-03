@@ -666,7 +666,7 @@ public class JsonUtilTest extends TestBase {
         JSONObject json = new JSONObject();
         json.put("key", "value");
 
-        Type<Map<String, Object>> type = CommonUtil.typeOf("Map<String, Object>");
+        Type<Map<String, Object>> type = N.typeOf("Map<String, Object>");
         Map<String, Object> map = JsonUtil.unwrap(json, type);
 
         assertNotNull(map);
@@ -678,7 +678,7 @@ public class JsonUtilTest extends TestBase {
         JSONObject json = new JSONObject();
         json.put("name", "Helen");
 
-        Type<Object> type = CommonUtil.typeOf(Object.class);
+        Type<Object> type = N.typeOf(Object.class);
         Object result = JsonUtil.unwrap(json, type);
 
         assertNotNull(result);
@@ -690,7 +690,7 @@ public class JsonUtilTest extends TestBase {
         JSONObject json = new JSONObject();
         json.put("test", "value");
 
-        Type<JSONObject> type = CommonUtil.typeOf(JSONObject.class);
+        Type<JSONObject> type = N.typeOf(JSONObject.class);
         JSONObject result = JsonUtil.unwrap(json, type);
 
         assertNotNull(result);
@@ -704,7 +704,7 @@ public class JsonUtilTest extends TestBase {
         json.put("age", 50);
         json.put("active", true);
 
-        Type<SimpleBean> type = CommonUtil.typeOf(SimpleBean.class);
+        Type<SimpleBean> type = N.typeOf(SimpleBean.class);
         SimpleBean bean = JsonUtil.unwrap(json, type);
 
         assertNotNull(bean);
@@ -879,7 +879,7 @@ public class JsonUtilTest extends TestBase {
         json.put(2);
         json.put(3);
 
-        Type<List<Integer>> type = CommonUtil.typeOf("List<Integer>");
+        Type<List<Integer>> type = N.typeOf("List<Integer>");
         List<Integer> list = JsonUtil.unwrap(json, type);
 
         assertNotNull(list);
@@ -891,7 +891,7 @@ public class JsonUtilTest extends TestBase {
         JSONArray json = new JSONArray();
         json.put("item");
 
-        Type<Object> type = CommonUtil.typeOf(Object.class);
+        Type<Object> type = N.typeOf(Object.class);
         Object result = JsonUtil.unwrap(json, type);
 
         assertNotNull(result);
@@ -903,7 +903,7 @@ public class JsonUtilTest extends TestBase {
         JSONArray json = new JSONArray();
         json.put("test");
 
-        Type<JSONArray> type = CommonUtil.typeOf(JSONArray.class);
+        Type<JSONArray> type = N.typeOf(JSONArray.class);
         JSONArray result = JsonUtil.unwrap(json, type);
 
         assertNotNull(result);
@@ -917,7 +917,7 @@ public class JsonUtilTest extends TestBase {
         json.put("y");
         json.put("z");
 
-        Type<Set<String>> type = CommonUtil.typeOf("Set<String>");
+        Type<Set<String>> type = N.typeOf("Set<String>");
         Set<String> set = JsonUtil.unwrap(json, type);
 
         assertNotNull(set);
@@ -931,7 +931,7 @@ public class JsonUtilTest extends TestBase {
         json.put(10);
         json.put(15);
 
-        Type<int[]> type = CommonUtil.typeOf(int[].class);
+        Type<int[]> type = N.typeOf(int[].class);
         int[] array = JsonUtil.unwrap(json, type);
 
         assertNotNull(array);
@@ -945,7 +945,7 @@ public class JsonUtilTest extends TestBase {
         json.put("a");
         json.put("b");
 
-        Type<String[]> type = CommonUtil.typeOf(String[].class);
+        Type<String[]> type = N.typeOf(String[].class);
         String[] array = JsonUtil.unwrap(json, type);
 
         assertNotNull(array);
@@ -988,7 +988,7 @@ public class JsonUtilTest extends TestBase {
         json.put(inner1);
         json.put(inner2);
 
-        Type<List<List<Integer>>> type = CommonUtil.typeOf("List<List<Integer>>");
+        Type<List<List<Integer>>> type = N.typeOf("List<List<Integer>>");
         List<List<Integer>> result = JsonUtil.unwrap(json, type);
 
         assertNotNull(result);
@@ -1012,7 +1012,7 @@ public class JsonUtilTest extends TestBase {
         outer.put(inner1);
         outer.put(inner2);
 
-        Type<List<List<Integer>>> type = CommonUtil.typeOf("List<List<Integer>>");
+        Type<List<List<Integer>>> type = N.typeOf("List<List<Integer>>");
         List<List<Integer>> result = JsonUtil.unwrap(outer, type);
 
         Assertions.assertNotNull(result);
@@ -1044,7 +1044,7 @@ public class JsonUtilTest extends TestBase {
         json.put("a");
         json.put("b");
 
-        Type<ArrayList<String>> arrayListType = CommonUtil.typeOf("ArrayList<String>");
+        Type<ArrayList<String>> arrayListType = N.typeOf("ArrayList<String>");
         ArrayList<String> arrayList = JsonUtil.unwrap(json, arrayListType);
 
         assertNotNull(arrayList);
@@ -1101,7 +1101,7 @@ public class JsonUtilTest extends TestBase {
         JSONObject json = new JSONObject();
         json.put("key", "value");
 
-        Type<String> type = CommonUtil.typeOf(String.class);
+        Type<String> type = N.typeOf(String.class);
 
         assertThrows(IllegalArgumentException.class, () -> {
             JsonUtil.unwrap(json, type);
@@ -1130,7 +1130,7 @@ public class JsonUtilTest extends TestBase {
         JSONArray json = new JSONArray();
         json.put("value");
 
-        Type<String> type = CommonUtil.typeOf(String.class);
+        Type<String> type = N.typeOf(String.class);
 
         assertThrows(IllegalArgumentException.class, () -> {
             JsonUtil.unwrap(json, type);
@@ -1255,7 +1255,7 @@ public class JsonUtilTest extends TestBase {
         json.put("x");
         json.put("y");
 
-        Type<String> type = CommonUtil.typeOf(String.class);
+        Type<String> type = N.typeOf(String.class);
         List<String> list = JsonUtil.toList(json, type);
 
         assertNotNull(list);
@@ -1276,7 +1276,7 @@ public class JsonUtilTest extends TestBase {
         json.put(map1);
         json.put(map2);
 
-        Type<Map<String, Object>> type = CommonUtil.typeOf("Map<String, Object>");
+        Type<Map<String, Object>> type = N.typeOf("Map<String, Object>");
         List<Map<String, Object>> list = JsonUtil.toList(json, type);
 
         assertNotNull(list);
@@ -1294,7 +1294,7 @@ public class JsonUtilTest extends TestBase {
         JSONArray json = new JSONArray();
         json.put(inner);
 
-        Type<List<Integer>> type = CommonUtil.typeOf("List<Integer>");
+        Type<List<Integer>> type = N.typeOf("List<Integer>");
         List<List<Integer>> list = JsonUtil.toList(json, type);
 
         assertNotNull(list);
@@ -1310,7 +1310,7 @@ public class JsonUtilTest extends TestBase {
         json.put(JSONObject.NULL);
         json.put("third");
 
-        Type<String> type = CommonUtil.typeOf(String.class);
+        Type<String> type = N.typeOf(String.class);
         List<String> list = JsonUtil.toList(json, type);
 
         assertNotNull(list);

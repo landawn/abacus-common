@@ -19,46 +19,36 @@ import java.io.IOException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for Boolean array operations.
- * This class provides serialization/deserialization and I/O operations
- * for Boolean[] arrays, handling {@code null} elements and array formatting.
+ * Type handler for {@code Boolean[]} (boxed Boolean array) values.
+ * Provides serialization, deserialization, and I/O operations for {@code Boolean[]} arrays,
+ * including proper handling of {@code null} array elements.
+ *
+ * <p>String representation: a bracket-enclosed, comma-separated list of boolean values,
+ * e.g. {@code "[true, false, null, true]"}. The empty array is represented as {@code "[]"}.
+ * Individual {@code null} elements are represented as the literal string {@code "null"}.</p>
  */
 public final class BooleanArrayType extends ObjectArrayType<Boolean> {
 
     /**
-     * Package-private constructor for BooleanArrayType.
-     * This constructor is called by the TypeFactory to create Boolean[] type instances.
+     * Package-private constructor for {@code BooleanArrayType}.
+     * Instances are created by {@link TypeFactory}; do not instantiate directly.
      */
     BooleanArrayType() {
         super(Boolean[].class);
     }
 
     /**
-     * Converts a Boolean array to its string representation.
-     * The array is formatted with square brackets and comma-separated elements.
-     * Null elements are represented as "null" in the output.
+     * Converts a {@code Boolean[]} array to its string representation.
+     * The result is a bracket-enclosed, comma-separated list of element values.
+     * {@code null} elements are rendered as the literal string {@code "null"}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Boolean[]> type = TypeFactory.getType(Boolean[].class);
-     * Boolean[] array = {true, false, null, true};
-     * String result = type.stringOf(array);
-     * // result: "[true, false, null, true]"
-     *
-     * String empty = type.stringOf(new Boolean[0]);
-     * // empty: "[]"
-     *
-     * String nullResult = type.stringOf(null);
-     * // nullResult: null
-     * }</pre>
-     *
-     * @param x the Boolean array to convert
-     * @return a string representation like "[true, false, null]", or {@code null} if input is {@code null},
-     *         or "[]" if the array is empty
+     * @param x the {@code Boolean[]} to convert; may be {@code null}
+     * @return {@code "[true, false, null]"} style string, {@code "[]"} for an empty array,
+     *         or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final Boolean[] x) {
@@ -72,26 +62,14 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
     }
 
     /**
-     * Converts a string representation back to a Boolean array.
-     * Parses a string in the format "[true, false, null]" into a Boolean array.
-     * The string "null" (case-sensitive) is parsed as a {@code null} element.
+     * Parses a string in the format {@code "[true, false, null]"} and returns a {@code Boolean[]} array.
+     * The exact 4-character string {@code "null"} (case-sensitive) is parsed as a {@code null} element.
+     * Returns {@code null} for a {@code null}, empty, or blank input string.
+     * Returns an empty array for the string {@code "[]"}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Boolean[]> type = TypeFactory.getType(Boolean[].class);
-     * Boolean[] result = type.valueOf("[true, false, null, true]");
-     * // result: {true, false, null, true}
-     *
-     * Boolean[] empty = type.valueOf("[]");
-     * // empty: {} (empty array)
-     *
-     * Boolean[] nullResult = type.valueOf(null);
-     * // nullResult: null
-     * }</pre>
-     *
-     * @param str the string to parse, expecting format like "[true, false, null]"
-     * @return a Boolean array parsed from the string, or {@code null} if str is {@code null},
-     *         or an empty array if str is empty or equals "[]"
+     * @param str the string to parse; may be {@code null}, empty, or blank
+     * @return the parsed {@code Boolean[]} array, an empty array for {@code "[]"},
+     *         or {@code null} if {@code str} is {@code null}, empty, or blank
      */
     @Override
     public Boolean[] valueOf(final String str) {
@@ -119,13 +97,14 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
     }
 
     /**
-     * Appends a Boolean array to an Appendable object.
-     * Formats the array with square brackets and comma-separated elements.
-     * Null array elements are appended as "null", and boolean values as "true" or "false".
+     * Appends a {@code Boolean[]} array to an {@link Appendable} in bracket-enclosed format.
+     * Appends the literal {@code "null"} string if {@code x} is {@code null}.
+     * Each {@code null} element is written as {@code "null"};
+     * non-null elements are written as {@code "true"} or {@code "false"}.
      *
-     * @param appendable the Appendable object to append to
-     * @param x the Boolean array to append, may be null
-     * @throws IOException if an I/O error occurs during the append operation
+     * @param appendable the target {@code Appendable}
+     * @param x the {@code Boolean[]} array to append; may be {@code null}
+     * @throws IOException if an I/O error occurs during appending
      */
     @Override
     public void appendTo(final Appendable appendable, final Boolean[] x) throws IOException {
@@ -151,14 +130,15 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
     }
 
     /**
-     * Writes a Boolean array to a CharacterWriter.
-     * Uses optimized character arrays for boolean values to improve performance.
-     * The output format matches the string representation with square brackets.
+     * Writes a {@code Boolean[]} array to a {@link CharacterWriter} in bracket-enclosed format.
+     * Uses pre-allocated character arrays for {@code true}/{@code false}/{@code null} literals
+     * for efficient output. The format is identical to {@link #appendTo(Appendable, Boolean[])}.
+     * {@code config} is not used.
      *
-     * @param writer the CharacterWriter to write to
-     * @param x the Boolean array to write, may be null
-     * @param config the serialization configuration (not used for boolean arrays)
-     * @throws IOException if an I/O error occurs during the write operation
+     * @param writer the {@code CharacterWriter} to write to
+     * @param x the {@code Boolean[]} array to write; may be {@code null}
+     * @param config the serialization configuration (unused for boolean arrays); may be {@code null}
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final Boolean[] x, final JsonXmlSerConfig<?> config) throws IOException {

@@ -34,13 +34,19 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
 /**
- * The Abstract base class for {@code long} types in the type system.
+ * The abstract base class for {@code long} types in the type system.
  * <p>
  * This class provides common functionality for handling {@code long} values,
- * including conversion from various date/time types, database operations, and serialization.
- * Note that this class uses {@code Number} as its generic type to allow for both
- * primitive {@code long} and {@code Long} wrapper handling.
+ * including string/character-array parsing, conversion from date/time types
+ * ({@link java.util.Date}, {@link java.util.Calendar}, {@link java.time.Instant},
+ * {@link java.time.ZonedDateTime}, {@link java.time.LocalDateTime}),
+ * JDBC read/write operations, and serialization.
+ * This class uses {@code Number} as its generic type parameter so that both the primitive
+ * {@code long} type and the {@code Long} wrapper type can share this implementation.
+ * Concrete subclasses cover each of those two variants.
  * </p>
+ *
+ * @see LongType
  */
 public abstract class AbstractLongType extends NumberType<Number> {
 
@@ -78,25 +84,18 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * This method handles various input types:
      * </p>
      * <ul>
-     *   <li>{@code null} returns the default value</li>
-     *   <li>{@code Date} objects return their time in milliseconds</li>
-     *   <li>{@code Calendar} objects return their time in milliseconds</li>
-     *   <li>{@code Instant} objects return their epoch milliseconds</li>
-     *   <li>{@code ZonedDateTime} objects return their epoch milliseconds</li>
-     *   <li>{@code LocalDateTime} objects are converted to {@code Timestamp} then to milliseconds</li>
-     *   <li>Other objects are converted to string and parsed</li>
+     *   <li>{@code null} — returns the default value</li>
+     *   <li>{@link java.util.Date} — returns the time in milliseconds</li>
+     *   <li>{@link java.util.Calendar} — returns the time in milliseconds</li>
+     *   <li>{@link java.time.Instant} — returns the epoch milliseconds</li>
+     *   <li>{@link java.time.ZonedDateTime} — returns the epoch milliseconds</li>
+     *   <li>{@link java.time.LocalDateTime} — converted to {@link java.sql.Timestamp} then to milliseconds</li>
+     *   <li>Other objects — converted to string and parsed as a {@code long}</li>
      * </ul>
      *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * Type<Long> type = TypeFactory.getType(Long.class);
-     * Long value1 = type.valueOf(new Date());      // returns timestamp in milliseconds
-     * Long value2 = type.valueOf(Instant.now());   // returns epoch milliseconds
-     * Long value3 = type.valueOf("1234567890");    // returns 1234567890L
-     * }</pre>
-     *
-     * @param obj the object to convert
-     * @return the {@code Long} value representing milliseconds for date/time types, or parsed value for others
+     * @param obj the object to convert, may be {@code null}
+     * @return the {@code Long} value representing milliseconds for date/time types, or parsed value for others,
+     *         or the default value if {@code obj} is {@code null}
      */
     @Override
     public Long valueOf(final Object obj) {
@@ -127,20 +126,11 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * <ul>
      *   <li>Empty or {@code null} strings return the default value</li>
      *   <li>Strings ending with 'l', 'L', 'f', 'F', 'd', or 'D' have the suffix stripped before parsing</li>
-     *   <li>Valid numeric strings are parsed to {@code long} values</li>
+     *   <li>Valid numeric strings are parsed to {@code Long} values</li>
      * </ul>
      *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * Type<Long> type = TypeFactory.getType(Long.class);
-     * Long value1 = type.valueOf("1234567890");    // returns 1234567890L
-     * Long value2 = type.valueOf("9999999999L");   // returns 9999999999L (suffix stripped)
-     * Long value3 = type.valueOf("42");            // returns 42L
-     * Long value4 = type.valueOf("");              // returns default value
-     * }</pre>
-     *
      * @param str the string to convert
-     * @return the {@code Long} value
+     * @return the {@code Long} value, or the default value if {@code str} is empty or {@code null}
      * @throws NumberFormatException if the string cannot be parsed as a {@code long}
      */
     @Override
@@ -166,21 +156,13 @@ public abstract class AbstractLongType extends NumberType<Number> {
 
     /**
      * Converts a character array to a {@code Long} value.
-     * <p>
      * Delegates to the {@link #parseLong(char[], int, int)} method for parsing.
-     * </p>
      *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * Type<Long> type = TypeFactory.getType(Long.class);
-     * char[] buffer = "9876543210".toCharArray();
-     * Long value = type.valueOf(buffer, 0, 10);   // returns 9876543210L
-     * }</pre>
-     *
-     * @param cbuf the character array to convert
-     * @param offset the starting position in the array
+     * @param cbuf the character array to convert, may be {@code null}
+     * @param offset the starting position in the array (0-based)
      * @param len the number of characters to read
-     * @return the {@code Long} value, or default value if input is {@code null} or empty
+     * @return the {@code Long} value, or the default value if {@code cbuf} is {@code null} or {@code len} is {@code 0}
+     * @throws NumberFormatException if the character sequence cannot be parsed as a {@code long}
      */
     @Override
     public Long valueOf(final char[] cbuf, final int offset, final int len) {
@@ -188,21 +170,9 @@ public abstract class AbstractLongType extends NumberType<Number> {
     }
 
     /**
-     * Checks if this type represents a {@code long} type.
-     * <p>
-     * This method always returns {@code true} for {@code long} types.
-     * </p>
+     * Returns {@code true} because this type represents a {@code long}/{@code Long} type.
      *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * Type<Long> type = TypeFactory.getType(Long.class);
-     * if (type.isLong()) {
-     *     // Handle long type specific logic
-     *     System.out.println("This is a long type");
-     * }
-     * }</pre>
-     *
-     * @return {@code true}, indicating this is a {@code long} type
+     * @return {@code true}
      */
     @Override
     public boolean isLong() {
@@ -211,25 +181,12 @@ public abstract class AbstractLongType extends NumberType<Number> {
 
     /**
      * Retrieves a {@code long} value from a {@code ResultSet} at the specified column index.
-     * <p>
-     * This method uses {@code rs.getLong()} which returns {@code 0} for SQL {@code NULL} values.
+     * Uses {@link java.sql.ResultSet#getLong(int)} which returns {@code 0L} for SQL {@code NULL} values.
      * Subclasses may override this to return {@code null} for SQL {@code NULL} values.
-     * </p>
-     *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * // For primitive long types
-     * Type<Long> type = TypeFactory.getType(long.class);
-     * long value = type.get(rs, 1);   // Returns 0L for SQL NULL
-     *
-     * // For wrapper Long types
-     * Type<Long> type = TypeFactory.getType(Long.class);
-     * Long value = type.get(rs, 1);   // Returns null for SQL NULL (overridden in subclass)
-     * }</pre>
      *
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the column index (1-based)
-     * @return the {@code long} value at the specified column; returns {@code 0L} if SQL {@code NULL} (may be overridden by subclasses to return {@code null})
+     * @return the {@code long} value at the specified column, or {@code 0L} if SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the {@code columnIndex} is invalid
      */
     @Override
@@ -239,25 +196,12 @@ public abstract class AbstractLongType extends NumberType<Number> {
 
     /**
      * Retrieves a {@code long} value from a {@code ResultSet} using the specified column label.
-     * <p>
-     * This method uses {@code rs.getLong()} which returns {@code 0} for SQL {@code NULL} values.
+     * Uses {@link java.sql.ResultSet#getLong(String)} which returns {@code 0L} for SQL {@code NULL} values.
      * Subclasses may override this to return {@code null} for SQL {@code NULL} values.
-     * </p>
-     *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * // For primitive long types
-     * Type<Long> type = TypeFactory.getType(long.class);
-     * long value = type.get(rs, "timestamp");   // Returns 0L for SQL NULL
-     *
-     * // For wrapper Long types
-     * Type<Long> type = TypeFactory.getType(Long.class);
-     * Long value = type.get(rs, "timestamp");   // Returns null for SQL NULL (overridden in subclass)
-     * }</pre>
      *
      * @param rs the {@code ResultSet} to read from
      * @param columnName the column label
-     * @return the {@code long} value at the specified column; returns {@code 0L} if SQL {@code NULL} (may be overridden by subclasses to return {@code null})
+     * @return the {@code long} value at the specified column, or {@code 0L} if SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the {@code columnName} is not found
      */
     @Override
@@ -309,9 +253,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
 
     /**
      * Appends the string representation of a {@code long} value to an {@code Appendable}.
-     * <p>
      * Writes "null" if the value is {@code null}, otherwise writes the numeric value.
-     * </p>
      *
      * @param appendable the {@code Appendable} to write to
      * @param x the {@code Number} value to append as {@code long}

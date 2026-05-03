@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
-import java.io.StringReader;
 
 import org.junit.jupiter.api.Test;
 
@@ -29,6 +28,26 @@ public class JsonStringReaderTest extends TestBase {
 
         void throwUnexpectedNonStringTokenForTest() {
             throwExceptionDueToUnexpectedNonStringToken();
+        }
+    }
+
+    private static final class CapturingSymbolReader implements JsonReader.SymbolReader {
+        private String propName;
+        private int fromIndex;
+        private int toIndex;
+
+        @Override
+        public ParserUtil.PropInfo getPropInfo(final String propName) {
+            this.propName = propName;
+            return null;
+        }
+
+        @Override
+        public ParserUtil.PropInfo readPropInfo(final char[] cbuf, final int fromIndex, final int toIndex) {
+            this.propName = String.valueOf(cbuf, fromIndex, toIndex - fromIndex);
+            this.fromIndex = fromIndex;
+            this.toIndex = toIndex;
+            return null;
         }
     }
 
@@ -557,6 +576,34 @@ public class JsonStringReaderTest extends TestBase {
         assertEquals("hello", text);
 
         reader.close();
+    }
+
+    @Test
+    public void testReadPropInfo() {
+        JsonReader reader = JsonStringReader.parse("\"name\"", new char[256]);
+        CapturingSymbolReader symbolReader = new CapturingSymbolReader();
+
+        reader.nextToken();
+        reader.nextToken();
+        assertNull(reader.readPropInfo(symbolReader));
+
+        assertEquals("name", symbolReader.propName);
+        assertEquals(1, symbolReader.fromIndex);
+        assertEquals(5, symbolReader.toIndex);
+    }
+
+    @Test
+    public void testReadPropInfo_EscapedName() {
+        JsonReader reader = JsonStringReader.parse("\"first\\nname\"", new char[256]);
+        CapturingSymbolReader symbolReader = new CapturingSymbolReader();
+
+        reader.nextToken();
+        reader.nextToken();
+        assertNull(reader.readPropInfo(symbolReader));
+
+        assertEquals("first\nname", symbolReader.propName);
+        assertEquals(0, symbolReader.fromIndex);
+        assertEquals("first\nname".length(), symbolReader.toIndex);
     }
 
     @Test

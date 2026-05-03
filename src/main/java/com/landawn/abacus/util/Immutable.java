@@ -18,11 +18,11 @@ package com.landawn.abacus.util;
  * A marker interface for immutable data structures in the abacus-common framework.
  * Classes implementing this interface indicate that their instances are immutable
  * and cannot be modified after creation.
- * 
+ *
  * <p>This interface serves as a type marker for immutable collections, maps, and other
  * data structures. All mutating operations on implementing classes should throw
  * {@link UnsupportedOperationException}.</p>
- * 
+ *
  * <p>Immutable objects provide several benefits:
  * <ul>
  * <li>Thread-safety: Immutable objects can be shared between threads without synchronization</li>
@@ -30,7 +30,7 @@ package com.landawn.abacus.util;
  * <li>Caching: Immutable objects can be cached and reused safely</li>
  * <li>Hash stability: Hash codes never change, making them ideal for use as map keys</li>
  * </ul>
- * 
+ *
  * <p>Common implementations include:
  * <ul>
  * <li>{@link ImmutableList} - An immutable list implementation</li>
@@ -38,7 +38,7 @@ package com.landawn.abacus.util;
  * <li>{@link ImmutableMap} - An immutable map implementation</li>
  * <li>{@link ImmutableArray} - An immutable array wrapper</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Check if an object is immutable
@@ -47,7 +47,7 @@ package com.landawn.abacus.util;
  *     sharedCollection = myCollection;
  * }
  * }</pre>
- * 
+ *
  * @see ImmutableCollection
  * @see ImmutableList
  * @see ImmutableSet

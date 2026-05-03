@@ -20,9 +20,15 @@ import java.sql.SQLException;
 import com.landawn.abacus.util.Numbers;
 
 /**
- * Type handler for Float wrapper type.
- * This class provides functionality to handle Float objects in database operations and type conversions.
- * It extends AbstractFloatType to inherit common float type handling behavior.
+ * Type handler for {@link Float} (wrapper class) values.
+ * This class provides database read operations and type information for {@link Float} objects.
+ *
+ * <p>When reading from a database, the column value is retrieved via
+ * {@link java.sql.ResultSet#getObject(int) ResultSet.getObject} to preserve SQL {@code NULL}:
+ * a {@code null} result returns {@code null}, a {@code Float} result is returned directly, and
+ * any other numeric type is converted via {@link com.landawn.abacus.util.Numbers#toFloat(Object)}.
+ *
+ * @see AbstractFloatType
  */
 public final class FloatType extends AbstractFloatType {
 
@@ -40,9 +46,9 @@ public final class FloatType extends AbstractFloatType {
     }
 
     /**
-     * Returns the Class object representing the Float class.
+     * Returns the Java class represented by this type handler.
      *
-     * @return the Class object for Float.class
+     * @return {@code Float.class}
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
@@ -52,9 +58,9 @@ public final class FloatType extends AbstractFloatType {
 
     /**
      * Indicates whether this type represents a primitive wrapper class.
-     * Float is the wrapper class for the primitive float type.
+     * {@link Float} is the wrapper for the primitive {@code float} type.
      *
-     * @return {@code true}, indicating Float is a primitive wrapper
+     * @return {@code true}, always, because {@link Float} is a primitive wrapper
      */
     @Override
     public boolean isPrimitiveWrapper() {
@@ -62,19 +68,15 @@ public final class FloatType extends AbstractFloatType {
     }
 
     /**
-     * Retrieves a Float value from a ResultSet at the specified column index.
-     * This method handles various numeric types in the database and converts them to Float.
+     * Retrieves a {@link Float} value from a {@link java.sql.ResultSet} at the specified column index.
+     * The column is read via {@link java.sql.ResultSet#getObject(int)} to preserve SQL {@code NULL}.
+     * If the returned object is already a {@link Float} it is returned directly; any other numeric
+     * type is converted via {@link com.landawn.abacus.util.Numbers#toFloat(Object)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Float> type = TypeFactory.getType(Float.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * Float temperature = type.get(rs, 1);   // retrieves Float from column 1
-     * }</pre>
-     *
-     * @param rs the ResultSet containing the data, must not be {@code null}
-     * @param columnIndex the column index (1-based) to retrieve the value from
-     * @return the Float value at the specified column, or {@code null} if the column value is SQL NULL
+     * @param rs          the {@link java.sql.ResultSet} to read from; must not be {@code null}
+     * @param columnIndex the 1-based column index
+     * @return the {@link Float} value at the specified column,
+     *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -91,19 +93,15 @@ public final class FloatType extends AbstractFloatType {
     }
 
     /**
-     * Retrieves a Float value from a ResultSet using the specified column label.
-     * This method handles various numeric types in the database and converts them to Float.
+     * Retrieves a {@link Float} value from a {@link java.sql.ResultSet} using the specified column label.
+     * The column is read via {@link java.sql.ResultSet#getObject(String)} to preserve SQL {@code NULL}.
+     * If the returned object is already a {@link Float} it is returned directly; any other numeric
+     * type is converted via {@link com.landawn.abacus.util.Numbers#toFloat(Object)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Float> type = TypeFactory.getType(Float.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * Float temperature = type.get(rs, "temperature");   // retrieves Float from "temperature" column
-     * }</pre>
-     *
-     * @param rs the ResultSet containing the data, must not be {@code null}
-     * @param columnName the label of the column to retrieve the value from, must not be {@code null}
-     * @return the Float value in the specified column, or {@code null} if the column value is SQL NULL
+     * @param rs         the {@link java.sql.ResultSet} to read from; must not be {@code null}
+     * @param columnName the label of the column to retrieve
+     * @return the {@link Float} value in the specified column,
+     *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs
      */
     @Override

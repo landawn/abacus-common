@@ -38,7 +38,7 @@ public class PasswordTest extends AbstractTest {
         N.println(pwd.toString());
 
         Password pwd2 = new Password("SHA-256");
-        Set<Password> set = CommonUtil.toSet(pwd);
+        Set<Password> set = N.toSet(pwd);
         assertTrue(set.contains(pwd2));
 
         assertEquals("SHA-256", pwd2.getAlgorithm());

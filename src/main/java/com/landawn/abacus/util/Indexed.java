@@ -57,8 +57,8 @@ package com.landawn.abacus.util;
  * <pre>{@code
  * // Basic creation and access
  * Indexed<String> indexed = Indexed.of("Hello", 5);
- * String value = indexed.value();   // "Hello"
- * long index = indexed.index();   // 5
+ * String value = indexed.value();  // "Hello"
+ * int index = indexed.index();     // 5
  *
  * // Stream processing with indices
  * List<String> items = Arrays.asList("a", "b", "c");
@@ -309,8 +309,8 @@ public final class Indexed<T> extends AbstractIndexed {
      * <pre>{@code
      * // Basic value retrieval
      * Indexed<String> indexed = Indexed.of("Hello", 5);
-     * String value = indexed.value();   // "Hello"
-     * long index = indexed.index();     // 5
+     * String value = indexed.value();  // "Hello"
+     * int index = indexed.index();     // 5
      *
      * // Handling null values
      * Indexed<String> nullIndexed = Indexed.of(null, 0);

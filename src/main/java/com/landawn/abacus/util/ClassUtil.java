@@ -168,25 +168,25 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   </tr>
  *   <tr>
  *     <td>Class Loading</td>
- *     <td>forName(), loadClass()</td>
+ *     <td>forName()</td>
  *     <td>ClassLoader cache</td>
  *     <td>Dynamic class loading, plugin systems</td>
  *   </tr>
  *   <tr>
- *     <td>Bean Introspection</td>
- *     <td>getPropInfo(), getPropNameList()</td>
+ *     <td>Bean Introspection (via {@link Beans})</td>
+ *     <td>Beans.getPropNameList(), Beans.getPropGetters()</td>
  *     <td>Property metadata cache</td>
  *     <td>ORM frameworks, serialization</td>
  *   </tr>
  *   <tr>
- *     <td>Property Access</td>
- *     <td>getPropValue(), setPropValue()</td>
+ *     <td>Property Access (via {@link Beans})</td>
+ *     <td>Beans.getPropValue(), Beans.setPropValue()</td>
  *     <td>Method handle cache</td>
  *     <td>Data binding, configuration management</td>
  *   </tr>
  *   <tr>
  *     <td>Type Conversion</td>
- *     <td>wrap(), unwrap(), convert()</td>
+ *     <td>wrap(), unwrap()</td>
  *     <td>Type mapping cache</td>
  *     <td>Type safety, primitive handling</td>
  *   </tr>
@@ -350,7 +350,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * </ul>
  *
  * <p><b>Attribution:</b>
- * This class includes code adapted from Apache Commons Lang under the Apache License 2.0. 
+ * This class includes code adapted from Apache Commons Lang under the Apache License 2.0.
  * Methods from these libraries may have been modified for consistency, performance optimization, and null-safety enhancement.
  *
  * @see java.lang.reflect.Method
@@ -744,7 +744,7 @@ public final class ClassUtil {
      * Returns the Class object associated with the class or interface with the given string name.
      * This method supports primitive types (boolean, char, byte, short, int, long, float, double)
      * and array types with format {@code java.lang.String[]}.
-     * 
+     *
      * <p>The method also handles:</p>
      * <ul>
      *   <li>Fully qualified class names</li>
@@ -752,7 +752,7 @@ public final class ClassUtil {
      *   <li>Array notation (e.g., "String[]", "int[][]")</li>
      *   <li>Inner class notation (with $ separator)</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<?> strClass = ClassUtil.forName("java.lang.String");
@@ -1962,7 +1962,7 @@ public final class ClassUtil {
 
                     if (tmp.length() > 1 && tmp.substring(0, half).equals(tmp.substring(half))) {
                         sb.append(Strings.reverse(tmp.substring(0, half)));
-                    } else if (tmp.length() > 2 && tmp.length() % 2 == 1 && tmp.substring(0, half).equals(tmp.substring(half + 1))) {
+                    } else if (tmp.length() > 2 && tmp.length() % 2 != 0 && tmp.substring(0, half).equals(tmp.substring(half + 1))) {
                         sb.append(Strings.reverse(tmp.substring(0, half)));
                     } else {
                         sb.append(Strings.reverse(tmp));
@@ -1983,7 +1983,7 @@ public final class ClassUtil {
      * This method calculates the distance in the inheritance hierarchy from
      * a child class to a parent class. This method follows the superclass chain only;
      * interfaces are not considered.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int distance = ClassUtil.inheritanceDistance(ArrayList.class, AbstractList.class);
@@ -1991,7 +1991,7 @@ public final class ClassUtil {
      *
      * distance = ClassUtil.inheritanceDistance(ArrayList.class, List.class);
      * // Returns -1 (interfaces are not considered)
-     * 
+     *
      * distance = ClassUtil.inheritanceDistance(String.class, Object.class);
      * // Returns 1 (String directly extends Object)
      * }</pre>
@@ -2558,7 +2558,7 @@ public final class ClassUtil {
     /**
      * Creates a MethodHandle for the specified method. MethodHandles provide
      * a more efficient way to invoke methods compared to standard reflection.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Method method = MyClass.class.getMethod("getValue");

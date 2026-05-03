@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,11 +53,11 @@ public class PairTypeTest extends TestBase {
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = stringIntPairType.parameterTypes();
+        List<Type<?>> paramTypes = stringIntPairType.parameterTypes();
         assertNotNull(paramTypes);
-        assertEquals(2, paramTypes.length);
-        assertEquals("String", paramTypes[0].name());
-        assertEquals("Integer", paramTypes[1].name());
+        assertEquals(2, paramTypes.size());
+        assertEquals("String", paramTypes.get(0).name());
+        assertEquals("Integer", paramTypes.get(1).name());
     }
 
     @Test

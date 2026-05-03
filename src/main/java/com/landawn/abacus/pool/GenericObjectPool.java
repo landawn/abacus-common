@@ -110,11 +110,11 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * Uses default auto-balancing and balance factor settings.
      *
      * @param capacity the maximum number of objects the pool can hold (must be non-negative)
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
+     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy to use for selecting objects to evict
      */
-    protected GenericObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy) {
-        this(capacity, evictDelay, evictionPolicy, 0, null);
+    protected GenericObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy) {
+        this(capacity, evictDelayInMillis, evictionPolicy, 0, null);
     }
 
     /**
@@ -122,14 +122,14 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * Uses default auto-balancing and balance factor settings.
      *
      * @param capacity the maximum number of objects the pool can hold (must be non-negative)
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
+     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy to use for selecting objects to evict
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit (must be non-negative)
      * @param memoryMeasure the function to calculate object memory size, or {@code null} if not using memory limits
      */
-    protected GenericObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final long maxMemorySize,
+    protected GenericObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final long maxMemorySize,
             final ObjectPool.MemoryMeasure<E> memoryMeasure) {
-        this(capacity, evictDelay, evictionPolicy, true, DEFAULT_BALANCE_FACTOR, maxMemorySize, memoryMeasure);
+        this(capacity, evictDelayInMillis, evictionPolicy, true, DEFAULT_BALANCE_FACTOR, maxMemorySize, memoryMeasure);
     }
 
     /**
@@ -137,36 +137,40 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * Does not use memory-based constraints.
      *
      * @param capacity the maximum number of objects the pool can hold (must be non-negative)
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
+     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy to use for selecting objects to evict
      * @param autoBalance whether to automatically remove objects when the pool is full
      * @param balanceFactor the proportion of objects to remove during balancing, typically 0.1 to 0.5 (must be non-negative)
      */
-    protected GenericObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final boolean autoBalance,
+    protected GenericObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final boolean autoBalance,
             final float balanceFactor) {
-        this(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor, 0, null);
+        this(capacity, evictDelayInMillis, evictionPolicy, autoBalance, balanceFactor, 0, null);
     }
 
     /**
      * Constructs a new GenericObjectPool with full configuration options.
      *
      * @param capacity the maximum number of objects the pool can hold (must be non-negative)
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
+     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy to use for selecting objects to evict
      * @param autoBalance whether to automatically remove objects when the pool is full
      * @param balanceFactor the proportion of objects to remove during balancing, typically 0.1 to 0.5 (must be non-negative)
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit (must be non-negative)
      * @param memoryMeasure the function to calculate object memory size, or {@code null} if not using memory limits
      */
-    protected GenericObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final boolean autoBalance,
+    protected GenericObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final boolean autoBalance,
             final float balanceFactor, final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure) {
-        super(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor, maxMemorySize);
+        super(capacity, evictDelayInMillis, evictionPolicy, autoBalance, balanceFactor, maxMemorySize);
 
         this.memoryMeasure = memoryMeasure;
         pool = new ArrayDeque<>(Math.min(capacity, 1000));
 
         cmp = createComparator();
         scheduleEvictionTask();
+
+        // Register shutdown hook AFTER all subclass state is fully initialized so a JVM shutdown
+        // racing the constructor cannot invoke close() against a null pool/cmp.
+        registerShutdownHook();
     }
 
     private Comparator<E> createComparator() {
@@ -187,7 +191,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     private void scheduleEvictionTask() {
-        if (evictDelay <= 0 || isClosed) {
+        if (evictDelayInMillis <= 0 || isClosed) {
             return;
         }
 
@@ -203,7 +207,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             }
         };
 
-        scheduleFuture = scheduledExecutor.scheduleWithFixedDelay(evictTask, evictDelay, evictDelay, TimeUnit.MILLISECONDS);
+        scheduleFuture = scheduledExecutor.scheduleWithFixedDelay(evictTask, evictDelayInMillis, evictDelayInMillis, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -236,8 +240,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      */
     @Override
     public boolean add(final E element) throws IllegalStateException {
-        assertNotClosed();
-
         if (element == null) {
             throw new IllegalArgumentException("Element cannot be null");
         }
@@ -249,6 +251,10 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         lock.lock();
 
         try {
+            // Re-check inside the lock: a concurrent close() could have set isClosed between
+            // the prior unlocked check and our lock acquisition, leaking this element.
+            assertNotClosed();
+
             if (pool.size() >= capacity) {
                 if (autoBalance) {
                     evict();
@@ -363,8 +369,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      */
     @Override
     public boolean add(final E element, final long timeout, final TimeUnit unit) throws IllegalStateException, InterruptedException {
-        assertNotClosed();
-
         if (element == null) {
             throw new IllegalArgumentException("Element cannot be null");
         }
@@ -378,6 +382,10 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         lock.lock();
 
         try {
+            // Re-check closed-state inside the lock; a concurrent close() between an unlocked
+            // check and lock acquisition would otherwise leak this element.
+            assertNotClosed();
+
             if ((pool.size() >= capacity) && autoBalance) {
                 evict();
             }
@@ -385,7 +393,20 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             int maxSpins = 10000;
 
             while (maxSpins-- > 0) {
+                // Re-check inside the loop: a concurrent close() that ran while this thread was
+                // parked on notFull.awaitNanos() (now signaled by removeAll()) emptied the pool;
+                // without this check the awakened thread would happily push the element into the
+                // newly-closed pool, leaking it (its destroy() never fires on close()).
+                assertNotClosed();
+
                 if (pool.size() < capacity) {
+                    // Re-check expiry: the element may have expired during the awaitNanos wait
+                    // below. Pushing an expired element corrupts hit/miss accounting and exposes
+                    // a doomed object to the next take()er.
+                    if (element.activityPrint().isExpired()) {
+                        return false;
+                    }
+
                     if (memoryMeasure != null) {
                         final long elementMemorySize = memoryMeasure.sizeOf(element);
 
@@ -399,11 +420,11 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                                 evict();
 
                                 if (maxMemorySize > 0 && elementMemorySize > maxMemorySize - totalDataSize.get()) {
-                                    // ignore. 
+                                    // ignore.
                                     return false;
                                 }
                             } else {
-                                // ignore. 
+                                // ignore.
                                 return false;
                             }
                         }
@@ -567,6 +588,11 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
         try {
             while (true) {
+                // Re-check on every iteration: a concurrent close()/removeAll() now signals
+                // notEmpty.signalAll(), so a waiter parked on awaitNanos wakes up and must
+                // notice the closed state instead of looping back to wait again.
+                assertNotClosed();
+
                 element = pool.size() > 0 ? pool.pop() : null;
 
                 if (element != null) {
@@ -731,17 +757,12 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Returns the hash code value for this pool.
      * The hash code is based on the internal pool structure.
-     * 
+     *
      * @return a hash code value for this pool
      */
     @Override
     public int hashCode() {
-        lock.lock();
-        try {
-            return pool.hashCode();
-        } finally {
-            lock.unlock();
-        }
+        return snapshot().hashCode();
     }
 
     /**
@@ -762,24 +783,22 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             return false;
         }
 
-        lock.lock();
-        try {
-            return N.equals(((GenericObjectPool<E>) obj).pool, pool);
-        } finally {
-            lock.unlock();
-        }
+        final List<E> snapshot = snapshot();
+        final List<E> otherSnapshot = ((GenericObjectPool<E>) obj).snapshot();
+
+        return snapshot.equals(otherSnapshot);
     }
 
     /**
      * Returns a string representation of this pool.
      * The string representation consists of the string representation of the internal pool.
-     * 
+     *
      * @return a string representation of this pool
      */
     @Override
     public String toString() {
-        return "{pool=GenericObjectPool, capacity=" + capacity + ", evictDelay=" + evictDelay + ", evictionPolicy=" + evictionPolicy + ", autoBalance="
-                + autoBalance + ", balanceFactor=" + balanceFactor + ", maxMemorySize=" + maxMemorySize + ", memoryMeasure=" + memoryMeasure
+        return "{pool=GenericObjectPool, capacity=" + capacity + ", evictDelayInMillis=" + evictDelayInMillis + ", evictionPolicy=" + evictionPolicy
+                + ", autoBalance=" + autoBalance + ", balanceFactor=" + balanceFactor + ", maxMemorySize=" + maxMemorySize + ", memoryMeasure=" + memoryMeasure
                 + ", totalDataSize=" + totalDataSize.get() + "}";
     }
 
@@ -808,11 +827,32 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                 }
             }
 
-            for (final E element : heap) {
-                pool.remove(element);
-            }
+            // Identity-based removal: pool.remove(Object) uses equals(), which can drop a
+            // different element that happens to be equals-equal (e.g. PoolableAdapter with
+            // content-based equals wrapping the same value). Walk the deque once and remove
+            // the heap-selected items by identity.
+            removeByIdentity(heap);
 
             destroyAll(heap, Caller.VACATE);
+        }
+    }
+
+    private void removeByIdentity(final java.util.Collection<E> targets) {
+        if (targets == null || targets.isEmpty()) {
+            return;
+        }
+        // Remove ONE pool entry per target, by identity. If the same instance happens to be in
+        // the pool more than once, only the first occurrence is removed - matching the
+        // ArrayDeque.remove(Object) cardinality but using identity instead of equals so a
+        // content-equal-but-distinct entry isn't accidentally evicted.
+        for (final E target : targets) {
+            final java.util.Iterator<E> it = pool.iterator();
+            while (it.hasNext()) {
+                if (it.next() == target) {
+                    it.remove();
+                    break;
+                }
+            }
         }
     }
 
@@ -824,37 +864,53 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         return Math.max(1, (int) (pool.size() * balanceFactor));
     }
 
+    private List<E> snapshot() {
+        lock.lock();
+
+        try {
+            return new ArrayList<>(pool);
+        } finally {
+            lock.unlock();
+        }
+    }
+
     /**
      * Scans the pool for expired objects and removes them.
      * This method is called periodically by the scheduled eviction task.
      */
     @SuppressWarnings("deprecation")
     protected void removeExpired() {
-        lock.lock();
-
+        // Phase 1: under the lock, identify+remove expired elements from the pool.
         List<E> removingObjects = null;
-
+        lock.lock();
         try {
             for (final E element : pool) {
                 if (element.activityPrint().isExpired()) {
                     if (removingObjects == null) {
                         removingObjects = Objectory.createList();
                     }
-
                     removingObjects.add(element);
                 }
             }
 
             if (N.notEmpty(removingObjects)) {
-                pool.removeAll(removingObjects);
-
-                destroyAll(removingObjects, Caller.EVICT);
-
+                // Identity-based removal: see evict(int). pool.removeAll uses equals which can
+                // drop multiple distinct entries that happen to be equals-equal to one expired
+                // element, leaking still-valid objects with no destroy callback.
+                removeByIdentity(removingObjects);
                 notFull.signalAll();
             }
         } finally {
             lock.unlock();
+        }
 
+        // Phase 2: destroy outside the lock so user destroy() callbacks (which may close DB/TCP
+        // connections) can't stall the pool against unrelated take/add/etc.
+        try {
+            if (N.notEmpty(removingObjects)) {
+                destroyAll(removingObjects, Caller.EVICT);
+            }
+        } finally {
             Objectory.recycle(removingObjects);
         }
     }
@@ -918,23 +974,30 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     private void removeAll(final Caller caller) {
+        // Snapshot under the lock and clear pool state, then release the lock BEFORE invoking
+        // user destroy() callbacks. The pre-fix behavior held the pool lock across N user
+        // destroy() calls (which may close DB/TCP connections and block) — for a large pool that
+        // turned close()/clear() into a global stall against every other API call.
+        final List<E> doomed;
         lock.lock();
-
         try {
-            destroyAll(new ArrayList<>(pool), caller);
-
+            doomed = new ArrayList<>(pool);
             pool.clear();
-
+            // Wake every waiter on either condition. notFull alone covered add(timeout) waiters,
+            // but take(timeout) waiters on notEmpty would otherwise hang until their own timeout
+            // expired even though the pool is being torn down.
             notFull.signalAll();
+            notEmpty.signalAll();
         } finally {
             lock.unlock();
         }
+        destroyAll(doomed, caller);
     }
 
     /**
      * Serializes this pool to an ObjectOutputStream.
      * The pool is locked during serialization to ensure consistency.
-     * 
+     *
      * @param os the output stream
      * @throws IOException if an I/O error occurs
      */
@@ -952,7 +1015,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Deserializes this pool from an ObjectInputStream and reinitializes transient fields
      * (lock, conditions, comparator, and eviction task).
-     * 
+     *
      * @param is the input stream
      * @throws IOException if an I/O error occurs
      * @throws ClassNotFoundException if the class of a serialized object cannot be found

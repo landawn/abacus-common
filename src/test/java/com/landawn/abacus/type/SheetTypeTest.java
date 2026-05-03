@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -35,9 +37,9 @@ public class SheetTypeTest extends TestBase {
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = sheetType.parameterTypes();
+        List<Type<?>> paramTypes = sheetType.parameterTypes();
         assertNotNull(paramTypes);
-        assertEquals(3, paramTypes.length);
+        assertEquals(3, paramTypes.size());
     }
 
     @Test

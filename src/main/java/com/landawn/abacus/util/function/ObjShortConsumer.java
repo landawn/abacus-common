@@ -55,4 +55,23 @@ public interface ObjShortConsumer<T> extends Throwables.ObjShortConsumer<T, Runt
     // @ai-ignore Obj* argument order convention - intentional: class name prefix determines parameter order. ObjShort* has object first, short second. Do not suggest reordering.
     @Override
     void accept(T t, short value);
+
+    /**
+     * Returns a composed {@code ObjShortConsumer} that performs, in sequence, this
+     * operation followed by the {@code after} operation. If performing either
+     * operation throws an exception, it is relayed to the caller of the
+     * composed operation. If performing this operation throws an exception,
+     * the {@code after} operation will not be performed.
+     *
+     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @return a composed {@code ObjShortConsumer} that performs in sequence this
+     *         operation followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
+     */
+    default ObjShortConsumer<T> andThen(final ObjShortConsumer<? super T> after) {
+        return (t, value) -> {
+            accept(t, value);
+            after.accept(t, value);
+        };
+    }
 }

@@ -27,29 +27,35 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for AtomicLong operations.
- * This class provides serialization/deserialization and database operations
- * for java.util.concurrent.atomic.AtomicLong instances.
+ * Type handler for {@link java.util.concurrent.atomic.AtomicLong} values.
+ * Provides serialization, deserialization, and JDBC operations for {@code AtomicLong} instances.
+ *
+ * <p>String representation: the decimal string of the contained {@code long} value.</p>
+ * <p>JDBC mapping: stored and retrieved as a SQL {@code BIGINT} column
+ * ({@link java.sql.Types#BIGINT}).</p>
+ *
+ * @see java.util.concurrent.atomic.AtomicLong
  */
 public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
 
     /**
-     * The type name constant for AtomicLong type identification.
+     * The type name constant used to identify this type within the type system
+     * (value: {@code "AtomicLong"}).
      */
     public static final String ATOMIC_LONG = AtomicLong.class.getSimpleName();
 
     /**
-     * Package-private constructor for AtomicLongType.
-     * This constructor is called by the TypeFactory to create AtomicLong type instances.
+     * Package-private constructor for {@code AtomicLongType}.
+     * Instances are created by {@link TypeFactory}; do not instantiate directly.
      */
     AtomicLongType() {
         super(ATOMIC_LONG);
     }
 
     /**
-     * Returns the Class object representing the AtomicLong class.
+     * Returns the Java class represented by this type handler.
      *
-     * @return the Class object for {@code AtomicLong}
+     * @return {@code AtomicLong.class}
      */
     @Override
     public Class<AtomicLong> javaType() {
@@ -57,13 +63,14 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
     }
 
     /**
-     * Retrieves an AtomicLong value from a ResultSet at the specified column index.
-     * The long value is read from the database and wrapped in a new AtomicLong instance.
+     * Retrieves an {@link java.util.concurrent.atomic.AtomicLong} from a {@link java.sql.ResultSet}
+     * at the specified column index.
+     * The column value is read as a SQL {@code BIGINT} and wrapped in a new {@code AtomicLong}.
      *
-     * @param rs the ResultSet to retrieve the value from
-     * @param columnIndex the column index (1-based) of the long value
-     * @return a new AtomicLong containing the retrieved value, or {@code null} if SQL NULL
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnIndex the 1-based index of the column containing the long value
+     * @return a new {@code AtomicLong} wrapping the retrieved value, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
      */
     @Override
     public AtomicLong get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -73,14 +80,14 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
     }
 
     /**
-     * Retrieves an AtomicLong value from a ResultSet using the specified column label.
-     * The long value is read from the database and wrapped in a new AtomicLong instance.
+     * Retrieves an {@link java.util.concurrent.atomic.AtomicLong} from a {@link java.sql.ResultSet}
+     * using the specified column label.
+     * The column value is read as a SQL {@code BIGINT} and wrapped in a new {@code AtomicLong}.
      *
-     * @param rs the ResultSet to retrieve the value from
-     * @param columnName the label for the column specified with the SQL AS clause,
-     *                    or the column name if no AS clause was specified
-     * @return a new AtomicLong containing the retrieved value, or {@code null} if SQL NULL
-     * @throws SQLException if a database access error occurs or the columnName is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnName the column label as specified in the SQL AS clause, or the column name if no AS clause was used
+     * @return a new {@code AtomicLong} wrapping the retrieved value, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
     @Override
     public AtomicLong get(final ResultSet rs, final String columnName) throws SQLException {
@@ -90,14 +97,15 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
     }
 
     /**
-     * Sets an AtomicLong parameter in a PreparedStatement at the specified position.
-     * The long value is extracted from the AtomicLong before setting.
-     * If the AtomicLong is {@code null}, sets the parameter to SQL NULL.
+     * Sets an {@link java.util.concurrent.atomic.AtomicLong} parameter on a
+     * {@link java.sql.PreparedStatement} at the specified position.
+     * If {@code x} is {@code null}, the parameter is set to SQL NULL
+     * ({@link java.sql.Types#BIGINT}); otherwise the contained long value is used.
      *
-     * @param stmt the PreparedStatement to set the parameter on
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the AtomicLong value to set, may be {@code null} (set as SQL NULL)
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param stmt the {@code PreparedStatement} on which to set the parameter
+     * @param columnIndex the 1-based parameter index to set
+     * @param x the {@code AtomicLong} value to set; {@code null} is stored as SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final AtomicLong x) throws SQLException {
@@ -109,14 +117,15 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
     }
 
     /**
-     * Sets a named AtomicLong parameter in a CallableStatement.
-     * The long value is extracted from the AtomicLong before setting.
-     * If the AtomicLong is {@code null}, sets the parameter to SQL NULL.
+     * Sets a named {@link java.util.concurrent.atomic.AtomicLong} parameter on a
+     * {@link java.sql.CallableStatement}.
+     * If {@code x} is {@code null}, the parameter is set to SQL NULL
+     * ({@link java.sql.Types#BIGINT}); otherwise the contained long value is used.
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param stmt the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the AtomicLong value to set, may be {@code null} (set as SQL NULL)
-     * @throws SQLException if a database access error occurs or the parameter name is invalid
+     * @param x the {@code AtomicLong} value to set; {@code null} is stored as SQL NULL
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final AtomicLong x) throws SQLException {
@@ -128,27 +137,12 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
     }
 
     /**
-     * Converts an AtomicLong value to its string representation.
-     * The long value is extracted from the AtomicLong and converted to string.
+     * Converts an {@link java.util.concurrent.atomic.AtomicLong} to its decimal string representation.
+     * The contained {@code long} value is obtained via {@link java.util.concurrent.atomic.AtomicLong#get()}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * AtomicLongType type = (AtomicLongType) TypeFactory.getType(AtomicLong.class);
-     *
-     * AtomicLong value = new AtomicLong(123456789L);
-     * String str = type.stringOf(value);
-     * // str: "123456789"
-     *
-     * AtomicLong zero = new AtomicLong(0L);
-     * String zeroStr = type.stringOf(zero);
-     * // zeroStr: "0"
-     *
-     * String nullStr = type.stringOf(null);
-     * // nullStr: null
-     * }</pre>
-     *
-     * @param x the AtomicLong value to convert
-     * @return the string representation of the long value, or {@code null} if input is null
+     * @param x the {@code AtomicLong} to convert; may be {@code null}
+     * @return the decimal string representation of the contained value,
+     *         or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final AtomicLong x) {
@@ -156,29 +150,13 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
     }
 
     /**
-     * Converts a string representation to an AtomicLong value.
-     * Parses the string as a long and wraps it in a new AtomicLong instance.
+     * Parses a decimal string and returns a new {@link java.util.concurrent.atomic.AtomicLong}
+     * containing the parsed value. Leading and trailing whitespace is trimmed before parsing.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * AtomicLongType type = (AtomicLongType) TypeFactory.getType(AtomicLong.class);
-     *
-     * AtomicLong value = type.valueOf("123456789");
-     * // value.get(): 123456789L
-     *
-     * AtomicLong negative = type.valueOf("-9876543210");
-     * // negative.get(): -9876543210L
-     *
-     * AtomicLong nullValue = type.valueOf(null);
-     * // nullValue: null
-     *
-     * // Throws NumberFormatException:
-     * // type.valueOf("not a number");
-     * }</pre>
-     *
-     * @param str the string to parse as a long
-     * @return a new AtomicLong containing the parsed value, or {@code null} if str is {@code null} or empty
-     * @throws NumberFormatException if the string cannot be parsed as a long
+     * @param str the decimal string to parse; may be {@code null} or empty
+     * @return a new {@code AtomicLong} containing the parsed value,
+     *         or {@code null} if {@code str} is {@code null} or empty
+     * @throws NumberFormatException if {@code str} cannot be parsed as a valid {@code long}
      */
     @Override
     public AtomicLong valueOf(final String str) {
@@ -186,12 +164,13 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
     }
 
     /**
-     * Appends an AtomicLong value to an Appendable object.
-     * Uses the AtomicLong's toString() method for the string representation.
+     * Appends an {@link java.util.concurrent.atomic.AtomicLong} value to an {@link Appendable}.
+     * Appends {@code "null"} if {@code x} is {@code null}; otherwise appends the decimal string of
+     * the contained long value (equivalent to {@link java.util.concurrent.atomic.AtomicLong#toString()}).
      *
-     * @param appendable the Appendable object to append to
-     * @param x the AtomicLong value to append, may be null
-     * @throws IOException if an I/O error occurs during the append operation
+     * @param appendable the target {@code Appendable}
+     * @param x the {@code AtomicLong} value to append; may be {@code null}
+     * @throws IOException if an I/O error occurs during appending
      */
     @Override
     public void appendTo(final Appendable appendable, final AtomicLong x) throws IOException {
@@ -203,13 +182,15 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
     }
 
     /**
-     * Writes an AtomicLong value to a CharacterWriter.
-     * Extracts the long value and uses the writer's optimized write method for longs.
+     * Writes an {@link java.util.concurrent.atomic.AtomicLong} value to a {@link CharacterWriter}.
+     * Writes the literal {@code "null"} character array if {@code x} is {@code null}; otherwise
+     * uses the writer's optimised {@code write(long)} method with the contained long value.
+     * {@code config} is not used.
      *
-     * @param writer the CharacterWriter to write to
-     * @param x the AtomicLong value to write, may be null
-     * @param config the serialization configuration (not used for long values)
-     * @throws IOException if an I/O error occurs during the write operation
+     * @param writer the {@code CharacterWriter} to write to
+     * @param x the {@code AtomicLong} value to write; may be {@code null}
+     * @param config the serialization configuration (unused for long values); may be {@code null}
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final AtomicLong x, final JsonXmlSerConfig<?> config) throws IOException {

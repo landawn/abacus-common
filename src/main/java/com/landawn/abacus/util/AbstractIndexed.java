@@ -15,21 +15,28 @@
 package com.landawn.abacus.util;
 
 /**
- * An abstract base class for objects that have an associated index value.
- * This class provides a foundation for indexed data structures where elements
- * need to maintain their position or index information.
- * 
- * <p>The class is immutable and stores a long index value that can be retrieved
- * as either an int or long value.</p>
- * 
+ * An abstract base class for objects that pair a value with an associated index position.
+ * Subclasses such as {@link Indexed}, {@link IndexedBoolean}, {@link IndexedByte}, etc.
+ * use this class to wrap a typed value together with its index.
+ *
+ * <p>The class is immutable once constructed. The index is stored as a {@code long} and
+ * can be retrieved as either an {@code int} (via {@link #index()}, which throws
+ * {@link ArithmeticException} on overflow) or as a {@code long} (via {@link #longIndex()}).</p>
+ *
+ * @see Indexed
  * @see Immutable
  */
 @com.landawn.abacus.annotation.Immutable
 abstract class AbstractIndexed implements Immutable {
 
-    /** The index value associated with this object */
+    /** The index value associated with this object. */
     protected final long index;
 
+    /**
+     * Constructs an {@code AbstractIndexed} instance with the specified index value.
+     *
+     * @param index the index position to associate with this object (must be non-negative)
+     */
     protected AbstractIndexed(final long index) {
         this.index = index;
     }
@@ -38,21 +45,21 @@ abstract class AbstractIndexed implements Immutable {
      * Returns the index value as an int.
      *
      * <p>This method converts the internal long index value to an int representation.
-     * If the long value is outside the range of int values (Integer.MIN_VALUE to 
+     * If the long value is outside the range of int values (Integer.MIN_VALUE to
      * Integer.MAX_VALUE), an ArithmeticException is thrown to prevent data loss.</p>
      *
-     * <p>For accessing the full range of index values without conversion, use 
+     * <p>For accessing the full range of index values without conversion, use
      * {@link #longIndex()} instead.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Indexed<String> indexed = Indexed.of("val", 42L);
-     * int idx = indexed.index();   // Returns 42
+     * int idx = indexed.index();  // Returns 42
      * System.out.println("Index: " + idx);
-     * 
+     *
      * // This would throw ArithmeticException:
      * Indexed<String> largeIndex = Indexed.of("val", Long.MAX_VALUE);
-     * int overflow = largeIndex.index();   // Throws ArithmeticException
+     * int overflow = largeIndex.index();  // Throws ArithmeticException
      * }</pre>
      *
      * @return the index value as an int

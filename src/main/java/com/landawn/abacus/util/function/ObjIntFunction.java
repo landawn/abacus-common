@@ -91,6 +91,7 @@ public interface ObjIntFunction<T, R> extends Throwables.ObjIntFunction<T, R, Ru
      * @param after the function to apply after this function is applied
      * @return a composed function that first applies this function and then
      *         applies the {@code after} function
+     * @throws NullPointerException if {@code after} is null
      */
     default <V> ObjIntFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return (t, u) -> after.apply(apply(t, u));

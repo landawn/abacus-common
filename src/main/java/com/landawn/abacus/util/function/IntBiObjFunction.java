@@ -19,8 +19,10 @@ import com.landawn.abacus.util.Throwables;
  * Represents a function that accepts one {@code int}-valued argument and two object-valued arguments
  * and produces a result. This is a three-arity specialization of {@link java.util.function.Function}.
  *
- * <p>This is a functional interface whose functional method is {@link #apply(int, Object, Object)}.
+ * <p>The parameter order follows the {@code IntBiObj*} convention: the {@code int} argument comes
+ * first, followed by two object arguments of types {@code T} and {@code U}.
  *
+ * <p>This is a functional interface whose functional method is {@link #apply(int, Object, Object)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
@@ -74,6 +76,7 @@ public interface IntBiObjFunction<T, U, R> extends Throwables.IntBiObjFunction<T
      * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed {@code IntBiObjFunction} that first applies this function and then applies the {@code after}
      *         function
+     * @throws NullPointerException if {@code after} is null
      */
     default <V> IntBiObjFunction<T, U, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return (i, t, u) -> after.apply(apply(i, t, u));

@@ -21,19 +21,19 @@ import java.io.Writer;
 /**
  * An abstract base class for writers that perform automatic character escaping based on
  * configurable replacement rules.
- * 
+ *
  * <p>This sealed class serves as the foundation for specialized writers that need to
  * escape certain characters during output, such as JSON, XML, or CSV writers. Each
  * subclass defines its own character replacement table that determines which characters
  * should be escaped and how.</p>
- * 
+ *
  * <p>The class provides efficient character-by-character and bulk writing operations
  * with automatic escaping. Characters that need escaping are replaced with their
  * corresponding escape sequences as defined in the replacement table.</p>
- * 
+ *
  * <p>This class is designed for high-performance output generation and is not thread-safe.
  * If multiple threads need to write concurrently, external synchronization is required.</p>
- * 
+ *
  * <p>Example of how subclasses use this class:</p>
  * <pre>{@code
  * // In a subclass like BufferedJsonWriter:
@@ -41,11 +41,11 @@ import java.io.Writer;
  * replacements['"'] = "\\\"".toCharArray();
  * replacements['\\'] = "\\\\".toCharArray();
  * // ... more replacements
- * 
+ *
  * CharacterWriter writer = new BufferedJsonWriter();
  * writer.writeCharacter("Hello \"World\"");   // Outputs: Hello \"World\"
  * }</pre>
- * 
+ *
  * @see BufferedJsonWriter
  * @see BufferedXmlWriter
  * @see BufferedCsvWriter
@@ -104,10 +104,10 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
 
     /**
      * Writes a single character with automatic escaping.
-     * 
+     *
      * <p>If the character needs escaping according to the replacement table,
      * the escape sequence is written instead of the original character.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // In a JSON writer where " is escaped as \"
@@ -128,11 +128,11 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
 
     /**
      * Writes a character array with automatic escaping.
-     * 
+     *
      * <p>Each character in the array is checked against the replacement table,
      * and escaped if necessary. This method is optimized to minimize the number
      * of write operations by batching non-escaped characters.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = "Hello \"World\"".toCharArray();
@@ -175,10 +175,10 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
 
     /**
      * Writes a portion of a character array with automatic escaping.
-     * 
+     *
      * <p>Only the specified portion of the array is processed for escaping.
      * Characters outside the specified range are not written.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = "prefix<data>suffix".toCharArray();
@@ -229,10 +229,10 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
 
     /**
      * Writes a string with automatic escaping.
-     * 
+     *
      * <p>Each character in the string is checked against the replacement table,
      * and escaped if necessary. If the string is {@code null}, "null" is written.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.writeCharacter("Hello \"World\"");   // Writes escaped version
@@ -253,10 +253,10 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
 
     /**
      * Writes a portion of a string with automatic escaping.
-     * 
+     *
      * <p>Only the specified portion of the string is processed for escaping.
      * Characters outside the specified range are not written.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String text = "prefix<data>suffix";
@@ -281,7 +281,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
     /**
      * Converts a character to its hexadecimal string representation.
      * Used for numeric character references in XML.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String hex = getHexString(0x1F);   // Returns "&#x1f;"
@@ -295,16 +295,16 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
     }
 
     /**
-     * Converts a character to its Unicode escape sequence.
-     * Used for JSON Unicode escapes.
-     * 
+     * Converts a character to its JSON Unicode escape sequence of the form {@code \\uXXXX}.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String unicode = getCharNum('\u2028');   // Returns "\\u2028"
+     * String unicode = getCharNum('\u2028');   // Returns "\u2028"
+     * String ctrl    = getCharNum('');   // Returns ""
      * }</pre>
      *
      * @param ch the character to convert
-     * @return the Unicode escape sequence
+     * @return the JSON Unicode escape sequence (e.g., {@code \u2028})
      */
     static String getCharNum(final char ch) {
         return String.format("\\u%04x", (int) ch);

@@ -36,16 +36,9 @@ public class MutableIntType extends NumberType<MutableInt> {
     }
 
     /**
-     * Returns the Class object representing the MutableInt type.
+     * Returns the {@link Class} object representing the {@link MutableInt} type.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableInt> type = TypeFactory.getType(MutableInt.class);
-     * Class<MutableInt> clazz = type.javaType();
-     * // clazz equals MutableInt.class
-     * }</pre>
-     *
-     * @return The Class object for MutableInt
+     * @return {@code MutableInt.class}
      */
     @Override
     public Class<MutableInt> javaType() {
@@ -53,22 +46,11 @@ public class MutableIntType extends NumberType<MutableInt> {
     }
 
     /**
-     * Converts a MutableInt object to its string representation.
-     * The integer value is converted to a decimal string representation.
+     * Converts a {@link MutableInt} object to its decimal string representation.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableInt> type = TypeFactory.getType(MutableInt.class);
-     * MutableInt mi = MutableInt.of(42);
-     * String str = type.stringOf(mi);
-     * // str equals "42"
-     *
-     * String nullStr = type.stringOf(null);
-     * // nullStr equals null
-     * }</pre>
-     *
-     * @param x The MutableInt object to convert
-     * @return The string representation of the integer value, or {@code null} if the input is null
+     * @param x the {@code MutableInt} object to convert, may be {@code null}
+     * @return the decimal string representation of the integer value,
+     *         or {@code null} if the input is {@code null}
      */
     @Override
     public String stringOf(final MutableInt x) {
@@ -76,24 +58,11 @@ public class MutableIntType extends NumberType<MutableInt> {
     }
 
     /**
-     * Parses a string to create a MutableInt object.
-     * The string is parsed as an integer value.
+     * Parses a string to create a {@link MutableInt} object.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableInt> type = TypeFactory.getType(MutableInt.class);
-     * MutableInt mi = type.valueOf("123");
-     * // mi.value() equals 123
-     *
-     * MutableInt nullMi = type.valueOf(null);
-     * // nullMi equals null
-     *
-     * MutableInt emptyMi = type.valueOf("");
-     * // emptyMi equals null
-     * }</pre>
-     *
-     * @param str The string to parse
-     * @return A MutableInt containing the parsed value, or {@code null} if the input is {@code null} or empty
+     * @param str the string to parse, may be {@code null} or empty
+     * @return a {@code MutableInt} containing the parsed integer value,
+     *         or {@code null} if the input is {@code null} or empty
      * @throws NumberFormatException if the string cannot be parsed as an integer
      */
     @Override
@@ -102,23 +71,15 @@ public class MutableIntType extends NumberType<MutableInt> {
     }
 
     /**
-     * Retrieves a MutableInt value from a ResultSet at the specified column index.
-     * The database integer value is wrapped in a MutableInt object.
+     * Retrieves an integer value from the specified column in the {@link ResultSet}
+     * and wraps it in a {@link MutableInt}.
+     * Returns {@code null} if the column value is SQL {@code NULL} (detected via {@link ResultSet#wasNull()}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableInt> type = TypeFactory.getType(MutableInt.class);
-     * ResultSet rs = statement.executeQuery("SELECT age FROM users");
-     * if (rs.next()) {
-     *     MutableInt age = type.get(rs, 1);
-     *     // age contains the integer value from the first column
-     * }
-     * }</pre>
-     *
-     * @param rs The ResultSet containing the data
-     * @param columnIndex The column index (1-based) to retrieve the value from
-     * @return A MutableInt containing the retrieved value
-     * @throws SQLException if a database access error occurs or the column index is invalid
+     * @param rs the {@code ResultSet} containing the data
+     * @param columnIndex the 1-based index of the column to retrieve
+     * @return a {@code MutableInt} wrapping the retrieved value,
+     *         or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public MutableInt get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -128,23 +89,15 @@ public class MutableIntType extends NumberType<MutableInt> {
     }
 
     /**
-     * Retrieves a MutableInt value from a ResultSet using the specified column label.
-     * The database integer value is wrapped in a MutableInt object.
+     * Retrieves an integer value from the specified column in the {@link ResultSet}
+     * and wraps it in a {@link MutableInt}.
+     * Returns {@code null} if the column value is SQL {@code NULL} (detected via {@link ResultSet#wasNull()}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableInt> type = TypeFactory.getType(MutableInt.class);
-     * ResultSet rs = statement.executeQuery("SELECT age FROM users");
-     * if (rs.next()) {
-     *     MutableInt age = type.get(rs, "age");
-     *     // age contains the integer value from the named column
-     * }
-     * }</pre>
-     *
-     * @param rs The ResultSet containing the data
-     * @param columnName The label of the column to retrieve the value from
-     * @return A MutableInt containing the retrieved value
-     * @throws SQLException if a database access error occurs or the column label is not found
+     * @param rs the {@code ResultSet} containing the data
+     * @param columnName the label of the column to retrieve (as specified in the SQL AS clause)
+     * @return a {@code MutableInt} wrapping the retrieved value,
+     *         or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
     @Override
     public MutableInt get(final ResultSet rs, final String columnName) throws SQLException {
@@ -154,26 +107,14 @@ public class MutableIntType extends NumberType<MutableInt> {
     }
 
     /**
-     * Sets a MutableInt parameter in a PreparedStatement at the specified position.
-     * If the MutableInt is {@code null}, SQL NULL is set. Otherwise, the wrapped integer value is stored.
+     * Sets a {@link MutableInt} parameter in a {@link PreparedStatement} at the specified index.
+     * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#INTEGER}) is set;
+     * otherwise the wrapped integer value is stored.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableInt> type = TypeFactory.getType(MutableInt.class);
-     * PreparedStatement stmt = conn.prepareStatement("INSERT INTO users (age) VALUES (?)");
-     * MutableInt age = MutableInt.of(25);
-     * type.set(stmt, 1, age);
-     * stmt.executeUpdate();
-     *
-     * // For null value
-     * type.set(stmt, 1, null);
-     * // This sets the parameter to SQL NULL
-     * }</pre>
-     *
-     * @param stmt The PreparedStatement to set the parameter on
-     * @param columnIndex The parameter index (1-based) to set
-     * @param x The MutableInt value to set
-     * @throws SQLException if a database access error occurs or the parameter index is invalid
+     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param columnIndex the 1-based index of the parameter to set
+     * @param x the {@code MutableInt} value to set, or {@code null} to set SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final MutableInt x) throws SQLException {
@@ -185,26 +126,14 @@ public class MutableIntType extends NumberType<MutableInt> {
     }
 
     /**
-     * Sets a MutableInt parameter in a CallableStatement using the specified parameter name.
-     * If the MutableInt is {@code null}, SQL NULL is set. Otherwise, the wrapped integer value is stored.
+     * Sets a {@link MutableInt} parameter in a {@link CallableStatement} by name.
+     * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#INTEGER}) is set;
+     * otherwise the wrapped integer value is stored.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableInt> type = TypeFactory.getType(MutableInt.class);
-     * CallableStatement stmt = conn.prepareCall("{call update_counter(?)}");
-     * MutableInt counter = MutableInt.of(100);
-     * type.set(stmt, "counter", counter);
-     * stmt.execute();
-     *
-     * // For null value
-     * type.set(stmt, "counter", null);
-     * // This sets the parameter to SQL NULL
-     * }</pre>
-     *
-     * @param stmt The CallableStatement to set the parameter on
-     * @param parameterName The name of the parameter to set
-     * @param x The MutableInt value to set
-     * @throws SQLException if a database access error occurs or the parameter name is not found
+     * @param stmt the {@code CallableStatement} to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the {@code MutableInt} value to set, or {@code null} to set SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final MutableInt x) throws SQLException {
@@ -216,24 +145,11 @@ public class MutableIntType extends NumberType<MutableInt> {
     }
 
     /**
-     * Appends the string representation of a MutableInt to an Appendable.
-     * The value is written as a decimal string or "null".
+     * Appends the decimal string representation of a {@link MutableInt} to an {@link Appendable}.
+     * Writes {@code "null"} when {@code x} is {@code null}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableInt> type = TypeFactory.getType(MutableInt.class);
-     * StringBuilder sb = new StringBuilder();
-     * MutableInt mi = MutableInt.of(42);
-     * type.appendTo(sb, mi);
-     * // sb.toString() equals "42"
-     *
-     * StringBuilder sb2 = new StringBuilder();
-     * type.appendTo(sb2, null);
-     * // sb2.toString() equals "null"
-     * }</pre>
-     *
-     * @param appendable The Appendable to write to
-     * @param x The MutableInt to append
+     * @param appendable the target to write to
+     * @param x the {@code MutableInt} to append, may be {@code null}
      * @throws IOException if an I/O error occurs while appending
      */
     @Override
@@ -246,25 +162,14 @@ public class MutableIntType extends NumberType<MutableInt> {
     }
 
     /**
-     * Writes the character representation of a MutableInt to a CharacterWriter.
-     * The value is written as numeric characters or the {@code null} character array.
-     * This method is optimized for character-based writing and uses a specialized writeInt method.
+     * Writes the integer value of a {@link MutableInt} to a {@link CharacterWriter}
+     * using the optimized {@code writeInt} method.
+     * Writes the {@code NULL_CHAR_ARRAY} when {@code x} is {@code null}.
+     * The {@code config} parameter is not used for integer values.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableInt> type = TypeFactory.getType(MutableInt.class);
-     * CharacterWriter writer = new CharacterWriter();
-     * MutableInt mi = MutableInt.of(12345);
-     * type.writeCharacter(writer, mi, null);
-     * // Writes: 12345
-     *
-     * type.writeCharacter(writer, null, null);
-     * // Writes: null
-     * }</pre>
-     *
-     * @param writer The CharacterWriter to write to
-     * @param x The MutableInt to write
-     * @param config The serialization configuration (currently unused for integer values)
+     * @param writer the {@code CharacterWriter} to write to
+     * @param x the {@code MutableInt} to write, may be {@code null}
+     * @param config the serialization configuration (unused for integer values)
      * @throws IOException if an I/O error occurs while writing
      */
     @Override

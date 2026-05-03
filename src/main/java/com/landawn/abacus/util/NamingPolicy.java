@@ -20,26 +20,28 @@ import com.landawn.abacus.annotation.Beta;
 
 /**
  * An enumeration representing different naming conventions for string transformation.
- * 
+ *
  * <p>This enum provides a set of predefined naming policies that can be used to convert
  * strings between different naming conventions commonly used in programming. Each policy
  * encapsulates a transformation function that converts a string according to its rules.</p>
- * 
+ *
  * <p>The available naming policies are:</p>
  * <ul>
  *   <li>{@link #CAMEL_CASE} - Converts to camelCase (e.g., "myVariableName")</li>
+ *   <li>{@link #UPPER_CAMEL_CASE} - Converts to UpperCamelCase (e.g., "MyVariableName")</li>
  *   <li>{@link #SNAKE_CASE} - Converts to lower_case_with_underscore (e.g., "my_variable_name")</li>
  *   <li>{@link #SCREAMING_SNAKE_CASE} - Converts to SCREAMING_SNAKE_CASE (e.g., "MY_VARIABLE_NAME")</li>
+ *   <li>{@link #KEBAB_CASE} - Converts to kebab-case (e.g., "my-variable-name")</li>
  *   <li>{@link #NO_CHANGE} - Leaves the string unchanged</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * String original = "user-name";
  * String camelCase = NamingPolicy.CAMEL_CASE.convert(original);   // "userName"
  * String snakeCase = NamingPolicy.SNAKE_CASE.convert(original);   // "user_name"
  * }</pre>
- * 
+ *
  * @see Strings#toCamelCase(String)
  * @see Strings#toSnakeCase(String)
  * @see Strings#toScreamingSnakeCase(String)

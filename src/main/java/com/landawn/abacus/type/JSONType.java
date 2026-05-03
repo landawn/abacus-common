@@ -18,14 +18,20 @@ import java.util.List;
 import java.util.Map;
 
 import com.landawn.abacus.util.ClassUtil;
-import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for JSON serialization and deserialization of generic types.
- * This type wraps another type and handles JSON string conversion for it.
+ * Type handler for JSON-wrapped types.
+ * This type handler wraps an arbitrary Java type and ensures that values are always
+ * serialized to and deserialized from JSON strings. It is primarily used when a field
+ * or column should be stored as a JSON string in the database rather than as its
+ * native type representation.
  *
- * @param <T> the type of object this JSONType handles
+ * <p>Special handling is provided for {@code "Map"} and {@code "List"} as short aliases
+ * for {@code java.util.Map} and {@code java.util.List} respectively.</p>
+ *
+ * @param <T> the type of object this JSONType wraps and serializes
  */
 @SuppressWarnings("java:S2160")
 public class JSONType<T> extends AbstractType<T> {
@@ -39,14 +45,14 @@ public class JSONType<T> extends AbstractType<T> {
     //    private final Type<T> elementType;
 
     /**
-     * Constructs a JSONType for the specified class name.
+     * Package-private constructor for JSONType.
+     * Creates a JSONType that wraps the specified class for JSON serialization and deserialization.
+     * The short aliases {@code "Map"} and {@code "List"} (case-insensitive) are recognized as
+     * {@link java.util.Map} and {@link java.util.List} respectively; all other names must be
+     * fully qualified class names resolvable by {@link com.landawn.abacus.util.ClassUtil}.
      *
-     * This constructor creates a JSONType that handles JSON serialization/deserialization
-     * for the specified type. Special handling is provided for "Map" and "List" class names.
-     *
-     * @param clsName the name of the class to create a JSONType for.
-     *                Can be "Map" for java.util.Map, "List" for java.util.List,
-     *                or a fully qualified class name
+     * @param clsName the class name or short alias ({@code "Map"}, {@code "List"}) for which
+     *                to create the JSON type handler
      */
     @SuppressWarnings("unchecked")
     JSONType(final String clsName) {
@@ -59,12 +65,11 @@ public class JSONType<T> extends AbstractType<T> {
     }
 
     /**
-     * Gets the declaring name of this JSONType.
+     * Returns the declaring name of this JSONType.
+     * The declaring name wraps the underlying type's declaring name with the {@code JSON<>} notation,
+     * for example {@code "JSON<java.util.Map>"} or {@code "JSON<com.example.MyBean>"}.
      *
-     * The declaring name includes the JSON wrapper notation and the declaring name
-     * of the wrapped type (e.g., "JSON&lt;Map&gt;", "JSON&lt;List&gt;").
-     *
-     * @return the declaring name of this type
+     * @return the declaring name in the format {@code "JSON<TypeDeclaringName>"}
      */
     @Override
     public String declaringName() {
@@ -72,9 +77,9 @@ public class JSONType<T> extends AbstractType<T> {
     }
 
     /**
-     * Gets the class object for the type handled by this JSONType.
+     * Returns the Class object for the underlying type handled by this JSONType.
      *
-     * @return the Class object representing the type T
+     * @return the Class object representing type {@code T}
      */
     @Override
     public Class<T> javaType() {
@@ -82,13 +87,11 @@ public class JSONType<T> extends AbstractType<T> {
     }
 
     /**
-     * Converts the specified object to its JSON string representation.
+     * Converts an object to its JSON string representation.
+     * Uses the default JSON parser and serialization configuration.
      *
-     * This method serializes the object using the JSON parser with default
-     * serialization configuration.
-     *
-     * @param x the object to convert to JSON string
-     * @return the JSON string representation of the object, or {@code null} if the input is null
+     * @param x the object to serialize; may be {@code null}
+     * @return the JSON string representation of the object, or {@code null} if the input is {@code null}
      */
     @Override
     public String stringOf(final T x) {
@@ -96,24 +99,10 @@ public class JSONType<T> extends AbstractType<T> {
     }
 
     /**
-     * Parses a JSON string into an object of type T.
+     * Deserializes a JSON string into an object of type {@code T}.
      *
-     * This method deserializes the JSON string using the JSON parser into
-     * an instance of the type class handled by this JSONType.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Map> mapType = TypeFactory.getType("JSON<Map>");
-     * Map map = mapType.valueOf("{\"key\":\"value\"}");
-     * // Deserializes JSON to Map
-     *
-     * Type<List> listType = TypeFactory.getType("JSON<List>");
-     * List list = listType.valueOf("[1,2,3]");
-     * // Deserializes JSON to List
-     * }</pre>
-     *
-     * @param str the JSON string to parse
-     * @return the deserialized object of type T, or {@code null} if the string is empty or null
+     * @param str the JSON string to parse; may be {@code null} or empty
+     * @return the deserialized object of type {@code T}, or {@code null} if {@code str} is {@code null} or empty
      */
     @Override
     public T valueOf(final String str) {

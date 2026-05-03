@@ -19,25 +19,25 @@ public class ArrayUtilTest extends AbstractTest {
         {
             final int[] a = Array.random(arrayLength);
             Profiler.run(1, loopNum, 3, "Arrays.sort(int[])", () -> Arrays.sort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "N.sort(int[])", () -> CommonUtil.sort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "N.sort(int[])", () -> N.sort(a.clone())).printResult();
             Profiler.run(1, loopNum, 3, "Arrays.parallelSort(int[])", () -> Arrays.parallelSort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "N.parallelSort(int[])", () -> CommonUtil.parallelSort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "N.parallelSort(int[])", () -> N.parallelSort(a.clone())).printResult();
         }
 
         {
             final long[] a = LongList.random(arrayLength).toArray();
             Profiler.run(1, loopNum, 3, "Arrays.sort(long[])", () -> Arrays.sort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "N.sort(long[])", () -> CommonUtil.sort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "N.sort(long[])", () -> N.sort(a.clone())).printResult();
             Profiler.run(1, loopNum, 3, "Arrays.parallelSort(long[])", () -> Arrays.parallelSort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "N.parallelSort(long[])", () -> CommonUtil.parallelSort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "N.parallelSort(long[])", () -> N.parallelSort(a.clone())).printResult();
         }
 
         {
             final double[] a = DoubleList.random(arrayLength).toArray();
             Profiler.run(1, loopNum, 3, "Arrays.sort(double[])", () -> Arrays.sort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "N.sort(double[])", () -> CommonUtil.sort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "N.sort(double[])", () -> N.sort(a.clone())).printResult();
             Profiler.run(1, loopNum, 3, "Arrays.parallelSort(double[])", () -> Arrays.parallelSort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "N.parallelSort(double[])", () -> CommonUtil.parallelSort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "N.parallelSort(double[])", () -> N.parallelSort(a.clone())).printResult();
         }
 
         {
@@ -47,9 +47,9 @@ public class ArrayUtilTest extends AbstractTest {
             }
 
             Profiler.run(1, loopNum, 3, "Arrays.sort(Object[])", () -> Arrays.sort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "N.sort(Object[])", () -> CommonUtil.sort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "N.sort(Object[])", () -> N.sort(a.clone())).printResult();
             Profiler.run(1, loopNum, 3, "Arrays.parallelSort(Object[])", () -> Arrays.parallelSort(a.clone())).printResult();
-            Profiler.run(1, loopNum, 3, "N.parallelSort(Object[])", () -> CommonUtil.parallelSort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "N.parallelSort(Object[])", () -> N.parallelSort(a.clone())).printResult();
         }
     }
 
@@ -59,15 +59,15 @@ public class ArrayUtilTest extends AbstractTest {
         final int[][] a = { { 1, 2, 3, 4 }, { 5, 5, 5, 5 } };
         final int[][] b = Array.transpose(a);
 
-        N.println(CommonUtil.deepToString(a));
+        N.println(N.deepToString(a));
         N.println(Strings.repeat("=", 80));
-        N.println(CommonUtil.deepToString(b));
+        N.println(N.deepToString(b));
 
         final Integer[][] c = Array.box(a);
 
         final Integer[][] d = Array.transpose(c);
         N.println(Strings.repeat("=", 80));
-        N.println(CommonUtil.deepToString(d));
+        N.println(N.deepToString(d));
         assertNotNull(d);
     }
 
@@ -106,7 +106,7 @@ public class ArrayUtilTest extends AbstractTest {
 
         final String[] strs = { null, null, "abc" };
 
-        N.println(CommonUtil.indexOf(strs, "abc"));
+        N.println(N.indexOf(strs, "abc"));
 
         N.println(strs[0] instanceof String);
 

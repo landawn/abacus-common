@@ -7,7 +7,7 @@ package com.landawn.abacus.type;
 import java.util.Map;
 
 /**
- * The Abstract base class for {@code Optional} types in the type system.
+ * The abstract base class for {@code Optional} types in the type system.
  * <p>
  * This class provides common functionality for handling {@code Optional}-like types
  * that can represent values that may or may not be present.
@@ -25,7 +25,7 @@ public abstract class AbstractOptionalType<T> extends AbstractType<T> {
     /** Standard field name for the actual value in serialized form */
     protected static final String VALUE = "value";
 
-    /** Cached instance of the {@code Map} type used for internal operations */
+    /** Lazily-initialized cached instance of the {@code Map<Object, Object>} type used for internal serialization operations */
     private static Type<Map<Object, Object>> mapType = null;
 
     /**
@@ -38,25 +38,14 @@ public abstract class AbstractOptionalType<T> extends AbstractType<T> {
     }
 
     /**
-     * Gets the cached {@code Map} type instance used for internal operations.
+     * Returns the cached {@code Map} type instance used for internal serialization operations.
      * <p>
-     * This method is synchronized to ensure thread-safe lazy initialization
-     * of the {@code Map} type. The {@code Map} type is used internally for converting
-     * Optional values to/from {@code Map} representations during serialization.
+     * This method uses lazy initialization with synchronization to ensure thread-safe access.
+     * The {@code Map} type is used internally to convert Optional values to/from
+     * {@code Map<Object, Object>} representations during serialization.
      * </p>
      *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * // Internal use for Optional serialization
-     * Type<Map<Object, Object>> mapType = AbstractOptionalType.getMapType();
-     * // The map type is used to convert Optional values to Maps with structure:
-     * // {
-     * //   "isPresent": true/false,
-     * //   "value": actual_value (if present)
-     * // }
-     * }</pre>
-     *
-     * @return the {@code Map} type instance for {@code Map<Object, Object>}
+     * @return the shared {@code Type} instance for {@code Map<Object, Object>}
      */
     protected static synchronized Type<Map<Object, Object>> getMapType() {
         if (mapType == null) {
@@ -67,13 +56,10 @@ public abstract class AbstractOptionalType<T> extends AbstractType<T> {
     }
 
     /**
-     * Checks if this type represents an {@code Optional} or {@code nullable} type.
-     * <p>
-     * This method always returns {@code true} for {@code Optional} types,
-     * indicating that values of this type may or may not be present.
-     * </p>
+     * Returns {@code true} because this type represents an {@code Optional} or
+     * {@code Nullable} container type — values may or may not be present.
      *
-     * @return {@code true}, indicating this is an {@code Optional} or {@code nullable} type
+     * @return {@code true}
      */
     @Override
     public boolean isOptionalOrNullable() {

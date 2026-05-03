@@ -24,28 +24,28 @@ import com.landawn.abacus.type.TypeFactory;
  * This abstract class provides a workaround for Java's type erasure by requiring
  * subclasses to specify their generic type parameter, which can then be retrieved
  * using reflection.
- * 
+ *
  * <p>Due to Java's type erasure, generic type information is normally lost at runtime.
  * This class captures that information by analyzing the generic superclass of concrete
  * subclasses, allowing frameworks to access complete type information including
  * generic parameters.
- * 
+ *
  * <p><b>To use this class, create an anonymous subclass with the desired generic type:</b></p>
  * <pre>{@code
  * // Capture type information for List<String>
  * TypeReference<List<String>> listType = new TypeReference<List<String>>() {};
- * 
+ *
  * // Capture type information for Map<String, Integer>
  * TypeReference<Map<String, Integer>> mapType = new TypeReference<Map<String, Integer>>() {};
- * 
+ *
  * // Use with JSON parsing or other frameworks
  * List<String> list = jsonParser.parse(json, listType);
  * }</pre>
- * 
+ *
  * <p>Note: This approach cannot capture types with wildcard parameters such as
  * {@code Class<?>} or {@code List<? extends CharSequence>}. Attempting to do so
  * will result in a runtime exception.
- * 
+ *
  * <p>Common use cases include:
  * <ul>
  *   <li>JSON/XML deserialization with generic types</li>
@@ -252,7 +252,7 @@ public abstract class TypeReference<T> {
      *   <li>You're migrating code from Guava or Gson and want consistent naming</li>
      *   <li>You prefer the "Token" terminology for type representations</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Using TypeToken instead of TypeReference

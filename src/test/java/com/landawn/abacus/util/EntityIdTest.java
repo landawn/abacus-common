@@ -23,7 +23,7 @@ public class EntityIdTest extends AbstractTest {
     //         entityId.set(AccountPNL.BIRTH_DATE, Dates.currentDate());
     //         N.println(entityId);
     //
-    //         entityId.set(CommonUtil.asProps(AccountPNL.ID, 2));
+    //         entityId.set(N.asProps(AccountPNL.ID, 2));
     //
     //         entityId = Seid.of(AccountPNL.FIRST_NAME, "firstName", AccountPNL.LAST_NAME, "lastName");
     //

@@ -75,8 +75,8 @@ public @interface Type {
     /**
      * Deprecated alias for {@link #name()}.
      *
-     * @return the type name value, or empty string if not specified
-     * @deprecated use {@link #name()} to specify the type name explicitly.
+     * @return the type name, or an empty string if not specified
+     * @deprecated Use {@link #name()} to specify the type name explicitly.
      */
     @Deprecated
     String value() default "";
@@ -137,7 +137,8 @@ public @interface Type {
      * private String sensitiveData;
      * }</pre>
      *
-     * @return the custom {@code Type} implementation class, or base {@link com.landawn.abacus.type.Type Type.class} for default handling
+     * @return the custom {@link com.landawn.abacus.type.Type Type} implementation class to use, or
+     *         {@link com.landawn.abacus.type.Type Type.class} itself when no custom type handling is needed
      */
     @SuppressWarnings("rawtypes")
     Class<? extends com.landawn.abacus.type.Type> clazz() default com.landawn.abacus.type.Type.class;

@@ -25,7 +25,7 @@ import com.landawn.abacus.exception.ParsingException;
  * A very simple CSV parser released under a commercial-friendly license.
  * This parser is designed to handle the parsing of a single CSV line into fields,
  * with support for quoted values, escaped characters, and customizable delimiters.
- * 
+ *
  * <p>Key features:</p>
  * <ul>
  * <li>Customizable separator, quote, and escape characters</li>
@@ -34,19 +34,19 @@ import com.landawn.abacus.exception.ParsingException;
  * <li>Options for strict quote handling and whitespace trimming</li>
  * <li>Can ignore quotation marks entirely for simple parsing</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Basic usage with default settings (comma separator, double-quote, backslash escape)
  * CsvParser parser = new CsvParser();
  * List<String> fields = parser.parseLine("John,Doe,30,\"New York, NY\"");
  * // Result: ["John", "Doe", "30", "New York, NY"]
- * 
+ *
  * // Custom separator
  * CsvParser tabParser = new CsvParser('\t');
  * String[] tabFields = tabParser.parseLineToArray("John\tDoe\t30");
  * // Result: ["John", "Doe", "30"]
- * 
+ *
  * // Parse with strict quotes (ignores characters outside quotes)
  * CsvParser strictParser = new CsvParser(',', '"', '\\', true);
  * List<String> result = strictParser.parseLine("\"clean\"dirty,\"text\"");
@@ -85,7 +85,8 @@ public class CsvParser {
 
     /**
      * The default escape character (backslash).
-     * Used to escape quotes or other special characters within fields.
+     * Used inside quoted fields to escape the quote character or the escape character itself.
+     * Other characters are not escaped.
      */
     public static final char DEFAULT_ESCAPE_CHARACTER = '\\';
 
@@ -97,7 +98,8 @@ public class CsvParser {
 
     /**
      * The default leading whitespace behavior.
-     * When {@code true}, leading whitespace is trimmed from unquoted fields.
+     * When {@code true}, whitespace surrounding unquoted fields is trimmed and any
+     * whitespace immediately following a separator is skipped.
      */
     public static final boolean DEFAULT_IGNORE_LEADING_WHITESPACE = true;
 
@@ -141,7 +143,7 @@ public class CsvParser {
     /**
      * Constructs a CsvParser using default settings.
      * Uses comma as separator, double-quote for quoting, and backslash for escaping.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CsvParser parser = new CsvParser();
@@ -288,20 +290,21 @@ public class CsvParser {
      * Checks to see if any two of the three characters are the same.
      * This is because in opencsv the separator, quote, and escape characters must be different.
      *
-     * @param separator The defined separator character
-     * @param quoteChar The defined quotation character
-     * @param escape The defined escape character
-     * @return True, if any two of the three are the same.
+     * @param separator the defined separator character
+     * @param quoteChar the defined quotation character
+     * @param escape the defined escape character
+     * @return {@code true} if any two of the three are the same, {@code false} otherwise
      */
     private boolean anyCharactersAreTheSame(final char separator, final char quoteChar, final char escape) {
         return isSameCharacter(separator, quoteChar) || isSameCharacter(separator, escape) || isSameCharacter(quoteChar, escape);
     }
 
     /**
-     * Checks that the two characters are the same and are not the defined NULL_CHARACTER.
-     * @param c1 First character
-     * @param c2 Second character
-     * @return True if both characters are the same and are not the defined NULL_CHARACTER
+     * Checks that the two characters are the same and are not the defined {@code NULL_CHARACTER}.
+     *
+     * @param c1 the first character
+     * @param c2 the second character
+     * @return {@code true} if both characters are the same and are not the defined {@code NULL_CHARACTER}
      */
     private boolean isSameCharacter(final char c1, final char c2) {
         return c1 != NULL_CHARACTER && c1 == c2;
@@ -377,7 +380,7 @@ public class CsvParser {
      * }</pre>
      *
      * @param nextLine the line to be parsed
-     * @return a List of String values, or an empty list if nextLine is null
+     * @return a List of String values, or an empty list if nextLine is {@code null}
      * @throws ParsingException if the line contains an unterminated quoted field
      */
     public List<String> parseLine(final String nextLine) throws ParsingException {
@@ -396,7 +399,7 @@ public class CsvParser {
      * }</pre>
      *
      * @param nextLine the line to be parsed
-     * @return an array of String values, or an empty array if nextLine is null
+     * @return an array of String values, or an empty array if nextLine is {@code null}
      * @throws ParsingException if the line contains an unterminated quoted field
      */
     public String[] parseLineToArray(final String nextLine) throws ParsingException {
@@ -421,7 +424,7 @@ public class CsvParser {
      * @param nextLine the line to be parsed
      * @param output the pre-allocated array to fill with parsed values
      * @throws ParsingException if the line contains an unterminated quoted field
-     * @throws IllegalArgumentException if output is null
+     * @throws IllegalArgumentException if output is {@code null}
      */
     public void parseLineToArray(final String nextLine, final String[] output) throws ParsingException {
         N.checkArgNotNull(output, "output");
@@ -430,11 +433,16 @@ public class CsvParser {
     }
 
     /**
-     * Parses an incoming String and returns an array of elements.
+     * Parses an incoming String and returns a list of the parsed elements.
      *
-     * @param nextLine The string to parse
-     * @return The comma-tokenized list of elements, or {@code null} if nextLine is null
-     * @throws ParsingException If bad things happen during the read
+     * <p>If {@code output} is provided, parsed values are written into it instead and
+     * {@code null} is returned. If {@code nextLine} is {@code null}, an empty list is returned.</p>
+     *
+     * @param nextLine the string to parse
+     * @param output an optional pre-allocated array to receive parsed values; may be {@code null}
+     * @return the tokenized list of elements when {@code output} is {@code null}; otherwise {@code null}.
+     *         If {@code nextLine} is {@code null}, returns an empty list.
+     * @throws ParsingException if the line contains an unterminated quoted field
      */
     protected List<String> parseLine(final String nextLine, final String[] output) throws ParsingException {
         if (nextLine == null) {
@@ -511,7 +519,7 @@ public class CsvParser {
                 int lastQuoteIndex = sb.lastIndexOf(String.valueOf(quoteChar));
 
                 if (lastQuoteIndex >= 0 && Strings.isBlank(sb.substring(lastQuoteIndex + 1))) {
-                    // Tested with: new CsvParser().parseLine("a,  b  ,  \"c\" "); 
+                    // Tested with: new CsvParser().parseLine("a,  b  ,  \"c\" ");
                     sb.setLength(lastQuoteIndex); // remove the last quote character
                 } else {
                     throw new ParsingException("Un-terminated quoted field at end of CSV line");
@@ -542,7 +550,7 @@ public class CsvParser {
      * Determines if we can process as if we were in quotes.
      *
      * @param inQuotes whether the parser is currently inside quotes
-     * @return True if we should process as if we are inside quotes.
+     * @return {@code true} if we should process as if we are inside quotes, {@code false} otherwise
      */
     private boolean inQuotes(final boolean inQuotes) {
         return inQuotes && !ignoreQuotations;
@@ -551,12 +559,12 @@ public class CsvParser {
     /**
      * Checks to see if the character after the index is a quotation character.
      *
-     * Precondition: the current character is a quote or an escape.
+     * <p>Precondition: the current character is a quote or an escape.</p>
      *
-     * @param nextLine The current line
-     * @param inQuotes True if the current context is quoted
-     * @param i Current index in line
-     * @return True if the following character is a quote
+     * @param nextLine the current line
+     * @param inQuotes {@code true} if the current context is quoted
+     * @param i the current index in the line
+     * @return {@code true} if the following character is a quote, {@code false} otherwise
      */
     private boolean isNextCharacterEscapedQuote(final String nextLine, final boolean inQuotes, final int i) {
         return inQuotes // we are in quotes; therefore, there can be escaped quotes in here.
@@ -570,12 +578,12 @@ public class CsvParser {
      * Meaning the next character is either a quotation character or the escape
      * char if it's inside quotes.
      *
-     * Precondition: the current character is an escape.
+     * <p>Precondition: the current character is an escape.</p>
      *
-     * @param nextLine The current line
-     * @param inQuotes True if the current context is quoted
-     * @param i Current index in line
-     * @return True if the following character is a quote
+     * @param nextLine the current line
+     * @param inQuotes {@code true} if the current context is quoted
+     * @param i the current index in the line
+     * @return {@code true} if the following character is escapable, {@code false} otherwise
      */
     private boolean isNextCharacterEscapable(final String nextLine, final boolean inQuotes, final int i) {
         return inQuotes // we are in quotes; therefore, there can be escaped quotes in here.
@@ -588,8 +596,8 @@ public class CsvParser {
      * Escapable characters for opencsv are the quotation character or the
      * escape character.
      *
-     * @param c Source character
-     * @return True if the character could be escapable.
+     * @param c the source character
+     * @return {@code true} if the character could be escapable, {@code false} otherwise
      */
     private boolean isCharacterEscapable(final char c) {
         return c == quoteChar || c == escape;

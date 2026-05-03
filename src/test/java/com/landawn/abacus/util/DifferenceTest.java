@@ -1545,8 +1545,8 @@ public class DifferenceTest extends AbstractTest {
 
     @Test
     public void testMapDifference_of() {
-        Map<String, Integer> map1 = CommonUtil.asMap("a", 1, "b", 2, "c", 3);
-        Map<String, Integer> map2 = CommonUtil.asMap("b", 2, "c", 4, "d", 5);
+        Map<String, Integer> map1 = N.asMap("a", 1, "b", 2, "c", 3);
+        Map<String, Integer> map2 = N.asMap("b", 2, "c", 4, "d", 5);
 
         MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
 
@@ -1559,8 +1559,8 @@ public class DifferenceTest extends AbstractTest {
 
     @Test
     public void testMapDifference_of_withKeysToCompare() {
-        Map<String, Integer> map1 = CommonUtil.asMap("a", 1, "b", 2, "c", 3);
-        Map<String, Integer> map2 = CommonUtil.asMap("b", 2, "c", 4, "d", 5);
+        Map<String, Integer> map1 = N.asMap("a", 1, "b", 2, "c", 3);
+        Map<String, Integer> map2 = N.asMap("b", 2, "c", 4, "d", 5);
         Collection<String> keysToCompare = Arrays.asList("b", "c");
 
         MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2, keysToCompare);
@@ -1573,8 +1573,8 @@ public class DifferenceTest extends AbstractTest {
 
     @Test
     public void testMapDifference_of_withValueEquivalence() {
-        Map<String, String> map1 = CommonUtil.asMap("a", "hello", "b", "WORLD");
-        Map<String, String> map2 = CommonUtil.asMap("a", "HELLO", "c", "test");
+        Map<String, String> map1 = N.asMap("a", "hello", "b", "WORLD");
+        Map<String, String> map2 = N.asMap("a", "HELLO", "c", "test");
 
         MapDifference<Map<String, String>, Map<String, String>, Map<String, Pair<String, String>>> diff = MapDifference.of(map1, map2,
                 String::equalsIgnoreCase);
@@ -1931,12 +1931,12 @@ public class DifferenceTest extends AbstractTest {
 
     @Test
     public void testMapDifference_of_collectionOfMaps() {
-        Map<String, String> mapA1 = CommonUtil.asMap("id", "1", "value", "A");
-        Map<String, String> mapA2 = CommonUtil.asMap("id", "2", "value", "B");
+        Map<String, String> mapA1 = N.asMap("id", "1", "value", "A");
+        Map<String, String> mapA2 = N.asMap("id", "2", "value", "B");
         List<Map<String, String>> listA = Arrays.asList(mapA1, mapA2);
 
-        Map<String, String> mapB1 = CommonUtil.asMap("id", "2", "value", "C");
-        Map<String, String> mapB2 = CommonUtil.asMap("id", "3", "value", "D");
+        Map<String, String> mapB1 = N.asMap("id", "2", "value", "C");
+        Map<String, String> mapB2 = N.asMap("id", "3", "value", "D");
         List<Map<String, String>> listB = Arrays.asList(mapB1, mapB2);
 
         MapDifference<List<Map<String, String>>, List<Map<String, String>>, Map<String, MapDifference<Map<String, String>, Map<String, String>, Map<String, Pair<String, String>>>>> diff = MapDifference
@@ -2451,8 +2451,8 @@ public class DifferenceTest extends AbstractTest {
 
     @Test
     public void testMapDifference_equalsAndHashCode() {
-        Map<String, Integer> map1 = CommonUtil.asMap("a", 1, "b", 2);
-        Map<String, Integer> map2 = CommonUtil.asMap("b", 3, "c", 4);
+        Map<String, Integer> map1 = N.asMap("a", 1, "b", 2);
+        Map<String, Integer> map2 = N.asMap("b", 3, "c", 4);
         MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff1 = MapDifference.of(map1, map2);
         MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff2 = MapDifference.of(map1, map2);
 
@@ -2535,8 +2535,8 @@ public class DifferenceTest extends AbstractTest {
 
     @Test
     public void testMapDifference_toString() {
-        Map<String, Integer> map1 = CommonUtil.asMap("a", 1, "b", 2);
-        Map<String, Integer> map2 = CommonUtil.asMap("b", 3, "c", 4);
+        Map<String, Integer> map1 = N.asMap("a", 1, "b", 2);
+        Map<String, Integer> map2 = N.asMap("b", 3, "c", 4);
         MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
         String expected = "{areEqual=false, common={}, onlyOnLeft={a=1}, onlyOnRight={c=4}, differentValues={b=(2, 3)}}";
         assertEquals(expected, diff.toString());
@@ -2574,7 +2574,7 @@ public class DifferenceTest extends AbstractTest {
 
         assertFalse(diff.differentValues().containsKey("lastUpdateTime"));
 
-        diff = BeanDifference.of(a, b, CommonUtil.toList("lastUpdateTime", "createdTime"));
+        diff = BeanDifference.of(a, b, N.toList("lastUpdateTime", "createdTime"));
         assertTrue(diff.differentValues().containsKey("lastUpdateTime"));
     }
 

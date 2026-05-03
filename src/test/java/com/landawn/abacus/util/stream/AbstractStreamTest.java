@@ -67,7 +67,6 @@ import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.RateLimiter;
-
 import com.landawn.abacus.util.Suppliers;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
@@ -406,106 +405,155 @@ public class AbstractStreamTest extends TestBase {
     }
 
     @Test
-    public void test_flatmapToChar() {
-        long count = Stream.of("a", "bc").flatmapToChar(s -> s.toCharArray()).count();
+    public void test_flatMapArrayToChar() {
+        long count = Stream.of("a", "bc").flatMapArrayToChar(s -> s.toCharArray()).count();
         assertEquals(3L, count);
     }
 
     @Test
     public void testFlatmapToChar() {
         stringStream = createStream("ab", "cd");
-        CharStream result = stringStream.flatmapToChar(String::toCharArray);
+        CharStream result = stringStream.flatMapArrayToChar(String::toCharArray);
         assertArrayEquals(new char[] { 'a', 'b', 'c', 'd' }, result.toArray());
     }
 
     @Test
-    public void test_flatmapToByte() {
+    public void test_flatmapToChar() {
+        stringStream = createStream("ab", "cd");
+        CharStream result = stringStream.flatmapToChar(s -> Arrays.asList(s.charAt(0), s.charAt(1)));
+        assertArrayEquals(new char[] { 'a', 'b', 'c', 'd' }, result.toArray());
+    }
+
+    @Test
+    public void test_flatMapArrayToByte() {
         byte[] bytes1 = { 1, 2 };
         byte[] bytes2 = { 3, 4 };
-        long count = Stream.of(bytes1, bytes2).flatmapToByte(b -> b).count();
+        long count = Stream.of(bytes1, bytes2).flatMapArrayToByte(b -> b).count();
         assertEquals(4L, count);
     }
 
     @Test
     public void testFlatmapToByte() {
         stringStream = createStream("ab", "cd");
-        ByteStream result = stringStream.flatmapToByte(String::getBytes);
+        ByteStream result = stringStream.flatMapArrayToByte(String::getBytes);
         byte[] expected = "abcd".getBytes();
         assertArrayEquals(expected, result.toArray());
     }
 
     @Test
-    public void test_flatmapToShort() {
+    public void test_flatmapToByte() {
+        stream = createStream(1, 2);
+        ByteStream result = stream.flatmapToByte(i -> Arrays.asList(i.byteValue(), (byte) (i * 10)));
+        assertArrayEquals(new byte[] { 1, 10, 2, 20 }, result.toArray());
+    }
+
+    @Test
+    public void test_flatMapArrayToShort() {
         short[] shorts1 = { 1, 2 };
         short[] shorts2 = { 3, 4 };
-        long count = Stream.of(shorts1, shorts2).flatmapToShort(s -> s).count();
+        long count = Stream.of(shorts1, shorts2).flatMapArrayToShort(s -> s).count();
         assertEquals(4L, count);
     }
 
     @Test
     public void testFlatmapToShort() {
         stream = createStream(1, 2);
-        ShortStream result = stream.flatmapToShort(i -> new short[] { i.byteValue(), (short) (i * 10) });
+        ShortStream result = stream.flatMapArrayToShort(i -> new short[] { i.byteValue(), (short) (i * 10) });
         assertArrayEquals(new short[] { 1, 10, 2, 20 }, result.toArray());
     }
 
     @Test
-    public void test_flatmapToInt() {
+    public void test_flatmapToShort() {
+        stream = createStream(1, 2);
+        ShortStream result = stream.flatmapToShort(i -> Arrays.asList(i.shortValue(), (short) (i * 10)));
+        assertArrayEquals(new short[] { 1, 10, 2, 20 }, result.toArray());
+    }
+
+    @Test
+    public void test_flatMapArrayToInt() {
         int[] ints1 = { 1, 2 };
         int[] ints2 = { 3, 4 };
-        long count = Stream.of(ints1, ints2).flatmapToInt(i -> i).count();
+        long count = Stream.of(ints1, ints2).flatMapArrayToInt(i -> i).count();
         assertEquals(4L, count);
     }
 
     @Test
     public void testFlatmapToInt() {
         stream = createStream(1, 2);
-        IntStream result = stream.flatmapToInt(i -> new int[] { i, i * 10 });
+        IntStream result = stream.flatMapArrayToInt(i -> new int[] { i, i * 10 });
         assertArrayEquals(new int[] { 1, 10, 2, 20 }, result.toArray());
     }
 
     @Test
-    public void test_flatmapToLong() {
+    public void test_flatmapToInt() {
+        stream = createStream(1, 2);
+        IntStream result = stream.flatmapToInt(i -> Arrays.asList(i, i * 10));
+        assertArrayEquals(new int[] { 1, 10, 2, 20 }, result.toArray());
+    }
+
+    @Test
+    public void test_flatMapArrayToLong() {
         long[] longs1 = { 1L, 2L };
         long[] longs2 = { 3L, 4L };
-        long count = Stream.of(longs1, longs2).flatmapToLong(l -> l).count();
+        long count = Stream.of(longs1, longs2).flatMapArrayToLong(l -> l).count();
         assertEquals(4L, count);
     }
 
     @Test
     public void testFlatmapToLong() {
         stream = createStream(1, 2);
-        LongStream result = stream.flatmapToLong(i -> new long[] { i, i * 10L });
+        LongStream result = stream.flatMapArrayToLong(i -> new long[] { i, i * 10L });
         assertArrayEquals(new long[] { 1L, 10L, 2L, 20L }, result.toArray());
     }
 
     @Test
-    public void test_flatmapToFloat() {
+    public void test_flatmapToLong() {
+        stream = createStream(1, 2);
+        LongStream result = stream.flatmapToLong(i -> Arrays.asList(i.longValue(), i * 10L));
+        assertArrayEquals(new long[] { 1L, 10L, 2L, 20L }, result.toArray());
+    }
+
+    @Test
+    public void test_flatMapArrayToFloat() {
         float[] floats1 = { 1.0f, 2.0f };
         float[] floats2 = { 3.0f, 4.0f };
-        long count = Stream.of(floats1, floats2).flatmapToFloat(f -> f).count();
+        long count = Stream.of(floats1, floats2).flatMapArrayToFloat(f -> f).count();
         assertEquals(4L, count);
     }
 
     @Test
     public void testFlatmapToFloat() {
         stream = createStream(1, 2);
-        FloatStream result = stream.flatmapToFloat(i -> new float[] { i, i * 10f });
+        FloatStream result = stream.flatMapArrayToFloat(i -> new float[] { i, i * 10f });
         assertArrayEquals(new float[] { 1f, 10f, 2f, 20f }, result.toArray(), 0.01f);
     }
 
     @Test
-    public void test_flatmapToDouble() {
+    public void test_flatmapToFloat() {
+        stream = createStream(1, 2);
+        FloatStream result = stream.flatmapToFloat(i -> Arrays.asList(i.floatValue(), i * 10f));
+        assertArrayEquals(new float[] { 1f, 10f, 2f, 20f }, result.toArray(), 0.01f);
+    }
+
+    @Test
+    public void test_flatMapArrayToDouble() {
         double[] doubles1 = { 1.0, 2.0 };
         double[] doubles2 = { 3.0, 4.0 };
-        long count = Stream.of(doubles1, doubles2).flatmapToDouble(d -> d).count();
+        long count = Stream.of(doubles1, doubles2).flatMapArrayToDouble(d -> d).count();
         assertEquals(4L, count);
     }
 
     @Test
     public void testFlatmapToDouble() {
         stream = createStream(1, 2);
-        DoubleStream result = stream.flatmapToDouble(i -> new double[] { i, i * 10.0 });
+        DoubleStream result = stream.flatMapArrayToDouble(i -> new double[] { i, i * 10.0 });
+        assertArrayEquals(new double[] { 1.0, 10.0, 2.0, 20.0 }, result.toArray(), 0.01);
+    }
+
+    @Test
+    public void test_flatmapToDouble() {
+        stream = createStream(1, 2);
+        DoubleStream result = stream.flatmapToDouble(i -> Arrays.asList(i.doubleValue(), i * 10.0));
         assertArrayEquals(new double[] { 1.0, 10.0, 2.0, 20.0 }, result.toArray(), 0.01);
     }
 

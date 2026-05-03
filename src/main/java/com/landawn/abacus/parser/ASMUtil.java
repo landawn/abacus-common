@@ -116,7 +116,7 @@ final class ASMUtil {
      * This class is designed as a utility class and should not be instantiated.
      */
     private ASMUtil() {
-        // Singleton.
+        // Utility class - prevent instantiation.
     }
 
     /**

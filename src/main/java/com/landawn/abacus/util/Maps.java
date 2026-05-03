@@ -280,9 +280,9 @@ import com.landawn.abacus.util.u.OptionalShort;
  * double avgSales = Maps.averageValues(salesData).orElse(0.0);
  *
  * // Transformation and filtering
- * Map<String, String> formatted = Maps.mapValues(salesData, 
+ * Map<String, String> formatted = Maps.mapValues(salesData,
  *     sales -> String.format("$%.2f", sales));
- * Map<String, Double> highPerformance = Maps.filter(salesData, 
+ * Map<String, Double> highPerformance = Maps.filter(salesData,
  *     (quarter, sales) -> sales > 1200.0);
  *
  * // Grouping and analysis
@@ -311,7 +311,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * boolean debugMode = Maps.getAsBoolean(config, "debug").orElse(false);
  *
  * // Validation and filtering
- * Map<String, String> validConfig = Maps.filter(config, 
+ * Map<String, String> validConfig = Maps.filter(config,
  *     (key, value) -> value != null && !value.trim().isEmpty());
  *
  * // Type conversion and transformation
@@ -322,7 +322,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * // Environment-specific filtering
  * String envPrefix = environment + ".";
- * Map<String, String> envConfig = Maps.filterByKey(validConfig, 
+ * Map<String, String> envConfig = Maps.filterByKey(validConfig,
  *     key -> key.startsWith(envPrefix));
  *
  * // Flattening nested configuration
@@ -540,7 +540,7 @@ public final class Maps {
      * map.put("two", 2);
      * Set<String> keys = Maps.keySet(map);
      * // keys contains: ["one", "two"]
-     * 
+     *
      * Map<String, Integer> emptyMap = null;
      * Set<String> emptyKeys = Maps.keySet(emptyMap);
      * // emptyKeys is an empty immutable set
@@ -557,7 +557,7 @@ public final class Maps {
     }
 
     /**
-     * Returns the collection of values from the specified map if it is not {@code null} or empty. 
+     * Returns the collection of values from the specified map if it is not {@code null} or empty.
      * Otherwise, an empty immutable list is returned.
      * This is a convenience method that avoids {@code null} checks and provides a guaranteed {@code non-null} Collection result.
      *
@@ -568,7 +568,7 @@ public final class Maps {
      * map.put("two", 2);
      * Collection<Integer> values = Maps.values(map);
      * // values contains: [1, 2]
-     * 
+     *
      * Map<String, Integer> emptyMap = null;
      * Collection<Integer> emptyValues = Maps.values(emptyMap);
      * // emptyValues is an empty immutable list
@@ -585,7 +585,7 @@ public final class Maps {
     }
 
     /**
-     * Returns the entry set of the specified map if it is not {@code null} or empty. 
+     * Returns the entry set of the specified map if it is not {@code null} or empty.
      * Otherwise, an empty immutable set is returned.
      * This is a convenience method that avoids {@code null} checks and provides a guaranteed {@code non-null} Set result.
      *
@@ -596,7 +596,7 @@ public final class Maps {
      * map.put("two", 2);
      * Set<Map.Entry<String, Integer>> entries = Maps.entrySet(map);
      * // entries contains the key-value pairs: ["one"=1, "two"=2]
-     * 
+     *
      * Map<String, Integer> emptyMap = null;
      * Set<Map.Entry<String, Integer>> emptyEntries = Maps.entrySet(emptyMap);
      * // emptyEntries is an empty immutable set
@@ -665,7 +665,7 @@ public final class Maps {
      * <pre>{@code
      * List<String> keys = Arrays.asList("a", "b", "a");
      * List<Integer> values = Arrays.asList(1, 2, 3);
-     * Map<String, Integer> result = Maps.zip(keys, values, 
+     * Map<String, Integer> result = Maps.zip(keys, values,
      *     (v1, v2) -> v1 + v2, HashMap::new);
      * // result: {a=4, b=2} (values for duplicate key "a" are summed: 1 + 3 = 4)
      * }</pre>
@@ -1248,11 +1248,24 @@ public final class Maps {
                     return defaultValue;
                 }
 
-                final int[] indexes = Strings.substringsBetween(key, "[", "]").stream().mapToInt(Numbers::toInt).toArray();
-                intermediateColl = (Collection) intermediateMap.get(key.substring(0, idx));
+                final int[] indexes;
+
+                try {
+                    indexes = Strings.substringsBetween(key, "[", "]").stream().mapToInt(Numbers::toInt).toArray();
+                } catch (final RuntimeException e) {
+                    return defaultValue;
+                }
+
+                final Object next = intermediateMap.get(key.substring(0, idx));
+
+                if (!(next instanceof Collection)) {
+                    return defaultValue;
+                }
+
+                intermediateColl = (Collection) next;
 
                 for (int j = 0, idxLen = indexes.length; j < idxLen; j++) {
-                    if (N.isEmpty(intermediateColl) || intermediateColl.size() <= indexes[j]) {
+                    if (indexes[j] < 0 || N.isEmpty(intermediateColl) || intermediateColl.size() <= indexes[j]) {
                         return defaultValue;
                     } else {
                         if (j == idxLen - 1) {
@@ -1265,10 +1278,22 @@ public final class Maps {
                                     return N.convert(ret, targetType);
                                 }
                             } else {
-                                intermediateMap = (Map) N.getElement(intermediateColl, indexes[j]);
+                                final Object nextMap = N.getElement(intermediateColl, indexes[j]);
+
+                                if (!(nextMap instanceof Map)) {
+                                    return defaultValue;
+                                }
+
+                                intermediateMap = (Map) nextMap;
                             }
                         } else {
-                            intermediateColl = (Collection) N.getElement(intermediateColl, indexes[j]);
+                            final Object nextColl = N.getElement(intermediateColl, indexes[j]);
+
+                            if (!(nextColl instanceof Collection)) {
+                                return defaultValue;
+                            }
+
+                            intermediateColl = (Collection) nextColl;
                         }
                     }
                 }
@@ -1282,7 +1307,13 @@ public final class Maps {
                         return N.convert(ret, targetType);
                     }
                 } else {
-                    intermediateMap = (Map) intermediateMap.get(key);
+                    final Object nextMap = intermediateMap.get(key);
+
+                    if (!(nextMap instanceof Map)) {
+                        return defaultValue;
+                    }
+
+                    intermediateMap = (Map) nextMap;
                 }
             }
         }
@@ -1591,10 +1622,10 @@ public final class Maps {
      * List<String> list1 = Maps.getOrPutIfAbsent(map, "key1", () -> new ArrayList<>());
      * list1.add("value1");
      * // map now contains: {"key1"=["value1"]}
-     * 
+     *
      * List<String> list2 = Maps.getOrPutIfAbsent(map, "key1", () -> new ArrayList<>());
      * // list2 is the same instance as list1, supplier not called
-     * 
+     *
      * map.put("key2", null);
      * List<String> list3 = Maps.getOrPutIfAbsent(map, "key2", () -> new ArrayList<>());
      * // New list created because value was null
@@ -1623,18 +1654,18 @@ public final class Maps {
     /**
      * Returns the value associated with the specified {@code key} if it exists and is not {@code null} in the specified {@code map},
      * otherwise puts a new {@code List} and returns it.
-     * 
+     *
      * <p>Here absent means key is not found in the specified map or found with {@code null} value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, List<Integer>> map = new HashMap<>();
-     * 
+     *
      * List<Integer> list1 = Maps.getOrPutListIfAbsent(map, "numbers");
      * list1.add(1);
      * list1.add(2);
      * // map now contains: {"numbers"=[1, 2]}
-     * 
+     *
      * List<Integer> list2 = Maps.getOrPutListIfAbsent(map, "numbers");
      * // list2 is the same instance as list1
      * // list2 contains [1, 2]
@@ -1660,18 +1691,18 @@ public final class Maps {
     /**
      * Returns the value associated with the specified {@code key} if it exists and is not {@code null} in the specified {@code map},
      * otherwise puts a new {@code Set} and returns it.
-     * 
+     *
      * <p>Here absent means key is not found in the specified map or found with {@code null} value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Set<String>> map = new HashMap<>();
-     * 
+     *
      * Set<String> set1 = Maps.getOrPutSetIfAbsent(map, "tags");
      * set1.add("java");
      * set1.add("spring");
      * // map now contains: {"tags"=["java", "spring"]}
-     * 
+     *
      * Set<String> set2 = Maps.getOrPutSetIfAbsent(map, "tags");
      * // set2 is the same instance as set1
      * }</pre>
@@ -1696,13 +1727,13 @@ public final class Maps {
     /**
      * Returns the value associated with the specified {@code key} if it exists and is not {@code null} in the specified {@code map},
      * otherwise puts a new {@code LinkedHashSet} and returns it.
-     * 
+     *
      * <p>Here absent means key is not found in the specified map or found with {@code null} value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Set<String>> map = new HashMap<>();
-     * 
+     *
      * Set<String> set = Maps.getOrPutLinkedHashSetIfAbsent(map, "orderedTags");
      * set.add("first");
      * set.add("second");
@@ -1730,18 +1761,18 @@ public final class Maps {
     /**
      * Returns the value associated with the specified {@code key} if it exists and is not {@code null} in the specified {@code map},
      * otherwise puts a new {@code Map} and returns it.
-     * 
+     *
      * <p>Here absent means key is not found in the specified map or found with {@code null} value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Map<String, Integer>> map = new HashMap<>();
-     * 
+     *
      * Map<String, Integer> innerMap = Maps.getOrPutMapIfAbsent(map, "scores");
      * innerMap.put("math", 95);
      * innerMap.put("english", 88);
      * // map now contains: {"scores"={"math"=95, "english"=88}}
-     * 
+     *
      * Map<String, Integer> sameMap = Maps.getOrPutMapIfAbsent(map, "scores");
      * // sameMap is the same instance as innerMap
      * }</pre>
@@ -1767,13 +1798,13 @@ public final class Maps {
     /**
      * Returns the value associated with the specified {@code key} if it exists and is not {@code null} in the specified {@code map},
      * otherwise puts a new {@code LinkedHashMap} and returns it.
-     * 
+     *
      * <p>Here absent means key is not found in the specified map or found with {@code null} value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Map<String, String>> map = new HashMap<>();
-     * 
+     *
      * Map<String, String> innerMap = Maps.getOrPutLinkedHashMapIfAbsent(map, "config");
      * innerMap.put("first", "1");
      * innerMap.put("second", "2");
@@ -1810,7 +1841,7 @@ public final class Maps {
      * map.put("flag1", true);
      * map.put("flag2", "false");
      * map.put("flag3", null);
-     * 
+     *
      * OptionalBoolean result1 = Maps.getAsBoolean(map, "flag1");   // OptionalBoolean.of(true)
      * OptionalBoolean result2 = Maps.getAsBoolean(map, "flag2");   // OptionalBoolean.of(false)
      * OptionalBoolean result3 = Maps.getAsBoolean(map, "flag3");   // OptionalBoolean.empty()
@@ -1849,7 +1880,7 @@ public final class Maps {
      * Map<String, Object> map = new HashMap<>();
      * map.put("enabled", true);
      * map.put("disabled", "false");
-     * 
+     *
      * boolean result1 = Maps.getAsBooleanOrDefault(map, "enabled", false);   // true
      * boolean result2 = Maps.getAsBooleanOrDefault(map, "disabled", true);   // false
      * boolean result3 = Maps.getAsBooleanOrDefault(map, "missing", true);    // true (default)
@@ -1888,7 +1919,7 @@ public final class Maps {
      * map.put("letter", 'A');
      * map.put("digit", "5");
      * map.put("empty", null);
-     * 
+     *
      * OptionalChar result1 = Maps.getAsChar(map, "letter");    // OptionalChar.of('A')
      * OptionalChar result2 = Maps.getAsChar(map, "digit");     // OptionalChar.of('5')
      * OptionalChar result3 = Maps.getAsChar(map, "empty");     // OptionalChar.empty()
@@ -1926,7 +1957,7 @@ public final class Maps {
      * Map<String, Object> map = new HashMap<>();
      * map.put("grade", 'A');
      * map.put("initial", "J");
-     * 
+     *
      * char result1 = Maps.getAsCharOrDefault(map, "grade", 'F');     // 'A'
      * char result2 = Maps.getAsCharOrDefault(map, "initial", 'X');   // 'J'
      * char result3 = Maps.getAsCharOrDefault(map, "missing", 'N');   // 'N' (default)
@@ -1965,7 +1996,7 @@ public final class Maps {
      * map.put("small", (byte) 10);
      * map.put("medium", 127);
      * map.put("text", "25");
-     * 
+     *
      * OptionalByte result1 = Maps.getAsByte(map, "small");     // OptionalByte.of(10)
      * OptionalByte result2 = Maps.getAsByte(map, "medium");    // OptionalByte.of(127)
      * OptionalByte result3 = Maps.getAsByte(map, "text");      // OptionalByte.of(25)
@@ -2003,7 +2034,7 @@ public final class Maps {
      * Map<String, Object> map = new HashMap<>();
      * map.put("id", (byte) 5);
      * map.put("count", "10");
-     * 
+     *
      * byte result1 = Maps.getAsByteOrDefault(map, "id", (byte) 0);         // 5
      * byte result2 = Maps.getAsByteOrDefault(map, "count", (byte) 0);      // 10
      * byte result3 = Maps.getAsByteOrDefault(map, "missing", (byte) -1);   // -1 (default)
@@ -2042,7 +2073,7 @@ public final class Maps {
      * map.put("year", (short) 2023);
      * map.put("count", 1000);
      * map.put("text", "500");
-     * 
+     *
      * OptionalShort result1 = Maps.getAsShort(map, "year");      // OptionalShort.of(2023)
      * OptionalShort result2 = Maps.getAsShort(map, "count");     // OptionalShort.of(1000)
      * OptionalShort result3 = Maps.getAsShort(map, "text");      // OptionalShort.of(500)
@@ -2080,7 +2111,7 @@ public final class Maps {
      * Map<String, Object> map = new HashMap<>();
      * map.put("port", (short) 8080);
      * map.put("timeout", "3000");
-     * 
+     *
      * short result1 = Maps.getAsShortOrDefault(map, "port", (short) 80);      // 8080
      * short result2 = Maps.getAsShortOrDefault(map, "timeout", (short) 0);    // 3000
      * short result3 = Maps.getAsShortOrDefault(map, "missing", (short) -1);   // -1 (default)
@@ -2119,7 +2150,7 @@ public final class Maps {
      * map.put("count", 42);
      * map.put("total", "100");
      * map.put("null", null);
-     * 
+     *
      * OptionalInt result1 = Maps.getAsInt(map, "count");     // OptionalInt.of(42)
      * OptionalInt result2 = Maps.getAsInt(map, "total");     // OptionalInt.of(100)
      * OptionalInt result3 = Maps.getAsInt(map, "null");      // OptionalInt.empty()
@@ -2157,7 +2188,7 @@ public final class Maps {
      * Map<String, Object> map = new HashMap<>();
      * map.put("age", 25);
      * map.put("score", "98");
-     * 
+     *
      * int result1 = Maps.getAsIntOrDefault(map, "age", 0);        // 25
      * int result2 = Maps.getAsIntOrDefault(map, "score", 0);      // 98
      * int result3 = Maps.getAsIntOrDefault(map, "missing", -1);   // -1 (default)
@@ -2189,19 +2220,19 @@ public final class Maps {
      * Returns an empty {@code OptionalLong} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
      * Otherwise returns an {@code OptionalLong} with the value mapped by the specified {@code key}.
      * If the mapped value is not Long/Number type, underlying conversion will be executed.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("count", 42L);
      * map.put("score", "100");
-     * 
+     *
      * OptionalLong count = Maps.getAsLong(map, "count");
      * // count.isPresent() = true, count.getAsLong() = 42
-     * 
+     *
      * OptionalLong score = Maps.getAsLong(map, "score");
      * // score.isPresent() = true, score.getAsLong() = 100 (converted from String)
-     * 
+     *
      * OptionalLong missing = Maps.getAsLong(map, "missing");
      * // missing.isPresent() = false
      * }</pre>
@@ -2231,19 +2262,19 @@ public final class Maps {
      * Returns the specified {@code defaultValue} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
      * Otherwise returns the value mapped by the specified {@code key}.
      * If the mapped value is not Long/Number type, underlying conversion will be executed.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("count", 42L);
      * map.put("score", "100");
-     * 
+     *
      * long count = Maps.getAsLongOrDefault(map, "count", -1L);
      * // count = 42
-     * 
+     *
      * long score = Maps.getAsLongOrDefault(map, "score", -1L);
      * // score = 100 (converted from String)
-     * 
+     *
      * long missing = Maps.getAsLongOrDefault(map, "missing", -1L);
      * // missing = -1
      * }</pre>
@@ -2274,19 +2305,19 @@ public final class Maps {
      * Returns an empty {@code OptionalFloat} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
      * Otherwise returns an {@code OptionalFloat} with the value mapped by the specified {@code key}.
      * If the mapped value is not Float/Number type, underlying conversion will be executed.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("price", 19.99f);
      * map.put("discount", "0.15");
-     * 
+     *
      * OptionalFloat price = Maps.getAsFloat(map, "price");
      * // price.isPresent() = true, price.getAsFloat() = 19.99
-     * 
+     *
      * OptionalFloat discount = Maps.getAsFloat(map, "discount");
      * // discount.isPresent() = true, discount.getAsFloat() = 0.15 (converted from String)
-     * 
+     *
      * OptionalFloat missing = Maps.getAsFloat(map, "missing");
      * // missing.isPresent() = false
      * }</pre>
@@ -2314,19 +2345,19 @@ public final class Maps {
      * Returns the specified {@code defaultValue} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
      * Otherwise returns the value mapped by the specified {@code key}.
      * If the mapped value is not Float/Number type, underlying conversion will be executed.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("price", 19.99f);
      * map.put("discount", "0.15");
-     * 
+     *
      * float price = Maps.getAsFloatOrDefault(map, "price", 0.0f);
      * // price = 19.99
-     * 
+     *
      * float discount = Maps.getAsFloatOrDefault(map, "discount", 0.0f);
      * // discount = 0.15 (converted from String)
-     * 
+     *
      * float missing = Maps.getAsFloatOrDefault(map, "missing", 0.0f);
      * // missing = 0.0
      * }</pre>
@@ -2355,19 +2386,19 @@ public final class Maps {
      * Returns an empty {@code OptionalDouble} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
      * Otherwise returns an {@code OptionalDouble} with the value mapped by the specified {@code key}.
      * If the mapped value is not Double/Number type, underlying conversion will be executed.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("temperature", 98.6);
      * map.put("pi", "3.14159");
-     * 
+     *
      * OptionalDouble temp = Maps.getAsDouble(map, "temperature");
      * // temp.isPresent() = true, temp.getAsDouble() = 98.6
-     * 
+     *
      * OptionalDouble pi = Maps.getAsDouble(map, "pi");
      * // pi.isPresent() = true, pi.getAsDouble() = 3.14159 (converted from String)
-     * 
+     *
      * OptionalDouble missing = Maps.getAsDouble(map, "missing");
      * // missing.isPresent() = false
      * }</pre>
@@ -2395,19 +2426,19 @@ public final class Maps {
      * Returns the specified {@code defaultValue} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
      * Otherwise returns the value mapped by the specified {@code key}.
      * If the mapped value is not Double/Number type, underlying conversion will be executed.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("temperature", 98.6);
      * map.put("pi", "3.14159");
-     * 
+     *
      * double temp = Maps.getAsDoubleOrDefault(map, "temperature", 0.0);
      * // temp = 98.6
-     * 
+     *
      * double pi = Maps.getAsDoubleOrDefault(map, "pi", 0.0);
      * // pi = 3.14159 (converted from String)
-     * 
+     *
      * double missing = Maps.getAsDoubleOrDefault(map, "missing", 0.0);
      * // missing = 0.0
      * }</pre>
@@ -2436,19 +2467,19 @@ public final class Maps {
      * Returns an empty {@code Optional<String>} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
      * Otherwise returns an {@code Optional<String>} with the value mapped by the specified {@code key}.
      * If the mapped value is not String type, underlying conversion will be executed.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("name", "John");
      * map.put("age", 25);
-     * 
+     *
      * Optional<String> name = Maps.getAsString(map, "name");
      * // name.isPresent() = true, name.get() = "John"
-     * 
+     *
      * Optional<String> age = Maps.getAsString(map, "age");
      * // age.isPresent() = true, age.get() = "25" (converted from Integer)
-     * 
+     *
      * Optional<String> missing = Maps.getAsString(map, "missing");
      * // missing.isPresent() = false
      * }</pre>
@@ -2478,19 +2509,19 @@ public final class Maps {
      * Returns the value to which the specified key is found if the value is not {@code null},
      * or {@code defaultValue} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
      * If the mapped value is not of String type, underlying conversion will be executed by {@code N.stringOf(value)}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("name", "John");
      * map.put("age", 25);
-     * 
+     *
      * String name = Maps.getAsStringOrDefault(map, "name", "Unknown");
      * // name = "John"
-     * 
+     *
      * String age = Maps.getAsStringOrDefault(map, "age", "Unknown");
      * // age = "25" (converted from Integer)
-     * 
+     *
      * String missing = Maps.getAsStringOrDefault(map, "missing", "Unknown");
      * // missing = "Unknown"
      * }</pre>
@@ -2524,19 +2555,19 @@ public final class Maps {
      * Returns an empty {@code Optional<T>} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
      * Otherwise returns an {@code Optional<T>} with the value mapped by the specified {@code key}.
      * If the mapped value is not {@code T} type, underlying conversion will be executed by {@code N.convert(val, targetType)}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("date", "2023-12-25");
      * map.put("count", "100");
-     * 
+     *
      * Optional<LocalDate> date = Maps.getAs(map, "date", LocalDate.class);
      * // date.isPresent() = true, date.get() = LocalDate.of(2023, 12, 25)
-     * 
+     *
      * Optional<Integer> count = Maps.getAs(map, "count", Integer.class);
      * // count.isPresent() = true, count.get() = 100
-     * 
+     *
      * Optional<BigDecimal> missing = Maps.getAs(map, "missing", BigDecimal.class);
      * // missing.isPresent() = false
      * }</pre>
@@ -2571,15 +2602,15 @@ public final class Maps {
      * Returns an empty {@code Optional<T>} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
      * Otherwise returns an {@code Optional<T>} with the value mapped by the specified {@code key}.
      * If the mapped value is not {@code T} type, underlying conversion will be executed by {@code N.convert(val, targetType)}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("items", Arrays.asList("A", "B", "C"));
-     * 
+     *
      * Optional<List<String>> items = Maps.getAs(map, "items", new TypeReference<List<String>>() {});
      * // items.isPresent() = true, items.get() = ["A", "B", "C"]
-     * 
+     *
      * Optional<Set<Integer>> missing = Maps.getAs(map, "missing", new TypeReference<Set<Integer>>() {});
      * // missing.isPresent() = false
      * }</pre>
@@ -2614,19 +2645,19 @@ public final class Maps {
      * Returns the value to which the specified {@code key} is mapped if the value is not {@code null},
      * or {@code defaultValue} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
      * If the mapped value is not of type {@code T}, an underlying conversion will be executed.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("count", "100");
      * map.put("active", "true");
-     * 
+     *
      * Integer count = Maps.getAsOrDefault(map, "count", 0);
      * // count = 100 (converted from String)
-     * 
+     *
      * Boolean active = Maps.getAsOrDefault(map, "active", false);
      * // active = true (converted from String)
-     * 
+     *
      * Double missing = Maps.getAsOrDefault(map, "missing", 0.0);
      * // missing = 0.0
      * }</pre>
@@ -2705,7 +2736,7 @@ public final class Maps {
     }
 
     /**
-     * Returns a list of values mapped by the keys which exist in the specified {@code Map}, 
+     * Returns a list of values mapped by the keys which exist in the specified {@code Map},
      * or default value if the key doesn't exist in the {@code Map} or associated value is {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2714,7 +2745,7 @@ public final class Maps {
      * map.put("a", 1);
      * map.put("b", 2);
      * map.put("c", null);
-     * 
+     *
      * List<String> keys = Arrays.asList("a", "b", "c", "d");
      * List<Integer> values = Maps.getValuesOrDefault(map, keys, -1);
      * // values = [1, 2, -1, -1] ("c" has null value, "d" is missing)
@@ -2823,23 +2854,27 @@ public final class Maps {
 
     /**
      * Calculates the difference between two maps.
-     * The difference is defined as a map where each entry's key exists in the first map,
-     * and the entry's value is a pair consisting of the value from the first map and the value from the second map.
-     * If a key exists in the first map but not in the second, the value from the second map in the pair is an empty {@code Nullable}.
+     * The result is a map containing only those keys from the first map whose mapped values
+     * differ from (or are absent in) the second map. For each included key the value is a
+     * {@link Pair} where the left element is the value from the first map and the right element
+     * is a {@link Nullable} holding the value from the second map (empty {@code Nullable} when
+     * the key is not present in the second map).
+     * <p>Entries whose key-value pair is equal in both maps are <i>not</i> included in the result.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map1 = Maps.of("a", 1, "b", 2, "c", 3);
      * Map<String, Integer> map2 = Maps.of("a", 1, "b", 20, "d", 4);
-     * 
+     *
      * Map<String, Pair<Integer, Nullable<Integer>>> diff = Maps.difference(map1, map2);
      * // diff contains:
      * // "b" -> Pair.of(2, Nullable.of(20))    // different values
      * // "c" -> Pair.of(3, Nullable.empty())   // key only in map1
+     * // "a" is NOT included because it has the same value in both maps
      * }</pre>
      *
-     * <p>Note that this method only returns keys from the first map. Keys that exist only in the second map 
-     * are not included in the result. If you need to identify keys that are unique to each map, 
+     * <p>Note that this method only returns keys from the first map. Keys that exist only in the second map
+     * are not included in the result. If you need to identify keys that are unique to each map,
      * use {@link #symmetricDifference(Map, Map)} instead.
      *
      * <p>If the first map is {@code null}, an empty map is returned. If the second map is {@code null},
@@ -2899,7 +2934,7 @@ public final class Maps {
      * <pre>{@code
      * Map<String, Integer> map1 = Maps.of("a", 1, "b", 2, "c", 3);
      * Map<String, Integer> map2 = Maps.of("b", 2, "c", 4, "d", 5);
-     * 
+     *
      * Map<String, Pair<Nullable<Integer>, Nullable<Integer>>> result = Maps.symmetricDifference(map1, map2);
      * // result contains:
      * // "a" -> Pair.of(Nullable.of(1), Nullable.empty())   // key only in map1
@@ -2968,19 +3003,19 @@ public final class Maps {
 
     /**
      * Checks if the specified map contains the specified entry.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("a", 1);
      * map.put("b", 2);
-     * 
+     *
      * Map.Entry<String, Integer> entry1 = new AbstractMap.SimpleEntry<>("a", 1);
      * Map.Entry<String, Integer> entry2 = new AbstractMap.SimpleEntry<>("a", 2);
-     * 
+     *
      * boolean contains1 = Maps.containsEntry(map, entry1);
      * // contains1 = true
-     * 
+     *
      * boolean contains2 = Maps.containsEntry(map, entry2);
      * // contains2 = false (value doesn't match)
      * }</pre>
@@ -2998,22 +3033,22 @@ public final class Maps {
 
     /**
      * Checks if the specified map contains the specified key-value pair.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("a", 1);
      * map.put("b", null);
-     * 
+     *
      * boolean contains1 = Maps.containsEntry(map, "a", 1);
      * // contains1 = true
-     * 
+     *
      * boolean contains2 = Maps.containsEntry(map, "a", 2);
      * // contains2 = false
-     * 
+     *
      * boolean contains3 = Maps.containsEntry(map, "b", null);
      * // contains3 = true
-     * 
+     *
      * boolean contains4 = Maps.containsEntry(map, "c", null);
      * // contains4 = false (key not present)
      * }</pre>
@@ -3035,7 +3070,7 @@ public final class Maps {
 
     /**
      * Puts if the specified key is not already associated with a value (or is mapped to {@code null}).
-     * 
+     *
      * <p>Here absent means key is not found in the specified map or found with {@code null} value.
      *
      * <p><b>Usage Examples:</b></p>
@@ -3077,7 +3112,7 @@ public final class Maps {
 
     /**
      * Puts if the specified key is not already associated with a value (or is mapped to {@code null}).
-     * 
+     *
      * <p>Here absent means key is not found in the specified map or found with {@code null} value.
      *
      * <p><b>Usage Examples:</b></p>
@@ -3104,6 +3139,12 @@ public final class Maps {
      * @see Map#putIfAbsent(Object, Object)
      */
     public static <K, V> V putIfAbsent(final Map<K, V> map, final K key, final Supplier<V> supplier) {
+        // Delegate to ConcurrentMap.computeIfAbsent (atomic; supplier called at most once)
+        // when the input is concurrent. For plain maps this remains a single-thread op as before.
+        if (map instanceof java.util.concurrent.ConcurrentMap) {
+            return ((java.util.concurrent.ConcurrentMap<K, V>) map).computeIfAbsent(key, k -> supplier.get());
+        }
+
         V v = map.get(key);
 
         if (v == null) {
@@ -3122,12 +3163,12 @@ public final class Maps {
      * <pre>{@code
      * Map<String, Integer> target = new HashMap<>();
      * target.put("a", 1);
-     * 
+     *
      * Map<String, Integer> source = new HashMap<>();
      * source.put("b", 2);
      * source.put("c", 3);
      * source.put("abc", 4);
-     * 
+     *
      * boolean changed = Maps.putAllIf(target, source, key -> key.length() > 1);
      * // changed: true
      * // target: {a=1, abc=4}
@@ -3167,12 +3208,12 @@ public final class Maps {
      * <pre>{@code
      * Map<String, Integer> target = new HashMap<>();
      * target.put("a", 1);
-     * 
+     *
      * Map<String, Integer> source = new HashMap<>();
      * source.put("b", 2);
      * source.put("c", 3);
      * source.put("d", 10);
-     * 
+     *
      * boolean changed = Maps.putAllIf(target, source, (key, value) -> value > 2);
      * // changed: true
      * // target: {a=1, c=3, d=10}
@@ -3238,7 +3279,7 @@ public final class Maps {
      * Map<String, Integer> map = new HashMap<>();
      * map.put("a", 1);
      * map.put("b", 2);
-     * 
+     *
      * boolean removed1 = Maps.removeEntry(map, "a", 1);   // true, entry removed
      * boolean removed2 = Maps.removeEntry(map, "b", 3);   // false, value doesn't match
      * // map: {b=2}
@@ -3281,11 +3322,11 @@ public final class Maps {
      * map.put("a", 1);
      * map.put("b", 2);
      * map.put("c", 3);
-     * 
+     *
      * Map<String, Integer> entriesToRemove = new HashMap<>();
      * entriesToRemove.put("a", 1);
      * entriesToRemove.put("b", 5);   // Different value
-     * 
+     *
      * boolean changed = Maps.removeEntries(map, entriesToRemove);
      * // changed: true
      * // map: {b=2, c=3}  // Only "a"=1 was removed
@@ -3323,7 +3364,7 @@ public final class Maps {
      * map.put("a", 1);
      * map.put("b", 2);
      * map.put("c", 3);
-     * 
+     *
      * List<String> keysToRemove = Arrays.asList("a", "c", "d");
      * boolean changed = Maps.removeKeys(map, keysToRemove);
      * // changed: true
@@ -3359,7 +3400,7 @@ public final class Maps {
      * map.put("a", 1);
      * map.put("b", 2);
      * map.put("c", 3);
-     * 
+     *
      * boolean changed = Maps.removeIf(map, entry -> entry.getValue() > 1);
      * // changed: true
      * // map: {a=1}
@@ -3413,7 +3454,7 @@ public final class Maps {
      * map.put("apple", 1);
      * map.put("banana", 2);
      * map.put("cherry", 3);
-     * 
+     *
      * boolean changed = Maps.removeIf(map, (key, value) -> key.length() > 5 && value > 1);
      * // changed: true
      * // map: {apple=1}  // "banana" and "cherry" were removed (both have length > 5 and value > 1)
@@ -3467,7 +3508,7 @@ public final class Maps {
      * map.put("apple", 1);
      * map.put("banana", 2);
      * map.put("cherry", 3);
-     * 
+     *
      * boolean changed = Maps.removeIfKey(map, key -> key.startsWith("b"));
      * // changed: true
      * // map: {apple=1, cherry=3}
@@ -3522,7 +3563,7 @@ public final class Maps {
      * map.put("b", 2);
      * map.put("c", 3);
      * map.put("d", 2);
-     * 
+     *
      * boolean changed = Maps.removeIfValue(map, value -> value == 2);
      * // changed: true
      * // map: {a=1, c=3}
@@ -3575,7 +3616,7 @@ public final class Maps {
      * Map<String, Integer> map = new HashMap<>();
      * map.put("a", 1);
      * map.put("b", 2);
-     * 
+     *
      * Integer oldValue1 = Maps.replace(map, "a", 10);   // returns 1
      * Integer oldValue2 = Maps.replace(map, "c", 30);   // returns null
      * // map: {a=10, b=2}
@@ -3613,7 +3654,7 @@ public final class Maps {
      * Map<String, Integer> map = new HashMap<>();
      * map.put("a", 1);
      * map.put("b", 2);
-     * 
+     *
      * boolean replaced1 = Maps.replace(map, "a", 1, 10);   // true
      * boolean replaced2 = Maps.replace(map, "b", 3, 20);   // false, old value doesn't match
      * // map: {a=10, b=2}
@@ -3654,7 +3695,7 @@ public final class Maps {
      * map.put("a", 1);
      * map.put("b", 2);
      * map.put("c", 3);
-     * 
+     *
      * Maps.replaceAll(map, (key, value) -> value * 10);
      * // map: {a=10, b=20, c=30}
      * }</pre>
@@ -3672,13 +3713,17 @@ public final class Maps {
             return;
         }
 
-        try {
-            for (final Map.Entry<K, V> entry : map.entrySet()) {
-                entry.setValue(function.apply(entry.getKey(), entry.getValue()));
+        for (final Map.Entry<K, V> entry : map.entrySet()) {
+            // Apply the user function OUTSIDE the catch so user-thrown IllegalStateException
+            // surfaces as-is. Only entry.setValue can legitimately raise CME-style ISE here.
+            final V newValue = function.apply(entry.getKey(), entry.getValue());
+
+            try {
+                entry.setValue(newValue);
+            } catch (final IllegalStateException ise) {
+                // entry is no longer in the map (e.g., concurrent removal)
+                throw new ConcurrentModificationException(ise);
             }
-        } catch (final IllegalStateException ise) {
-            // this usually means the entry is no longer in the map.
-            throw new ConcurrentModificationException(ise);
         }
     }
 
@@ -3696,7 +3741,7 @@ public final class Maps {
      * map.put("a", 1);
      * map.put("b", 2);
      * map.put("c", 3);
-     * 
+     *
      * Map<String, Integer> filtered = Maps.filter(map, entry -> entry.getValue() > 1);
      * // filtered: {b=2, c=3}
      * }</pre>
@@ -3738,7 +3783,7 @@ public final class Maps {
      * map.put("apple", 5);
      * map.put("banana", 2);
      * map.put("cherry", 8);
-     * 
+     *
      * Map<String, Integer> filtered = Maps.filter(map, (key, value) -> key.length() > 5 || value > 4);
      * // filtered: {apple=5, banana=2, cherry=8}
      * }</pre>
@@ -3779,7 +3824,7 @@ public final class Maps {
      * map.put("apple", 1);
      * map.put("banana", 2);
      * map.put("apricot", 3);
-     * 
+     *
      * Map<String, Integer> filtered = Maps.filterByKey(map, key -> key.startsWith("ap"));
      * // filtered: {apple=1, apricot=3}
      * }</pre>
@@ -3820,7 +3865,7 @@ public final class Maps {
      * map.put("a", 10);
      * map.put("b", 20);
      * map.put("c", 30);
-     * 
+     *
      * Map<String, Integer> filtered = Maps.filterByValue(map, value -> value >= 20);
      * // filtered: {b=20, c=30}
      * }</pre>
@@ -4343,18 +4388,23 @@ public final class Maps {
 
         final Map<K, Object> mapToUse = (Map<K, Object>) map;
 
-        final Object[] values = new Object[keys.size()];
-        int idx = 0;
+        // Snapshot first; only mutate the original map after we've prepared every (newKey, value)
+        // pair. If the rebuild step below failed mid-loop, the original draining-then-reinserting
+        // approach would have lost every entry we'd already drained.
+        final List<Object> values = new ArrayList<>(keys.size());
+        for (final K key : keys) {
+            values.add(mapToUse.get(key));
+        }
 
         for (final K key : keys) {
-            values[idx++] = mapToUse.remove(key);
+            mapToUse.remove(key);
         }
 
         final Iterator<K> newKeyIter = newKeySet.iterator();
-        idx = 0;
+        int idx = 0;
 
         while (newKeyIter.hasNext()) {
-            mapToUse.put(newKeyIter.next(), values[idx++]);
+            mapToUse.put(newKeyIter.next(), values.get(idx++));
         }
     }
 

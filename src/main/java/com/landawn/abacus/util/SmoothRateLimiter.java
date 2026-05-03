@@ -182,7 +182,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
      * reason that this is warmupPeriod/2 is to maintain the behavior of the original implementation
      * where coldFactor was hard coded as 3.)
      *
-     * <p>It remains to calculate thresholdsPermits and maxPermits.
+     * <p>It remains to calculate thresholdPermits and maxPermits.
      *
      * <ul>
      *   <li>The time to go from thresholdPermits to 0 is equal to the integral of the function
@@ -199,7 +199,6 @@ abstract class SmoothRateLimiter extends RateLimiter {
      *       <blockquote>
      *       maxPermits = thresholdPermits + 2 * warmupPeriod / (stableInterval + coldInterval)
      *       </blockquote>
-     *
      * </ul>
      */
     static final class SmoothWarmingUp extends SmoothRateLimiter {
@@ -274,7 +273,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
      */
     static final class SmoothBursty extends SmoothRateLimiter {
 
-        /**  The work (permits) of how many seconds can be saved up if this RateLimiter is unused?. */
+        /** The work (permits) of how many seconds can be saved up if this RateLimiter is unused. */
         final double maxBurstSeconds;
 
         SmoothBursty(final SleepingStopwatch stopwatch, final double maxBurstSeconds) {

@@ -22,7 +22,6 @@ import java.sql.Timestamp;
 
 import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Strings;
 
 /**
  * Type handler for {@link java.sql.Timestamp} objects.
@@ -120,7 +119,7 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      */
     @Override
     public Timestamp valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : (isSysTime(str) ? Dates.currentTimestamp() : Dates.parseTimestamp(str));
+        return isNullDateTime(str) ? null : (isSysTime(str) ? Dates.currentTimestamp() : Dates.parseTimestamp(str));
     }
 
     /**

@@ -335,7 +335,7 @@ public class ParallelArrayIntStreamTest extends TestBase {
     public void testFlatMapIntArray() {
         IntStream stream = createIntStream(new int[] { 1, 2 });
         IntFunction<int[]> mapper = i -> new int[] { i, i + 10 };
-        List<Integer> result = stream.flatmap(mapper).toList();
+        List<Integer> result = stream.flatMapArray(mapper).toList();
         assertEquals(4, result.size());
         assertTrue(result.contains(1));
         assertTrue(result.contains(11));
@@ -346,13 +346,13 @@ public class ParallelArrayIntStreamTest extends TestBase {
     @Test
     @DisplayName("Test flatmap with array method")
     public void testFlatmapArray() {
-        IntStream flattened = parallelStream.flatmap(i -> new int[] { i, i * 2 });
+        IntStream flattened = parallelStream.flatMapArray(i -> new int[] { i, i * 2 });
         int[] result = flattened.sorted().toArray();
 
         assertEquals(20, result.length);
 
         parallelStream = createIntStream(new int[] { 1, 2, 3 });
-        flattened = parallelStream.flatmap(i -> i % 2 == 0 ? new int[] { i } : new int[0]);
+        flattened = parallelStream.flatMapArray(i -> i % 2 == 0 ? new int[] { i } : new int[0]);
         assertArrayEquals(new int[] { 2 }, flattened.toArray());
     }
 
@@ -367,8 +367,33 @@ public class ParallelArrayIntStreamTest extends TestBase {
 
     @Test
     public void testFlatmap_ParallelPath() {
-        long count = createIntStream(TEST_ARRAY).flatmap(i -> new int[] { i, i * 10 }).count();
+        long count = createIntStream(TEST_ARRAY).flatMapArray(i -> new int[] { i, i * 10 }).count();
         assertEquals(52, count);
+    }
+
+    @Test
+    public void testFlatmapCollection_ParallelPath() {
+        long count = createIntStream(TEST_ARRAY).flatmap(i -> Arrays.asList(i, i * 10)).count();
+        assertEquals(TEST_ARRAY.length * 2L, count);
+    }
+
+    @Test
+    public void testFlatmapCollection() {
+        // sequential fallback
+        int[] r = createIntStream(new int[] { 1, 2 }).flatmap(i -> Arrays.asList(i, i * 10)).toArray();
+        java.util.Arrays.sort(r);
+        assertArrayEquals(new int[] { 1, 2, 10, 20 }, r);
+
+        // empty
+        assertEquals(0, createIntStream(new int[] {}).flatmap(i -> Arrays.asList((Integer) i)).count());
+        assertEquals(0, createIntStream(TEST_ARRAY).flatmap(i -> java.util.Collections.<Integer> emptyList()).count());
+        assertEquals(0, createIntStream(TEST_ARRAY).flatmap(i -> (java.util.Collection<Integer>) null).count());
+
+        // null elements -> 0
+        int[] withNulls = createIntStream(new int[] { 1, 2 }).flatmap(i -> Arrays.asList((Integer) null, i)).toArray();
+        assertEquals(4, withNulls.length);
+        java.util.Arrays.sort(withNulls);
+        assertArrayEquals(new int[] { 0, 0, 1, 2 }, withNulls);
     }
 
     @Test
@@ -386,7 +411,7 @@ public class ParallelArrayIntStreamTest extends TestBase {
 
     @Test
     public void testFlatmap_SequentialFallback_SingleElement() {
-        List<Integer> result = createIntStream(new int[] { 3 }).flatmap(i -> new int[] { i, i * 10 }).toList();
+        List<Integer> result = createIntStream(new int[] { 3 }).flatMapArray(i -> new int[] { i, i * 10 }).toList();
         assertEquals(2, result.size());
         assertTrue(result.contains(3));
         assertTrue(result.contains(30));

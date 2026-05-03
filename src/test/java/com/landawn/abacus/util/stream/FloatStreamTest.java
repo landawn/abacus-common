@@ -406,10 +406,33 @@ public class FloatStreamTest extends TestBase {
     }
 
     @Test
-    @DisplayName("flatmap() should flatten arrays")
+    @DisplayName("flatMapArray() should flatten arrays")
     public void testFlatmapArray() {
         FloatStream stream = createFloatStream(1.0f, 2.0f);
-        assertArrayEquals(new float[] { 1.0f, 2.0f, 2.0f, 4.0f }, stream.flatmap(x -> new float[] { x, x * 2 }).toArray());
+        assertArrayEquals(new float[] { 1.0f, 2.0f, 2.0f, 4.0f }, stream.flatMapArray(x -> new float[] { x, x * 2 }).toArray());
+    }
+
+    @Test
+    public void testFlatmapCollection() {
+        // multi
+        assertArrayEquals(new float[] { 1f, 10f, 2f, 20f }, createFloatStream(1f, 2f).flatmap(x -> Arrays.asList(x, x * 10f)).toArray(), 0.0001f);
+
+        // single
+        assertArrayEquals(new float[] { 7f, 9f }, createFloatStream(7f).flatmap(x -> Arrays.asList(x, 9f)).toArray(), 0.0001f);
+
+        // empty stream
+        assertArrayEquals(new float[] {}, createFloatStream(new float[] {}).flatmap(x -> Arrays.asList((Float) x)).toArray(), 0.0001f);
+
+        // empty collection
+        assertArrayEquals(new float[] {}, createFloatStream(1f, 2f).flatmap(x -> java.util.Collections.<Float> emptyList()).toArray(), 0.0001f);
+
+        // null collection
+        assertArrayEquals(new float[] {}, createFloatStream(1f).flatmap(x -> (java.util.Collection<Float>) null).toArray(), 0.0001f);
+
+        // null elements -> 0f
+        assertArrayEquals(new float[] { 0f, 5.5f, 0f }, createFloatStream(1f).flatmap(x -> Arrays.asList((Float) null, 5.5f, (Float) null)).toArray(), 0.0001f);
+
+        assertEquals(4, createFloatStream(1f, 2f).flatmap(x -> Arrays.asList((Float) null, x)).count());
     }
 
     @Test
@@ -847,8 +870,7 @@ public class FloatStreamTest extends TestBase {
 
     @Test
     public void testToMapWithMergeAndFactory() {
-        LinkedHashMap<Integer, Float> result = createFloatStream(1.0f, 2.0f, 3.0f, 1.5f).toMap(f -> (int) (float) f, f -> f, (a, b) -> a + b,
-                LinkedHashMap::new);
+        LinkedHashMap<Integer, Float> result = createFloatStream(1.0f, 2.0f, 3.0f, 1.5f).toMap(f -> (int) f, f -> f, (a, b) -> a + b, LinkedHashMap::new);
         assertTrue(result instanceof LinkedHashMap);
         assertEquals(2.5f, result.get(1), DELTA);
     }
@@ -1542,7 +1564,7 @@ public class FloatStreamTest extends TestBase {
     // TODO: mapToDouble(FloatToDoubleFunction) is abstract - tested via concrete implementations above
     // TODO: mapToObj(FloatFunction) is abstract - tested via concrete implementations above
     // TODO: flatMap(FloatFunction) is abstract - tested via concrete implementations above
-    // TODO: flatmap(FloatFunction<float[]>) is abstract - tested via concrete implementations above
+    // TODO: flatMapArray(FloatFunction<float[]>) is abstract - tested via concrete implementations above
     // TODO: flatMapToInt(FloatFunction) is abstract - tested via concrete implementations above
     // TODO: flatMapToLong(FloatFunction) is abstract - tested via concrete implementations above
     // TODO: flatMapToDouble(FloatFunction) is abstract - tested via concrete implementations above
@@ -2882,24 +2904,26 @@ public class FloatStreamTest extends TestBase {
 
     @Test
     public void testStreamCreatedAfterFlatmap() {
-        assertEquals(10, FloatStream.of(1, 2, 3, 4, 5).flatmap(f -> new float[] { f, f * 10 }).count());
-        assertEquals(9, FloatStream.of(1, 2, 3, 4, 5).flatmap(f -> new float[] { f, f * 10 }).skip(1).count());
-        assertArrayEquals(new float[] { 1, 10, 2, 20, 3, 30, 4, 40, 5, 50 }, FloatStream.of(1, 2, 3, 4, 5).flatmap(f -> new float[] { f, f * 10 }).toArray(),
-                0.001f);
-        assertArrayEquals(new float[] { 10, 2, 20, 3, 30, 4, 40, 5, 50 },
-                FloatStream.of(1, 2, 3, 4, 5).flatmap(f -> new float[] { f, f * 10 }).skip(1).toArray(), 0.001f);
-        assertEquals(N.toList(1f, 10f, 2f, 20f, 3f, 30f, 4f, 40f, 5f, 50f), FloatStream.of(1, 2, 3, 4, 5).flatmap(f -> new float[] { f, f * 10 }).toList());
-        assertEquals(N.toList(10f, 2f, 20f, 3f, 30f, 4f, 40f, 5f, 50f), FloatStream.of(1, 2, 3, 4, 5).flatmap(f -> new float[] { f, f * 10 }).skip(1).toList());
-        assertEquals(10, FloatStream.of(1, 2, 3, 4, 5).map(e -> e).flatmap(f -> new float[] { f, f * 10 }).count());
-        assertEquals(9, FloatStream.of(1, 2, 3, 4, 5).map(e -> e).flatmap(f -> new float[] { f, f * 10 }).skip(1).count());
+        assertEquals(10, FloatStream.of(1, 2, 3, 4, 5).flatMapArray(f -> new float[] { f, f * 10 }).count());
+        assertEquals(9, FloatStream.of(1, 2, 3, 4, 5).flatMapArray(f -> new float[] { f, f * 10 }).skip(1).count());
         assertArrayEquals(new float[] { 1, 10, 2, 20, 3, 30, 4, 40, 5, 50 },
-                FloatStream.of(1, 2, 3, 4, 5).map(e -> e).flatmap(f -> new float[] { f, f * 10 }).toArray(), 0.001f);
+                FloatStream.of(1, 2, 3, 4, 5).flatMapArray(f -> new float[] { f, f * 10 }).toArray(), 0.001f);
         assertArrayEquals(new float[] { 10, 2, 20, 3, 30, 4, 40, 5, 50 },
-                FloatStream.of(1, 2, 3, 4, 5).map(e -> e).flatmap(f -> new float[] { f, f * 10 }).skip(1).toArray(), 0.001f);
+                FloatStream.of(1, 2, 3, 4, 5).flatMapArray(f -> new float[] { f, f * 10 }).skip(1).toArray(), 0.001f);
         assertEquals(N.toList(1f, 10f, 2f, 20f, 3f, 30f, 4f, 40f, 5f, 50f),
-                FloatStream.of(1, 2, 3, 4, 5).map(e -> e).flatmap(f -> new float[] { f, f * 10 }).toList());
+                FloatStream.of(1, 2, 3, 4, 5).flatMapArray(f -> new float[] { f, f * 10 }).toList());
         assertEquals(N.toList(10f, 2f, 20f, 3f, 30f, 4f, 40f, 5f, 50f),
-                FloatStream.of(1, 2, 3, 4, 5).map(e -> e).flatmap(f -> new float[] { f, f * 10 }).skip(1).toList());
+                FloatStream.of(1, 2, 3, 4, 5).flatMapArray(f -> new float[] { f, f * 10 }).skip(1).toList());
+        assertEquals(10, FloatStream.of(1, 2, 3, 4, 5).map(e -> e).flatMapArray(f -> new float[] { f, f * 10 }).count());
+        assertEquals(9, FloatStream.of(1, 2, 3, 4, 5).map(e -> e).flatMapArray(f -> new float[] { f, f * 10 }).skip(1).count());
+        assertArrayEquals(new float[] { 1, 10, 2, 20, 3, 30, 4, 40, 5, 50 },
+                FloatStream.of(1, 2, 3, 4, 5).map(e -> e).flatMapArray(f -> new float[] { f, f * 10 }).toArray(), 0.001f);
+        assertArrayEquals(new float[] { 10, 2, 20, 3, 30, 4, 40, 5, 50 },
+                FloatStream.of(1, 2, 3, 4, 5).map(e -> e).flatMapArray(f -> new float[] { f, f * 10 }).skip(1).toArray(), 0.001f);
+        assertEquals(N.toList(1f, 10f, 2f, 20f, 3f, 30f, 4f, 40f, 5f, 50f),
+                FloatStream.of(1, 2, 3, 4, 5).map(e -> e).flatMapArray(f -> new float[] { f, f * 10 }).toList());
+        assertEquals(N.toList(10f, 2f, 20f, 3f, 30f, 4f, 40f, 5f, 50f),
+                FloatStream.of(1, 2, 3, 4, 5).map(e -> e).flatMapArray(f -> new float[] { f, f * 10 }).skip(1).toList());
 
     }
 

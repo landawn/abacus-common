@@ -74,8 +74,8 @@ public @interface Table {
     /**
      * Deprecated alias for {@link #name()}.
      *
-     * @return the table name value
-     * @deprecated use {@link #name()} to specify the table name explicitly.
+     * @return the table name
+     * @deprecated Use {@link #name()} to specify the table name explicitly.
      */
     @Deprecated
     String value() default "";

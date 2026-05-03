@@ -36,7 +36,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * Interface marking objects that should not be cached or updated.
  * This is a marker interface for one-off objects that are designed to be used once and discarded.
  * To persist or modify the object, call the {@code copy()} method to create a mutable copy.
- * 
+ *
  * <p>This pattern is useful for objects that wrap temporary resources or provide read-only views
  * of data that should not be retained in memory.</p>
  *
@@ -50,7 +50,7 @@ public interface NoCachingNoUpdating {
      * A wrapper class for arrays that enforces no-caching and no-updating semantics.
      * This class provides a read-only view of an array with utility methods for accessing
      * and transforming the data. The array itself should never be cached or modified.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "b", "c"};
@@ -75,7 +75,7 @@ public interface NoCachingNoUpdating {
          * The array must not be {@code null}.
          *
          * @param a the array to wrap
-         * @throws IllegalArgumentException if the array is null
+         * @throws IllegalArgumentException if the array is {@code null}
          */
         protected DisposableArray(final T[] a) {
             N.checkArgNotNull(a, cs.a);
@@ -84,7 +84,7 @@ public interface NoCachingNoUpdating {
 
         /**
          * Creates a new DisposableArray with a new array of the specified component type and length.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableArray<String> array = DisposableArray.create(String.class, 10);
@@ -105,7 +105,7 @@ public interface NoCachingNoUpdating {
         /**
          * Wraps an existing array in a DisposableArray.
          * The array is not copied; the DisposableArray provides a view of the original array.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Integer[] numbers = {1, 2, 3, 4, 5};
@@ -143,7 +143,7 @@ public interface NoCachingNoUpdating {
         /**
          * Copies the elements to the specified array.
          * If the target array is too small, a new array of the same type is allocated.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableArray<String> disposable = DisposableArray.wrap(new String[] {"a", "b", "c"});
@@ -219,7 +219,7 @@ public interface NoCachingNoUpdating {
 
         /**
          * Performs the given action for each element of the array.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableArray<String> disposable = DisposableArray.wrap(new String[] {"a", "b", "c"});
@@ -239,7 +239,7 @@ public interface NoCachingNoUpdating {
         /**
          * Applies the given function to the wrapped array and returns the result.
          * This is useful for performing operations that need access to the entire array.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableArray<Integer> disposable = DisposableArray.wrap(new Integer[] {1, 2, 3});
@@ -270,7 +270,7 @@ public interface NoCachingNoUpdating {
 
         /**
          * Joins the string representations of the array elements using the specified delimiter.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableArray<String> disposable = DisposableArray.wrap(new String[] {"a", "b", "c"});
@@ -287,7 +287,7 @@ public interface NoCachingNoUpdating {
         /**
          * Joins the string representations of the array elements using the specified delimiter,
          * prefix, and suffix.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableArray<String> disposable = DisposableArray.wrap(new String[] {"a", "b", "c"});
@@ -327,7 +327,7 @@ public interface NoCachingNoUpdating {
     /**
      * A specialized DisposableArray for Object arrays.
      * This class provides optimized handling for arrays of type Object[].
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DisposableObjArray array = DisposableObjArray.create(10);
@@ -390,7 +390,7 @@ public interface NoCachingNoUpdating {
      * A wrapper class for boolean arrays that enforces no-caching and no-updating semantics.
      * This class provides a read-only view of a boolean array with utility methods for accessing
      * and transforming the data.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] array = {true, false, true};
@@ -488,7 +488,7 @@ public interface NoCachingNoUpdating {
         /**
          * Converts the array to a Collection of the specified type.
          * Each boolean value is boxed to Boolean.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableBooleanArray array = DisposableBooleanArray.wrap(new boolean[] {true, false});
@@ -583,7 +583,7 @@ public interface NoCachingNoUpdating {
      * A wrapper class for char arrays that enforces no-caching and no-updating semantics.
      * This class provides a read-only view of a char array with utility methods for accessing,
      * transforming, and performing calculations on the data.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] array = {'a', 'b', 'c'};
@@ -718,7 +718,7 @@ public interface NoCachingNoUpdating {
          * Finds the minimum char value in the array.
          *
          * @return the minimum value
-         * @throws ArrayIndexOutOfBoundsException if the array is empty
+         * @throws IllegalArgumentException if the array is empty
          */
         public char min() {
             return N.min(a);
@@ -728,7 +728,7 @@ public interface NoCachingNoUpdating {
          * Finds the maximum char value in the array.
          *
          * @return the maximum value
-         * @throws ArrayIndexOutOfBoundsException if the array is empty
+         * @throws IllegalArgumentException if the array is empty
          */
         public char max() {
             return N.max(a);
@@ -808,7 +808,7 @@ public interface NoCachingNoUpdating {
      * A wrapper class for byte arrays that enforces no-caching and no-updating semantics.
      * This class provides a read-only view of a byte array with utility methods for accessing,
      * transforming, and performing calculations on the data.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] array = {1, 2, 3, 4, 5};
@@ -941,7 +941,7 @@ public interface NoCachingNoUpdating {
          * Finds the minimum byte value in the array.
          *
          * @return the minimum value
-         * @throws ArrayIndexOutOfBoundsException if the array is empty
+         * @throws IllegalArgumentException if the array is empty
          */
         public byte min() {
             return N.min(a);
@@ -951,7 +951,7 @@ public interface NoCachingNoUpdating {
          * Finds the maximum byte value in the array.
          *
          * @return the maximum value
-         * @throws ArrayIndexOutOfBoundsException if the array is empty
+         * @throws IllegalArgumentException if the array is empty
          */
         public byte max() {
             return N.max(a);
@@ -1031,7 +1031,7 @@ public interface NoCachingNoUpdating {
      * A wrapper class for short arrays that enforces no-caching and no-updating semantics.
      * This class provides a read-only view of a short array with utility methods for accessing,
      * transforming, and performing calculations on the data.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] array = {100, 200, 300};
@@ -1164,7 +1164,7 @@ public interface NoCachingNoUpdating {
          * Finds the minimum short value in the array.
          *
          * @return the minimum value
-         * @throws ArrayIndexOutOfBoundsException if the array is empty
+         * @throws IllegalArgumentException if the array is empty
          */
         public short min() {
             return N.min(a);
@@ -1174,7 +1174,7 @@ public interface NoCachingNoUpdating {
          * Finds the maximum short value in the array.
          *
          * @return the maximum value
-         * @throws ArrayIndexOutOfBoundsException if the array is empty
+         * @throws IllegalArgumentException if the array is empty
          */
         public short max() {
             return N.max(a);
@@ -1254,7 +1254,7 @@ public interface NoCachingNoUpdating {
      * A wrapper class for int arrays that enforces no-caching and no-updating semantics.
      * This class provides a read-only view of an int array with utility methods for accessing,
      * transforming, and performing calculations on the data.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {10, 20, 30, 40, 50};
@@ -1388,7 +1388,7 @@ public interface NoCachingNoUpdating {
          * Finds the minimum int value in the array.
          *
          * @return the minimum value
-         * @throws ArrayIndexOutOfBoundsException if the array is empty
+         * @throws IllegalArgumentException if the array is empty
          */
         public int min() {
             return N.min(a);
@@ -1398,7 +1398,7 @@ public interface NoCachingNoUpdating {
          * Finds the maximum int value in the array.
          *
          * @return the maximum value
-         * @throws ArrayIndexOutOfBoundsException if the array is empty
+         * @throws IllegalArgumentException if the array is empty
          */
         public int max() {
             return N.max(a);
@@ -1478,7 +1478,7 @@ public interface NoCachingNoUpdating {
      * A wrapper class for long arrays that enforces no-caching and no-updating semantics.
      * This class provides a read-only view of a long array with utility methods for accessing,
      * transforming, and performing calculations on the data.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] array = {1000L, 2000L, 3000L};
@@ -1611,7 +1611,7 @@ public interface NoCachingNoUpdating {
          * Finds the minimum long value in the array.
          *
          * @return the minimum value
-         * @throws ArrayIndexOutOfBoundsException if the array is empty
+         * @throws IllegalArgumentException if the array is empty
          */
         public long min() {
             return N.min(a);
@@ -1621,7 +1621,7 @@ public interface NoCachingNoUpdating {
          * Finds the maximum long value in the array.
          *
          * @return the maximum value
-         * @throws ArrayIndexOutOfBoundsException if the array is empty
+         * @throws IllegalArgumentException if the array is empty
          */
         public long max() {
             return N.max(a);
@@ -1701,7 +1701,7 @@ public interface NoCachingNoUpdating {
      * A wrapper class for float arrays that enforces no-caching and no-updating semantics.
      * This class provides a read-only view of a float array with utility methods for accessing,
      * transforming, and performing calculations on the data.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] array = {1.5f, 2.5f, 3.5f};
@@ -1834,7 +1834,7 @@ public interface NoCachingNoUpdating {
          * Finds the minimum float value in the array.
          *
          * @return the minimum value
-         * @throws ArrayIndexOutOfBoundsException if the array is empty
+         * @throws IllegalArgumentException if the array is empty
          */
         public float min() {
             return N.min(a);
@@ -1844,7 +1844,7 @@ public interface NoCachingNoUpdating {
          * Finds the maximum float value in the array.
          *
          * @return the maximum value
-         * @throws ArrayIndexOutOfBoundsException if the array is empty
+         * @throws IllegalArgumentException if the array is empty
          */
         public float max() {
             return N.max(a);
@@ -1924,7 +1924,7 @@ public interface NoCachingNoUpdating {
      * A wrapper class for double arrays that enforces no-caching and no-updating semantics.
      * This class provides a read-only view of a double array with utility methods for accessing,
      * transforming, and performing calculations on the data.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] array = {1.1, 2.2, 3.3, 4.4};
@@ -2058,7 +2058,7 @@ public interface NoCachingNoUpdating {
          * Finds the minimum double value in the array.
          *
          * @return the minimum value
-         * @throws ArrayIndexOutOfBoundsException if the array is empty
+         * @throws IllegalArgumentException if the array is empty
          */
         public double min() {
             return N.min(a);
@@ -2068,7 +2068,7 @@ public interface NoCachingNoUpdating {
          * Finds the maximum double value in the array.
          *
          * @return the maximum value
-         * @throws ArrayIndexOutOfBoundsException if the array is empty
+         * @throws IllegalArgumentException if the array is empty
          */
         public double max() {
             return N.max(a);
@@ -2148,7 +2148,7 @@ public interface NoCachingNoUpdating {
      * A wrapper class for Deque that enforces no-caching and no-updating semantics.
      * This class provides a read-only view of a Deque with utility methods for accessing
      * and transforming the data. The Deque itself should never be cached or modified externally.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Deque<String> deque = new ArrayDeque<>();
@@ -2344,7 +2344,7 @@ public interface NoCachingNoUpdating {
      * A wrapper class for Map.Entry that enforces no-caching and no-updating semantics.
      * This class provides a read-only view of a Map.Entry. The entry itself should never
      * be cached, and setValue() is not supported.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map.Entry<String, Integer> entry = Map.entry("key", 100);
@@ -2375,7 +2375,7 @@ public interface NoCachingNoUpdating {
          * @param <V> the type of the value
          * @param entry the Map.Entry to wrap
          * @return a new DisposableEntry wrapping the given entry
-         * @throws IllegalArgumentException if the entry is null
+         * @throws IllegalArgumentException if the entry is {@code null}
          */
         public static <K, V> DisposableEntry<K, V> wrap(final Map.Entry<K, V> entry) throws IllegalArgumentException {
             N.checkArgNotNull(entry, cs.entry);
@@ -2434,7 +2434,7 @@ public interface NoCachingNoUpdating {
 
         /**
          * Applies the given bi-function to the key and value of this entry and returns the result.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableEntry<String, Integer> entry = DisposableEntry.wrap(Map.entry("age", 25));
@@ -2487,7 +2487,7 @@ public interface NoCachingNoUpdating {
     /**
      * A wrapper class for Pair that enforces no-caching and no-updating semantics.
      * This class provides a read-only view of a Pair. The pair itself should never be cached.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("left", 100);
@@ -2518,7 +2518,7 @@ public interface NoCachingNoUpdating {
          * @param <R> the type of the right element
          * @param p the Pair to wrap
          * @return a new DisposablePair wrapping the given pair
-         * @throws IllegalArgumentException if the pair is null
+         * @throws IllegalArgumentException if the pair is {@code null}
          */
         public static <L, R> DisposablePair<L, R> wrap(final Pair<L, R> p) throws IllegalArgumentException {
             N.checkArgNotNull(p, cs.pair);
@@ -2564,7 +2564,7 @@ public interface NoCachingNoUpdating {
 
         /**
          * Applies the given bi-function to the left and right elements and returns the result.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposablePair<Integer, Integer> pair = DisposablePair.wrap(Pair.of(3, 4));
@@ -2607,7 +2607,7 @@ public interface NoCachingNoUpdating {
     /**
      * A wrapper class for Triple that enforces no-caching and no-updating semantics.
      * This class provides a read-only view of a Triple. The triple itself should never be cached.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("left", 100, true);
@@ -2641,7 +2641,7 @@ public interface NoCachingNoUpdating {
          * @param <R> the type of the right element
          * @param p the Triple to wrap
          * @return a new DisposableTriple wrapping the given triple
-         * @throws IllegalArgumentException if the triple is null
+         * @throws IllegalArgumentException if the triple is {@code null}
          */
         public static <L, M, R> DisposableTriple<L, M, R> wrap(final Triple<L, M, R> p) throws IllegalArgumentException {
             N.checkArgNotNull(p, cs.triple);
@@ -2699,7 +2699,7 @@ public interface NoCachingNoUpdating {
 
         /**
          * Applies the given tri-function to the left, middle, and right elements and returns the result.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableTriple<Integer, Integer, Integer> triple = DisposableTriple.wrap(Triple.of(1, 2, 3));
@@ -2743,7 +2743,7 @@ public interface NoCachingNoUpdating {
      * This class is designed for temporal data where the time of creation or modification
      * is important. Like other NoCachingNoUpdating implementations, instances should not
      * be cached or updated directly.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Timed<String> timedValue = Timed.of("Hello", System.currentTimeMillis());

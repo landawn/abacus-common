@@ -33,7 +33,7 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.TypeAttrParser;
 
 /**
- * The Abstract base class for all types in the type system.
+ * The abstract base class for all types in the type system.
  * <p>
  * This class provides default implementations for most {@code Type} interface methods
  * and defines common constants and utility methods used across all type implementations.
@@ -84,9 +84,8 @@ public abstract class AbstractType<T> implements Type<T> {
     /** Character array representation of boolean {@code false} for efficient writing */
     static final char[] FALSE_CHAR_ARRAY = FALSE_STRING.toCharArray();
 
-    /** Empty type array constant */
-    @SuppressWarnings("rawtypes")
-    protected static final Type[] EMPTY_TYPE_ARRAY = {};
+    /** Empty parameter-types list constant */
+    protected static final List<Type<?>> EMPTY_TYPE_LIST = List.of();
 
     /** Map for converting separator strings to regex patterns */
     private static final Map<String, String> separatorConverter = new HashMap<>();
@@ -622,10 +621,11 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Gets the serialization type for this type.
-     * Returns SERIALIZABLE if the type is serializable, otherwise UNKNOWN.
+     * Returns the serialization type for this type.
+     * Returns {@link SerializationType#SERIALIZABLE} if {@link #isSerializable()} returns
+     * {@code true}; otherwise returns {@link SerializationType#UNKNOWN}.
      *
-     * @return the serialization type
+     * @return the {@link SerializationType} for this type
      */
     @Override
     public SerializationType serializationType() {
@@ -667,13 +667,13 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Gets the parameter types for generic types.
-     * Default implementation returns an empty array.
+     * Default implementation returns an empty list.
      *
-     * @return array of parameter types
+     * @return immutable list of parameter types
      */
     @Override
-    public Type<?>[] parameterTypes() {
-        return AbstractType.EMPTY_TYPE_ARRAY;
+    public List<Type<?>> parameterTypes() {
+        return EMPTY_TYPE_LIST;
     }
 
     /**
@@ -719,8 +719,9 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Converts an object to this type.
-     * Default implementation converts the object to string first,
-     * then parses it using {@link #valueOf(String)}.
+     * Default implementation serializes the object to a string using the type-specific
+     * {@link #stringOf} method of the object's actual runtime type, then parses that
+     * string using {@link #valueOf(String)}.
      *
      * @param obj the object to convert
      * @return the converted value
@@ -775,7 +776,9 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Sets a parameter value in a PreparedStatement.
-     * Default implementation converts the value to string.
+     * Default implementation converts the value to its string representation via
+     * {@link #stringOf(Object)} and sets it as a {@code VARCHAR} using
+     * {@link PreparedStatement#setString}.
      *
      * @param stmt the PreparedStatement
      * @param columnIndex the parameter index (1-based)
@@ -789,7 +792,9 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Sets a parameter value in a CallableStatement.
-     * Default implementation converts the value to string.
+     * Default implementation converts the value to its string representation via
+     * {@link #stringOf(Object)} and sets it as a {@code VARCHAR} using
+     * {@link CallableStatement#setString}.
      *
      * @param stmt the CallableStatement
      * @param parameterName the parameter name
@@ -832,9 +837,9 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Appends the string representation of a value to an Appendable.
-     * Default implementation writes "null" for {@code null} values,
-     * otherwise uses {@link #stringOf(Object)}.
+     * Appends the string representation of a value to an {@code Appendable}.
+     * Appends the literal {@code "null"} string for {@code null} values;
+     * otherwise delegates to {@link #stringOf(Object)}.
      *
      * @param appendable the target to append to
      * @param x the value to append
@@ -850,8 +855,9 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Writes a value to a CharacterWriter with optional configuration.
-     * Default implementation handles string quotation based on configuration.
+     * Writes a value to a {@code CharacterWriter} with optional configuration.
+     * Writes {@code "null"} for a {@code null} value; otherwise serializes via
+     * {@link #stringOf(Object)} and applies string quotation from {@code config} if specified.
      *
      * @param writer the CharacterWriter to write to
      * @param x the value to write
@@ -1103,26 +1109,28 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if a character sequence possibly represents a long timestamp.
-     * A string is considered a possible long if positions 2 and 4 contain digits.
+     * Checks if a character sequence possibly represents a millisecond timestamp (i.e., a long integer).
+     * A string is considered a possible millisecond value if it has more than 4 characters and
+     * the characters at positions 2 and 4 are both digits, which distinguishes pure numeric
+     * values from date strings like {@code "2023-01-01"} where position 4 is {@code '-'}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check numeric timestamp
-     * boolean result1 = isPossibleLong("1234567890");
+     * boolean result1 = isPossibleMillis("1234567890");
      * // result1: true (positions 2 and 4 are digits)
      *
      * // Check ISO date format
-     * boolean result2 = isPossibleLong("2023-01-01");
+     * boolean result2 = isPossibleMillis("2023-01-01");
      * // result2: false (position 4 is '-', not a digit)
      *
      * // Check short string
-     * boolean result3 = isPossibleLong("123");
+     * boolean result3 = isPossibleMillis("123");
      * // result3: false (length <= 4)
      * }</pre>
      *
      * @param dateTime the character sequence to check
-     * @return {@code true} if it could be a long timestamp
+     * @return {@code true} if the sequence could represent a millisecond timestamp
      */
     protected static boolean isPossibleMillis(final CharSequence dateTime) {
         final int len = dateTime.length();
@@ -1141,13 +1149,15 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if a character array possibly represents a long timestamp.
-     * A character array is considered a possible long if positions 2 and 4 contain digits.
+     * Checks if a region of a character array possibly represents a millisecond timestamp
+     * (i.e., a long integer). The region is considered a possible millisecond value if it has
+     * more than 4 characters and the characters at relative positions 2 and 4 are both digits,
+     * which distinguishes pure numeric values from date strings where position 4 is a separator.
      *
-     * @param cbuf the character array
-     * @param offset the starting position
-     * @param len the length to check
-     * @return {@code true} if it could be a long timestamp
+     * @param cbuf the character array to inspect
+     * @param offset the starting position within the array
+     * @param len the number of characters in the region to inspect
+     * @return {@code true} if the character region could represent a millisecond timestamp
      */
     protected static boolean isPossibleLong(final char[] cbuf, final int offset, final int len) {
         if (len > 4) {
@@ -1308,18 +1318,21 @@ public abstract class AbstractType<T> implements Type<T> {
      * This method extends the standard Boolean parsing functionality by adding special handling
      * for single-character strings, recognizing "Y", "y", and "1" as {@code true} values,
      * in addition to the standard "true" string.
+     * </p>
      * <p>
      * For single-character inputs:
+     * </p>
      * <ul>
-     *   <li>"Y", "y", "1" → true</li>
-     *   <li>Any other single character → false</li>
+     *   <li>"Y", "y", "1" &rarr; {@code true}</li>
+     *   <li>Any other single character &rarr; {@code false}</li>
      * </ul>
      * <p>
      * For multi-character inputs, delegates to {@link Boolean#valueOf(String)}, which
      * returns {@code true} only if the string equals "true" (case-insensitive).
+     * </p>
      *
-     * @param str the string to parse, must not be null
-     * @return a Boolean representing the parsed value
+     * @param str the string to parse, must not be {@code null}
+     * @return a {@code Boolean} representing the parsed value
      * @see Boolean#valueOf(String)
      */
     protected Boolean parseBoolean(final String str) {

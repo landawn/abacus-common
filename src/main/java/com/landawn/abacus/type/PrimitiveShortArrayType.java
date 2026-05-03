@@ -16,15 +16,19 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for primitive {@code short[]} arrays, providing serialization and deserialization support.
+ * Type handler for primitive {@code short[]} arrays, providing serialization, deserialization,
+ * and conversion between short arrays and their string representations or collections.
+ * String representations use the format {@code [1, 2, 3]} with comma-separated elements
+ * enclosed in square brackets.
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<short[]> {
@@ -32,13 +36,17 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
     public static final String SHORT_ARRAY = short[].class.getSimpleName();
 
     private final Type<Short> elementType;
-    private final Type<Short>[] parameterTypes;
+    private final List<Type<?>> parameterTypes;
 
+    /**
+     * Constructs a new PrimitiveShortArrayType instance.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
+     */
     PrimitiveShortArrayType() {
         super(SHORT_ARRAY);
 
         elementType = TypeFactory.getType(short.class);
-        parameterTypes = new Type[] { elementType };
+        parameterTypes = List.of(elementType);
     }
 
     /**
@@ -84,16 +92,16 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<short[]> type = TypeFactory.getType(short[].class);
-     * Type<Short>[] paramTypes = type.parameterTypes();
-     * System.out.println(paramTypes.length);      // Output: 1
-     * System.out.println(paramTypes[0].name());   // Output: short
+     * List<Type<?>> paramTypes = type.parameterTypes();
+     * System.out.println(paramTypes.size());        // Output: 1
+     * System.out.println(paramTypes.get(0).name()); // Output: short
      * }</pre>
      *
-     * @return an array containing the Short Type that describes the elements of this array type
+     * @return an immutable list containing the Short Type that describes the elements of this array type
      * @see #elementType()
      */
     @Override
-    public Type<Short>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 

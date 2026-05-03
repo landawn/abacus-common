@@ -110,7 +110,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Factory Methods:</b>
  * <ul>
- *   <li>{@link #withDefault()} - Default whitespace-based splitting</li>
+ *   <li>{@link #withDefault()} - Default comma-and-space splitting using {@link #DEFAULT_DELIMITER}</li>
  *   <li>{@link #forLines()} - Line-based splitting for text processing</li>
  *   <li>{@link #with(char)} - Single character delimiter</li>
  *   <li>{@link #with(CharSequence)} - Multi-character string delimiter</li>
@@ -159,11 +159,12 @@ import com.landawn.abacus.util.stream.Stream;
  * </ul>
  *
  * <p><b>Thread Safety:</b>
- * Splitter instances are <b>thread-safe</b> after configuration:
+ * Splitter instances are safe to reuse across threads after configuration is complete and no further
+ * configuration methods are invoked:
  * <ul>
- *   <li>Configuration is immutable once created</li>
- *   <li>Can be safely shared between multiple threads</li>
- *   <li>No mutable state during splitting operations</li>
+ *   <li>Configuration methods mutate the instance and are not safe for concurrent use</li>
+ *   <li>Once configured, split operations read the configured state without mutating it</li>
+ *   <li>Configured instances can be shared between multiple threads for read-only use</li>
  *   <li>Ideal for caching and reuse in concurrent environments</li>
  * </ul>
  *
@@ -228,7 +229,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Memory Management:</b>
  * <ul>
  *   <li>Streaming operations minimize memory footprint</li>
- *   <li>Immutable configuration prevents memory leaks</li>
+ *   <li>Reusing configured instances avoids repeated setup allocations</li>
  *   <li>Lazy evaluation defers allocation until needed</li>
  *   <li>Consider streaming for very large input texts</li>
  * </ul>
@@ -258,7 +259,7 @@ import com.landawn.abacus.util.stream.Stream;
 public final class Splitter {
 
     /**
-     * The default delimiter used to separate elements when joining.
+     * The default delimiter used to split delimited text when {@link #withDefault()} is used.
      * @see Joiner#DEFAULT_DELIMITER
      */
     public static final String DEFAULT_DELIMITER = Joiner.DEFAULT_DELIMITER;

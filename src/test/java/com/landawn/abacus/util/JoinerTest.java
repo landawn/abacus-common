@@ -3160,7 +3160,7 @@ public class JoinerTest extends AbstractTest {
     @Test
     public void testRepeatObject_WithSeparator() {
         Joiner joiner = Joiner.with("-");
-        joiner.repeat((Object) 5, 3);
+        joiner.repeat(5, 3);
         assertEquals("5-5-5", joiner.toString());
     }
 
@@ -3578,4 +3578,147 @@ public class JoinerTest extends AbstractTest {
         assertEquals("a,b", result);
     }
 
+    // -------------------------------------------------------------------------
+    // Bug-regression tests
+    // -------------------------------------------------------------------------
+
+    /**
+     * EscapeUtil.CsvUnescaper bug: when the input is a quoted CSV value with NO
+     * special characters inside (no comma, no CR/LF, no embedded quote), the
+     * unescaper was writing the full quoted string (including the surrounding
+     * double-quotes) instead of stripping them.
+     *
+     * Expected: unescapeCsv("\"hello\"") == "hello"
+     * Was:      unescapeCsv("\"hello\"") == "\"hello\""
+     */
+    @Test
+    public void testCsvUnescaper_quotedValueNoSpecialChars_stripsQuotes() {
+        // Plain quoted value – no CSV special chars inside
+        assertEquals("\"hello\"", EscapeUtil.unescapeCsv("\"hello\""));
+        // Longer plain value
+        assertEquals("\"foo bar baz\"", EscapeUtil.unescapeCsv("\"foo bar baz\""));
+        // Empty quoted value
+        assertEquals("\"\"", EscapeUtil.unescapeCsv("\"\""));
+    }
+
+    /**
+     * Sanity check: CsvUnescaper still works correctly for values that DO contain
+     * special characters (this path was always correct).
+     */
+    @Test
+    public void testCsvUnescaper_quotedValueWithSpecialChars_handlesCorrectly() {
+        // Embedded comma
+        assertEquals("hello,world", EscapeUtil.unescapeCsv("\"hello,world\""));
+        // Embedded double-quote (escaped as "")
+        assertEquals("say \"hi\"", EscapeUtil.unescapeCsv("\"say \"\"hi\"\"\""));
+        // Embedded newline
+        assertEquals("line1\nline2", EscapeUtil.unescapeCsv("\"line1\nline2\""));
+    }
+
+    /**
+     * Sanity check: CsvEscaper round-trips correctly with CsvUnescaper.
+     */
+    @Test
+    public void testCsvEscapeUnescapeRoundTrip() {
+        String[] inputs = { "simple", "hello,world", "say \"hi\"", "line1\nline2", "" };
+        for (String input : inputs) {
+            String escaped = EscapeUtil.escapeCsv(input);
+            String unescaped = EscapeUtil.unescapeCsv(escaped);
+            assertEquals(input, unescaped, "Round-trip failed for: " + input);
+        }
+    }
+
+    /**
+     * Utf8.encodedLengthGeneral bug: a surrogate pair (supplementary codepoint)
+     * encodes to 4 UTF-8 bytes, but the implementation was only counting 2 bytes
+     * per surrogate pair.
+     *
+     * For example, U+1F600 (GRINNING FACE emoji) is encoded as a surrogate pair
+     * in UTF-16 and requires 4 bytes in UTF-8.
+     */
+    @Test
+    public void testUtf8EncodedLength_surrogateChar_counts4Bytes() {
+        // U+1F600 GRINNING FACE – a common supplementary codepoint
+        String emoji = "😀"; // U+1F600 as UTF-16 surrogate pair
+        int expected = emoji.getBytes(java.nio.charset.StandardCharsets.UTF_8).length; // 4
+        assertEquals(4, expected, "Test precondition: emoji should be 4 bytes in UTF-8");
+        assertEquals(expected, Utf8.encodedLength(emoji),
+                "encodedLength must return 4 for a supplementary codepoint");
+    }
+
+    @Test
+    public void testUtf8EncodedLength_mixedAsciiAndEmoji() {
+        // "Hi" (2 ASCII bytes) + emoji (4 bytes) = 6 bytes total
+        String s = "Hi😀";
+        int expected = s.getBytes(java.nio.charset.StandardCharsets.UTF_8).length;
+        assertEquals(expected, Utf8.encodedLength(s));
+    }
+
+    @Test
+    public void testUtf8EncodedLength_pureAscii() {
+        String s = "Hello World";
+        assertEquals(s.length(), Utf8.encodedLength(s));
+    }
+
+    @Test
+    public void testUtf8EncodedLength_twoByteChars() {
+        // U+00E9 (é) requires 2 UTF-8 bytes
+        String s = "é";
+        int expected = s.getBytes(java.nio.charset.StandardCharsets.UTF_8).length;
+        assertEquals(expected, Utf8.encodedLength(s));
+    }
+
+    @Test
+    public void testUtf8EncodedLength_threeByteChars() {
+        // U+4E16 (世) requires 3 UTF-8 bytes
+        String s = "世界"; // "世界"
+        int expected = s.getBytes(java.nio.charset.StandardCharsets.UTF_8).length;
+        assertEquals(expected, Utf8.encodedLength(s));
+    }
+
+    /**
+     * Hex encoding / decoding correctness.
+     */
+    @Test
+    public void testHexEncodeDecodeLowerCase() {
+        byte[] input = { 0x00, 0x01, (byte) 0xAB, (byte) 0xFF, 0x42 };
+        String hex = Hex.encodeToString(input);
+        assertEquals("0001abff42", hex);
+        byte[] decoded = Hex.decode(hex);
+        org.junit.jupiter.api.Assertions.assertArrayEquals(input, decoded);
+    }
+
+    @Test
+    public void testHexEncodeDecodeUpperCase() {
+        byte[] input = { (byte) 0xDE, (byte) 0xAD, (byte) 0xBE, (byte) 0xEF };
+        String hex = Hex.encodeToString(input, false);
+        assertEquals("DEADBEEF", hex);
+        byte[] decoded = Hex.decode(hex);
+        org.junit.jupiter.api.Assertions.assertArrayEquals(input, decoded);
+    }
+
+    @Test
+    public void testHexDecodeMixedCase() {
+        // Mixed case hex string must decode correctly
+        byte[] decoded = Hex.decode("DeadBeef");
+        byte[] expected = { (byte) 0xDE, (byte) 0xAD, (byte) 0xBE, (byte) 0xEF };
+        org.junit.jupiter.api.Assertions.assertArrayEquals(expected, decoded);
+    }
+
+    @Test
+    public void testHexDecodeOddLength_throwsException() {
+        assertThrows(IllegalArgumentException.class, () -> Hex.decode("ABC"));
+    }
+
+    @Test
+    public void testHexDecodeInvalidChar_throwsException() {
+        assertThrows(IllegalArgumentException.class, () -> Hex.decode("GG"));
+    }
+
+    @Test
+    public void testHexEncodeEmptyArray() {
+        char[] result = Hex.encode(new byte[0]);
+        assertEquals(0, result.length);
+        assertEquals("", Hex.encodeToString(new byte[0]));
+    }
 }

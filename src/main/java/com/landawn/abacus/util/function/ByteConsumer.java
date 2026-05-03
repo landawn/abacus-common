@@ -65,6 +65,7 @@ public interface ByteConsumer extends Throwables.ByteConsumer<RuntimeException> 
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code ByteConsumer} that performs in sequence this operation followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     default ByteConsumer andThen(final ByteConsumer after) {
         return value -> {

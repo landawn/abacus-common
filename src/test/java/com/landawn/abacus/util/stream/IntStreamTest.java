@@ -301,7 +301,7 @@ public class IntStreamTest extends TestBase {
 
     @Test
     public void testFlatmap_WithArrays() {
-        stream = IntStream.of(1, 2, 3).flatmap(x -> new int[] { x, x * 10 });
+        stream = IntStream.of(1, 2, 3).flatMapArray(x -> new int[] { x, x * 10 });
         assertArrayEquals(new int[] { 1, 10, 2, 20, 3, 30 }, stream.toArray());
     }
 
@@ -313,8 +313,31 @@ public class IntStreamTest extends TestBase {
 
     @Test
     public void testFlatmap_HappyPath() {
-        int[] result = IntStream.of(1, 2, 3).flatmap(i -> new int[] { i, i * 10 }).toArray();
+        int[] result = IntStream.of(1, 2, 3).flatMapArray(i -> new int[] { i, i * 10 }).toArray();
         assertArrayEquals(new int[] { 1, 10, 2, 20, 3, 30 }, result);
+    }
+
+    @Test
+    public void testFlatmapCollection() {
+        // multi
+        assertArrayEquals(new int[] { 1, 10, 2, 20 }, IntStream.of(1, 2).flatmap(i -> Arrays.asList(i, i * 10)).toArray());
+
+        // single
+        assertArrayEquals(new int[] { 7, 9 }, IntStream.of(7).flatmap(i -> Arrays.asList(i, 9)).toArray());
+
+        // empty stream
+        assertArrayEquals(new int[] {}, IntStream.empty().flatmap(i -> Arrays.asList((Integer) i)).toArray());
+
+        // empty collection
+        assertArrayEquals(new int[] {}, IntStream.of(1, 2).flatmap(i -> java.util.Collections.<Integer> emptyList()).toArray());
+
+        // null collection
+        assertArrayEquals(new int[] {}, IntStream.of(1).flatmap(i -> (java.util.Collection<Integer>) null).toArray());
+
+        // null elements -> 0
+        assertArrayEquals(new int[] { 0, 5, 0 }, IntStream.of(1).flatmap(i -> Arrays.asList((Integer) null, 5, (Integer) null)).toArray());
+
+        assertEquals(4, IntStream.of(1, 2).flatmap(i -> Arrays.asList((Integer) null, i)).count());
     }
 
     @Test
@@ -333,6 +356,18 @@ public class IntStreamTest extends TestBase {
     public void testFlattMap_Empty() {
         IntStream result = IntStream.empty().flattMap(n -> java.util.stream.IntStream.of(n, n * 10));
         assertEquals(0, result.count());
+    }
+
+    @Test
+    public void testFlatMapJdkStream() {
+        int[] result = IntStream.of(1, 2, 3).flatMapJdkStream(i -> java.util.stream.IntStream.of(i, i * 10)).toArray();
+        assertArrayEquals(new int[] { 1, 10, 2, 20, 3, 30 }, result);
+    }
+
+    @Test
+    public void testFlatMapJdkStream_EmptyInput() {
+        int[] result = IntStream.empty().flatMapJdkStream(i -> java.util.stream.IntStream.of(i)).toArray();
+        assertArrayEquals(new int[] {}, result);
     }
 
     @Test
@@ -1534,7 +1569,7 @@ public class IntStreamTest extends TestBase {
     // TODO: mapToDouble(IntToDoubleFunction) is abstract - tested via concrete implementations above
     // TODO: mapToObj(IntFunction) is abstract - tested via concrete implementations above
     // TODO: flatMap(IntFunction) is abstract - tested via concrete implementations above
-    // TODO: flatmap(IntFunction<int[]>) is abstract - tested via concrete implementations above
+    // TODO: flatMapArray(IntFunction<int[]>) is abstract - tested via concrete implementations above
     // TODO: flatMapToByte(IntFunction) is abstract - tested via concrete implementations above
     // TODO: flatMapToChar(IntFunction) is abstract - tested via concrete implementations above
     // TODO: flatMapToShort(IntFunction) is abstract - tested via concrete implementations above
@@ -2819,22 +2854,24 @@ public class IntStreamTest extends TestBase {
 
     @Test
     public void testStreamCreatedAfterFlatmap() {
-        assertEquals(9, IntStream.of(1, 2, 3).flatmap(i -> new int[] { i, i * 10, i * 100 }).count());
-        assertEquals(8, IntStream.of(1, 2, 3).flatmap(i -> new int[] { i, i * 10, i * 100 }).skip(1).count());
-        assertArrayEquals(new int[] { 1, 10, 100, 2, 20, 200, 3, 30, 300 }, IntStream.of(1, 2, 3).flatmap(i -> new int[] { i, i * 10, i * 100 }).toArray());
-        assertArrayEquals(new int[] { 10, 100, 2, 20, 200, 3, 30, 300 },
-                IntStream.of(1, 2, 3).flatmap(i -> new int[] { i, i * 10, i * 100 }).skip(1).toArray());
-        assertEquals(N.toList(1, 10, 100, 2, 20, 200, 3, 30, 300), IntStream.of(1, 2, 3).flatmap(i -> new int[] { i, i * 10, i * 100 }).toList());
-        assertEquals(N.toList(10, 100, 2, 20, 200, 3, 30, 300), IntStream.of(1, 2, 3).flatmap(i -> new int[] { i, i * 10, i * 100 }).skip(1).toList());
-        assertEquals(9, IntStream.of(1, 2, 3).map(e -> e).flatmap(i -> new int[] { i, i * 10, i * 100 }).count());
-        assertEquals(8, IntStream.of(1, 2, 3).map(e -> e).flatmap(i -> new int[] { i, i * 10, i * 100 }).skip(1).count());
+        assertEquals(9, IntStream.of(1, 2, 3).flatMapArray(i -> new int[] { i, i * 10, i * 100 }).count());
+        assertEquals(8, IntStream.of(1, 2, 3).flatMapArray(i -> new int[] { i, i * 10, i * 100 }).skip(1).count());
         assertArrayEquals(new int[] { 1, 10, 100, 2, 20, 200, 3, 30, 300 },
-                IntStream.of(1, 2, 3).map(e -> e).flatmap(i -> new int[] { i, i * 10, i * 100 }).toArray());
+                IntStream.of(1, 2, 3).flatMapArray(i -> new int[] { i, i * 10, i * 100 }).toArray());
         assertArrayEquals(new int[] { 10, 100, 2, 20, 200, 3, 30, 300 },
-                IntStream.of(1, 2, 3).map(e -> e).flatmap(i -> new int[] { i, i * 10, i * 100 }).skip(1).toArray());
-        assertEquals(N.toList(1, 10, 100, 2, 20, 200, 3, 30, 300), IntStream.of(1, 2, 3).map(e -> e).flatmap(i -> new int[] { i, i * 10, i * 100 }).toList());
+                IntStream.of(1, 2, 3).flatMapArray(i -> new int[] { i, i * 10, i * 100 }).skip(1).toArray());
+        assertEquals(N.toList(1, 10, 100, 2, 20, 200, 3, 30, 300), IntStream.of(1, 2, 3).flatMapArray(i -> new int[] { i, i * 10, i * 100 }).toList());
+        assertEquals(N.toList(10, 100, 2, 20, 200, 3, 30, 300), IntStream.of(1, 2, 3).flatMapArray(i -> new int[] { i, i * 10, i * 100 }).skip(1).toList());
+        assertEquals(9, IntStream.of(1, 2, 3).map(e -> e).flatMapArray(i -> new int[] { i, i * 10, i * 100 }).count());
+        assertEquals(8, IntStream.of(1, 2, 3).map(e -> e).flatMapArray(i -> new int[] { i, i * 10, i * 100 }).skip(1).count());
+        assertArrayEquals(new int[] { 1, 10, 100, 2, 20, 200, 3, 30, 300 },
+                IntStream.of(1, 2, 3).map(e -> e).flatMapArray(i -> new int[] { i, i * 10, i * 100 }).toArray());
+        assertArrayEquals(new int[] { 10, 100, 2, 20, 200, 3, 30, 300 },
+                IntStream.of(1, 2, 3).map(e -> e).flatMapArray(i -> new int[] { i, i * 10, i * 100 }).skip(1).toArray());
+        assertEquals(N.toList(1, 10, 100, 2, 20, 200, 3, 30, 300),
+                IntStream.of(1, 2, 3).map(e -> e).flatMapArray(i -> new int[] { i, i * 10, i * 100 }).toList());
         assertEquals(N.toList(10, 100, 2, 20, 200, 3, 30, 300),
-                IntStream.of(1, 2, 3).map(e -> e).flatmap(i -> new int[] { i, i * 10, i * 100 }).skip(1).toList());
+                IntStream.of(1, 2, 3).map(e -> e).flatMapArray(i -> new int[] { i, i * 10, i * 100 }).skip(1).toList());
     }
 
     @Test

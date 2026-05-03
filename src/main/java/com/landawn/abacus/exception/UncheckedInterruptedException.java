@@ -57,7 +57,7 @@ import java.io.Serial;
  *
  * @see UncheckedException
  * @see InterruptedException
- * @see Thread#interrupt()
+ * @see Thread#currentThread()
  */
 public class UncheckedInterruptedException extends UncheckedException {
 

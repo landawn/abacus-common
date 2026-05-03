@@ -36,11 +36,11 @@ import com.landawn.abacus.util.stream.Stream;
 
 /**
  * Utility class for working with HTTP Archive (HAR) files.
- * 
- * <p>HAR (HTTP Archive) is a JSON-formatted archive file format for logging of a web browser's 
- * interaction with a site. This utility provides methods to parse HAR files and replay the 
+ *
+ * <p>HAR (HTTP Archive) is a JSON-formatted archive file format for logging of a web browser's
+ * interaction with a site. This utility provides methods to parse HAR files and replay the
  * captured HTTP requests.</p>
- * 
+ *
  * <p>Key features:</p>
  * <ul>
  *   <li>Parse HAR files and extract HTTP request information</li>
@@ -49,15 +49,15 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>Support for curl command generation from HAR entries</li>
  *   <li>Configurable HTTP header filtering</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Send a single request from HAR file
  * String response = HARUtil.sendRequest(new File("capture.har"), "http://localhost:18080/data");
- * 
+ *
  * // Send multiple requests matching a pattern
  * List<String> responses = HARUtil.sendRequests(
- *     new File("capture.har"), 
+ *     new File("capture.har"),
  *     url -> url.contains("/api/")
  * );
  * }</pre>
@@ -91,6 +91,9 @@ public final class HARUtil {
      *
      * <p>The filter receives the header name and value as parameters and should return
      * {@code true} to include the header or {@code false} to exclude it.</p>
+     *
+     * <p><b>Note:</b> This setting is stored in thread-local state and only affects HAR request
+     * replay on the current thread.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -155,6 +158,9 @@ public final class HARUtil {
      * <p>When enabled, a curl command equivalent to each HAR request will be logged
      * using the default logger at {@code INFO} level.</p>
      *
+     * <p><b>Note:</b> This method sets the logging configuration for the current thread only,
+     * as the curl logging settings are stored in thread-local storage.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HARUtil.configureCurlLoggingForCurrentThread(true, '"');
@@ -174,6 +180,9 @@ public final class HARUtil {
      *
      * <p>This method provides full control over curl command logging, including the
      * ability to specify a custom log handler for processing the generated curl commands.</p>
+     *
+     * <p><b>Note:</b> This method sets the logging configuration for the current thread only,
+     * as the curl logging settings are stored in thread-local storage.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -633,8 +642,9 @@ public final class HARUtil {
      * }</pre>
      *
      * @param requestEntry the HAR request entry map.
-     * @return a tuple where the first element is the request body text
-     *         and the second element is the MIME type.
+     * @return a tuple where the first element is the request body text (may be {@code null} if the
+     *         request has no body) and the second element is the MIME type (may be {@code null} if
+     *         no MIME type is present).
      */
     public static Tuple2<String, String> getBodyAndMimeTypeByRequestEntry(final Map<String, Object> requestEntry) {
         final String requestBody = Maps.getByPath(requestEntry, "postData.text");

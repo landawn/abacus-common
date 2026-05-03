@@ -15,9 +15,8 @@
 package com.landawn.abacus.type;
 
 /**
- * Type handler for primitive boolean values.
- * This class handles the primitive boolean type specifically, as opposed to the Boolean wrapper class.
- * It provides type information and default value handling for boolean primitives.
+ * Type handler for the primitive {@code boolean} type, as opposed to the {@link Boolean} wrapper class.
+ * It provides type information and default value handling for {@code boolean} primitives.
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code

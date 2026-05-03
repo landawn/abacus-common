@@ -19,26 +19,26 @@ import com.landawn.abacus.util.function.FloatConsumer;
  * A state object for collecting statistics about float values.
  * This class is designed to work with streams of float values, providing
  * a way to calculate count, sum, min, max, and average in a single pass.
- * 
+ *
  * <p>This class uses Kahan summation algorithm internally to reduce numerical
  * errors when computing the sum of float values, providing better accuracy
  * than naive summation.</p>
- * 
+ *
  * <p>This class is mutable and not thread-safe. It's designed to be used
  * as a reduction target in stream operations.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * FloatSummaryStatistics stats = new FloatSummaryStatistics();
  * floatStream.forEach(stats::accept);
- * 
+ *
  * System.out.println("Count: " + stats.getCount());
  * System.out.println("Sum: " + stats.getSum());
  * System.out.println("Min: " + stats.getMin());
  * System.out.println("Max: " + stats.getMax());
  * System.out.println("Average: " + stats.getAverage());
  * }</pre>
- * 
+ *
  * @see java.util.DoubleSummaryStatistics
  * @see java.util.IntSummaryStatistics
  * @see java.util.LongSummaryStatistics
@@ -55,7 +55,7 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * Constructs an empty instance with zero count, zero sum,
      * {@code Float.POSITIVE_INFINITY} min, {@code Float.NEGATIVE_INFINITY} max,
      * and zero average.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatSummaryStatistics stats = new FloatSummaryStatistics();
@@ -79,7 +79,7 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * @param min the minimum value
      * @param max the maximum value
      * @param sum the sum of all values
-     * @throws IllegalArgumentException if count is negative or minimum is greater than maximum 
+     * @throws IllegalArgumentException if count is negative or minimum is greater than maximum
      */
     public FloatSummaryStatistics(final long count, final float min, final float max, final double sum) {
         if (count < 0) {
@@ -127,11 +127,11 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * <pre>{@code
      * FloatSummaryStatistics stats1 = new FloatSummaryStatistics();
      * FloatSummaryStatistics stats2 = new FloatSummaryStatistics();
-     * 
+     *
      * // Process different parts of data
      * part1.forEach(stats1::accept);
      * part2.forEach(stats2::accept);
-     * 
+     *
      * // Combine results
      * stats1.combine(stats2);
      * }</pre>
@@ -148,7 +148,7 @@ public class FloatSummaryStatistics implements FloatConsumer {
     /**
      * Returns the minimum value recorded, or {@code Float.POSITIVE_INFINITY}
      * if no values have been recorded.
-     * 
+     *
      * <p>Note: If any recorded value was NaN, then the result will be NaN.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -168,7 +168,7 @@ public class FloatSummaryStatistics implements FloatConsumer {
     /**
      * Returns the maximum value recorded, or {@code Float.NEGATIVE_INFINITY}
      * if no values have been recorded.
-     * 
+     *
      * <p>Note: If any recorded value was NaN, then the result will be NaN.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -208,8 +208,8 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * Returns the sum of values recorded.
      * The sum is calculated using Kahan summation algorithm to minimize
      * floating-point rounding errors.
-     * 
-     * <p>Note: The sum is returned as a Double to maintain precision.
+     *
+     * <p>Note: The sum is returned as a {@code double} to maintain precision.
      * If no values have been recorded, returns 0.0.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -218,7 +218,7 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * stats.accept(1.1f);
      * stats.accept(2.2f);
      * stats.accept(3.3f);
-     * Double sum = stats.getSum();   // Returns 6.6 (approximately)
+     * double sum = stats.getSum();   // Returns 6.6 (approximately)
      * }</pre>
      *
      * @return the sum of values, or zero if none
@@ -230,7 +230,7 @@ public class FloatSummaryStatistics implements FloatConsumer {
     /**
      * Returns the arithmetic mean of values recorded, or zero if no values have been recorded.
      * The average is calculated as sum / count using high-precision arithmetic.
-     * 
+     *
      * <p>Note: If the sum is NaN or infinite, or if the count is zero,
      * special rules apply as per floating-point arithmetic.</p>
      *
@@ -240,7 +240,7 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * stats.accept(2.0f);
      * stats.accept(4.0f);
      * stats.accept(6.0f);
-     * Double avg = stats.getAverage();   // Returns 4.0
+     * double avg = stats.getAverage();   // Returns 4.0
      * }</pre>
      *
      * @return the arithmetic mean of values, or zero if none
@@ -251,9 +251,9 @@ public class FloatSummaryStatistics implements FloatConsumer {
 
     /**
      * Returns a string representation of this statistics object.
-     * The string representation consists of the minimum, maximum, count, sum, 
+     * The string representation consists of the minimum, maximum, count, sum,
      * and average values in a readable format.
-     * 
+     *
      * <p>Format: {@code {min=<min>, max=<max>, count=<count>, sum=<sum>, average=<average>}}</p>
      *
      * <p><b>Usage Examples:</b></p>

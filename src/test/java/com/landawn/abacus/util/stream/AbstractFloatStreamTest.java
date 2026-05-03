@@ -73,6 +73,24 @@ public class AbstractFloatStreamTest extends TestBase {
     }
 
     @Test
+    public void testDebounce() {
+        float[] result = createFloatStream(new float[] { 1.0f, 2.0f, 3.0f, 4.0f }).debounce(2, Duration.ofHours(1)).toArray();
+        assertArrayEquals(new float[] { 1.0f, 2.0f }, result);
+    }
+
+    @Test
+    public void testDebounce_EmptyInput() {
+        float[] result = createFloatStream(new float[] {}).debounce(2, Duration.ofHours(1)).toArray();
+        assertArrayEquals(new float[] {}, result);
+    }
+
+    @Test
+    public void testDebounce_ErrorPath() {
+        assertThrows(IllegalArgumentException.class, () -> createFloatStream(new float[] { 1.0f }).debounce(0, Duration.ofHours(1)).toArray());
+        assertThrows(IllegalArgumentException.class, () -> createFloatStream(new float[] { 1.0f }).debounce(1, Duration.ofMillis(0)).toArray());
+    }
+
+    @Test
     public void testSkipUntil() {
         FloatStream result = stream.skipUntil(x -> x > 3.0f);
         assertArrayEquals(new float[] { 4.0f, 5.0f }, result.toArray());
@@ -93,7 +111,7 @@ public class AbstractFloatStreamTest extends TestBase {
 
     @Test
     public void testFlatmap() {
-        FloatStream result = stream.flatmap(x -> new float[] { x, x * 2 });
+        FloatStream result = stream.flatMapArray(x -> new float[] { x, x * 2 });
         assertArrayEquals(new float[] { 1.0f, 2.0f, 2.0f, 4.0f, 3.0f, 6.0f, 4.0f, 8.0f, 5.0f, 10.0f }, result.toArray());
     }
 

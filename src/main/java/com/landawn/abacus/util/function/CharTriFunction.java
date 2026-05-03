@@ -41,7 +41,7 @@ public interface CharTriFunction<R> extends Throwables.CharTriFunction<R, Runtim
      * CharTriFunction<String> concat = (c1, c2, c3) -> "" + c1 + c2 + c3;
      * String result = concat.apply('a', 'b', 'c');   // Returns "abc"
      *
-     * CharTriFunction<Integer> sumValues = (c1, c2, c3) -> (int)c1 + c2 + c3;
+     * CharTriFunction<Integer> sumValues = (c1, c2, c3) -> (int)c1 + (int)c2 + (int)c3;
      * Integer total = sumValues.apply('a', 'b', 'c');   // Returns 294 (97+98+99)
      * }</pre>
      *
@@ -71,6 +71,7 @@ public interface CharTriFunction<R> extends Throwables.CharTriFunction<R, Runtim
      * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed function that first applies this function and then applies the
      *         {@code after} function
+     * @throws NullPointerException if {@code after} is null
      */
     default <V> CharTriFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return (a, b, c) -> after.apply(apply(a, b, c));

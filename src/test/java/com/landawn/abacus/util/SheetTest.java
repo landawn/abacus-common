@@ -98,18 +98,18 @@ public class SheetTest extends AbstractTest {
         Sheet<String, String, Integer> emptySheet = new Sheet<>();
 
         assertEquals(0, emptySheet.nonNullValueCount());
-        assertTrue(emptySheet.cellsH().toList().isEmpty());
-        assertTrue(emptySheet.streamH().toList().isEmpty());
+        assertTrue(emptySheet.cellsByRow().toList().isEmpty());
+        assertTrue(emptySheet.streamByRow().toList().isEmpty());
 
         Map<String, Map<String, Integer>> rowMap = emptySheet.rowsMap();
         assertTrue(rowMap.isEmpty());
     }
 
-    // L4390: Stream.empty() in cellsV(fromColumnIndex, toColumnIndex) when rowCount == 0
+    // L4390: Stream.empty() in cellsByColumn(fromColumnIndex, toColumnIndex) when rowCount == 0
     @Test
     public void testCellsV_EmptyRowCount_ReturnsEmpty() {
         Sheet<String, String, Integer> s = Sheet.rows(Collections.emptyList(), Arrays.asList("c1", "c2"), new Integer[0][]);
-        assertEquals(0, s.cellsV(0, 2).count());
+        assertEquals(0, s.cellsByColumn(0, 2).count());
     }
 
     @Test
@@ -3951,7 +3951,7 @@ public class SheetTest extends AbstractTest {
         assertTrue(column.stream().allMatch(Fn.isNull()));
 
         List<String> visited = new ArrayList<>();
-        uninitSheet.forEachH((r, c, v) -> {
+        uninitSheet.forEachByRow((r, c, v) -> {
             assertNull(v);
             visited.add(r + "," + c);
         });
@@ -4013,7 +4013,7 @@ public class SheetTest extends AbstractTest {
     @Test
     public void testForEachH() {
         List<Integer> collected = new ArrayList<>();
-        sheet.forEachH((r, c, v) -> {
+        sheet.forEachByRow((r, c, v) -> {
             if (v != null) {
                 collected.add(v);
             }
@@ -4025,7 +4025,7 @@ public class SheetTest extends AbstractTest {
     @Test
     public void testForEachH_Original() {
         Map<String, Object> collected = new LinkedHashMap<>();
-        objectSheet.forEachH((r, c, v) -> collected.put(r + "-" + c, v));
+        objectSheet.forEachByRow((r, c, v) -> collected.put(r + "-" + c, v));
 
         assertEquals("V11", collected.get("R1-C1"));
         assertEquals(true, collected.get("R2-C3"));
@@ -4039,7 +4039,7 @@ public class SheetTest extends AbstractTest {
     public void testForEachH_UninitializedSheet() {
         Sheet<String, String, Integer> uninitSheet = new Sheet<>(rowKeys, columnKeys);
         List<String> visited = new ArrayList<>();
-        uninitSheet.forEachH((r, c, v) -> {
+        uninitSheet.forEachByRow((r, c, v) -> {
             assertNull(v);
             visited.add(r + "-" + c);
         });
@@ -4052,7 +4052,7 @@ public class SheetTest extends AbstractTest {
     @Test
     public void testForEachH_exceptionPropagation() {
         IOException thrown = assertThrows(IOException.class, () -> {
-            objectSheet.forEachH((r, c, v) -> {
+            objectSheet.forEachByRow((r, c, v) -> {
                 if (r.equals("R2") && c.equals("C1")) {
                     throw new IOException("Test Exception");
                 }
@@ -4064,7 +4064,7 @@ public class SheetTest extends AbstractTest {
     @Test
     public void testForEachV() {
         List<Integer> collected = new ArrayList<>();
-        sheet.forEachV((r, c, v) -> {
+        sheet.forEachByColumn((r, c, v) -> {
             if (v != null) {
                 collected.add(v);
             }
@@ -4077,7 +4077,7 @@ public class SheetTest extends AbstractTest {
     public void testForEachV_UninitializedSheet() {
         Sheet<String, String, Integer> uninitSheet = new Sheet<>(rowKeys, columnKeys);
         List<String> visited = new ArrayList<>();
-        uninitSheet.forEachV((r, c, v) -> {
+        uninitSheet.forEachByColumn((r, c, v) -> {
             assertNull(v);
             visited.add(r + "-" + c);
         });
@@ -4090,7 +4090,7 @@ public class SheetTest extends AbstractTest {
     @Test
     public void testForEachV_exceptionPropagation() {
         RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
-            objectSheet.forEachV((r, c, v) -> {
+            objectSheet.forEachByColumn((r, c, v) -> {
                 if (c.equals("C2") && r.equals("R1")) {
                     throw new RuntimeException("Test Exception V");
                 }
@@ -4102,7 +4102,7 @@ public class SheetTest extends AbstractTest {
     @Test
     public void testForEachNonNullH() {
         List<Integer> collected = new ArrayList<>();
-        sheet.forEachNonNullH((r, c, v) -> collected.add(v));
+        sheet.forEachNonNullByRow((r, c, v) -> collected.add(v));
         assertEquals(9, collected.size());
     }
 
@@ -4110,7 +4110,7 @@ public class SheetTest extends AbstractTest {
     public void testForEachNonNullH_WithNulls() {
         Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1", "r2"), Arrays.asList("c1", "c2"), new Integer[][] { { 1, null }, { null, 4 } });
         List<Integer> collected = new ArrayList<>();
-        s.forEachNonNullH((r, c, v) -> collected.add(v));
+        s.forEachNonNullByRow((r, c, v) -> collected.add(v));
         assertEquals(2, collected.size());
         assertEquals(Integer.valueOf(1), collected.get(0));
         assertEquals(Integer.valueOf(4), collected.get(1));
@@ -4120,7 +4120,7 @@ public class SheetTest extends AbstractTest {
     public void testForEachNonNullH_UninitializedSheet() {
         Sheet<String, String, Integer> uninitSheet = new Sheet<>(rowKeys, columnKeys);
         List<Integer> collected = new ArrayList<>();
-        uninitSheet.forEachNonNullH((r, c, v) -> collected.add(v));
+        uninitSheet.forEachNonNullByRow((r, c, v) -> collected.add(v));
         assertTrue(collected.isEmpty());
     }
 
@@ -4128,7 +4128,7 @@ public class SheetTest extends AbstractTest {
     public void testForEachNonNullH_WithNullValues() {
         Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1", "r2"), Arrays.asList("c1", "c2"), new Integer[][] { { 1, null }, { null, 4 } });
         List<Integer> collected = new ArrayList<>();
-        s.forEachNonNullH((r, c, v) -> collected.add(v));
+        s.forEachNonNullByRow((r, c, v) -> collected.add(v));
         assertEquals(2, collected.size());
         assertTrue(collected.contains(1));
         assertTrue(collected.contains(4));
@@ -4137,7 +4137,7 @@ public class SheetTest extends AbstractTest {
     @Test
     public void testForEachNonNullH_exceptionPropagation() {
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
-            objectSheet.forEachNonNullH((r, c, v) -> {
+            objectSheet.forEachNonNullByRow((r, c, v) -> {
                 if (r.equals("R2") && c.equals("C3")) {
                     throw new IllegalArgumentException("Test Exception NonNullH");
                 }
@@ -4149,7 +4149,7 @@ public class SheetTest extends AbstractTest {
     @Test
     public void testForEachNonNullV() {
         List<Integer> collected = new ArrayList<>();
-        sheet.forEachNonNullV((r, c, v) -> collected.add(v));
+        sheet.forEachNonNullByColumn((r, c, v) -> collected.add(v));
         assertEquals(9, collected.size());
     }
 
@@ -4157,7 +4157,7 @@ public class SheetTest extends AbstractTest {
     public void testForEachNonNullV_WithNulls() {
         Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1", "r2"), Arrays.asList("c1", "c2"), new Integer[][] { { 1, null }, { null, 4 } });
         List<Integer> collected = new ArrayList<>();
-        s.forEachNonNullV((r, c, v) -> collected.add(v));
+        s.forEachNonNullByColumn((r, c, v) -> collected.add(v));
         assertEquals(2, collected.size());
         // Vertical order: c1(r1=1), c1(r2=null skip), c2(r1=null skip), c2(r2=4)
         assertEquals(Integer.valueOf(1), collected.get(0));
@@ -4168,7 +4168,7 @@ public class SheetTest extends AbstractTest {
     public void testForEachNonNullV_UninitializedSheet() {
         Sheet<String, String, Integer> uninitSheet = new Sheet<>(rowKeys, columnKeys);
         List<Integer> collected = new ArrayList<>();
-        uninitSheet.forEachNonNullV((r, c, v) -> collected.add(v));
+        uninitSheet.forEachNonNullByColumn((r, c, v) -> collected.add(v));
         assertTrue(collected.isEmpty());
     }
 
@@ -4176,7 +4176,7 @@ public class SheetTest extends AbstractTest {
     public void testForEachNonNullV_WithNullValues() {
         Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1", "r2"), Arrays.asList("c1", "c2"), new Integer[][] { { 1, null }, { null, 4 } });
         List<Integer> collected = new ArrayList<>();
-        s.forEachNonNullV((r, c, v) -> collected.add(v));
+        s.forEachNonNullByColumn((r, c, v) -> collected.add(v));
         assertEquals(2, collected.size());
         assertTrue(collected.contains(1));
         assertTrue(collected.contains(4));
@@ -4185,7 +4185,7 @@ public class SheetTest extends AbstractTest {
     @Test
     public void testForEachNonNullV_exceptionPropagation() {
         UnsupportedOperationException thrown = assertThrows(UnsupportedOperationException.class, () -> {
-            objectSheet.forEachNonNullV((r, c, v) -> {
+            objectSheet.forEachNonNullByColumn((r, c, v) -> {
                 if (c.equals("C1") && r.equals("R1")) {
                     throw new UnsupportedOperationException("Test Exception NonNullV");
                 }
@@ -4196,7 +4196,7 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testCellsH() {
-        Stream<Cell<String, String, Integer>> cells = sheet.cellsH();
+        Stream<Cell<String, String, Integer>> cells = sheet.cellsByRow();
         List<Cell<String, String, Integer>> cellList = cells.toList();
         assertEquals(9, cellList.size());
         assertEquals(Integer.valueOf(1), cellList.get(0).value());
@@ -4206,7 +4206,7 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testCellsHWithRange() {
-        Stream<Cell<String, String, Integer>> cells = sheet.cellsH(0, 2);
+        Stream<Cell<String, String, Integer>> cells = sheet.cellsByRow(0, 2);
         List<Cell<String, String, Integer>> cellList = cells.toList();
         assertEquals(6, cellList.size());
     }
@@ -4217,7 +4217,7 @@ public class SheetTest extends AbstractTest {
         uninitSheet.set("R1", "C1", 1);
         uninitSheet.set("R2", "C2", 2);
 
-        List<Cell<String, String, Integer>> cells = uninitSheet.cellsH(1, 2).toList();
+        List<Cell<String, String, Integer>> cells = uninitSheet.cellsByRow(1, 2).toList();
         assertEquals(3, cells.size());
     }
 
@@ -4229,7 +4229,7 @@ public class SheetTest extends AbstractTest {
             }
         }
 
-        List<Cell<String, String, Integer>> cells = sheet.cellsH(0, 2).toList();
+        List<Cell<String, String, Integer>> cells = sheet.cellsByRow(0, 2).toList();
         assertEquals(6, cells.size());
         assertEquals(Integer.valueOf(0), cells.get(0).value());
         assertEquals(Integer.valueOf(12), cells.get(5).value());
@@ -4237,7 +4237,7 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testCellsH_ValueOrder() {
-        List<Cell<String, String, Integer>> cells = sheet.cellsH().toList();
+        List<Cell<String, String, Integer>> cells = sheet.cellsByRow().toList();
         assertEquals(9, cells.size());
         // row1: col1=1, col2=2, col3=3; row2: col1=4, col2=5, col3=6; ...
         assertEquals(Integer.valueOf(1), cells.get(0).value());
@@ -4248,24 +4248,24 @@ public class SheetTest extends AbstractTest {
         assertEquals("row2", cells.get(3).rowKey());
     }
 
-    // L4316, L4319, L4323-4326: advance() and count() in cellsH() ObjIteratorEx
+    // L4316, L4319, L4323-4326: advance() and count() in cellsByRow() ObjIteratorEx
     @Test
     public void testCellsH_CountMethod() {
         Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1", "r2"), Arrays.asList("c1", "c2"), new Integer[][] { { 1, 2 }, { 3, 4 } });
-        assertEquals(4, s.cellsH().count());
-        assertEquals(2, s.cellsH(0, 1).count()); // one row, two columns
+        assertEquals(4, s.cellsByRow().count());
+        assertEquals(2, s.cellsByRow(0, 1).count()); // one row, two columns
     }
 
     @Test
     public void testCellsH_SkipMethod_TriggersAdvance() {
         Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1", "r2"), Arrays.asList("c1", "c2"), new Integer[][] { { 1, 2 }, { 3, 4 } });
-        assertEquals(3, s.cellsH().skip(1).count());
-        assertEquals(1, s.cellsH().skip(3).count());
+        assertEquals(3, s.cellsByRow().skip(1).count());
+        assertEquals(1, s.cellsByRow().skip(3).count());
     }
 
     @Test
     public void testCellsH_emptyRange() {
-        assertTrue(objectSheet.cellsH(1, 1).toList().isEmpty());
+        assertTrue(objectSheet.cellsByRow(1, 1).toList().isEmpty());
     }
 
     @Test
@@ -4275,7 +4275,7 @@ public class SheetTest extends AbstractTest {
         uninitSheet.set("R2", "C2", 22);
         uninitSheet.set("R2", "C3", 23);
 
-        List<Cell<String, String, Integer>> cells = uninitSheet.cellsH(1, 2).toList();
+        List<Cell<String, String, Integer>> cells = uninitSheet.cellsByRow(1, 2).toList();
         assertEquals(3, cells.size());
         assertEquals("R2", cells.get(0).rowKey());
         assertEquals(Integer.valueOf(21), cells.get(0).value());
@@ -4283,41 +4283,41 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testStreamsWithEmptyRange() {
-        assertTrue(sheet.cellsH(1, 1).toList().isEmpty());
-        assertTrue(sheet.streamV(2, 2).toList().isEmpty());
-        assertTrue(sheet.pointsH(0, 0).toList().isEmpty());
+        assertTrue(sheet.cellsByRow(1, 1).toList().isEmpty());
+        assertTrue(sheet.streamByColumn(2, 2).toList().isEmpty());
+        assertTrue(sheet.pointsByRow(0, 0).toList().isEmpty());
     }
 
     @Test
     public void testCellsHWithInvalidRange() {
         assertThrows(IndexOutOfBoundsException.class, () -> {
-            sheet.cellsH(-1, 2);
+            sheet.cellsByRow(-1, 2);
         });
         assertThrows(IndexOutOfBoundsException.class, () -> {
-            sheet.cellsH(0, 10);
+            sheet.cellsByRow(0, 10);
         });
     }
 
     @Test
     public void testCellsHWithInvalidFromIndex() {
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.cellsH(-1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.cellsByRow(-1, 2));
     }
 
     @Test
     public void testCellsHWithInvalidToIndex() {
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.cellsH(0, 5));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.cellsByRow(0, 5));
     }
 
     @Test
     public void testCellsHWithFromGreaterThanTo() {
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.cellsH(2, 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.cellsByRow(2, 1));
     }
 
-    // L4303: NoSuchElementException in cellsH() iterator next() when exhausted
+    // L4303: NoSuchElementException in cellsByRow() iterator next() when exhausted
     @Test
     public void testCellsH_NoSuchElementException() {
         Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1"), Arrays.asList("c1"), new Integer[][] { { 1 } });
-        com.landawn.abacus.util.ObjIterator<Cell<String, String, Integer>> iter = s.cellsH().iterator();
+        com.landawn.abacus.util.ObjIterator<Cell<String, String, Integer>> iter = s.cellsByRow().iterator();
         while (iter.hasNext()) {
             iter.next();
         }
@@ -4326,7 +4326,7 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testCellsV() {
-        Stream<Cell<String, String, Integer>> cells = sheet.cellsV();
+        Stream<Cell<String, String, Integer>> cells = sheet.cellsByColumn();
         List<Cell<String, String, Integer>> cellList = cells.toList();
         assertEquals(9, cellList.size());
         assertEquals(Integer.valueOf(1), cellList.get(0).value());
@@ -4336,7 +4336,7 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testCellsVWithRange() {
-        Stream<Cell<String, String, Integer>> cells = sheet.cellsV(0, 2);
+        Stream<Cell<String, String, Integer>> cells = sheet.cellsByColumn(0, 2);
         List<Cell<String, String, Integer>> cellList = cells.toList();
         assertEquals(6, cellList.size());
     }
@@ -4349,7 +4349,7 @@ public class SheetTest extends AbstractTest {
             }
         }
 
-        List<Cell<String, String, Integer>> cells = sheet.cellsV(1, 3).toList();
+        List<Cell<String, String, Integer>> cells = sheet.cellsByColumn(1, 3).toList();
         assertEquals(6, cells.size());
         assertEquals(Integer.valueOf(1), cells.get(0).value());
         assertEquals(Integer.valueOf(22), cells.get(5).value());
@@ -4357,7 +4357,7 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testCellsV_ValueOrder() {
-        List<Cell<String, String, Integer>> cells = sheet.cellsV().toList();
+        List<Cell<String, String, Integer>> cells = sheet.cellsByColumn().toList();
         assertEquals(9, cells.size());
         // col1: row1=1, row2=4, row3=7; col2: row1=2, row2=5, ...
         assertEquals(Integer.valueOf(1), cells.get(0).value());
@@ -4366,24 +4366,24 @@ public class SheetTest extends AbstractTest {
         assertEquals(Integer.valueOf(2), cells.get(3).value());
     }
 
-    // L4422, L4425, L4429-4432: advance() and count() in cellsV() ObjIteratorEx
+    // L4422, L4425, L4429-4432: advance() and count() in cellsByColumn() ObjIteratorEx
     @Test
     public void testCellsV_CountMethod() {
         Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1", "r2"), Arrays.asList("c1", "c2"), new Integer[][] { { 1, 2 }, { 3, 4 } });
-        assertEquals(4, s.cellsV().count());
-        assertEquals(2, s.cellsV(0, 1).count()); // one column, two rows
+        assertEquals(4, s.cellsByColumn().count());
+        assertEquals(2, s.cellsByColumn(0, 1).count()); // one column, two rows
     }
 
     @Test
     public void testCellsV_SkipMethod_TriggersAdvance() {
         Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1", "r2"), Arrays.asList("c1", "c2"), new Integer[][] { { 1, 2 }, { 3, 4 } });
-        assertEquals(3, s.cellsV().skip(1).count());
-        assertEquals(1, s.cellsV().skip(3).count());
+        assertEquals(3, s.cellsByColumn().skip(1).count());
+        assertEquals(1, s.cellsByColumn().skip(3).count());
     }
 
     @Test
     public void testCellsV_emptyRange() {
-        assertTrue(objectSheet.cellsV(1, 1).toList().isEmpty());
+        assertTrue(objectSheet.cellsByColumn(1, 1).toList().isEmpty());
     }
 
     @Test
@@ -4393,7 +4393,7 @@ public class SheetTest extends AbstractTest {
         uninitSheet.set("R2", "C2", 22);
         uninitSheet.set("R3", "C2", 32);
 
-        List<Cell<String, String, Integer>> cells = uninitSheet.cellsV(1, 2).toList();
+        List<Cell<String, String, Integer>> cells = uninitSheet.cellsByColumn(1, 2).toList();
         assertEquals(3, cells.size());
         assertEquals("C2", cells.get(0).columnKey());
         assertEquals(Integer.valueOf(12), cells.get(0).value());
@@ -4401,15 +4401,15 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testCellsV_InvalidRange() {
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.cellsV(-1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.cellsV(0, 10));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.cellsByColumn(-1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.cellsByColumn(0, 10));
     }
 
-    // L4409: NoSuchElementException in cellsV() iterator next() when exhausted
+    // L4409: NoSuchElementException in cellsByColumn() iterator next() when exhausted
     @Test
     public void testCellsV_NoSuchElementException() {
         Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1"), Arrays.asList("c1"), new Integer[][] { { 1 } });
-        com.landawn.abacus.util.ObjIterator<Cell<String, String, Integer>> iter = s.cellsV().iterator();
+        com.landawn.abacus.util.ObjIterator<Cell<String, String, Integer>> iter = s.cellsByColumn().iterator();
         while (iter.hasNext()) {
             iter.next();
         }
@@ -4418,22 +4418,22 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testCellsR() {
-        Stream<Stream<Cell<String, String, Integer>>> cellsR = sheet.cellsR();
-        List<List<Cell<String, String, Integer>>> result = cellsR.map(Stream::toList).toList();
+        Stream<Stream<Cell<String, String, Integer>>> rowCells = sheet.rowCells();
+        List<List<Cell<String, String, Integer>>> result = rowCells.map(Stream::toList).toList();
         assertEquals(3, result.size());
         assertEquals(3, result.get(0).size());
     }
 
     @Test
     public void testCellsRWithRange() {
-        Stream<Stream<Cell<String, String, Integer>>> cellsR = sheet.cellsR(0, 2);
-        List<List<Cell<String, String, Integer>>> result = cellsR.map(Stream::toList).toList();
+        Stream<Stream<Cell<String, String, Integer>>> rowCells = sheet.rowCells(0, 2);
+        List<List<Cell<String, String, Integer>>> result = rowCells.map(Stream::toList).toList();
         assertEquals(2, result.size());
     }
 
     @Test
     public void testCellsR_ValueOrder() {
-        List<List<Cell<String, String, Integer>>> cellRows = sheet.cellsR().map(Stream::toList).toList();
+        List<List<Cell<String, String, Integer>>> cellRows = sheet.rowCells().map(Stream::toList).toList();
         assertEquals(3, cellRows.size());
         assertEquals(3, cellRows.get(0).size());
         assertEquals(Integer.valueOf(1), cellRows.get(0).get(0).value());
@@ -4442,33 +4442,33 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testCellsR_emptyRange() {
-        assertTrue(objectSheet.cellsR(1, 1).toList().isEmpty());
+        assertTrue(objectSheet.rowCells(1, 1).toList().isEmpty());
     }
 
     @Test
     public void testCellsR_InvalidRange() {
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.cellsR(-1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.cellsR(0, 10));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.rowCells(-1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.rowCells(0, 10));
     }
 
     @Test
     public void testCellsC() {
-        Stream<Stream<Cell<String, String, Integer>>> cellsC = sheet.cellsC();
-        List<List<Cell<String, String, Integer>>> result = cellsC.map(Stream::toList).toList();
+        Stream<Stream<Cell<String, String, Integer>>> columnCells = sheet.columnCells();
+        List<List<Cell<String, String, Integer>>> result = columnCells.map(Stream::toList).toList();
         assertEquals(3, result.size());
         assertEquals(3, result.get(0).size());
     }
 
     @Test
     public void testCellsCWithRange() {
-        Stream<Stream<Cell<String, String, Integer>>> cellsC = sheet.cellsC(0, 2);
-        List<List<Cell<String, String, Integer>>> result = cellsC.map(Stream::toList).toList();
+        Stream<Stream<Cell<String, String, Integer>>> columnCells = sheet.columnCells(0, 2);
+        List<List<Cell<String, String, Integer>>> result = columnCells.map(Stream::toList).toList();
         assertEquals(2, result.size());
     }
 
     @Test
     public void testCellsC_ValueOrder() {
-        List<List<Cell<String, String, Integer>>> cellCols = sheet.cellsC().map(Stream::toList).toList();
+        List<List<Cell<String, String, Integer>>> cellCols = sheet.columnCells().map(Stream::toList).toList();
         assertEquals(3, cellCols.size());
         assertEquals(3, cellCols.get(0).size());
         // First column: row1=1, row2=4, row3=7
@@ -4479,18 +4479,18 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testCellsC_emptyRange() {
-        assertTrue(objectSheet.cellsC(1, 1).toList().isEmpty());
+        assertTrue(objectSheet.columnCells(1, 1).toList().isEmpty());
     }
 
     @Test
     public void testCellsC_InvalidRange() {
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.cellsC(-1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.cellsC(0, 10));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.columnCells(-1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.columnCells(0, 10));
     }
 
     @Test
     public void testPointsH() {
-        Stream<Point> points = sheet.pointsH();
+        Stream<Point> points = sheet.pointsByRow();
         List<Point> pointList = points.toList();
         assertEquals(9, pointList.size());
         assertEquals(0, pointList.get(0).rowIndex());
@@ -4499,17 +4499,17 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testPointsHWithRange() {
-        Stream<Point> points = sheet.pointsH(0, 2);
+        Stream<Point> points = sheet.pointsByRow(0, 2);
         List<Point> pointList = points.toList();
         assertEquals(6, pointList.size());
     }
 
     @Test
     public void testPointsH_fullRangeAndSubRange() {
-        assertEquals(9, objectSheet.pointsH().count());
-        assertEquals(3, objectSheet.pointsH(0, 1).count());
-        assertEquals(0, objectSheet.pointsH(1, 1).count());
-        List<Sheet.Point> r1Points = objectSheet.pointsH(0, 1).toList();
+        assertEquals(9, objectSheet.pointsByRow().count());
+        assertEquals(3, objectSheet.pointsByRow(0, 1).count());
+        assertEquals(0, objectSheet.pointsByRow(1, 1).count());
+        List<Sheet.Point> r1Points = objectSheet.pointsByRow(0, 1).toList();
         assertEquals(Sheet.Point.of(0, 0), r1Points.get(0));
         assertEquals(Sheet.Point.of(0, 1), r1Points.get(1));
         assertEquals(Sheet.Point.of(0, 2), r1Points.get(2));
@@ -4517,7 +4517,7 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testPointsHWithSingleRow() {
-        List<Point> points = sheet.pointsH(1, 2).toList();
+        List<Point> points = sheet.pointsByRow(1, 2).toList();
         assertEquals(3, points.size());
         assertEquals(Point.of(1, 0), points.get(0));
         assertEquals(Point.of(1, 1), points.get(1));
@@ -4526,13 +4526,13 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testPointsH_InvalidRange() {
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.pointsH(-1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.pointsH(0, 10));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.pointsByRow(-1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.pointsByRow(0, 10));
     }
 
     @Test
     public void testPointsV() {
-        Stream<Point> points = sheet.pointsV();
+        Stream<Point> points = sheet.pointsByColumn();
         List<Point> pointList = points.toList();
         assertEquals(9, pointList.size());
         assertEquals(0, pointList.get(0).rowIndex());
@@ -4541,17 +4541,17 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testPointsVWithRange() {
-        Stream<Point> points = sheet.pointsV(0, 2);
+        Stream<Point> points = sheet.pointsByColumn(0, 2);
         List<Point> pointList = points.toList();
         assertEquals(6, pointList.size());
     }
 
     @Test
     public void testPointsV_fullRangeAndSubRange() {
-        assertEquals(9, objectSheet.pointsV().count());
-        assertEquals(3, objectSheet.pointsV(0, 1).count());
-        assertEquals(0, objectSheet.pointsV(1, 1).count());
-        List<Sheet.Point> c1Points = objectSheet.pointsV(0, 1).toList();
+        assertEquals(9, objectSheet.pointsByColumn().count());
+        assertEquals(3, objectSheet.pointsByColumn(0, 1).count());
+        assertEquals(0, objectSheet.pointsByColumn(1, 1).count());
+        List<Sheet.Point> c1Points = objectSheet.pointsByColumn(0, 1).toList();
         assertEquals(Sheet.Point.of(0, 0), c1Points.get(0));
         assertEquals(Sheet.Point.of(1, 0), c1Points.get(1));
         assertEquals(Sheet.Point.of(2, 0), c1Points.get(2));
@@ -4559,7 +4559,7 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testPointsVWithSingleColumn() {
-        List<Point> points = sheet.pointsV(1, 2).toList();
+        List<Point> points = sheet.pointsByColumn(1, 2).toList();
         assertEquals(3, points.size());
         assertEquals(Point.of(0, 1), points.get(0));
         assertEquals(Point.of(1, 1), points.get(1));
@@ -4568,72 +4568,72 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testPointsV_InvalidRange() {
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.pointsV(-1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.pointsV(0, 10));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.pointsByColumn(-1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.pointsByColumn(0, 10));
     }
 
     @Test
     public void testPointsR() {
-        Stream<Stream<Point>> pointsR = sheet.pointsR();
-        List<List<Point>> result = pointsR.map(Stream::toList).toList();
+        Stream<Stream<Point>> rowPoints = sheet.rowPoints();
+        List<List<Point>> result = rowPoints.map(Stream::toList).toList();
         assertEquals(3, result.size());
         assertEquals(3, result.get(0).size());
     }
 
     @Test
     public void testPointsRWithRange() {
-        Stream<Stream<Point>> pointsR = sheet.pointsR(0, 2);
-        List<List<Point>> result = pointsR.map(Stream::toList).toList();
+        Stream<Stream<Point>> rowPoints = sheet.rowPoints(0, 2);
+        List<List<Point>> result = rowPoints.map(Stream::toList).toList();
         assertEquals(2, result.size());
     }
 
     @Test
     public void testPointsR_fullRangeAndSubRange() {
-        assertEquals(3, objectSheet.pointsR().count());
-        assertEquals(1, objectSheet.pointsR(1, 2).count());
-        assertEquals(0, objectSheet.pointsR(1, 1).count());
+        assertEquals(3, objectSheet.rowPoints().count());
+        assertEquals(1, objectSheet.rowPoints(1, 2).count());
+        assertEquals(0, objectSheet.rowPoints(1, 1).count());
 
-        List<Sheet.Point> r2Points = objectSheet.pointsR(1, 2).first().get().toList();
+        List<Sheet.Point> r2Points = objectSheet.rowPoints(1, 2).first().get().toList();
         assertEquals(3, r2Points.size());
         assertEquals(Sheet.Point.of(1, 0), r2Points.get(0));
     }
 
     @Test
     public void testPointsR_InvalidRange() {
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.pointsR(-1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.pointsR(0, 10));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.rowPoints(-1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.rowPoints(0, 10));
     }
 
     @Test
     public void testPointsC() {
-        Stream<Stream<Point>> pointsC = sheet.pointsC();
-        List<List<Point>> result = pointsC.map(Stream::toList).toList();
+        Stream<Stream<Point>> columnPoints = sheet.columnPoints();
+        List<List<Point>> result = columnPoints.map(Stream::toList).toList();
         assertEquals(3, result.size());
         assertEquals(3, result.get(0).size());
     }
 
     @Test
     public void testPointsCWithRange() {
-        Stream<Stream<Point>> pointsC = sheet.pointsC(0, 2);
-        List<List<Point>> result = pointsC.map(Stream::toList).toList();
+        Stream<Stream<Point>> columnPoints = sheet.columnPoints(0, 2);
+        List<List<Point>> result = columnPoints.map(Stream::toList).toList();
         assertEquals(2, result.size());
     }
 
     @Test
     public void testPointsC_fullRangeAndSubRange_ACTUAL_BEHAVIOR() {
         objectSheet.println();
-        List<Stream<Sheet.Point>> pointsCStreams = objectSheet.pointsC().toList();
-        assertEquals(objectSheet.columnCount(), pointsCStreams.size());
+        List<Stream<Sheet.Point>> columnPointsStreams = objectSheet.columnPoints().toList();
+        assertEquals(objectSheet.columnCount(), columnPointsStreams.size());
 
         for (int i = 0; i < objectSheet.columnCount(); i++) {
-            List<Sheet.Point> streamContent = pointsCStreams.get(i).toList();
-            assertEquals(objectSheet.rowCount(), streamContent.size());
+            List<Sheet.Point> columnStreamsontent = columnPointsStreams.get(i).toList();
+            assertEquals(objectSheet.rowCount(), columnStreamsontent.size());
             for (int j = 0; j < objectSheet.rowCount(); j++) {
-                assertEquals(Sheet.Point.of(j, i), streamContent.get(j));
+                assertEquals(Sheet.Point.of(j, i), columnStreamsontent.get(j));
             }
         }
 
-        List<Stream<Sheet.Point>> actualPointsCStreams = objectSheet.pointsC(0, objectSheet.columnCount()).toList();
+        List<Stream<Sheet.Point>> actualPointsCStreams = objectSheet.columnPoints(0, objectSheet.columnCount()).toList();
         assertEquals(objectSheet.columnCount(), actualPointsCStreams.size());
         List<Sheet.Point> firstColPoints = actualPointsCStreams.get(0).toList();
         assertEquals(objectSheet.rowCount(), firstColPoints.size());
@@ -4644,18 +4644,18 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testPointsC_overload_emptyRange() {
-        assertTrue(objectSheet.pointsC(1, 1).toList().isEmpty());
+        assertTrue(objectSheet.columnPoints(1, 1).toList().isEmpty());
     }
 
     @Test
     public void testPointsC_InvalidRange() {
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.pointsC(-1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.pointsC(0, 10));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.columnPoints(-1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.columnPoints(0, 10));
     }
 
     @Test
     public void testStreamH() {
-        Stream<Integer> stream = sheet.streamH();
+        Stream<Integer> stream = sheet.streamByRow();
         List<Integer> values = stream.toList();
         assertEquals(9, values.size());
         assertEquals(Integer.valueOf(1), values.get(0));
@@ -4663,28 +4663,28 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testStreamHWithRange() {
-        Stream<Integer> stream = sheet.streamH(0, 2);
+        Stream<Integer> stream = sheet.streamByRow(0, 2);
         List<Integer> values = stream.toList();
         assertEquals(6, values.size());
     }
 
     @Test
     public void testStreamH_ValueOrder() {
-        List<Integer> values = sheet.streamH().toList();
+        List<Integer> values = sheet.streamByRow().toList();
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9), values);
     }
 
     @Test
     public void testStreamOperationsOnEmptySheet() {
-        assertEquals(0, emptySheet.streamH().count());
-        assertEquals(0, emptySheet.streamV().count());
-        assertEquals(0, emptySheet.cellsH().count());
-        assertEquals(0, emptySheet.pointsH().count());
+        assertEquals(0, emptySheet.streamByRow().count());
+        assertEquals(0, emptySheet.streamByColumn().count());
+        assertEquals(0, emptySheet.cellsByRow().count());
+        assertEquals(0, emptySheet.pointsByRow().count());
     }
 
     @Test
     public void testStreamH_emptyRange() {
-        assertTrue(objectSheet.streamH(1, 1).toList().isEmpty());
+        assertTrue(objectSheet.streamByRow(1, 1).toList().isEmpty());
     }
 
     @Test
@@ -4694,7 +4694,7 @@ public class SheetTest extends AbstractTest {
         uninitSheet.set("R2", "C2", 22);
         uninitSheet.set("R2", "C3", 23);
 
-        List<Integer> values = uninitSheet.streamH(1, 2).toList();
+        List<Integer> values = uninitSheet.streamByRow(1, 2).toList();
         assertEquals(3, values.size());
         assertEquals(Integer.valueOf(21), values.get(0));
         assertEquals(Integer.valueOf(22), values.get(1));
@@ -4703,13 +4703,13 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testStreamH_InvalidRange() {
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.streamH(-1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.streamH(0, 10));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.streamByRow(-1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.streamByRow(0, 10));
     }
 
     @Test
     public void testStreamV() {
-        Stream<Integer> stream = sheet.streamV();
+        Stream<Integer> stream = sheet.streamByColumn();
         List<Integer> values = stream.toList();
         assertEquals(9, values.size());
         assertEquals(Integer.valueOf(1), values.get(0));
@@ -4717,21 +4717,21 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testStreamVWithRange() {
-        Stream<Integer> stream = sheet.streamV(0, 2);
+        Stream<Integer> stream = sheet.streamByColumn(0, 2);
         List<Integer> values = stream.toList();
         assertEquals(6, values.size());
     }
 
     @Test
     public void testStreamV_ValueOrder() {
-        List<Integer> values = sheet.streamV().toList();
+        List<Integer> values = sheet.streamByColumn().toList();
         // column by column: col1(1,4,7), col2(2,5,8), col3(3,6,9)
         assertEquals(Arrays.asList(1, 4, 7, 2, 5, 8, 3, 6, 9), values);
     }
 
     @Test
     public void testStreamV_emptyRange() {
-        assertTrue(objectSheet.streamV(1, 1).toList().isEmpty());
+        assertTrue(objectSheet.streamByColumn(1, 1).toList().isEmpty());
     }
 
     @Test
@@ -4741,7 +4741,7 @@ public class SheetTest extends AbstractTest {
         uninitSheet.set("R2", "C2", 22);
         uninitSheet.set("R3", "C2", 32);
 
-        List<Integer> values = uninitSheet.streamV(1, 2).toList();
+        List<Integer> values = uninitSheet.streamByColumn(1, 2).toList();
         assertEquals(3, values.size());
         assertEquals(Integer.valueOf(12), values.get(0));
         assertEquals(Integer.valueOf(22), values.get(1));
@@ -4750,19 +4750,19 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testStreamVWithInvalidRange() {
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.streamV(-1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.streamByColumn(-1, 2));
     }
 
     @Test
     public void testStreamV_InvalidRange() {
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.streamV(-1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.streamV(0, 10));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.streamByColumn(-1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.streamByColumn(0, 10));
     }
 
     @Test
     public void testStreamR() {
-        Stream<Stream<Integer>> streamR = sheet.streamR();
-        List<List<Integer>> result = streamR.map(Stream::toList).toList();
+        Stream<Stream<Integer>> rowStreams = sheet.rowStreams();
+        List<List<Integer>> result = rowStreams.map(Stream::toList).toList();
         assertEquals(3, result.size());
         assertEquals(3, result.get(0).size());
         assertEquals(Integer.valueOf(1), result.get(0).get(0));
@@ -4770,14 +4770,14 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testStreamRWithRange() {
-        Stream<Stream<Integer>> streamR = sheet.streamR(0, 2);
-        List<List<Integer>> result = streamR.map(Stream::toList).toList();
+        Stream<Stream<Integer>> rowStreams = sheet.rowStreams(0, 2);
+        List<List<Integer>> result = rowStreams.map(Stream::toList).toList();
         assertEquals(2, result.size());
     }
 
     @Test
     public void testStreamR_ValueOrder() {
-        List<List<Integer>> rows = sheet.streamR().map(Stream::toList).toList();
+        List<List<Integer>> rows = sheet.rowStreams().map(Stream::toList).toList();
         assertEquals(3, rows.size());
         assertEquals(Arrays.asList(1, 2, 3), rows.get(0));
         assertEquals(Arrays.asList(4, 5, 6), rows.get(1));
@@ -4786,19 +4786,19 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testStreamR_emptyRange() {
-        assertTrue(objectSheet.streamR(1, 1).toList().isEmpty());
+        assertTrue(objectSheet.rowStreams(1, 1).toList().isEmpty());
     }
 
     @Test
     public void testStreamR_InvalidRange() {
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.streamR(-1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.streamR(0, 10));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.rowStreams(-1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.rowStreams(0, 10));
     }
 
     @Test
     public void testStreamC() {
-        Stream<Stream<Integer>> streamC = sheet.streamC();
-        List<List<Integer>> result = streamC.map(Stream::toList).toList();
+        Stream<Stream<Integer>> columnStreams = sheet.columnStreams();
+        List<List<Integer>> result = columnStreams.map(Stream::toList).toList();
         assertEquals(3, result.size());
         assertEquals(3, result.get(0).size());
         assertEquals(Integer.valueOf(1), result.get(0).get(0));
@@ -4806,14 +4806,14 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testStreamCWithRange() {
-        Stream<Stream<Integer>> streamC = sheet.streamC(0, 2);
-        List<List<Integer>> result = streamC.map(Stream::toList).toList();
+        Stream<Stream<Integer>> columnStreams = sheet.columnStreams(0, 2);
+        List<List<Integer>> result = columnStreams.map(Stream::toList).toList();
         assertEquals(2, result.size());
     }
 
     @Test
     public void testStreamC_ValueOrder() {
-        List<List<Integer>> cols = sheet.streamC().map(Stream::toList).toList();
+        List<List<Integer>> cols = sheet.columnStreams().map(Stream::toList).toList();
         assertEquals(3, cols.size());
         assertEquals(Arrays.asList(1, 4, 7), cols.get(0));
         assertEquals(Arrays.asList(2, 5, 8), cols.get(1));
@@ -4822,18 +4822,18 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testStreamC_emptyRange() {
-        assertTrue(objectSheet.streamC(1, 1).toList().isEmpty());
+        assertTrue(objectSheet.columnStreams(1, 1).toList().isEmpty());
     }
 
     @Test
     public void testStreamC_InvalidRange() {
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.streamC(-1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.streamC(0, 10));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.columnStreams(-1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.columnStreams(0, 10));
     }
 
     @Test
     public void testToDatasetH() {
-        Dataset ds = sheet.toDatasetH();
+        Dataset ds = sheet.toDatasetByRow();
         assertNotNull(ds);
         assertEquals(3, ds.size());
         assertEquals(3, ds.columnCount());
@@ -4842,21 +4842,21 @@ public class SheetTest extends AbstractTest {
     @Test
     public void testToDatasetH_uninitialized() {
         Sheet<String, String, String> uninit = new Sheet<>(rowKeys, colKeys);
-        Dataset ds = uninit.toDatasetH();
-        assertEquals(CommonUtil.toList("C1", "C2", "C3"), ds.columnNames());
+        Dataset ds = uninit.toDatasetByRow();
+        assertEquals(N.toList("C1", "C2", "C3"), ds.columnNames());
         assertEquals(3, ds.size());
         assertNull(ds.moveToRow(0).get("C1"));
     }
 
     @Test
     public void testToDatasetH_WithData() {
-        Dataset ds = sheet.toDatasetH();
+        Dataset ds = sheet.toDatasetByRow();
         assertNotNull(ds);
     }
 
     @Test
     public void testToDatasetH_ColumnNames() {
-        Dataset ds = sheet.toDatasetH();
+        Dataset ds = sheet.toDatasetByRow();
         assertNotNull(ds);
         assertEquals(3, ds.size());
         assertEquals(Arrays.asList("col1", "col2", "col3"), ds.columnNames());
@@ -4865,14 +4865,14 @@ public class SheetTest extends AbstractTest {
     @Test
     public void testToDatasetV_UninitializedSheet() {
         Sheet<String, String, Integer> uninitSheet = new Sheet<>(rowKeys, columnKeys);
-        Dataset ds = uninitSheet.toDatasetV();
+        Dataset ds = uninitSheet.toDatasetByColumn();
         assertEquals(Arrays.asList("row1", "row2", "row3"), ds.columnNames());
         assertEquals(3, ds.size());
     }
 
     @Test
     public void testToDatasetV() {
-        Dataset ds = sheet.toDatasetV();
+        Dataset ds = sheet.toDatasetByColumn();
         assertNotNull(ds);
         assertEquals(3, ds.size());
         assertEquals(3, ds.columnCount());
@@ -4880,13 +4880,13 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testToDatasetV_WithData() {
-        Dataset ds = sheet.toDatasetV();
+        Dataset ds = sheet.toDatasetByColumn();
         assertNotNull(ds);
     }
 
     @Test
     public void testToDatasetV_ColumnNames() {
-        Dataset ds = sheet.toDatasetV();
+        Dataset ds = sheet.toDatasetByColumn();
         assertNotNull(ds);
         assertEquals(3, ds.size());
         assertEquals(Arrays.asList("row1", "row2", "row3"), ds.columnNames());
@@ -4900,7 +4900,7 @@ public class SheetTest extends AbstractTest {
         uninitSheet.set("R2", "C1", 3);
         uninitSheet.set("R2", "C2", 4);
 
-        Integer[][] array = uninitSheet.toArrayH(Integer.class);
+        Integer[][] array = uninitSheet.toArrayByRow(Integer.class);
 
         assertEquals(3, array.length);
         assertEquals(3, array[0].length);
@@ -4910,7 +4910,7 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testToArrayH_WithClass_New() {
-        Integer[][] arr = intSheet.toArrayH(Integer.class);
+        Integer[][] arr = intSheet.toArrayByRow(Integer.class);
         assertEquals(3, arr.length);
         assertEquals(3, arr[0].length);
         assertEquals(Integer.valueOf(11), arr[0][0]);
@@ -4920,7 +4920,7 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testToArrayH() {
-        Object[][] array = sheet.toArrayH();
+        Object[][] array = sheet.toArrayByRow();
         assertNotNull(array);
         assertEquals(3, array.length);
         assertEquals(3, array[0].length);
@@ -4930,7 +4930,7 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testToArrayHWithComponentType() {
-        Integer[][] array = sheet.toArrayH(Integer.class);
+        Integer[][] array = sheet.toArrayByRow(Integer.class);
         assertNotNull(array);
         assertEquals(3, array.length);
         assertEquals(3, array[0].length);
@@ -4941,7 +4941,7 @@ public class SheetTest extends AbstractTest {
     @Test
     public void testToArrayH_uninitialized() {
         Sheet<String, String, String> uninit = new Sheet<>(rowKeys, colKeys);
-        Object[][] arr = uninit.toArrayH();
+        Object[][] arr = uninit.toArrayByRow();
         assertEquals(3, arr.length);
         assertEquals(3, arr[0].length);
         assertNull(arr[0][0]);
@@ -4950,7 +4950,7 @@ public class SheetTest extends AbstractTest {
     @Test
     public void testToArrayH_EmptySheet() {
         Sheet<String, String, Integer> empty = new Sheet<>();
-        Object[][] arr = empty.toArrayH();
+        Object[][] arr = empty.toArrayByRow();
         assertEquals(0, arr.length);
     }
 
@@ -4960,13 +4960,13 @@ public class SheetTest extends AbstractTest {
         stringSheet.set("R1", "C1", "S11");
         stringSheet.set("R1", "C2", "S12");
 
-        String[][] arr = stringSheet.toArrayH(String.class);
+        String[][] arr = stringSheet.toArrayByRow(String.class);
         assertEquals(1, arr.length);
         assertEquals(2, arr[0].length);
         assertEquals("S11", arr[0][0]);
 
         assertThrows(ArrayStoreException.class, () -> {
-            objectSheet.toArrayH(Integer.class);
+            objectSheet.toArrayByRow(Integer.class);
         });
     }
 
@@ -4978,7 +4978,7 @@ public class SheetTest extends AbstractTest {
         uninitSheet.set("R2", "C1", 3);
         uninitSheet.set("R2", "C2", 4);
 
-        Integer[][] array = uninitSheet.toArrayV(Integer.class);
+        Integer[][] array = uninitSheet.toArrayByColumn(Integer.class);
 
         assertEquals(3, array.length);
         assertEquals(3, array[0].length);
@@ -4988,7 +4988,7 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testToArrayV() {
-        Object[][] array = sheet.toArrayV();
+        Object[][] array = sheet.toArrayByColumn();
         assertNotNull(array);
         assertEquals(3, array.length);
         assertEquals(3, array[0].length);
@@ -4998,7 +4998,7 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testToArrayVWithComponentType() {
-        Integer[][] array = sheet.toArrayV(Integer.class);
+        Integer[][] array = sheet.toArrayByColumn(Integer.class);
         assertNotNull(array);
         assertEquals(3, array.length);
         assertEquals(3, array[0].length);
@@ -5009,7 +5009,7 @@ public class SheetTest extends AbstractTest {
     @Test
     public void testToArrayV_uninitialized() {
         Sheet<String, String, String> uninit = new Sheet<>(rowKeys, colKeys);
-        Object[][] arr = uninit.toArrayV();
+        Object[][] arr = uninit.toArrayByColumn();
         assertEquals(3, arr.length);
         assertEquals(3, arr[0].length);
         assertNull(arr[0][0]);
@@ -5018,7 +5018,7 @@ public class SheetTest extends AbstractTest {
     @Test
     public void testToArrayV_EmptySheet() {
         Sheet<String, String, Integer> empty = new Sheet<>();
-        Object[][] arr = empty.toArrayV();
+        Object[][] arr = empty.toArrayByColumn();
         assertEquals(0, arr.length);
     }
 
@@ -5028,14 +5028,14 @@ public class SheetTest extends AbstractTest {
         stringSheet.set("R1", "C1", "S11");
         stringSheet.set("R2", "C1", "S21");
 
-        String[][] arr = stringSheet.toArrayV(String.class);
+        String[][] arr = stringSheet.toArrayByColumn(String.class);
         assertEquals(1, arr.length);
         assertEquals(2, arr[0].length);
         assertEquals("S11", arr[0][0]);
         assertEquals("S21", arr[0][1]);
 
         assertThrows(ArrayStoreException.class, () -> {
-            objectSheet.toArrayV(UUID.class);
+            objectSheet.toArrayByColumn(UUID.class);
         });
     }
 
@@ -5197,12 +5197,12 @@ public class SheetTest extends AbstractTest {
 
         Sheet.empty().println();
 
-        Sheet<String, String, Object> sheet = Sheet.rows(CommonUtil.toList("r1", "r2", "r3"), CommonUtil.toList("c1", "c2"),
+        Sheet<String, String, Object> sheet = Sheet.rows(N.toList("r1", "r2", "r3"), N.toList("c1", "c2"),
                 new Object[][] { { 1, "a" }, { null, "b" }, { 5, "c" } });
 
         sheet.println();
-        sheet.toDatasetH().println();
-        sheet.toDatasetV().println();
+        sheet.toDatasetByRow().println();
+        sheet.toDatasetByColumn().println();
 
         sheet.rows().map(it -> Pair.of(it.left(), it.right().join(","))).forEach(Fn.println());
         sheet.columns().map(it -> Pair.of(it.left(), it.right().join(","))).forEach(Fn.println());
@@ -5216,10 +5216,10 @@ public class SheetTest extends AbstractTest {
 
         N.println(sheet.nonNullValueCount());
 
-        sheet = new Sheet<>(CommonUtil.toList("r1", "r2", "r3"), CommonUtil.toList("c1", "c2"));
-        sheet.forEachH((r, c, v) -> N.println(r + ": " + c + ": " + v));
+        sheet = new Sheet<>(N.toList("r1", "r2", "r3"), N.toList("c1", "c2"));
+        sheet.forEachByRow((r, c, v) -> N.println(r + ": " + c + ": " + v));
 
-        sheet = Sheet.rows(CommonUtil.emptyList(), CommonUtil.emptyList(), CommonUtil.emptyList());
+        sheet = Sheet.rows(N.emptyList(), N.emptyList(), N.emptyList());
         N.println(sheet);
         N.println(N.toJson(sheet));
 

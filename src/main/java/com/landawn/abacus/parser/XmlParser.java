@@ -27,7 +27,7 @@ import com.landawn.abacus.type.Type;
  * Interface for XML parsing operations, extending the base {@link Parser} interface.
  * This interface provides XML-specific serialization and deserialization methods,
  * including support for DOM nodes and node class mappings.
- * 
+ *
  * <p>The XmlParser supports:
  * <ul>
  *   <li>Serialization of Java objects to XML format</li>
@@ -36,18 +36,18 @@ import com.landawn.abacus.type.Type;
  *   <li>DOM-based parsing with Node objects</li>
  *   <li>Dynamic type resolution using node class mappings</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * XmlParser parser = ParserFactory.createXmlParser();
- * 
+ *
  * // Serialize object to XML
  * MyBean bean = new MyBean();
  * String xml = parser.serialize(bean);
- * 
+ *
  * // Deserialize XML to object
  * MyBean restored = parser.deserialize(xml, MyBean.class);
- * 
+ *
  * // Deserialize from DOM Node
  * try {
  *     Document doc = DocumentBuilderFactory.newInstance()
@@ -56,14 +56,14 @@ import com.landawn.abacus.type.Type;
  * } catch (Exception e) {
  *     // Handle parsing exception
  * }
- * 
+ *
  * // Deserialize with node type mappings
  * Map<String, Type<?>> nodeTypes = new HashMap<>();
  * nodeTypes.put("person", Type.of(Person.class));
  * nodeTypes.put("company", Type.of(Company.class));
  * Object result = parser.deserialize(xmlStream, config, nodeTypes);
  * }</pre>
- * 
+ *
  * @see Parser
  * @see XmlSerConfig
  * @see XmlDeserConfig

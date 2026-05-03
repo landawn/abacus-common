@@ -131,12 +131,12 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * Converts an object to a ZonedDateTime instance.
      * <p>
      * This method handles conversion from:
+     * </p>
      * <ul>
      *   <li>Number types - interpreted as epoch milliseconds in the default timezone</li>
      *   <li>String types - parsed according to supported date/time formats</li>
      *   <li>null - returns null</li>
      * </ul>
-     * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -160,6 +160,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * Converts a string to a ZonedDateTime instance.
      * <p>
      * This method handles several input formats:
+     * </p>
      * <ul>
      *   <li>null or empty string returns null</li>
      *   <li>"SYS_TIME" returns the current ZonedDateTime</li>
@@ -168,7 +169,6 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      *   <li>ISO 8601 timestamp strings with 'Z' suffix (24 chars) are parsed as ISO timestamp</li>
      *   <li>Other formats are parsed using the default ZonedDateTime parser</li>
      * </ul>
-     * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -275,7 +275,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ZonedDateTime zdt = type.get(resultSet, "created_date");
-     * // Retrieves timestamp from <i>created_date</i> column
+     * // Retrieves timestamp from the "created_date" column
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -366,12 +366,14 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * Writes the character representation of a ZonedDateTime to a CharacterWriter.
      * <p>
      * This method handles different date/time formats based on the provided configuration:
+     * </p>
      * <ul>
      *   <li>LONG format: writes the epoch milliseconds as a number</li>
      *   <li>ISO_8601_DATE_TIME: writes in ISO 8601 date-time format</li>
      *   <li>ISO_8601_TIMESTAMP: writes in ISO 8601 timestamp format</li>
      *   <li>Default: uses the ISO 8601 timestamp format</li>
      * </ul>
+     * <p>
      * The output may be quoted based on the configuration settings, except for LONG format.
      * </p>
      *

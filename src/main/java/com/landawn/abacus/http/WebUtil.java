@@ -105,7 +105,7 @@ public final class WebUtil {
         HttpMethod httpMethod = null;
         StringBuilder headers = new StringBuilder();
         String token = "";
-        String body = "";
+        final List<String> bodyParts = new ArrayList<>();
         boolean hasDataOption = false;
         boolean hasHeadOption = false;
         for (int i = 0, size = tokens.size(); i < size; i++) {
@@ -139,18 +139,25 @@ public final class WebUtil {
 
                 if (inlineBody != null) {
                     if (shouldConsumeNextDataToken(token, inlineBody, i, size, tokens)) {
-                        body = tokens.get(++i);
+                        bodyParts.add(tokens.get(++i));
                     } else {
-                        body = inlineBody;
+                        bodyParts.add(inlineBody);
                     }
                 } else if (i + 1 < size) {
-                    body = tokens.get(++i);
+                    bodyParts.add(tokens.get(++i));
                 } else {
-                    body = Strings.EMPTY;
+                    bodyParts.add(Strings.EMPTY);
                 }
             }
         }
 
+        final String body = combineDataValues(bodyParts);
+
+        if (httpMethod == null) {
+            httpMethod = hasHeadOption ? HttpMethod.HEAD : (hasDataOption ? HttpMethod.POST : HttpMethod.GET);
+        }
+
+        final boolean isRequestBodySupported = supportsHttpRequestBodyBuilder(httpMethod);
         String requestBody = null;
 
         if (Strings.isNotEmpty(body)) {
@@ -159,24 +166,32 @@ public final class WebUtil {
 
         final StringBuilder sb = new StringBuilder(IOUtil.LINE_SEPARATOR_UNIX);
 
+        if (Strings.isEmpty(url)) {
+            throw new IllegalArgumentException("No URL found in curl command: " + curl);
+        }
+
         if (Strings.isNotEmpty(requestBody)) {
             sb.append(requestBody).append(IOUtil.LINE_SEPARATOR_UNIX).append(IOUtil.LINE_SEPARATOR_UNIX);
         }
 
-        sb.append("  HttpRequest.url(\"").append(url).append("\")");
+        if (Strings.isNotEmpty(body) && !isRequestBodySupported) {
+            sb.append("  // HttpRequest.body(...) only supports POST, PUT, and PATCH. Request body omitted for ")
+                    .append(httpMethod.name())
+                    .append('.')
+                    .append(IOUtil.LINE_SEPARATOR_UNIX)
+                    .append(IOUtil.LINE_SEPARATOR_UNIX);
+        }
+
+        sb.append("  HttpRequest.url(\"").append(escapeJava(url)).append("\")");
 
         if (Strings.isNotEmpty(headers.toString())) {
             sb.append(headers);
         }
 
-        if (httpMethod == null) {
-            httpMethod = hasDataOption ? HttpMethod.POST : (hasHeadOption ? HttpMethod.HEAD : HttpMethod.GET);
-        }
-
         if (httpMethod == HttpMethod.GET) {
             sb.append(indent).append(".get();");
         } else {
-            if (Strings.isNotEmpty(body)) {
+            if (Strings.isNotEmpty(body) && isRequestBodySupported) {
                 sb.append(indent).append(".body(requestBody)");
             }
 
@@ -251,7 +266,7 @@ public final class WebUtil {
         HttpMethod httpMethod = null;
         StringBuilder headers = new StringBuilder();
         String token = "";
-        String body = "";
+        final List<String> bodyParts = new ArrayList<>();
         String mediaType = null;
         boolean hasDataOption = false;
         boolean hasHeadOption = false;
@@ -282,7 +297,7 @@ public final class WebUtil {
                             .append("\")"); //NOSONAR
 
                     if ("Content-Type".equalsIgnoreCase(header.substring(0, idx).trim())) {
-                        mediaType = "MediaType.parse(\"" + header.substring(idx + 1).trim() + "\")";
+                        mediaType = "MediaType.parse(\"" + escapeJava(header.substring(idx + 1).trim()) + "\")";
                     }
                 }
             } else if (isDataOptionToken(token)) {
@@ -290,18 +305,25 @@ public final class WebUtil {
 
                 if (inlineBody != null) {
                     if (shouldConsumeNextDataToken(token, inlineBody, i, size, tokens)) {
-                        body = tokens.get(++i);
+                        bodyParts.add(tokens.get(++i));
                     } else {
-                        body = inlineBody;
+                        bodyParts.add(inlineBody);
                     }
                 } else if (i + 1 < size) {
-                    body = tokens.get(++i);
+                    bodyParts.add(tokens.get(++i));
                 } else {
-                    body = Strings.EMPTY;
+                    bodyParts.add(Strings.EMPTY);
                 }
             }
         }
 
+        final String body = combineDataValues(bodyParts);
+
+        if (httpMethod == null) {
+            httpMethod = hasHeadOption ? HttpMethod.HEAD : (hasDataOption ? HttpMethod.POST : HttpMethod.GET);
+        }
+
+        final boolean isRequestBodySupported = supportsGeneratedOkHttpBody(httpMethod);
         String requestBody = null;
 
         if (Strings.isNotEmpty(body)) {
@@ -310,22 +332,30 @@ public final class WebUtil {
 
         final StringBuilder sb = new StringBuilder(IOUtil.LINE_SEPARATOR_UNIX);
 
+        if (Strings.isEmpty(url)) {
+            throw new IllegalArgumentException("No URL found in curl command: " + curl);
+        }
+
         if (Strings.isNotEmpty(requestBody)) {
             sb.append(requestBody).append(IOUtil.LINE_SEPARATOR_UNIX).append(IOUtil.LINE_SEPARATOR_UNIX);
         }
 
-        sb.append("  OkHttpRequest.url(\"").append(url).append("\")");
+        if (Strings.isNotEmpty(body) && !isRequestBodySupported) {
+            sb.append("  // Request body omitted for ")
+                    .append(httpMethod.name())
+                    .append(" because this generated request does not support it.")
+                    .append(IOUtil.LINE_SEPARATOR_UNIX)
+                    .append(IOUtil.LINE_SEPARATOR_UNIX);
+        }
+
+        sb.append("  OkHttpRequest.url(\"").append(escapeJava(url)).append("\")");
 
         if (Strings.isNotEmpty(headers.toString())) {
             sb.append(headers);
         }
 
-        if (Strings.isNotEmpty(requestBody)) {
+        if (Strings.isNotEmpty(requestBody) && isRequestBodySupported) {
             sb.append(indent).append(".body(requestBody)");
-        }
-
-        if (httpMethod == null) {
-            httpMethod = hasDataOption ? HttpMethod.POST : (hasHeadOption ? HttpMethod.HEAD : HttpMethod.GET);
         }
 
         if (httpMethod == HttpMethod.GET) {
@@ -373,6 +403,40 @@ public final class WebUtil {
 
         return !(Strings.startsWithIgnoreCase(nextToken, "https://") || Strings.startsWithIgnoreCase(nextToken, "http://")
                 || Strings.startsWith(nextToken, "-"));
+    }
+
+    private static String combineDataValues(final List<String> bodyParts) {
+        if (bodyParts.isEmpty()) {
+            return Strings.EMPTY;
+        }
+
+        if (bodyParts.size() == 1) {
+            return bodyParts.get(0);
+        }
+
+        final StringBuilder sb = Objectory.createStringBuilder();
+
+        try {
+            for (int i = 0, size = bodyParts.size(); i < size; i++) {
+                if (i > 0) {
+                    sb.append('&');
+                }
+
+                sb.append(bodyParts.get(i));
+            }
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
+        }
+    }
+
+    private static boolean supportsHttpRequestBodyBuilder(final HttpMethod httpMethod) {
+        return httpMethod == HttpMethod.POST || httpMethod == HttpMethod.PUT || httpMethod == HttpMethod.PATCH;
+    }
+
+    private static boolean supportsGeneratedOkHttpBody(final HttpMethod httpMethod) {
+        return httpMethod != HttpMethod.GET && httpMethod != HttpMethod.HEAD;
     }
 
     private static String escapeJava(final String str) {
@@ -619,11 +683,14 @@ public final class WebUtil {
      */
     public static String buildCurl(final String httpMethod, final String url, final Map<String, ?> headers, final String body, final String bodyContentType,
             final char quoteChar) {
+        N.checkArgNotEmpty(httpMethod, "httpMethod");
+        N.checkArgNotEmpty(url, "url");
+
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
             sb.append(IOUtil.LINE_SEPARATOR_UNIX);
-            sb.append("curl -X ").append(httpMethod).append(" ").append(quoteChar).append(url).append(quoteChar);
+            sb.append("curl -X ").append(httpMethod).append(" ").append(quoteChar).append(Strings.quoteEscaped(url, quoteChar)).append(quoteChar);
 
             if (N.notEmpty(headers)) {
                 String headerValue = null;

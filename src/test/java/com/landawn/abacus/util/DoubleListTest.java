@@ -2078,15 +2078,17 @@ public class DoubleListTest extends TestBase {
 
     @Test
     public void testMinMaxWithNaN() {
+        // DoubleList.min/max delegate to N.min/max, which propagate NaN per Math.min/max
+        // (IEEE 754) — any NaN in the input yields a NaN result.
         list.addAll(new double[] { 1.1, Double.NaN, 2.2 });
 
         OptionalDouble min = list.min();
         assertTrue(min.isPresent());
-        assertEquals(1.1, min.get(), DELTA);
+        assertTrue(Double.isNaN(min.get()));
 
         OptionalDouble max = list.max();
         assertTrue(max.isPresent());
-        assertEquals(2.2, max.get(), DELTA);
+        assertTrue(Double.isNaN(max.get()));
     }
 
     @Test

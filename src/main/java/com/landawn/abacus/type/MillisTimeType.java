@@ -24,9 +24,18 @@ import java.sql.Types;
 import com.landawn.abacus.util.Dates;
 
 /**
- * Type handler for {@link Time} objects that stores and retrieves them as milliseconds
- * in the database. This implementation converts between java.sql.Time instances and their
- * millisecond representation (time since epoch).
+ * Type handler for {@link java.sql.Time} objects that stores and retrieves time values
+ * as milliseconds since the Unix epoch (January 1, 1970, 00:00:00 UTC) in the database.
+ *
+ * <p>The database column type used is {@link java.sql.Types#BIGINT BIGINT}.
+ * On read, the stored {@code long} value is converted to a {@link java.sql.Time} instance
+ * via {@link com.landawn.abacus.util.Dates#createTime(long)}.
+ * On write, the time's millisecond value is stored as a {@code long}.
+ * SQL {@code NULL} is mapped to Java {@code null} in both directions.
+ *
+ * @see MillisCalendarType
+ * @see MillisDateType
+ * @see MillisTimestampType
  */
 public class MillisTimeType extends TimeType {
 
@@ -40,28 +49,16 @@ public class MillisTimeType extends TimeType {
     }
 
     /**
-     * Retrieves a Time value from a ResultSet at the specified column index.
-     * The value is read as a long representing milliseconds since epoch.
-     * A value of 0 is treated as NULL and returns {@code null}.
+     * Retrieves a {@link java.sql.Time} value from the specified column in the {@link ResultSet}.
+     * The column is read as a {@code BIGINT} representing milliseconds since the Unix epoch
+     * and converted to a {@code Time} instance.
+     * SQL {@code NULL} (detected via {@link ResultSet#wasNull()}) is returned as {@code null}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Time> type = TypeFactory.getType(Time.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     *
-     * // Column contains milliseconds value 3600000 (01:00:00)
-     * Time time = type.get(rs, 1);
-     * // Returns: Time object for 01:00:00
-     *
-     * // Column contains 0 (representing NULL)
-     * time = type.get(rs, 2);
-     * // Returns: null
-     * }</pre>
-     *
-     * @param rs The ResultSet containing the data
-     * @param columnIndex The column index (1-based) to retrieve the value from
-     * @return A Time object created from the milliseconds value, or {@code null} if the value is 0
-     * @throws SQLException if a database access error occurs or the column index is invalid
+     * @param rs the {@code ResultSet} containing the data
+     * @param columnIndex the 1-based index of the column to retrieve
+     * @return a {@code Time} created from the stored millisecond value,
+     *         or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public Time get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -71,28 +68,16 @@ public class MillisTimeType extends TimeType {
     }
 
     /**
-     * Retrieves a Time value from a ResultSet using the specified column label.
-     * The value is read as a long representing milliseconds since epoch.
-     * A value of 0 is treated as NULL and returns {@code null}.
+     * Retrieves a {@link java.sql.Time} value from the specified column in the {@link ResultSet}.
+     * The column is read as a {@code BIGINT} representing milliseconds since the Unix epoch
+     * and converted to a {@code Time} instance.
+     * SQL {@code NULL} (detected via {@link ResultSet#wasNull()}) is returned as {@code null}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Time> type = TypeFactory.getType(Time.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     *
-     * // Column "start_time" contains milliseconds value 3600000 (01:00:00)
-     * Time time = type.get(rs, "start_time");
-     * // Returns: Time object for 01:00:00
-     *
-     * // Column "end_time" contains 0 (representing NULL)
-     * time = type.get(rs, "end_time");
-     * // Returns: null
-     * }</pre>
-     *
-     * @param rs The ResultSet containing the data
-     * @param columnName The label of the column to retrieve the value from
-     * @return A Time object created from the milliseconds value, or {@code null} if the value is 0
-     * @throws SQLException if a database access error occurs or the column label is not found
+     * @param rs the {@code ResultSet} containing the data
+     * @param columnName the label of the column to retrieve (as specified in the SQL AS clause)
+     * @return a {@code Time} created from the stored millisecond value,
+     *         or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
     @Override
     public Time get(final ResultSet rs, final String columnName) throws SQLException {
@@ -102,27 +87,14 @@ public class MillisTimeType extends TimeType {
     }
 
     /**
-     * Sets a Time parameter in a PreparedStatement at the specified position.
-     * The Time is stored as a long value representing milliseconds since epoch.
-     * If the Time is {@code null}, SQL NULL is set.
+     * Sets a {@link java.sql.Time} parameter in a {@link PreparedStatement} at the specified index.
+     * The time's millisecond value is stored as a {@code BIGINT}.
+     * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#BIGINT}) is set.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Time> type = TypeFactory.getType(Time.class);
-     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
-     *
-     * Time time = new Time(3600000L);   // 01:00:00
-     * type.set(stmt, 2, time);
-     * // Sets parameter to 3600000
-     *
-     * type.set(stmt, 2, null);
-     * // Sets parameter to SQL NULL
-     * }</pre>
-     *
-     * @param stmt The PreparedStatement to set the parameter on
-     * @param columnIndex The parameter index (1-based) to set
-     * @param x The Time value to set, or {@code null} to set SQL NULL
-     * @throws SQLException if a database access error occurs or the parameter index is invalid
+     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param columnIndex the 1-based index of the parameter to set
+     * @param x the {@code Time} value to set, or {@code null} to set SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Time x) throws SQLException {
@@ -134,27 +106,14 @@ public class MillisTimeType extends TimeType {
     }
 
     /**
-     * Sets a Time parameter in a CallableStatement using the specified parameter name.
-     * The Time is stored as a long value representing milliseconds since epoch.
-     * If the Time is {@code null}, SQL NULL is set.
+     * Sets a {@link java.sql.Time} parameter in a {@link CallableStatement} by name.
+     * The time's millisecond value is stored as a {@code BIGINT}.
+     * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#BIGINT}) is set.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Time> type = TypeFactory.getType(Time.class);
-     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
-     *
-     * Time time = new Time(3600000L);   // 01:00:00
-     * type.set(stmt, "p_start_time", time);
-     * // Sets parameter to 3600000
-     *
-     * type.set(stmt, "p_end_time", null);
-     * // Sets parameter to SQL NULL
-     * }</pre>
-     *
-     * @param stmt The CallableStatement to set the parameter on
-     * @param parameterName The name of the parameter to set
-     * @param x The Time value to set, or {@code null} to set SQL NULL
-     * @throws SQLException if a database access error occurs or the parameter name is not found
+     * @param stmt the {@code CallableStatement} to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the {@code Time} value to set, or {@code null} to set SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Time x) throws SQLException {

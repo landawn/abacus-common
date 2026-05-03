@@ -78,9 +78,9 @@ import com.landawn.abacus.util.stream.DoubleStream;
  * <pre>{@code
  * // Creating and initializing double lists
  * DoubleList prices = DoubleList.of(100.50, 101.25, 99.75, 102.10);
- * DoubleList range = DoubleList.range(0.0, 10.0, 0.1);   // [0.0, 0.1, 0.2, ..., 9.9]
- * DoubleList measurements = new DoubleList(10000);   // Pre-sized for large dataset
- * DoubleList random = DoubleList.random(0.0, 1.0, 1000);   // 1000 random doubles [0.0, 1.0)
+ * DoubleList repeated = DoubleList.repeat(0.0, 10);                // [0.0, 0.0, ..., 0.0] (10 elements)
+ * DoubleList measurements = new DoubleList(10000);                  // Pre-sized for large dataset
+ * DoubleList random = DoubleList.random(1000);                      // 1000 random doubles
  *
  * // Basic operations
  * prices.add(103.45);   // Append double value
@@ -150,10 +150,9 @@ import com.landawn.abacus.util.stream.DoubleStream;
  *
  * <p><b>Double-Specific Operations:</b>
  * <ul>
- *   <li><b>Range Generation:</b> {@code range()}, {@code rangeClosed()} for arithmetic sequences</li>
  *   <li><b>Mathematical Functions:</b> {@code min()}, {@code max()}, {@code median()}</li>
  *   <li><b>Statistical Analysis:</b> Full integration with DoubleStream for advanced operations</li>
- *   <li><b>Random Generation:</b> {@code random()} methods for simulations and testing</li>
+ *   <li><b>Random Generation:</b> {@code random(int)} for simulations and testing</li>
  *   <li><b>Parallel Operations:</b> {@code parallelSort()} for large dataset optimization</li>
  * </ul>
  *
@@ -161,7 +160,6 @@ import com.landawn.abacus.util.stream.DoubleStream;
  * <ul>
  *   <li><b>{@code of(double...)}:</b> Create from varargs array</li>
  *   <li><b>{@code copyOf(double[])}:</b> Create defensive copy of array</li>
- *   <li><b>{@code range(double, double, double)}:</b> Create arithmetic sequence with step</li>
  *   <li><b>{@code repeat(double, int)}:</b> Create with repeated values</li>
  *   <li><b>{@code random(int)}:</b> Create with random double values</li>
  * </ul>
@@ -187,7 +185,7 @@ import com.landawn.abacus.util.stream.DoubleStream;
  * <ul>
  *   <li><b>Not Thread-Safe:</b> This implementation is not synchronized</li>
  *   <li><b>External Synchronization:</b> Required for concurrent access</li>
- *   <li><b>Fail-Fast Iterators:</b> Detect concurrent modifications</li>
+ *   <li><b>Iterators:</b> Not fail-fast; concurrent modification yields undefined results</li>
  *   <li><b>Read-Only Access:</b> Multiple threads can safely read simultaneously</li>
  * </ul>
  *
@@ -262,7 +260,7 @@ import com.landawn.abacus.util.stream.DoubleStream;
  * <p><b>Common Patterns:</b>
  * <ul>
  *   <li><b>Financial Data:</b> {@code DoubleList prices = new DoubleList(tradingDays);}</li>
- *   <li><b>Scientific Data:</b> {@code DoubleList measurements = DoubleList.random(minVal, maxVal, count);}</li>
+ *   <li><b>Scientific Data:</b> {@code DoubleList measurements = DoubleList.random(count);}</li>
  *   <li><b>Statistical Analysis:</b> {@code DoubleList results = dataset.stream().mapToDouble(...).collect(...);}</li>
  *   <li><b>Mathematical Modeling:</b> {@code DoubleList coefficients = DoubleList.of(a, b, c, d);}</li>
  * </ul>
@@ -1046,8 +1044,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * The elements from fromIndex (inclusive) to toIndex (exclusive) are moved
      * so that the element originally at fromIndex will be at newPositionAfterMove.
      * Other elements are shifted as necessary to accommodate the move.
-     * 
-     * <p><b>Usage Examples:</b></p> 
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleList list = DoubleList.of(0, 1, 2, 3, 4, 5);
      * list.moveRange(1, 3, 3);   // Moves elements [1, 2] to position starting at index 3
@@ -1056,13 +1054,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and size() - lengthOfRange, inclusive.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the list
      */
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
+        N.checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, size);
         N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
     }
 
@@ -1421,7 +1420,6 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @see #difference(DoubleList)
      * @see #symmetricDifference(DoubleList)
      * @see N#intersection(double[], double[])
-     * @see N#intersection(int[], int[])
      */
     @Override
     public DoubleList intersection(final DoubleList b) {
@@ -1468,7 +1466,6 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @see #difference(double[])
      * @see #symmetricDifference(double[])
      * @see N#intersection(double[], double[])
-     * @see N#intersection(int[], int[])
      */
     @Override
     public DoubleList intersection(final double[] b) {
@@ -1505,7 +1502,6 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @see #symmetricDifference(DoubleList)
      * @see #intersection(DoubleList)
      * @see N#difference(double[], double[])
-     * @see N#difference(int[], int[])
      */
     @Override
     public DoubleList difference(final DoubleList b) {
@@ -1553,7 +1549,6 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @see #symmetricDifference(double[])
      * @see #intersection(double[])
      * @see N#difference(double[], double[])
-     * @see N#difference(double[], double[])
      */
     @Override
     public DoubleList difference(final double[] b) {
@@ -1593,7 +1588,6 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @see #difference(DoubleList)
      * @see #intersection(DoubleList)
      * @see N#symmetricDifference(double[], double[])
-     * @see N#symmetricDifference(int[], int[])
      */
     @Override
     public DoubleList symmetricDifference(final DoubleList b) {
@@ -1654,7 +1648,6 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @see #difference(double[])
      * @see #intersection(double[])
      * @see N#symmetricDifference(double[], double[])
-     * @see N#symmetricDifference(int[], int[])
      */
     @Override
     public DoubleList symmetricDifference(final double[] b) {
@@ -1742,7 +1735,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Returns the index of the last occurrence of the specified element in this list,
      * searching backwards from the specified index, or -1 if the element is not found.
      * Elements are compared using {@code Double.compare} for accurate floating-point comparison.
-     * 
+     *
      * @param valueToFind the element to search for
      * @param startIndexFromBack the index to start searching backwards from (inclusive).
      *        The search includes this index and proceeds towards index 0.
@@ -1819,7 +1812,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Returns the median value of all elements in this list.
-     * 
+     *
      * <p>The median is the middle value when the elements are sorted in ascending order. For lists with
      * an odd number of elements, this is the exact middle element. For lists with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
@@ -1832,7 +1825,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Returns the median value of elements within the specified range of this list.
-     * 
+     *
      * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
      * For ranges with an odd number of elements, this returns the exact middle element when sorted.
      * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
@@ -1852,7 +1845,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Performs the given action for each element in this list, in the order elements
      * occur in the list, until all elements have been processed or the action throws
      * an exception.
-     * 
+     *
      * <p>This method iterates through all elements from index 0 to size-1.</p>
      *
      * @param action the action to be performed for each element. Must not be {@code null}.
@@ -1865,11 +1858,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Performs the given action for each element in the specified range of this list,
      * in the order elements occur in the list (or reverse order if fromIndex &gt; toIndex),
      * until all elements have been processed or the action throws an exception.
-     * 
+     *
      * <p>If {@code fromIndex <= toIndex}, iteration proceeds from fromIndex (inclusive)
      * to toIndex (exclusive). If {@code fromIndex > toIndex}, iteration proceeds from
      * fromIndex (inclusive) down to toIndex (exclusive) in reverse order.</p>
-     * 
+     *
      * <p>Special case: if {@code toIndex == -1} and {@code fromIndex > toIndex},
      * iteration starts from fromIndex down to 0 (inclusive).</p>
      *
@@ -1899,7 +1892,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Returns an {@code OptionalDouble} containing the first element of this list,
      * or an empty {@code OptionalDouble} if this list is empty.
-     * 
+     *
      * <p>This method provides a null-safe way to access the first element without
      * risking an exception when the list is empty.</p>
      *
@@ -1913,7 +1906,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Returns an {@code OptionalDouble} containing the last element of this list,
      * or an empty {@code OptionalDouble} if this list is empty.
-     * 
+     *
      * <p>This method provides a null-safe way to access the last element without
      * risking an exception when the list is empty.</p>
      *
@@ -1927,10 +1920,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Returns a new {@code DoubleList} containing only the distinct elements from the
      * specified range of this list, preserving their original order of first occurrence.
-     * 
+     *
      * <p>This method creates a new list containing each unique element from the specified
      * range exactly once, in the order they first appear. Duplicate values are removed.</p>
-     * 
+     *
      * <p>For example, if the range contains [1.0, 2.0, 1.0, 3.0, 2.0], the returned
      * list will contain [1.0, 2.0, 3.0].</p>
      *
@@ -1953,10 +1946,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Checks whether this list contains any duplicate elements.
-     * 
+     *
      * <p>This method returns {@code true} if any value appears more than once
      * in the list, {@code false} if all elements are unique.</p>
-     * 
+     *
      * <p>The comparison uses {@code ==} for primitive doubles, which means that
      * {@code NaN} values are considered equal to themselves for this purpose.</p>
      *
@@ -1970,11 +1963,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Checks whether the elements in this list are sorted in ascending order.
-     * 
+     *
      * <p>Returns {@code true} if the list is empty, contains only one element,
      * or all elements are arranged in non-decreasing order (each element is less
      * than or equal to the next element).</p>
-     * 
+     *
      * <p>This method considers {@code NaN} values according to their natural
      * ordering as defined by {@code Double.compare()}.</p>
      *
@@ -1988,15 +1981,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Sorts the elements of this list into ascending order.
-     * 
+     *
      * <p>This method modifies the list in-place, arranging all elements according
      * to their natural ordering. The sort is stable: equal elements will not be
      * reordered as a result of the sort.</p>
-     * 
+     *
      * <p>The sorting algorithm is a Dual-Pivot Quicksort by Vladimir Yaroslavskiy,
      * Jon Bentley, and Joshua Bloch. This algorithm offers O(n log(n)) performance
      * on many data sets.</p>
-     * 
+     *
      * <p>If the list contains fewer than 2 elements, no sorting is performed.</p>
      */
     @Override
@@ -2008,14 +2001,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Sorts the elements of this list into ascending order using a parallel sort algorithm.
-     * 
+     *
      * <p>This method modifies the list in-place, arranging all elements according
      * to their natural ordering. The parallel sort algorithm divides the array into
      * sub-arrays that are sorted in parallel and then merged.</p>
-     * 
+     *
      * <p>This method is beneficial for large lists on multi-core systems. For small
      * lists, the overhead of parallelization may make it slower than {@link #sort()}.</p>
-     * 
+     *
      * <p>If the list contains fewer than 2 elements, no sorting is performed.</p>
      */
     public void parallelSort() {
@@ -2026,11 +2019,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Sorts the elements of this list into descending order.
-     * 
+     *
      * <p>This method first sorts the list in ascending order using {@link #sort()},
      * then reverses the entire list to achieve descending order. This approach
      * maintains stability for equal elements.</p>
-     * 
+     *
      * <p>If the list contains fewer than 2 elements, no sorting is performed.</p>
      */
     @Override
@@ -2043,11 +2036,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Searches for the specified value in this sorted list using the binary search algorithm.
-     * 
+     *
      * <p>The list must be sorted in ascending order prior to making this call.
      * If it is not sorted, the results are undefined. If the list contains multiple
      * elements with the specified value, there is no guarantee which one will be found.</p>
-     * 
+     *
      * <p>This method runs in O(log n) time for a list of size n.</p>
      *
      * @param valueToFind the value to search for
@@ -2064,11 +2057,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Searches for the specified value within the specified range of this sorted list
      * using the binary search algorithm.
-     * 
+     *
      * <p>The range must be sorted in ascending order prior to making this call.
      * If it is not sorted, the results are undefined. If the range contains multiple
      * elements with the specified value, there is no guarantee which one will be found.</p>
-     * 
+     *
      * <p>This method runs in O(log(toIndex - fromIndex)) time.</p>
      *
      * @param fromIndex the index of the first element (inclusive) to be searched
@@ -2090,11 +2083,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Reverses the order of all elements in this list.
-     * 
+     *
      * <p>This method modifies the list in-place. After calling this method,
      * the first element becomes the last, the second element becomes the
      * second-to-last, and so on.</p>
-     * 
+     *
      * <p>If the list contains fewer than 2 elements, no reversal is performed.</p>
      */
     @Override
@@ -2106,11 +2099,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Reverses the order of elements in the specified range of this list.
-     * 
+     *
      * <p>This method modifies the list in-place, reversing only the elements
      * between {@code fromIndex} (inclusive) and {@code toIndex} (exclusive).
      * Elements outside this range are not affected.</p>
-     * 
+     *
      * <p>If the range contains fewer than 2 elements, no reversal is performed.</p>
      *
      * @param fromIndex the index of the first element (inclusive) to be reversed
@@ -2130,8 +2123,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Rotates all elements in this list by the specified distance.
      * After calling rotate(distance), the element at index i will be moved to
-     * index (i + distance) % size. 
-     * 
+     * index (i + distance) % size.
+     *
      * <p>Positive values of distance rotate elements towards higher indices (right rotation),
      * while negative values rotate towards lower indices (left rotation).
      * The list is modified in place.</p>
@@ -2149,14 +2142,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Randomly permutes the elements in this list using a default source of randomness.
-     * 
+     *
      * <p>All permutations occur with approximately equal likelihood. This method
      * runs in linear time.</p>
-     * 
+     *
      * <p>This implementation traverses the list backwards, from the last element
      * up to the second, repeatedly swapping a randomly selected element into the
      * current position.</p>
-     * 
+     *
      * <p>If the list contains fewer than 2 elements, no shuffling is performed.</p>
      */
     @Override
@@ -2168,14 +2161,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Randomly permutes the elements in this list using the specified source of randomness.
-     * 
+     *
      * <p>All permutations occur with equal likelihood assuming that the source of
      * randomness is fair. This method runs in linear time.</p>
-     * 
+     *
      * <p>This implementation traverses the list backwards, from the last element
      * up to the second, repeatedly swapping a randomly selected element into the
      * current position using the provided {@code Random} instance.</p>
-     * 
+     *
      * <p>If the list contains fewer than 2 elements, no shuffling is performed.</p>
      *
      * @param rnd the source of randomness to use to shuffle the list. Must not be {@code null}.
@@ -2189,7 +2182,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Swaps the elements at the specified positions in this list.
-     * 
+     *
      * <p>After calling this method, the element previously at position {@code i}
      * will be at position {@code j}, and vice versa.</p>
      *
@@ -2208,7 +2201,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Returns a shallow copy of this list.
-     * 
+     *
      * <p>The returned list will have the same size and contain the same elements
      * in the same order as this list. The new list will have its own backing array,
      * so changes to the returned list will not affect this list, and vice versa.</p>
@@ -2223,7 +2216,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Returns a shallow copy of the portion of this list between the specified
      * {@code fromIndex} (inclusive) and {@code toIndex} (exclusive).
-     * 
+     *
      * <p>The returned list will contain {@code toIndex - fromIndex} elements.
      * The new list will have its own backing array, so changes to the returned
      * list will not affect this list, and vice versa.</p>
@@ -2244,12 +2237,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Returns a shallow copy of the portion of this list between the specified
      * {@code fromIndex} and {@code toIndex} with the specified step.
-     * 
+     *
      * <p>The returned list will contain elements at indices {@code fromIndex},
      * {@code fromIndex + step}, {@code fromIndex + 2*step}, ..., up to but not
      * including {@code toIndex}. If {@code step} is negative and {@code fromIndex > toIndex},
      * elements are copied in reverse order.</p>
-     * 
+     *
      * <p>For example, copying elements from index 0 to 10 with step 2 will return
      * elements at indices 0, 2, 4, 6, 8.</p>
      *
@@ -2272,11 +2265,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Returns a list of {@code DoubleList} instances, each containing a consecutive
      * subsequence of elements from the specified range of this list.
-     * 
+     *
      * <p>This method divides the specified range into chunks of the specified size
      * (except possibly the last chunk, which may be smaller). Each chunk is returned
      * as a separate {@code DoubleList}.</p>
-     * 
+     *
      * <p>For example, splitting a range containing [1, 2, 3, 4, 5, 6, 7] with
      * chunk size 3 returns [[1, 2, 3], [4, 5, 6], [7]].</p>
      *
@@ -2305,11 +2298,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Trims the capacity of this list to be the list's current size.
-     * 
+     *
      * <p>This method minimizes the storage of a {@code DoubleList} instance.
      * If the backing array has excess capacity, a new array of the exact size
      * is allocated and the elements are copied into it.</p>
-     * 
+     *
      * <p>An application can use this operation to minimize the storage of a
      * {@code DoubleList} instance after it has finished adding elements.</p>
      *
@@ -2359,11 +2352,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Returns a {@code List<Double>} containing all elements of this list.
-     * 
+     *
      * <p>This method creates a new {@code ArrayList<Double>} and copies all
      * primitive double values from this list, boxing them into {@code Double}
      * objects. The returned list is independent of this list.</p>
-     * 
+     *
      * <p>This is equivalent to calling {@code boxed(0, size())}.</p>
      *
      * @return a new {@code List<Double>} containing all elements of this list
@@ -2376,7 +2369,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Returns a {@code List<Double>} containing the elements in the specified
      * range of this list.
-     * 
+     *
      * <p>This method creates a new {@code ArrayList<Double>} and copies the
      * primitive double values from the specified range, boxing them into
      * {@code Double} objects. The returned list is independent of this list.</p>
@@ -2466,11 +2459,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Returns an iterator over the elements in this list in proper sequence.
-     * 
-     * <p>The returned iterator is fail-fast: if the list is structurally modified
-     * at any time after the iterator is created, the iterator may throw a
-     * {@code ConcurrentModificationException}. This behavior is not guaranteed
-     * and should not be relied upon for correctness.</p>
+     *
+     * <p>The returned iterator is <b>not</b> fail-fast: it iterates over the list's
+     * backing array directly, and concurrent structural modifications during iteration
+     * yield undefined results rather than a {@code ConcurrentModificationException}.</p>
      *
      * @return a {@code DoubleIterator} over the elements in this list
      */
@@ -2485,7 +2477,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Returns a {@code DoubleStream} with this list as its source.
-     * 
+     *
      * <p>This method creates a stream that will iterate over all elements in
      * this list in the order they appear.</p>
      *
@@ -2498,7 +2490,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Returns a {@code DoubleStream} with the specified range of this
      * list as its source.
-     * 
+     *
      * <p>This method creates a stream that will iterate over the elements from
      * {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) in the order
      * they appear in the list.</p>
@@ -2517,7 +2509,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Returns the first element in this list.
-     * 
+     *
      * <p>This method provides direct access to the first element without creating
      * an {@code Optional} wrapper, but will throw an exception if the list is empty.</p>
      *
@@ -2532,7 +2524,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Returns the last element in this list.
-     * 
+     *
      * <p>This method provides direct access to the last element without creating
      * an {@code Optional} wrapper, but will throw an exception if the list is empty.</p>
      *
@@ -2547,7 +2539,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Inserts the specified element at the beginning of this list.
-     * 
+     *
      * <p>Shifts the element currently at position 0 (if any) and any subsequent
      * elements to the right (adds one to their indices). This operation has
      * O(n) time complexity where n is the size of the list.</p>
@@ -2560,7 +2552,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Appends the specified element to the end of this list.
-     * 
+     *
      * <p>This is equivalent to calling {@code add(e)} and has amortized
      * constant time complexity.</p>
      *
@@ -2572,7 +2564,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Removes and returns the first element from this list.
-     * 
+     *
      * <p>Shifts any subsequent elements to the left (subtracts one from their
      * indices). This operation has O(n) time complexity where n is the size
      * of the list.</p>
@@ -2588,7 +2580,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Removes and returns the last element from this list.
-     * 
+     *
      * <p>This operation has O(1) time complexity.</p>
      *
      * @return the last double value that was removed from the list
@@ -2602,7 +2594,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Returns the hash code value for this list.
-     * 
+     *
      * <p>The hash code is calculated based on the elements in the list and their
      * order. Two lists with the same elements in the same order will have the
      * same hash code.</p>
@@ -2616,7 +2608,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Compares the specified object with this list for equality.
-     * 
+     *
      * <p>Returns {@code true} if and only if the specified object is also a
      * {@code DoubleList}, both lists have the same size, and all corresponding
      * pairs of elements in the two lists are equal. Two double values are
@@ -2644,12 +2636,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Returns a string representation of this list.
-     * 
+     *
      * <p>The string representation consists of the list's elements in order,
      * enclosed in square brackets ("[]"). Adjacent elements are separated by
      * the characters ", " (comma and space). Elements are converted to strings
      * using {@code String.valueOf(double)}.</p>
-     * 
+     *
      * <p>If the list is empty, returns "[]".</p>
      *
      * @return a string representation of this list

@@ -18,17 +18,17 @@ package com.landawn.abacus.util;
  * An enumeration representing common colors with their associated integer values.
  * This enum provides a mapping between color names and numeric codes, useful for
  * serialization, database storage, or systems that require numeric color representations.
- * 
+ *
  * <p>Each color is assigned a unique integer value from 0 to 8, allowing for
  * consistent numeric representation across different systems.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Color myColor = Color.RED;
  * int colorCode = myColor.intValue();   // returns 2
  * Color fromCode = Color.valueOf(2);   // returns Color.RED
  * }</pre>
- * 
+ *
  * @see WeekDay
  * @see UnifiedStatus
  * @see ServiceStatus
@@ -90,13 +90,13 @@ public enum Color {
     /**
      * Returns the integer value associated with this color.
      * This method is useful when you need to store or transmit colors as numeric values.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Color color = Color.BLUE;
      * int value = color.intValue();   // returns 7
      * }</pre>
-     * 
+     *
      * @return the integer value representing this color (0-8)
      */
     public int intValue() {
@@ -106,13 +106,13 @@ public enum Color {
     /**
      * Returns the Color enum constant corresponding to the specified integer value.
      * This method performs a reverse lookup from integer code to Color instance.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Color red = Color.valueOf(2);     // returns Color.RED
      * Color green = Color.valueOf(5);   // returns Color.GREEN
      * }</pre>
-     * 
+     *
      * @param intValue the integer value to look up (must be between 0 and 8 inclusive)
      * @return the Color enum constant associated with the specified integer value
      * @throws IllegalArgumentException if the intValue is not between 0 and 8, or

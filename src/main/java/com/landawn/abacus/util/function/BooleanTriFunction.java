@@ -21,7 +21,6 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>This is a functional interface whose functional method is {@link #apply(boolean, boolean, boolean)}.
  *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <R> the type of the result of the function
@@ -37,9 +36,9 @@ public interface BooleanTriFunction<R> extends Throwables.BooleanTriFunction<R, 
      * String result = formatter.apply(true, false, true);   // Returns "true,false,true"
      * }</pre>
      *
-     * @param a the first function argument
-     * @param b the second function argument
-     * @param c the third function argument
+     * @param a the first function argument ({@code boolean} value)
+     * @param b the second function argument ({@code boolean} value)
+     * @param c the third function argument ({@code boolean} value)
      * @return the function result
      */
     @Override
@@ -49,9 +48,17 @@ public interface BooleanTriFunction<R> extends Throwables.BooleanTriFunction<R, 
      * Returns a composed function that first applies this function to its input, and then applies the {@code after} function to the result.
      * If evaluation of either function throws an exception, it is relayed to the caller of the composed function.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanTriFunction<String> formatter = (a, b, c) -> String.format("%b,%b,%b", a, b, c);
+     * Function<String, Integer> length = String::length;
+     * BooleanTriFunction<Integer> combined = formatter.andThen(length);
+     * }</pre>
+     *
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed function that first applies this function and then applies the {@code after} function
+     * @throws NullPointerException if {@code after} is null
      */
     default <V> BooleanTriFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return (a, b, c) -> after.apply(apply(a, b, c));

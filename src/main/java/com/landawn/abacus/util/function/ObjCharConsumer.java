@@ -25,9 +25,6 @@ import com.landawn.abacus.util.Throwables;
  * <p>The interface extends {@code Throwables.ObjCharConsumer} with {@code RuntimeException} as the exception type,
  * making it suitable for use in contexts where checked exceptions are not required.
  *
- * <p>Note: Unlike some other primitive specializations, this interface does not provide default methods
- * for composition as the JDK does not provide a standard ObjCharConsumer interface.
- *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ObjCharConsumer<StringBuilder> appendChar = (sb, ch) -> sb.append(ch);
@@ -56,10 +53,29 @@ public interface ObjCharConsumer<T> extends Throwables.ObjCharConsumer<T, Runtim
      * Performs this operation on the given arguments.
      * This method is expected to operate via side-effects.
      *
-     * @param t the first input argument
-     * @param value the second input argument
+     * @param t the object input argument
+     * @param value the char input argument
      */
     // @ai-ignore Obj* argument order convention - intentional: class name prefix determines parameter order. ObjChar* has object first, char second. Do not suggest reordering.
     @Override
     void accept(T t, char value);
+
+    /**
+     * Returns a composed {@code ObjCharConsumer} that performs, in sequence, this
+     * operation followed by the {@code after} operation. If performing either
+     * operation throws an exception, it is relayed to the caller of the
+     * composed operation. If performing this operation throws an exception,
+     * the {@code after} operation will not be performed.
+     *
+     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @return a composed {@code ObjCharConsumer} that performs in sequence this
+     *         operation followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
+     */
+    default ObjCharConsumer<T> andThen(final ObjCharConsumer<? super T> after) {
+        return (t, value) -> {
+            accept(t, value);
+            after.accept(t, value);
+        };
+    }
 }

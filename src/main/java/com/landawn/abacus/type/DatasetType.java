@@ -18,46 +18,29 @@ import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for Dataset values.
- * This class provides serialization and deserialization for Dataset objects,
- * which are tabular data structures used for data manipulation and analysis.
- * Datasets are serialized to and from JSON format.
+ * Type handler for {@link Dataset} values.
+ * {@link Dataset} is a tabular data structure used for in-memory data manipulation and analysis.
  *
- * <p>DatasetType instances are obtained through TypeFactory and handle the conversion between
- * Dataset objects and their JSON string representations. The serialization preserves all columns,
- * rows, and the tabular structure of the Dataset.</p>
+ * <p>Datasets are serialized to and from JSON format. The serialization preserves all column
+ * names, row data, and the overall tabular structure.
  *
- * <p><b>Usage Examples:</b></p>
- * <pre>{@code
- * // Get DatasetType through TypeFactory
- * Type<Dataset> datasetType = TypeFactory.getType(Dataset.class);
+ * <p>Note: {@link #isSerializable()} returns {@code false}; the type system routes Dataset
+ * serialization through {@link SerializationType#DATA_SET} rather than the generic serializable path.
  *
- * // Create a dataset
- * Dataset dataset = Dataset.rows(
- *     Arrays.asList("id", "name", "age"),
- *     Arrays.asList(
- *         Arrays.asList(1, "Alice", 30),
- *         Arrays.asList(2, "Bob", 25)
- *     ));
- *
- * // Serialize dataset to JSON string
- * String json = datasetType.stringOf(dataset);
- *
- * // Deserialize JSON string back to dataset
- * Dataset parsedDataset = datasetType.valueOf(json);
- * }</pre>
+ * @see AbstractType
+ * @see Dataset
  */
 @SuppressWarnings("java:S2160")
 public class DatasetType extends AbstractType<Dataset> {
 
-    /** The type name constant for Dataset type identification. */
+    /** The type name constant for Dataset type identification, equal to {@code "Dataset"}. */
     public static final String DATA_SET = Dataset.class.getSimpleName();
 
     private final Class<Dataset> typeClass;
 
     /**
-     * Package-private constructor for DatasetType.
-     * This constructor is called by the TypeFactory to create Dataset type instances.
+     * Package-private constructor for {@code DatasetType}.
+     * Instances are created by the {@code TypeFactory}.
      */
     DatasetType() {
         super(DATA_SET);
@@ -66,9 +49,9 @@ public class DatasetType extends AbstractType<Dataset> {
     }
 
     /**
-     * Returns the Java class type handled by this type handler.
+     * Returns the Java class represented by this type handler.
      *
-     * @return The Class object representing Dataset.class
+     * @return {@code Dataset.class}
      */
     @Override
     public Class<Dataset> javaType() {
@@ -76,10 +59,9 @@ public class DatasetType extends AbstractType<Dataset> {
     }
 
     /**
-     * Indicates whether this type represents a Dataset.
-     * Always returns {@code true} for DatasetType.
+     * Indicates whether this type represents a {@link Dataset}.
      *
-     * @return {@code true}, as this type handler specifically handles Dataset objects
+     * @return {@code true}, always, because this handler is dedicated to {@link Dataset} objects
      */
     @Override
     public boolean isDataset() {
@@ -87,10 +69,10 @@ public class DatasetType extends AbstractType<Dataset> {
     }
 
     /**
-     * Indicates whether this Dataset type is serializable in the type system.
-     * Datasets require special JSON serialization handling.
+     * Indicates whether this type is handled by the generic serializable path.
+     * {@link Dataset} uses a dedicated serialization path ({@link SerializationType#DATA_SET}).
      *
-     * @return {@code false}, indicating Datasets are not simply serializable
+     * @return {@code false}, always
      */
     @Override
     public boolean isSerializable() {
@@ -98,9 +80,9 @@ public class DatasetType extends AbstractType<Dataset> {
     }
 
     /**
-     * Returns the serialization type category for Dataset objects.
+     * Returns the serialization type category for {@link Dataset} objects.
      *
-     * @return SerializationType.DATA_SET, indicating special Dataset serialization handling
+     * @return {@link SerializationType#DATA_SET}
      */
     @Override
     public SerializationType serializationType() {
@@ -108,11 +90,11 @@ public class DatasetType extends AbstractType<Dataset> {
     }
 
     /**
-     * Converts a Dataset to its JSON string representation.
-     * The Dataset is serialized with all its columns, rows, and metadata.
+     * Serializes a {@link Dataset} to its JSON string representation, preserving all
+     * column names, row data, and tabular structure.
      *
-     * @param x the Dataset to convert. Can be {@code null}.
-     * @return A JSON string representation of the Dataset, or {@code null} if input is null
+     * @param x the {@link Dataset} to serialize; may be {@code null}
+     * @return the JSON string, or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final Dataset x) {
@@ -120,12 +102,11 @@ public class DatasetType extends AbstractType<Dataset> {
     }
 
     /**
-     * Converts a JSON string representation back to a Dataset object.
-     * The string should contain a valid JSON representation of a Dataset
-     * with its structure and data.
+     * Deserializes a JSON string back into a {@link Dataset} object.
+     * The JSON must represent a valid {@link Dataset} structure with column names and row data.
      *
-     * @param str the JSON string to parse. Can be {@code null} or empty.
-     * @return A Dataset parsed from the JSON string, or {@code null} if input is null/empty
+     * @param str the JSON string to parse; may be {@code null} or empty
+     * @return the deserialized {@link Dataset}, or {@code null} if {@code str} is {@code null} or empty
      */
     @Override
     public Dataset valueOf(final String str) {

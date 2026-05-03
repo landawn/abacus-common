@@ -68,7 +68,7 @@ import com.landawn.abacus.util.Strings.StrUtil;
 public class StringsTest extends AbstractTest {
 
     public int findLength2(final char[] a, final char[] b) {
-        if (CommonUtil.isEmpty(a) || CommonUtil.isEmpty(b)) {
+        if (N.isEmpty(a) || N.isEmpty(b)) {
             return 0;
         }
 
@@ -98,7 +98,7 @@ public class StringsTest extends AbstractTest {
             }
         }
 
-        N.println(new String(CommonUtil.copyOfRange(a, end - maxLen, end)));
+        N.println(new String(N.copyOfRange(a, end - maxLen, end)));
 
         return maxLen;
     }
@@ -2010,6 +2010,64 @@ public class StringsTest extends AbstractTest {
         // null/empty
         assertNull(Strings.toUpperCamelCase((String) null));
         assertEquals("", Strings.toUpperCamelCase(""));
+    }
+
+    /**
+     * Regression tests for the bug where toCamelCase / toUpperCamelCase used
+     * {@code sb.length() - substr.length()} to locate the start of the most
+     * recently appended token. That formula is only correct when
+     * {@code substr.toLowerCase(Locale.ROOT)} produces the same number of
+     * characters as {@code substr}. The fix captures {@code startPos = sb.length()}
+     * BEFORE the append so the index is always exact.
+     *
+     * <p>The most visible symptom with common inputs is that the first character
+     * of every non-first token must be uppercased (lowerCamelCase) or every token
+     * must be uppercased (UpperCamelCase). Any off-by-one in the index would leave
+     * the wrong character capitalised.</p>
+     */
+    @Test
+    public void testToCamelCase_startPositionIndexBugFix() {
+        // Multi-token path (firstSplitorIndex >= 0): the fixed code records
+        // startPos before appending toLowerCase'd token, then uses startPos
+        // for setCharAt.  Verify correct capitalisation for every non-first token.
+        assertEquals("helloWorld", Strings.toCamelCase("hello_world"));
+        assertEquals("helloWorldFoo", Strings.toCamelCase("hello_world_foo"));
+        assertEquals("helloWorld", Strings.toCamelCase("HELLO_WORLD"));
+        assertEquals("helloWorldFoo", Strings.toCamelCase("HELLO_WORLD_FOO"));
+        assertEquals("helloWorld", Strings.toCamelCase("hello-world"));
+        assertEquals("firstName", Strings.toCamelCase("first_name"));
+        assertEquals("firstName", Strings.toCamelCase("FIRST_NAME"));
+
+        // Three tokens: only the second and third should be capitalised
+        assertEquals("oneTwoThree", Strings.toCamelCase("one_two_three"));
+        assertEquals("oneTwoThree", Strings.toCamelCase("ONE_TWO_THREE"));
+
+        // Single-char tokens: each non-first single-char token becomes uppercase
+        assertEquals("aBC", Strings.toCamelCase("a_b_c"));
+
+        // First token empty (leading separator) — empty tokens are skipped, so the
+        // next non-empty token becomes the first (lowercase) word
+        assertEquals("world", Strings.toCamelCase("_world"));
+    }
+
+    @Test
+    public void testToUpperCamelCase_startPositionIndexBugFix() {
+        // The fix in toUpperCamelCase mirrors the one in toCamelCase.
+        // Every token (including the first) must have its first letter uppercased.
+        assertEquals("HelloWorld", Strings.toUpperCamelCase("hello_world"));
+        assertEquals("HelloWorldFoo", Strings.toUpperCamelCase("hello_world_foo"));
+        assertEquals("HelloWorld", Strings.toUpperCamelCase("HELLO_WORLD"));
+        assertEquals("HelloWorldFoo", Strings.toUpperCamelCase("HELLO_WORLD_FOO"));
+        assertEquals("HelloWorld", Strings.toUpperCamelCase("hello-world"));
+        assertEquals("FirstName", Strings.toUpperCamelCase("first_name"));
+        assertEquals("FirstName", Strings.toUpperCamelCase("FIRST_NAME"));
+
+        // Three tokens
+        assertEquals("OneTwoThree", Strings.toUpperCamelCase("one_two_three"));
+        assertEquals("OneTwoThree", Strings.toUpperCamelCase("ONE_TWO_THREE"));
+
+        // Single-char tokens
+        assertEquals("ABC", Strings.toUpperCamelCase("a_b_c"));
     }
 
     @Test
@@ -6152,7 +6210,7 @@ public class StringsTest extends AbstractTest {
     public void testContainsAllChars() {
         assertTrue(Strings.containsAll("abcd", 'a', 'b'));
         assertFalse(Strings.containsAll("abcd", 'a', 'e'));
-        assertTrue(Strings.containsAll("abcd", CommonUtil.EMPTY_CHAR_ARRAY));
+        assertTrue(Strings.containsAll("abcd", N.EMPTY_CHAR_ARRAY));
         assertFalse(Strings.containsAll(null, 'a'));
     }
 
@@ -6161,7 +6219,7 @@ public class StringsTest extends AbstractTest {
     public void testContainsAllStrings() {
         assertTrue(Strings.containsAll("abcdef", "ab", "cd"));
         assertFalse(Strings.containsAll("abcdef", "ab", "gh"));
-        assertTrue(Strings.containsAll("abcdef", CommonUtil.EMPTY_STRING_ARRAY));
+        assertTrue(Strings.containsAll("abcdef", N.EMPTY_STRING_ARRAY));
         assertFalse(Strings.containsAll(null, "a"));
     }
 
@@ -6217,7 +6275,7 @@ public class StringsTest extends AbstractTest {
     public void testContainsAnyChars() {
         assertTrue(Strings.containsAny("abcd", 'a', 'e'));
         assertFalse(Strings.containsAny("abcd", 'e', 'f'));
-        assertFalse(Strings.containsAny("abcd", CommonUtil.EMPTY_CHAR_ARRAY));
+        assertFalse(Strings.containsAny("abcd", N.EMPTY_CHAR_ARRAY));
         assertFalse(Strings.containsAny(null, 'a'));
     }
 
@@ -6226,7 +6284,7 @@ public class StringsTest extends AbstractTest {
     public void testContainsAnyStrings() {
         assertTrue(Strings.containsAny("abcdef", "ab", "gh"));
         assertFalse(Strings.containsAny("abcdef", "gh", "ij"));
-        assertFalse(Strings.containsAny("abcdef", CommonUtil.EMPTY_STRING_ARRAY));
+        assertFalse(Strings.containsAny("abcdef", N.EMPTY_STRING_ARRAY));
         assertFalse(Strings.containsAny(null, "a"));
     }
 
@@ -6286,7 +6344,7 @@ public class StringsTest extends AbstractTest {
     public void testContainsNoneChars() {
         assertTrue(Strings.containsNone("abcd", 'e', 'f'));
         assertFalse(Strings.containsNone("abcd", 'a', 'e'));
-        assertTrue(Strings.containsNone("abcd", CommonUtil.EMPTY_CHAR_ARRAY));
+        assertTrue(Strings.containsNone("abcd", N.EMPTY_CHAR_ARRAY));
         assertTrue(Strings.containsNone(null, 'a'));
     }
 
@@ -6295,7 +6353,7 @@ public class StringsTest extends AbstractTest {
     public void testContainsNoneStrings() {
         assertTrue(Strings.containsNone("abcdef", "gh", "ij"));
         assertFalse(Strings.containsNone("abcdef", "ab", "gh"));
-        assertTrue(Strings.containsNone("abcdef", CommonUtil.EMPTY_STRING_ARRAY));
+        assertTrue(Strings.containsNone("abcdef", N.EMPTY_STRING_ARRAY));
         assertTrue(Strings.containsNone(null, "a"));
     }
 
@@ -8077,7 +8135,7 @@ public class StringsTest extends AbstractTest {
         assertEquals(" World", substringAfterAny("Hello World", 'o', ' '));
         assertNull(substringAfterAny("Hello", 'x', 'y', 'z'));
         assertNull(substringAfterAny(null, 'a', 'b'));
-        assertNull(substringAfterAny("test", CommonUtil.EMPTY_CHAR_ARRAY));
+        assertNull(substringAfterAny("test", N.EMPTY_CHAR_ARRAY));
     }
 
     @Test
@@ -8086,7 +8144,7 @@ public class StringsTest extends AbstractTest {
         assertEquals(" World", substringAfterAny("Hello World", "abc", "Hello", "xyz"));
         assertNull(substringAfterAny("Hello", "xyz", "abc"));
         assertNull(substringAfterAny(null, "test", "abc"));
-        assertNull(substringAfterAny("test", CommonUtil.EMPTY_STRING_ARRAY));
+        assertNull(substringAfterAny("test", N.EMPTY_STRING_ARRAY));
     }
 
     @Test
@@ -8316,7 +8374,7 @@ public class StringsTest extends AbstractTest {
         assertEquals("Hello ", substringBeforeAny("Hello World", 'W', ' '));
         assertNull(substringBeforeAny("Hello", 'x', 'y', 'z'));
         assertNull(substringBeforeAny(null, 'a', 'b'));
-        assertNull(substringBeforeAny("test", CommonUtil.EMPTY_CHAR_ARRAY));
+        assertNull(substringBeforeAny("test", N.EMPTY_CHAR_ARRAY));
     }
 
     @Test
@@ -8325,7 +8383,7 @@ public class StringsTest extends AbstractTest {
         assertEquals("", substringBeforeAny("Hello World", "abc", "Hello", "xyz"));
         assertNull(substringBeforeAny("Hello", "xyz", "abc"));
         assertNull(substringBeforeAny(null, "test", "abc"));
-        assertNull(substringBeforeAny("test", CommonUtil.EMPTY_STRING_ARRAY));
+        assertNull(substringBeforeAny("test", N.EMPTY_STRING_ARRAY));
     }
 
     @Test
@@ -8437,7 +8495,7 @@ public class StringsTest extends AbstractTest {
     @Test
     public void test_substringbetween_01() {
 
-        CommonUtil.firstNonBlank("aa", "bb").ifPresentOrElse(N::println, () -> N.println("empty"));
+        N.firstNonBlank("aa", "bb").ifPresentOrElse(N::println, () -> N.println("empty"));
 
         String str = StringUtils.substringBetween("abc", "", "c");
         N.println(str);
@@ -8849,27 +8907,27 @@ public class StringsTest extends AbstractTest {
     public void test_substringsBetween() {
 
         {
-            assertEquals("[\"a2[c\", \"a\"]", CommonUtil.stringOf(Strings.substringsBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.DEFAULT)));
-            assertEquals("[\"c\", \"a2[c]\", \"a\"]", CommonUtil.stringOf(Strings.substringsBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED)));
-            assertEquals("[\"a2[c]\", \"a\"]", CommonUtil.stringOf(Strings.substringsBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
+            assertEquals("[\"a2[c\", \"a\"]", N.stringOf(Strings.substringsBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.DEFAULT)));
+            assertEquals("[\"c\", \"a2[c]\", \"a\"]", N.stringOf(Strings.substringsBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED)));
+            assertEquals("[\"a2[c]\", \"a\"]", N.stringOf(Strings.substringsBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
         }
 
         {
-            assertEquals("[\"a2c\", \"a\"]", CommonUtil.stringOf(Strings.substringsBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.DEFAULT)));
-            assertEquals("[\"a2c\", \"a\"]", CommonUtil.stringOf(Strings.substringsBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED)));
-            assertEquals("[\"a2c\", \"a\"]", CommonUtil.stringOf(Strings.substringsBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
+            assertEquals("[\"a2c\", \"a\"]", N.stringOf(Strings.substringsBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.DEFAULT)));
+            assertEquals("[\"a2c\", \"a\"]", N.stringOf(Strings.substringsBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED)));
+            assertEquals("[\"a2c\", \"a\"]", N.stringOf(Strings.substringsBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
         }
 
         {
-            assertEquals("[\"[b[a\"]", CommonUtil.stringOf(Strings.substringsBetween("[[b[a]]c]", '[', ']', ExtractStrategy.DEFAULT)));
-            assertEquals("[\"a\", \"b[a]\", \"[b[a]]c\"]", CommonUtil.stringOf(Strings.substringsBetween("[[b[a]]c]", '[', ']', ExtractStrategy.STACK_BASED)));
-            assertEquals("[\"[b[a]]c\"]", CommonUtil.stringOf(Strings.substringsBetween("[[b[a]]c]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
+            assertEquals("[\"[b[a\"]", N.stringOf(Strings.substringsBetween("[[b[a]]c]", '[', ']', ExtractStrategy.DEFAULT)));
+            assertEquals("[\"a\", \"b[a]\", \"[b[a]]c\"]", N.stringOf(Strings.substringsBetween("[[b[a]]c]", '[', ']', ExtractStrategy.STACK_BASED)));
+            assertEquals("[\"[b[a]]c\"]", N.stringOf(Strings.substringsBetween("[[b[a]]c]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
         }
 
         {
-            assertEquals("[\"[b[a\", \"c\"]", CommonUtil.stringOf(Strings.substringsBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.DEFAULT)));
-            assertEquals("[\"a\", \"c\", \"b[a][c]d\"]", CommonUtil.stringOf(Strings.substringsBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.STACK_BASED)));
-            assertEquals("[\"b[a][c]d\"]", CommonUtil.stringOf(Strings.substringsBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
+            assertEquals("[\"[b[a\", \"c\"]", N.stringOf(Strings.substringsBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.DEFAULT)));
+            assertEquals("[\"a\", \"c\", \"b[a][c]d\"]", N.stringOf(Strings.substringsBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.STACK_BASED)));
+            assertEquals("[\"b[a][c]d\"]", N.stringOf(Strings.substringsBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
         }
 
     }
@@ -9095,29 +9153,29 @@ public class StringsTest extends AbstractTest {
     public void test_substringIndicesBetween() {
 
         {
-            assertEquals("[[2, 6], [10, 11]]", CommonUtil.stringOf(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.DEFAULT)));
+            assertEquals("[[2, 6], [10, 11]]", N.stringOf(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.DEFAULT)));
             assertEquals("[[5, 6], [2, 7], [10, 11]]",
-                    CommonUtil.stringOf(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED)));
-            assertEquals("[[2, 7], [10, 11]]", CommonUtil.stringOf(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
+                    N.stringOf(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED)));
+            assertEquals("[[2, 7], [10, 11]]", N.stringOf(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
         }
 
         {
-            assertEquals("[[2, 5], [9, 10]]", CommonUtil.stringOf(Strings.substringIndicesBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.DEFAULT)));
-            assertEquals("[[2, 5], [9, 10]]", CommonUtil.stringOf(Strings.substringIndicesBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED)));
-            assertEquals("[[2, 5], [9, 10]]", CommonUtil.stringOf(Strings.substringIndicesBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
+            assertEquals("[[2, 5], [9, 10]]", N.stringOf(Strings.substringIndicesBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.DEFAULT)));
+            assertEquals("[[2, 5], [9, 10]]", N.stringOf(Strings.substringIndicesBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED)));
+            assertEquals("[[2, 5], [9, 10]]", N.stringOf(Strings.substringIndicesBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
         }
 
         {
-            assertEquals("[[1, 5]]", CommonUtil.stringOf(Strings.substringIndicesBetween("[[b[a]]c]", '[', ']', ExtractStrategy.DEFAULT)));
-            assertEquals("[[4, 5], [2, 6], [1, 8]]", CommonUtil.stringOf(Strings.substringIndicesBetween("[[b[a]]c]", '[', ']', ExtractStrategy.STACK_BASED)));
-            assertEquals("[[1, 8]]", CommonUtil.stringOf(Strings.substringIndicesBetween("[[b[a]]c]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
+            assertEquals("[[1, 5]]", N.stringOf(Strings.substringIndicesBetween("[[b[a]]c]", '[', ']', ExtractStrategy.DEFAULT)));
+            assertEquals("[[4, 5], [2, 6], [1, 8]]", N.stringOf(Strings.substringIndicesBetween("[[b[a]]c]", '[', ']', ExtractStrategy.STACK_BASED)));
+            assertEquals("[[1, 8]]", N.stringOf(Strings.substringIndicesBetween("[[b[a]]c]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
         }
 
         {
-            assertEquals("[[1, 5], [7, 8]]", CommonUtil.stringOf(Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.DEFAULT)));
+            assertEquals("[[1, 5], [7, 8]]", N.stringOf(Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.DEFAULT)));
             assertEquals("[[4, 5], [7, 8], [2, 10]]",
-                    CommonUtil.stringOf(Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.STACK_BASED)));
-            assertEquals("[[2, 10]]", CommonUtil.stringOf(Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
+                    N.stringOf(Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.STACK_BASED)));
+            assertEquals("[[2, 10]]", N.stringOf(Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
         }
 
     }
@@ -9127,8 +9185,8 @@ public class StringsTest extends AbstractTest {
         N.println(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']'));
         N.println(Strings.substringsBetween("3[a2[c]]2[a]", '[', ']'));
 
-        assertEquals("[[2, 6], [10, 11]]", CommonUtil.stringOf(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']')));
-        assertEquals(CommonUtil.toList("a2[c", "a"), Strings.substringsBetween("3[a2[c]]2[a]", '[', ']'));
+        assertEquals("[[2, 6], [10, 11]]", N.stringOf(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']')));
+        assertEquals(N.toList("a2[c", "a"), Strings.substringsBetween("3[a2[c]]2[a]", '[', ']'));
 
         N.println(Strings.toCamelCase("a_B_c_D"));
         N.println(Strings.toCamelCase("B_B_c_d"));
@@ -10405,8 +10463,8 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void testConcat_Objects_EdgeCases() {
-        assertEquals("123", Strings.concat((Object) 1, (Object) 2, (Object) 3));
-        assertEquals("truenull", Strings.concat((Object) true, null));
+        assertEquals("123", Strings.concat(1, 2, 3));
+        assertEquals("truenull", Strings.concat(true, null));
     }
 
     @Test
@@ -10740,7 +10798,7 @@ public class StringsTest extends AbstractTest {
     //     @Test
     //     @DisplayName("Test joinEntries()")
     //     public void testJoinEntries() {
-    //         Map<String, String> map = CommonUtil.asLinkedHashMap("a", "1", "b", "2");
+    //         Map<String, String> map = N.asLinkedHashMap("a", "1", "b", "2");
     //         String result = Strings.joinEntries(map, ",", "=");
     //         assertEquals("a=1,b=2", result);
     //     }

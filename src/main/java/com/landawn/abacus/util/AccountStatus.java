@@ -18,7 +18,7 @@ package com.landawn.abacus.util;
  * Enumeration representing various states of an account lifecycle.
  * Each status has an associated integer value that can be used for persistence
  * or integration with systems that require numeric status codes.
- * 
+ *
  * <p>The account statuses follow a typical lifecycle progression:</p>
  * <ul>
  *   <li>BLANK (0) - Initial state of an account</li>
@@ -28,15 +28,15 @@ package com.landawn.abacus.util;
  *   <li>CLOSED (4) - Account has been formally closed</li>
  *   <li>DELETED (5) - Account has been deleted from the system</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * AccountStatus status = AccountStatus.ACTIVE;
  * int statusCode = status.code();   // Returns 1
- * 
+ *
  * // Convert from int to enum
  * AccountStatus restored = AccountStatus.fromCode(1);   // Returns ACTIVE
- * 
+ *
  * // Use in switch statements
  * switch (status) {
  *     case ACTIVE:
@@ -49,7 +49,7 @@ package com.landawn.abacus.util;
  *         // Handle other statuses
  * }
  * }</pre>
- * 
+ *
  * @see ServiceStatus
  * @see UnifiedStatus
  * @see WeekDay
@@ -85,7 +85,7 @@ public enum AccountStatus {
      * Returns the integer value associated with this account status.
      * This can be useful for database persistence or API communication
      * where numeric codes are preferred.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AccountStatus status = AccountStatus.SUSPENDED;
@@ -101,7 +101,7 @@ public enum AccountStatus {
     /**
      * Returns the AccountStatus corresponding to the specified integer value.
      * This method performs a reverse lookup from integer code to enum constant.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AccountStatus status = AccountStatus.fromCode(1);      // Returns ACTIVE

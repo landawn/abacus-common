@@ -285,6 +285,20 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
+    public void testHeadersWithHttpHeadersCollectionValue() throws IOException, InterruptedException {
+        server.enqueue(new MockResponse().setResponseCode(200));
+
+        HttpHeaders headers = HttpHeaders.create();
+        headers.set("Accept", Arrays.asList("application/json", "text/plain"));
+
+        OkHttpRequest.url(baseUrl).headers(headers).execute(HttpMethod.GET).close();
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        // RFC 7230 §3.2.2 — multi-value headers are comma-separated, not semicolon-separated.
+        assertEquals("application/json, text/plain", recordedRequest.getHeader("Accept"));
+    }
+
+    @Test
     public void testHeadersWithTwoHeaders() {
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
         OkHttpRequest result = request.headers("Header1", "value1", "Header2", "value2");
@@ -443,6 +457,28 @@ public class OkHttpRequestTest extends TestBase {
         bean.field2 = "value2";
         OkHttpRequest result = request.formBody(bean);
         assertSame(request, result);
+    }
+
+    @Test
+    public void testFormBodyEmptyMapSendsFormContentType() throws IOException, InterruptedException {
+        server.enqueue(new MockResponse().setResponseCode(200));
+
+        OkHttpRequest.url(baseUrl).formBody(new HashMap<>()).post().close();
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertEquals("application/x-www-form-urlencoded", recordedRequest.getHeader("Content-Type"));
+        assertEquals("", recordedRequest.getBody().readUtf8());
+    }
+
+    @Test
+    public void testFormBodyNullBeanSendsFormContentType() throws IOException, InterruptedException {
+        server.enqueue(new MockResponse().setResponseCode(200));
+
+        OkHttpRequest.url(baseUrl).formBody((Object) null).post().close();
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertEquals("application/x-www-form-urlencoded", recordedRequest.getHeader("Content-Type"));
+        assertEquals("", recordedRequest.getBody().readUtf8());
     }
 
     @Test
@@ -1254,6 +1290,55 @@ public class OkHttpRequestTest extends TestBase {
         ContinuableFuture<String> future = request.asyncExecute(HttpMethod.GET, String.class, executor);
         String result = future.get();
         assertEquals("Async Execute response", result);
+    }
+
+    // --- Bug fix: dead null-check after non-null assertion for resultClass ---
+
+    @Test
+    public void testExecute_nullResultClassIsRejected() {
+        // resultClass must not be null; passing null must throw immediately.
+        assertThrows(IllegalArgumentException.class,
+                () -> OkHttpRequest.url(baseUrl).execute(HttpMethod.GET, (Class<?>) null));
+    }
+
+    @Test
+    public void testExecute_voidResultClassReturnsNull() throws Exception {
+        // Void.class as resultClass should return null without reading the response body.
+        server.enqueue(new MockResponse().setBody("should be discarded").setResponseCode(200));
+        final Object result = OkHttpRequest.url(baseUrl).execute(HttpMethod.GET, Void.class);
+        assertNull(result, "Void.class result must produce a null return value");
+    }
+
+    @Test
+    public void testExecute_httpResponseClassIsRejected() {
+        // HttpResponse (the abacus wrapper) is not allowed as a result type;
+        // callers must use OkHttp's Response class directly.
+        assertThrows(IllegalArgumentException.class,
+                () -> OkHttpRequest.url(baseUrl).execute(HttpMethod.GET, com.landawn.abacus.http.HttpResponse.class));
+    }
+
+    @Test
+    public void testExecute_responseClassReturnsOkHttpResponse() throws Exception {
+        // Response.class (OkHttp) should be returned directly without deserialization.
+        server.enqueue(new MockResponse().setBody("raw body").setResponseCode(200));
+        Response resp = OkHttpRequest.url(baseUrl).execute(HttpMethod.GET, Response.class);
+        assertNotNull(resp);
+        assertEquals(200, resp.code());
+        IOUtil.close(resp);
+    }
+
+    // --- Bug fix: per-request OkHttpClient (built from httpClientBuilder) must be shut down ---
+
+    @Test
+    public void testExecuteWithCustomTimeout_completesSuccessfully() throws Exception {
+        // When connectTimeout/readTimeout are set, an internal httpClientBuilder is used.
+        // Verify the request still executes successfully (regression test).
+        server.enqueue(new MockResponse().setBody("timeout-client body").setResponseCode(200));
+        final String result = OkHttpRequest.url(baseUrl)
+                .connectTimeout(5_000L)
+                .readTimeout(10_000L)
+                .get(String.class);
+        assertEquals("timeout-client body", result);
     }
 
 }

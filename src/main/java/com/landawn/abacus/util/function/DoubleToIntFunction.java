@@ -26,6 +26,7 @@ import com.landawn.abacus.util.Throwables;
  * @see java.util.function.Function
  * @see java.util.function.DoubleToIntFunction
  * @see DoubleToLongFunction
+ * @see DoubleToFloatFunction
  */
 @FunctionalInterface
 public interface DoubleToIntFunction extends Throwables.DoubleToIntFunction<RuntimeException>, java.util.function.DoubleToIntFunction { //NOSONAR

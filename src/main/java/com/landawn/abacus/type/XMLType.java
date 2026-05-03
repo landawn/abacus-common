@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.landawn.abacus.util.ClassUtil;
-import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Strings;
 
 /**
  * Type implementation for XML serialization and deserialization of objects.

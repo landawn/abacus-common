@@ -426,9 +426,9 @@ public class AbstractTypeTest extends TestBase {
     @Test
     @DisplayName("Test getParameterTypes()")
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = stringType.parameterTypes();
+        List<Type<?>> paramTypes = stringType.parameterTypes();
         assertNotNull(paramTypes);
-        assertEquals(0, paramTypes.length);
+        assertEquals(0, paramTypes.size());
     }
 
     @Test

@@ -27,12 +27,12 @@ import com.landawn.abacus.util.stream.ByteStream;
 /**
  * An iterator specialized for primitive byte values, providing better performance
  * than {@code Iterator<Byte>} by avoiding boxing/unboxing overhead.
- * 
+ *
  * <p>This abstract class provides various static factory methods for creating
  * byte iterators from arrays, suppliers, and other sources. It also provides
  * transformation methods like {@code skip()}, {@code limit()}, {@code filter()},
  * and utility methods like {@code toArray()} and {@code stream()}.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
@@ -182,9 +182,9 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     /**
      * Returns a ByteIterator instance created lazily using the provided Supplier.
      * The Supplier is invoked only when the first method of the returned iterator is called.
-     * 
+     *
      * <p>This is useful for deferring expensive iterator creation until actually needed.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.defer(() -> ByteIterator.of((byte)1, (byte)2, (byte)3));
@@ -234,7 +234,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
 
     /**
      * Returns an infinite {@code ByteIterator} that generates values using the provided supplier.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.generate(() -> (byte)42);
@@ -267,7 +267,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     /**
      * Returns a {@code ByteIterator} that generates values using the provided supplier
      * while the hasNext condition returns {@code true}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] count = {0};

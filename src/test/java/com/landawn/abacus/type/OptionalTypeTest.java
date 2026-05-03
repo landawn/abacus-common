@@ -16,6 +16,8 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -103,10 +105,10 @@ public class OptionalTypeTest extends TestBase {
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = optionalStringType.parameterTypes();
+        List<Type<?>> paramTypes = optionalStringType.parameterTypes();
         assertNotNull(paramTypes);
-        assertEquals(1, paramTypes.length);
-        assertEquals("String", paramTypes[0].name());
+        assertEquals(1, paramTypes.size());
+        assertEquals("String", paramTypes.get(0).name());
     }
 
     @Test
@@ -259,6 +261,70 @@ public class OptionalTypeTest extends TestBase {
     public void test_name() {
         assertNotNull(optionalStringType.name());
         assertFalse(optionalStringType.name().isEmpty());
+    }
+
+    /**
+     * Regression test for bug: OptionalType.stringOf was using N.stringOf(x.get())
+     * instead of elementType.stringOf(x.get()), which bypassed type-specific formatting.
+     *
+     * For example, a Timestamp stored in Optional<Timestamp> must be serialized using
+     * TimestampType's formatting logic, not Timestamp.toString() from N.stringOf().
+     * The two produce different results: TimestampType uses Dates.format() while
+     * Timestamp.toString() uses JDBC escape format.
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testStringOf_usesElementTypeStringOf_notNStringOf() {
+        // Build Optional<Integer> type handler
+        OptionalType<Integer> optionalIntegerType = new OptionalType<>("Integer");
+        Type<Integer> elementType = (Type<Integer>) optionalIntegerType.elementType();
+
+        Integer value = 42;
+        Optional<Integer> opt = Optional.of(value);
+
+        // stringOf must delegate to elementType.stringOf, not N.stringOf
+        String fromOptionalType = optionalIntegerType.stringOf(opt);
+        String fromElementType = elementType.stringOf(value);
+
+        assertEquals(fromElementType, fromOptionalType,
+                "OptionalType.stringOf must delegate to elementType.stringOf, not N.stringOf");
+    }
+
+    /**
+     * Regression test: verifies that Optional<Timestamp> stringOf produces the same result
+     * as TimestampType.stringOf, rather than Timestamp.toString().
+     * Before the fix, N.stringOf(timestamp) called toString() which uses JDBC escape format,
+     * while TimestampType uses Dates.format() which uses the configured date pattern.
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testStringOf_Timestamp_usesTimestampTypeFormatting() {
+        OptionalType<Timestamp> optionalTimestampType = new OptionalType<>("Timestamp");
+        Type<Timestamp> timestampType = (Type<Timestamp>) optionalTimestampType.elementType();
+
+        Timestamp ts = new Timestamp(1703502645000L); // 2023-12-25T10:30:45Z in millis
+        Optional<Timestamp> opt = Optional.of(ts);
+
+        String fromOptionalType = optionalTimestampType.stringOf(opt);
+        String fromTimestampType = timestampType.stringOf(ts);
+
+        assertNotNull(fromOptionalType);
+        assertEquals(fromTimestampType, fromOptionalType,
+                "OptionalType<Timestamp>.stringOf must use TimestampType.stringOf formatting, not Timestamp.toString()");
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testStringOf_null_returnsNull() {
+        OptionalType<String> type = new OptionalType<>("String");
+        assertNull(type.stringOf(null));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testStringOf_empty_returnsNull() {
+        OptionalType<String> type = new OptionalType<>("String");
+        assertNull(type.stringOf(Optional.empty()));
     }
 
 }

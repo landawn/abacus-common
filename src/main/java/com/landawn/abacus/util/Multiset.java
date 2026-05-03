@@ -99,7 +99,7 @@ import com.landawn.abacus.util.stream.Stream;
  * // Creating from collections
  * List<String> data = Arrays.asList("a", "b", "a", "c", "b", "a");
  * Multiset<String> frequency = new Multiset<>(data);
- * frequency.forEach((element, count) -> 
+ * frequency.forEach((element, count) ->
  *     System.out.println(element + ": " + count));
  * // Output: a: 3, b: 2, c: 1
  *
@@ -179,7 +179,7 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Constructs an empty multiset with a default {@link HashMap} as the backing map.
      * The initial capacity is set to the default initial capacity of HashMap.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = new Multiset<>();
@@ -193,7 +193,7 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Constructs an empty multiset with the specified initial capacity.
      * Uses a {@link HashMap} as the backing map.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = new Multiset<>(100);
@@ -211,10 +211,10 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Constructs a multiset containing the elements of the specified collection.
      * The multiset will contain all elements from the collection, preserving duplicates.
-     * 
+     *
      * <p>If the input collection is a {@link Set}, the initial capacity is set to its size.
      * Otherwise, the initial capacity is set to half the collection size (assuming duplicates).</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "a", "c", "b", "a");
@@ -252,7 +252,7 @@ public final class Multiset<E> implements Collection<E> {
      * Constructs an empty multiset with a backing map of the specified type.
      * This allows customization of the internal map implementation for specific use cases
      * (e.g., {@link LinkedHashMap} for insertion order preservation, {@link TreeMap} for sorted elements).
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a multiset that maintains insertion order
@@ -270,7 +270,7 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Constructs an empty multiset with a backing map supplied by the provided supplier.
      * This provides maximum flexibility in creating the backing map instance.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a multiset with a custom map supplier
@@ -294,7 +294,7 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Creates a new multiset containing the specified elements.
      * Duplicate elements in the array will be counted as separate occurrences.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "b", "a", "c");
@@ -321,7 +321,7 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Creates a new multiset containing the elements of the specified collection.
      * This is a static factory method alternative to the constructor.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("x", "y", "x", "z");
@@ -339,7 +339,7 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Creates a new multiset containing the elements from the specified iterator.
      * This method consumes the iterator and counts occurrences of each element.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("a", "b", "a").iterator();
@@ -381,7 +381,7 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Finds the element with the minimum number of occurrences in this multiset.
      * If multiple elements have the same minimum count, one is arbitrarily chosen.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b", "b", "b", "c");
@@ -417,7 +417,7 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Finds the element with the maximum number of occurrences in this multiset.
      * If multiple elements have the same maximum count, one is arbitrarily chosen.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b", "b", "b", "c");
@@ -453,7 +453,7 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Finds all elements with the minimum number of occurrences in this multiset.
      * Returns all elements that share the lowest occurrence count.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b", "b", "c", "d");
@@ -491,7 +491,7 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Finds all elements with the maximum number of occurrences in this multiset.
      * Returns all elements that share the highest occurrence count.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "a", "b", "b", "b", "c");
@@ -529,7 +529,7 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Calculates the sum of all occurrences of all elements in this multiset.
      * This is equivalent to the total number of elements including duplicates.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b", "b", "b");
@@ -556,7 +556,7 @@ public final class Multiset<E> implements Collection<E> {
 
     /**
      * Calculates the average number of occurrences per distinct element in this multiset.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "a", "b", "b");
@@ -770,10 +770,10 @@ public final class Multiset<E> implements Collection<E> {
 
     /**
      * Adds a single occurrence of the specified element to this multiset.
-     * 
+     *
      * <p>This method always increments the count of the element by one and increases the total size
      * of the multiset by one.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = new Multiset<>();
@@ -807,7 +807,7 @@ public final class Multiset<E> implements Collection<E> {
      * @param element the element to add occurrences of.
      * @param occurrencesToAdd the number of occurrences to add; must be non-negative.
      * @return the count of the element before the operation.
-     * @throws IllegalArgumentException if occurrencesToAdd is negative., or if the addition would exceed {@link Integer#MAX_VALUE} occurrences.
+     * @throws IllegalArgumentException if occurrencesToAdd is negative, or if the addition would exceed {@link Integer#MAX_VALUE} occurrences.
      * @see #addAndGetCount(Object, int)
      * @see #setCount(Object, int)
      */
@@ -847,7 +847,7 @@ public final class Multiset<E> implements Collection<E> {
      * @param element the element to add occurrences of.
      * @param occurrences the number of occurrences to add; must be non-negative.
      * @return the count of the element after the operation.
-     * @throws IllegalArgumentException if occurrences is negative., or if the addition would exceed {@link Integer#MAX_VALUE} occurrences.
+     * @throws IllegalArgumentException if occurrences is negative, or if the addition would exceed {@link Integer#MAX_VALUE} occurrences.
      * @see #add(Object, int)
      */
     @Beta
@@ -875,8 +875,9 @@ public final class Multiset<E> implements Collection<E> {
 
     /**
      * Adds all elements from the specified collection to this multiset.
-     * Each element is added once, regardless of how many times it appears in the collection.
-     * 
+     * Each occurrence in the collection is added (so the count of an element is incremented
+     * by the number of times that element appears in the collection).
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = new Multiset<>();
@@ -894,9 +895,11 @@ public final class Multiset<E> implements Collection<E> {
     }
 
     /**
-     * Adds all elements from the specified collection to this multiset with the given number of occurrences.
-     * Each distinct element in the collection is added the specified number of times.
-     * 
+     * Adds {@code occurrencesToAdd} for every element in the specified collection.
+     * The count of an element is incremented by {@code occurrencesToAdd} for each time it
+     * appears in {@code c} (so a duplicate element in {@code c} causes the count to be
+     * incremented multiple times).
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = new Multiset<>();
@@ -907,7 +910,7 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @param c the collection containing elements to be added.
-     * @param occurrencesToAdd the number of occurrences to add for each element.
+     * @param occurrencesToAdd the number of occurrences to add for each appearance of an element in {@code c}.
      * @return {@code true} if this multiset changed as a result of the call.
      * @throws IllegalArgumentException if occurrencesToAdd is negative.
      */
@@ -928,10 +931,10 @@ public final class Multiset<E> implements Collection<E> {
 
     /**
      * Removes a single occurrence of the specified element from this multiset, if present.
-     * 
+     *
      * <p>If the element has multiple occurrences, only one is removed.
      * If the element has only one occurrence, it is removed completely from the multiset.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b");
@@ -1080,7 +1083,7 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Removes the specified number of occurrences of each element in the collection from this multiset.
      * If an element has fewer occurrences than specified, all its occurrences are removed.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "a", "b", "b");
@@ -1117,7 +1120,7 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Removes all occurrences of a specific element from this multiset.
      * After this operation, the element will not be present in the multiset.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "a", "b");
@@ -1139,7 +1142,7 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Removes all occurrences of all elements in the specified collection from this multiset.
      * This is equivalent to calling {@link #removeAll(Collection)}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b", "b", "c");
@@ -1158,7 +1161,7 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Removes all occurrences of elements that satisfy the given predicate.
      * The predicate is tested against each distinct element (not each occurrence).
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("apple", "apple", "banana", "cherry");
@@ -1200,7 +1203,7 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Removes all occurrences of elements that satisfy the given predicate.
      * The predicate receives both the element and its count.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "a", "b", "b", "c");
@@ -1243,7 +1246,7 @@ public final class Multiset<E> implements Collection<E> {
      * Updates the count of each element in this multiset based on the provided function.
      * The function receives each element and its current count, and returns the new count.
      * If the function returns zero or negative, the element is removed.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b", "b", "b");
@@ -1285,13 +1288,13 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Computes the count of the specified element if it is not already present.
      * If the element is present, returns its current count without modification.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = new Multiset<>();
      * int count = multiset.computeIfAbsent("apple", e -> 5);
      * System.out.println(count);   // Prints: 5
-     * 
+     *
      * count = multiset.computeIfAbsent("apple", e -> 10);
      * System.out.println(count);   // Prints: 5 (not modified)
      * }</pre>
@@ -1322,7 +1325,7 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Computes a new count for the specified element if it is already present.
      * If the element is not present, returns 0 without modification.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("apple", "apple");
@@ -1358,13 +1361,13 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Computes a new count for the specified element, whether present or not.
      * The remapping function receives the element and its current count (0 if not present).
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("apple", "apple");
      * int newCount = multiset.compute("apple", (e, count) -> count + 3);
      * System.out.println(newCount);   // Prints: 5
-     * 
+     *
      * newCount = multiset.compute("banana", (e, count) -> count + 2);
      * System.out.println(newCount);   // Prints: 2
      * }</pre>
@@ -1394,13 +1397,13 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Merges the specified value with the current count of the element using the remapping function.
      * If the element is not present, the value is used as the new count.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("apple", "apple");
      * int newCount = multiset.merge("apple", 3, (oldCount, value) -> oldCount + value);
      * System.out.println(newCount);   // Prints: 5
-     * 
+     *
      * newCount = multiset.merge("banana", 4, (oldCount, value) -> oldCount + value);
      * System.out.println(newCount);   // Prints: 4
      * }</pre>
@@ -1435,9 +1438,9 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Retains only the elements in this multiset that are contained in the specified collection.
      * In other words, removes all elements that are not in the specified collection.
-     * 
+     *
      * <p><b>Note:</b> This method only checks for element presence, not occurrence counts.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b", "b", "c");
@@ -1530,7 +1533,7 @@ public final class Multiset<E> implements Collection<E> {
      * Returns an unmodifiable view of the distinct elements contained in this multiset.
      * The element set is backed by the multiset, so changes to the multiset are reflected
      * in the element set.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b", "b", "b", "c");
@@ -1549,11 +1552,11 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Returns a view of the contents of this multiset, grouped into {@link Entry} instances,
      * each providing an element and its count.
-     * 
+     *
      * <p>The entry set contains exactly one entry for each distinct element in the multiset.
      * The entry set is backed by the multiset, so changes to the multiset are reflected in
      * the entry set.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b", "b", "b");
@@ -1624,7 +1627,7 @@ public final class Multiset<E> implements Collection<E> {
      * Returns an iterator over the elements in this multiset.
      * Elements that occur multiple times will appear multiple times in the iterator,
      * though not necessarily consecutively.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b");
@@ -1677,10 +1680,10 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Returns the total number of all occurrences of all elements in this multiset.
      * This is the sum of counts for all distinct elements.
-     * 
+     *
      * <p><b>Note:</b> This is different from {@link #countOfDistinctElements()} which returns
      * the number of distinct elements.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b", "b", "b");
@@ -1701,7 +1704,7 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Returns the number of distinct elements in this multiset.
      * This is equivalent to {@code elementSet().size()}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b", "b", "b", "c");
@@ -2011,10 +2014,10 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Performs the given action for each element of the multiset until all elements
      * have been processed or the action throws an exception.
-     * 
+     *
      * <p>Elements that occur multiple times in the multiset will be passed to the {@code Consumer}
      * correspondingly many times, though not necessarily sequentially.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b");
@@ -2038,11 +2041,11 @@ public final class Multiset<E> implements Collection<E> {
      * occurrences of that element. For some {@code Multiset} implementations, this may be more
      * efficient than iterating over the {@link #entrySet()} either explicitly or with {@code
      * entrySet().forEach(action)}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b", "b", "b");
-     * multiset.forEach((element, count) -> 
+     * multiset.forEach((element, count) ->
      *     System.out.println(element + " occurs " + count + " times"));
      * // Prints: a occurs 2 times, b occurs 3 times (order may vary)
      * }</pre>
@@ -2061,7 +2064,7 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Returns an (unmodifiable) {@code Stream} with elements from the {@code Multiset}.
      * Elements that occur multiple times in the multiset will appear multiple times in this {@code Stream}, though not necessarily sequentially.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b");
@@ -2204,7 +2207,7 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Checks if this Multiset is equal to the specified object.
      * The method returns {@code true} if the specified object is also a Multiset and has the same keys and occurrences pair.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> ms1 = Multiset.of("a", "a", "b");
@@ -2226,7 +2229,7 @@ public final class Multiset<E> implements Collection<E> {
      * The string representation consists of a list of key-value mappings in the Multiset, enclosed in braces ("{}").
      * Adjacent mappings are separated by the characters ", " (comma and space).
      * Each key-value mapping is rendered as the key followed by an equals sign ("=") followed by the associated value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b");
@@ -2362,7 +2365,7 @@ public final class Multiset<E> implements Collection<E> {
          * for this entry is one, this is simply the string representation of the corresponding element.
          * Otherwise, it is the string representation of the element, followed by the three characters
          * {@code " x "} (space, letter x, space), followed by the count.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Multiset<String> multiset = Multiset.of("hello", "world", "world", "world");
@@ -2382,7 +2385,7 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * An immutable implementation of the {@link Entry} interface.
      * This class represents a snapshot of an element-count pair at a specific point in time.
-     * 
+     *
      * @param <E> the type of element in this entry.
      */
     @SuppressWarnings("ClassCanBeRecord")
@@ -2430,7 +2433,7 @@ public final class Multiset<E> implements Collection<E> {
         /**
          * Return this entry's hash code, following the behavior specified in {@link
          * Multiset.Entry#hashCode}.
-         * 
+         *
          * @return the hash code for this entry
          */
         @Override
@@ -2443,7 +2446,7 @@ public final class Multiset<E> implements Collection<E> {
          * the associated element if the associated count is one, and otherwise the associated element
          * followed by the characters " x " (space, x and space) followed by the count. Elements and
          * counts are converted to strings as by {@code String.valueOf}.
-         * 
+         *
          * @return a string representation of this entry
          */
         @Override

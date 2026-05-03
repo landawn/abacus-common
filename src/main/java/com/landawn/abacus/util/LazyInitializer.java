@@ -21,10 +21,10 @@ import java.util.function.Supplier;
  * A thread-safe lazy initialization wrapper that defers object creation until the first access.
  * This class implements the double-checked locking pattern to ensure thread-safe lazy initialization
  * while minimizing synchronization overhead after initialization.
- * 
+ *
  * <p>The initialization is performed only once, even in multi-threaded environments. Once initialized,
  * subsequent calls to {@link #get()} return the cached value without synchronization.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * LazyInitializer<ExpensiveObject> lazy = LazyInitializer.of(() -> new ExpensiveObject());
@@ -32,7 +32,7 @@ import java.util.function.Supplier;
  * ExpensiveObject obj = lazy.get();   // Object is created here
  * ExpensiveObject same = lazy.get();   // Returns the same cached instance
  * }</pre>
- * 
+ *
  * @param <T> the type of the lazily initialized object
  */
 final class LazyInitializer<T> implements com.landawn.abacus.util.function.Supplier<T> {
@@ -40,6 +40,12 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
     private volatile boolean initialized = false;
     private volatile T value = null; //NOSONAR
 
+    /**
+     * Constructs a new {@code LazyInitializer} with the specified supplier.
+     *
+     * @param supplier the supplier used to produce the value on first access; must not be {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     */
     LazyInitializer(final Supplier<T> supplier) {
         N.checkArgNotNull(supplier, cs.supplier);
 
@@ -49,13 +55,13 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
     /**
      * Creates a new LazyInitializer instance with the specified supplier.
      * If the supplier is already a LazyInitializer, it is returned as-is to avoid double wrapping.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LazyInitializer<String> lazy = LazyInitializer.of(() -> "Hello World");
      * String value = lazy.get();   // "Hello World"
      * }</pre>
-     * 
+     *
      * @param <T> the type of the lazily initialized object
      * @param supplier the supplier that will provide the value when first requested
      * @return a LazyInitializer wrapping the supplier, or the supplier itself if it's already a LazyInitializer

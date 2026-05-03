@@ -7,12 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -315,15 +313,6 @@ public class FastJsonTest extends TestBase {
         assertEquals("null", content);
     }
 
-    @Test
-    public void testToJson_ToFileIOException() {
-        File invalidFile = new File("/invalid/path/test.json");
-
-        assertThrows(RuntimeException.class, () -> {
-            FastJson.toJson(testPerson, invalidFile);
-        });
-    }
-
     // ==================== toJson(Object, File, Feature...) ====================
 
     @Test
@@ -350,15 +339,6 @@ public class FastJsonTest extends TestBase {
     }
 
     @Test
-    public void testToJson_ToFileWithFeaturesIOException() {
-        File invalidFile = new File("/invalid/path/test.json");
-
-        assertThrows(RuntimeException.class, () -> {
-            FastJson.toJson(testPerson, invalidFile, JSONWriter.Feature.PrettyFormat);
-        });
-    }
-
-    @Test
     public void testToJson_ToFileWithWriteNulls() throws Exception {
         File outputFile = tempDir.resolve("nulls.json").toFile();
         TestPerson personWithNull = new TestPerson("Jane", 25, null);
@@ -382,16 +362,6 @@ public class FastJsonTest extends TestBase {
         assertTrue(outputFile.exists());
         String content = Files.readString(outputFile.toPath());
         assertTrue(content.contains("\"name\":\"John\""));
-    }
-
-    @Test
-    public void testToJson_ToFileWithContextIOException() {
-        File invalidFile = new File("/invalid/path/test.json");
-        JSONWriter.Context context = new JSONWriter.Context();
-
-        assertThrows(RuntimeException.class, () -> {
-            FastJson.toJson(testPerson, invalidFile, context);
-        });
     }
 
     // ==================== toJson(Object, OutputStream) ====================

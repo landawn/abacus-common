@@ -68,6 +68,7 @@ public interface DoubleObjConsumer<T> extends Throwables.DoubleObjConsumer<T, Ru
      *
      * @param after the operation to perform after this operation
      * @return a composed {@code DoubleObjConsumer} that performs in sequence this operation followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     default DoubleObjConsumer<T> andThen(final DoubleObjConsumer<? super T> after) {
         return (i, t) -> {

@@ -18,8 +18,8 @@ import java.io.Serial;
 
 /**
  * Exception thrown when an operation encounters more elements than expected or allowed.
- * This exception extends {@link IllegalStateException} to indicate that the application
- * is in an illegal state because the number of elements exceeded the expected limit.
+ * This is an unchecked exception that signals an illegal state: the element count exceeded
+ * the anticipated or permitted limit.
  *
  * <p>Common use cases include:</p>
  * <ul>
@@ -31,15 +31,9 @@ import java.io.Serial;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // In a stream operation expecting at most one element
  * List<String> results = stream.collect(Collectors.toList());
  * if (results.size() > 1) {
  *     throw new TooManyElementsException("Expected at most 1 element, but found: " + results.size());
- * }
- *
- * // In a bounded collection
- * if (queue.size() >= maxCapacity) {
- *     throw new TooManyElementsException("Queue capacity exceeded: " + maxCapacity);
  * }
  * }</pre>
  *

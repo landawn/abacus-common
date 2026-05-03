@@ -317,16 +317,16 @@ public class IteratorsTest extends TestBase {
 
     @Test
     public void testIndexOfTwoParams() {
-        assertEquals(CommonUtil.INDEX_NOT_FOUND, Iterators.indexOf(null, "test"));
+        assertEquals(N.INDEX_NOT_FOUND, Iterators.indexOf(null, "test"));
 
-        assertEquals(CommonUtil.INDEX_NOT_FOUND, Iterators.indexOf(Collections.emptyIterator(), "test"));
+        assertEquals(N.INDEX_NOT_FOUND, Iterators.indexOf(Collections.emptyIterator(), "test"));
 
         List<String> list = Arrays.asList("a", "b", "c", "b", "d");
         assertEquals(0, Iterators.indexOf(list.iterator(), "a"));
         assertEquals(1, Iterators.indexOf(list.iterator(), "b"));
         assertEquals(4, Iterators.indexOf(list.iterator(), "d"));
 
-        assertEquals(CommonUtil.INDEX_NOT_FOUND, Iterators.indexOf(list.iterator(), "e"));
+        assertEquals(N.INDEX_NOT_FOUND, Iterators.indexOf(list.iterator(), "e"));
 
         List<String> listWithNull = Arrays.asList("a", null, "b", null);
         assertEquals(1, Iterators.indexOf(listWithNull.iterator(), null));
@@ -334,15 +334,15 @@ public class IteratorsTest extends TestBase {
 
     @Test
     public void testIndexOfThreeParams() {
-        assertEquals(CommonUtil.INDEX_NOT_FOUND, Iterators.indexOf(null, "test", 0));
+        assertEquals(N.INDEX_NOT_FOUND, Iterators.indexOf(null, "test", 0));
 
         List<String> list = Arrays.asList("a", "b", "c", "b", "d");
         assertEquals(1, Iterators.indexOf(list.iterator(), "b", 0));
 
         assertEquals(3, Iterators.indexOf(list.iterator(), "b", 2));
-        assertEquals(CommonUtil.INDEX_NOT_FOUND, Iterators.indexOf(list.iterator(), "a", 1));
+        assertEquals(N.INDEX_NOT_FOUND, Iterators.indexOf(list.iterator(), "a", 1));
 
-        assertEquals(CommonUtil.INDEX_NOT_FOUND, Iterators.indexOf(list.iterator(), "a", 10));
+        assertEquals(N.INDEX_NOT_FOUND, Iterators.indexOf(list.iterator(), "a", 10));
     }
 
     // ===================== indexOf with fromIndex =====================
@@ -472,16 +472,16 @@ public class IteratorsTest extends TestBase {
 
     @Test
     public void test_repeat() throws Exception {
-        Stream.of(Iterators.repeatElements(CommonUtil.toList(1, 2, 3), 3)).println();
-        Stream.of(Iterators.cycle(CommonUtil.toList(1, 2, 3), 3)).println();
-        Stream.of(Iterators.repeatElementsToSize(CommonUtil.toList(1, 2, 3), 7)).println();
-        Stream.of(Iterators.cycleToSize(CommonUtil.toList(1, 2, 3), 5)).println();
+        Stream.of(Iterators.repeatElements(N.toList(1, 2, 3), 3)).println();
+        Stream.of(Iterators.cycle(N.toList(1, 2, 3), 3)).println();
+        Stream.of(Iterators.repeatElementsToSize(N.toList(1, 2, 3), 7)).println();
+        Stream.of(Iterators.cycleToSize(N.toList(1, 2, 3), 5)).println();
 
-        assertEquals(3, CommonUtil.repeatElementsToSize(CommonUtil.toList(1, 2, 3, 4, 5, 6), 3).size());
-        assertEquals(8, CommonUtil.repeatElementsToSize(CommonUtil.toList(1, 2, 3, 4, 5, 6), 8).size());
+        assertEquals(3, N.repeatElementsToSize(N.toList(1, 2, 3, 4, 5, 6), 3).size());
+        assertEquals(8, N.repeatElementsToSize(N.toList(1, 2, 3, 4, 5, 6), 8).size());
 
-        assertEquals(3, CommonUtil.cycleToSize(CommonUtil.toList(1, 2, 3, 4, 5, 6), 3).size());
-        assertEquals(8, CommonUtil.cycleToSize(CommonUtil.toList(1, 2, 3, 4, 5, 6), 8).size());
+        assertEquals(3, N.cycleToSize(N.toList(1, 2, 3, 4, 5, 6), 3).size());
+        assertEquals(8, N.cycleToSize(N.toList(1, 2, 3, 4, 5, 6), 8).size());
     }
 
     @Test
@@ -806,35 +806,35 @@ public class IteratorsTest extends TestBase {
     public void test_cycle() {
         assertDoesNotThrow(() -> {
             N.println(Iterators.cycle(1, 2, 3).limit(10).toList());
-            N.println(Iterators.cycle(CommonUtil.toSet(1, 2, 3)).limit(10).toList());
+            N.println(Iterators.cycle(N.toSet(1, 2, 3)).limit(10).toList());
             N.println(Strings.repeat("#", 80));
-            N.println(Iterators.cycle(CommonUtil.toSet(1), 0).limit(10).toList());
-            N.println(Iterators.cycle(CommonUtil.toSet(1), 1).limit(10).toList());
-            N.println(Iterators.cycle(CommonUtil.toSet(1), 2).limit(10).toList());
-            N.println(Iterators.cycle(CommonUtil.toSet(1), 3).limit(10).toList());
-            N.println(Iterators.cycle(CommonUtil.toSet(1), 4).limit(10).toList());
+            N.println(Iterators.cycle(N.toSet(1), 0).limit(10).toList());
+            N.println(Iterators.cycle(N.toSet(1), 1).limit(10).toList());
+            N.println(Iterators.cycle(N.toSet(1), 2).limit(10).toList());
+            N.println(Iterators.cycle(N.toSet(1), 3).limit(10).toList());
+            N.println(Iterators.cycle(N.toSet(1), 4).limit(10).toList());
             N.println(Strings.repeat("#", 80));
-            N.println(Iterators.cycle(CommonUtil.toSet(1, 2), 0).limit(10).toList());
-            N.println(Iterators.cycle(CommonUtil.toSet(1, 2), 1).limit(10).toList());
-            N.println(Iterators.cycle(CommonUtil.toSet(1, 2), 2).limit(10).toList());
-            N.println(Iterators.cycle(CommonUtil.toSet(1, 2), 3).limit(10).toList());
-            N.println(Iterators.cycle(CommonUtil.toSet(1, 2), 4).limit(10).toList());
+            N.println(Iterators.cycle(N.toSet(1, 2), 0).limit(10).toList());
+            N.println(Iterators.cycle(N.toSet(1, 2), 1).limit(10).toList());
+            N.println(Iterators.cycle(N.toSet(1, 2), 2).limit(10).toList());
+            N.println(Iterators.cycle(N.toSet(1, 2), 3).limit(10).toList());
+            N.println(Iterators.cycle(N.toSet(1, 2), 4).limit(10).toList());
             N.println(Strings.repeat("#", 80));
-            N.println(Iterators.cycle(CommonUtil.toSet(1, 2, 3), 0).limit(10).toList());
-            N.println(Iterators.cycle(CommonUtil.toSet(1, 2, 3), 1).limit(10).toList());
-            N.println(Iterators.cycle(CommonUtil.toSet(1, 2, 3), 2).limit(10).toList());
-            N.println(Iterators.cycle(CommonUtil.toSet(1, 2, 3), 3).limit(10).toList());
-            N.println(Iterators.cycle(CommonUtil.toSet(1, 2, 3), 4).limit(10).toList());
+            N.println(Iterators.cycle(N.toSet(1, 2, 3), 0).limit(10).toList());
+            N.println(Iterators.cycle(N.toSet(1, 2, 3), 1).limit(10).toList());
+            N.println(Iterators.cycle(N.toSet(1, 2, 3), 2).limit(10).toList());
+            N.println(Iterators.cycle(N.toSet(1, 2, 3), 3).limit(10).toList());
+            N.println(Iterators.cycle(N.toSet(1, 2, 3), 4).limit(10).toList());
             N.println(Strings.repeat("#", 80));
-            N.println(Stream.of(CommonUtil.toSet(1, 2, 3)).cycled(0).limit(10).toList());
-            N.println(Stream.of(CommonUtil.toSet(1, 2, 3)).cycled(1).limit(10).toList());
-            N.println(Stream.of(CommonUtil.toSet(1, 2, 3)).cycled(2).limit(10).toList());
-            N.println(Stream.of(CommonUtil.toSet(1, 2, 3)).cycled(3).limit(10).toList());
-            N.println(Stream.of(CommonUtil.toSet(1, 2, 3)).cycled(4).limit(10).toList());
+            N.println(Stream.of(N.toSet(1, 2, 3)).cycled(0).limit(10).toList());
+            N.println(Stream.of(N.toSet(1, 2, 3)).cycled(1).limit(10).toList());
+            N.println(Stream.of(N.toSet(1, 2, 3)).cycled(2).limit(10).toList());
+            N.println(Stream.of(N.toSet(1, 2, 3)).cycled(3).limit(10).toList());
+            N.println(Stream.of(N.toSet(1, 2, 3)).cycled(4).limit(10).toList());
             N.println(Strings.repeat("#", 80));
 
-            N.println(Iterators.cycle(CommonUtil.EMPTY_CHAR_OBJ_ARRAY).limit(10).toList());
-            N.println(Iterators.cycle(CommonUtil.emptyList()).limit(10).toList());
+            N.println(Iterators.cycle(N.EMPTY_CHAR_OBJ_ARRAY).limit(10).toList());
+            N.println(Iterators.cycle(N.emptyList()).limit(10).toList());
         });
     }
 
@@ -1198,8 +1198,8 @@ public class IteratorsTest extends TestBase {
 
     @Test
     public void testTriIteratorConcat() {
-        TriIterator<String, Integer, Boolean> tri1 = TriIterator.zip(CommonUtil.toList("a"), CommonUtil.toList(1), CommonUtil.toList(true));
-        TriIterator<String, Integer, Boolean> tri2 = TriIterator.zip(CommonUtil.toList("b"), CommonUtil.toList(2), CommonUtil.toList(false));
+        TriIterator<String, Integer, Boolean> tri1 = TriIterator.zip(N.toList("a"), N.toList(1), N.toList(true));
+        TriIterator<String, Integer, Boolean> tri2 = TriIterator.zip(N.toList("b"), N.toList(2), N.toList(false));
 
         TriIterator<String, Integer, Boolean> result = Iterators.concat(tri1, tri2);
 
@@ -2410,7 +2410,7 @@ public class IteratorsTest extends TestBase {
         a = ObjIterator.of(1, 3, 5);
         b = ObjIterator.of(2, 4, 6);
 
-        com.google.common.collect.Iterators.mergeSorted(CommonUtil.toList(a, b), Comparators.NATURAL_ORDER).forEachRemaining(Fn.println());
+        com.google.common.collect.Iterators.mergeSorted(N.toList(a, b), Comparators.NATURAL_ORDER).forEachRemaining(Fn.println());
         assertNotNull(b);
     }
 
@@ -3699,12 +3699,12 @@ public class IteratorsTest extends TestBase {
         }
         {
             final Iterator<String> iter = ObjIterator.of("a", "b", "c");
-            Iterators.flatMap(iter, it -> CommonUtil.toList(it + "1", it + "2")).forEachRemaining(Fn.println());
+            Iterators.flatMap(iter, it -> N.toList(it + "1", it + "2")).forEachRemaining(Fn.println());
             N.println("==========================================================================");
         }
         {
             final Iterator<String> iter = ObjIterator.of("a", "b", "c");
-            Iterators.flatmap(iter, it -> CommonUtil.asArray(it + "1", it + "2")).forEachRemaining(Fn.println());
+            Iterators.flatmap(iter, it -> N.asArray(it + "1", it + "2")).forEachRemaining(Fn.println());
             N.println("==========================================================================");
         }
     }
@@ -3713,13 +3713,13 @@ public class IteratorsTest extends TestBase {
     public void test_filter_map_2() throws Exception {
 
         {
-            final List<String> list = CommonUtil.toList("a", "b", "c");
+            final List<String> list = N.toList("a", "b", "c");
             N.map(list, it -> it + "1").forEach(Fn.println());
             N.println("==========================================================================");
         }
         {
-            final List<String> list = CommonUtil.toList("a", "b", "c");
-            N.flatMap(list, it -> CommonUtil.toList(it + "1", it + "2")).forEach(Fn.println());
+            final List<String> list = N.toList("a", "b", "c");
+            N.flatMap(list, it -> N.toList(it + "1", it + "2")).forEach(Fn.println());
             N.println("==========================================================================");
         }
     }
@@ -3756,27 +3756,27 @@ public class IteratorsTest extends TestBase {
     @Test
     public void test_filter_2() throws Exception {
         {
-            final List<String> list = CommonUtil.toList("a", "b", "c");
+            final List<String> list = N.toList("a", "b", "c");
             N.filter(list, it -> !it.equals("b")).forEach(Fn.println());
             N.println("==========================================================================");
         }
         {
-            final List<String> list = CommonUtil.toList("a", "b", "c");
+            final List<String> list = N.toList("a", "b", "c");
             N.takeWhile(list, it -> !it.equals("b")).forEach(Fn.println());
             N.println("==========================================================================");
         }
         {
-            final List<String> list = CommonUtil.toList("a", "b", "c");
+            final List<String> list = N.toList("a", "b", "c");
             N.takeWhileInclusive(list, it -> !it.equals("b")).forEach(Fn.println());
             N.println("==========================================================================");
         }
         {
-            final List<String> list = CommonUtil.toList("a", "b", "c");
+            final List<String> list = N.toList("a", "b", "c");
             N.dropWhile(list, it -> !it.equals("b")).forEach(Fn.println());
             N.println("==========================================================================");
         }
         {
-            final List<String> list = CommonUtil.toList("a", "b", "c");
+            final List<String> list = N.toList("a", "b", "c");
             N.skipUntil(list, it -> it.equals("b")).forEach(Fn.println());
             N.println("==========================================================================");
         }
@@ -4121,17 +4121,17 @@ public class IteratorsTest extends TestBase {
     public void test_skipUntil() throws Exception {
         {
             final int[] a = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-            final List<Integer> list = CommonUtil.toList(a);
+            final List<Integer> list = N.toList(a);
             final List<Integer> ret = N.skipUntil(list, it -> it > 3);
-            assertEquals(CommonUtil.toList(4, 5, 6, 7, 8, 9), ret);
+            assertEquals(N.toList(4, 5, 6, 7, 8, 9), ret);
         }
         {
             final int[] a = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-            final List<Integer> list = CommonUtil.toList(a);
+            final List<Integer> list = N.toList(a);
             final List<Integer> ret = Stream.of(list).skipUntil(it -> it > 3).toList();
-            assertEquals(CommonUtil.toList(4, 5, 6, 7, 8, 9), ret);
+            assertEquals(N.toList(4, 5, 6, 7, 8, 9), ret);
             final int[] b = IntStream.of(a).skipUntil(it -> it > 3).toArray();
-            assertEquals(CommonUtil.toList(4, 5, 6, 7, 8, 9), CommonUtil.toList(b));
+            assertEquals(N.toList(4, 5, 6, 7, 8, 9), N.toList(b));
         }
     }
 

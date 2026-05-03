@@ -14,8 +14,8 @@
 package com.landawn.abacus.util.function;
 
 /**
- * Represents a function that accepts an int-valued argument and produces a
- * byte-valued result. This is the {@code int}-to-{@code byte} primitive
+ * Represents a function that accepts an {@code int}-valued argument and produces a
+ * {@code byte}-valued result. This is the {@code int}-to-{@code byte} primitive
  * specialization for {@link java.util.function.Function}.
  *
  * <p>This is a functional interface whose functional method is
@@ -59,9 +59,7 @@ public interface IntToByteFunction {
      * }</pre>
      *
      * @param value the function argument, an int value to be converted to byte
-     * @return the function result as a byte value. If the input value is outside
-     *         the range of byte (-128 to 127), the result will be the lower 8 bits
-     *         of the input value (equivalent to {@code (byte) value})
+     * @return the function result as a byte value
      */
     byte applyAsByte(int value);
 }

@@ -25,17 +25,17 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * This class hashes passwords with the configured digest algorithm and returns the
  * digest encoded as Base64 text. It supports any algorithm available through the
  * active Java security providers.
- * 
+ *
  * <p>This class is immutable. Hashing operations are synchronized because
  * {@link MessageDigest} instances are not thread-safe.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Password password = new Password("SHA-256");
  * String encrypted = password.encrypt("myPassword123");
  * boolean matches = password.isEqual("myPassword123", encrypted);
  * }</pre>
- * 
+ *
  * @see MessageDigest
  * @see java.security.Security
  */
@@ -49,7 +49,7 @@ public final class Password {
      * Creates a new {@code Password} instance with the specified hashing algorithm.
      * The algorithm must be one supported by the Java security provider
      * (e.g., "MD5", "SHA-1", "SHA-256", "SHA-512").
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Password sha256Password = new Password("SHA-256");
@@ -72,7 +72,7 @@ public final class Password {
 
     /**
      * Returns the name of the hashing algorithm used by this Password instance.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Password password = new Password("SHA-256");
@@ -89,7 +89,7 @@ public final class Password {
      * Hashes the given password string with the configured digest algorithm and returns
      * the resulting digest encoded in Base64 format. This method is synchronized because
      * the underlying {@link MessageDigest} instance is reused.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Password password = new Password("SHA-256");
@@ -117,12 +117,12 @@ public final class Password {
      * Verifies whether a plain-text password matches a previously hashed password.
      * This method hashes {@code plainPassword} with the configured algorithm and compares
      * the resulting Base64 text against {@code encryptedPassword}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Password password = new Password("SHA-256");
      * String encrypted = password.encrypt("myPassword");
-     * 
+     *
      * boolean matches = password.isEqual("myPassword", encrypted);         // true
      * boolean notMatches = password.isEqual("wrongPassword", encrypted);   // false
      * }</pre>
@@ -160,13 +160,13 @@ public final class Password {
     /**
      * Compares this Password instance with the specified object for equality.
      * Two Password instances are considered equal if they use the same algorithm.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Password p1 = new Password("SHA-256");
      * Password p2 = new Password("SHA-256");
      * Password p3 = new Password("MD5");
-     * 
+     *
      * p1.equals(p2);   // true
      * p1.equals(p3);   // false
      * }</pre>

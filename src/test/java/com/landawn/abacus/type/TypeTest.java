@@ -167,10 +167,10 @@ public class TypeTest extends AbstractTest {
             N.println(type.javaType());
 
             assertEquals(Multimap.class, type.javaType());
-            assertEquals(String.class, type.parameterTypes()[0].javaType());
-            assertEquals(Date.class, type.parameterTypes()[1].javaType());
-            assertEquals(List.class, type.parameterTypes()[2].javaType());
-            assertEquals(Date.class, type.parameterTypes()[2].elementType().javaType());
+            assertEquals(String.class, type.parameterTypes().get(0).javaType());
+            assertEquals(Date.class, type.parameterTypes().get(1).javaType());
+            assertEquals(List.class, type.parameterTypes().get(2).javaType());
+            assertEquals(Date.class, type.parameterTypes().get(2).elementType().javaType());
 
             assertTrue(type.isSerializable());
         }
@@ -183,9 +183,9 @@ public class TypeTest extends AbstractTest {
             N.println(type.javaType());
 
             assertEquals(Multimap.class, type.javaType());
-            assertEquals(String.class, type.parameterTypes()[0].javaType());
-            assertEquals(List.class, type.parameterTypes()[1].javaType());
-            assertEquals(Date.class, type.parameterTypes()[1].elementType().javaType());
+            assertEquals(String.class, type.parameterTypes().get(0).javaType());
+            assertEquals(List.class, type.parameterTypes().get(1).javaType());
+            assertEquals(Date.class, type.parameterTypes().get(1).elementType().javaType());
 
             assertTrue(type.isSerializable());
         }
@@ -252,7 +252,7 @@ public class TypeTest extends AbstractTest {
 
         assertEquals(Multiset.class, type.javaType());
         assertEquals(Date.class, type.elementType().javaType());
-        assertEquals(Date.class, type.parameterTypes()[0].javaType());
+        assertEquals(Date.class, type.parameterTypes().get(0).javaType());
 
         assertTrue(type.isSerializable());
     }
@@ -263,7 +263,11 @@ public class TypeTest extends AbstractTest {
 
         N.println(type.javaType());
 
-        assertEquals(int.class, type.javaType());
+        // ClazzType handles instances of java.lang.Class; the parameter (int.class) is
+        // exposed via ClazzType.getParameterClass(). Pre-fix this returned int.class which
+        // broke type-system checks like Type.javaType().isAssignableFrom(...).
+        assertEquals(Class.class, type.javaType());
+        assertEquals(int.class, ((com.landawn.abacus.type.ClazzType) (Type) type).getParameterClass());
     }
 
     @Test

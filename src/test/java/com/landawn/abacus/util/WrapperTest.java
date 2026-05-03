@@ -612,20 +612,6 @@ public class WrapperTest extends TestBase {
     }
 
     @Test
-    public void test_equals_arrayVsCustomWrapper() {
-        // An ArrayWrapper and an AnyWrapper should not be considered equal
-        // even if they wrap the same value, because they use different equals functions
-        int[] arr = { 1, 2, 3 };
-        Wrapper<int[]> arrayWrapper = Wrapper.of(arr);
-        Wrapper<int[]> customWrapper = Wrapper.of(arr, a -> java.util.Arrays.hashCode(a), (a1, a2) -> java.util.Arrays.equals(a1, a2));
-
-        // They may or may not be equal depending on internal implementation of equals
-        // but they should both work correctly with the same value
-        assertSame(arr, arrayWrapper.value());
-        assertSame(arr, customWrapper.value());
-    }
-
-    @Test
     public void testEqualsArray() {
         int[] array1 = { 1, 2, 3 };
         int[] array2 = { 1, 2, 3 };

@@ -61,10 +61,10 @@ public interface LongTriFunction<R> extends Throwables.LongTriFunction<R, Runtim
      *   <li>Business logic that requires three long parameters</li>
      * </ul>
      *
-     * @param a the first argument
-     * @param b the second argument
-     * @param c the third argument
-     * @return the function result of type R
+     * @param a the first {@code long} argument
+     * @param b the second {@code long} argument
+     * @param c the third {@code long} argument
+     * @return the function result of type {@code R}
      */
     @Override
     R apply(long a, long b, long c);
@@ -89,9 +89,10 @@ public interface LongTriFunction<R> extends Throwables.LongTriFunction<R, Runtim
      *
      * @param <V> the type of output of the {@code after} function, and of the
      *           composed function
-     * @param after the function to apply after this function is applied
+     * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed function that first applies this function and then
      *         applies the {@code after} function
+     * @throws NullPointerException if {@code after} is null
      */
     default <V> LongTriFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return (a, b, c) -> after.apply(apply(a, b, c));

@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -499,9 +498,9 @@ public class TriIteratorTest extends TestBase {
 
     @Test
     public void testZipIterablesWithDefaults() {
-        List<String> names = CommonUtil.toList("Alice");
-        List<Integer> ages = CommonUtil.toList(25, 30);
-        List<Boolean> active = CommonUtil.toList();
+        List<String> names = N.toList("Alice");
+        List<Integer> ages = N.toList(25, 30);
+        List<Boolean> active = N.toList();
 
         TriIterator<String, Integer, Boolean> iter = TriIterator.zip(names, ages, active, "Unknown", 0, false);
 
@@ -672,8 +671,8 @@ public class TriIteratorTest extends TestBase {
 
     @Test
     public void testZipIterables_nullIterable() {
-        List<String> names = CommonUtil.toList("Alice");
-        List<Integer> ages = CommonUtil.toList(25);
+        List<String> names = N.toList("Alice");
+        List<Integer> ages = N.toList(25);
 
         TriIterator<String, Integer, Boolean> iter = TriIterator.zip(names, ages, (Iterable<Boolean>) null);
         assertFalse(iter.hasNext());
@@ -709,8 +708,8 @@ public class TriIteratorTest extends TestBase {
 
     @Test
     public void testZipIterators_nullIterator() {
-        List<String> names = CommonUtil.toList("Alice");
-        List<Integer> ages = CommonUtil.toList(25);
+        List<String> names = N.toList("Alice");
+        List<Integer> ages = N.toList(25);
 
         TriIterator<String, Integer, Boolean> iter = TriIterator.zip(names.iterator(), ages.iterator(), (Iterator<Boolean>) null);
         assertFalse(iter.hasNext());

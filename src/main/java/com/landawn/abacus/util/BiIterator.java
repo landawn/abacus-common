@@ -32,21 +32,31 @@ import com.landawn.abacus.util.stream.EntryStream;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * The BiIterator class is an abstract class that extends ImmutableIterator.
- * It represents an iterator over a pair of values of type A and B.
- * This class provides a blueprint for classes that need to iterate over pairs of values.
+ * An abstract, immutable iterator over pairs of values of types {@code A} and {@code B}.
  *
- * @param <A> the first type of elements returned by this iterator
- * @param <B> the second type of elements returned by this iterator
+ * <p>Each call to {@link #next()} returns a {@link Pair}{@code <A, B>} holding the two values
+ * together. The more efficient {@link #forEachRemaining(java.util.function.BiConsumer)} and
+ * {@link #foreachRemaining(Throwables.BiConsumer)} variants accept the two components
+ * directly, avoiding the creation of intermediate {@code Pair} objects.</p>
+ *
+ * <p>Static factory methods support creation from maps, arrays, iterables, and
+ * generator functions. Transformation methods such as {@link #skip(long)},
+ * {@link #limit(long)}, and {@link #map(BiFunction)} are provided for common
+ * pipeline operations.</p>
+ *
+ * @param <A> the type of the first element in each pair
+ * @param <B> the type of the second element in each pair
  *
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Enumerations
+ * @see Pair
  */
 @SuppressWarnings({ "java:S6548" })
 public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
     /**
-     * Constructs a new BiIterator.
+     * Constructs a new {@code BiIterator}.
+     * Intended for use by subclasses only.
      */
     protected BiIterator() {
     }
@@ -110,7 +120,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiIterator<String, Integer> empty = BiIterator.empty();
-     * assertFalse(empty.hasNext());   // true - no elements
+     * assertFalse(empty.hasNext());   // hasNext() returns false - no elements
      * }</pre>
      *
      * @param <A> the first type of elements returned by this iterator
@@ -1267,7 +1277,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Converts this {@code BiIterator} into a {@code Stream} by applying the mapper function to each pair.
+     * Converts this {@code BiIterator} into a {@link Stream} by applying the mapper function to each pair.
      * The resulting stream will contain the mapped values.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1278,7 +1288,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      *
      * @param <R> the type of elements in the resulting Stream
      * @param mapper the function to apply to each pair, must not be {@code null}
-     * @return a Stream containing the elements produced by the mapper function
+     * @return a {@code Stream} containing the elements produced by the mapper function
      */
     public <R> Stream<R> stream(final BiFunction<? super A, ? super B, ? extends R> mapper) {
         return Stream.of(map(mapper));

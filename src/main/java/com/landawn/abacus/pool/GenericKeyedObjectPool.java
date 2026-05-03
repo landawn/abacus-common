@@ -105,11 +105,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * Uses default auto-balancing and balance factor settings.
      *
      * @param capacity the maximum number of entries the pool can hold (must be non-negative)
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
+     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy to use for selecting entries to evict
      */
-    protected GenericKeyedObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy) {
-        this(capacity, evictDelay, evictionPolicy, 0, null);
+    protected GenericKeyedObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy) {
+        this(capacity, evictDelayInMillis, evictionPolicy, 0, null);
     }
 
     /**
@@ -117,14 +117,14 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * Uses default auto-balancing and balance factor settings.
      *
      * @param capacity the maximum number of entries the pool can hold (must be non-negative)
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
+     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy to use for selecting entries to evict
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit (must be non-negative)
      * @param memoryMeasure the function to calculate entry memory size, or {@code null} if not using memory limits
      */
-    protected GenericKeyedObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final long maxMemorySize,
+    protected GenericKeyedObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final long maxMemorySize,
             final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
-        this(capacity, evictDelay, evictionPolicy, true, DEFAULT_BALANCE_FACTOR, maxMemorySize, memoryMeasure);
+        this(capacity, evictDelayInMillis, evictionPolicy, true, DEFAULT_BALANCE_FACTOR, maxMemorySize, memoryMeasure);
     }
 
     /**
@@ -132,36 +132,40 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * Does not use memory-based constraints.
      *
      * @param capacity the maximum number of entries the pool can hold (must be non-negative)
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
+     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy to use for selecting entries to evict
      * @param autoBalance whether to automatically remove entries when the pool is full
      * @param balanceFactor the proportion of entries to remove during balancing, typically 0.1 to 0.5 (must be non-negative)
      */
-    protected GenericKeyedObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final boolean autoBalance,
+    protected GenericKeyedObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final boolean autoBalance,
             final float balanceFactor) {
-        this(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor, 0, null);
+        this(capacity, evictDelayInMillis, evictionPolicy, autoBalance, balanceFactor, 0, null);
     }
 
     /**
      * Constructs a new GenericKeyedObjectPool with full configuration options.
      *
      * @param capacity the maximum number of entries the pool can hold (must be non-negative)
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
+     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy to use for selecting entries to evict
      * @param autoBalance whether to automatically remove entries when the pool is full
      * @param balanceFactor the proportion of entries to remove during balancing, typically 0.1 to 0.5 (must be non-negative)
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit (must be non-negative)
      * @param memoryMeasure the function to calculate entry memory size, or {@code null} if not using memory limits
      */
-    protected GenericKeyedObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final boolean autoBalance,
+    protected GenericKeyedObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final boolean autoBalance,
             final float balanceFactor, final long maxMemorySize, final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
-        super(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor, maxMemorySize);
+        super(capacity, evictDelayInMillis, evictionPolicy, autoBalance, balanceFactor, maxMemorySize);
 
         this.memoryMeasure = memoryMeasure;
         pool = new HashMap<>(Math.min(capacity, 1000));
 
         cmp = createComparator();
         scheduleEvictionTask();
+
+        // Register shutdown hook AFTER subclass init completes; otherwise a JVM shutdown racing
+        // the constructor would invoke close() with a null pool/cmp.
+        registerShutdownHook();
     }
 
     private Comparator<Map.Entry<K, E>> createComparator() {
@@ -181,7 +185,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     private void scheduleEvictionTask() {
-        if (evictDelay <= 0 || isClosed) {
+        if (evictDelayInMillis <= 0 || isClosed) {
             return;
         }
 
@@ -197,7 +201,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             }
         };
 
-        scheduleFuture = scheduledExecutor.scheduleWithFixedDelay(evictTask, evictDelay, evictDelay, TimeUnit.MILLISECONDS);
+        scheduleFuture = scheduledExecutor.scheduleWithFixedDelay(evictTask, evictDelayInMillis, evictDelayInMillis, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -231,8 +235,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      */
     @Override
     public boolean put(final K key, final E value) throws IllegalStateException {
-        assertNotClosed();
-
         if (key == null || value == null) {
             throw new IllegalArgumentException("Key and value cannot be null");
         }
@@ -244,6 +246,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         lock.lock();
 
         try {
+            // Re-check inside the lock; a concurrent close() between an unlocked check and lock
+            // acquisition would otherwise leak this entry.
+            assertNotClosed();
             // Make sure the old value is removed regardless if the new value will put successfully or not.
             // Use pool.remove() directly to avoid double memory subtraction (remove() subtracts memory, and destroy() also subtracts).
             E oldValue = pool.remove(key);
@@ -746,8 +751,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      */
     @Override
     public String toString() {
-        return "{pool=GenericKeyedObjectPool, capacity=" + capacity + ", evictDelay=" + evictDelay + ", evictionPolicy=" + evictionPolicy + ", autoBalance="
-                + autoBalance + ", balanceFactor=" + balanceFactor + ", maxMemorySize=" + maxMemorySize + ", memoryMeasure=" + memoryMeasure
+        return "{pool=GenericKeyedObjectPool, capacity=" + capacity + ", evictDelayInMillis=" + evictDelayInMillis + ", evictionPolicy=" + evictionPolicy
+                + ", autoBalance=" + autoBalance + ", balanceFactor=" + balanceFactor + ", maxMemorySize=" + maxMemorySize + ", memoryMeasure=" + memoryMeasure
                 + ", totalDataSize=" + totalDataSize.get() + "}";
     }
 
@@ -803,10 +808,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      */
     @SuppressWarnings({ "null", "deprecation" })
     protected void removeExpired() {
-        lock.lock();
-
+        // Phase 1: under the lock, collect expired entries and remove them from the pool.
         Map<K, E> removingObjects = null;
-
+        lock.lock();
         try {
             for (final Map.Entry<K, E> entry : pool.entrySet()) {
                 if (entry.getValue().activityPrint().isExpired()) {
@@ -822,14 +826,18 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 for (final K key : removingObjects.keySet()) {
                     pool.remove(key);
                 }
-
-                destroyAll(removingObjects, Caller.EVICT);
-
                 notFull.signalAll();
             }
         } finally {
             lock.unlock();
+        }
 
+        // Phase 2: destroy outside the lock so user destroy() doesn't stall the whole pool.
+        try {
+            if (N.notEmpty(removingObjects)) {
+                destroyAll(removingObjects, Caller.EVICT);
+            }
+        } finally {
             Objectory.recycle(removingObjects);
         }
     }
@@ -893,17 +901,17 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     private void removeAll(final Caller caller) {
+        // Snapshot under lock; destroy outside. See GenericObjectPool.removeAll for rationale.
+        final Map<K, E> doomed;
         lock.lock();
-
         try {
-            destroyAll(new HashMap<>(pool), caller);
-
+            doomed = new HashMap<>(pool);
             pool.clear();
-
             notFull.signalAll();
         } finally {
             lock.unlock();
         }
+        destroyAll(doomed, caller);
     }
 
     /**

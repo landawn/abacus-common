@@ -30,7 +30,7 @@ package com.landawn.abacus.util.function;
 public interface DoubleToFloatFunction {
     /**
      * A default implementation that casts the double value to float.
-     * Note that this conversion may lose precision for large double values.
+     * Note that this conversion may lose precision, as {@code float} has fewer mantissa bits than {@code double}.
      */
     DoubleToFloatFunction DEFAULT = value -> (float) value;
 

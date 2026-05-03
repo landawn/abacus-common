@@ -72,7 +72,7 @@ public class XmlUtilTest extends TestBase {
             if (obj == null || getClass() != obj.getClass())
                 return false;
             Person person = (Person) obj;
-            return age == person.age && CommonUtil.equals(name, person.name);
+            return age == person.age && N.equals(name, person.name);
         }
 
         @Override
@@ -333,7 +333,10 @@ public class XmlUtilTest extends TestBase {
                 } finally {
                     xmlReader.close();
                 }
-            } catch (RuntimeException e) {
+            } catch (Exception e) {
+                // With SUPPORT_DTD=false the parser may throw a (checked) XMLStreamException for
+                // an undeclared entity, or it may silently emit no characters. Either way, the
+                // marker must not be exfiltrated.
                 blockedByException = true;
             }
 
@@ -435,24 +438,16 @@ public class XmlUtilTest extends TestBase {
     }
 
     @Test
-    public void testXmlEncode() {
+    public void testXmlEncode_disabledByDefault() {
+        // C1: xmlEncode is disabled by default because XMLDecoder is an unsafe-deserialization
+        // primitive (CVE-2017-3506 etc). Opt in with -Dabacus.xml.allowXmlEncoderDecoder=true.
         Person person = new Person("Bob", 35);
-        String xml = XmlUtil.xmlEncode(person);
-
-        Assertions.assertNotNull(xml);
-        Assertions.assertTrue(xml.contains("<?xml"));
-        Assertions.assertTrue(xml.contains("java"));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> XmlUtil.xmlEncode(person));
     }
 
     @Test
-    public void testXmlDecode() {
-        Person original = new Person("Charlie", 40);
-        String xml = XmlUtil.xmlEncode(original);
-        Person decoded = XmlUtil.xmlDecode(xml);
-
-        Assertions.assertNotNull(decoded);
-        Assertions.assertEquals(original.getName(), decoded.getName());
-        Assertions.assertEquals(original.getAge(), decoded.getAge());
+    public void testXmlDecode_disabledByDefault() {
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> XmlUtil.xmlDecode("<?xml ?><void/>"));
     }
 
     @Test
@@ -930,15 +925,16 @@ public class XmlUtilTest extends TestBase {
 
     @Test
     public void testGetAttributeTypeClass_unknownType() throws Exception {
-        // An unknown type attribute — should not throw; returns null for unresolvable class names
+        // An unknown type attribute in a non-JDK package — security gate refuses to resolve it.
+        // Pre-fix: returned a class via Type.of's auto-load (gadget-chain primitive).
+        // Post-fix (without the opt-in system property): returns null.
         String xml = "<?xml version=\"1.0\"?><root type=\"com.unknown.NonExistentClass12345XYZ\"/>";
         DocumentBuilder builder = XmlUtil.createDOMParser();
         Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
         Node root = doc.getDocumentElement();
 
-        // Should not throw; unknown class names result in Object.class as fallback
         Class<?> result = XmlUtil.getAttributeTypeClass(root);
-        org.junit.jupiter.api.Assertions.assertNotNull(result);
+        Assertions.assertNull(result);
     }
 
     @Test

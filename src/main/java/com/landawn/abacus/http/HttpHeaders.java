@@ -66,7 +66,7 @@ public final class HttpHeaders {
      * This class contains constants for all standard HTTP request and response headers.
      *
      * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
-     * 
+     *
      * <p>The constants are organized into categories:</p>
      * <ul>
      *   <li>Common headers used in both requests and responses</li>
@@ -472,6 +472,7 @@ public final class HttpHeaders {
          * Private constructor to prevent instantiation of this constants class.
          */
         private ReferrerPolicyValues() {
+            // Utility class - prevent instantiation
         }
 
         /** No referrer information is sent. */
@@ -480,7 +481,7 @@ public final class HttpHeaders {
         /** The full URL is sent as referrer, except when navigating from HTTPS to HTTP. */
         public static final String NO_REFERRER_WHEN_DOWNGRADE = "no-referrer-when-downgrade";
 
-        /** Only send the origin as referrer when the protocol security level stays the same. */
+        /** Send the full referrer for same-origin requests; send no referrer for cross-origin requests. */
         public static final String SAME_ORIGIN = "same-origin";
 
         /** Only send the origin of the document as the referrer. */
@@ -643,16 +644,17 @@ public final class HttpHeaders {
     /**
      * Converts a header value to its string representation.
      * Handles special cases for Collections (joined with "; "), Dates (formatted as HTTP date),
-     * and Instants (converted to Date then formatted).
+     * and Instants (converted to Date then formatted). A {@code null} value is converted to an empty string.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String value = HttpHeaders.valueOf(Arrays.asList("gzip", "deflate"));   // "gzip; deflate"
+     * String value = HttpHeaders.valueOf(Arrays.asList("gzip", "deflate"));   // "gzip, deflate"
      * String date = HttpHeaders.valueOf(new Date());                          // HTTP date format
      * }</pre>
      *
      * @param headerValue the header value to convert
-     * @return the string representation of the header value
+     * @return the string representation of the header value, or an empty string if
+     *         {@code headerValue} is {@code null}
      */
     public static String valueOf(final Object headerValue) {
         if (headerValue == null) {
@@ -660,7 +662,7 @@ public final class HttpHeaders {
         } else if (headerValue instanceof String) {
             return (String) headerValue;
         } else if (headerValue instanceof Collection) {
-            return Strings.join((Collection<?>) headerValue, "; ");
+            return Strings.join((Collection<?>) headerValue, ", ");
         } else if (headerValue instanceof Date) {
             return HttpDate.format((Date) headerValue);
         } else if (headerValue instanceof Instant) {
@@ -1102,8 +1104,9 @@ public final class HttpHeaders {
 
     /**
      * Returns a set of all header names in this HttpHeaders.
-     * The returned set is backed by the underlying map, so changes to the HttpHeaders
-     * are reflected in the set, and vice-versa. To remove headers, use {@link #remove(String)}.
+     * The returned set is backed by the underlying map, so changes to this HttpHeaders
+     * are reflected in the set. Removing entries through the returned set also updates
+     * this HttpHeaders, but adding new elements to the set is not supported.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1124,7 +1127,7 @@ public final class HttpHeaders {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * headers.forEach((name, value) -> 
+     * headers.forEach((name, value) ->
      *     System.out.println(name + ": " + value));
      * }</pre>
      *

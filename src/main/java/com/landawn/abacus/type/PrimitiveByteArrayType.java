@@ -22,6 +22,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.List;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedSQLException;
@@ -29,13 +30,15 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for primitive byte arrays (byte[]).
- * Provides functionality for serialization, deserialization, database operations,
- * and conversion between byte arrays and their various representations including Blob objects.
+ * Type handler for primitive {@code byte[]} arrays, providing serialization, deserialization,
+ * database operations, and conversion between byte arrays and various representations,
+ * including {@link java.sql.Blob} objects.
+ * String representations use the format {@code [1, 2, 3]} with comma-separated numeric byte values
+ * enclosed in square brackets.
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byte[]> {
@@ -43,7 +46,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     public static final String BYTE_ARRAY = byte[].class.getSimpleName();
 
     private final Type<Byte> elementType;
-    private final Type<Byte>[] parameterTypes;
+    private final List<Type<?>> parameterTypes;
 
     /**
      * Constructs a new PrimitiveByteArrayType instance.
@@ -53,7 +56,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
         super(BYTE_ARRAY);
 
         elementType = TypeFactory.getType(byte.class);
-        parameterTypes = new Type[] { elementType };
+        parameterTypes = List.of(elementType);
     }
 
     /**
@@ -79,11 +82,11 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     /**
      * Returns the parameter types associated with this array type.
      *
-     * @return an array containing the Byte Type that describes the elements of this array type
+     * @return an immutable list containing the Byte Type that describes the elements of this array type
      * @see #elementType()
      */
     @Override
-    public Type<Byte>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 
@@ -148,12 +151,14 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
 
     /**
      * Converts an object to a byte array.
-     * Handles special case of Blob objects by extracting their byte content.
-     * For other object types, converts to string first then parses as byte array.
+     * Handles {@link InputStream} (reads all bytes) and {@link Blob} objects (extracts bytes and frees the Blob)
+     * as special cases. For other object types, converts the object to its string representation first
+     * and then parses that string as a byte array.
      * Returns {@code null} if input is {@code null}.
      *
-     * @param obj the object to convert (can be a Blob or other type)
+     * @param obj the object to convert (can be an {@link InputStream}, {@link Blob}, or any other type)
      * @return the byte array representation of the object, or {@code null} if input is null
+     * @throws UnsupportedOperationException if the input is a {@link Blob} whose length exceeds {@link Integer#MAX_VALUE}
      * @throws UncheckedSQLException if a database access error occurs while reading or freeing a Blob
      */
     @SuppressFBWarnings
@@ -164,6 +169,8 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
         } else if (obj instanceof InputStream is) {
             return IOUtil.readAllBytes(is);
         } else if (obj instanceof Blob blob) {
+            RuntimeException primaryException = null;
+
             try {
                 final long len = blob.length();
 
@@ -173,12 +180,21 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
 
                 return blob.getBytes(1, (int) len);
             } catch (final SQLException e) {
-                throw new UncheckedSQLException(e);
+                primaryException = new UncheckedSQLException(e);
+                throw primaryException;
+            } catch (final RuntimeException e) {
+                primaryException = e;
+                throw primaryException;
             } finally {
                 try {
                     blob.free();
                 } catch (final SQLException e) {
-                    throw new UncheckedSQLException(e); //NOSONAR
+                    final UncheckedSQLException freeException = new UncheckedSQLException(e);
+                    if (primaryException != null) {
+                        primaryException.addSuppressed(freeException);
+                    } else {
+                        throw freeException; //NOSONAR
+                    }
                 }
             }
         } else {

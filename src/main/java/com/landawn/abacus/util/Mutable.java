@@ -19,11 +19,11 @@ package com.landawn.abacus.util;
 
 /**
  * A marker interface that provides mutable access to a value.
- * 
+ *
  * <p>This interface serves as a generic marker for the mutable wrapper implementations
  * in this package. It identifies classes that wrap primitive or object values and allow
  * those values to be modified after construction.</p>
- * 
+ *
  * <p>The primary use cases for mutable wrappers include:</p>
  * <ul>
  *   <li>Passing primitive values by reference to methods that need to modify them</li>
@@ -31,7 +31,7 @@ package com.landawn.abacus.util;
  *   <li>Accumulating values within lambda expressions or anonymous inner classes</li>
  *   <li>Avoiding the overhead of autoboxing when working with primitive values that change frequently</li>
  * </ul>
- * 
+ *
  * <p>Common implementations include:</p>
  * <ul>
  *   <li>{@link MutableBoolean} - for boolean values</li>
@@ -43,7 +43,7 @@ package com.landawn.abacus.util;
  *   <li>{@link MutableDouble} - for double values</li>
  *   <li>{@link MutableChar} - for char values</li>
  * </ul>
- * 
+ *
  * <p>Example usage with a mutable counter in a lambda:</p>
  * <pre>{@code
  * MutableInt counter = MutableInt.of(0);
@@ -54,7 +54,7 @@ package com.landawn.abacus.util;
  * });
  * System.out.println("Valid items: " + counter.value());
  * }</pre>
- * 
+ *
  * <p>Example usage for passing by reference:</p>
  * <pre>{@code
  * public void processData(List<Integer> data, MutableLong sum, MutableInt count) {
@@ -64,13 +64,13 @@ package com.landawn.abacus.util;
  *     }
  * }
  * }</pre>
- * 
+ *
  * <p><strong>Thread Safety:</strong> Implementations of this interface are generally
  * NOT thread-safe. If multiple threads access a mutable instance concurrently,
  * and at least one thread modifies it, external synchronization is required.</p>
- * 
+ *
  * <p>Note: This interface is adapted from Apache Commons Lang.</p>
- * 
+ *
  * @version $Id: Mutable.java 1478488 2013-05-02 19:05:44Z ggregory $
  */
 public interface Mutable {

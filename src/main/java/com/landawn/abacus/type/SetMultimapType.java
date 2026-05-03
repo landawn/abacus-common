@@ -23,8 +23,10 @@ import com.landawn.abacus.util.SetMultimap;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for SetMultimap, which maps keys to sets of values.
- * This class handles serialization and deserialization of SetMultimap instances.
+ * Type handler for {@link SetMultimap}, a multimap implementation that maps each key to a
+ * {@link java.util.Set} of values (i.e., duplicate values for the same key are not stored).
+ * This class handles serialization and deserialization of {@code SetMultimap} instances,
+ * converting them to and from a JSON object where each key maps to a JSON array of unique values.
  *
  * @param <K> the key type
  * @param <E> the element type in the value sets

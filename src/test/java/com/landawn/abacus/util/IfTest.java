@@ -323,8 +323,8 @@ public class IfTest extends TestBase {
 
     @Test
     public void testIsEmptyCharSequence_StringBuilder() {
-        assertTrue(If.isEmpty((CharSequence) new StringBuilder()).b);
-        assertFalse(If.isEmpty((CharSequence) new StringBuilder("text")).b);
+        assertTrue(If.isEmpty(new StringBuilder()).b);
+        assertFalse(If.isEmpty(new StringBuilder("text")).b);
     }
 
     // ==================== isEmpty(boolean[]) ====================

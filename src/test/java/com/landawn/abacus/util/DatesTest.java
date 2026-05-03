@@ -991,6 +991,9 @@ public class DatesTest extends TestBase {
         assertNull(Dates.parseDate(""));
         assertNull(Dates.parseDate("null"));
 
+        // Raw epoch-millis input (no format) preserves the exact value to keep serialize/
+        // deserialize round-trips of sql.Date bit-exact. JDBC normalization only applies to
+        // format-parsed inputs.
         java.sql.Date date = Dates.parseDate("1000000000");
         assertNotNull(date);
         assertEquals(1000000000L, date.getTime());
@@ -1034,6 +1037,7 @@ public class DatesTest extends TestBase {
         assertNull(Dates.parseTime(""));
         assertNull(Dates.parseTime("null"));
 
+        // Raw epoch-millis input preserves the exact value to keep round-trips bit-exact.
         Time time = Dates.parseTime("1000000000");
         assertNotNull(time);
         assertEquals(1000000000L, time.getTime());
@@ -1284,6 +1288,8 @@ public class DatesTest extends TestBase {
 
     @Test
     public void testParse_withNullFormat_longString() {
+        // Raw epoch-millis input is not JDBC-normalized; it preserves the exact value for
+        // serialize/deserialize round-trips.
         long millis = 1234567890000L;
         java.sql.Date date = Dates.parseDate(String.valueOf(millis));
         assertNotNull(date);

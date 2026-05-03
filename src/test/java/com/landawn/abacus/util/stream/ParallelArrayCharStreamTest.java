@@ -263,7 +263,7 @@ public class ParallelArrayCharStreamTest extends TestBase {
     public void testFlatMapCharArray() {
         CharStream stream = createCharStream(new char[] { 'a', 'b' });
         CharFunction<char[]> mapper = c -> new char[] { c, (char) (c + 1) };
-        List<Character> result = stream.flatmap(mapper).toList();
+        List<Character> result = stream.flatMapArray(mapper).toList();
         assertEquals(4, result.size());
         assertTrue(result.contains('a'));
         assertTrue(result.contains('b'));
@@ -280,7 +280,7 @@ public class ParallelArrayCharStreamTest extends TestBase {
 
     @Test
     public void testFlatmap_SequentialFallback() {
-        List<Character> result = createCharStream(new char[] { 'a' }).flatmap(c -> new char[] { c, (char) (c + 1) }).toList();
+        List<Character> result = createCharStream(new char[] { 'a' }).flatMapArray(c -> new char[] { c, (char) (c + 1) }).toList();
         assertEquals(2, result.size());
     }
 
@@ -295,7 +295,7 @@ public class ParallelArrayCharStreamTest extends TestBase {
 
     @Test
     public void testFlatmapCharArray() {
-        List<Character> result = createCharStream(new char[] { 'a', 'b' }).flatmap(c -> new char[] { c, Character.toUpperCase(c) }).boxed().toList();
+        List<Character> result = createCharStream(new char[] { 'a', 'b' }).flatMapArray(c -> new char[] { c, Character.toUpperCase(c) }).boxed().toList();
         assertEquals(4, result.size());
         assertTrue(result.containsAll(Arrays.asList('a', 'A', 'b', 'B')));
     }
@@ -310,8 +310,41 @@ public class ParallelArrayCharStreamTest extends TestBase {
 
     @Test
     public void testFlatmap_ParallelPath() {
-        long count = createCharStream(TEST_ARRAY).flatmap(c -> new char[] { c, Character.toUpperCase(c) }).count();
+        long count = createCharStream(TEST_ARRAY).flatMapArray(c -> new char[] { c, Character.toUpperCase(c) }).count();
         assertEquals(52, count);
+    }
+
+    @Test
+    public void testFlatmapCollection_ParallelPath() {
+        long count = createCharStream(TEST_ARRAY).flatmap(c -> Arrays.asList(c, Character.toUpperCase(c))).count();
+        assertEquals(TEST_ARRAY.length * 2L, count);
+    }
+
+    @Test
+    public void testFlatmapCollection() {
+        // sequential fallback (small input)
+        List<Character> small = createCharStream(new char[] { 'a', 'b' }).flatmap(c -> Arrays.asList(c, Character.toUpperCase(c))).boxed().toList();
+        assertEquals(4, small.size());
+        assertTrue(small.containsAll(Arrays.asList('a', 'A', 'b', 'B')));
+
+        // empty stream
+        assertEquals(0, createCharStream(new char[] {}).flatmap(c -> Arrays.asList((Character) c)).count());
+
+        // empty collection
+        assertEquals(0, createCharStream(TEST_ARRAY).flatmap(c -> java.util.Collections.<Character> emptyList()).count());
+
+        // null collection
+        assertEquals(0, createCharStream(TEST_ARRAY).flatmap(c -> (java.util.Collection<Character>) null).count());
+
+        // null elements -> (char) 0
+        char[] withNulls = createCharStream(new char[] { 'a', 'b' }).flatmap(c -> Arrays.asList((Character) null, c)).toArray();
+        assertEquals(4, withNulls.length);
+        java.util.Arrays.sort(withNulls);
+        // Result should contain two (char) 0 and {'a','b'}
+        assertEquals((char) 0, withNulls[0]);
+        assertEquals((char) 0, withNulls[1]);
+        assertEquals('a', withNulls[2]);
+        assertEquals('b', withNulls[3]);
     }
 
     @Test
@@ -335,7 +368,7 @@ public class ParallelArrayCharStreamTest extends TestBase {
     public void testFlatMapToInt_SequentialFallback() {
         List<Integer> result = createCharStream(new char[] { 'a' }).flatMapToInt(c -> IntStream.of((int) c)).toList();
         assertEquals(1, result.size());
-        assertEquals((int) 'a', result.get(0));
+        assertEquals('a', result.get(0));
     }
 
     @Test

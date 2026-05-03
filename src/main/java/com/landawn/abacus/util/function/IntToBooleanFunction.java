@@ -46,7 +46,7 @@ public interface IntToBooleanFunction {
      * boolean defaultResult = IntToBooleanFunction.DEFAULT.applyAsBoolean(1);   // Returns true
      * }</pre>
      *
-     * @param value the function argument
+     * @param value the {@code int} function argument
      * @return the {@code boolean} result
      */
     boolean applyAsBoolean(int value);

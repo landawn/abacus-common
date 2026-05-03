@@ -26,12 +26,12 @@ import com.landawn.abacus.util.stream.CharStream;
 /**
  * An iterator specialized for primitive char values, providing better performance
  * than {@code Iterator<Character>} by avoiding boxing/unboxing overhead.
- * 
+ *
  * <p>This abstract class provides various static factory methods for creating
  * char iterators from arrays, suppliers, and other sources. It also provides
  * transformation methods like {@code indexed()} and utility methods like
  * {@code toArray()} and {@code stream()}.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * CharIterator iter = CharIterator.of('a', 'b', 'c');
@@ -353,11 +353,22 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     public abstract char nextChar();
 
     /**
-     * Skips the first {@code n} elements from this iterator and returns a new iterator.
+     * Returns a new {@code CharIterator} that skips the first {@code n} elements of this iterator.
+     *
+     * <p>The skip is performed lazily when the returned iterator is first accessed.
+     * If {@code n} is greater than the number of remaining elements, all elements are consumed
+     * and the returned iterator will be empty.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharIterator iter = CharIterator.of('a', 'b', 'c', 'd', 'e');
+     * CharIterator skipped = iter.skip(2);
+     * // skipped will iterate over: 'c', 'd', 'e'
+     * }</pre>
      *
      * @param n the number of elements to skip, must be non-negative
-     * @return this iterator if n is 0, otherwise a new CharIterator with n elements skipped
-     * @throws IllegalArgumentException if n is negative
+     * @return this iterator if {@code n} is 0, otherwise a new {@code CharIterator} with the first {@code n} elements skipped
+     * @throws IllegalArgumentException if {@code n} is negative
      */
     public CharIterator skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -402,11 +413,21 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
-     * Limits this iterator to return at most the specified number of elements.
+     * Returns a new {@code CharIterator} that yields at most {@code count} elements.
+     *
+     * <p>If {@code count} is 0, returns an empty iterator. If the iterator has fewer
+     * than {@code count} elements remaining, all remaining elements are included.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharIterator iter = CharIterator.of('a', 'b', 'c', 'd', 'e');
+     * CharIterator limited = iter.limit(3);
+     * // limited will iterate over: 'a', 'b', 'c'
+     * }</pre>
      *
      * @param count the maximum number of elements to return, must be non-negative
-     * @return an empty iterator if count is 0, otherwise a new CharIterator limited to count elements
-     * @throws IllegalArgumentException if count is negative
+     * @return an empty iterator if {@code count} is 0, otherwise a new {@code CharIterator} limited to {@code count} elements
+     * @throws IllegalArgumentException if {@code count} is negative
      */
     public CharIterator limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, cs.count);
@@ -438,11 +459,21 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
-     * Filters elements based on the given predicate.
+     * Returns a new {@code CharIterator} that includes only elements matching the given predicate.
      *
-     * @param predicate the predicate to test elements
-     * @return a new CharIterator containing only elements that match the predicate
-     * @throws IllegalArgumentException if predicate is null
+     * <p>The returned iterator applies the predicate to each element lazily as elements are requested,
+     * and only returns those elements for which the predicate returns {@code true}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharIterator iter = CharIterator.of('a', 'B', 'c', 'D', 'e');
+     * CharIterator lowers = iter.filter(Character::isLowerCase);
+     * // lowers will iterate over: 'a', 'c', 'e'
+     * }</pre>
+     *
+     * @param predicate the predicate to test each element, must not be {@code null}
+     * @return a new {@code CharIterator} containing only elements that match the predicate
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     public CharIterator filter(final CharPredicate predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate);

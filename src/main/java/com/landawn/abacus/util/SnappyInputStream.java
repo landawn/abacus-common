@@ -21,11 +21,11 @@ import java.io.InputStream;
  * A wrapper class for Snappy-compressed input streams that provides transparent decompression.
  * This class extends {@link InputStream} and delegates all operations to the underlying
  * Xerial Snappy implementation while providing a consistent API.
- * 
+ *
  * <p>Snappy is a fast compression/decompression algorithm developed by Google, optimized for
  * speed rather than compression ratio. This input stream automatically decompresses data
  * that was compressed using Snappy compression.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * try (FileInputStream fis = new FileInputStream("data.snappy");
@@ -37,7 +37,7 @@ import java.io.InputStream;
  *     }
  * }
  * }</pre>
- * 
+ *
  * @see SnappyOutputStream
  * @see org.xerial.snappy.SnappyInputStream
  */
@@ -48,7 +48,7 @@ public final class SnappyInputStream extends InputStream {
     /**
      * Creates a new SnappyInputStream that decompresses data from the specified input stream.
      * The input stream should contain data that was compressed using Snappy compression.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * InputStream compressedStream = new FileInputStream("compressed.snappy");
@@ -67,7 +67,7 @@ public final class SnappyInputStream extends InputStream {
      * The value byte is returned as an {@code int} in the range 0 to 255.
      * If no byte is available because the end of the stream has been reached,
      * the value -1 is returned.
-     * 
+     *
      * <p>This method blocks until input data is available, the end of the stream
      * is detected, or an exception is thrown.</p>
      *
@@ -82,7 +82,7 @@ public final class SnappyInputStream extends InputStream {
     /**
      * Reads up to {@code b.length} bytes of decompressed data from this input stream
      * into an array of bytes. This method blocks until some input is available.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] buffer = new byte[1024];
@@ -102,7 +102,7 @@ public final class SnappyInputStream extends InputStream {
     /**
      * Reads up to {@code len} bytes of decompressed data from this input stream
      * into an array of bytes, starting at the specified offset.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] buffer = new byte[1024];
@@ -127,7 +127,7 @@ public final class SnappyInputStream extends InputStream {
      * Skips over and discards {@code n} bytes of decompressed data from this input stream.
      * The {@code skip} method may, for a variety of reasons, end up skipping over some
      * smaller number of bytes, possibly 0. The actual number of bytes skipped is returned.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long skipped = snappyStream.skip(1024);   // Try to skip 1024 bytes
@@ -149,7 +149,7 @@ public final class SnappyInputStream extends InputStream {
      * Returns an estimate of the number of bytes that can be read (or skipped over)
      * from this input stream without blocking by the next invocation of a method
      * for this input stream.
-     * 
+     *
      * <p>Note that this method provides only an estimate; the actual number of bytes
      * that can be read without blocking may be more or less than the returned value.</p>
      *
@@ -165,7 +165,7 @@ public final class SnappyInputStream extends InputStream {
      * Marks the current position in this input stream. A subsequent call to
      * the {@code reset} method repositions this stream at the last marked position
      * so that subsequent reads re-read the same bytes.
-     * 
+     *
      * <p>The {@code readLimit} argument tells this input stream to allow that many
      * bytes to be read before the mark position gets invalidated.</p>
      *
@@ -181,7 +181,7 @@ public final class SnappyInputStream extends InputStream {
     /**
      * Repositions this stream to the position at the time the {@code mark} method
      * was last called on this input stream.
-     * 
+     *
      * <p>Stream marks are intended to be used in situations where you need to read
      * ahead a little to see what's in the stream.</p>
      *
@@ -213,7 +213,7 @@ public final class SnappyInputStream extends InputStream {
      * Closes this input stream and releases any system resources associated with the stream.
      * Once the stream has been closed, further read(), available(), reset(), or skip()
      * invocations will throw an IOException.
-     * 
+     *
      * <p>Closing a previously closed stream has no effect.</p>
      *
      * @throws IOException if an I/O error occurs

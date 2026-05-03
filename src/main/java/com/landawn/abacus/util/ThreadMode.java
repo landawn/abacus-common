@@ -17,19 +17,19 @@ package com.landawn.abacus.util;
 /**
  * Enumeration representing different threading modes for concurrent operations.
  * This enum is used to specify how operations should be executed in a multithreaded context.
- * 
+ *
  * <p>The threading mode determines whether operations run in the default thread context
  * or are submitted to a thread pool for concurrent execution.
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Execute operation in default thread mode
  * processor.execute(task, ThreadMode.DEFAULT);
- * 
+ *
  * // Execute operation using thread pool
  * processor.execute(task, ThreadMode.THREAD_POOL_EXECUTOR);
  * }</pre>
- * 
+ *
  */
 public enum ThreadMode {
 
@@ -37,7 +37,7 @@ public enum ThreadMode {
      * Default threading mode where operations are executed in the current thread context.
      * This mode does not create additional threads and executes operations synchronously
      * in the calling thread.
-     * 
+     *
      * <p>Use this mode when:
      * <ul>
      *   <li>Thread safety is not a concern</li>
@@ -51,7 +51,7 @@ public enum ThreadMode {
      * Thread pool executor mode where operations are submitted to a thread pool for execution.
      * This mode enables concurrent execution of operations across multiple threads,
      * potentially improving performance for CPU-intensive or I/O-bound tasks.
-     * 
+     *
      * <p>Use this mode when:
      * <ul>
      *   <li>Operations can benefit from parallel execution</li>

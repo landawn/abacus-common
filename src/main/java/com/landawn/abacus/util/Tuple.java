@@ -159,7 +159,7 @@ import com.landawn.abacus.util.u.Optional;
  *   <li><b>Creation Cost:</b> O(1) - Simple object allocation with field assignments</li>
  *   <li><b>Access Time:</b> O(1) - Direct field access without method call overhead</li>
  *   <li><b>Memory Overhead:</b> Minimal - Only standard object header plus final field references</li>
- *   <li><b>Iteration Cost:</b> O(n) where n is the arity, using reflection for {@code forEach}</li>
+ *   <li><b>Iteration Cost:</b> O(n) where n is the arity; {@code forEach} simply invokes the consumer once per field (no reflection)</li>
  *   <li><b>Comparison Cost:</b> O(n) for {@code equals()}, compares all elements</li>
  * </ul>
  *
@@ -374,18 +374,19 @@ public abstract class Tuple<TP> implements Immutable {
     /**
      * Returns an array containing all elements of this tuple, using the specified array type.
      *
-     * <p>If the provided array is large enough to hold all elements, it is used directly and
-     * the element following the last tuple element (if any) is set to {@code null}. Otherwise, a new
-     * array of the same runtime type is created with the exact size needed.</p>
+     * <p>If the provided array is large enough to hold all elements, it is used directly to store
+     * the tuple elements at positions {@code 0..arity()-1}; any positions beyond the tuple's
+     * elements are left unchanged. Otherwise, a new array of the same runtime type with length
+     * equal to the tuple's arity is allocated.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple2<String, String> t = Tuple.of("hello", "world");
-     * String[] array = t.toArray(new String[0]);   // Returns ["hello", "world"]
+     * String[] array = t.toArray(new String[0]);   // Returns a new String[2]: ["hello", "world"]
      *
      * // Using pre-sized array
      * String[] existing = new String[5];
-     * String[] result = t.toArray(existing);   // Uses existing array, sets existing[2] to null
+     * String[] result = t.toArray(existing);   // Uses existing array, fills indexes 0..1
      * }</pre>
      *
      * @param <A> the component type of the array to contain the tuple elements.
@@ -566,10 +567,10 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Creates a Tuple4 containing the specified elements in order.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Tuple4<String, String, Integer, Date> record = 
+     * Tuple4<String, String, Integer, Date> record =
      *     Tuple.of("John", "Doe", 35, new Date());
      * }</pre>
      *
@@ -676,13 +677,13 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Creates a Tuple8 containing the specified elements in order.
-     * 
+     *
      * <p><b>Note:</b> This method is deprecated. For tuples with 8 or more elements,
      * it is strongly recommended to use a dedicated class or record with meaningful property names
      * for better code readability and maintainability.</p>
-     * 
+     *
      * <p>Example of preferred approach:</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Instead of Tuple8, consider:
@@ -770,9 +771,9 @@ public abstract class Tuple<TP> implements Immutable {
     /**
      * Creates a Tuple2 from a Map.Entry, with the entry's key as the first element
      * and the entry's value as the second element.
-     * 
+     *
      * <p>This is useful for converting Map entries to tuples for further processing.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = Map.of("Alice", 25, "Bob", 30);
@@ -780,7 +781,7 @@ public abstract class Tuple<TP> implements Immutable {
      *     .map(Tuple::from)
      *     .forEach(t -> System.out.println(t._1 + ": " + t._2));
      * }</pre>
-     * 
+     *
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <K> the key type of the map entry.
@@ -795,16 +796,16 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Creates a tuple from an array of objects.
-     * 
+     *
      * <p>The arity of the returned tuple matches the length of the array.
      * The array must contain between 0 and 9 elements.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Object[] data = {"hello", 42, true};
      * Tuple3<String, Integer, Boolean> t = Tuple.from(data);
      * }</pre>
-     * 
+     *
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <TP> the type of tuple to create.
@@ -868,17 +869,17 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Creates a tuple from a collection of objects.
-     * 
+     *
      * <p>The arity of the returned tuple matches the size of the collection.
      * Elements are added to the tuple in the order returned by the collection's iterator.
      * The collection must contain between 0 and 9 elements.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Object> list = Arrays.asList("a", 1, true);
      * Tuple3<String, Integer, Boolean> t = Tuple.from(list);
      * }</pre>
-     * 
+     *
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <TP> the type of tuple to create.
@@ -944,13 +945,13 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Converts a Tuple1 to a List containing its single element.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple1<String> t = Tuple.of("hello");
      * List<String> list = Tuple.toList(t);   // Returns ["hello"]
      * }</pre>
-     * 
+     *
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <T> the type of the element in the tuple.
@@ -964,15 +965,15 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Converts a Tuple2 to a List containing its elements in order.
-     * 
+     *
      * <p>All elements must be assignable to the common type T.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple2<String, String> t = Tuple.of("hello", "world");
      * List<String> list = Tuple.toList(t);   // Returns ["hello", "world"]
      * }</pre>
-     * 
+     *
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <T> the common type of the elements in the tuple.
@@ -1146,18 +1147,18 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Flattens a nested Tuple2 structure into a Tuple3.
-     * 
+     *
      * <p>The input tuple contains a Tuple2 as its first element and a single element as its second element.
      * The result combines all three elements into a single Tuple3.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Tuple2<Tuple2<String, Integer>, Boolean> nested = 
+     * Tuple2<Tuple2<String, Integer>, Boolean> nested =
      *     Tuple.of(Tuple.of("name", 25), true);
      * Tuple3<String, Integer, Boolean> flat = Tuple.flatten(nested);
      * // Result: ("name", 25, true)
      * }</pre>
-     * 
+     *
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <T1> the type of the first element in the nested tuple.
@@ -1173,18 +1174,18 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Flattens a nested Tuple3 structure into a Tuple5.
-     * 
+     *
      * <p>The input tuple contains a Tuple3 as its first element and two additional elements.
      * The result combines all five elements into a single Tuple5.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Tuple3<Tuple3<String, Integer, Double>, Boolean, Date> nested = 
+     * Tuple3<Tuple3<String, Integer, Double>, Boolean, Date> nested =
      *     Tuple.of(Tuple.of("data", 100, 3.14), true, new Date());
      * Tuple5<String, Integer, Double, Boolean, Date> flat = Tuple.flatten(nested);
      * // Result: ("data", 100, 3.14, true, Date)
      * }</pre>
-     * 
+     *
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <T1> the type of the first element in the nested tuple.
@@ -1202,11 +1203,11 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Represents an empty tuple with no elements.
-     * 
+     *
      * <p>This internal class is used to represent the absence of values in a tuple context.
      * The singleton instance {@code EMPTY} is returned by factory methods when creating
      * tuples from empty collections or arrays.</p>
-     * 
+     *
      * <p><b>Note:</b> This class is marked as {@link Beta} and is primarily for internal use.</p>
      */
     @Beta
@@ -1330,19 +1331,19 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Represents a tuple with exactly one element.
-     * 
+     *
      * <p>This class provides a type-safe container for a single value and can be useful for:</p>
      * <ul>
      *   <li>Wrapping a single value to pass through generic APIs expecting tuples</li>
      *   <li>Maintaining consistency when working with methods that return different tuple sizes</li>
      *   <li>Representing optional single values in a tuple context</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple1<String> message = Tuple.of("Hello");
      * String value = message._1;  // "Hello"
-     * 
+     *
      * // Converting to array
      * Object[] array = message.toArray();   // ["Hello"]
      * }</pre>
@@ -1401,7 +1402,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Checks if this tuple contains the specified value.
-         * 
+         *
          * <p>Since this tuple has only one element, this method returns true
          * if and only if the element equals the specified value (including {@code null} equality).</p>
          *
@@ -1471,7 +1472,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Checks if this tuple is equal to the specified object.
-         * 
+         *
          * <p>Two Tuple1 instances are equal if they contain equal elements.</p>
          *
          * @param obj the object to compare with.
@@ -1507,7 +1508,7 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Represents a tuple with exactly two elements.
-     * 
+     *
      * <p>This is one of the most commonly used tuple types, often representing:</p>
      * <ul>
      *   <li>Key-value pairs</li>
@@ -1515,22 +1516,22 @@ public abstract class Tuple<TP> implements Immutable {
      *   <li>Range boundaries (min, max)</li>
      *   <li>Two related values that don't warrant a dedicated class</li>
      * </ul>
-     * 
+     *
      * <p>Tuple2 provides additional utility methods for working with pairs of values,
      * including conversion to {@link Pair} and {@link java.util.Map.Entry}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Creating a key-value pair
      * Tuple2<String, Integer> score = Tuple.of("Alice", 95);
-     * 
+     *
      * // Using with bi-consumer
-     * score.accept((name, points) -> 
+     * score.accept((name, points) ->
      *     System.out.println(name + " scored " + points));
-     * 
+     *
      * // Converting to Map.Entry
      * Map.Entry<String, Integer> entry = score.toImmutableEntry();
-     * 
+     *
      * // Reversing elements
      * Tuple2<Integer, String> reversed = score.reverse();   // (95, "Alice")
      * }</pre>
@@ -1594,7 +1595,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Checks if this tuple contains the specified value.
-         * 
+         *
          * <p>Returns {@code true} if either element equals the specified value.</p>
          *
          * @param valueToFind the value to search for.
@@ -1636,10 +1637,10 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Converts this Tuple2 to a Pair with the same elements.
-         * 
+         *
          * <p>The first element becomes the left value and the second element
          * becomes the right value of the Pair.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Tuple2<String, Integer> tuple = Tuple.of("key", 100);
@@ -1655,11 +1656,11 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Converts this Tuple2 to an ImmutableEntry (Map.Entry) with the same elements.
-         * 
+         *
          * <p>The first element becomes the key and the second element becomes the value
          * of the entry. This is useful for creating map entries or when working with
          * APIs that expect Map.Entry objects.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Tuple2<String, Integer> tuple = Tuple.of("age", 25);
@@ -1676,10 +1677,10 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Creates a new Tuple2 with the elements in reversed order.
-         * 
+         *
          * <p>This is useful when you need to swap the positions of elements,
          * such as converting from (key, value) to (value, key).</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Tuple2<String, Integer> original = Tuple.of("name", 42);
@@ -1709,14 +1710,14 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Performs the given bi-consumer action on the two elements of this tuple.
-         * 
+         *
          * <p>This method provides a more natural way to work with the two elements
          * as separate parameters rather than accessing them through fields.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Tuple2<String, Integer> nameAge = Tuple.of("Alice", 30);
-         * nameAge.accept((name, age) -> 
+         * nameAge.accept((name, age) ->
          *     System.out.println(name + " is " + age + " years old"));
          * }</pre>
          *
@@ -1730,15 +1731,15 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Applies the given bi-function to the two elements of this tuple and returns the result.
-         * 
+         *
          * <p>This method allows transformation of the tuple elements into a single value
          * using a function that takes both elements as parameters.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Tuple2<Integer, Integer> dimensions = Tuple.of(10, 20);
          * Integer area = dimensions.map((width, height) -> width * height);   // 200
-         * 
+         *
          * Tuple2<String, String> names = Tuple.of("John", "Doe");
          * String fullName = names.map((first, last) -> first + " " + last);
          * }</pre>
@@ -1756,15 +1757,15 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * Returns an Optional containing this tuple if both elements match the given bi-predicate,
          * otherwise returns an empty Optional.
-         * 
+         *
          * <p>This method is useful for filtering tuples based on conditions involving both elements.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Tuple2<Integer, Integer> range = Tuple.of(10, 20);
          * Optional<Tuple2<Integer, Integer>> valid = range.filter((min, max) -> min < max);
          * // Returns Optional containing the tuple
-         * 
+         *
          * Optional<Tuple2<Integer, Integer>> invalid = range.filter((min, max) -> min > max);
          * // Returns empty Optional
          * }</pre>
@@ -1795,7 +1796,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Checks if this tuple is equal to the specified object.
-         * 
+         *
          * <p>Two Tuple2 instances are equal if they contain equal elements in the same positions.</p>
          *
          * @param obj the object to compare with.
@@ -1831,7 +1832,7 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Represents a tuple with exactly three elements.
-     * 
+     *
      * <p>Tuple3 is commonly used for:</p>
      * <ul>
      *   <li>3D coordinates (x, y, z)</li>
@@ -1839,24 +1840,24 @@ public abstract class Tuple<TP> implements Immutable {
      *   <li>Database rows with three columns</li>
      *   <li>Returning three related values from a method</li>
      * </ul>
-     * 
+     *
      * <p>This class provides additional utility methods for working with three elements,
      * including specialized consumers and functions that accept three parameters.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // three-dimensional coordinates
      * Tuple3<Double, Double, Double> point = Tuple.of(1.0, 2.0, 3.0);
-     * 
+     *
      * // RGB color
      * Tuple3<Integer, Integer, Integer> color = Tuple.of(255, 128, 0);
-     * 
+     *
      * // Using tri-consumer
-     * color.accept((r, g, b) -> 
+     * color.accept((r, g, b) ->
      *     System.out.printf("RGB(%d, %d, %d)%n", r, g, b));
-     * 
+     *
      * // Converting to Triple
-     * Triple<String, Integer, Boolean> triple = 
+     * Triple<String, Integer, Boolean> triple =
      *     Tuple.of("data", 42, true).toTriple();
      * }</pre>
      *
@@ -1965,8 +1966,8 @@ public abstract class Tuple<TP> implements Immutable {
          * Converts this Tuple3 to a Triple with the same elements.
          * Triple is another representation of a three-element container.
          *
-         * 
-         * 
+         *
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Tuple3<String, Integer, Boolean> tuple = Tuple.of("A", 1, true);
@@ -1984,8 +1985,8 @@ public abstract class Tuple<TP> implements Immutable {
          * The first element becomes the third, the third element becomes the first,
          * and the second element remains in the middle position.
          *
-         * 
-         * 
+         *
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Tuple3<String, Integer, Boolean> original = Tuple.of("A", 2, true);
@@ -2020,12 +2021,12 @@ public abstract class Tuple<TP> implements Immutable {
          * Performs the given tri-consumer action on the three elements of this tuple.
          * The elements are passed to the tri-consumer as separate arguments.
          *
-         * 
-         * 
+         *
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Tuple3<String, Integer, Boolean> data = Tuple.of("John", 30, true);
-         * data.accept((name, age, active) -> 
+         * data.accept((name, age, active) ->
          *     System.out.println(name + " is " + age + " years old"));
          * }</pre>
          *
@@ -2041,12 +2042,12 @@ public abstract class Tuple<TP> implements Immutable {
          * Applies the given tri-function to the three elements of this tuple and returns the result.
          * The elements are passed to the tri-function as separate arguments.
          *
-         * 
-         * 
+         *
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Tuple3<Integer, Integer, Integer> rgb = Tuple.of(255, 128, 64);
-         * String hex = rgb.map((r, g, b) -> 
+         * String hex = rgb.map((r, g, b) ->
          *     String.format("#%02X%02X%02X", r, g, b));
          * // hex = "#FF8040"
          * }</pre>
@@ -2065,12 +2066,12 @@ public abstract class Tuple<TP> implements Immutable {
          * Returns an Optional containing this tuple if all three elements match the given tri-predicate,
          * otherwise returns an empty Optional.
          *
-         * 
-         * 
+         *
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Tuple3<Integer, Integer, Integer> point = Tuple.of(3, 4, 5);
-         * Optional<Tuple3<Integer, Integer, Integer>> rightTriangle = 
+         * Optional<Tuple3<Integer, Integer, Integer>> rightTriangle =
          *     point.filter((a, b, c) -> a*a + b*b == c*c);
          * // rightTriangle.isPresent() == true
          * }</pre>
@@ -2136,7 +2137,7 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Represents an immutable tuple of 4 elements of potentially different types.
-     * 
+     *
      * <p>Tuple4 is commonly used for:</p>
      * <ul>
      *   <li>RGBA color values (red, green, blue, alpha)</li>
@@ -2148,11 +2149,11 @@ public abstract class Tuple<TP> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // RGBA color
-     * Tuple4<Integer, Integer, Integer, Float> color = 
+     * Tuple4<Integer, Integer, Integer, Float> color =
      *     Tuple.of(255, 128, 0, 0.8f);
-     * 
+     *
      * // Database record
-     * Tuple4<Long, String, String, Date> user = 
+     * Tuple4<Long, String, String, Date> user =
      *     Tuple.of(123L, "John", "john@example.com", new Date());
      * }</pre>
      *
@@ -2268,13 +2269,13 @@ public abstract class Tuple<TP> implements Immutable {
          * The first element becomes the fourth, the fourth element becomes the first,
          * the second element becomes the third, and the third element becomes the second.
          *
-         * 
-         * 
+         *
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple4<String, Integer, Double, Boolean> original = 
+         * Tuple4<String, Integer, Double, Boolean> original =
          *     Tuple.of("A", 1, 2.0, true);
-         * Tuple4<Boolean, Double, Integer, String> reversed = 
+         * Tuple4<Boolean, Double, Integer, String> reversed =
          *     original.reverse();
          * // reversed contains (true, 2.0, 1, "A")
          * }</pre>
@@ -2355,7 +2356,7 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Represents an immutable tuple of 5 elements of potentially different types.
-     * 
+     *
      * <p>Tuple5 is suitable for very complex data structures requiring five components.
      * At this size, consider whether a dedicated class with meaningful field names
      * would provide better code readability and maintainability.</p>
@@ -2363,11 +2364,11 @@ public abstract class Tuple<TP> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Database record with five fields
-     * Tuple5<Long, String, String, Date, Boolean> employee = 
+     * Tuple5<Long, String, String, Date, Boolean> employee =
      *     Tuple.of(123L, "John Doe", "Engineering", new Date(), true);
-     * 
+     *
      * // 5D point
-     * Tuple5<Double, Double, Double, Double, Double> point5D = 
+     * Tuple5<Double, Double, Double, Double, Double> point5D =
      *     Tuple.of(1.0, 2.0, 3.0, 4.0, 5.0);
      * }</pre>
      *
@@ -2491,13 +2492,13 @@ public abstract class Tuple<TP> implements Immutable {
          * the second element becomes the fourth, the fourth element becomes the second,
          * and the third element remains in the middle position.
          *
-         * 
-         * 
+         *
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple5<String, Integer, Double, Boolean, Long> original = 
+         * Tuple5<String, Integer, Double, Boolean, Long> original =
          *     Tuple.of("A", 1, 2.0, true, 100L);
-         * Tuple5<Long, Boolean, Double, Integer, String> reversed = 
+         * Tuple5<Long, Boolean, Double, Integer, String> reversed =
          *     original.reverse();
          * // reversed contains (100L, true, 2.0, 1, "A")
          * }</pre>
@@ -2580,7 +2581,7 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Represents an immutable tuple of 6 elements of potentially different types.
-     * 
+     *
      * <p>Tuple6 is suitable for very complex data structures requiring six components.
      * At this size, consider whether a dedicated class with meaningful field names
      * would provide better code readability and maintainability.</p>
@@ -2588,11 +2589,11 @@ public abstract class Tuple<TP> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Configuration tuple
-     * Tuple6<String, Integer, Boolean, String, Double, Long> config = 
+     * Tuple6<String, Integer, Boolean, String, Double, Long> config =
      *     Tuple.of("localhost", 8080, true, "admin", 3.14, 1000L);
-     * 
+     *
      * // Date/time components
-     * Tuple6<Integer, Integer, Integer, Integer, Integer, Integer> datetime = 
+     * Tuple6<Integer, Integer, Integer, Integer, Integer, Integer> datetime =
      *     Tuple.of(2024, 12, 25, 14, 30, 45);
      * }</pre>
      *
@@ -2721,13 +2722,13 @@ public abstract class Tuple<TP> implements Immutable {
          * Elements are rearranged so the first becomes the sixth,
          * the second becomes the fifth, and so on.
          *
-         * 
-         * 
+         *
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple6<String, Integer, Double, Boolean, Long, Character> original = 
+         * Tuple6<String, Integer, Double, Boolean, Long, Character> original =
          *     Tuple.of("A", 1, 2.0, true, 100L, 'X');
-         * Tuple6<Character, Long, Boolean, Double, Integer, String> reversed = 
+         * Tuple6<Character, Long, Boolean, Double, Integer, String> reversed =
          *     original.reverse();
          * // reversed contains ('X', 100L, true, 2.0, 1, "A")
          * }</pre>
@@ -2814,7 +2815,7 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Represents an immutable tuple of 7 elements of potentially different types.
-     * 
+     *
      * <p>Tuple7 is suitable for very complex data structures requiring seven components.
      * At this size, consider whether a dedicated class with meaningful field names
      * would provide better code readability and maintainability.</p>
@@ -2822,11 +2823,11 @@ public abstract class Tuple<TP> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Weekly temperature readings
-     * Tuple7<Double, Double, Double, Double, Double, Double, Double> weeklyTemp = 
+     * Tuple7<Double, Double, Double, Double, Double, Double, Double> weeklyTemp =
      *     Tuple.of(20.5, 21.0, 19.8, 22.3, 23.1, 24.0, 22.5);
-     * 
+     *
      * // Complex database record
-     * Tuple7<Long, String, String, Date, Boolean, Double, String> record = 
+     * Tuple7<Long, String, String, Date, Boolean, Double, String> record =
      *     Tuple.of(123L, "John", "Doe", new Date(), true, 75000.0, "Active");
      * }</pre>
      *
@@ -2961,13 +2962,13 @@ public abstract class Tuple<TP> implements Immutable {
          * The ordering is completely reversed: first becomes seventh,
          * second becomes sixth, and so on.
          *
-         * 
-         * 
+         *
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple7<String, Integer, Double, Boolean, Long, Character, Float> original = 
+         * Tuple7<String, Integer, Double, Boolean, Long, Character, Float> original =
          *     Tuple.of("A", 1, 2.0, true, 100L, 'X', 3.14f);
-         * Tuple7<Float, Character, Long, Boolean, Double, Integer, String> reversed = 
+         * Tuple7<Float, Character, Long, Boolean, Double, Integer, String> reversed =
          *     original.reverse();
          * // reversed contains (3.14f, 'X', 100L, true, 2.0, 1, "A")
          * }</pre>
@@ -3056,7 +3057,7 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Represents an immutable tuple of 8 elements of potentially different types.
-     * 
+     *
      * <p>Tuple8 is suitable for very complex data structures requiring eight components.
      * At this size, consider whether a dedicated class with meaningful field names
      * would provide better code readability and maintainability.</p>
@@ -3064,11 +3065,11 @@ public abstract class Tuple<TP> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Complex configuration with eight parameters
-     * Tuple8<String, Integer, String, Boolean, Double, Long, String, Integer> config = 
+     * Tuple8<String, Integer, String, Boolean, Double, Long, String, Integer> config =
      *     Tuple.of("server1", 8080, "https", true, 99.9, 5000L, "admin", 10);
-     * 
+     *
      * // Multi-dimensional data point
-     * Tuple8<Double, Double, Double, Double, Double, Double, Double, Double> point8D = 
+     * Tuple8<Double, Double, Double, Double, Double, Double, Double, Double> point8D =
      *     Tuple.of(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0);
      * }</pre>
      *
@@ -3208,13 +3209,13 @@ public abstract class Tuple<TP> implements Immutable {
          * Creates a new Tuple8 with the elements in reversed order.
          * All elements are reversed: first becomes eighth, second becomes seventh, etc.
          *
-         * 
-         * 
+         *
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple8<String, Integer, Double, Boolean, Long, Character, Float, Byte> original = 
+         * Tuple8<String, Integer, Double, Boolean, Long, Character, Float, Byte> original =
          *     Tuple.of("A", 1, 2.0, true, 100L, 'X', 3.14f, (byte)5);
-         * Tuple8<Byte, Float, Character, Long, Boolean, Double, Integer, String> reversed = 
+         * Tuple8<Byte, Float, Character, Long, Boolean, Double, Integer, String> reversed =
          *     original.reverse();
          * // reversed contains ((byte)5, 3.14f, 'X', 100L, true, 2.0, 1, "A")
          * }</pre>
@@ -3305,22 +3306,22 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Represents an immutable tuple of 9 elements of potentially different types.
-     * 
+     *
      * <p>Tuple9 is suitable for very complex data structures requiring nine components.
      * At this size, consider whether a dedicated class with meaningful field names
      * would provide better code readability and maintainability.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Creating a Tuple9
-     * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t = 
+     * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t =
      *     Tuple.of("John", 30, 175.5, true, 'A', 1000L, 3.14f, (short)10, (byte)5);
-     * 
+     *
      * // Accessing elements
      * String name = t._1;  // "John"
      * Integer age = t._2;  // 30
      * Double height = t._3;  // 175.5
-     * 
+     *
      * // Using functional operations
      * t.forEach(System.out::println);   // Prints all 9 elements
      * String summary = t.map(tuple -> tuple._1 + " is " + tuple._2 + " years old");
@@ -3368,7 +3369,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * Default no-arg constructor for serialization frameworks (e.g., Kryo).
          * Creates a Tuple9 with all elements set to {@code null}.
-         * 
+         *
          * <p>This constructor is primarily used by serialization libraries and should not
          * be called directly in application code.</p>
          */
@@ -3379,12 +3380,12 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Creates a new Tuple9 with the specified elements.
-         * 
+         *
          * <p>Any or all elements may be {@code null}. The tuple is immutable once created.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t = 
+         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t =
          *     new Tuple9<>("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
          * }</pre>
          *
@@ -3417,12 +3418,12 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Returns the arity (number of elements) of this tuple.
-         * 
+         *
          * <p>For Tuple9, this method always returns 9.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t = 
+         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t =
          *     Tuple.of("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
          * int arity = t.arity();   // Returns 9
          * }</pre>
@@ -3436,17 +3437,17 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Checks if any element in this tuple is {@code null}.
-         * 
+         *
          * <p>This method performs a short-circuit evaluation, returning {@code true} as soon as
          * the first {@code null} element is encountered.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t1 = 
+         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t1 =
          *     Tuple.of("A", null, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
          * boolean hasNull = t1.anyNull();   // Returns true
-         * 
-         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t2 = 
+         *
+         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t2 =
          *     Tuple.of("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
          * boolean hasNull2 = t2.anyNull();   // Returns false
          * }</pre>
@@ -3460,16 +3461,16 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Checks if all elements in this tuple are {@code null}.
-         * 
+         *
          * <p>This method returns {@code true} only when every single element (_1 through _9) is {@code null}.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t1 = 
+         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t1 =
          *     Tuple.of(null, null, null, null, null, null, null, null, null);
          * boolean allNull = t1.allNull();   // Returns true
-         * 
-         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t2 = 
+         *
+         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t2 =
          *     Tuple.of("A", null, null, null, null, null, null, null, null);
          * boolean allNull2 = t2.allNull();   // Returns false
          * }</pre>
@@ -3483,16 +3484,16 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Checks if this tuple contains the specified value.
-         * 
+         *
          * <p>The comparison uses N.equals() which handles {@code null} values correctly.
          * The method checks each element in order (_1 through _9) and returns true
          * as soon as a matching element is found.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t = 
+         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t =
          *     Tuple.of("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
-         * 
+         *
          * boolean found1 = t.contains("A");    // Returns true
          * boolean found2 = t.contains(100L);   // Returns true
          * boolean found3 = t.contains("B");    // Returns false
@@ -3510,16 +3511,16 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Returns a new array containing all elements of this tuple in order.
-         * 
+         *
          * <p>The returned array is always a new Object array of length 9, containing
          * the elements in positions _1 through _9. Modifications to the returned array
          * do not affect the tuple.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t = 
+         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t =
          *     Tuple.of("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
-         * 
+         *
          * Object[] array = t.toArray();
          * // array = ["A", 1, 2.0, true, 'X', 100L, 3.14f, 5, 10]
          * }</pre>
@@ -3533,27 +3534,27 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Returns an array containing all elements of this tuple, using the provided array if possible.
-         * 
+         *
          * <p>If the provided array has a length of at least 9, it is filled with the tuple elements
-         * and returned. If the array is larger than 9, the element at index 9 is set to {@code null}.
+         * at indexes 0..8 and returned; any positions beyond index 8 are left unchanged.
          * If the array is smaller than 9, a new array of the same runtime type with length 9 is created.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple9<String, String, String, String, String, String, String, String, String> t = 
+         * Tuple9<String, String, String, String, String, String, String, String, String> t =
          *     Tuple.of("A", "B", "C", "D", "E", "F", "G", "H", "I");
-         * 
+         *
          * // Using a smaller array - new array created
          * String[] small = new String[5];
          * String[] result1 = t.toArray(small);   // New String[9] array created
-         * 
+         *
          * // Using exact size array
          * String[] exact = new String[9];
          * String[] result2 = t.toArray(exact);   // Same array returned
-         * 
+         *
          * // Using larger array
          * String[] large = new String[12];
-         * String[] result3 = t.toArray(large);   // Same array used, large[9] set to null
+         * String[] result3 = t.toArray(large);   // Same array used, indexes 9..11 unchanged
          * }</pre>
          *
          * @param <A> the component type of the array.
@@ -3582,16 +3583,16 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Returns a new Tuple9 with all elements in reverse order.
-         * 
+         *
          * <p>Creates a new tuple where the first element becomes the last, the second becomes
          * the second-to-last, and so on. The original tuple remains unchanged.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t = 
+         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t =
          *     Tuple.of("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
-         * 
-         * Tuple9<Byte, Short, Float, Long, Character, Boolean, Double, Integer, String> reversed = 
+         *
+         * Tuple9<Byte, Short, Float, Long, Character, Boolean, Double, Integer, String> reversed =
          *     t.reverse();
          * // reversed = ((byte)10, (short)5, 3.14f, 100L, 'X', true, 2.0, 1, "A")
          * }</pre>
@@ -3604,23 +3605,23 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Performs the given action for each element of this tuple in order.
-         * 
+         *
          * <p>The consumer is called once for each element, from _1 through _9 in sequence.
          * Each element is passed to the consumer as an Object, regardless of its actual type.
          * The consumer must handle any type casting if needed.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t = 
+         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t =
          *     Tuple.of("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
-         * 
+         *
          * // Print each element
          * t.forEach(System.out::println);
-         * 
+         *
          * // Collect elements into a list
          * List<Object> list = new ArrayList<>();
          * t.forEach(list::add);
-         * 
+         *
          * // Count non-null elements
          * AtomicInteger count = new AtomicInteger();
          * t.forEach(e -> { if (e != null) count.incrementAndGet(); });
@@ -3647,21 +3648,21 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Returns a hash code value for this tuple.
-         * 
+         *
          * <p>The hash code is computed using all 9 elements. The calculation uses a standard
          * polynomial hash formula with prime number 31, and handles {@code null} values correctly
          * through N.hashCode().</p>
-         * 
+         *
          * <p>The hash code is consistent with equals(): two tuples that are equal according
          * to equals() will have the same hash code.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t1 = 
+         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t1 =
          *     Tuple.of("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
-         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t2 = 
+         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t2 =
          *     Tuple.of("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
-         * 
+         *
          * assert t1.hashCode() == t2.hashCode();   // Same elements = same hash code
          * }</pre>
          *
@@ -3684,20 +3685,20 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Compares this tuple to the specified object for equality.
-         * 
+         *
          * <p>Two Tuple9 instances are considered equal if and only if all 9 corresponding
          * elements are equal according to N.equals() (which handles {@code null} values correctly).
          * The comparison is type-safe: the object must be exactly a Tuple9 instance.</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t1 = 
+         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t1 =
          *     Tuple.of("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
-         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t2 = 
+         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t2 =
          *     Tuple.of("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
-         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t3 = 
+         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t3 =
          *     Tuple.of("B", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
-         * 
+         *
          * assert t1.equals(t2);               // true - all elements equal
          * assert !t1.equals(t3);              // false - first element differs
          * assert !t1.equals("not a tuple");   // false - different type
@@ -3724,23 +3725,23 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Returns a string representation of this tuple.
-         * 
+         *
          * <p>The string representation consists of the 9 elements enclosed in parentheses
          * and separated by commas and spaces. Each element is converted to string using
          * N.toString() which handles {@code null} values by returning "null".</p>
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t = 
+         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t =
          *     Tuple.of("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
-         * 
-         * String str = t.toString(); 
+         *
+         * String str = t.toString();
          * // Returns: "(A, 1, 2.0, true, X, 100, 3.14, 5, 10)"
-         * 
-         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t2 = 
+         *
+         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t2 =
          *     Tuple.of("A", null, 2.0, true, null, 100L, 3.14f, null, (byte)10);
-         * 
-         * String str2 = t2.toString(); 
+         *
+         * String str2 = t2.toString();
          * // Returns: "(A, null, 2.0, true, null, 100, 3.14, null, 10)"
          * }</pre>
          *

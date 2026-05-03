@@ -59,7 +59,7 @@ public class PrefixSearchTableTest extends TestBase {
 
         Map<List<Integer>, String> map = table.getAll(Arrays.asList(1, 2, 3)).toMap();
         assertEquals(2, map.size());
-        assertTrue(map.equals(CommonUtil.asMap(asList(1, 2), "bar", asList(1, 2, 3), "foo")));
+        assertTrue(map.equals(N.asMap(asList(1, 2), "bar", asList(1, 2, 3), "foo")));
     }
 
     @Test
@@ -73,7 +73,7 @@ public class PrefixSearchTableTest extends TestBase {
         PrefixSearchTable<Integer, String> table = PrefixSearchTable.<Integer, String> builder().add(Arrays.asList(1), "foo").build();
         Map<List<Integer>, String> map = table.getAll(Arrays.asList(1)).toMap();
         assertEquals(1, map.size());
-        assertTrue(Maps.containsEntry(map, CommonUtil.newImmutableEntry(Arrays.asList(1), "foo")));
+        assertTrue(Maps.containsEntry(map, N.newImmutableEntry(Arrays.asList(1), "foo")));
     }
 
     @Test
@@ -87,7 +87,7 @@ public class PrefixSearchTableTest extends TestBase {
         PrefixSearchTable<Integer, String> table = PrefixSearchTable.<Integer, String> builder().add(Arrays.asList(1), "foo").build();
         Map<List<Integer>, String> map = table.getAll(Arrays.asList(1, 2, 3)).toMap();
         assertEquals(1, map.size());
-        assertTrue(Maps.containsEntry(map, CommonUtil.newImmutableEntry(Arrays.asList(1), "foo")));
+        assertTrue(Maps.containsEntry(map, N.newImmutableEntry(Arrays.asList(1), "foo")));
     }
 
     @Test
@@ -95,7 +95,7 @@ public class PrefixSearchTableTest extends TestBase {
         PrefixSearchTable<Integer, String> table = PrefixSearchTable.<Integer, String> builder().add(Arrays.asList(1, 2, 3), "foo").build();
         Map<List<Integer>, String> map = table.getAll(Arrays.asList(1, 2, 3)).toMap();
         assertEquals(1, map.size());
-        assertTrue(Maps.containsEntry(map, CommonUtil.newImmutableEntry(Arrays.asList(1, 2, 3), "foo")));
+        assertTrue(Maps.containsEntry(map, N.newImmutableEntry(Arrays.asList(1, 2, 3), "foo")));
     }
 
     @Test
@@ -103,7 +103,7 @@ public class PrefixSearchTableTest extends TestBase {
         PrefixSearchTable<Integer, String> table = PrefixSearchTable.<Integer, String> builder().add(Arrays.asList(1, 2, 3), "foo").build();
         Map<List<Integer>, String> map = table.getAll(Arrays.asList(1, 2, 3, 4, 5)).toMap();
         assertEquals(1, map.size());
-        assertTrue(Maps.containsEntry(map, CommonUtil.newImmutableEntry(Arrays.asList(1, 2, 3), "foo")));
+        assertTrue(Maps.containsEntry(map, N.newImmutableEntry(Arrays.asList(1, 2, 3), "foo")));
     }
 
     @Test
@@ -174,7 +174,7 @@ public class PrefixSearchTableTest extends TestBase {
 
         Map<List<Integer>, String> map = table.getAll(Arrays.asList(1, 2, 3)).toMap();
         assertEquals(2, map.size());
-        assertTrue(map.equals(CommonUtil.asMap(Arrays.asList(1), "bar", Arrays.asList(1, 2, 3), "foo")));
+        assertTrue(map.equals(N.asMap(Arrays.asList(1), "bar", Arrays.asList(1, 2, 3), "foo")));
     }
 
     // ===== Builder.addAll(Map) =====

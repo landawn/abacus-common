@@ -2,7 +2,6 @@ package com.landawn.abacus.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,7 +13,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Stream;
 
@@ -352,7 +350,7 @@ public class ObjListIteratorTest extends TestBase {
     @Test
     public void testOfListIterator_WrapsObjListIterator() {
         ObjListIterator<String> original = ObjListIterator.of(Arrays.asList("a", "b"));
-        ObjListIterator<String> wrapped = ObjListIterator.of((ListIterator<String>) original);
+        ObjListIterator<String> wrapped = ObjListIterator.of(original);
         // Should return the same instance
         Assertions.assertSame(original, wrapped);
     }
@@ -796,8 +794,8 @@ public class ObjListIteratorTest extends TestBase {
         iter.foreachIndexed((index, value) -> results.add(index + ": " + value));
 
         Assertions.assertEquals(2, results.size());
-        Assertions.assertEquals("0: b", results.get(0));
-        Assertions.assertEquals("1: c", results.get(1));
+        Assertions.assertEquals("1: b", results.get(0));
+        Assertions.assertEquals("2: c", results.get(1));
     }
 
     @Test
@@ -822,5 +820,30 @@ public class ObjListIteratorTest extends TestBase {
         Assertions.assertEquals(2, results.size());
         Assertions.assertEquals("0=x", results.get(0));
         Assertions.assertEquals("1=y", results.get(1));
+    }
+
+    @Test
+    public void testForeachIndexed_UsesNextIndex() throws Exception {
+        // Index must match nextIndex() before calling next(), not a local counter starting at 0.
+        // After consuming 2 elements, foreachIndexed should produce indices 2, 3, 4 not 0, 1, 2.
+        List<String> list = Arrays.asList("a", "b", "c", "d", "e");
+        ObjListIterator<String> iter = ObjListIterator.of(list);
+        iter.next(); // consume "a" (nextIndex becomes 1)
+        iter.next(); // consume "b" (nextIndex becomes 2)
+
+        List<Integer> indices = new ArrayList<>();
+        List<String> values = new ArrayList<>();
+        iter.foreachIndexed((index, value) -> {
+            indices.add(index);
+            values.add(value);
+        });
+
+        Assertions.assertEquals(3, indices.size());
+        Assertions.assertEquals(2, (int) indices.get(0));
+        Assertions.assertEquals(3, (int) indices.get(1));
+        Assertions.assertEquals(4, (int) indices.get(2));
+        Assertions.assertEquals("c", values.get(0));
+        Assertions.assertEquals("d", values.get(1));
+        Assertions.assertEquals("e", values.get(2));
     }
 }

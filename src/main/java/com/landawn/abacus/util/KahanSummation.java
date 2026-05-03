@@ -25,7 +25,7 @@ import com.landawn.abacus.util.u.OptionalDouble;
  * <p>
  * This is particularly useful when summing many numbers where intermediate results may
  * lose precision due to floating-point arithmetic limitations.
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * KahanSummation sum = new KahanSummation();
@@ -33,7 +33,7 @@ import com.landawn.abacus.util.u.OptionalDouble;
  * sum.add(0.2);
  * sum.add(0.3);
  * double result = sum.sum();   // More accurate than simple addition
- * 
+ *
  * // Or use the static factory method:
  * KahanSummation sum2 = KahanSummation.of(0.1, 0.2, 0.3);
  * }</pre>
@@ -58,7 +58,7 @@ public final class KahanSummation { // NOSONAR
 
     /**
      * Creates a new KahanSummation instance initialized with the provided values.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * KahanSummation sum = KahanSummation.of(1.0, 2.0, 3.0);
@@ -82,7 +82,7 @@ public final class KahanSummation { // NOSONAR
      * Adds a single value to the summation using the Kahan algorithm.
      * <p>
      * The algorithm maintains a running compensation (correction) for lost low-order bits.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * KahanSummation sum = new KahanSummation();
@@ -103,7 +103,7 @@ public final class KahanSummation { // NOSONAR
 
     /**
      * Adds all values from the provided array to the summation.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * KahanSummation sum = new KahanSummation();
@@ -123,12 +123,12 @@ public final class KahanSummation { // NOSONAR
      * Combines this summation with values from simple summation (count and sum).
      * <p>
      * This method is useful when combining pre-computed sums.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * KahanSummation sum1 = new KahanSummation();
      * sum1.add(1.0);
-     * 
+     *
      * // Combine with pre-computed values
      * sum1.combine(5, 10.0);   // Add 5 values with sum 10.0
      * }</pre>
@@ -147,7 +147,7 @@ public final class KahanSummation { // NOSONAR
      * Combines this summation with another KahanSummation instance.
      * <p>
      * This method properly combines both the sum and the correction term from the other instance.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * KahanSummation sum1 = KahanSummation.of(0.1, 0.2);
@@ -167,7 +167,7 @@ public final class KahanSummation { // NOSONAR
 
     /**
      * Returns the count of values added to this summation.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * KahanSummation sum = new KahanSummation();
@@ -187,7 +187,7 @@ public final class KahanSummation { // NOSONAR
      * <p>
      * If the result is NaN and the simple sum is infinite, returns the simple sum instead.
      * This handles edge cases where the compensation might produce NaN.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * KahanSummation sum = new KahanSummation();
@@ -211,7 +211,7 @@ public final class KahanSummation { // NOSONAR
 
     /**
      * Calculates and returns the average of all added values.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * KahanSummation sum = KahanSummation.of(1.0, 2.0, 3.0, 4.0);
@@ -229,7 +229,7 @@ public final class KahanSummation { // NOSONAR
      * Returns a string representation of this KahanSummation.
      * <p>
      * The format is: {@code {count=<count>, sum=<sum>, average=<average>}}
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * KahanSummation sum = KahanSummation.of(1.0, 2.0, 3.0);
@@ -247,20 +247,9 @@ public final class KahanSummation { // NOSONAR
 
     /**
      * Core Kahan summation algorithm implementation.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * function KahanSum(input)
-     * var sum = input[1]
-     * var c = 0.0                 // A running compensation for lost low-order bits.
-     * for i = 2 to input.length do
-     *     var y = input[i] - c    // So far, so good: c is zero at first.
-     *     var t = sum + y         // Alas, sum is big, y small, so low-order digits of y are lost.
-     *     c = (t - sum) - y       // (t - sum) cancels the high-order part of y; subtracting y recovers negative (low part of y)
-     *     sum = t                 // Algebraically, c should always be zero. Beware overly aggressive optimizing compilers!
-     * next i                      // Next time around, the lost low part will be added to y in a fresh attempt.
-     * return sum
-     * }</pre>
+     *
+     * <p>This method updates the running {@code sum} and {@code correction} fields
+     * using the classic compensated summation technique to reduce floating-point error.</p>
      *
      * @param value the value to add using Kahan summation
      */

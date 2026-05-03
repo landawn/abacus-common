@@ -56,10 +56,15 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *
  * // Look up a cached type
  * Type<?> type = typeCache.get("int");
- *
- * // Use computeIfAbsent for atomic cache-on-miss
- * Type<?> resolved = typeCache.computeIfAbsent("long", name -> resolveType(name));
  * }</pre>
+ *
+ * <p><b>Thread safety note:</b> Although the underlying {@link ConcurrentHashMap} provides
+ * atomic implementations of methods like {@code computeIfAbsent}, this class extends
+ * {@link AbstractMap} and does <i>not</i> override those default methods. As a result,
+ * default {@link Map} methods inherited from {@code AbstractMap} (such as
+ * {@link Map#computeIfAbsent}, {@link Map#merge}, {@link Map#compute}) are <i>not</i>
+ * guaranteed to be atomic on this class. For atomic compound operations, obtain the
+ * backing map via a different API or use explicit external synchronization.</p>
  *
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values

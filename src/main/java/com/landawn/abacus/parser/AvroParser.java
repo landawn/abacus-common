@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
@@ -66,7 +65,7 @@ import com.landawn.abacus.util.Strings;
  * <p>The reason for not encoding content with Base64 for File/OutputStream is to provide
  * a higher performance solution for binary data handling.</p>
  *
- * <p>Usage Examples:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // With SpecificRecord
  * User user = new User("John", 30);
@@ -86,6 +85,9 @@ import com.landawn.abacus.util.Strings;
  * parser.serialize(data, config, outputStream);
  * }</pre>
  *
+ * @see AvroSerConfig
+ * @see AvroDeserConfig
+ * @see ParserFactory#createAvroParser()
  */
 public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserConfig> {
 
@@ -143,7 +145,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      *     new User("John", 30),
      *     new User("Jane", 25)
      * );
-     * parser.serialize(users, new File("users.avro"));
+     * parser.serialize(users, config, new File("users.avro"));
      * }</pre>
      *
      * @param obj the object to serialize (may be {@code null} depending on implementation)
@@ -510,7 +512,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
         } else if (targetType.isCollection() && (eleType != null && SpecificRecord.class.isAssignableFrom(eleType.javaType()))) {
             final Class<Object> eleClass = eleType.javaType();
             @SuppressWarnings("rawtypes")
-            final Collection<Object> c = targetType.isCollection() ? N.newCollection((Class<Collection>) targetClass) : new ArrayList<>();
+            final Collection<Object> c = N.newCollection((Class<Collection>) targetClass);
             final DatumReader<Object> datumReader = new SpecificDatumReader<>(eleClass);
 
             try (DataFileStream<Object> dataFileReader = new DataFileStream<>(targetInput, datumReader)) {
@@ -538,7 +540,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
                 } else if (targetType.isCollection()) {
                     if (eleType != null && (eleType.isBean() || eleType.isMap() || GenericRecord.class.isAssignableFrom(eleType.javaType()))) {
                         @SuppressWarnings("rawtypes")
-                        final Collection<Object> c = targetType.isCollection() ? N.newCollection((Class<Collection>) targetClass) : new ArrayList<>();
+                        final Collection<Object> c = N.newCollection((Class<Collection>) targetClass);
 
                         while (dataFileReader.hasNext()) {
                             c.add(fromGenericRecord((GenericRecord) dataFileReader.next(), eleType.javaType()));
@@ -704,7 +706,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
             return (T) m;
         } else if (type.isCollection()) {
             @SuppressWarnings("rawtypes")
-            final Collection<Object> c = type.isCollection() ? N.newCollection((Class<Collection>) targetClass) : new ArrayList<>();
+            final Collection<Object> c = N.newCollection((Class<Collection>) targetClass);
             Object propValue = null;
 
             for (final Field field : source.getSchema().getFields()) {

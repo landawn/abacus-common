@@ -21,39 +21,49 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for ByteBuffer operations.
- * This class provides conversion between java.nio.ByteBuffer instances
- * and their Base64-encoded string representations, enabling storage and
- * transmission of binary buffer data in text formats.
+ * Type handler for {@link java.nio.ByteBuffer} values.
+ * Converts between {@code ByteBuffer} instances and their Base64-encoded string representations,
+ * enabling storage and transmission of binary buffer data in text-based formats.
+ *
+ * <p>The buffer's content is defined as the bytes from index {@code 0} up to (but not including)
+ * the current {@link java.nio.ByteBuffer#position() position}. The position is preserved across
+ * calls to {@link #stringOf(ByteBuffer)} and {@link #byteArrayOf(ByteBuffer)}.</p>
+ *
+ * <p>There is no direct JDBC mapping; this type is intended for JSON/XML serialization contexts.
+ * For database binary data, prefer {@link BytesType} or {@link BlobType}.</p>
+ *
+ * @see java.nio.ByteBuffer
  */
 public class ByteBufferType extends AbstractType<ByteBuffer> {
 
     /**
-     * The type name constant for ByteBuffer type identification.
+     * The type name constant used to identify this type within the type system
+     * (value: {@code "ByteBuffer"}).
      */
     public static final String BYTE_BUFFER = "ByteBuffer";
 
     /**
-     * Package-private constructor for ByteBufferType.
-     * This constructor is called by the TypeFactory to create ByteBuffer type instances.
+     * Package-private constructor for {@code ByteBufferType} using the standard {@link java.nio.ByteBuffer} class.
+     * Instances are created by {@link TypeFactory}; do not instantiate directly.
      */
     ByteBufferType() {
         super(BYTE_BUFFER);
     }
 
     /**
-     * Package-private constructor for ByteBufferType with a specific subclass.
+     * Package-private constructor for {@code ByteBufferType} with a specific {@link java.nio.ByteBuffer} subclass.
+     * Instances are created by {@link TypeFactory}; do not instantiate directly.
      *
-     * @param cls the specific ByteBuffer subclass
+     * @param cls the specific {@code ByteBuffer} subclass to use as the type name source
      */
     ByteBufferType(final Class<? extends ByteBuffer> cls) {
         super(ClassUtil.getSimpleClassName(cls));
     }
 
     /**
-     * Returns the Class object representing the ByteBuffer class.
+     * Returns the Java class represented by this type handler.
      *
-     * @return the Class object for java.nio.ByteBuffer
+     * @return {@code ByteBuffer.class}
      */
     @Override
     public Class<ByteBuffer> javaType() {
@@ -61,10 +71,9 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
     }
 
     /**
-     * Determines whether this type represents a ByteBuffer.
-     * Always returns {@code true} for ByteBufferType instances.
+     * Indicates that this type handler manages {@link java.nio.ByteBuffer} values.
      *
-     * @return {@code true} indicating this is a byte buffer type
+     * @return {@code true} always
      */
     @Override
     public boolean isByteBuffer() {
@@ -72,12 +81,13 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
     }
 
     /**
-     * Converts a ByteBuffer to its Base64-encoded string representation.
-     * The buffer's content from position 0 to the current position is encoded.
+     * Converts a {@link java.nio.ByteBuffer} to its Base64-encoded string representation.
+     * The encoded bytes are taken from position {@code 0} to the buffer's current
+     * {@link java.nio.ByteBuffer#position() position}; the position is restored after reading.
      *
-     * @param x the ByteBuffer to encode
-     * @return the Base64-encoded string representation of the buffer's content,
-     *         or {@code null} if the input is null
+     * @param x the {@code ByteBuffer} to encode; may be {@code null}
+     * @return the Base64-encoded string of the buffer's written content,
+     *         or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final ByteBuffer x) {
@@ -85,27 +95,16 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
     }
 
     /**
-     * Converts a Base64-encoded string back to a ByteBuffer.
-     * Creates a ByteBuffer wrapping the decoded byte array with position
-     * set to the array length and limit/capacity set to array length.
+     * Decodes a Base64-encoded string and returns a {@link java.nio.ByteBuffer} wrapping the decoded bytes.
+     * The resulting buffer has its position set to the length of the decoded array
+     * (i.e. positioned at the end of the written data, consistent with the convention used by
+     * {@link #byteArrayOf(ByteBuffer)} and {@link #valueOf(byte[])}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<ByteBuffer> type = TypeFactory.getType(ByteBuffer.class);
-     * ByteBuffer buffer = ByteBuffer.wrap("Hello".getBytes());
-     * buffer.position(5);
-     *
-     * String encoded = type.stringOf(buffer);
-     * // encoded: Base64 string of "Hello"
-     *
-     * ByteBuffer decoded = type.valueOf(encoded);
-     * // decoded: ByteBuffer containing "Hello" bytes
-     * }</pre>
-     *
-     * @param str the Base64-encoded string to decode
-     * @return a ByteBuffer containing the decoded data, or {@code null} if str is {@code null},
-     *         or an empty buffer if str is empty
-     * @throws IllegalArgumentException if the input string is not valid Base64
+     * @param str the Base64-encoded string to decode; may be {@code null} or empty
+     * @return a {@code ByteBuffer} wrapping the decoded bytes with position at {@code bytes.length},
+     *         or {@code null} if {@code str} is {@code null},
+     *         or an empty buffer if {@code str} is empty
+     * @throws IllegalArgumentException if {@code str} contains characters outside the Base64 alphabet
      */
     @Override
     public ByteBuffer valueOf(final String str) {
@@ -119,23 +118,13 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
     }
 
     /**
-     * Extracts the content of a ByteBuffer as a byte array.
-     * Reads from position 0 to the current position of the buffer,
-     * then resets the position back to its original value.
+     * Extracts the written content of a {@link java.nio.ByteBuffer} as a byte array.
+     * Copies bytes from index {@code 0} up to (but not including) the buffer's current
+     * {@link java.nio.ByteBuffer#position() position}, then restores the position to its
+     * original value before returning.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ByteBuffer buffer = ByteBuffer.allocate(10);
-     * buffer.put("Hello".getBytes());
-     * // buffer position is now 5
-     *
-     * byte[] data = ByteBufferType.byteArrayOf(buffer);
-     * // data: [72, 101, 108, 108, 111] (bytes for "Hello")
-     * // buffer position is still 5 after the call
-     * }</pre>
-     *
-     * @param x the ByteBuffer to extract bytes from
-     * @return a byte array containing the buffer's content from 0 to current position
+     * @param x the {@code ByteBuffer} to extract bytes from; must not be {@code null}
+     * @return a new byte array containing the buffer's written bytes (indices {@code 0..position-1})
      */
     public static byte[] byteArrayOf(final ByteBuffer x) {
         final byte[] bytes = new byte[x.position()];
@@ -148,20 +137,14 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
     }
 
     /**
-     * Creates a ByteBuffer from a byte array.
-     * The resulting buffer wraps the input array with position set to the array length,
-     * limit set to array length, and capacity equal to array length.
+     * Wraps a byte array in a {@link java.nio.ByteBuffer} with position set to the end
+     * of the data (i.e. {@code bytes.length}).
+     * The resulting buffer has capacity equal to {@code bytes.length} and limit equal to
+     * {@code bytes.length}, with position at {@code bytes.length} — ready for reading
+     * via {@link #byteArrayOf(ByteBuffer)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * byte[] data = "Hello".getBytes();
-     * ByteBuffer buffer = ByteBufferType.valueOf(data);
-     * // buffer: ByteBuffer with capacity=5, position=5, limit=5
-     * // Wraps the data array
-     * }</pre>
-     *
-     * @param bytes the byte array to wrap in a ByteBuffer
-     * @return a ByteBuffer wrapping the input array with position at the end
+     * @param bytes the byte array to wrap; must not be {@code null}
+     * @return a {@code ByteBuffer} wrapping {@code bytes} with position at {@code bytes.length}
      */
     public static ByteBuffer valueOf(final byte[] bytes) {
         return ByteBuffer.wrap(bytes, bytes.length, 0);

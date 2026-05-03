@@ -76,6 +76,24 @@ public class AbstractIntStreamTest extends TestBase {
     }
 
     @Test
+    public void testDebounce() {
+        IntStream result = createIntStream(1, 2, 3, 4).debounce(2, Duration.ofHours(1));
+        Assertions.assertArrayEquals(new int[] { 1, 2 }, result.toArray());
+    }
+
+    @Test
+    public void testDebounce_EmptyInput() {
+        IntStream result = createIntStream().debounce(2, Duration.ofHours(1));
+        Assertions.assertArrayEquals(new int[] {}, result.toArray());
+    }
+
+    @Test
+    public void testDebounce_ErrorPath() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> createIntStream(1).debounce(0, Duration.ofHours(1)).toArray());
+        Assertions.assertThrows(IllegalArgumentException.class, () -> createIntStream(1).debounce(1, Duration.ofMillis(0)).toArray());
+    }
+
+    @Test
     public void testSkipUntil() {
         IntStream result = stream.skipUntil(x -> x > 3);
         int[] array = result.toArray();
@@ -98,7 +116,7 @@ public class AbstractIntStreamTest extends TestBase {
 
     @Test
     public void testFlatmap() {
-        IntStream result = stream.flatmap(x -> new int[] { x, x * 2 });
+        IntStream result = stream.flatMapArray(x -> new int[] { x, x * 2 });
         int[] array = result.toArray();
         Assertions.assertArrayEquals(new int[] { 1, 2, 2, 4, 3, 6, 4, 8, 5, 10 }, array);
     }

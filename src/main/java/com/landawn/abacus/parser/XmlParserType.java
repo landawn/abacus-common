@@ -17,14 +17,14 @@ package com.landawn.abacus.parser;
 /**
  * Enumeration of XML parser types supported by the framework.
  * Each parser type represents a different approach to XML processing with distinct characteristics.
- * 
+ *
  * <p>Available parser types:
  * <ul>
  *   <li>{@link #SAX} - Simple API for XML (event-driven, memory efficient)</li>
  *   <li>{@link #DOM} - Document Object Model (tree-based, loads entire document)</li>
  *   <li>{@link #StAX} - Streaming API for XML (pull-based, balances performance and ease of use)</li>
  * </ul>
- * 
+ *
  * <p>Parser characteristics:
  * <ul>
  *   <li><b>SAX</b>: Event-driven, forward-only, memory efficient for large documents,
@@ -34,18 +34,18 @@ package com.landawn.abacus.parser;
  *   <li><b>StAX</b>: Pull-based streaming, developer controls parsing flow,
  *       good balance between performance and ease of use</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create parser with specific type
  * XmlParser staxParser = new XmlParserImpl(XmlParserType.StAX);
  * XmlParser domParser = new XmlParserImpl(XmlParserType.DOM);
- * 
+ *
  * // Choose parser based on requirements
  * XmlParserType parserType = largeFile ? XmlParserType.StAX : XmlParserType.DOM;
  * XmlParser parser = new XmlParserImpl(parserType);
  * }</pre>
- * 
+ *
  * @see XmlParserImpl
  */
 enum XmlParserType {

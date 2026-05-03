@@ -27,24 +27,24 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * A utility class that provides simplified reflection operations with improved performance through caching.
  * This class wraps common reflection tasks like field access, method invocation, and object instantiation
  * in an easy-to-use fluent API.
- * 
+ *
  * <p>For better performance, add the <a href="https://github.com/EsotericSoftware/reflectasm">reflectasm</a>
  * library to your build path. When available, this class will automatically use ReflectASM for improved
  * reflection performance.</p>
- * 
+ *
  * <p>All reflection metadata (fields, constructors, methods) is cached for performance optimization.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create instance from class name
- * MyClass obj = Reflection.on("com.example.MyClass").newInstance();
- * 
+ * MyClass obj = Reflection.<MyClass>on("com.example.MyClass").newInstance().instance();
+ *
  * // Access instance fields and methods
  * Reflection.on(obj)
  *     .set("name", "John")
  *     .set("age", 30)
  *     .invoke("processData", "input");
- * 
+ *
  * // Get field value
  * String name = Reflection.on(obj).get("name");
  * }</pre>
@@ -92,18 +92,18 @@ public final class Reflection<T> {
 
     /**
      * Creates a Reflection instance for the specified class name.
-     * The class is loaded using the current thread's context class loader.
+     * The class is loaded via {@link ClassUtil#forName(String)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Reflection<MyClass> ref = Reflection.on("com.example.MyClass");
-     * MyClass instance = ref.newInstance();
+     * MyClass instance = ref.newInstance().instance();
      * }</pre>
      *
      * @param <T> the type of the class
      * @param clsName the fully qualified name of the class
      * @return a Reflection instance for the specified class
-     * @throws RuntimeException if the class cannot be found
+     * @throws IllegalArgumentException if the class cannot be located
      */
     public static <T> Reflection<T> on(final String clsName) {
         return on(ClassUtil.forName(clsName));
@@ -115,7 +115,7 @@ public final class Reflection<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Reflection<String> ref = Reflection.on(String.class);
-     * String str = ref.newInstance("Hello");
+     * String str = ref.newInstance("Hello").instance();
      * }</pre>
      *
      * @param <T> the type of the class
@@ -150,7 +150,7 @@ public final class Reflection<T> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MyClass obj = Reflection.on(MyClass.class).newInstance();
+     * MyClass obj = Reflection.on(MyClass.class).newInstance().instance();
      * }</pre>
      *
      * @return a new Reflection instance wrapping the newly created object

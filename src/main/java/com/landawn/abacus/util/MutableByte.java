@@ -20,24 +20,24 @@ import java.io.Serial;
 
 /**
  * A mutable wrapper for a {@code byte} value, providing methods to modify the wrapped value.
- * 
+ *
  * <p>This class is useful in scenarios where you need to pass a byte by reference,
  * accumulate byte values in lambda expressions, or store frequently changing byte values
  * in collections without creating new Byte objects.</p>
- * 
+ *
  * <p><strong>Note: This class is NOT thread-safe.</strong> If multiple threads access a
  * MutableByte instance concurrently, and at least one thread modifies it, external
  * synchronization is required.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * MutableByte counter = MutableByte.of((byte)0);
  * byteArray.forEach(b -> counter.add(b));
  * System.out.println("Sum: " + counter.value());
  * }</pre>
- * 
+ *
  * <p>Note: This class is adapted from Apache Commons Lang.</p>
- * 
+ *
  * @version $Id: MutableByte.java 1669791 2015-03-28 15:22:59Z britter $
  * @see Byte
  * @see Number
@@ -56,7 +56,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
 
     /**
      * Constructs a new MutableByte with the default value of zero.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = new MutableByte();   // value is 0
@@ -67,12 +67,12 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
 
     /**
      * Constructs a new MutableByte with the specified initial value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = new MutableByte((byte)127);   // value is 127
      * }</pre>
-     * 
+     *
      * @param value the initial value to store
      */
     MutableByte(final byte value) {
@@ -82,12 +82,12 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     /**
      * Creates a new MutableByte instance with the specified value.
      * This is a factory method that provides a more fluent way to create instances.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte flags = MutableByte.of((byte)0xFF);
      * }</pre>
-     * 
+     *
      * @param value the initial value
      * @return a new MutableByte instance containing the specified value
      */
@@ -97,13 +97,13 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
 
     /**
      * Returns the current byte value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = MutableByte.of((byte)42);
      * byte val = num.value();   // returns 42
      * }</pre>
-     * 
+     *
      * @return the current byte value
      */
     public byte value() {
@@ -128,13 +128,13 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
 
     /**
      * Sets the value to the specified byte.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = MutableByte.of((byte)10);
      * num.setValue((byte)20);   // value is now 20
      * }</pre>
-     * 
+     *
      * @param newValue the value to set
      */
     public void setValue(final byte newValue) {
@@ -143,7 +143,10 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
 
     /**
      * Returns the current value and then sets it to the specified new value.
-     * This is an atomic-like get-then-set operation for single-threaded use.
+     *
+     * <p><strong>Note:</strong> this is not atomic; it simply returns the previous value
+     * and assigns the new one within a single method call. External synchronization is
+     * required for concurrent use.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -161,9 +164,11 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     }
 
     /**
-     * Sets the value to the specified new value and then returns it.
-     * This is an atomic-like set-then-get operation for single-threaded use,
-     * useful when you want to update and immediately use the new value.
+     * Sets the value to the specified new value and then returns it. Useful when you
+     * want to update and immediately use the new value.
+     *
+     * <p><strong>Note:</strong> this is not atomic. External synchronization is required
+     * for concurrent use.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

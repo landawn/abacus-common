@@ -526,6 +526,13 @@ public final class TypeFactory {
         }
     }
 
+    /**
+     * Returns the canonical class name for the given class, falling back to {@link Class#getName()}
+     * when no canonical name is available (e.g., for anonymous or local classes).
+     *
+     * @param cls the class to obtain a name for
+     * @return the canonical class name, or the binary name if no canonical name exists
+     */
     static String getClassName(final Class<?> cls) {
         String clsName = ClassUtil.getCanonicalClassName(cls);
 
@@ -536,6 +543,15 @@ public final class TypeFactory {
         return clsName;
     }
 
+    /**
+     * Returns a human-readable name for the given {@link java.lang.reflect.Type}.
+     * For {@link Class} instances this delegates to {@link #getClassName(Class)};
+     * for all other types (e.g., {@link java.lang.reflect.ParameterizedType}) it
+     * uses {@link ClassUtil#getTypeName(java.lang.reflect.Type)}.
+     *
+     * @param javaType the reflection type to name
+     * @return a string representation of the type suitable for use as a type-pool key
+     */
     static String getJavaTypeName(final java.lang.reflect.Type javaType) {
         if (javaType instanceof Class) {
             return getClassName((Class<?>) javaType);
@@ -1310,6 +1326,7 @@ public final class TypeFactory {
      * </p>
      * <p>
      * Supported type name formats:
+     * </p>
      * <ul>
      *   <li>Simple class name: "String", "Integer" for built-in type</li>
      *   <li>Fully qualified class name: "java.lang.String", "com.example.Person"</li>
@@ -1322,7 +1339,6 @@ public final class TypeFactory {
      *   <li>Tuple types: "Pair&lt;String,Integer&gt;", "Triple&lt;String,Integer,Boolean&gt;"</li>
      *   <li>Enum with parameters: "Color(true)" - for case-insensitive enum parsing</li>
      * </ul>
-     * </p>
      * <p>
      * The method caches Type objects for reuse. If the type pool size reaches multiples of 100,
      * a warning is logged about the pool size.

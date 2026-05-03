@@ -29,35 +29,35 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 
 /**
+ * General File System utilities for checking disk space.
+ *
  * <p>This class is copied from Apache Commons IO developed at The Apache Software Foundation
  * under the Apache License 2.0.</p>
- * 
- * General File System utilities for checking disk space.
- * 
+ *
  * <p>This class provides static utility methods for querying file system
  * free space by invoking native operating system commands. It supports
  * Windows, Unix, and POSIX-compliant systems.</p>
- * 
+ *
  * <p>The class works by executing platform-specific commands:</p>
  * <ul>
  * <li>Windows: uses 'dir /-c' command</li>
  * <li>Unix/Linux: uses 'df -k' command</li>
  * <li>AIX/HP-UX: uses 'df -kP' command</li>
  * </ul>
- * 
+ *
  * <p><b>Note:</b> This implementation relies on command-line utilities and may not work
  * on all platforms or configurations. For modern applications, consider using
  * {@link java.nio.file.FileStore} instead.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Get free space in kilobytes for a specific path
  * long freeSpaceKb = FileSystemUtil.freeSpaceKb("/home");
  * System.out.println("Free space: " + freeSpaceKb + " KB");
- * 
+ *
  * // Get free space for current working directory
  * long currentDirSpace = FileSystemUtil.freeSpaceKb();
- * 
+ *
  * // With timeout
  * long freeSpace = FileSystemUtil.freeSpaceKb("C:\\", 5000);
  * }</pre>
@@ -123,26 +123,26 @@ final class FileSystemUtil {
 
     /**
      * Returns the free space on a drive or volume in kilobytes.
-     * 
+     *
      * <p>This method invokes the appropriate command line utility based on the
      * operating system to determine free space. The path must be a valid
      * file system path on the current platform.</p>
-     * 
+     *
      * <p>Platform-specific behavior:</p>
      * <ul>
      * <li>Windows: uses 'dir /-c' on the specified path</li>
      * <li>Unix/Linux: uses 'df -k' on the specified path</li>
      * <li>AIX/HP-UX: uses 'df -kP' on the specified path</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Windows
      * long freeKb = FileSystemUtil.freeSpaceKb("C:");
-     * 
+     *
      * // Unix/Linux
      * long freeKb = FileSystemUtil.freeSpaceKb("/home");
-     * 
+     *
      * // Check if enough space (e.g., 100MB)
      * if (FileSystemUtil.freeSpaceKb("/tmp") < 100 * 1024) {
      *     System.err.println("Not enough space!");
@@ -161,11 +161,11 @@ final class FileSystemUtil {
 
     /**
      * Returns the free space on a drive or volume in kilobytes with a timeout.
-     * 
+     *
      * <p>This method is similar to {@link #freeSpaceKb(String)} but allows
      * specifying a timeout for the command execution. This is useful to prevent
      * hanging on unresponsive file systems.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
@@ -191,12 +191,12 @@ final class FileSystemUtil {
 
     /**
      * Returns the free space in the current working directory in kilobytes.
-     * 
+     *
      * <p>This is equivalent to calling:</p>
      * <pre>{@code
      * freeSpaceKb(new File(".").getAbsolutePath())
      * }</pre>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long freeKb = FileSystemUtil.freeSpaceKb();
@@ -213,12 +213,12 @@ final class FileSystemUtil {
 
     /**
      * Returns the free space in the current working directory in kilobytes with a timeout.
-     * 
+     *
      * <p>This is equivalent to calling:</p>
      * <pre>{@code
      * freeSpaceKb(new File(".").getAbsolutePath(), timeout)
      * }</pre>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get free space in current directory with 3 second timeout
@@ -239,11 +239,11 @@ final class FileSystemUtil {
     /**
      * Returns the free space on a drive or volume in a cross-platform manner.
      * Note that some OS's are NOT currently supported, including OS/390.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FileSystemUtils.freeSpace("C:");        // Windows
-     * FileSystemUtils.freeSpace("/volume");   // *nix
+     * FileSystemUtil.freeSpaceKb("C:");        // Windows
+     * FileSystemUtil.freeSpaceKb("/volume");   // *nix
      * }</pre>
      * The free space is calculated via the command line.
      * It uses 'dir /-c' on Windows and <i>df</i> on *nix.

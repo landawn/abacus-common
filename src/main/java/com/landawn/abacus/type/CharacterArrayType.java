@@ -20,44 +20,43 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
-import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for Character array (Character[]) values.
- * This class provides serialization, deserialization, and output operations for Character arrays.
- * It handles proper formatting with brackets, separators, and {@code null} value representation.
+ * Type handler for boxed-character array ({@code Character[]}) values.
+ * This class provides serialization, deserialization, and output operations for {@code Character[]} arrays.
+ *
+ * <p>The canonical string format is a bracket-enclosed, comma-separated list where each non-null
+ * character element is wrapped in single quotes (e.g., {@code ['a', 'b', null, 'z']}),
+ * and null elements are written as the literal {@code null}.</p>
+ *
+ * @see ObjectArrayType
  */
 public final class CharacterArrayType extends ObjectArrayType<Character> {
 
     /**
-     * Package-private constructor for CharacterArrayType.
-     * This constructor is called by the TypeFactory to create Character[] type instances.
+     * Package-private constructor for {@code CharacterArrayType}.
+     * Instances are created by the {@code TypeFactory}.
      */
     CharacterArrayType() {
         super(Character[].class);
     }
 
     /**
-     * Converts a Character array to its string representation.
-     * The output format is: [element1, element2, ...]
-     * - Null elements are represented as "null"
-     * - Non-null characters are wrapped in single quotes
-     * - Empty arrays return "[]"
+     * Converts a {@code Character[]} to its canonical string representation.
+     * The output format is a bracket-enclosed, comma-separated list.
+     * Each non-null character is wrapped in single quotes; null elements are written as {@code null}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Character[]> type = TypeFactory.getType(Character[].class);
-     * Character[] array = {'a', 'b', null, 'z'};
-     * String result = type.stringOf(array);
-     * // result: "['a', 'b', null, 'z']"
+     * <p>Examples:</p>
+     * <ul>
+     *   <li>{@code ['a', 'b', null, 'z']} for {@code new Character[]{'a','b',null,'z'}}</li>
+     *   <li>{@code []} for an empty array</li>
+     *   <li>{@code null} if the input is {@code null}</li>
+     * </ul>
      *
-     * String empty = type.stringOf(new Character[0]);
-     * // empty: "[]"
-     * }</pre>
-     *
-     * @param x the Character array to convert. Can be {@code null}.
-     * @return A string representation of the array with quoted characters, or {@code null} if input is null
+     * @param x the {@code Character[]} to convert; may be {@code null}
+     * @return the string representation, or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final Character[] x) {
@@ -94,24 +93,19 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
     }
 
     /**
-     * Converts a string representation back to a Character array.
-     * Expects format: [element1, element2, ...]
-     * - Handles both quoted and unquoted characters
-     * - "null" strings (4 characters) are converted to {@code null} elements
-     * - Empty string or "[]" returns empty array
+     * Parses a string representation back into a {@code Character[]} array.
+     * The expected format is a bracket-enclosed, comma-separated list as produced by {@link #stringOf}.
+     * Elements may be enclosed in single or double quotes; the literal {@code null} (4 characters)
+     * is converted to a {@code null} array element.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Character[]> type = TypeFactory.getType(Character[].class);
-     * Character[] result = type.valueOf("['a', 'b', null, 'z']");
-     * // result: {'a', 'b', null, 'z'}
+     * <p>Special cases:</p>
+     * <ul>
+     *   <li>{@code null}, blank, or empty string returns {@code null}</li>
+     *   <li>{@code "[]"} returns an empty array</li>
+     * </ul>
      *
-     * Character[] empty = type.valueOf("[]");
-     * // empty: {} (empty array)
-     * }</pre>
-     *
-     * @param str the string to parse. Can be {@code null}.
-     * @return A Character array parsed from the string, or {@code null} if input is null
+     * @param str the string to parse; may be {@code null}
+     * @return the parsed {@code Character[]}, or {@code null} if {@code str} is {@code null} or blank
      */
     @Override
     public Character[] valueOf(final String str) {
@@ -149,12 +143,13 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
     }
 
     /**
-     * Appends a Character array to an Appendable output.
-     * The output format is: [element1, element2, ...]
-     * Null elements are represented as "null" (without quotes).
+     * Appends a {@code Character[]} to an {@link Appendable}.
+     * The output format is a bracket-enclosed, comma-separated list.
+     * Null elements are written as {@code null}; non-null characters are written unquoted.
+     * If {@code x} is {@code null}, the literal {@code null} is appended.
      *
-     * @param appendable the Appendable to write to
-     * @param x the Character array to append. Can be {@code null}.
+     * @param appendable the {@link Appendable} to write to
+     * @param x          the {@code Character[]} to append; may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
@@ -181,15 +176,19 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
     }
 
     /**
-     * Writes a Character array to a CharacterWriter with optional quotation based on configuration.
-     * The output format is: [element1, element2, ...]
-     * - If quotation is configured, characters are wrapped in the specified quote character
-     * - Single quotes within characters are escaped when using single quote quotation
-     * - Null elements are always represented as "null" without quotes
+     * Writes a {@code Character[]} to a {@link CharacterWriter} with optional per-element quotation.
+     * The output format is a bracket-enclosed, comma-separated list.
+     * <ul>
+     *   <li>If {@code config} specifies a non-zero {@code charQuotation}, each non-null character
+     *       is wrapped in that quote character, and a single quote ({@code '}) is escaped with a
+     *       backslash when using single-quote quotation.</li>
+     *   <li>Null elements are always written as {@code null}, without quotes.</li>
+     *   <li>If {@code x} is {@code null}, the literal {@code null} is written.</li>
+     * </ul>
      *
-     * @param writer the CharacterWriter to write to
-     * @param x the Character array to write. Can be {@code null}.
-     * @param config the serialization configuration that specifies quotation settings. Can be {@code null}.
+     * @param writer the {@link CharacterWriter} to write to
+     * @param x      the {@code Character[]} to write; may be {@code null}
+     * @param config serialization configuration controlling quotation; may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
@@ -239,12 +238,12 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
     }
 
     /**
-     * Converts a Character array to a string representation using standard array formatting.
-     * This is an alternative string representation that uses join utility for formatting.
-     * The output format is: [element1, element2, ...]
+     * Converts a {@code Character[]} to a human-readable string using the standard join utility.
+     * Unlike {@link #stringOf}, elements are written without quote delimiters.
+     * The format is a bracket-enclosed, comma-separated list (e.g., {@code [a, b, c]}).
      *
-     * @param x the Character array to convert. Can be {@code null}.
-     * @return A string representation of the array, or {@code null} if input is null
+     * @param x the {@code Character[]} to convert; may be {@code null}
+     * @return a string representation of the array, or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String toString(final Character[] x) {

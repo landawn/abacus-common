@@ -26,6 +26,7 @@ import java.io.StringWriter;
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +37,8 @@ import com.landawn.abacus.util.Tuple.Tuple9;
 
 public class Tuple9TypeTest extends TestBase {
 
-    private final Tuple9Type type = new Tuple9Type("String", "String", "String", "String", "String", "String", "String", "String", "String");
+    private final Tuple9Type<String, String, String, String, String, String, String, String, String> type = new Tuple9Type("String", "String", "String",
+            "String", "String", "String", "String", "String", "String");
 
     @Test
     public void test_declaringName() {
@@ -52,9 +54,9 @@ public class Tuple9TypeTest extends TestBase {
 
     @Test
     public void test_parameterTypes() {
-        Type<?>[] params = type.parameterTypes();
+        List<Type<?>> params = type.parameterTypes();
         assertNotNull(params);
-        assertEquals(9, params.length);
+        assertEquals(9, params.size());
     }
 
     @Test
@@ -91,8 +93,7 @@ public class Tuple9TypeTest extends TestBase {
         Tuple9<String, String, String, String, String, String, String, String, String> t = Tuple.of("a", "b", "c", "d", "e", "f", "g", "h", "i");
         String json = type.stringOf(t);
         @SuppressWarnings("unchecked")
-        Tuple9<String, String, String, String, String, String, String, String, String> result = (Tuple9<String, String, String, String, String, String, String, String, String>) type
-                .valueOf(json);
+        Tuple9<String, String, String, String, String, String, String, String, String> result = type.valueOf(json);
         assertNotNull(result);
         assertEquals("a", result._1);
         assertEquals("i", result._9);

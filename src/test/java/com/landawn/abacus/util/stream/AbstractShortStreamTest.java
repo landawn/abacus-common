@@ -78,6 +78,26 @@ public class AbstractShortStreamTest extends TestBase {
     }
 
     @Test
+    public void testDebounce() {
+        short[] result = createShortStream(new short[] { 1, 2, 3, 4 }).debounce(2, com.landawn.abacus.util.Duration.ofHours(1)).toArray();
+        assertArrayEquals(new short[] { 1, 2 }, result);
+    }
+
+    @Test
+    public void testDebounce_EmptyInput() {
+        short[] result = createShortStream(new short[] {}).debounce(2, com.landawn.abacus.util.Duration.ofHours(1)).toArray();
+        assertArrayEquals(new short[] {}, result);
+    }
+
+    @Test
+    public void testDebounce_ErrorPath() {
+        assertThrows(IllegalArgumentException.class,
+                () -> createShortStream(new short[] { 1 }).debounce(0, com.landawn.abacus.util.Duration.ofHours(1)).toArray());
+        assertThrows(IllegalArgumentException.class,
+                () -> createShortStream(new short[] { 1 }).debounce(1, com.landawn.abacus.util.Duration.ofMillis(0)).toArray());
+    }
+
+    @Test
     public void testSkipUntil() {
         ShortStream result = createShortStream(new short[] { 1, 2, 3, 4, 5 }).skipUntil(v -> v > 3);
         assertArrayEquals(new short[] { 4, 5 }, result.toArray());
@@ -103,13 +123,13 @@ public class AbstractShortStreamTest extends TestBase {
 
     @Test
     public void testFlatmap() {
-        ShortStream result = createShortStream(new short[] { 1, 2, 3 }).flatmap(v -> new short[] { v, (short) (v * 10) });
+        ShortStream result = createShortStream(new short[] { 1, 2, 3 }).flatMapArray(v -> new short[] { v, (short) (v * 10) });
         assertArrayEquals(new short[] { 1, 10, 2, 20, 3, 30 }, result.toArray());
 
-        result = createShortStream(new short[] { 1, 2, 3 }).flatmap(v -> new short[] {});
+        result = createShortStream(new short[] { 1, 2, 3 }).flatMapArray(v -> new short[] {});
         assertArrayEquals(new short[] {}, result.toArray());
 
-        result = createShortStream(new short[] { 1, 2, 3 }).flatmap(v -> v == 2 ? new short[] {} : new short[] { v });
+        result = createShortStream(new short[] { 1, 2, 3 }).flatMapArray(v -> v == 2 ? new short[] {} : new short[] { v });
         assertArrayEquals(new short[] { 1, 3 }, result.toArray());
     }
 

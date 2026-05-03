@@ -84,6 +84,7 @@ public interface ObjDoubleFunction<T, R> extends Throwables.ObjDoubleFunction<T,
      * @param after the function to apply after this function is applied
      * @return a composed function that first applies this function and then
      *         applies the {@code after} function
+     * @throws NullPointerException if {@code after} is null
      */
     default <V> ObjDoubleFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return (t, u) -> after.apply(apply(t, u));

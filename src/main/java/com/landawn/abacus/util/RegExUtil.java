@@ -65,7 +65,7 @@ import com.landawn.abacus.util.function.IntBiFunction;
  *   <li><b>{@link #NUMBER_FINDER}:</b> Extracts numeric values including integers and decimals</li>
  *   <li><b>{@link #EMAIL_ADDRESS_RFC_5322_MATCHER}:</b> Validates and extracts email addresses</li>
  *   <li><b>{@link #HTTP_URL_MATCHER}:</b> Matches HTTP/HTTPS URLs with optional protocols</li>
- *   <li><b>{@link #DATE_MATCHER}:</b> Recognizes common date formats (MM/dd/yyyy, etc.)</li>
+ *   <li><b>{@link #DATE_MATCHER}:</b> Recognizes ISO-style date formats (yyyy-MM-dd, yyyy/MM/dd, yyyy.MM.dd)</li>
  *   <li><b>{@link #WHITESPACE_MATCHER}:</b> Matches multiple consecutive whitespace characters</li>
  *   <li><b>{@link #LINE_SEPARATOR}:</b> Platform-independent line ending detection</li>
  * </ul>
@@ -83,12 +83,12 @@ import com.landawn.abacus.util.function.IntBiFunction;
  * <pre>{@code
  * // Basic pattern matching and validation
  * boolean hasNumber = RegExUtil.find("Order #12345", RegExUtil.NUMBER_FINDER);
- * boolean isValidEmail = RegExUtil.matches("user@example.com", RegExUtil.EMAIL_PATTERN);
- * boolean isJavaClass = RegExUtil.matches("MyClass", RegExUtil.JAVA_IDENTIFIER);
+ * boolean isValidEmail = RegExUtil.matches("user@example.com", RegExUtil.EMAIL_ADDRESS_RFC_5322_MATCHER);
+ * boolean isJavaClass = RegExUtil.matches("MyClass", RegExUtil.JAVA_IDENTIFIER_MATCHER);
  *
  * // String cleaning and normalization
  * String normalized = RegExUtil.replaceAll("Hello    World", "\\s+", " ");
- * String cleaned = RegExUtil.replaceAll(text, RegExUtil.WHITESPACE_NORMALIZER, " ");
+ * String cleaned = RegExUtil.replaceAll(text, RegExUtil.WHITESPACE_FINDER, " ");
  *
  * // Extracting and counting matches
  * int numberCount = RegExUtil.countMatches("1 apple, 2 oranges, 3 bananas", "\\d+");
@@ -107,7 +107,7 @@ import com.landawn.abacus.util.function.IntBiFunction;
  *     .collect(Collectors.toList());
  *
  * // Complex replacement with context
- * String processed = RegExUtil.replaceAll(sourceCode, RegExUtil.JAVA_IDENTIFIER, 
+ * String processed = RegExUtil.replaceAll(sourceCode, RegExUtil.JAVA_IDENTIFIER_FINDER,
  *     identifier -> isReservedWord(identifier) ? escapeIdentifier(identifier) : identifier);
  *
  * // Line-by-line processing
@@ -223,9 +223,9 @@ import com.landawn.abacus.util.function.IntBiFunction;
  * <p><b>Usage Examples: Log File Processing</b>
  * <pre>{@code
  * public class LogProcessor {
- *     private static final Pattern TIMESTAMP_PATTERN = 
+ *     private static final Pattern TIMESTAMP_PATTERN =
  *         Pattern.compile("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}");
- *     private static final Pattern ERROR_PATTERN = 
+ *     private static final Pattern ERROR_PATTERN =
  *         Pattern.compile("ERROR|FATAL", Pattern.CASE_INSENSITIVE);
  *
  *     public List<LogEntry> processLogFile(String logContent) {
@@ -241,19 +241,19 @@ import com.landawn.abacus.util.function.IntBiFunction;
  *             .findFirst()
  *             .map(MatchResult::group)
  *             .orElse("Unknown");
- *         
+ *
  *         String level = RegExUtil.matchResults(line, ERROR_PATTERN)
  *             .findFirst()
  *             .map(MatchResult::group)
  *             .orElse("INFO");
- *             
+ *
  *         return new LogEntry(timestamp, level, line);
  *     }
  *
  *     public String anonymizeLog(String logContent) {
  *         // Replace email addresses with [EMAIL]
- *         String anonymized = RegExUtil.replaceAll(logContent, RegExUtil.EMAIL_PATTERN, "[EMAIL]");
- *         
+ *         String anonymized = RegExUtil.replaceAll(logContent, RegExUtil.EMAIL_ADDRESS_RFC_5322_FINDER, "[EMAIL]");
+ *
  *         // Replace numbers with [NUM]
  *         return RegExUtil.replaceAll(anonymized, RegExUtil.NUMBER_FINDER, "[NUM]");
  *     }
@@ -269,7 +269,7 @@ import com.landawn.abacus.util.function.IntBiFunction;
  * </ul>
  *
  * <p><b>Attribution:</b>
- * This class includes code adapted from Apache Commons Lang under the Apache License 2.0. 
+ * This class includes code adapted from Apache Commons Lang under the Apache License 2.0.
  * Methods from these libraries may have been modified for consistency, performance optimization, and null-safety enhancement.
  *
  * @see java.util.regex.Pattern
@@ -536,8 +536,8 @@ public final class RegExUtil {
      *   <li>{@code "1E-9"}</li>
      * </ul>
      *
-     * <p><strong>Note:</strong> This pattern requires at least one digit before the decimal point, 
-     * so values like {@code .5} are not matched. It also allows optional exponent notation, but only 
+     * <p><strong>Note:</strong> This pattern requires at least one digit before the decimal point,
+     * so values like {@code .5} are not matched. It also allows optional exponent notation, but only
      * when preceded by a valid base number.</p>
      *
      * @see java.util.regex.Pattern
@@ -701,7 +701,7 @@ public final class RegExUtil {
      *   <li>{@code (0[1-9]|1[012])} — capturing group for month: 01-09 or 10-12</li>
      *   <li>{@code \\2} — backreference ensuring the same date separator is used</li>
      *   <li>{@code (0[1-9]|[12][0-9]|3[01])} — capturing group for day: 01-09, 10-29, or 30-31</li>
-     *   <li>{@code } — literal space separating date and time</li>
+     *   <li>{@code " "} — literal space separating date and time</li>
      *   <li>{@code ([01]\\d|2[0-3])} — capturing group for hours: 00-19 or 20-23</li>
      *   <li>{@code :} — literal colon separator</li>
      *   <li>{@code ([0-5]\\d)} — capturing group for minutes: 00-59</li>
@@ -800,22 +800,19 @@ public final class RegExUtil {
             "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])");
 
     /**
-     * A regular expression {@link Pattern} that matches complete URLs.
+     * A regular expression {@link Pattern} that finds URLs within a larger text.
      * <p>
-     * This pattern validates URLs that must match from start to end of the string.
-     * It supports HTTP, HTTPS, FTP, and FILE protocols and ensures the URL
-     * contains a valid host and optional path components.
+     * This pattern searches for URLs in input text and supports HTTP, HTTPS, FTP, and FILE
+     * protocols. It matches URLs that contain a valid host and optional path components.
      * </p>
      *
      * <p>Regex breakdown:</p>
      * <ul>
-     *   <li>{@code ^} — start of string anchor</li>
      *   <li>{@code (https?|ftp|file)} — protocol: http, https, ftp, or file</li>
      *   <li>{@code ://} — protocol separator</li>
      *   <li>{@code [^\\s/$.?#]} — first character of host (not whitespace, slash, dollar, dot, question mark, or hash)</li>
      *   <li>{@code .} — any character (typically part of the host)</li>
      *   <li>{@code [^\\s]*} — zero or more non-whitespace characters (rest of URL)</li>
-     *   <li>{@code $} — end of string anchor</li>
      * </ul>
      *
      * <p>Example matches:</p>
@@ -831,12 +828,11 @@ public final class RegExUtil {
      *   <li>{@code "http://.example.com"} — starts with dot after protocol</li>
      *   <li>{@code "http://example .com"} — contains whitespace</li>
      *   <li>{@code "example.com"} — missing protocol</li>
-     *   <li>{@code "Visit http://example.com today"} — doesn't match entire string</li>
      * </ul>
      *
-     * <p><strong>Note:</strong> This pattern requires the entire input string to be a valid URL
-     * due to the start {@code ^} and end {@code $} anchors. For finding URLs within text,
-     * use {@link #HTTP_URL_FINDER} or create a pattern without anchors.</p>
+     * <p><strong>Note:</strong> This pattern can find URLs within larger text strings. To require
+     * the entire input string to be a URL, use {@link #URL_MATCHER} instead. For matching only
+     * HTTP and HTTPS URLs, see {@link #HTTP_URL_FINDER}.</p>
      *
      * @see java.util.regex.Pattern
      * @see #HTTP_URL_FINDER
@@ -1385,7 +1381,7 @@ public final class RegExUtil {
      * String result = RegExUtil.findFirst("abc123xyz456", "\\d+");
      * // Returns: "123"
      *
-     * String email = RegExUtil.findFirst("Contact: john@example.com or jane@test.org", 
+     * String email = RegExUtil.findFirst("Contact: john@example.com or jane@test.org",
      *                                   "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b");
      * // Returns: "john@example.com"
      *
@@ -1428,7 +1424,7 @@ public final class RegExUtil {
      * This method searches through the input string to find the first occurrence that matches
      * the provided regular expression pattern. If a match is found, the matched substring is
      * returned. If no match is found, {@code null} is returned.
-     * </p> 
+     * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2250,7 +2246,7 @@ public final class RegExUtil {
      * <pre>{@code
      * int count = RegExUtil.countMatches("Hello World", "l");
      * // Returns: 3
-     * 
+     *
      * int digitCount = RegExUtil.countMatches("abc123def456", "\\d+");
      * // Returns: 2 (two groups of digits)
      * }</pre>
@@ -2312,7 +2308,7 @@ public final class RegExUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Stream<MatchResult> matches = RegExUtil.matchResults("abc123def456", "\\d+");
-     * matches.forEach(match -> System.out.println(match.group())); 
+     * matches.forEach(match -> System.out.println(match.group()));
      * // Prints: 123, 456
      * }</pre>
      *
@@ -2425,7 +2421,7 @@ public final class RegExUtil {
      * <pre>{@code
      * String[] parts = RegExUtil.split("one,two,three", ",");
      * // Returns: ["one", "two", "three"]
-     * 
+     *
      * String[] words = RegExUtil.split("Hello   World", "\\s+");
      * // Returns: ["Hello", "World"]
      * }</pre>
@@ -2551,7 +2547,7 @@ public final class RegExUtil {
         return pattern.split(source, limit);
     }
 
-    /** 
+    /**
      * Splits the given string into an array of lines, using the default line separator.
      * If the string is {@code null}, an empty array is returned. If the string is empty, an array containing an empty string is returned.
      * This method handles all types of line breaks (CR, LF, CRLF, etc.) across different platforms.
@@ -2579,7 +2575,7 @@ public final class RegExUtil {
         return LINE_SEPARATOR.split(source);
     }
 
-    /** 
+    /**
      * Splits the given string into an array of lines, with a specified limit on the number of lines.
      * If the string is {@code null}, an empty array is returned. If the string is empty, an array containing an empty string is returned.
      * The limit parameter controls how many lines are returned.

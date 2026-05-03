@@ -24,9 +24,18 @@ import java.util.Calendar;
 import com.landawn.abacus.util.Dates;
 
 /**
- * Type handler for {@link Calendar} objects that stores and retrieves them as milliseconds
- * in the database. This implementation converts between Calendar instances and their
- * millisecond representation (time since epoch).
+ * Type handler for {@link Calendar} objects that stores and retrieves date/time values
+ * as milliseconds since the Unix epoch (January 1, 1970, 00:00:00 UTC) in the database.
+ *
+ * <p>The database column type used is {@link java.sql.Types#BIGINT BIGINT}.
+ * On read, the stored {@code long} value is converted to a {@link Calendar} instance
+ * via {@link com.landawn.abacus.util.Dates#createCalendar(long)}.
+ * On write, the {@code Calendar}'s time-in-milliseconds is stored as a {@code long}.
+ * SQL {@code NULL} is mapped to Java {@code null} in both directions.
+ *
+ * @see MillisDateType
+ * @see MillisTimeType
+ * @see MillisTimestampType
  */
 public class MillisCalendarType extends CalendarType {
 
@@ -40,28 +49,16 @@ public class MillisCalendarType extends CalendarType {
     }
 
     /**
-     * Retrieves a Calendar value from the specified column in the ResultSet.
-     * The method reads a long value representing milliseconds from the database
-     * and converts it to a Calendar instance.
+     * Retrieves a {@link Calendar} value from the specified column in the {@link ResultSet}.
+     * The column is read as a {@code BIGINT} representing milliseconds since the Unix epoch
+     * and converted to a {@code Calendar} instance.
+     * SQL {@code NULL} (detected via {@link ResultSet#wasNull()}) is returned as {@code null}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Calendar> type = TypeFactory.getType(Calendar.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     *
-     * // Column contains milliseconds value 1609459200000 (Jan 1, 2021)
-     * Calendar cal = type.get(rs, 1);
-     * // Returns: Calendar object for Jan 1, 2021
-     *
-     * // Column contains 0 (representing NULL)
-     * cal = type.get(rs, 2);
-     * // Returns: null
-     * }</pre>
-     *
-     * @param rs the ResultSet containing the query results
-     * @param columnIndex the index of the column to retrieve (1-based)
-     * @return a Calendar object created from the milliseconds value, or {@code null} if the database value was 0
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param rs the {@code ResultSet} containing the query results
+     * @param columnIndex the 1-based index of the column to retrieve
+     * @return a {@code Calendar} created from the stored millisecond value,
+     *         or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public Calendar get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -71,28 +68,16 @@ public class MillisCalendarType extends CalendarType {
     }
 
     /**
-     * Retrieves a Calendar value from the specified column in the ResultSet.
-     * The method reads a long value representing milliseconds from the database
-     * and converts it to a Calendar instance.
+     * Retrieves a {@link Calendar} value from the specified column in the {@link ResultSet}.
+     * The column is read as a {@code BIGINT} representing milliseconds since the Unix epoch
+     * and converted to a {@code Calendar} instance.
+     * SQL {@code NULL} (detected via {@link ResultSet#wasNull()}) is returned as {@code null}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Calendar> type = TypeFactory.getType(Calendar.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     *
-     * // Column "created_date" contains milliseconds value 1609459200000
-     * Calendar cal = type.get(rs, "created_date");
-     * // Returns: Calendar object for Jan 1, 2021
-     *
-     * // Column "deleted_date" contains 0 (representing NULL)
-     * cal = type.get(rs, "deleted_date");
-     * // Returns: null
-     * }</pre>
-     *
-     * @param rs the ResultSet containing the query results
-     * @param columnName the label of the column to retrieve
-     * @return a Calendar object created from the milliseconds value, or {@code null} if the database value was 0
-     * @throws SQLException if a database access error occurs or the columnName is not found
+     * @param rs the {@code ResultSet} containing the query results
+     * @param columnName the label of the column to retrieve (as specified in the SQL AS clause)
+     * @return a {@code Calendar} created from the stored millisecond value,
+     *         or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
     @Override
     public Calendar get(final ResultSet rs, final String columnName) throws SQLException {
@@ -102,28 +87,14 @@ public class MillisCalendarType extends CalendarType {
     }
 
     /**
-     * Sets a Calendar value at the specified parameter index in the PreparedStatement.
-     * The method converts the Calendar to its millisecond representation and stores it
-     * as a long value in the database. If the Calendar is {@code null}, SQL NULL is set.
+     * Sets a {@link Calendar} parameter in a {@link PreparedStatement} at the specified index.
+     * The {@code Calendar}'s time-in-milliseconds is stored as a {@code BIGINT} value.
+     * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#BIGINT}) is set.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Calendar> type = TypeFactory.getType(Calendar.class);
-     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
-     *
-     * Calendar cal = Calendar.getInstance();
-     * cal.setTimeInMillis(1609459200000L);   // Jan 1, 2021
-     * type.set(stmt, 2, cal);
-     * // Sets parameter to 1609459200000
-     *
-     * type.set(stmt, 2, null);
-     * // Sets parameter to SQL NULL
-     * }</pre>
-     *
-     * @param stmt the PreparedStatement to set the parameter on
-     * @param columnIndex the index of the parameter to set (1-based)
-     * @param x the Calendar value to set, or {@code null} to set SQL NULL
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param columnIndex the 1-based index of the parameter to set
+     * @param x the {@code Calendar} value to set, or {@code null} to set SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Calendar x) throws SQLException {
@@ -135,28 +106,14 @@ public class MillisCalendarType extends CalendarType {
     }
 
     /**
-     * Sets a Calendar value for the specified parameter name in the CallableStatement.
-     * The method converts the Calendar to its millisecond representation and stores it
-     * as a long value in the database. If the Calendar is {@code null}, SQL NULL is set.
+     * Sets a {@link Calendar} parameter in a {@link CallableStatement} by name.
+     * The {@code Calendar}'s time-in-milliseconds is stored as a {@code BIGINT} value.
+     * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#BIGINT}) is set.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Calendar> type = TypeFactory.getType(Calendar.class);
-     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
-     *
-     * Calendar cal = Calendar.getInstance();
-     * cal.setTimeInMillis(1609459200000L);   // Jan 1, 2021
-     * type.set(stmt, "p_event_date", cal);
-     * // Sets parameter to 1609459200000
-     *
-     * type.set(stmt, "p_cancelled_date", null);
-     * // Sets parameter to SQL NULL
-     * }</pre>
-     *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
-     * @param x the Calendar value to set, or {@code null} to set SQL NULL
-     * @throws SQLException if a database access error occurs or the parameterName is not found
+     * @param x the {@code Calendar} value to set, or {@code null} to set SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Calendar x) throws SQLException {

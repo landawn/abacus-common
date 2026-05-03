@@ -52,8 +52,8 @@ public interface LongBiConsumer extends Throwables.LongBiConsumer<RuntimeExcepti
      * recorder.accept(1234567890L, System.currentTimeMillis());
      * }</pre>
      *
-     * @param a the first input argument
-     * @param b the second input argument
+     * @param a the first {@code long} input argument
+     * @param b the second {@code long} input argument
      */
     @Override
     void accept(long a, long b);
@@ -80,6 +80,7 @@ public interface LongBiConsumer extends Throwables.LongBiConsumer<RuntimeExcepti
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code LongBiConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     default LongBiConsumer andThen(final LongBiConsumer after) {
         return (a, b) -> {

@@ -70,9 +70,10 @@ public interface ObjDoubleConsumer<T> extends Throwables.ObjDoubleConsumer<T, Ru
      * combined.accept(numbers, 3.14);
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation
      * @return a composed {@code ObjDoubleConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     default ObjDoubleConsumer<T> andThen(final ObjDoubleConsumer<? super T> after) {
         return (t, u) -> {

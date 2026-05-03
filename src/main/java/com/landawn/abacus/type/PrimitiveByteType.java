@@ -15,17 +15,17 @@
 package com.landawn.abacus.type;
 
 /**
- * Type handler for primitive byte values.
- * This class handles the primitive byte type specifically, as opposed to the Byte wrapper class.
- * It provides type information and default value handling for byte primitives.
+ * Type handler for the primitive {@code byte} type, as opposed to the {@link Byte} wrapper class.
+ * It provides type information and default value handling for {@code byte} primitives,
+ * which map to the SQL {@code TINYINT} type.
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Type<Byte> type = TypeFactory.getType(byte.class);
  *
  * // Convert string to byte
- * Byte value = type.valueOf("42");   // Returns 42
- * Byte value2 = type.valueOf("-128");   // Returns -128
+ * Byte value = type.valueOf("42");    // Returns (byte) 42
+ * Byte value2 = type.valueOf("-128"); // Returns (byte) -128
  *
  * // Get default value
  * Byte defaultVal = type.defaultValue();   // Returns 0
@@ -45,6 +45,10 @@ public final class PrimitiveByteType extends AbstractByteType {
 
     private static final Byte DEFAULT_VALUE = 0;
 
+    /**
+     * Constructs a new PrimitiveByteType instance.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
+     */
     PrimitiveByteType() {
         super(BYTE);
     }

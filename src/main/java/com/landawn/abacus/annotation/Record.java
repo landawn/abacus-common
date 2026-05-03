@@ -21,50 +21,48 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * A test annotation used to mark classes as record-like entities, particularly for testing purposes.
- * This annotation is primarily used to identify entity classes created by Lombok that simulate
- * the behavior of Java 16+ record types in environments where records are not available.
+ * Marks a class as a record-like entity, treating it as equivalent to a Java record for ORM
+ * and reflection-based operations. This annotation is primarily used to identify classes
+ * (for example, those backed by Lombok) that simulate the behavior of Java 14+ record types
+ * when native record syntax is unavailable or impractical.
  *
- * <p>This annotation serves as a marker for testing frameworks and tools to understand that
- * the annotated class represents a data-only structure similar to a Java record, even when
- * implemented using traditional class syntax with Lombok annotations.</p>
+ * <p>A class annotated with {@code @Record} is treated as a record class by framework utilities
+ * such as {@code Beans}, enabling record-specific introspection and mapping behavior even when
+ * the class does not extend {@link java.lang.Record}.</p>
  *
  * <p><b>Primary use cases:</b></p>
  * <ul>
- *   <li>Testing record-like behavior in pre-Java 16 environments.</li>
- *   <li>Marking Lombok-generated classes that simulate records.</li>
- *   <li>Providing metadata for tools that need to distinguish record-like classes.</li>
- *   <li>Supporting backward compatibility testing for record migration.</li>
+ *   <li>Marking Lombok-generated classes (e.g., using {@code @Value} or {@code @Data} with final
+ *       fields) that simulate Java records.</li>
+ *   <li>Providing metadata for frameworks that distinguish record-like data classes from
+ *       regular mutable beans.</li>
+ *   <li>Enabling backward-compatible record semantics in codebases that cannot yet use Java 14+
+ *       native records.</li>
+ * </ul>
+ *
+ * <p><b>Implied semantics for annotated classes:</b></p>
+ * <ul>
+ *   <li>Instances should be effectively immutable.</li>
+ *   <li>All fields should be effectively final.</li>
+ *   <li>Equality is based on field values, not object identity.</li>
+ *   <li>String representation includes all field values.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * @Record
- * @Data
- * @AllArgsConstructor
+ * @Value           // Lombok: generates all-args constructor, getters, equals, hashCode, toString
  * public class PersonRecord {
- *     private final String name;
- *     private final int age;
- *     private final String email;
- *     // Lombok generates constructor, getters, equals, hashCode, toString
+ *     String name;
+ *     int age;
+ *     String email;
  * }
  *
- * // This class behaves similarly to a Java 16+ record:
+ * // This class is treated equivalently to a Java 14+ record:
  * // public record PersonRecord(String name, int age, String email) {}
  * }</pre>
  *
- * <p><b>Testing implications:</b></p>
- * <ul>
- *   <li>Classes marked with this annotation should be treated as immutable.</li>
- *   <li>All fields should be effectively final.</li>
- *   <li>Equality should be based on field values, not identity.</li>
- *   <li>String representation should include all field values.</li>
- * </ul>
- *
- * <p><strong>Note:</strong> This annotation is meta-annotated with {@link Test}, indicating it is
- * primarily intended for testing purposes and may not be suitable for production code.</p>
- *
- * @see Test
+ * @see Immutable
  * @see java.lang.Record
  */
 @Test

@@ -87,6 +87,7 @@ public interface FloatBiFunction<R> extends Throwables.FloatBiFunction<R, Runtim
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied
      * @return a composed function that first applies this function and then applies the {@code after} function
+     * @throws NullPointerException if {@code after} is null
      */
     default <V> FloatBiFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return (a, b) -> after.apply(apply(a, b));

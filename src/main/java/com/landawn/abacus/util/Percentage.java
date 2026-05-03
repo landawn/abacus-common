@@ -21,16 +21,16 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Enumeration representing common percentage values with their string representations and decimal equivalents.
  * This enum provides a convenient way to work with percentages in calculations and formatting.
- * 
+ *
  * <p>The enum includes values from very small percentages (0.0001%) to very high percentages (99.9999%),
  * covering most common use cases in statistics, probability, and general calculations.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Percentage p = Percentage._95;
  * double value = p.doubleValue();   // Returns 0.95
  * String str = p.toString();   // Returns "95%"
- * 
+ *
  * // Get a range of percentages
  * ImmutableSet<Percentage> highPercentages = Percentage.range(Percentage._90, Percentage._99);
  * }</pre>
@@ -299,13 +299,13 @@ public enum Percentage {
      * @throws NullPointerException if {@code p} is {@code null}.
      */
     private static int intValue(final Percentage p) {
-        return (int) (p.val * 1_000_000);
+        return (int) Math.round(p.val * 1_000_000);
     }
 
     /**
      * Returns the decimal representation of this percentage.
      * For example, 95% returns 0.95, 0.1% returns 0.001.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double value = Percentage._75.doubleValue();                // Returns 0.75

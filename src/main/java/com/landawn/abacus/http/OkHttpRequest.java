@@ -54,7 +54,6 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import okhttp3.internal.Util;
 
 /**
  * A fluent HTTP request builder and executor based on OkHttp.
@@ -69,13 +68,13 @@ import okhttp3.internal.Util;
  * Response response = OkHttpRequest.url("http://localhost:18080/users")
  *     .header("Accept", "application/json")
  *     .get();
- * 
+ *
  * // POST request with JSON body
  * User user = new User("John", "Doe");
  * String result = OkHttpRequest.url("http://localhost:18080/users")
  *     .jsonBody(user)
  *     .post(String.class);
- * 
+ *
  * // Asynchronous request
  * ContinuableFuture<Response> future = OkHttpRequest.url("http://localhost:18080/data")
  *     .asyncGet();
@@ -150,7 +149,7 @@ public final class OkHttpRequest {
 
     /**
      * Creates a new OkHttpRequest instance with the specified URL using the default HTTP client.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * OkHttpRequest request = OkHttpRequest.url("http://localhost:18080/users");
@@ -418,7 +417,7 @@ public final class OkHttpRequest {
 
     /**
      * Sets the Basic Authentication header for this request.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * OkHttpRequest.url("http://localhost:18080/secure")
@@ -438,7 +437,7 @@ public final class OkHttpRequest {
     /**
      * Sets the header named {@code name} to {@code value}.
      * If this request already has any headers with that name, they are all replaced.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * OkHttpRequest.url("http://localhost:18080/data")
@@ -502,13 +501,13 @@ public final class OkHttpRequest {
     /**
      * Sets HTTP headers specified by the key/value entries from the provided Map.
      * If this request already has any headers with that name, they are all replaced.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, String> headers = new HashMap<>();
      * headers.put("Accept", "application/json");
      * headers.put("Authorization", "Bearer token123");
-     * 
+     *
      * OkHttpRequest.url("http://localhost:18080/data")
      *     .headers(headers)
      *     .get();
@@ -557,7 +556,7 @@ public final class OkHttpRequest {
 
         if (headers != null && !headers.isEmpty()) {
             for (String headerName : headers.headerNames()) {
-                map.put(headerName, N.stringOf(headers.get(headerName)));
+                map.put(headerName, HttpHeaders.valueOf(headers.get(headerName)));
             }
         }
 
@@ -610,7 +609,7 @@ public final class OkHttpRequest {
     /**
      * Sets query parameters for {@code GET} or {@code DELETE} request.
      * The query string will be appended to the URL.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * OkHttpRequest.url("http://localhost:18080/search")
@@ -630,13 +629,13 @@ public final class OkHttpRequest {
     /**
      * Sets query parameters for {@code GET} or {@code DELETE} request.
      * The parameters will be URL-encoded and appended to the URL.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> params = new HashMap<>();
      * params.put("q", "java programming");
      * params.put("limit", 10);
-     * 
+     *
      * OkHttpRequest.url("http://localhost:18080/search")
      *     .query(params)
      *     .get();
@@ -653,7 +652,7 @@ public final class OkHttpRequest {
 
     /**
      * Sets the request body as JSON with Content-Type: application/json.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "{\"name\":\"John\",\"age\":30}";
@@ -672,7 +671,7 @@ public final class OkHttpRequest {
     /**
      * Sets the request body as JSON with Content-Type: application/json.
      * The object will be serialized to JSON using the default JSON serializer.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 30);
@@ -728,13 +727,13 @@ public final class OkHttpRequest {
     /**
      * Sets the request body as form data with Content-Type: application/x-www-form-urlencoded.
      * The map entries will be encoded as form fields.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, String> formData = new HashMap<>();
      * formData.put("username", "john_doe");
      * formData.put("password", "secret123");
-     * 
+     *
      * OkHttpRequest.url("http://localhost:18080/login")
      *     .formBody(formData)
      *     .post();
@@ -746,7 +745,7 @@ public final class OkHttpRequest {
      */
     public OkHttpRequest formBody(final Map<?, ?> formBodyByMap) {
         if (N.isEmpty(formBodyByMap)) {
-            body = Util.EMPTY_REQUEST;
+            body = new FormBody.Builder().build();
             return this;
         }
 
@@ -763,13 +762,13 @@ public final class OkHttpRequest {
     /**
      * Sets the request body as form data with Content-Type: application/x-www-form-urlencoded.
      * The bean properties will be encoded as form fields using getter methods.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LoginRequest login = new LoginRequest();
      * login.setUsername("john_doe");
      * login.setPassword("secret123");
-     * 
+     *
      * OkHttpRequest.url("http://localhost:18080/login")
      *     .formBody(login)
      *     .post();
@@ -782,7 +781,7 @@ public final class OkHttpRequest {
      */
     public OkHttpRequest formBody(final Object formBodyByBean) throws IllegalArgumentException {
         if (formBodyByBean == null) {
-            body = Util.EMPTY_REQUEST;
+            body = new FormBody.Builder().build();
             return this;
         }
 
@@ -1138,7 +1137,6 @@ public final class OkHttpRequest {
      */
     @Beta
     public Response execute(final HttpMethod httpMethod) throws IOException {
-        // body = (body == null && HttpMethod.DELETE.equals(httpMethod)) ? Util.EMPTY_REQUEST : body;
         // final Request request = createRequest(httpMethod);
 
         return execute(httpMethod, Response.class);
@@ -1176,7 +1174,7 @@ public final class OkHttpRequest {
                 return (T) resp;
             }
 
-            if (resultClass == null || resultClass.equals(Void.class)) {
+            if (resultClass.equals(Void.class)) {
                 return null;
             } else if (resp.isSuccessful()) {
                 final String contentType = request.header(HttpHeaders.Names.CONTENT_TYPE);
@@ -1233,15 +1231,24 @@ public final class OkHttpRequest {
 
     private Response execute(final Request request) throws IOException {
         if (httpClientBuilder != null) {
-            return httpClientBuilder.build().newCall(request).execute();
+            final OkHttpClient builtClient = httpClientBuilder.build();
+            try {
+                return builtClient.newCall(request).execute();
+            } finally {
+                // Shut down the per-request built client to release its thread pool and connection pool.
+                builtClient.dispatcher().executorService().shutdown();
+                builtClient.connectionPool().evictAll();
+            }
         } else {
             return httpClient.newCall(request).execute();
         }
     }
 
     void doAfterExecution() {
-        if (closeHttpClientAfterExecution) {
-            // Shutdown isn't necessary?
+        if (closeHttpClientAfterExecution && httpClientBuilder == null && httpClient != DEFAULT_CLIENT) {
+            // Shut down the caller-provided client to release its thread pool and connection pool.
+            httpClient.dispatcher().executorService().shutdown();
+            httpClient.connectionPool().evictAll();
         }
     }
 
@@ -1265,12 +1272,12 @@ public final class OkHttpRequest {
 
     /**
      * Executes a GET request asynchronously using the default executor.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Response> future = OkHttpRequest.url("http://localhost:18080/users")
      *     .asyncGet();
-     * 
+     *
      * future.getThenAccept(response -> {
      *     if (response.isSuccessful()) {
      *         // Process response

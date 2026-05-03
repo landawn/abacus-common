@@ -203,7 +203,7 @@ public class ArrayCharStreamTest extends TestBase {
 
     @Test
     public void testFlatmap() {
-        List<Character> result = createCharStream('a', 'b').flatmap(c -> new char[] { c, Character.toUpperCase(c) }).boxed().toList();
+        List<Character> result = createCharStream('a', 'b').flatMapArray(c -> new char[] { c, Character.toUpperCase(c) }).boxed().toList();
         assertEquals(Arrays.asList('a', 'A', 'b', 'B'), result);
     }
 
@@ -238,6 +238,23 @@ public class ArrayCharStreamTest extends TestBase {
         List<Character> result = createCharStream('a', 'b', 'a', 'c', 'b').distinct().boxed().toList();
         assertEquals(3, result.size());
         assertTrue(result.containsAll(Arrays.asList('a', 'b', 'c')));
+    }
+
+    @Test
+    public void testSkip() {
+        List<Character> result = createCharStream('a', 'b', 'c', 'd').skip(2).boxed().toList();
+        assertEquals(Arrays.asList('c', 'd'), result);
+    }
+
+    @Test
+    public void testSkip_EmptyInput() {
+        List<Character> result = createCharStream(new char[] {}).skip(2).boxed().toList();
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testSkip_ErrorPath() {
+        assertThrows(IllegalArgumentException.class, () -> createCharStream('a').skip(-1).boxed().toList());
     }
 
     @Test

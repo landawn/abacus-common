@@ -29,7 +29,7 @@ package com.landawn.abacus.util.function;
 public interface ShortNConsumer {
     /**
      * Performs this operation on the given arguments.
-     * The behavior of this operation is generally expected to be non-interfering and stateless.
+     * This method is expected to operate via side-effects.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -76,8 +76,9 @@ public interface ShortNConsumer {
      * combined.accept((short) 1, (short) 2, (short) 3);   // Logs count then sum
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation
      * @return a composed {@code ShortNConsumer} that performs in sequence this operation followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     default ShortNConsumer andThen(final ShortNConsumer after) {
         return args -> {

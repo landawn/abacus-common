@@ -145,6 +145,9 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Deserializes a JSON string into an object of the specified target class using custom deserialization configuration.
      * This method allows fine-grained control over the deserialization process through configuration options.
      *
+     * <p>This base-class implementation always throws {@link UnsupportedOperationException}. Concrete
+     * subclasses must override this method to provide actual parsing behavior.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonDeserConfig config = new JsonDeserConfig();
@@ -155,8 +158,8 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @param source the JSON string to deserialize; must not be {@code null}
      * @param config the deserialization configuration to use, or {@code null} to use default configuration
      * @param targetType the class of the target object to deserialize into; must not be {@code null}
-     * @return an instance of the target class populated with data from the JSON string; never {@code null}
-     * @throws UnsupportedOperationException if this operation is not supported by the implementation
+     * @return an instance of the target class populated with data from the JSON string
+     * @throws UnsupportedOperationException always thrown by this base-class implementation
      */
     @Override
     public <T> T parse(final String source, final JsonDeserConfig config, final Class<? extends T> targetType) throws UnsupportedOperationException {
@@ -188,6 +191,9 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Deserializes a JSON array string and populates the provided object array using custom deserialization configuration.
      * This method allows fine-grained control over how array elements are deserialized.
      *
+     * <p>This base-class implementation always throws {@link UnsupportedOperationException}. Concrete
+     * subclasses must override this method to provide actual parsing behavior.</p>
+     *
      * <p>Usage Examples:</p>
      * <pre>{@code
      * Object[] output = new Object[3];
@@ -198,7 +204,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @param source the JSON array string to deserialize; must not be {@code null}
      * @param config the deserialization configuration to use, or {@code null} to use default configuration
      * @param output the array to populate with deserialized elements; must not be {@code null}
-     * @throws UnsupportedOperationException if this operation is not supported by the implementation
+     * @throws UnsupportedOperationException always thrown by this base-class implementation
      */
     @Override
     public void parse(final String source, final JsonDeserConfig config, final Object[] output) throws UnsupportedOperationException {
@@ -230,6 +236,9 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Deserializes a JSON array string and populates the provided collection using custom deserialization configuration.
      * This method allows fine-grained control over how collection elements are deserialized.
      *
+     * <p>This base-class implementation always throws {@link UnsupportedOperationException}. Concrete
+     * subclasses must override this method to provide actual parsing behavior.</p>
+     *
      * <p>Usage Examples:</p>
      * <pre>{@code
      * List<String> output = new ArrayList<>();
@@ -240,7 +249,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @param source the JSON array string to deserialize; must not be {@code null}
      * @param config the deserialization configuration to use, or {@code null} to use default configuration
      * @param output the collection to populate with deserialized elements; must not be {@code null}
-     * @throws UnsupportedOperationException if this operation is not supported by the implementation
+     * @throws UnsupportedOperationException always thrown by this base-class implementation
      */
     @Override
     public void parse(final String source, final JsonDeserConfig config, final Collection<?> output) throws UnsupportedOperationException {

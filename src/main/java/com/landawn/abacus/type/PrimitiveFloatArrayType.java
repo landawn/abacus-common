@@ -16,17 +16,19 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for primitive float arrays (float[]).
- * Provides functionality for serialization, deserialization, and conversion between
- * float arrays and their string representations or collections.
+ * Type handler for primitive {@code float[]} arrays, providing serialization, deserialization,
+ * and conversion between float arrays and their string representations or collections.
+ * String representations use the format {@code [1.5, 2.7, 3.14]} with comma-separated elements
+ * enclosed in square brackets.
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<float[]> {
@@ -34,13 +36,17 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
     public static final String FLOAT_ARRAY = float[].class.getSimpleName();
 
     private final Type<Float> elementType;
-    private final Type<Float>[] parameterTypes;
+    private final List<Type<?>> parameterTypes;
 
+    /**
+     * Constructs a new PrimitiveFloatArrayType instance.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
+     */
     PrimitiveFloatArrayType() {
         super(FLOAT_ARRAY);
 
         elementType = TypeFactory.getType(float.class);
-        parameterTypes = new Type[] { elementType };
+        parameterTypes = List.of(elementType);
     }
 
     /**
@@ -80,11 +86,11 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
     /**
      * Returns the parameter types associated with this array type.
      *
-     * @return an array containing the Float Type that describes the elements of this array type
+     * @return an immutable list containing the Float Type that describes the elements of this array type
      * @see #elementType()
      */
     @Override
-    public Type<Float>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 

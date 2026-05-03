@@ -35,25 +35,25 @@ import com.landawn.abacus.annotation.MayReturnNull;
 
 /**
  * Utility class for generating cryptographic message digests (hashes) using various algorithms.
- * This class provides convenient static methods for computing digests of byte arrays, files, 
+ * This class provides convenient static methods for computing digests of byte arrays, files,
  * input streams, and strings using standard algorithms like MD5, SHA-1, SHA-256, etc.
- * 
- * <p>This class is immutable and thread-safe. However, the MessageDigest instances it creates 
+ *
+ * <p>This class is immutable and thread-safe. However, the MessageDigest instances it creates
  * generally won't be thread-safe.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Generate MD5 hash of a string
  * String hash = DigestUtil.md5Hex("Hello World");
- * 
+ *
  * // Generate SHA-256 hash of a file
  * byte[] digest = DigestUtil.sha256(new File("document.pdf"));
  * }</pre>
  *
  * <p><b>Attribution:</b>
- * This class includes code adapted from Apache Commons Codec under the Apache License 2.0. 
+ * This class includes code adapted from Apache Commons Codec under the Apache License 2.0.
  * Methods from these libraries may have been modified for consistency, performance optimization, and null-safety enhancement.
- * 
+ *
  * @see MessageDigestAlgorithms
  */
 public class DigestUtil {
@@ -2194,10 +2194,10 @@ public class DigestUtil {
     /**
      * Contains standard algorithm names for MessageDigest that can be used with the
      * {@link DigestUtil#getDigest(String)} method and other methods requiring algorithm names.
-     * 
+     *
      * <p>These constants represent the standard names as defined in the Java Cryptography
      * Architecture Standard Algorithm Name Documentation.</p>
-     * 
+     *
      * @see <a href="http://docs.oracle.com/javase/6/docs/technotes/guides/security/StandardNames.html">
      *      Java Cryptography Architecture Standard Algorithm Name Documentation</a>
      */
@@ -2224,7 +2224,7 @@ public class DigestUtil {
         /**
          * The SHA-224 hash algorithm defined in FIPS PUB 180-3.
          * Present in Oracle Java 8.
-         * 
+         *
          */
         public static final String SHA_224 = "SHA-224";
 
@@ -2249,42 +2249,42 @@ public class DigestUtil {
         /**
          * The SHA-512/224 hash algorithm defined in FIPS PUB 180-4.
          * A truncated variant of SHA-512. Included starting in Oracle Java 9.
-         * 
+         *
          */
         public static final String SHA_512_224 = "SHA-512/224";
 
         /**
          * The SHA-512/256 hash algorithm defined in FIPS PUB 180-4.
          * A truncated variant of SHA-512. Included starting in Oracle Java 9.
-         * 
+         *
          */
         public static final String SHA_512_256 = "SHA-512/256";
 
         /**
          * The SHA3-224 hash algorithm defined in FIPS PUB 202.
          * Part of the SHA-3 family. Included starting in Oracle Java 9.
-         * 
+         *
          */
         public static final String SHA3_224 = "SHA3-224";
 
         /**
          * The SHA3-256 hash algorithm defined in FIPS PUB 202.
          * Part of the SHA-3 family. Included starting in Oracle Java 9.
-         * 
+         *
          */
         public static final String SHA3_256 = "SHA3-256";
 
         /**
          * The SHA3-384 hash algorithm defined in FIPS PUB 202.
          * Part of the SHA-3 family. Included starting in Oracle Java 9.
-         * 
+         *
          */
         public static final String SHA3_384 = "SHA3-384";
 
         /**
          * The SHA3-512 hash algorithm defined in FIPS PUB 202.
          * Part of the SHA-3 family. Included starting in Oracle Java 9.
-         * 
+         *
          */
         public static final String SHA3_512 = "SHA3-512";
 

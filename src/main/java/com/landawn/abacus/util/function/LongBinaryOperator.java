@@ -25,6 +25,11 @@ import com.landawn.abacus.util.Throwables;
  * providing compatibility with the Java standard library while supporting the
  * abacus-common framework's exception handling capabilities.
  *
+ * <p>Note: arithmetic operations on {@code long} values are subject to overflow
+ * (silently wraps around). {@code long} values range from {@link Long#MIN_VALUE} to
+ * {@link Long#MAX_VALUE}. Use {@link Math#addExact(long, long)} or similar methods
+ * when overflow detection is required.
+ *
  * <p>This is a functional interface whose functional method is
  * {@link #applyAsLong(long, long)}.
  *
@@ -66,9 +71,9 @@ public interface LongBinaryOperator extends Throwables.LongBinaryOperator<Runtim
      * long maximum = max.applyAsLong(10L, 20L);   // Returns 20L
      * }</pre>
      *
-     * @param a the first operand, typically the accumulator in reduction operations
-     * @param b the second operand, typically the next element in reduction operations
-     * @return the operator result, a long value computed from the two operands
+     * @param a the first {@code long} operand, typically the accumulator in reduction operations
+     * @param b the second {@code long} operand, typically the next element in reduction operations
+     * @return the {@code long}-valued result computed from the two operands
      */
     @Override
     long applyAsLong(long a, long b);

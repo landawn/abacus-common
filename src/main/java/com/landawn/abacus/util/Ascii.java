@@ -26,17 +26,17 @@ package com.landawn.abacus.util;
  * <li>Google Guava's {@code CharMatcher.ascii()} matches ASCII characters and provides text processing methods which
  * operate only on the ASCII characters of a string.</li>
  * </ul>
- * 
+ *
  * <p>This class provides constants for all ASCII control characters as defined in RFC 20,
  * making it easy to work with low-level ASCII protocols and data formats.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Check if a character is ASCII
  * if (ch >= Ascii.MIN && ch <= Ascii.MAX) {
  *     // Character is ASCII
  * }
- * 
+ *
  * // Use ASCII control characters
  * String csvLine = "field1" + Ascii.HT + "field2" + Ascii.HT + "field3";
  * }</pre>

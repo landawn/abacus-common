@@ -622,13 +622,13 @@ public class TypeInterfaceTest extends TestBase {
     @Test
     @DisplayName("Test getParameterTypes()")
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = mapType.parameterTypes();
+        List<Type<?>> paramTypes = mapType.parameterTypes();
         assertNotNull(paramTypes);
-        assertEquals(2, paramTypes.length);
+        assertEquals(2, paramTypes.size());
 
-        Type<?>[] stringParamTypes = stringType.parameterTypes();
+        List<Type<?>> stringParamTypes = stringType.parameterTypes();
         assertNotNull(stringParamTypes);
-        assertEquals(0, stringParamTypes.length);
+        assertEquals(0, stringParamTypes.size());
     }
 
     @Test

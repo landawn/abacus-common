@@ -21,20 +21,20 @@ import java.io.Writer;
  * A specialized writer for efficient CSV output with automatic character escaping.
  * This class extends CharacterWriter and provides optimized writing of CSV content
  * with proper escaping of special CSV characters according to RFC 4180.
- * 
+ *
  * <p>The writer handles the following CSV escaping rules:</p>
  * <ul>
- *   <li>Double quotes (") are escaped as "" or \" depending on configuration</li>
- *   <li>Backslashes (\) are escaped as \\</li>
- *   <li>Tab characters (\t) are escaped as \t</li>
- *   <li>Newline characters (\n) are escaped as \n</li>
- *   <li>Carriage returns (\r) are escaped as \r</li>
- *   <li>Control characters and special Unicode characters are properly escaped</li>
+ *   <li>Double quotes ({@code "}) are escaped as {@code ""} or {@code \"} depending on configuration</li>
+ *   <li>Backslashes ({@code \}) are escaped as {@code \\}</li>
+ *   <li>Tab characters ({@code \t}) are escaped as {@code \t}</li>
+ *   <li>Newline characters ({@code \n}) are escaped as {@code \n}</li>
+ *   <li>Carriage returns ({@code \r}) are escaped as {@code \r}</li>
+ *   <li>Control characters and special Unicode characters (U+2028, U+2029) are properly escaped</li>
  * </ul>
- * 
- * <p>The escape mode (double quote vs backslash) is determined by the
- * CsvUtil.isBackSlashEscapeCharForWrite() setting.</p>
- * 
+ *
+ * <p>The escape mode (double-quote vs backslash) is determined by the
+ * {@code CsvUtil.isBackSlashEscapeCharForWrite()} setting.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * try (BufferedCsvWriter writer = new BufferedCsvWriter()) {
@@ -43,7 +43,7 @@ import java.io.Writer;
  *     String csv = writer.toString();
  * }
  * }</pre>
- * 
+ *
  * @see com.landawn.abacus.util.CsvUtil
  * @see CharacterWriter
  */
@@ -116,7 +116,7 @@ public final class BufferedCsvWriter extends CharacterWriter {
      * Creates a new BufferedCsvWriter with an internal buffer.
      * The escape mode (double quote vs backslash) is determined by the
      * current CsvUtil configuration.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedCsvWriter writer = new BufferedCsvWriter();
@@ -133,7 +133,7 @@ public final class BufferedCsvWriter extends CharacterWriter {
      * Creates a new BufferedCsvWriter that writes to the specified OutputStream.
      * Characters are encoded using the default character encoding.
      * The escape mode is determined by the current CsvUtil configuration.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (FileOutputStream fos = new FileOutputStream("data.csv");
@@ -152,7 +152,7 @@ public final class BufferedCsvWriter extends CharacterWriter {
     /**
      * Creates a new BufferedCsvWriter that writes to the specified Writer.
      * The escape mode is determined by the current CsvUtil configuration.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (FileWriter fw = new FileWriter("data.csv");
@@ -170,11 +170,11 @@ public final class BufferedCsvWriter extends CharacterWriter {
 
     /**
      * Checks if the writer is using backslash escaping for double quotes.
-     * 
+     *
      * <p>When {@code true}, double quotes are escaped as \" (backslash-quote).
      * When {@code false}, double quotes are escaped as "" (double-double-quote),
      * which is the standard CSV escaping method.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedCsvWriter writer = new BufferedCsvWriter();

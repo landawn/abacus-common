@@ -17,7 +17,7 @@ package com.landawn.abacus.util;
  * @Type(enumerated = EnumType.ORDINAL)
  * private Status orderStatus;
  * }</pre>
- * 
+ *
  * @see UnifiedStatus
  */
 public enum EnumType {

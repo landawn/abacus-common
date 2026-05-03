@@ -15,14 +15,16 @@ package com.landawn.abacus.util.function;
 
 /**
  * Represents an operation that accepts a variable number of float-valued arguments and returns no result.
- * This is a functional interface whose functional method is {@link #accept(float...)}.
+ * This is the N-arity specialization of {@link FloatConsumer}.
+ * Unlike most other functional interfaces, {@code FloatNConsumer} is expected to operate via side-effects.
  *
- * <p>This is a primitive type specialization of {@code Consumer} for {@code float} varargs.</p>
+ * <p>This is a functional interface whose functional method is {@link #accept(float...)}.
  *
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
- * @see java.util.function.Consumer
+ * @see FloatConsumer
+ * @see FloatBiConsumer
  */
 @FunctionalInterface
 public interface FloatNConsumer {
@@ -75,9 +77,10 @@ public interface FloatNConsumer {
      * combined.accept(1.0f, 2.0f, 3.0f);   // Prints count then sum
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation
      * @return a composed {@code FloatNConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     default FloatNConsumer andThen(final FloatNConsumer after) {
         return args -> {

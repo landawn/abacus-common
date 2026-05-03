@@ -19,13 +19,18 @@ import java.io.Writer;
 import java.nio.CharBuffer;
 
 /**
- * A Writer implementation that wraps an Appendable object.
- * This class adapts any Appendable (such as StringBuilder, StringBuffer, or Writer)
- * to the Writer interface, enabling it to be used wherever a Writer is expected.
- * 
- * <p>The class automatically handles flushing if the underlying Appendable
- * implements Flushable, and closing if it implements AutoCloseable.</p>
- * 
+ * A {@link java.io.Writer} implementation that wraps any {@link Appendable} object.
+ * This class adapts any {@code Appendable} (such as {@link StringBuilder},
+ * {@link StringBuffer}, or another {@code Writer}) to the {@code Writer} interface,
+ * enabling it to be used wherever a {@code Writer} is expected.
+ *
+ * <p>Flushing is supported if the underlying {@code Appendable} also implements
+ * {@link java.io.Flushable}; otherwise {@link #flush()} is a no-op. Closing
+ * delegates to the underlying {@code Appendable} if it also implements
+ * {@link AutoCloseable}.</p>
+ *
+ * <p>Once closed, any further write or flush call will throw {@link java.io.IOException}.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * StringBuilder sb = new StringBuilder();
@@ -35,8 +40,9 @@ import java.nio.CharBuffer;
  * }
  * System.out.println(sb.toString());   // "Hello, World!"
  * }</pre>
- * 
+ *
  * @see StringWriter
+ * @see java.io.Writer
  */
 public sealed class AppendableWriter extends Writer permits StringWriter {
 
@@ -45,15 +51,15 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
     private boolean closed;
 
     /**
-     * Constructs an AppendableWriter that wraps the specified Appendable.
-     * 
+     * Constructs an {@code AppendableWriter} that wraps the specified {@link Appendable}.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = new StringBuilder();
      * AppendableWriter writer = new AppendableWriter(sb);
      * }</pre>
      *
-     * @param appendable the Appendable to wrap, must not be {@code null}
+     * @param appendable the {@code Appendable} to wrap; must not be {@code null}
      * @throws IllegalArgumentException if {@code appendable} is {@code null}
      */
     public AppendableWriter(final Appendable appendable) throws IllegalArgumentException {
@@ -66,7 +72,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
 
     /**
      * Appends the specified character to this writer.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.append('A').append('B').append('C');
@@ -87,9 +93,9 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
 
     /**
      * Appends the specified character sequence to this writer.
-     * 
+     *
      * <p>If csq is {@code null}, then the four characters "null" are appended to this writer.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.append("Hello").append(" ").append("World");
@@ -110,19 +116,19 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
 
     /**
      * Appends a subsequence of the specified character sequence to this writer.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.append("Hello World", 0, 5);   // Appends "Hello"
      * }</pre>
      *
-     * @param csq the character sequence from which a subsequence will be appended. 
+     * @param csq the character sequence from which a subsequence will be appended.
      *            If csq is {@code null}, then characters will be appended as if csq contained the four characters "null"
      * @param start the index of the first character in the subsequence
      * @param end the index of the character following the last character in the subsequence
      * @return this writer
      * @throws IOException if an I/O error occurs or if the writer has been closed
-     * @throws IndexOutOfBoundsException if start or end are negative, or start is greater than end, 
+     * @throws IndexOutOfBoundsException if start or end are negative, or start is greater than end,
      *         or end is greater than csq.length()
      */
     @Override
@@ -136,7 +142,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
 
     /**
      * Writes a single character.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write('X');
@@ -155,15 +161,16 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
 
     /**
      * Writes an array of characters.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = {'H', 'e', 'l', 'l', 'o'};
      * writer.write(chars);
      * }</pre>
      *
-     * @param cbuf the array of characters to write
+     * @param cbuf the array of characters to write; must not be {@code null}
      * @throws IOException if an I/O error occurs or if the writer has been closed
+     * @throws NullPointerException if {@code cbuf} is {@code null}
      */
     @Override
     public void write(final char[] cbuf) throws IOException {
@@ -174,7 +181,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
 
     /**
      * Writes a portion of an array of characters.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = {'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd'};
@@ -185,7 +192,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * @param off the offset from which to start writing characters
      * @param len the number of characters to write
      * @throws IOException if an I/O error occurs or if the writer has been closed
-     * @throws IndexOutOfBoundsException if off is negative, or len is negative, 
+     * @throws IndexOutOfBoundsException if off is negative, or len is negative,
      *         or off+len is greater than the length of the given array
      */
     @Override
@@ -197,7 +204,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
 
     /**
      * Writes a string.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write("Hello, World!");
@@ -215,7 +222,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
 
     /**
      * Writes a portion of a string.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write("Hello, World!", 7, 5);   // Writes "World"
@@ -225,7 +232,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * @param off the offset from which to start writing characters
      * @param len the number of characters to write
      * @throws IOException if an I/O error occurs or if the writer has been closed
-     * @throws IndexOutOfBoundsException if off is negative, or len is negative, 
+     * @throws IndexOutOfBoundsException if off is negative, or len is negative,
      *         or off+len is greater than the length of the given string
      */
     @Override
@@ -237,10 +244,10 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
 
     /**
      * Flushes the stream.
-     * 
+     *
      * <p>If the underlying Appendable implements Flushable, its flush method will be called.
      * Otherwise, this method does nothing.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write("Important data");
@@ -260,12 +267,15 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
 
     /**
      * Closes the stream, flushing it first.
-     * 
-     * <p>Once the stream has been closed, further write() or flush() invocations
-     * will cause an IOException to be thrown. Closing a previously closed stream has no effect.</p>
-     * 
-     * <p>If the underlying Appendable implements AutoCloseable, its close method will be called.</p>
-     * 
+     *
+     * <p>Once the stream has been closed, further {@code write()} or {@code flush()} invocations
+     * will cause an {@link java.io.IOException} to be thrown. Closing a previously closed stream
+     * has no effect.</p>
+     *
+     * <p>If the underlying {@code Appendable} implements {@link AutoCloseable},
+     * its {@code close()} method will be called. Non-{@link java.io.IOException} exceptions
+     * thrown by the underlying {@code close()} are rethrown as unchecked exceptions.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (AppendableWriter writer = new AppendableWriter(appendable)) {
@@ -273,7 +283,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * } // Automatically closed
      * }</pre>
      *
-     * @throws IOException if an I/O error occurs
+     * @throws java.io.IOException if an I/O error occurs while flushing or closing
      */
     @Override
     public void close() throws IOException {
@@ -302,9 +312,9 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
 
     /**
      * Returns the current content of the underlying Appendable as a string.
-     * 
+     *
      * <p>This method calls toString() on the wrapped Appendable object.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = new StringBuilder();

@@ -23,13 +23,13 @@ import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.Dates;
 
 /**
- * The Abstract base class for {@code Date} types in the type system.
+ * The abstract base class for {@code Date} types in the type system.
  * <p>
  * This class provides common functionality for handling {@code Date} objects and their subclasses,
  * including serialization, formatting, and type checking operations.
  * </p>
  *
- * @param <T> the specific {@code Date} type (e.g., {@link java.util.Date}, {@link java.sql.Date}, {@link java.sql.Timestamp})
+ * @param <T> the specific {@code Date} subtype (e.g., {@link java.util.Date}, {@link java.sql.Date}, {@link java.sql.Timestamp})
  */
 public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
 
@@ -43,12 +43,9 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
     }
 
     /**
-     * Checks if this type represents a {@code Date} type.
-     * <p>
-     * This method always returns {@code true} for Date types.
-     * </p>
+     * Returns {@code true} because this type represents a {@code Date} type.
      *
-     * @return {@code true}, indicating this is a {@code Date} type
+     * @return {@code true}
      */
     @Override
     public boolean isDate() {
@@ -56,12 +53,9 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
     }
 
     /**
-     * Checks if this type is comparable.
-     * <p>
-     * Date types are comparable based on their time values.
-     * </p>
+     * Returns {@code true} because {@code Date} types are comparable based on their time values.
      *
-     * @return {@code true}, indicating that {@code Date} types support comparison
+     * @return {@code true}
      */
     @Override
     public boolean isComparable() {
@@ -69,12 +63,9 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
     }
 
     /**
-     * Indicates whether values of this type require quoting in CSV format.
-     * <p>
-     * Date values are typically formatted as date strings that do not require quotes.
-     * </p>
+     * Returns {@code false} because date values do not require quoting in CSV format.
      *
-     * @return {@code false}, as date values do not require quoting in CSV format
+     * @return {@code false}
      */
     @Override
     public boolean isCsvQuoteRequired() {

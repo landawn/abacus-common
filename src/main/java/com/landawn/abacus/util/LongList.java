@@ -172,7 +172,7 @@ import com.landawn.abacus.util.stream.LongStream;
  * <ul>
  *   <li><b>Not Thread-Safe:</b> This implementation is not synchronized</li>
  *   <li><b>External Synchronization:</b> Required for concurrent access</li>
- *   <li><b>Fail-Fast Iterators:</b> Detect concurrent modifications</li>
+ *   <li><b>Iterators:</b> Not fail-fast; concurrent modification yields undefined results</li>
  *   <li><b>Read-Only Access:</b> Multiple threads can safely read simultaneously</li>
  * </ul>
  *
@@ -344,7 +344,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * Constructs a LongList containing the elements of the specified array.
      * The list will use the provided array as its internal storage without copying,
      * making this operation O(1) in time complexity.
-     * 
+     *
      * <p>Changes to the provided array after construction will be reflected in this list
      * and vice versa, as they share the same underlying array.
      *
@@ -357,10 +357,10 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     /**
      * Constructs a LongList using the specified array as the internal storage with the specified size.
      * The list will use the provided array directly without copying.
-     * 
+     *
      * <p>This constructor allows creating a list that uses only a portion of the provided array.
      * The size parameter must not exceed the array length.
-     * 
+     *
      * <p>Changes to the provided array after construction will be reflected in this list
      * and vice versa, as they share the same underlying array.
      *
@@ -439,11 +439,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Creates a LongList containing a sequence of long values in the specified range.
-     * 
+     *
      * <p>The sequence starts at startInclusive and increments by 1 until reaching
      * endExclusive. If startInclusive equals endExclusive, an empty list is returned.
      * If startInclusive is greater than endExclusive, the sequence decrements by 1.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongList.range(1, 5);   // returns [1, 2, 3, 4]
@@ -461,10 +461,10 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Creates a LongList containing a sequence of long values in the specified range with the given step.
-     * 
+     *
      * <p>The sequence starts at startInclusive and increments by the step value until the value
      * would exceed endExclusive (or fall below it if step is negative).
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongList.range(0, 10, 2);    // returns [0, 2, 4, 6, 8]
@@ -484,10 +484,10 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Creates a LongList containing a sequence of long values in the specified closed range.
-     * 
+     *
      * <p>The sequence starts at startInclusive and increments by 1 until reaching
      * endInclusive. Unlike {@link #range(long, long)}, the end value is included.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongList.rangeClosed(1, 4);   // returns [1, 2, 3, 4]
@@ -505,11 +505,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Creates a LongList containing a sequence of long values in the specified closed range with the given step.
-     * 
+     *
      * <p>The sequence starts at startInclusive and increments by the step value until the value
      * would exceed endInclusive (or fall below it if step is negative). The end value is included
      * if it's exactly reachable by the step increments.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongList.rangeClosed(0, 10, 2);    // returns [0, 2, 4, 6, 8, 10]
@@ -529,7 +529,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Creates a LongList containing the specified element repeated the given number of times.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongList.repeat(5, 3);   // returns [5, 5, 5]
@@ -548,7 +548,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Creates a LongList filled with random long values.
-     * 
+     *
      * <p>The random values are generated using a secure random number generator
      * and can be any valid long value (positive or negative).
      *
@@ -670,7 +670,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Appends all elements from the specified LongList to the end of this list.
-     * 
+     *
      * <p>The elements are appended in the order they appear in the specified list.
      * This list will grow as necessary to accommodate all new elements.
      *
@@ -697,7 +697,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Inserts all elements from the specified LongList into this list at the specified position.
-     * 
+     *
      * <p>Shifts the element currently at that position (if any) and any subsequent
      * elements to the right (increases their indices). The new elements will appear
      * in this list in the order they appear in the specified list.
@@ -736,7 +736,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Appends all elements from the specified array to the end of this list.
-     * 
+     *
      * <p>The elements are appended in the order they appear in the array.
      * This list will grow as necessary to accommodate all new elements.
      *
@@ -751,7 +751,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Inserts all elements from the specified array into this list at the specified position.
-     * 
+     *
      * <p>Shifts the element currently at that position (if any) and any subsequent
      * elements to the right (increases their indices). The new elements will appear
      * in this list in the order they appear in the array.
@@ -798,12 +798,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * Removes the first occurrence of the specified element from this list, if it is present.
      *
      * <p>If this list contains multiple occurrences of the specified element, only the first
-     * occurrence is removed. The list is shifted to close the gap left by the removed element.
+     * occurrence is removed. The list is shifted to close the gap left by the removed element.</p>
      *
-     * <p>This method runs in linear time, as it may need to search through the entire list
+     * <p>This method runs in linear time, as it may need to search through the entire list.</p>
+     *
      * <p><b>Note:</b> This method removes by value. To remove by index, use {@link #removeAt(int)}.</p>
      *
-     * @param e the element to be removed from this list
+     * @param e the element to be removed from this list, if present
      * @return {@code true} if this list contained the specified element (and it was removed);
      *         {@code false} otherwise
      */
@@ -822,7 +823,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Removes all occurrences of the specified element from this list.
-     * 
+     *
      * <p>This method removes every element in the list that equals the specified value,
      * not just the first occurrence. The remaining elements are shifted to close any gaps.
      *
@@ -866,7 +867,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Removes from this list all of its elements that are contained in the specified LongList.
-     * 
+     *
      * <p>This method compares elements by value. For each element in the specified list,
      * it removes one matching occurrence from this list (if present). If the specified list
      * contains duplicates, multiple occurrences may be removed from this list.
@@ -885,7 +886,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Removes from this list all of its elements that are contained in the specified array.
-     * 
+     *
      * <p>This method compares elements by value. For each element in the specified array,
      * it removes one matching occurrence from this list (if present). If the specified array
      * contains duplicates, multiple occurrences may be removed from this list.
@@ -904,7 +905,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Removes all elements from this list that satisfy the given predicate.
-     * 
+     *
      * <p>Each element in the list is tested with the predicate, and elements for which
      * the predicate returns {@code true} are removed. The order of remaining elements
      * is preserved.
@@ -934,7 +935,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Removes all duplicate elements from this list, keeping only the first occurrence of each value.
-     * 
+     *
      * <p>This method preserves the order of elements. If the list is already sorted,
      * the operation is optimized to run in O(n) time. Otherwise, it uses a LinkedHashSet
      * internally to track seen elements, resulting in O(n) time complexity with O(n) space.
@@ -980,9 +981,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Retains only the elements in this list that are contained in the specified LongList.
-     * 
+     *
      * <p>In other words, removes from this list all of its elements that are not contained
-     * in the specified list. This method preserves the order of retained elements.
+     * in the specified list. This method preserves the order of retained elements.</p>
+     *
+     * <p>If the specified list is {@code null} or empty, all elements are removed from this list.</p>
      *
      * @param c the LongList containing elements to be retained in this list
      * @return {@code true} if this list was modified as a result of the call
@@ -1000,7 +1003,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Retains only the elements in this list that are contained in the specified array.
-     * 
+     *
      * <p>In other words, removes from this list all of its elements that are not contained
      * in the specified array. This method preserves the order of retained elements.
      *
@@ -1059,7 +1062,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     //    /**
     //     * Removes the element at the specified position in this list and returns it.
-    //     * 
+    //     *
     //     * <p>Shifts any subsequent elements to the left (subtracts one from their indices).
     //     *
     //     * @param index the index of the element to be removed
@@ -1095,11 +1098,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Removes all elements at the specified indices from this list.
-     * 
-     * <p>The indices array may contain duplicate values and does not need to be sorted.
-     * Invalid indices are ignored. The remaining elements maintain their relative order.
      *
-     * @param indices the indices of elements to be removed
+     * <p>The indices array may contain duplicate values and does not need to be sorted.
+     * The remaining elements maintain their relative order.
+     *
+     * @param indices the indices of elements to be removed. If {@code null} or empty, this list remains unchanged.
+     * @throws IndexOutOfBoundsException if any index is out of range ({@code index < 0 || index >= size()})
      */
     @Override
     public void removeAt(final int... indices) {
@@ -1125,7 +1129,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Removes all elements in the specified range from this list.
-     * 
+     *
      * <p>Removes elements starting at fromIndex (inclusive) up to toIndex (exclusive).
      * Shifts any subsequent elements to the left to close the gap.
      *
@@ -1159,8 +1163,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * The elements from fromIndex (inclusive) to toIndex (exclusive) are moved
      * so that the element originally at fromIndex will be at newPositionAfterMove.
      * Other elements are shifted as necessary to accommodate the move.
-     * 
-     * <p><b>Usage Examples:</b></p> 
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongList list = LongList.of(0, 1, 2, 3, 4, 5);
      * list.moveRange(1, 3, 3);   // Moves elements [1, 2] to position starting at index 3
@@ -1169,19 +1173,20 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and size() - lengthOfRange, inclusive.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the list
      */
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
+        N.checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, size);
         N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
     }
 
     /**
      * Replaces a range of elements in this list with the elements from the specified LongList.
-     * 
+     *
      * <p>The elements from fromIndex (inclusive) to toIndex (exclusive) are removed and
      * replaced with all elements from the replacement list. The size of this list may change
      * if the replacement contains a different number of elements than the replaced range.
@@ -1230,7 +1235,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Replaces a range of elements in this list with the elements from the specified array.
-     * 
+     *
      * <p>The elements from fromIndex (inclusive) to toIndex (exclusive) are removed and
      * replaced with all elements from the replacement array. The size of this list may change
      * if the replacement contains a different number of elements than the replaced range.
@@ -1279,7 +1284,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Replaces all occurrences of the specified value with a new value in this list.
-     * 
+     *
      * <p>This method scans through the entire list and replaces every element that
      * equals oldVal with newVal.
      *
@@ -1307,7 +1312,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Replaces each element of this list with the result of applying the given operator to that element.
-     * 
+     *
      * <p>This method applies the provided unary operator to each element in the list,
      * replacing the element with the result of the operation.
      *
@@ -1321,7 +1326,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Replaces all elements in this list that satisfy the given predicate with the specified value.
-     * 
+     *
      * <p>Each element is tested with the predicate, and elements for which the predicate
      * returns {@code true} are replaced with newValue.
      *
@@ -1345,7 +1350,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Fills the entire list with the specified value.
-     * 
+     *
      * <p>After this operation, every element in the list will have the same value.
      * The size of the list remains unchanged.
      *
@@ -1357,7 +1362,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Fills the specified range of this list with the specified value.
-     * 
+     *
      * <p>Elements from fromIndex (inclusive) to toIndex (exclusive) are set to the given value.
      * Other elements in the list remain unchanged.
      *
@@ -1389,7 +1394,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Tests if this list contains any of the elements in the specified LongList.
-     * 
+     *
      * <p>Returns {@code true} if this list contains at least one element that is also
      * present in the specified list.
      *
@@ -1407,7 +1412,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Tests if this list contains any of the elements in the specified array.
-     * 
+     *
      * <p>Returns {@code true} if this list contains at least one element that is also
      * present in the specified array.
      *
@@ -1481,7 +1486,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Tests if this list and the specified LongList have no elements in common.
-     * 
+     *
      * <p>Two lists are disjoint if they share no common elements. Empty lists are
      * disjoint with all lists (including other empty lists).
      *
@@ -1515,7 +1520,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Tests if this list and the specified array have no elements in common.
-     * 
+     *
      * <p>This list and the array are disjoint if they share no common elements.
      * Empty lists are disjoint with all arrays (including empty arrays).
      *
@@ -1556,7 +1561,6 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @see #difference(LongList)
      * @see #symmetricDifference(LongList)
      * @see N#intersection(long[], long[])
-     * @see N#intersection(int[], int[])
      */
     @Override
     public LongList intersection(final LongList b) {
@@ -1602,7 +1606,6 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @see #difference(long[])
      * @see #symmetricDifference(long[])
      * @see N#intersection(long[], long[])
-     * @see N#intersection(int[], int[])
      */
     @Override
     public LongList intersection(final long[] b) {
@@ -1637,7 +1640,6 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @see #symmetricDifference(LongList)
      * @see #intersection(LongList)
      * @see N#difference(long[], long[])
-     * @see N#difference(int[], int[])
      */
     @Override
     public LongList difference(final LongList b) {
@@ -1683,7 +1685,6 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @see #symmetricDifference(long[])
      * @see #intersection(long[])
      * @see N#difference(long[], long[])
-     * @see N#difference(int[], int[])
      */
     @Override
     public LongList difference(final long[] b) {
@@ -1799,7 +1800,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Counts the number of occurrences of the specified value in this list.
-     * 
+     *
      * <p>This method performs a linear scan through the list, counting elements
      * that are equal to the specified value.
      *
@@ -1839,7 +1840,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Returns the index of the first occurrence of the specified value in this list,
-     * starting the search at the specified index, or {@code N.INDEX_NOT_FOUND} (-1) 
+     * starting the search at the specified index, or {@code N.INDEX_NOT_FOUND} (-1)
      * if the value is not found.
      * <p>
      * The search starts at the specified {@code fromIndex} and proceeds to the end of the list.
@@ -1983,7 +1984,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Returns the median value of all elements in this list.
-     * 
+     *
      * <p>The median is the middle value when the elements are sorted in ascending order. For lists with
      * an odd number of elements, this is the exact middle element. For lists with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
@@ -1996,7 +1997,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Returns the median value of elements within the specified range of this list.
-     * 
+     *
      * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
      * For ranges with an odd number of elements, this returns the exact middle element when sorted.
      * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
@@ -2264,8 +2265,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     /**
      * Rotates all elements in this list by the specified distance.
      * After calling rotate(distance), the element at index i will be moved to
-     * index (i + distance) % size. 
-     * 
+     * index (i + distance) % size.
+     *
      * <p>Positive values of distance rotate elements towards higher indices (right rotation),
      * while negative values rotate towards lower indices (left rotation).
      * The list is modified in place.</p>
@@ -2631,10 +2632,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     /**
      * Returns an iterator over the elements in this list in proper sequence.
      *
-     * <p>The returned iterator is fail-fast: if the list is structurally modified
-     * at any time after the iterator is created, the iterator may throw a
-     * {@code ConcurrentModificationException}. This behavior is not guaranteed
-     * and should not be relied upon for correctness.</p>
+     * <p>The returned iterator is <b>not</b> fail-fast: it iterates over the list's
+     * backing array directly, and concurrent structural modifications during iteration
+     * yield undefined results rather than a {@code ConcurrentModificationException}.</p>
      *
      * @return a {@code LongIterator} over the elements in this list
      */

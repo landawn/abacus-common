@@ -33,11 +33,11 @@ import com.landawn.abacus.util.stream.ObjIteratorEx;
  *   <li>Plain Changes algorithm - generates all permutations without considering order</li>
  *   <li>Lexicographical algorithm - generates permutations in a specific order based on a comparator</li>
  * </ul>
- * 
+ *
  * <p>All methods return iterators that generate permutations lazily, making them memory-efficient
  * for large collections. The generated lists are new instances and modifications to them do not
  * affect the original collection.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * List<String> items = Arrays.asList("A", "B", "C");
@@ -58,21 +58,21 @@ public final class PermutationIterator {
 
     /**
      * Returns an iterator over all permutations of the specified collection.
-     * 
+     *
      * <p>This implementation uses the Plain Changes algorithm for permutation generation,
      * described in Knuth's "The Art of Computer Programming", Volume 4, Chapter 7, Section 7.2.1.2.</p>
-     * 
+     *
      * <p>If the input collection contains duplicate elements, some of the generated
      * permutations will be equal. An empty collection has only one permutation: an empty list.</p>
-     * 
+     *
      * <p>The returned iterator generates permutations lazily and does not store all permutations
      * in memory, making it suitable for large collections.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> numbers = Arrays.asList(1, 2, 3);
      * ObjIterator<List<Integer>> perms = PermutationIterator.of(numbers);
-     * // Generates: [1,2,3], [1,3,2], [2,1,3], [2,3,1], [3,1,2], [3,2,1]
+     * // Generates all 6 permutations of [1,2,3] in Plain Changes order
      * }</pre>
      *
      * @param <T> the type of elements in the collection
@@ -175,17 +175,17 @@ public final class PermutationIterator {
     /**
      * Returns an iterator over all permutations of the specified collection in lexicographical order.
      * The elements must implement {@link Comparable}.
-     * 
+     *
      * <p>This is an implementation of the algorithm for Lexicographical Permutations Generation,
      * described in Knuth's "The Art of Computer Programming", Volume 4, Chapter 7, Section 7.2.1.2.
      * The iteration order follows the lexicographical order. This means that the first permutation
      * will be in ascending order, and the last will be in descending order.</p>
-     * 
+     *
      * <p>Duplicate elements are considered equal. For example, the list [1, 1] will have only
      * one permutation, instead of two. This is why the elements have to implement {@link Comparable}.</p>
-     * 
+     *
      * <p>An empty collection has only one permutation: an empty list.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> numbers = Arrays.asList(3, 1, 2);
@@ -205,27 +205,27 @@ public final class PermutationIterator {
     /**
      * Returns an iterator over all permutations of the specified collection using the specified
      * {@link Comparator} for establishing the lexicographical ordering.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // String permutations in alphabetical order
      * List<String> words = Arrays.asList("b", "c", "a");
      * ObjIterator<List<String>> perms = PermutationIterator.ordered(words, String::compareTo);
      * // Generates: [a,b,c], [a,c,b], [b,a,c], [b,c,a], [c,a,b], [c,b,a]
-     * 
+     *
      * // Handling duplicates
      * List<Integer> numbers = Arrays.asList(1, 2, 2, 1);
      * ObjIterator<List<Integer>> perms2 = PermutationIterator.ordered(numbers, Integer::compare);
      * // Generates: [1,1,2,2], [1,2,1,2], [1,2,2,1], [2,1,1,2], [2,1,2,1], [2,2,1,1]
      * }</pre>
-     * 
+     *
      * <p>This is an implementation of the algorithm for Lexicographical Permutations Generation,
      * described in Knuth's "The Art of Computer Programming", Volume 4, Chapter 7, Section 7.2.1.2.
      * The iteration order follows the lexicographical order defined by the comparator.</p>
-     * 
+     *
      * <p>Elements that compare as equal are considered identical and no new permutations
      * are created by swapping them.</p>
-     * 
+     *
      * <p>An empty collection has only one permutation: an empty list.</p>
      *
      * @param <T> the type of elements in the collection

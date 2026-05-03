@@ -39,21 +39,18 @@ public class InstantType extends AbstractTemporalType<Instant> {
     /** The type name constant for Instant type identification. */
     public static final String INSTANT = Instant.class.getSimpleName();
 
+    /**
+     * Package-private constructor for InstantType.
+     * This constructor is called by the TypeFactory to create Instant type instances.
+     */
     InstantType() {
         super(INSTANT);
     }
 
     /**
-     * Returns the Class object representing the Instant type.
+     * Returns the Java class represented by this type handler.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Instant> type = TypeFactory.getType(Instant.class);
-     * Class<Instant> clazz = type.javaType();
-     * // Returns: Instant.class
-     * }</pre>
-     *
-     * @return Instant.class
+     * @return {@code Instant.class}
      */
     @Override
     public Class<Instant> javaType() {
@@ -61,22 +58,11 @@ public class InstantType extends AbstractTemporalType<Instant> {
     }
 
     /**
-     * Converts an Instant to its string representation.
-     * Uses ISO-8601 timestamp format with millisecond precision (e.g., "2023-12-25T10:30:45.123Z").
+     * Serializes an {@link Instant} to its ISO-8601 timestamp string representation.
+     * Uses millisecond precision and UTC timezone (e.g., {@code "2023-12-25T10:30:45.123Z"}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Instant> type = TypeFactory.getType(Instant.class);
-     * Instant instant = Instant.ofEpochMilli(1703502645123L);
-     * String result = type.stringOf(instant);
-     * // Returns: "2023-12-25T10:30:45.123Z"
-     *
-     * result = type.stringOf(null);
-     * // Returns: null
-     * }</pre>
-     *
-     * @param x the Instant to convert to string
-     * @return the ISO-8601 timestamp string representation, or {@code null} if the input is null
+     * @param x the {@link Instant} to serialize; may be {@code null}
+     * @return the ISO-8601 timestamp string, or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final Instant x) {
@@ -84,23 +70,16 @@ public class InstantType extends AbstractTemporalType<Instant> {
     }
 
     /**
-     * Converts various object types to an Instant.
-     * Supported input types include:
-     * - Number: interpreted as milliseconds since epoch
-     * - Other types: converted to string and then parsed
+     * Converts an arbitrary object to an {@link Instant} instance.
+     * Supported conversions:
+     * <ul>
+     *   <li>{@link Number}: treated as milliseconds since the epoch</li>
+     *   <li>{@code null}: returns {@code null}</li>
+     *   <li>Any other type: converted to its string representation, then parsed via {@link #valueOf(String)}</li>
+     * </ul>
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Instant> type = TypeFactory.getType(Instant.class);
-     * Instant instant1 = type.valueOf(1703502645123L);
-     * // Converts long to Instant
-     *
-     * Instant instant2 = type.valueOf("2023-12-25T10:30:45Z");
-     * // Parses string to Instant
-     * }</pre>
-     *
-     * @param obj the object to convert to Instant
-     * @return an Instant instance, or {@code null} if the input is null
+     * @param obj the object to convert; may be {@code null}
+     * @return an {@link Instant} representing the input value, or {@code null} if {@code obj} is {@code null}
      */
     @Override
     public Instant valueOf(final Object obj) {
@@ -112,29 +91,18 @@ public class InstantType extends AbstractTemporalType<Instant> {
     }
 
     /**
-     * Parses a string representation into an Instant.
-     * The method handles:
-     * - {@code null} or null-like strings: returns null
-     * - "sysTime": returns current instant
-     * - numeric strings: interpreted as milliseconds since epoch
-     * - ISO-8601 formatted strings: parsed according to standard formats
-     * - Standard Instant.parse() format for other strings
+     * Converts a string representation to an {@link Instant} instance.
+     * <ul>
+     *   <li>{@code null} or null-datetime strings: returns {@code null}</li>
+     *   <li>{@code "sysTime"}: returns {@link Instant#now()}</li>
+     *   <li>Numeric strings (possible millis): parsed as milliseconds since the epoch</li>
+     *   <li>20-character strings ending in {@code 'Z'}: parsed as ISO-8601 date-time</li>
+     *   <li>24-character strings ending in {@code 'Z'}: parsed as ISO-8601 timestamp with milliseconds</li>
+     *   <li>All other values: parsed via {@link Instant#parse(CharSequence)}</li>
+     * </ul>
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Instant> type = TypeFactory.getType(Instant.class);
-     * Instant instant1 = type.valueOf("2023-12-25T10:30:45Z");
-     * // Parses ISO-8601 date-time
-     *
-     * Instant instant2 = type.valueOf("1703502645123");
-     * // Parses milliseconds since epoch
-     *
-     * Instant instant3 = type.valueOf("sysTime");
-     * // Returns current instant
-     * }</pre>
-     *
-     * @param str the string to parse into an Instant
-     * @return the parsed Instant instance, or {@code null} if the input is {@code null} or represents a {@code null} datetime
+     * @param str the string to parse; may be {@code null} or empty
+     * @return the parsed {@link Instant}, or {@code null} if {@code str} is {@code null} or a null-datetime string
      */
     @Override
     public Instant valueOf(final String str) {
@@ -161,23 +129,16 @@ public class InstantType extends AbstractTemporalType<Instant> {
     }
 
     /**
-     * Parses a character array into an Instant.
-     * This method is optimized for performance when parsing from character buffers.
-     * If the character sequence appears to be a long number, it's interpreted as milliseconds since epoch.
-     * Otherwise, the characters are converted to a string and parsed using standard instant parsing.
+     * Converts a region of a character array to an {@link Instant} instance.
+     * If the character sequence looks like a {@code long} value (an epoch-millisecond timestamp),
+     * it is parsed as such; otherwise the characters are converted to a {@link String} and
+     * delegated to {@link #valueOf(String)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Instant> type = TypeFactory.getType(Instant.class);
-     * char[] chars = "2023-12-25T10:30:45Z".toCharArray();
-     * Instant instant = type.valueOf(chars, 0, chars.length);
-     * // Parses character array to Instant
-     * }</pre>
-     *
-     * @param cbuf the character array containing the instant representation
-     * @param offset the start offset in the character array
-     * @param len the number of characters to parse
-     * @return the parsed Instant instance, or {@code null} if the input is {@code null} or empty
+     * @param cbuf   the character array containing the value; may be {@code null}
+     * @param offset the index of the first character to use
+     * @param len    the number of characters to use
+     * @return an {@link Instant} parsed from the specified character region,
+     *         or {@code null} if {@code cbuf} is {@code null} or {@code len} is {@code 0}
      */
     @Override
     public Instant valueOf(final char[] cbuf, final int offset, final int len) {
@@ -197,21 +158,13 @@ public class InstantType extends AbstractTemporalType<Instant> {
     }
 
     /**
-     * Retrieves an Instant value from the specified column in a ResultSet.
-     * The method reads a Timestamp from the database and converts it to an Instant.
+     * Retrieves an {@link Instant} value from a {@link ResultSet} at the specified column index.
+     * The column is read as a {@link Timestamp} and converted via {@link Timestamp#toInstant()}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Instant> type = TypeFactory.getType(Instant.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * Instant instant = type.get(rs, 1);
-     * // Returns: Instant value from column 1
-     * }</pre>
-     *
-     * @param rs the ResultSet to read from
-     * @param columnIndex the index of the column to read (1-based)
-     * @return the Instant value from the column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param rs          the {@link ResultSet} to read from
+     * @param columnIndex the 1-based column index
+     * @return the {@link Instant} from the column, or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
     public Instant get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -221,20 +174,12 @@ public class InstantType extends AbstractTemporalType<Instant> {
     }
 
     /**
-     * Retrieves an Instant value from the specified column in a ResultSet using the column name.
-     * The method reads a Timestamp from the database and converts it to an Instant.
+     * Retrieves an {@link Instant} value from a {@link ResultSet} using the specified column label.
+     * The column is read as a {@link Timestamp} and converted via {@link Timestamp#toInstant()}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Instant> type = TypeFactory.getType(Instant.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * Instant instant = type.get(rs, "created_at");
-     * // Returns: Instant value from "created_at" column
-     * }</pre>
-     *
-     * @param rs the ResultSet to read from
-     * @param columnName the column label (or name if no label was specified) to read
-     * @return the Instant value from the column, or {@code null} if the column value is SQL NULL
+     * @param rs         the {@link ResultSet} to read from
+     * @param columnName the label of the column to retrieve
+     * @return the {@link Instant} from the column, or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
@@ -245,21 +190,13 @@ public class InstantType extends AbstractTemporalType<Instant> {
     }
 
     /**
-     * Sets an Instant parameter in a PreparedStatement.
-     * The Instant is converted to a Timestamp for database storage.
+     * Sets an {@link Instant} value as a parameter in a {@link PreparedStatement}.
+     * The {@link Instant} is converted to a {@link Timestamp} via {@link Timestamp#from(Instant)}.
+     * A {@code null} value sets SQL {@code NULL}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Instant> type = TypeFactory.getType(Instant.class);
-     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
-     * Instant now = Instant.now();
-     * type.set(stmt, 2, now);
-     * // Sets parameter to current instant
-     * }</pre>
-     *
-     * @param stmt the PreparedStatement to set the parameter on
-     * @param columnIndex the index of the parameter to set (1-based)
-     * @param x the Instant to set, or null
+     * @param stmt        the {@link PreparedStatement} in which to set the parameter
+     * @param columnIndex the 1-based parameter index
+     * @param x           the {@link Instant} to set; may be {@code null}
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -268,21 +205,13 @@ public class InstantType extends AbstractTemporalType<Instant> {
     }
 
     /**
-     * Sets an Instant parameter in a CallableStatement using a parameter name.
-     * The Instant is converted to a Timestamp for database storage.
+     * Sets an {@link Instant} value as a named parameter in a {@link CallableStatement}.
+     * The {@link Instant} is converted to a {@link Timestamp} via {@link Timestamp#from(Instant)}.
+     * A {@code null} value sets SQL {@code NULL}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Instant> type = TypeFactory.getType(Instant.class);
-     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
-     * Instant now = Instant.now();
-     * type.set(stmt, "created_at", now);
-     * // Sets parameter to current instant
-     * }</pre>
-     *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param stmt          the {@link CallableStatement} in which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the Instant to set, or null
+     * @param x             the {@link Instant} to set; may be {@code null}
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -291,20 +220,12 @@ public class InstantType extends AbstractTemporalType<Instant> {
     }
 
     /**
-     * Appends the string representation of an Instant to an Appendable.
-     * Uses the default ISO-8601 timestamp format.
+     * Appends the string representation of an {@link Instant} to an {@link Appendable}.
+     * Uses the default ISO-8601 timestamp format (e.g., {@code "2023-12-25T10:30:45.123Z"}).
+     * If {@code x} is {@code null}, the literal {@code null} is appended.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Instant> type = TypeFactory.getType(Instant.class);
-     * StringBuilder sb = new StringBuilder();
-     * Instant instant = Instant.ofEpochMilli(1703502645123L);
-     * type.appendTo(sb, instant);
-     * // sb contains: "2023-12-25T10:30:45.123Z"
-     * }</pre>
-     *
-     * @param appendable the Appendable to write to
-     * @param x the Instant to append
+     * @param appendable the {@link Appendable} to write to
+     * @param x          the {@link Instant} to append; may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
@@ -317,35 +238,20 @@ public class InstantType extends AbstractTemporalType<Instant> {
     }
 
     /**
-     * Writes the character representation of an Instant to a CharacterWriter.
-     * The format depends on the serialization configuration:
-     * - LONG format: writes milliseconds since epoch as a number
-     * - ISO_8601_DATE_TIME: writes in "yyyy-MM-dd'T'HH:mm:ssZ" format
-     * - ISO_8601_TIMESTAMP: writes in "yyyy-MM-dd'T'HH:mm:ss.SSSZ" format
-     * - Default: uses the standard stringOf() format
-     * String formats are quoted if specified in the configuration.
+     * Writes an {@link Instant} value to a {@link CharacterWriter}.
+     * The output format depends on the serialization configuration:
+     * <ul>
+     *   <li>{@code LONG}: writes epoch milliseconds as an unquoted number</li>
+     *   <li>{@code ISO_8601_DATE_TIME}: writes in {@code "yyyy-MM-dd'T'HH:mm:ss'Z'"} format</li>
+     *   <li>{@code ISO_8601_TIMESTAMP}: writes in {@code "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"} format</li>
+     *   <li>No config / {@code null} format: uses {@link #stringOf(Instant)}</li>
+     * </ul>
+     * Non-{@code LONG} formats are quoted when {@code config} specifies a string quotation character.
+     * If {@code x} is {@code null}, the literal {@code null} is written.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Instant> type = TypeFactory.getType(Instant.class);
-     * CharacterWriter writer = new CharacterWriter();
-     * Instant instant = Instant.ofEpochMilli(1703502645123L);
-     *
-     * JsonXmlSerConfig config =
-     *     JsonXmlSerConfig.of().setDateTimeFormat(DateTimeFormat.LONG);
-     * type.writeCharacter(writer, instant, config);
-     * // Writes: 1703502645123
-     *
-     * writer = new CharacterWriter();
-     * config = JsonXmlSerConfig.of()
-     *     .setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP);
-     * type.writeCharacter(writer, instant, config);
-     * // Writes: "2023-12-25T10:30:45.123Z"
-     * }</pre>
-     *
-     * @param writer the CharacterWriter to write to
-     * @param x the Instant to write
-     * @param config the serialization configuration to use
+     * @param writer the {@link CharacterWriter} to write to
+     * @param x      the {@link Instant} to write; may be {@code null}
+     * @param config the serialization configuration; may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @SuppressWarnings("null")

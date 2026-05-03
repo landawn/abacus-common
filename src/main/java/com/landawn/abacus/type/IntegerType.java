@@ -20,9 +20,16 @@ import java.sql.SQLException;
 import com.landawn.abacus.util.Numbers;
 
 /**
- * Type handler for Integer wrapper type.
- * This class provides functionality to handle Integer objects in database operations and type conversions.
- * It extends AbstractIntegerType to inherit common integer type handling behavior.
+ * Type handler for {@link Integer} (wrapper class) values.
+ * This class provides database read operations and type information for {@link Integer} objects.
+ *
+ * <p>When reading from a database, the column value is retrieved via
+ * {@link java.sql.ResultSet#getObject(int) ResultSet.getObject} to preserve SQL {@code NULL}:
+ * a {@code null} result returns {@code null}, an {@link Integer} result is returned directly,
+ * any other {@link Number} is narrowed via {@link Number#intValue()}, and
+ * non-numeric values are parsed via {@link com.landawn.abacus.util.Numbers#toInt(Object)}.
+ *
+ * @see AbstractIntegerType
  */
 public final class IntegerType extends AbstractIntegerType {
 
@@ -40,9 +47,9 @@ public final class IntegerType extends AbstractIntegerType {
     }
 
     /**
-     * Returns the Class object representing the Integer class.
+     * Returns the Java class represented by this type handler.
      *
-     * @return the Class object for Integer.class
+     * @return {@code Integer.class}
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
@@ -52,9 +59,9 @@ public final class IntegerType extends AbstractIntegerType {
 
     /**
      * Indicates whether this type represents a primitive wrapper class.
-     * Integer is the wrapper class for the primitive int type.
+     * {@link Integer} is the wrapper for the primitive {@code int} type.
      *
-     * @return {@code true}, indicating Integer is a primitive wrapper
+     * @return {@code true}, always, because {@link Integer} is a primitive wrapper
      */
     @Override
     public boolean isPrimitiveWrapper() {
@@ -62,21 +69,17 @@ public final class IntegerType extends AbstractIntegerType {
     }
 
     /**
-     * Retrieves an Integer value from a ResultSet at the specified column index.
-     * This method handles various numeric types in the database and converts them to Integer.
+     * Retrieves an {@link Integer} value from a {@link java.sql.ResultSet} at the specified column index.
+     * The column is read via {@link java.sql.ResultSet#getObject(int)} to preserve SQL {@code NULL}.
+     * If the returned object is already an {@link Integer} it is returned directly; any other
+     * {@link Number} is narrowed via {@link Number#intValue()}; non-numeric values are parsed via
+     * {@link com.landawn.abacus.util.Numbers#toInt(Object)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Integer> type = TypeFactory.getType(Integer.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * Integer age = type.get(rs, 1);   // retrieves Integer from column 1
-     * }</pre>
-     *
-     * @param rs the ResultSet containing the data, must not be {@code null}
-     * @param columnIndex the column index (1-based) to retrieve the value from
-     * @return the Integer value at the specified column, or {@code null} if the column value is SQL NULL
+     * @param rs          the {@link java.sql.ResultSet} to read from; must not be {@code null}
+     * @param columnIndex the 1-based column index
+     * @return the {@link Integer} value at the specified column,
+     *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs
-     * @throws NumberFormatException if a non-numeric value cannot be converted to Integer
      */
     @Override
     public Integer get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -94,21 +97,17 @@ public final class IntegerType extends AbstractIntegerType {
     }
 
     /**
-     * Retrieves an Integer value from a ResultSet using the specified column label.
-     * This method handles various numeric types in the database and converts them to Integer.
+     * Retrieves an {@link Integer} value from a {@link java.sql.ResultSet} using the specified column label.
+     * The column is read via {@link java.sql.ResultSet#getObject(String)} to preserve SQL {@code NULL}.
+     * If the returned object is already an {@link Integer} it is returned directly; any other
+     * {@link Number} is narrowed via {@link Number#intValue()}; non-numeric values are parsed via
+     * {@link com.landawn.abacus.util.Numbers#toInt(Object)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Integer> type = TypeFactory.getType(Integer.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * Integer age = type.get(rs, "age");   // retrieves Integer from "age" column
-     * }</pre>
-     *
-     * @param rs the ResultSet containing the data, must not be {@code null}
-     * @param columnName the label of the column to retrieve the value from, must not be {@code null}
-     * @return the Integer value in the specified column, or {@code null} if the column value is SQL NULL
+     * @param rs         the {@link java.sql.ResultSet} to read from; must not be {@code null}
+     * @param columnName the label of the column to retrieve
+     * @return the {@link Integer} value in the specified column,
+     *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs
-     * @throws NumberFormatException if a non-numeric value cannot be converted to Integer
      */
     @Override
     public Integer get(final ResultSet rs, final String columnName) throws SQLException {

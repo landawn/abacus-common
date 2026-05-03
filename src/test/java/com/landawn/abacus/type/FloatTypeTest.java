@@ -137,7 +137,7 @@ public class FloatTypeTest extends TestBase {
 
         // Test with null
         type.set(stmt, 2, null);
-        verify(stmt).setNull(2, java.sql.Types.FLOAT);
+        verify(stmt).setNull(2, java.sql.Types.REAL);
     }
 
     @Test
@@ -150,7 +150,7 @@ public class FloatTypeTest extends TestBase {
 
         // Test with null
         type.set(stmt, "param2", null);
-        verify(stmt).setNull("param2", java.sql.Types.FLOAT);
+        verify(stmt).setNull("param2", java.sql.Types.REAL);
     }
 
     @Test

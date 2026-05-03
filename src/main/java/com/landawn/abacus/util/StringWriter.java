@@ -18,11 +18,11 @@ package com.landawn.abacus.util;
  * A high-performance string writer implementation built on StringBuilder.
  * Unlike {@link java.io.StringWriter}, this implementation is NOT thread-safe,
  * trading thread safety for better performance in single-threaded scenarios.
- * 
+ *
  * <p>This class extends {@link AppendableWriter} and uses a StringBuilder as its
  * internal buffer. It provides all standard Writer operations plus additional
  * methods for efficient string building.
- * 
+ *
  * <p>Key differences from java.io.StringWriter:
  * <ul>
  *   <li>Not thread-safe (no synchronization overhead)</li>
@@ -30,7 +30,7 @@ package com.landawn.abacus.util;
  *   <li>Provides direct access to the underlying StringBuilder</li>
  *   <li>Returns <i>this</i> from append methods for method chaining</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * StringWriter writer = new StringWriter();
@@ -39,7 +39,7 @@ package com.landawn.abacus.util;
  *       .append("World!");
  * String result = writer.toString();   // "Hello World!"
  * }</pre>
- * 
+ *
  * @see AppendableWriter
  * @see java.io.StringWriter
  */
@@ -50,7 +50,7 @@ public final class StringWriter extends AppendableWriter {
     /**
      * Creates a new StringWriter with a default initial capacity.
      * The initial capacity is determined by the StringBuilder's default constructor.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringWriter writer = new StringWriter();
@@ -64,7 +64,7 @@ public final class StringWriter extends AppendableWriter {
     /**
      * Creates a new StringWriter with the specified initial capacity.
      * This can improve performance when the approximate size of the content is known.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // If expecting approximately 1000 characters
@@ -81,7 +81,7 @@ public final class StringWriter extends AppendableWriter {
      * Creates a new StringWriter that wraps the provided StringBuilder.
      * Any content already in the StringBuilder will be preserved, and new
      * content will be appended to it.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = new StringBuilder("Existing content. ");
@@ -101,10 +101,10 @@ public final class StringWriter extends AppendableWriter {
     /**
      * Returns the underlying StringBuilder used by this writer.
      * This allows direct manipulation of the buffer when needed.
-     * 
+     *
      * <p>Note: Modifying the returned StringBuilder will affect the
      * content of this StringWriter.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringWriter writer = new StringWriter();
@@ -122,7 +122,7 @@ public final class StringWriter extends AppendableWriter {
     /**
      * Appends a single character to this writer.
      * This method returns the writer itself to allow method chaining.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.append('H').append('i').append('!');
@@ -141,7 +141,7 @@ public final class StringWriter extends AppendableWriter {
     /**
      * Appends a character sequence to this writer.
      * If the sequence is {@code null}, the string "null" is appended.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.append("Hello").append(" ").append("World");
@@ -161,7 +161,7 @@ public final class StringWriter extends AppendableWriter {
      * Appends a portion of a character sequence to this writer.
      * If the sequence is {@code null}, then characters are appended as if the sequence
      * contained the four characters "null".
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.append("Hello World", 0, 5);   // Appends "Hello"
@@ -185,7 +185,7 @@ public final class StringWriter extends AppendableWriter {
      * Writes a single character to this writer.
      * The character is written as the low-order 16 bits of the integer value;
      * the high-order 16 bits are ignored.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write(65);    // Writes 'A'
@@ -202,7 +202,7 @@ public final class StringWriter extends AppendableWriter {
     /**
      * Writes an array of characters to this writer.
      * The entire array is written to the internal buffer.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = {'H', 'e', 'l', 'l', 'o'};
@@ -220,7 +220,7 @@ public final class StringWriter extends AppendableWriter {
      * Writes a portion of a character array to this writer.
      * Characters are written starting at offset {@code off} and
      * writing {@code len} characters.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = {'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd'};
@@ -240,8 +240,9 @@ public final class StringWriter extends AppendableWriter {
 
     /**
      * Writes a string to this writer.
-     * If the string is {@code null}, nothing is written.
-     * 
+     * If the string is {@code null}, the four characters {@code "null"} are written
+     * (matching {@link StringBuilder#append(String)} semantics).
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write("Hello, World!");
@@ -258,7 +259,7 @@ public final class StringWriter extends AppendableWriter {
      * Writes a portion of a string to this writer.
      * Characters are written starting at offset {@code off} and
      * writing {@code len} characters.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write("Hello, World!", 7, 5);   // Writes "World"
@@ -291,7 +292,7 @@ public final class StringWriter extends AppendableWriter {
      * Since StringWriter writes to an in-memory buffer and uses no
      * system resources, this method has no effect. The writer can
      * continue to be used after calling close().
-     * 
+     *
      * <p>This method is provided only for compatibility with the
      * Writer interface.
      */
@@ -304,7 +305,7 @@ public final class StringWriter extends AppendableWriter {
      * Returns the current content of the buffer as a string.
      * This method creates a new String from the current content
      * of the internal StringBuilder.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringWriter writer = new StringWriter();

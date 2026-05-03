@@ -24,28 +24,28 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 /**
  * A high-performance buffered reader implementation that can read from strings,
  * input streams, or other readers.
- * 
+ *
  * <p>This class provides optimized reading capabilities and can be reused by
  * reinitializing with different sources. Unlike the standard BufferedReader,
  * this implementation allows switching between string-based and stream-based
  * reading modes.</p>
- * 
+ *
  * <p><b>Important:</b> This class is not thread-safe. If multiple threads access
  * an instance concurrently, external synchronization is required.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Reading from a string
  * BufferedReader reader = new BufferedReader("Hello\nWorld");
  * String line1 = reader.readLine();   // "Hello"
  * String line2 = reader.readLine();   // "World"
- * 
+ *
  * // Reading from an InputStream
  * BufferedReader reader2 = new BufferedReader(new FileInputStream("file.txt"));
  * String firstLine = reader2.readLine();
  * reader2.close();
  * }</pre>
- * 
+ *
  * @see java.io.BufferedReader
  */
 @SuppressFBWarnings
@@ -73,10 +73,10 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
 
     /**
      * Creates a BufferedReader that reads from the specified string.
-     * 
+     *
      * <p>This constructor initializes the reader to read characters directly
      * from the provided string without any underlying stream.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedReader reader = new BufferedReader("Line 1\nLine 2\nLine 3");
@@ -86,7 +86,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      *     System.out.println(line);
      * }
      * }</pre>
-     * 
+     *
      * @param st the string to read from
      */
     BufferedReader(final String st) {
@@ -96,17 +96,17 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
 
     /**
      * Creates a BufferedReader that reads from the specified InputStream.
-     * 
+     *
      * <p>The stream is wrapped with an InputStreamReader using the default
      * character encoding.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedReader reader = new BufferedReader(System.in);
      * System.out.print("Enter text: ");
      * String input = reader.readLine();
      * }</pre>
-     * 
+     *
      * @param is the input stream to read from
      */
     BufferedReader(final InputStream is) {
@@ -115,7 +115,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
 
     /**
      * Creates a BufferedReader that reads from the specified Reader.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FileReader fileReader = new FileReader("data.txt");
@@ -123,7 +123,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * String content = reader.readLine();
      * reader.close();
      * }</pre>
-     * 
+     *
      * @param reader the reader to read from
      */
     BufferedReader(final Reader reader) {
@@ -133,11 +133,11 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
 
     /**
      * Reads a single character from the input.
-     * 
+     *
      * <p>This method returns the character as an integer value, or -1 if
      * the end of the stream has been reached. Line terminators are processed
      * according to the reader's configuration.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedReader reader = new BufferedReader("ABC");
@@ -184,7 +184,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
 
     /**
      * Reads characters into a portion of an array.
-     * 
+     *
      * <p>This method implements efficient bulk reading of characters. It attempts
      * to read as many characters as possible up to the specified length.</p>
      *
@@ -239,10 +239,10 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
 
     /**
      * Reads characters into a portion of an array.
-     * 
+     *
      * <p>This method attempts to read up to {@code len} characters from the input,
      * storing them into the array {@code cbuf} starting at offset {@code off}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedReader reader = new BufferedReader("Hello World");
@@ -301,12 +301,14 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
     }
 
     /**
-     * Reads a line of text with control over line terminator handling.
-     * 
-     * @param ignoreLF if {@code true}, skip a leading line feed character
+     * Reads a line of text with control over whether a leading line-feed character
+     * should be skipped (used internally for handling {@code \r\n} sequences).
+     *
+     * @param ignoreLF if {@code true}, a leading {@code '\n'} character at the current
+     *        position is skipped before reading the line (used after reading a {@code '\r'})
      * @return a String containing the contents of the line, not including
      *         any line-termination characters, or {@code null} if the end of the
-     *         stream has been reached
+     *         stream has been reached without reading any characters
      * @throws IOException if an I/O error occurs
      */
     String readLine(final boolean ignoreLF) throws IOException {
@@ -390,7 +392,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
 
     /**
      * Reads a line of text.
-     * 
+     *
      * <p>A line is considered to be terminated by any one of a line feed ('\n'),
      * a carriage return ('\r'), or a carriage return followed immediately by a
      * line feed. The line terminator is not included in the returned string.</p>
@@ -452,10 +454,10 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
 
     /**
      * Skips characters.
-     * 
+     *
      * <p>This method will skip as many characters as possible up to the
      * specified number, and returns the actual number of characters skipped.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedReader reader = new BufferedReader("1234567890");
@@ -525,10 +527,10 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
 
     /**
      * Tells whether this stream is ready to be read.
-     * 
+     *
      * <p>A stream is ready if the buffer contains data or if the underlying
      * stream is ready.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedReader reader = new BufferedReader("Hello");
@@ -575,11 +577,11 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
 
     /**
      * Closes the stream and releases any system resources associated with it.
-     * 
+     *
      * <p>Once the stream has been closed, further read(), ready(), or skip()
      * invocations will throw an IOException. Closing a previously closed
      * stream has no effect.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedReader reader = new BufferedReader(new FileInputStream("file.txt"));
@@ -611,16 +613,16 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
 
     /**
      * Reinitializes this reader to read from the specified string.
-     * 
+     *
      * <p>This method allows reusing the same BufferedReader instance for
      * reading different strings, which can be more efficient than creating
      * new instances.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedReader reader = new BufferedReader("First");
      * System.out.println(reader.readLine());   // "First"
-     * 
+     *
      * reader.reinit("Second");
      * System.out.println(reader.readLine());   // "Second"
      * }</pre>
@@ -641,7 +643,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
 
     /**
      * Reinitializes this reader to read from the specified InputStream.
-     * 
+     *
      * <p>The stream is wrapped with an InputStreamReader using the default
      * character encoding.</p>
      *
@@ -653,7 +655,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
 
     /**
      * Reinitializes this reader to read from the specified Reader.
-     * 
+     *
      * <p>This method allows reusing the same BufferedReader instance for
      * reading from different sources.</p>
      *

@@ -18,28 +18,28 @@ package com.landawn.abacus.util;
 
 /**
  * Utility class providing IEEE-754r compliant operations for floating-point numbers.
- * 
+ *
  * <p>This class provides methods for finding minimum and maximum values among floating-point
  * numbers following the IEEE-754r standard. The key difference from standard Math.min/max
  * methods is the special handling of NaN (Not-a-Number) values.</p>
- * 
+ *
  * <p>According to IEEE-754r:</p>
  * <ul>
  *   <li>When comparing a NaN with a non-NaN value, the non-NaN value is returned</li>
  *   <li>Only when all values are NaN is NaN returned</li>
  * </ul>
- * 
+ *
  * <p>This behavior differs from {@link Math#min} and {@link Math#max}, which return NaN
  * if any argument is NaN.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Standard Math.min returns NaN if any argument is NaN
  * double result1 = Math.min(5.0, Double.NaN);   // returns NaN
- * 
+ *
  * // IEEE754rUtil.min returns the non-NaN value
  * double result2 = IEEE754rUtil.min(5.0, Double.NaN);   // returns 5.0
- * 
+ *
  * // Array operations
  * float[] values = {3.0f, Float.NaN, 1.0f, 2.0f};
  * float min = IEEE754rUtil.min(values);   // returns 1.0f
@@ -122,10 +122,10 @@ public final class IEEE754rUtil {
 
     /**
      * Returns the minimum value in a float array according to IEEE-754r standard.
-     * 
+     *
      * <p>NaN values in the array are ignored unless all values are NaN.
      * The array must not be {@code null} or empty.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] values = {3.0f, Float.NaN, 1.0f, 5.0f};
@@ -213,10 +213,10 @@ public final class IEEE754rUtil {
 
     /**
      * Returns the minimum value in a double array according to IEEE-754r standard.
-     * 
+     *
      * <p>NaN values in the array are ignored unless all values are NaN.
      * The array must not be {@code null} or empty.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] values = {3.0, Double.NaN, 1.0, 5.0};
@@ -304,10 +304,10 @@ public final class IEEE754rUtil {
 
     /**
      * Returns the maximum value in a float array according to IEEE-754r standard.
-     * 
+     *
      * <p>NaN values in the array are ignored unless all values are NaN.
      * The array must not be {@code null} or empty.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] values = {3.0f, Float.NaN, 1.0f, 5.0f};
@@ -395,10 +395,10 @@ public final class IEEE754rUtil {
 
     /**
      * Returns the maximum value in a double array according to IEEE-754r standard.
-     * 
+     *
      * <p>NaN values in the array are ignored unless all values are NaN.
      * The array must not be {@code null} or empty.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] values = {3.0, Double.NaN, 1.0, 5.0};

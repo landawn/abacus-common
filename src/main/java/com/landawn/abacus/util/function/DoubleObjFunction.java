@@ -67,6 +67,7 @@ public interface DoubleObjFunction<T, R> extends Throwables.DoubleObjFunction<T,
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied
      * @return a composed function that first applies this function and then applies the {@code after} function
+     * @throws NullPointerException if {@code after} is null
      */
     default <V> DoubleObjFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return (i, t) -> after.apply(apply(i, t));

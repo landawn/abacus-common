@@ -59,7 +59,7 @@ public abstract class AbstractPool implements Pool {
     /**
      * Default delay in milliseconds between eviction runs.
      */
-    static final long DEFAULT_EVICT_DELAY = 3000;
+    static final long DEFAULT_EVICT_DELAY_IN_MILLIS = 3000;
 
     /**
      * Default balance factor used when auto-balancing is enabled.
@@ -139,7 +139,7 @@ public abstract class AbstractPool implements Pool {
      * Delay in milliseconds between eviction runs.
      * A value of 0 or less disables automatic eviction.
      */
-    final long evictDelay;
+    final long evictDelayInMillis;
 
     /**
      * Maximum total memory size in bytes the pool can use.
@@ -179,22 +179,22 @@ public abstract class AbstractPool implements Pool {
      * This protected constructor is used by subclasses to initialize core pool functionality.
      *
      * @param capacity the maximum number of objects the pool can hold (must be non-negative)
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
+     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy for determining which objects to evict
      * @param autoBalance whether to automatically remove objects when the pool is full
      * @param balanceFactor the proportion of objects to remove during balancing, typically 0.1 to 0.5 (must be non-negative)
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit (must be non-negative)
      * @throws IllegalArgumentException if any numeric parameter is negative
      */
-    protected AbstractPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final boolean autoBalance, final float balanceFactor,
-            final long maxMemorySize) {
-        if (capacity < 0 || evictDelay < 0 || balanceFactor < 0 || maxMemorySize < 0) {
-            throw new IllegalArgumentException("Capacity(" + capacity + "), evict delay(" + evictDelay + "), balance factor(" + balanceFactor
+    protected AbstractPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final boolean autoBalance,
+            final float balanceFactor, final long maxMemorySize) {
+        if (capacity < 0 || evictDelayInMillis < 0 || balanceFactor < 0 || maxMemorySize < 0) {
+            throw new IllegalArgumentException("Capacity(" + capacity + "), evict delay(" + evictDelayInMillis + "), balance factor(" + balanceFactor
                     + "), max memory size(" + maxMemorySize + ") cannot be negative");
         }
 
         this.capacity = capacity;
-        this.evictDelay = evictDelay; // 0 means disabled
+        this.evictDelayInMillis = evictDelayInMillis; // 0 means disabled
         this.maxMemorySize = maxMemorySize;
         this.evictionPolicy = evictionPolicy == null ? EvictionPolicy.LAST_ACCESS_TIME : evictionPolicy;
         this.autoBalance = autoBalance;
@@ -212,6 +212,19 @@ public abstract class AbstractPool implements Pool {
             }
         });
 
+        // NOTE: subclass constructors must call registerShutdownHook() as their LAST statement,
+        // AFTER initializing all fields the close()-path touches (pool collection, comparator,
+        // scheduleFuture). Registering here would publish `this` to the JVM shutdown thread
+        // before the subclass finishes initialization — a JVM shutdown beginning in that race
+        // window would invoke close() against half-initialized state and NPE.
+    }
+
+    /**
+     * Registers the shutdown hook with the JVM. Must be called by concrete subclasses as the
+     * last statement of their constructors so that all subclass state is fully initialized
+     * before the hook can fire.
+     */
+    protected final void registerShutdownHook() {
         Runtime.getRuntime().addShutdownHook(shutdownHook);
     }
 
@@ -234,7 +247,6 @@ public abstract class AbstractPool implements Pool {
     /**
      * Acquires the lock for this pool.
      * This method blocks until the lock is available.
-     *
      */
     void lock() {
         lock.lock();
@@ -314,7 +326,7 @@ public abstract class AbstractPool implements Pool {
     /**
      * Checks whether this pool has been closed.
      * Once closed, a pool cannot be reopened and all operations will throw IllegalStateException.
-     * 
+     *
      * @return {@code true} if the pool has been closed, {@code false} otherwise
      */
     @Override
@@ -325,7 +337,7 @@ public abstract class AbstractPool implements Pool {
     /**
      * Verifies that this pool is not closed, throwing an exception if it is.
      * This method should be called at the beginning of any operation that requires the pool to be open.
-     * 
+     *
      * @throws IllegalStateException if the pool has been closed
      */
     protected void assertNotClosed() {

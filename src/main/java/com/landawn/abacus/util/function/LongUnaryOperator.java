@@ -86,9 +86,10 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
      * long result = add10ThenMultiplyBy3.applyAsLong(5L);   // returns 45L ((5 + 10) * 3)
      * }</pre>
      *
-     * @param before the operator to apply before this operator is applied
+     * @param before the operator to apply before this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies the {@code before}
      *         operator and then applies this operator
+     * @throws NullPointerException if {@code before} is null
      *
      * @see #andThen(java.util.function.LongUnaryOperator)
      */
@@ -113,9 +114,10 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
      * long result = multiplyBy2ThenSubtract5.applyAsLong(10L);   // returns 15L ((10 * 2) - 5)
      * }</pre>
      *
-     * @param after the operator to apply after this operator is applied
+     * @param after the operator to apply after this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies this operator and then
      *         applies the {@code after} operator
+     * @throws NullPointerException if {@code after} is null
      *
      * @see #compose(java.util.function.LongUnaryOperator)
      */

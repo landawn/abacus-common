@@ -25,10 +25,10 @@ import com.landawn.abacus.util.u.Optional;
  * A container class that holds three values of potentially different types.
  * This class is mutable and provides various utility methods for accessing and modifying
  * the three elements (left, middle, and right).
- * 
+ *
  * <p>Triple is commonly used to return multiple values from a method or to group
  * three related values together without creating a dedicated class.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Triple<String, Integer, Boolean> triple = Triple.of("Hello", 42, true);
@@ -293,8 +293,9 @@ public final class Triple<L, M, R> implements Mutable {
     }
 
     /**
-     * Sets all three elements of this Triple to the specified values in a single operation.
-     * This is more efficient than calling setLeft, setMiddle, and setRight separately.
+     * Sets all three elements of this Triple to the specified values in a single method call.
+     * This is a convenience method that calls {@link #setLeft(Object)}, {@link #setMiddle(Object)},
+     * and {@link #setRight(Object)} in sequence.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -316,7 +317,8 @@ public final class Triple<L, M, R> implements Mutable {
     /**
      * Returns the current value of the left element and then updates it with the specified new value.
      * This method is useful when you need to retrieve the old value while setting a new one
-     * in an atomic-like operation.
+     * in a single method call. Note: this is not atomic and is not safe for concurrent use without
+     * external synchronization.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -357,7 +359,8 @@ public final class Triple<L, M, R> implements Mutable {
     /**
      * Returns the current value of the middle element and then updates it with the specified new value.
      * This method is useful when you need to retrieve the old value while setting a new one
-     * in an atomic-like operation.
+     * in a single method call. Note: this is not atomic and is not safe for concurrent use without
+     * external synchronization.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -398,7 +401,8 @@ public final class Triple<L, M, R> implements Mutable {
     /**
      * Returns the current value of the right element and then updates it with the specified new value.
      * This method is useful when you need to retrieve the old value while setting a new one
-     * in an atomic-like operation.
+     * in a single method call. Note: this is not atomic and is not safe for concurrent use without
+     * external synchronization.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -564,10 +568,13 @@ public final class Triple<L, M, R> implements Mutable {
     * are updated to {@code newLeft}, {@code newMiddle} and {@code newRight}
     * respectively. If the predicate returns {@code false}, this triple remains unchanged.</p>
     *
-    * <p>From the caller's perspective, the update of left, middle and right is atomic:
-    * either all three values are changed, or none of them are. The predicate is evaluated
-    * at most once. If it throws an exception, no element is modified and the exception
-    * is propagated to the caller.</p>
+    * <p>The update of all three fields is performed sequentially within a single method call;
+    * either all three values are changed (when the predicate returns {@code true}), or none
+    * are (when it returns {@code false}). This method is not atomic and provides no thread-safety
+    * guarantees: concurrent readers from other threads may observe a partially-updated state and
+    * external synchronization is required for safe concurrent use. The predicate is evaluated at
+    * most once; if it throws an exception, no element is modified and the exception is propagated
+    * to the caller.</p>
     *
     * <p><b>Usage examples:</b></p>
     * <pre>{@code

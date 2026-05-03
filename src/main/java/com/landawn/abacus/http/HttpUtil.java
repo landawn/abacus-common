@@ -69,7 +69,7 @@ import com.landawn.abacus.util.Strings;
  * Internal utility class for HTTP operations. This class is not intended for direct use by application code.
  * It provides static utility methods for working with HTTP connections,
  * including content type/encoding handling, stream wrapping, and response validation.
- * 
+ *
  * <p>Key features:</p>
  * <ul>
  *   <li>Content type and encoding detection</li>
@@ -79,7 +79,7 @@ import com.landawn.abacus.util.Strings;
  *   <li>Response code validation</li>
  *   <li>SSL/TLS utilities</li>
  * </ul>
- * 
+ *
  * @see HttpClient
  * @see HttpRequest
  * @see HttpResponse
@@ -219,7 +219,7 @@ public final class HttpUtil {
     /**
      * Checks if the HTTP response code indicates success.
      * A response code is considered successful if it's in the range [200, 300).
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (HttpUtil.isSuccessfulResponseCode(response.getResponseCode())) {
@@ -263,22 +263,27 @@ public final class HttpUtil {
 
         if (Strings.isNotEmpty(value)) {
             final int len = value.length();
-            int idx = value.indexOf(HttpHeaders.LF);
+            char c = 0;
 
-            while (idx != -1) {
-                idx++;
+            for (int i = 0; i < len; i++) {
+                c = value.charAt(i);
 
-                if (idx < len) {
-                    final char c = value.charAt(idx);
+                if (c == '\r' || c == HttpHeaders.LF) {
+                    // RFC 7230: only CRLF is valid for obs-fold (header field folding).
+                    // A bare LF (\n) must be rejected to prevent header injection.
 
-                    if ((c == ' ') || (c == '\t')) {
-                        idx = value.indexOf(HttpHeaders.LF, idx);
+                    // c == '\r': expect LF next
+                    // After CRLF, expect at least one SP or HTAB (obs-fold continuation)
+                    if ((c == HttpHeaders.LF) || ++i >= len || value.charAt(i) != HttpHeaders.LF || (++i >= len)) {
+                        return false;
+                    }
 
-                        continue;
+                    c = value.charAt(i);
+
+                    if (c != ' ' && c != '\t') {
+                        return false;
                     }
                 }
-
-                return false;
             }
         }
 
@@ -289,12 +294,12 @@ public final class HttpUtil {
      * Reads an HTTP header value from various object types.
      * If the value is a Collection, joins multiple values with commas.
      * Otherwise, converts the value to a string.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Single value
      * String header1 = HttpUtil.readHttpHeaderValue("text/plain");
-     * 
+     *
      * // Multiple values
      * List<String> values = Arrays.asList("gzip", "deflate");
      * String header2 = HttpUtil.readHttpHeaderValue(values);   // "gzip,deflate"
@@ -408,18 +413,18 @@ public final class HttpUtil {
     }
 
     /**
-     * Gets the Content-Type from an HttpURLConnection.
-     * Extracts the Content-Type from the connection's header fields.
+     * Gets the Content-Type from the response headers of an HttpURLConnection.
+     * Extracts the Content-Type from the connection's response header fields.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpURLConnection conn = (HttpURLConnection) new URL("http://localhost:18080").openConnection();
-     * conn.setRequestProperty("Content-Type", "application/json");
-     * String contentType = HttpUtil.getContentType(conn);  // "application/json"
+     * HttpURLConnection conn = (HttpURLConnection) new URL("http://example.com/api").openConnection();
+     * conn.connect();
+     * String contentType = HttpUtil.getContentType(conn);  // e.g. "application/json"
      * }</pre>
      *
      * @param connection The HTTP connection
-     * @return The Content-Type value, or {@code null} if not found
+     * @return The Content-Type value from the response headers, or {@code null} if not found
      */
     public static String getContentType(final HttpURLConnection connection) {
         return getContentType(connection.getHeaderFields());
@@ -512,18 +517,18 @@ public final class HttpUtil {
     }
 
     /**
-     * Gets the Content-Encoding from an HttpURLConnection.
-     * Extracts the Content-Encoding from the connection's header fields.
+     * Gets the Content-Encoding from the response headers of an HttpURLConnection.
+     * Extracts the Content-Encoding from the connection's response header fields.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpURLConnection conn = (HttpURLConnection) new URL("http://localhost:18080").openConnection();
-     * conn.setRequestProperty("Content-Encoding", "gzip");
-     * String encoding = HttpUtil.getContentEncoding(conn);  // "gzip"
+     * HttpURLConnection conn = (HttpURLConnection) new URL("http://example.com/api").openConnection();
+     * conn.connect();
+     * String encoding = HttpUtil.getContentEncoding(conn);  // e.g. "gzip"
      * }</pre>
      *
      * @param connection The HTTP connection
-     * @return The Content-Encoding value, or {@code null} if not found
+     * @return The Content-Encoding value from the response headers, or {@code null} if not found
      */
     public static String getContentEncoding(final HttpURLConnection connection) {
         return getContentEncoding(connection.getHeaderFields());
@@ -616,18 +621,18 @@ public final class HttpUtil {
     }
 
     /**
-     * Gets the Accept header from an HttpURLConnection.
-     * Extracts the Accept header from the connection's header fields.
+     * Gets the Accept header from the response headers of an HttpURLConnection.
+     * Extracts the Accept header from the connection's response header fields.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpURLConnection conn = (HttpURLConnection) new URL("http://localhost:18080").openConnection();
-     * conn.setRequestProperty("Accept", "application/json");
-     * String accept = HttpUtil.getAccept(conn);  // "application/json"
+     * HttpURLConnection conn = (HttpURLConnection) new URL("http://example.com/api").openConnection();
+     * conn.connect();
+     * String accept = HttpUtil.getAccept(conn);
      * }</pre>
      *
      * @param connection The HTTP connection
-     * @return The Accept value, or {@code null} if not found
+     * @return The Accept value from the response headers, or {@code null} if not found
      */
     public static String getAccept(final HttpURLConnection connection) {
         return getAccept(connection.getHeaderFields());
@@ -720,18 +725,18 @@ public final class HttpUtil {
     }
 
     /**
-     * Gets the Accept-Encoding header from an HttpURLConnection.
-     * Extracts the Accept-Encoding header from the connection's header fields.
+     * Gets the Accept-Encoding header from the response headers of an HttpURLConnection.
+     * Extracts the Accept-Encoding header from the connection's response header fields.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpURLConnection conn = (HttpURLConnection) new URL("http://localhost:18080").openConnection();
-     * conn.setRequestProperty("Accept-Encoding", "gzip");
-     * String acceptEncoding = HttpUtil.getAcceptEncoding(conn);  // "gzip"
+     * HttpURLConnection conn = (HttpURLConnection) new URL("http://example.com/api").openConnection();
+     * conn.connect();
+     * String acceptEncoding = HttpUtil.getAcceptEncoding(conn);
      * }</pre>
      *
      * @param connection The HTTP connection
-     * @return The Accept-Encoding value, or {@code null} if not found
+     * @return The Accept-Encoding value from the response headers, or {@code null} if not found
      */
     public static String getAcceptEncoding(final HttpURLConnection connection) {
         return getAcceptEncoding(connection.getHeaderFields());
@@ -824,18 +829,18 @@ public final class HttpUtil {
     }
 
     /**
-     * Gets the Accept-Charset header from an HttpURLConnection.
-     * Extracts the Accept-Charset header from the connection's header fields.
+     * Gets the Accept-Charset header from the response headers of an HttpURLConnection.
+     * Extracts the Accept-Charset header from the connection's response header fields.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpURLConnection conn = (HttpURLConnection) new URL("http://localhost:18080").openConnection();
-     * conn.setRequestProperty("Accept-Charset", "utf-8");
-     * String acceptCharset = HttpUtil.getAcceptCharset(conn);  // "utf-8"
+     * HttpURLConnection conn = (HttpURLConnection) new URL("http://example.com/api").openConnection();
+     * conn.connect();
+     * String acceptCharset = HttpUtil.getAcceptCharset(conn);
      * }</pre>
      *
      * @param connection The HTTP connection
-     * @return The Accept-Charset value, or {@code null} if not found
+     * @return The Accept-Charset value from the response headers, or {@code null} if not found
      */
     public static String getAcceptCharset(final HttpURLConnection connection) {
         return getAcceptCharset(connection.getHeaderFields());
@@ -1006,7 +1011,7 @@ public final class HttpUtil {
     /**
      * Wraps an input stream with decompression based on the content format.
      * Supports GZIP, Brotli, Snappy, and LZ4 decompression.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * InputStream wrapped = HttpUtil.wrapInputStream(inputStream, ContentFormat.JSON_GZIP);
@@ -1044,7 +1049,7 @@ public final class HttpUtil {
     /**
      * Wraps an output stream with compression based on the content format.
      * Supports GZIP, Snappy, and LZ4 compression. Brotli compression is not supported for output.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * OutputStream wrapped = HttpUtil.wrapOutputStream(outputStream, ContentFormat.JSON_GZIP);
@@ -1183,7 +1188,7 @@ public final class HttpUtil {
     /**
      * Extracts the charset from a Content-Type header value with a specified default.
      * Parses strings like "text/html; charset=UTF-8" to extract the charset.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Charset charset = HttpUtil.getCharset("application/json; charset=ISO-8859-1", Charsets.UTF_8);
@@ -1309,7 +1314,7 @@ public final class HttpUtil {
      * HTTP date parser and formatter.
      * This class provides methods for parsing and formatting HTTP dates according to RFC 7231.
      * It supports multiple date formats for compatibility with various HTTP implementations.
-     * 
+     *
      * <p>Copied from OkHttp under Apache License, Version 2.0.</p>
      */
     public static final class HttpDate {
@@ -1368,7 +1373,7 @@ public final class HttpUtil {
          * @return The parsed Date, or {@code null} if the value couldn't be parsed
          */
         public static Date parse(final String value) {
-            if (value.isEmpty()) {
+            if (value == null || value.isEmpty()) {
                 return null;
             }
 
@@ -1416,7 +1421,7 @@ public final class HttpUtil {
          *
          * @param value The date to format
          * @return The formatted date string
-         * 
+         *
          */
         public static String format(final Date value) {
             return STANDARD_DATE_FORMAT.get().format(value);

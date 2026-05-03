@@ -29,7 +29,7 @@ public class DateTimeTest extends AbstractTest {
 
     @Test
     public void test_DateTime() {
-        Type<DateTime> type = CommonUtil.typeOf(DateTime.class);
+        Type<DateTime> type = N.typeOf(DateTime.class);
         DateTime now = DateTime.now();
         String str = type.stringOf(now);
         N.println(str);
@@ -42,7 +42,7 @@ public class DateTimeTest extends AbstractTest {
 
     @Test
     public void test_MutableDateTime() {
-        Type<MutableDateTime> type = CommonUtil.typeOf(MutableDateTime.class);
+        Type<MutableDateTime> type = N.typeOf(MutableDateTime.class);
         MutableDateTime now = MutableDateTime.now();
         String str = type.stringOf(now);
         N.println(str);

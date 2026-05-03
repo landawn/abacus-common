@@ -1,7 +1,5 @@
 package com.landawn.abacus.util;
 
-import com.landawn.abacus.TestBase;
-
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -10,6 +8,7 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.function.Consumer;
 
 public class MTest extends TestBase {
@@ -26,10 +25,10 @@ public class MTest extends TestBase {
 
         N.println("Sorting");
         long startTime = System.currentTimeMillis();
-        CommonUtil.parallelSort(a);
+        N.parallelSort(a);
         N.println("Took: " + (System.currentTimeMillis() - startTime));
 
-        assertTrue(CommonUtil.isSorted(a));
+        assertTrue(N.isSorted(a));
     }
 
     @Test
@@ -43,10 +42,10 @@ public class MTest extends TestBase {
 
         N.println("Sorting");
         long startTime = System.currentTimeMillis();
-        CommonUtil.parallelSort(a);
+        N.parallelSort(a);
         N.println("Took: " + (System.currentTimeMillis() - startTime));
 
-        assertTrue(CommonUtil.isSorted(a));
+        assertTrue(N.isSorted(a));
     }
 
     @Test
@@ -60,10 +59,10 @@ public class MTest extends TestBase {
 
         N.println("Sorting");
         long startTime = System.currentTimeMillis();
-        CommonUtil.parallelSort(a);
+        N.parallelSort(a);
         N.println("Took: " + (System.currentTimeMillis() - startTime));
 
-        assertTrue(CommonUtil.isSorted(a));
+        assertTrue(N.isSorted(a));
     }
 
     @Test
@@ -77,10 +76,10 @@ public class MTest extends TestBase {
 
         N.println("Sorting");
         long startTime = System.currentTimeMillis();
-        CommonUtil.parallelSort(a);
+        N.parallelSort(a);
         N.println("Took: " + (System.currentTimeMillis() - startTime));
 
-        assertTrue(CommonUtil.isSorted(a));
+        assertTrue(N.isSorted(a));
     }
 
     @Test
@@ -94,10 +93,10 @@ public class MTest extends TestBase {
 
         N.println("Sorting");
         long startTime = System.currentTimeMillis();
-        CommonUtil.parallelSort(a);
+        N.parallelSort(a);
         N.println("Took: " + (System.currentTimeMillis() - startTime));
 
-        assertTrue(CommonUtil.isSorted(a));
+        assertTrue(N.isSorted(a));
     }
 
     @Test
@@ -115,7 +114,7 @@ public class MTest extends TestBase {
 
         N.println("Sorting");
         long startTime = System.currentTimeMillis();
-        CommonUtil.parallelSort(a);
+        N.parallelSort(a);
         N.println("Took: " + (System.currentTimeMillis() - startTime));
         assertNotNull(startTime);
     }

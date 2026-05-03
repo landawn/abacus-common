@@ -70,9 +70,10 @@ public interface Function<T, R> extends Throwables.Function<T, R, RuntimeExcepti
      *
      * @param <V> the type of input to the {@code before} function, and to the
      *           composed function
-     * @param before the function to apply before this function is applied. Must not be {@code null}.
+     * @param before the function to apply before this function is applied
      * @return a composed {@code Function} that first applies the {@code before}
      *         function and then applies this function
+     * @throws NullPointerException if {@code before} is null
      *
      * @see #andThen(java.util.function.Function)
      */
@@ -98,9 +99,10 @@ public interface Function<T, R> extends Throwables.Function<T, R, RuntimeExcepti
      *
      * @param <V> the type of output of the {@code after} function, and of the
      *           composed function
-     * @param after the function to apply after this function is applied. Must not be {@code null}.
+     * @param after the function to apply after this function is applied
      * @return a composed {@code Function} that first applies this function and then
      *         applies the {@code after} function
+     * @throws NullPointerException if {@code after} is null
      *
      * @see #compose(java.util.function.Function)
      */

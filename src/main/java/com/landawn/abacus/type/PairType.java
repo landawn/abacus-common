@@ -17,6 +17,7 @@ package com.landawn.abacus.type;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.List;
 
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
@@ -26,8 +27,8 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Pair;
-import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Strings;
 
 /**
  * Type handler for {@link Pair} objects, providing serialization and deserialization capabilities.
@@ -62,7 +63,7 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
 
     private final Type<R> rightType;
 
-    private final Type<?>[] parameterTypes;
+    private final List<Type<?>> parameterTypes;
 
     /**
      * Constructs a new PairType with the specified left and right type names.
@@ -77,7 +78,7 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
         declaringName = getTypeName(leftTypeName, rightTypeName, true);
         leftType = TypeFactory.getType(leftTypeName);
         rightType = TypeFactory.getType(rightTypeName);
-        parameterTypes = new Type[] { leftType, rightType };
+        parameterTypes = List.of(leftType, rightType);
     }
 
     /**
@@ -102,13 +103,13 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
     }
 
     /**
-     * Returns an array containing the Type objects for the left and right elements of the Pair.
+     * Returns an immutable list containing the Type objects for the left and right elements of the Pair.
      * The first element is the type of the left value, and the second element is the type of the right value.
      *
-     * @return an array of Type objects representing the parameter types
+     * @return an immutable list of Type objects representing the parameter types
      */
     @Override
-    public Type<?>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 

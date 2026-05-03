@@ -43,7 +43,7 @@ public class ImmutableTest extends TestBase {
         Assertions.assertTrue(ImmutableList.empty() instanceof Immutable);
         Assertions.assertTrue(ImmutableSet.empty() instanceof Immutable);
         Assertions.assertTrue(ImmutableMap.empty() instanceof Immutable);
-        Assertions.assertTrue(ImmutableCollection.wrap(CommonUtil.emptyList()) instanceof Immutable);
+        Assertions.assertTrue(ImmutableCollection.wrap(N.emptyList()) instanceof Immutable);
         Assertions.assertTrue(ImmutableArray.of("a", "b") instanceof Immutable);
 
         Assertions.assertTrue(ImmutableBiMap.empty() instanceof Immutable);

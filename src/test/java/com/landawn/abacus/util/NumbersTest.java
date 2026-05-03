@@ -2284,6 +2284,27 @@ public class NumbersTest extends TestBase {
         Assertions.assertFalse(Numbers.isNumber("123e"));
     }
 
+    @Test
+    public void testIsInteger() {
+        Assertions.assertTrue(Numbers.isInteger("0"));
+        Assertions.assertTrue(Numbers.isInteger("123"));
+        Assertions.assertTrue(Numbers.isInteger("-456"));
+        Assertions.assertTrue(Numbers.isInteger("+7"));
+        Assertions.assertTrue(Numbers.isInteger("00042"));
+    }
+
+    @Test
+    public void testIsInteger_EdgeCase() {
+        Assertions.assertFalse(Numbers.isInteger(null));
+        Assertions.assertFalse(Numbers.isInteger(""));
+        Assertions.assertFalse(Numbers.isInteger("+"));
+        Assertions.assertFalse(Numbers.isInteger("-"));
+        Assertions.assertFalse(Numbers.isInteger("12.3"));
+        Assertions.assertFalse(Numbers.isInteger(" 123"));
+        Assertions.assertFalse(Numbers.isInteger("123 "));
+        Assertions.assertFalse(Numbers.isInteger("abc"));
+    }
+
     // Cover quickCheckForIsConvertibleToNumber with boundary cases
     @Test
     public void testQuickCheckForIsConvertibleToNumber_Boundaries() {
@@ -5454,8 +5475,8 @@ public class NumbersTest extends TestBase {
     @Test
     public void testSaturatedCast_InRange() {
         assertEquals(0, Numbers.saturatedCast(0L));
-        assertEquals(Integer.MAX_VALUE, Numbers.saturatedCast((long) Integer.MAX_VALUE));
-        assertEquals(Integer.MIN_VALUE, Numbers.saturatedCast((long) Integer.MIN_VALUE));
+        assertEquals(Integer.MAX_VALUE, Numbers.saturatedCast(Integer.MAX_VALUE));
+        assertEquals(Integer.MIN_VALUE, Numbers.saturatedCast(Integer.MIN_VALUE));
         assertEquals(Integer.MAX_VALUE, Numbers.saturatedCast((long) Integer.MAX_VALUE + 1));
         assertEquals(Integer.MIN_VALUE, Numbers.saturatedCast((long) Integer.MIN_VALUE - 1));
     }

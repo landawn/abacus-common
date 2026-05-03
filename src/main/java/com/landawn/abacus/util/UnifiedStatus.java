@@ -17,7 +17,7 @@ package com.landawn.abacus.util;
 /**
  * Enumeration representing various status states for entities, services, processes, and operations.
  * Each status has an associated numeric code for efficient storage and comparison.
- * 
+ *
  * <p>This enum provides a comprehensive set of status values commonly used in applications:
  * <ul>
  *   <li>General account/service/object statuses (ACTIVE, SUSPENDED, EXPIRED, etc.)</li>
@@ -27,10 +27,10 @@ package com.landawn.abacus.util;
  *   <li>Privilege statuses (READ_ONLY, UPDATABLE, INSERTABLE, WRITABLE)</li>
  *   <li>State statuses (FROZEN, LOCKED, AVAILABLE, DISABLED, etc.)</li>
  * </ul>
- * 
+ *
  * <p>The status codes are designed to be stored efficiently in databases and provide
  * fast lookups through the {@link #fromCode(int)} method.
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Using status in an entity
@@ -45,7 +45,7 @@ package com.landawn.abacus.util;
  *     // Allow access
  * }
  * }</pre>
- * 
+ *
  * @see ServiceStatus
  * @see AccountStatus
  * @see WeekDay
@@ -361,7 +361,7 @@ public enum UnifiedStatus {
      * Returns the numeric code associated with this status.
      * Codes are designed to be efficiently stored in databases and
      * provide fast lookups.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * UnifiedStatus status = UnifiedStatus.ACTIVE;

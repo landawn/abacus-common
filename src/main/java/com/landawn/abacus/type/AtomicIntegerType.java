@@ -27,29 +27,35 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for AtomicInteger operations.
- * This class provides serialization/deserialization and database operations
- * for java.util.concurrent.atomic.AtomicInteger instances.
+ * Type handler for {@link java.util.concurrent.atomic.AtomicInteger} values.
+ * Provides serialization, deserialization, and JDBC operations for {@code AtomicInteger} instances.
+ *
+ * <p>String representation: the decimal string of the contained {@code int} value.</p>
+ * <p>JDBC mapping: stored and retrieved as a SQL {@code INTEGER} column
+ * ({@link java.sql.Types#INTEGER}).</p>
+ *
+ * @see java.util.concurrent.atomic.AtomicInteger
  */
 public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
 
     /**
-     * The type name constant for AtomicInteger type identification.
+     * The type name constant used to identify this type within the type system
+     * (value: {@code "AtomicInteger"}).
      */
     public static final String ATOMIC_INTEGER = AtomicInteger.class.getSimpleName();
 
     /**
-     * Package-private constructor for AtomicIntegerType.
-     * This constructor is called by the TypeFactory to create AtomicInteger type instances.
+     * Package-private constructor for {@code AtomicIntegerType}.
+     * Instances are created by {@link TypeFactory}; do not instantiate directly.
      */
     AtomicIntegerType() {
         super(ATOMIC_INTEGER);
     }
 
     /**
-     * Returns the Class object representing the AtomicInteger class.
+     * Returns the Java class represented by this type handler.
      *
-     * @return the Class object for {@code AtomicInteger}
+     * @return {@code AtomicInteger.class}
      */
     @Override
     public Class<AtomicInteger> javaType() {
@@ -57,27 +63,12 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
     }
 
     /**
-     * Converts an AtomicInteger value to its string representation.
-     * The integer value is extracted from the AtomicInteger and converted to string.
+     * Converts an {@link java.util.concurrent.atomic.AtomicInteger} to its decimal string representation.
+     * The contained {@code int} value is obtained via {@link java.util.concurrent.atomic.AtomicInteger#get()}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * AtomicIntegerType type = (AtomicIntegerType) TypeFactory.getType(AtomicInteger.class);
-     *
-     * AtomicInteger value = new AtomicInteger(42);
-     * String str = type.stringOf(value);
-     * // str: "42"
-     *
-     * AtomicInteger zero = new AtomicInteger(0);
-     * String zeroStr = type.stringOf(zero);
-     * // zeroStr: "0"
-     *
-     * String nullStr = type.stringOf(null);
-     * // nullStr: null
-     * }</pre>
-     *
-     * @param x the AtomicInteger value to convert
-     * @return the string representation of the integer value, or {@code null} if input is null
+     * @param x the {@code AtomicInteger} to convert; may be {@code null}
+     * @return the decimal string representation of the contained value,
+     *         or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final AtomicInteger x) {
@@ -85,29 +76,13 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
     }
 
     /**
-     * Converts a string representation to an AtomicInteger value.
-     * Parses the string as an integer and wraps it in a new AtomicInteger instance.
+     * Parses a decimal string and returns a new {@link java.util.concurrent.atomic.AtomicInteger}
+     * containing the parsed value. Leading and trailing whitespace is trimmed before parsing.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * AtomicIntegerType type = (AtomicIntegerType) TypeFactory.getType(AtomicInteger.class);
-     *
-     * AtomicInteger value = type.valueOf("42");
-     * // value.get(): 42
-     *
-     * AtomicInteger negative = type.valueOf("-100");
-     * // negative.get(): -100
-     *
-     * AtomicInteger nullValue = type.valueOf(null);
-     * // nullValue: null
-     *
-     * // Throws NumberFormatException:
-     * // type.valueOf("not a number");
-     * }</pre>
-     *
-     * @param str the string to parse as an integer
-     * @return a new AtomicInteger containing the parsed value, or {@code null} if str is {@code null} or empty
-     * @throws NumberFormatException if the string cannot be parsed as an integer
+     * @param str the decimal string to parse; may be {@code null} or empty
+     * @return a new {@code AtomicInteger} containing the parsed value,
+     *         or {@code null} if {@code str} is {@code null} or empty
+     * @throws NumberFormatException if {@code str} cannot be parsed as a valid {@code int}
      */
     @Override
     public AtomicInteger valueOf(final String str) {
@@ -115,21 +90,14 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
     }
 
     /**
-     * Retrieves an AtomicInteger value from a ResultSet at the specified column index.
-     * The integer value is read from the database and wrapped in a new AtomicInteger instance.
+     * Retrieves an {@link java.util.concurrent.atomic.AtomicInteger} from a {@link java.sql.ResultSet}
+     * at the specified column index.
+     * The column value is read as a SQL {@code INTEGER} and wrapped in a new {@code AtomicInteger}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * AtomicIntegerType type = (AtomicIntegerType) TypeFactory.getType(AtomicInteger.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * AtomicInteger counter = type.get(rs, 1);   // retrieves AtomicInteger from column 1
-     * int value = counter.get();  // get the underlying int value
-     * }</pre>
-     *
-     * @param rs the ResultSet to retrieve the value from
-     * @param columnIndex the column index (1-based) of the integer value
-     * @return a new AtomicInteger containing the retrieved value, or {@code null} if SQL NULL
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnIndex the 1-based index of the column containing the integer value
+     * @return a new {@code AtomicInteger} wrapping the retrieved value, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
      */
     @Override
     public AtomicInteger get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -139,22 +107,14 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
     }
 
     /**
-     * Retrieves an AtomicInteger value from a ResultSet using the specified column label.
-     * The integer value is read from the database and wrapped in a new AtomicInteger instance.
+     * Retrieves an {@link java.util.concurrent.atomic.AtomicInteger} from a {@link java.sql.ResultSet}
+     * using the specified column label.
+     * The column value is read as a SQL {@code INTEGER} and wrapped in a new {@code AtomicInteger}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * AtomicIntegerType type = (AtomicIntegerType) TypeFactory.getType(AtomicInteger.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * AtomicInteger counter = type.get(rs, "counter");   // retrieves AtomicInteger from "counter" column
-     * int value = counter.get();  // get the underlying int value
-     * }</pre>
-     *
-     * @param rs the ResultSet to retrieve the value from
-     * @param columnName the label for the column specified with the SQL AS clause,
-     *                    or the column name if no AS clause was specified
-     * @return a new AtomicInteger containing the retrieved value, or {@code null} if SQL NULL
-     * @throws SQLException if a database access error occurs or the columnName is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnName the column label as specified in the SQL AS clause, or the column name if no AS clause was used
+     * @return a new {@code AtomicInteger} wrapping the retrieved value, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
     @Override
     public AtomicInteger get(final ResultSet rs, final String columnName) throws SQLException {
@@ -164,25 +124,15 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
     }
 
     /**
-     * Sets an AtomicInteger parameter in a PreparedStatement at the specified position.
-     * The integer value is extracted from the AtomicInteger before setting.
-     * If the AtomicInteger is {@code null}, sets the parameter to SQL NULL.
+     * Sets an {@link java.util.concurrent.atomic.AtomicInteger} parameter on a
+     * {@link java.sql.PreparedStatement} at the specified position.
+     * If {@code x} is {@code null}, the parameter is set to SQL NULL
+     * ({@link java.sql.Types#INTEGER}); otherwise the contained int value is used.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * AtomicIntegerType type = (AtomicIntegerType) TypeFactory.getType(AtomicInteger.class);
-     * AtomicInteger counter = new AtomicInteger(42);
-     * try (PreparedStatement stmt = conn.prepareStatement("UPDATE stats SET counter = ? WHERE id = ?")) {
-     *     type.set(stmt, 1, counter);
-     *     stmt.setInt(2, 1);
-     *     stmt.executeUpdate();
-     * }
-     * }</pre>
-     *
-     * @param stmt the PreparedStatement to set the parameter on
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the AtomicInteger value to set, may be {@code null} (set as SQL NULL)
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param stmt the {@code PreparedStatement} on which to set the parameter
+     * @param columnIndex the 1-based parameter index to set
+     * @param x the {@code AtomicInteger} value to set; {@code null} is stored as SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final AtomicInteger x) throws SQLException {
@@ -194,24 +144,15 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
     }
 
     /**
-     * Sets a named AtomicInteger parameter in a CallableStatement.
-     * The integer value is extracted from the AtomicInteger before setting.
-     * If the AtomicInteger is {@code null}, sets the parameter to SQL NULL.
+     * Sets a named {@link java.util.concurrent.atomic.AtomicInteger} parameter on a
+     * {@link java.sql.CallableStatement}.
+     * If {@code x} is {@code null}, the parameter is set to SQL NULL
+     * ({@link java.sql.Types#INTEGER}); otherwise the contained int value is used.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * AtomicIntegerType type = (AtomicIntegerType) TypeFactory.getType(AtomicInteger.class);
-     * AtomicInteger counter = new AtomicInteger(100);
-     * try (CallableStatement stmt = conn.prepareCall("{call updateCounter(?)}")) {
-     *     type.set(stmt, "counter", counter);
-     *     stmt.execute();
-     * }
-     * }</pre>
-     *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param stmt the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the AtomicInteger value to set, may be {@code null} (set as SQL NULL)
-     * @throws SQLException if a database access error occurs or the parameter name is invalid
+     * @param x the {@code AtomicInteger} value to set; {@code null} is stored as SQL NULL
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final AtomicInteger x) throws SQLException {
@@ -223,21 +164,13 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
     }
 
     /**
-     * Appends an AtomicInteger value to an Appendable object.
-     * Uses the AtomicInteger's toString() method for the string representation.
+     * Appends an {@link java.util.concurrent.atomic.AtomicInteger} value to an {@link Appendable}.
+     * Appends {@code "null"} if {@code x} is {@code null}; otherwise appends the decimal string of
+     * the contained integer value (equivalent to {@link java.util.concurrent.atomic.AtomicInteger#toString()}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * AtomicIntegerType type = (AtomicIntegerType) TypeFactory.getType(AtomicInteger.class);
-     * StringBuilder sb = new StringBuilder();
-     * AtomicInteger counter = new AtomicInteger(42);
-     * type.appendTo(sb, counter);
-     * // sb.toString() equals "42"
-     * }</pre>
-     *
-     * @param appendable the Appendable object to append to
-     * @param x the AtomicInteger value to append, may be null
-     * @throws IOException if an I/O error occurs during the append operation
+     * @param appendable the target {@code Appendable}
+     * @param x the {@code AtomicInteger} value to append; may be {@code null}
+     * @throws IOException if an I/O error occurs during appending
      */
     @Override
     public void appendTo(final Appendable appendable, final AtomicInteger x) throws IOException {
@@ -249,22 +182,15 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
     }
 
     /**
-     * Writes an AtomicInteger value to a CharacterWriter.
-     * Extracts the integer value and uses the writer's optimized writeInt method.
+     * Writes an {@link java.util.concurrent.atomic.AtomicInteger} value to a {@link CharacterWriter}.
+     * Writes the literal {@code "null"} character array if {@code x} is {@code null}; otherwise
+     * uses the writer's optimised {@code writeInt} method with the contained integer value.
+     * {@code config} is not used.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * AtomicIntegerType type = (AtomicIntegerType) TypeFactory.getType(AtomicInteger.class);
-     * CharacterWriter writer = new CharacterWriter();
-     * AtomicInteger counter = new AtomicInteger(42);
-     * type.writeCharacter(writer, counter, null);
-     * // Writes: 42
-     * }</pre>
-     *
-     * @param writer the CharacterWriter to write to
-     * @param x the AtomicInteger value to write, may be null
-     * @param config the serialization configuration (not used for integer values)
-     * @throws IOException if an I/O error occurs during the write operation
+     * @param writer the {@code CharacterWriter} to write to
+     * @param x the {@code AtomicInteger} value to write; may be {@code null}
+     * @param config the serialization configuration (unused for integer values); may be {@code null}
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final AtomicInteger x, final JsonXmlSerConfig<?> config) throws IOException {

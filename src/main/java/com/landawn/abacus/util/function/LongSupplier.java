@@ -16,14 +16,16 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Represents a supplier of long-valued results.
+ * Represents a supplier of {@code long}-valued results. This is the {@code long}-producing
+ * primitive specialization of {@link java.util.function.Supplier}.
+ *
+ * <p>There is no requirement that a distinct result be returned each time the supplier is invoked.
+ *
+ * <p>This interface extends both {@link java.util.function.LongSupplier} and
+ * {@link com.landawn.abacus.util.Throwables.LongSupplier}, providing compatibility with the standard Java
+ * functional interfaces while also supporting the Throwables framework.
  *
  * <p>This is a functional interface whose functional method is {@link #getAsLong()}.
- *
- * <p>The interface extends both {@code Throwables.LongSupplier} with {@code RuntimeException}
- * and {@code java.util.function.LongSupplier}, providing compatibility with the Java standard library
- * while adding predefined supplier instances for common use cases.
- *
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *

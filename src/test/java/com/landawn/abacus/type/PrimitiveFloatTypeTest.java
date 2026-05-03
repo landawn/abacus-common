@@ -122,7 +122,7 @@ public class PrimitiveFloatTypeTest extends TestBase {
         verify(stmt).setFloat(1, 123.45f);
 
         type.set(stmt, 2, null);
-        verify(stmt).setNull(2, java.sql.Types.FLOAT);
+        verify(stmt).setNull(2, java.sql.Types.REAL);
     }
 
     @Test
@@ -133,7 +133,7 @@ public class PrimitiveFloatTypeTest extends TestBase {
         verify(stmt).setFloat("param1", 99.99f);
 
         type.set(stmt, "param2", null);
-        verify(stmt).setNull("param2", java.sql.Types.FLOAT);
+        verify(stmt).setNull("param2", java.sql.Types.REAL);
     }
 
     @Test

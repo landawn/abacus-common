@@ -26,27 +26,27 @@ import com.landawn.abacus.util.stream.DoubleStream;
 /**
  * A specialized iterator for primitive double values that extends ImmutableIterator.
  * This class provides efficient iteration over double values without boxing overhead.
- * 
+ *
  * <p>DoubleIterator is particularly useful when working with large collections of primitive
  * double values where performance is critical. It provides various utility methods for
  * transforming, filtering, and processing double values.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create iterator from array
  * double[] values = {1.5, 2.5, 3.5, 4.5};
  * DoubleIterator iter = DoubleIterator.of(values);
- * 
+ *
  * // Iterate through values
  * while (iter.hasNext()) {
  *     double value = iter.nextDouble();
  *     System.out.println(value);
  * }
- * 
+ *
  * // Use with filtering
  * DoubleIterator filtered = DoubleIterator.of(values)
  *     .filter(d -> d > 2.0);
- * 
+ *
  * // Convert to stream
  * DoubleStream stream = DoubleIterator.of(values).stream();
  * }</pre>
@@ -249,7 +249,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * <pre>{@code
      * // Generate random doubles infinitely
      * DoubleIterator randomIter = DoubleIterator.generate(Math::random);
-     * 
+     *
      * // Must use limit() to avoid infinite iteration
      * randomIter.limit(5).foreachRemaining(System.out::println);
      * }</pre>
@@ -639,7 +639,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * Performs the given action for each remaining element.
      * This method is deprecated; use type-specific methods instead.
      *
-     * @param action the action to perform on each element 
+     * @param action the action to perform on each element
      * @deprecated use {@link #foreachRemaining(Throwables.DoubleConsumer)} instead to avoid boxing
      */
     @Deprecated

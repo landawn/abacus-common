@@ -20,11 +20,11 @@ import java.util.Map;
 
 /**
  * An enumeration representing the various calendar fields used for date and time manipulation.
- * 
+ *
  * <p>This enum provides a type-safe way to work with calendar fields, mapping directly
  * to the corresponding {@link Calendar} field constants. Each enum value has the same
  * integer value as its corresponding Calendar constant, ensuring compatibility.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Calendar cal = Calendar.getInstance();
@@ -37,14 +37,14 @@ import java.util.Map;
  * CalendarField field = CalendarField.of(Calendar.MONTH);
  * System.out.println(field);   // MONTH
  * }</pre>
- * 
+ *
  * @see java.util.Calendar
  */
 public enum CalendarField {
     /**
      * Field for milliseconds within a second (0-999).
      * Has the same int value as {@link Calendar#MILLISECOND}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * calendar.set(CalendarField.MILLISECOND.value(), 500);   // Set to 500ms
@@ -57,7 +57,7 @@ public enum CalendarField {
     /**
      * Field for seconds within a minute (0-59).
      * Has the same int value as {@link Calendar#SECOND}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * calendar.add(CalendarField.SECOND.value(), 30);   // Add 30 seconds
@@ -70,7 +70,7 @@ public enum CalendarField {
     /**
      * Field for minutes within an hour (0-59).
      * Has the same int value as {@link Calendar#MINUTE}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * calendar.set(CalendarField.MINUTE.value(), 45);   // Set to 45 minutes

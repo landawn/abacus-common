@@ -19,40 +19,41 @@ import java.io.IOException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for Float array (Float[]) values.
- * This class provides serialization, deserialization, and output operations for Float arrays.
- * It handles proper formatting with brackets, separators, and {@code null} value representation.
+ * Type handler for boxed-float array ({@code Float[]}) values.
+ * This class provides serialization, deserialization, and output operations for {@code Float[]} arrays.
+ *
+ * <p>The canonical string format is a bracket-enclosed, comma-separated list where null elements
+ * are written as the literal {@code null} (e.g., {@code [1.5, null, 3.14, -0.5]}).
+ *
+ * @see ObjectArrayType
  */
 public final class FloatArrayType extends ObjectArrayType<Float> {
 
+    /**
+     * Package-private constructor for {@code FloatArrayType}.
+     * Instances are created by the {@code TypeFactory}.
+     */
     FloatArrayType() {
         super(Float[].class);
     }
 
     /**
-     * Converts a Float array to its string representation.
-     * The output format is: [element1, element2, ...]
-     * - Null elements are represented as "null"
-     * - Empty arrays return "[]"
-     * - Uses efficient string joining for performance
+     * Converts a {@code Float[]} to its canonical string representation.
+     * The output is a bracket-enclosed, comma-separated list; null elements appear as {@code null}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Float[]> type = TypeFactory.getType(Float[].class);
-     * Float[] array = {1.5f, null, 3.14f, -0.5f};
-     * String result = type.stringOf(array);
-     * // result: "[1.5, null, 3.14, -0.5]"
+     * <p>Examples:
+     * <ul>
+     *   <li>{@code [1.5, null, 3.14, -0.5]} for {@code new Float[]{1.5f, null, 3.14f, -0.5f}}</li>
+     *   <li>{@code []} for an empty array</li>
+     *   <li>{@code null} if the input is {@code null}</li>
+     * </ul>
      *
-     * String empty = type.stringOf(new Float[0]);
-     * // empty: "[]"
-     * }</pre>
-     *
-     * @param x the Float array to convert. Can be {@code null}.
-     * @return A string representation of the array, or {@code null} if input is null
+     * @param x the {@code Float[]} to convert; may be {@code null}
+     * @return the string representation, or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final Float[] x) {
@@ -66,24 +67,18 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
     }
 
     /**
-     * Converts a string representation back to a Float array.
-     * Expects format: [element1, element2, ...]
-     * - "null" strings (4 characters) are converted to {@code null} elements
-     * - Empty string or "[]" returns empty array
-     * - Individual elements are parsed as Float values
+     * Parses a string representation back into a {@code Float[]} array.
+     * The expected format is a bracket-enclosed, comma-separated list as produced by {@link #stringOf}.
+     * The literal {@code null} (4 characters) is converted to a {@code null} array element.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Float[]> type = TypeFactory.getType(Float[].class);
-     * Float[] result = type.valueOf("[1.5, null, 3.14, -0.5]");
-     * // result: {1.5f, null, 3.14f, -0.5f}
+     * <p>Special cases:
+     * <ul>
+     *   <li>{@code null}, blank, or empty string returns {@code null}</li>
+     *   <li>{@code "[]"} returns an empty array</li>
+     * </ul>
      *
-     * Float[] empty = type.valueOf("[]");
-     * // empty: {} (empty array)
-     * }</pre>
-     *
-     * @param str the string to parse. Can be {@code null}.
-     * @return A Float array parsed from the string, or {@code null} if input is null
+     * @param str the string to parse; may be {@code null}
+     * @return the parsed {@code Float[]}, or {@code null} if {@code str} is {@code null} or blank
      */
     @Override
     public Float[] valueOf(final String str) {
@@ -111,13 +106,13 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
     }
 
     /**
-     * Appends a Float array to an Appendable output.
-     * The output format is: [element1, element2, ...]
-     * Null elements are represented as "null".
-     * Uses toString() for Float values to ensure proper formatting.
+     * Appends a {@code Float[]} to an {@link Appendable}.
+     * The output format is a bracket-enclosed, comma-separated list.
+     * Null elements are written as {@code null}; non-null values use {@link Float#toString()}.
+     * If {@code x} is {@code null}, the literal {@code null} is appended.
      *
-     * @param appendable the Appendable to write to
-     * @param x the Float array to append. Can be {@code null}.
+     * @param appendable the {@link Appendable} to write to
+     * @param x          the {@code Float[]} to append; may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
@@ -144,14 +139,14 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
     }
 
     /**
-     * Writes a Float array to a CharacterWriter.
-     * The output format is: [element1, element2, ...]
-     * Null elements are represented as "null".
-     * Uses optimized numeric writing for Float values.
+     * Writes a {@code Float[]} to a {@link CharacterWriter}.
+     * The output format is a bracket-enclosed, comma-separated list.
+     * Null elements are written as {@code null}; non-null values use the writer's optimized
+     * float-write method. If {@code x} is {@code null}, the literal {@code null} is written.
      *
-     * @param writer the CharacterWriter to write to
-     * @param x the Float array to write. Can be {@code null}.
-     * @param config the serialization configuration (currently unused for Float arrays)
+     * @param writer the {@link CharacterWriter} to write to
+     * @param x      the {@code Float[]} to write; may be {@code null}
+     * @param config serialization configuration (not used for {@code Float} arrays); may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override

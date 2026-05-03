@@ -75,13 +75,13 @@ public final class PoolFactory { //NOSONAR
     /**
      * Creates a new ObjectPool with the specified capacity.
      * Uses default eviction delay of 3 seconds and LAST_ACCESS_TIME eviction policy.
-     * 
+     *
      * @param <E> the type of elements in the pool, must implement Poolable
      * @param capacity the maximum number of objects the pool can hold
      * @return a new ObjectPool instance with the specified capacity
      */
     public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity) {
-        return new GenericObjectPool<>(capacity, AbstractPool.DEFAULT_EVICT_DELAY, EvictionPolicy.LAST_ACCESS_TIME);
+        return new GenericObjectPool<>(capacity, AbstractPool.DEFAULT_EVICT_DELAY_IN_MILLIS, EvictionPolicy.LAST_ACCESS_TIME);
     }
 
     /**
@@ -166,14 +166,14 @@ public final class PoolFactory { //NOSONAR
     /**
      * Creates a new KeyedObjectPool with the specified capacity.
      * Uses default eviction delay of 3 seconds and LAST_ACCESS_TIME eviction policy.
-     * 
+     *
      * @param <K> the type of keys maintained by the pool
      * @param <E> the type of pooled values, must implement Poolable
      * @param capacity the maximum number of key-value pairs the pool can hold
      * @return a new KeyedObjectPool instance with the specified capacity
      */
     public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity) {
-        return new GenericKeyedObjectPool<>(capacity, AbstractPool.DEFAULT_EVICT_DELAY, EvictionPolicy.LAST_ACCESS_TIME);
+        return new GenericKeyedObjectPool<>(capacity, AbstractPool.DEFAULT_EVICT_DELAY_IN_MILLIS, EvictionPolicy.LAST_ACCESS_TIME);
     }
 
     /**

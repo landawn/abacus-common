@@ -15,7 +15,27 @@
 package com.landawn.abacus.type;
 
 /**
- * Type handler for primitive {@code short} values, providing conversion between short and its string representation.
+ * Type handler for the primitive {@code short} type, as opposed to the {@link Short} wrapper class.
+ * It provides type information and default value handling for {@code short} primitives.
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * Type<Short> type = TypeFactory.getType(short.class);
+ *
+ * // Convert string to short
+ * Short value = type.valueOf("100");   // Returns (short) 100
+ * Short value2 = type.valueOf("-128");   // Returns (short) -128
+ *
+ * // Get default value
+ * Short defaultVal = type.defaultValue();   // Returns 0
+ *
+ * // Read from database
+ * try (ResultSet rs = stmt.executeQuery("SELECT quantity FROM inventory")) {
+ *     if (rs.next()) {
+ *         Short quantity = type.get(rs, 1);
+ *     }
+ * }
+ * }</pre>
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveShortType extends AbstractShortType {
@@ -24,6 +44,10 @@ public final class PrimitiveShortType extends AbstractShortType {
 
     private static final Short DEFAULT_VALUE = 0;
 
+    /**
+     * Constructs a new PrimitiveShortType instance.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
+     */
     PrimitiveShortType() {
         super(SHORT);
     }

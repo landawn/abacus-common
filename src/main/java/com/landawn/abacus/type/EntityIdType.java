@@ -18,35 +18,31 @@ import com.landawn.abacus.util.EntityId;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for EntityId values.
- * This class provides serialization and deserialization for EntityId objects,
- * which are composite identifiers used to uniquely identify entities.
- * EntityIds are serialized to and from JSON format.
+ * Type handler for {@link EntityId} values.
+ * {@link EntityId} is a composite identifier used to uniquely identify entities in the framework.
+ *
+ * <p>EntityId instances are serialized to and from JSON format. The serialization preserves all
+ * component key-value pairs that make up the composite identifier.
+ *
+ * <p>Note: {@link #isSerializable()} returns {@code false}; the type system routes EntityId
+ * serialization through {@link SerializationType#ENTITY_ID} rather than the generic serializable path.
+ *
+ * @see AbstractType
+ * @see EntityId
  */
 @SuppressWarnings("java:S2160")
 public class EntityIdType extends AbstractType<EntityId> {
 
     /**
-     * The type name constant for EntityId type identification.
+     * The type name constant for EntityId type identification, equal to {@code "EntityId"}.
      */
     public static final String ENTITY_ID = EntityId.class.getSimpleName();
 
     private final Class<EntityId> typeClass;
 
     /**
-     * Package-private constructor for EntityIdType.
-     * This constructor is called by the TypeFactory to create EntityId type instances.
-     * EntityIds are composite identifiers used for entity identification and are serialized
-     * to/from JSON format.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * // Obtained via TypeFactory
-     * Type<EntityId> type = TypeFactory.getType(EntityId.class);
-     * EntityId entityId = EntityId.of("User", 12345L);
-     * String json = type.stringOf(entityId);
-     * EntityId parsed = type.valueOf(json);
-     * }</pre>
+     * Package-private constructor for {@code EntityIdType}.
+     * Instances are created by the {@code TypeFactory}.
      */
     EntityIdType() {
         super(ENTITY_ID);
@@ -55,9 +51,9 @@ public class EntityIdType extends AbstractType<EntityId> {
     }
 
     /**
-     * Returns the Java class type handled by this type handler.
+     * Returns the Java class represented by this type handler.
      *
-     * @return The Class object representing EntityId.class
+     * @return {@code EntityId.class}
      */
     @Override
     public Class<EntityId> javaType() {
@@ -65,10 +61,9 @@ public class EntityIdType extends AbstractType<EntityId> {
     }
 
     /**
-     * Indicates whether this type represents an EntityId.
-     * Always returns {@code true} for EntityIdType.
+     * Indicates whether this type represents an {@link EntityId}.
      *
-     * @return {@code true}, as this type handler specifically handles EntityId objects
+     * @return {@code true}, always, because this handler is dedicated to {@link EntityId} objects
      */
     @Override
     public boolean isEntityId() {
@@ -76,10 +71,10 @@ public class EntityIdType extends AbstractType<EntityId> {
     }
 
     /**
-     * Indicates whether this EntityId type is serializable in the type system.
-     * EntityIds require special JSON serialization handling.
+     * Indicates whether this type is handled by the generic serializable path.
+     * {@link EntityId} uses a dedicated serialization path ({@link SerializationType#ENTITY_ID}).
      *
-     * @return {@code false}, indicating EntityIds are not simply serializable
+     * @return {@code false}, always
      */
     @Override
     public boolean isSerializable() {
@@ -87,9 +82,9 @@ public class EntityIdType extends AbstractType<EntityId> {
     }
 
     /**
-     * Returns the serialization type category for EntityId objects.
+     * Returns the serialization type category for {@link EntityId} objects.
      *
-     * @return SerializationType.ENTITY_ID, indicating special EntityId serialization handling
+     * @return {@link SerializationType#ENTITY_ID}
      */
     @Override
     public SerializationType serializationType() {
@@ -97,11 +92,11 @@ public class EntityIdType extends AbstractType<EntityId> {
     }
 
     /**
-     * Converts an EntityId to its JSON string representation.
-     * The EntityId is serialized with all its component fields.
+     * Serializes an {@link EntityId} to its JSON string representation, preserving all
+     * component key-value pairs.
      *
-     * @param x the EntityId to convert. Can be {@code null}.
-     * @return A JSON string representation of the EntityId, or {@code null} if input is null
+     * @param x the {@link EntityId} to serialize; may be {@code null}
+     * @return the JSON string, or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final EntityId x) {
@@ -109,12 +104,11 @@ public class EntityIdType extends AbstractType<EntityId> {
     }
 
     /**
-     * Converts a JSON string representation back to an EntityId object.
-     * The string should contain a valid JSON representation of an EntityId
-     * with all required fields.
+     * Deserializes a JSON string back into an {@link EntityId} object.
+     * The JSON must represent a valid {@link EntityId} with all required component fields.
      *
-     * @param str the JSON string to parse. Can be {@code null} or empty.
-     * @return An EntityId parsed from the JSON string, or {@code null} if input is null/empty
+     * @param str the JSON string to parse; may be {@code null} or empty
+     * @return the deserialized {@link EntityId}, or {@code null} if {@code str} is {@code null} or empty
      */
     @Override
     public EntityId valueOf(final String str) {

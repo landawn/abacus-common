@@ -270,14 +270,14 @@ public class IteratorStreamTest extends TestBase {
     @Test
     public void testFlatmapToChar() {
         Stream<String> stream = createStream(Arrays.asList("ab", "cd"));
-        char[] result = stream.flatmapToChar(String::toCharArray).toArray();
+        char[] result = stream.flatMapArrayToChar(String::toCharArray).toArray();
         assertArrayEquals(new char[] { 'a', 'b', 'c', 'd' }, result);
     }
 
     @Test
     public void testFlatmapToChar_nonParallel() {
         Stream<String> stream = createStream(Arrays.asList("ab", "cd"));
-        char[] result = stream.flatmapToChar(s -> s.toCharArray()).toArray();
+        char[] result = stream.flatMapArrayToChar(s -> s.toCharArray()).toArray();
         assertEquals(4, result.length);
     }
 
@@ -291,7 +291,7 @@ public class IteratorStreamTest extends TestBase {
     @Test
     public void testFlatmapToByte() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2));
-        byte[] result = stream.flatmapToByte(x -> new byte[] { x.byteValue(), (byte) (x * 10) }).toArray();
+        byte[] result = stream.flatMapArrayToByte(x -> new byte[] { x.byteValue(), (byte) (x * 10) }).toArray();
         assertArrayEquals(new byte[] { 1, 10, 2, 20 }, result);
     }
 
@@ -305,14 +305,14 @@ public class IteratorStreamTest extends TestBase {
     @Test
     public void testFlatmapToShort() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2));
-        short[] result = stream.flatmapToShort(x -> new short[] { x.shortValue(), (short) (x * 10) }).toArray();
+        short[] result = stream.flatMapArrayToShort(x -> new short[] { x.shortValue(), (short) (x * 10) }).toArray();
         assertArrayEquals(new short[] { 1, 10, 2, 20 }, result);
     }
 
     @Test
     public void testFlatmapToShort_nonParallel() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
-        short[] result = stream.flatmapToShort(x -> new short[] { x.shortValue(), (short) (x * 2) }).toArray();
+        short[] result = stream.flatMapArrayToShort(x -> new short[] { x.shortValue(), (short) (x * 2) }).toArray();
         assertEquals(6, result.length);
     }
 
@@ -326,14 +326,14 @@ public class IteratorStreamTest extends TestBase {
     @Test
     public void testFlatmapToInt() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2));
-        int[] result = stream.flatmapToInt(x -> new int[] { x, x * 10 }).toArray();
+        int[] result = stream.flatMapArrayToInt(x -> new int[] { x, x * 10 }).toArray();
         assertArrayEquals(new int[] { 1, 10, 2, 20 }, result);
     }
 
     @Test
     public void testFlatmapToInt_nonParallel() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
-        int[] result = stream.flatmapToInt(x -> new int[] { x, x * 10 }).toArray();
+        int[] result = stream.flatMapArrayToInt(x -> new int[] { x, x * 10 }).toArray();
         assertEquals(6, result.length);
     }
 
@@ -347,14 +347,14 @@ public class IteratorStreamTest extends TestBase {
     @Test
     public void testFlatmapToLong() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2));
-        long[] result = stream.flatmapToLong(x -> new long[] { x, x * 10L }).toArray();
+        long[] result = stream.flatMapArrayToLong(x -> new long[] { x, x * 10L }).toArray();
         assertArrayEquals(new long[] { 1L, 10L, 2L, 20L }, result);
     }
 
     @Test
     public void testFlatmapToLong_nonParallel() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
-        long[] result = stream.flatmapToLong(x -> new long[] { x, (long) x * 100 }).toArray();
+        long[] result = stream.flatMapArrayToLong(x -> new long[] { x, (long) x * 100 }).toArray();
         assertEquals(6, result.length);
     }
 
@@ -368,14 +368,14 @@ public class IteratorStreamTest extends TestBase {
     @Test
     public void testFlatmapToFloat() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2));
-        float[] result = stream.flatmapToFloat(x -> new float[] { x, x * 10f }).toArray();
+        float[] result = stream.flatMapArrayToFloat(x -> new float[] { x, x * 10f }).toArray();
         assertArrayEquals(new float[] { 1f, 10f, 2f, 20f }, result, 0.001f);
     }
 
     @Test
     public void testFlatmapToFloat_nonParallel() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
-        float[] result = stream.flatmapToFloat(x -> new float[] { x, x * 1.5f }).toArray();
+        float[] result = stream.flatMapArrayToFloat(x -> new float[] { x, x * 1.5f }).toArray();
         assertEquals(6, result.length);
     }
 
@@ -389,14 +389,14 @@ public class IteratorStreamTest extends TestBase {
     @Test
     public void testFlatmapToDouble() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2));
-        double[] result = stream.flatmapToDouble(x -> new double[] { x, x * 10.0 }).toArray();
+        double[] result = stream.flatMapArrayToDouble(x -> new double[] { x, x * 10.0 }).toArray();
         assertArrayEquals(new double[] { 1.0, 10.0, 2.0, 20.0 }, result, 0.001);
     }
 
     @Test
     public void testFlatmapToDouble_nonParallel() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
-        double[] result = stream.flatmapToDouble(x -> new double[] { x, x * 2.5 }).toArray();
+        double[] result = stream.flatMapArrayToDouble(x -> new double[] { x, x * 2.5 }).toArray();
         assertEquals(6, result.length);
     }
 

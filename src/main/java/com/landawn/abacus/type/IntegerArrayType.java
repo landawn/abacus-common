@@ -19,39 +19,41 @@ import java.io.IOException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for Integer array (Integer[]).
- * This class provides optimized serialization and deserialization for arrays of Integer objects,
- * including proper handling of {@code null} elements within the array.
+ * Type handler for boxed-integer array ({@code Integer[]}) values.
+ * This class provides serialization, deserialization, and output operations for {@code Integer[]} arrays.
+ *
+ * <p>The canonical string format is a bracket-enclosed, comma-separated list where null elements
+ * are written as the literal {@code null} (e.g., {@code [1, null, 3, 42]}).
+ *
+ * @see ObjectArrayType
  */
 public final class IntegerArrayType extends ObjectArrayType<Integer> {
 
+    /**
+     * Package-private constructor for {@code IntegerArrayType}.
+     * Instances are created by the {@code TypeFactory}.
+     */
     IntegerArrayType() {
         super(Integer[].class);
     }
 
     /**
-     * Converts an Integer array to its string representation.
-     * The array is serialized as a JSON array string with proper {@code null} handling.
-     * Null elements are represented as "null" in the output string.
-     * This method is optimized for performance using string joining.
+     * Converts an {@code Integer[]} to its canonical string representation.
+     * The output is a bracket-enclosed, comma-separated list; null elements appear as {@code null}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Integer[]> type = TypeFactory.getType(Integer[].class);
-     * Integer[] array = {1, null, 3, 42};
-     * String result = type.stringOf(array);
-     * // result: "[1, null, 3, 42]"
+     * <p>Examples:
+     * <ul>
+     *   <li>{@code [1, null, 3, 42]} for {@code new Integer[]{1, null, 3, 42}}</li>
+     *   <li>{@code []} for an empty array</li>
+     *   <li>{@code null} if the input is {@code null}</li>
+     * </ul>
      *
-     * String empty = type.stringOf(new Integer[0]);
-     * // empty: "[]"
-     * }</pre>
-     *
-     * @param x the Integer array to convert to string
-     * @return the JSON array string representation (e.g., "[1,null,3]"), or {@code null} if the input array is null
+     * @param x the {@code Integer[]} to convert; may be {@code null}
+     * @return the string representation, or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final Integer[] x) {
@@ -65,24 +67,18 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
     }
 
     /**
-     * Parses a string representation into an Integer array.
-     * The string should be in JSON array format. Handles the following cases:
-     * - {@code null}, empty, or blank string: returns null
-     * - "[]": returns empty Integer array
-     * - JSON array: parses each element, treating "null" strings as {@code null} values
+     * Parses a string representation back into an {@code Integer[]} array.
+     * The expected format is a bracket-enclosed, comma-separated list as produced by {@link #stringOf}.
+     * The literal {@code null} (4 characters) is converted to a {@code null} array element.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Integer[]> type = TypeFactory.getType(Integer[].class);
-     * Integer[] result = type.valueOf("[1, null, 3, 42]");
-     * // result: {1, null, 3, 42}
+     * <p>Special cases:
+     * <ul>
+     *   <li>{@code null}, blank, or empty string returns {@code null}</li>
+     *   <li>{@code "[]"} returns an empty array</li>
+     * </ul>
      *
-     * Integer[] empty = type.valueOf("[]");
-     * // empty: {} (empty array)
-     * }</pre>
-     *
-     * @param str the JSON array string to parse (e.g., "[1,null,3]")
-     * @return the parsed Integer array, or {@code null} if the input is null
+     * @param str the string to parse; may be {@code null}
+     * @return the parsed {@code Integer[]}, or {@code null} if {@code str} is {@code null} or blank
      */
     @Override
     public Integer[] valueOf(final String str) {
@@ -110,12 +106,13 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
     }
 
     /**
-     * Appends the string representation of an Integer array to an Appendable.
-     * The output format is a JSON array with proper {@code null} handling.
-     * This method is optimized to avoid string concatenation overhead.
+     * Appends an {@code Integer[]} to an {@link Appendable}.
+     * The output format is a bracket-enclosed, comma-separated list.
+     * Null elements are written as {@code null}; non-null values use {@link Integer#toString()}.
+     * If {@code x} is {@code null}, the literal {@code null} is appended.
      *
-     * @param appendable the Appendable to write to
-     * @param x the Integer array to append
+     * @param appendable the {@link Appendable} to write to
+     * @param x          the {@code Integer[]} to append; may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
@@ -142,13 +139,14 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
     }
 
     /**
-     * Writes the character representation of an Integer array to a CharacterWriter.
-     * This method is optimized for performance by using specialized writeInt method
-     * for {@code non-null} values, avoiding string conversion overhead.
+     * Writes an {@code Integer[]} to a {@link CharacterWriter}.
+     * The output format is a bracket-enclosed, comma-separated list.
+     * Null elements are written as {@code null}; non-null values use the writer's optimized
+     * integer-write method. If {@code x} is {@code null}, the literal {@code null} is written.
      *
-     * @param writer the CharacterWriter to write to
-     * @param x the Integer array to write
-     * @param config the serialization configuration (not used for integer arrays)
+     * @param writer the {@link CharacterWriter} to write to
+     * @param x      the {@code Integer[]} to write; may be {@code null}
+     * @param config serialization configuration (not used for {@code Integer} arrays); may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override

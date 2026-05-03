@@ -509,7 +509,7 @@ public class ArrayStreamTest extends TestBase {
     @Test
     public void testFlatmapToChar() {
         Stream<String> stream = Stream.of(new String[] { "ab", "cd" });
-        char[] result = stream.flatmapToChar(String::toCharArray).toArray();
+        char[] result = stream.flatMapArrayToChar(String::toCharArray).toArray();
         assertArrayEquals(new char[] { 'a', 'b', 'c', 'd' }, result);
     }
 
@@ -527,7 +527,7 @@ public class ArrayStreamTest extends TestBase {
     @Test
     public void testFlatmapToCharWithContent() {
         String[] arr = { "hi", "yo" };
-        char[] result = Stream.of(arr).flatmapToChar(String::toCharArray).toArray();
+        char[] result = Stream.of(arr).flatMapArrayToChar(String::toCharArray).toArray();
         assertEquals(4, result.length);
     }
 
@@ -548,7 +548,7 @@ public class ArrayStreamTest extends TestBase {
     @Test
     public void testFlatmapToByte() {
         Stream<Integer> stream = Stream.of(new Integer[] { 1, 2, 3 });
-        byte[] result = stream.flatmapToByte(i -> new byte[] { i.byteValue(), (byte) (i * 10) }).toArray();
+        byte[] result = stream.flatMapArrayToByte(i -> new byte[] { i.byteValue(), (byte) (i * 10) }).toArray();
         assertArrayEquals(new byte[] { 1, 10, 2, 20, 3, 30 }, result);
     }
 
@@ -562,7 +562,7 @@ public class ArrayStreamTest extends TestBase {
     @Test
     public void testFlatmapToShort() {
         Stream<Integer> stream = Stream.of(new Integer[] { 1, 2 });
-        short[] result = stream.flatmapToShort(i -> new short[] { i.shortValue(), (short) (i * 10) }).toArray();
+        short[] result = stream.flatMapArrayToShort(i -> new short[] { i.shortValue(), (short) (i * 10) }).toArray();
         assertArrayEquals(new short[] { 1, 10, 2, 20 }, result);
     }
 
@@ -576,7 +576,7 @@ public class ArrayStreamTest extends TestBase {
     @Test
     public void testFlatmapToInt() {
         Stream<Integer> stream = Stream.of(new Integer[] { 1, 2, 3 });
-        int[] result = stream.flatmapToInt(i -> new int[] { i, i * 10 }).toArray();
+        int[] result = stream.flatMapArrayToInt(i -> new int[] { i, i * 10 }).toArray();
         assertArrayEquals(new int[] { 1, 10, 2, 20, 3, 30 }, result);
     }
 
@@ -590,7 +590,7 @@ public class ArrayStreamTest extends TestBase {
     @Test
     public void testFlatmapToLong() {
         Stream<Integer> stream = Stream.of(new Integer[] { 1, 2 });
-        long[] result = stream.flatmapToLong(i -> new long[] { i.longValue(), i * 10L }).toArray();
+        long[] result = stream.flatMapArrayToLong(i -> new long[] { i.longValue(), i * 10L }).toArray();
         assertArrayEquals(new long[] { 1, 10, 2, 20 }, result);
     }
 
@@ -604,7 +604,7 @@ public class ArrayStreamTest extends TestBase {
     @Test
     public void testFlatmapToFloat() {
         Stream<Integer> stream = Stream.of(new Integer[] { 1, 2 });
-        float[] result = stream.flatmapToFloat(i -> new float[] { i.floatValue(), i * 10.0f }).toArray();
+        float[] result = stream.flatMapArrayToFloat(i -> new float[] { i.floatValue(), i * 10.0f }).toArray();
         assertArrayEquals(new float[] { 1.0f, 10.0f, 2.0f, 20.0f }, result, 0.001f);
     }
 
@@ -618,7 +618,7 @@ public class ArrayStreamTest extends TestBase {
     @Test
     public void testFlatmapToDouble() {
         Stream<Integer> stream = Stream.of(new Integer[] { 1, 2 });
-        double[] result = stream.flatmapToDouble(i -> new double[] { i.doubleValue(), i * 10.0 }).toArray();
+        double[] result = stream.flatMapArrayToDouble(i -> new double[] { i.doubleValue(), i * 10.0 }).toArray();
         assertArrayEquals(new double[] { 1.0, 10.0, 2.0, 20.0 }, result, 0.001);
     }
 

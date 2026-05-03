@@ -22,43 +22,52 @@ import java.sql.SQLException;
 
 import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for java.sql.Date values.
+ * Type handler for {@link java.sql.Date} values.
  * This class provides serialization, deserialization, and database operations for SQL Date objects.
- * SQL Dates represent dates without time components (year, month, day only).
- * It supports conversion from various formats including timestamps, date strings, and the special "sysTime" value.
+ * SQL {@link java.sql.Date} represents a date without a time component (year, month, and day only).
+ *
+ * <p>Supported conversions include:
+ * <ul>
+ *   <li>{@link Number}: interpreted as milliseconds since the Unix epoch</li>
+ *   <li>{@link java.util.Date}: the time portion is preserved in the resulting SQL Date</li>
+ *   <li>{@link String}: parsed as a date string, or the special value {@code "sysTime"} for today's date</li>
+ *   <li>{@code char[]}: parsed as a timestamp (milliseconds) or date string</li>
+ * </ul>
+ *
+ * @see AbstractDateType
+ * @see java.sql.Date
  */
 public class DateType extends AbstractDateType<Date> {
 
     /**
-     * The type name constant for Date type identification.
+     * The type name constant for Date type identification, equal to {@code "Date"}.
      */
     public static final String DATE = Date.class.getSimpleName();
 
     /**
-     * Package-private constructor for DateType.
-     * This constructor is called by the TypeFactory to create Date type instances.
+     * Package-private constructor for {@code DateType}.
+     * Instances are created by the {@code TypeFactory}.
      */
     DateType() {
         super(DATE);
     }
 
     /**
-     * Package-private constructor for DateType with a custom type name.
-     * This constructor allows subclasses to provide their own type name.
+     * Package-private constructor for {@code DateType} with a custom type name.
+     * Used by subclasses that extend this type with a specialized name.
      *
-     * @param typeName the name of the type
+     * @param typeName the custom type name to register
      */
     DateType(final String typeName) {
         super(typeName);
     }
 
     /**
-     * Returns the Java class type handled by this type handler.
+     * Returns the Java class represented by this type handler.
      *
-     * @return The Class object representing java.sql.Date.class
+     * @return {@code java.sql.Date.class}
      */
     @Override
     public Class<Date> javaType() {
@@ -66,30 +75,17 @@ public class DateType extends AbstractDateType<Date> {
     }
 
     /**
-     * Converts various object types to a SQL Date instance.
-     * Supported input types include:
-     * - Number: interpreted as milliseconds since epoch
-     * - java.util.Date: converted to SQL Date (time portion is truncated)
-     * - String: parsed as a date string
-     * - Other objects: converted to string first, then parsed
+     * Converts an arbitrary object to a {@link java.sql.Date} instance.
+     * The conversion rules are:
+     * <ul>
+     *   <li>{@link Number}: treated as milliseconds since the Unix epoch</li>
+     *   <li>{@link java.util.Date}: the time instant is used to construct a new {@link java.sql.Date}</li>
+     *   <li>{@code null}: returns {@code null}</li>
+     *   <li>Any other type: converted to its string representation, then parsed via {@link #valueOf(String)}</li>
+     * </ul>
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Date> dateType = TypeFactory.getType(Date.class);
-     *
-     * // Convert from milliseconds (Number)
-     * Date date1 = dateType.valueOf(1609459200000L);   // 2021-01-01
-     *
-     * // Convert from java.util.Date
-     * Date date2 = dateType.valueOf(new java.util.Date());
-     *
-     * // Convert from String (including special "sysTime" value)
-     * Date date3 = dateType.valueOf("2021-01-01");
-     * Date date4 = dateType.valueOf("sysTime");   // current system date
-     * }</pre>
-     *
-     * @param obj the object to convert to SQL Date. Can be {@code null}.
-     * @return A SQL Date instance representing the input value, or {@code null} if input is null
+     * @param obj the object to convert; may be {@code null}
+     * @return a {@link java.sql.Date} representing the input value, or {@code null} if {@code obj} is {@code null}
      */
     @Override
     public Date valueOf(final Object obj) {
@@ -103,63 +99,32 @@ public class DateType extends AbstractDateType<Date> {
     }
 
     /**
-     * Converts a string representation to a SQL Date instance.
-     * Special handling for:
-     * - {@code null} or empty string: returns null
-     * - "sysTime": returns the current system date
-     * - Other strings: parsed using date parsing utilities
+     * Converts a string representation to a {@link java.sql.Date} instance.
+     * <ul>
+     *   <li>{@code null} or empty string: returns {@code null}</li>
+     *   <li>{@code "sysTime"}: returns today's date (via {@link com.landawn.abacus.util.Dates#currentDate()})</li>
+     *   <li>All other values: parsed by {@link com.landawn.abacus.util.Dates#parseDate(String)}</li>
+     * </ul>
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Date> dateType = TypeFactory.getType(Date.class);
-     *
-     * // Parse standard ISO date strings
-     * Date date1 = dateType.valueOf("2021-01-01");
-     * Date date2 = dateType.valueOf("2021-02-15");
-     *
-     * // Use special "sysTime" value to get current system date
-     * Date now = dateType.valueOf("sysTime");
-     *
-     * // Handle null/empty strings
-     * Date nullDate = dateType.valueOf(null);   // returns null
-     * Date emptyDate = dateType.valueOf("");    // returns null
-     * }</pre>
-     *
-     * @param str the string to parse. Can be {@code null} or empty.
-     * @return A SQL Date instance parsed from the string, or {@code null} if input is null/empty
+     * @param str the string to parse; may be {@code null} or empty
+     * @return a {@link java.sql.Date} parsed from {@code str}, or {@code null} if {@code str} is {@code null} or empty
      */
     @Override
     public Date valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : (isSysTime(str) ? Dates.currentDate() : Dates.parseDate(str));
+        return isNullDateTime(str) ? null : (isSysTime(str) ? Dates.currentDate() : Dates.parseDate(str));
     }
 
     /**
-     * Converts a character array to a SQL Date instance.
-     * If the character array appears to represent a numeric value (timestamp),
-     * it attempts to parse it as milliseconds since epoch.
-     * Otherwise, it converts to string and uses string parsing.
+     * Converts a region of a character array to a {@link java.sql.Date} instance.
+     * If the character sequence looks like a {@code long} value (an epoch-millisecond timestamp),
+     * it is parsed as such; otherwise the characters are converted to a {@link String} and
+     * delegated to {@link #valueOf(String)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Date> dateType = TypeFactory.getType(Date.class);
-     *
-     * // Parse from character array containing timestamp
-     * char[] timestampChars = "1609459200000".toCharArray();
-     * Date date1 = dateType.valueOf(timestampChars, 0, timestampChars.length);
-     *
-     * // Parse from character array containing date string
-     * char[] dateChars = "2021-01-01".toCharArray();
-     * Date date2 = dateType.valueOf(dateChars, 0, dateChars.length);
-     *
-     * // Parse subset of character array
-     * char[] largeArray = "prefix2021-01-01suffix".toCharArray();
-     * Date date3 = dateType.valueOf(largeArray, 6, 10);   // extracts "2021-01-01"
-     * }</pre>
-     *
-     * @param cbuf the character array containing the value to parse
-     * @param offset the starting position in the character array
-     * @param len the number of characters to use
-     * @return A SQL Date instance parsed from the character array, or {@code null} if input is {@code null} or empty
+     * @param cbuf   the character array containing the value; may be {@code null}
+     * @param offset the index of the first character to use
+     * @param len    the number of characters to use
+     * @return a {@link java.sql.Date} parsed from the specified character region,
+     *         or {@code null} if {@code cbuf} is {@code null} or {@code len} is {@code 0}
      */
     @Override
     public Date valueOf(final char[] cbuf, final int offset, final int len) {
@@ -179,22 +144,12 @@ public class DateType extends AbstractDateType<Date> {
     }
 
     /**
-     * Retrieves a SQL Date value from a ResultSet at the specified column index.
+     * Retrieves a {@link java.sql.Date} value from a {@link ResultSet} at the specified column index.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Date> dateType = TypeFactory.getType(Date.class);
-     *
-     * try (ResultSet rs = stmt.executeQuery("SELECT created_date FROM users")) {
-     *     if (rs.next()) {
-     *         Date createdDate = dateType.get(rs, 1);   // retrieves date from column 1
-     *     }
-     * }
-     * }</pre>
-     *
-     * @param rs the ResultSet containing the data
-     * @param columnIndex the column index (1-based) of the date value
-     * @return A SQL Date instance from the result set, or {@code null} if the column value is SQL NULL
+     * @param rs          the {@link ResultSet} to read from
+     * @param columnIndex the 1-based column index
+     * @return the {@link java.sql.Date} at the specified column,
+     *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
@@ -203,22 +158,12 @@ public class DateType extends AbstractDateType<Date> {
     }
 
     /**
-     * Retrieves a SQL Date value from a ResultSet using the specified column label.
+     * Retrieves a {@link java.sql.Date} value from a {@link ResultSet} using the specified column label.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Date> dateType = TypeFactory.getType(Date.class);
-     *
-     * try (ResultSet rs = stmt.executeQuery("SELECT created_date FROM users")) {
-     *     if (rs.next()) {
-     *         Date createdDate = dateType.get(rs, "created_date");   // retrieves by column name
-     *     }
-     * }
-     * }</pre>
-     *
-     * @param rs the ResultSet containing the data
-     * @param columnName the label of the column containing the date value
-     * @return A SQL Date instance from the result set, or {@code null} if the column value is SQL NULL
+     * @param rs         the {@link ResultSet} to read from
+     * @param columnName the label of the column to retrieve
+     * @return the {@link java.sql.Date} in the specified column,
+     *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
@@ -227,23 +172,11 @@ public class DateType extends AbstractDateType<Date> {
     }
 
     /**
-     * Sets a SQL Date value as a parameter in a PreparedStatement.
+     * Sets a {@link java.sql.Date} value as a parameter in a {@link PreparedStatement}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Date> dateType = TypeFactory.getType(Date.class);
-     *
-     * try (PreparedStatement stmt = conn.prepareStatement(
-     *         "INSERT INTO events (name, event_date) VALUES (?, ?)")) {
-     *     stmt.setString(1, "Meeting");
-     *     dateType.set(stmt, 2, Date.valueOf("2021-01-01"));
-     *     stmt.executeUpdate();
-     * }
-     * }</pre>
-     *
-     * @param stmt the PreparedStatement in which to set the parameter
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the SQL Date value to set. Can be {@code null}.
+     * @param stmt        the {@link PreparedStatement} in which to set the parameter
+     * @param columnIndex the 1-based parameter index
+     * @param x           the {@link java.sql.Date} to set; may be {@code null}
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
@@ -252,22 +185,11 @@ public class DateType extends AbstractDateType<Date> {
     }
 
     /**
-     * Sets a SQL Date value as a named parameter in a CallableStatement.
+     * Sets a {@link java.sql.Date} value as a named parameter in a {@link CallableStatement}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Date> dateType = TypeFactory.getType(Date.class);
-     *
-     * try (CallableStatement stmt = conn.prepareCall("{call addEvent(?, ?)}")) {
-     *     stmt.setString(1, "Conference");
-     *     dateType.set(stmt, "eventDate", Date.valueOf("2021-06-15"));
-     *     stmt.execute();
-     * }
-     * }</pre>
-     *
-     * @param stmt the CallableStatement in which to set the parameter
+     * @param stmt          the {@link CallableStatement} in which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the SQL Date value to set. Can be {@code null}.
+     * @param x             the {@link java.sql.Date} to set; may be {@code null}
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override

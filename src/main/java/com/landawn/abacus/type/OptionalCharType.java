@@ -18,17 +18,18 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.u.OptionalChar;
 
 /**
- * Type handler for {@link OptionalChar} objects, providing serialization, deserialization,
- * and database interaction capabilities for optional character values. This handler manages
- * the conversion between database character/integer values and OptionalChar wrapper objects.
+ * Type handler for {@link OptionalChar} objects from the {@code com.landawn.abacus.util.u} package,
+ * providing serialization, deserialization, and database interaction capabilities for optional character values.
+ * Note: this handles the abacus-specific {@code OptionalChar}, which has no direct JDK equivalent.
+ * Character values are stored in the database as VARCHAR (single-character string), not as integer code points.
  */
 public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
 
     public static final String OPTIONAL_CHAR = OptionalChar.class.getSimpleName();
 
     /**
-     * Constructs an OptionalCharType.
-     * This constructor initializes the type handler for OptionalChar objects.
+     * Package-private constructor for OptionalCharType.
+     * This constructor is called by the TypeFactory to create OptionalChar type instances.
      */
     protected OptionalCharType() {
         super(OPTIONAL_CHAR);
@@ -175,7 +176,7 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
     }
 
     /**
-     * Retrieves a character value from a ResultSet using the specified column label and wraps it in an {@link OptionalChar}. 
+     * Retrieves a character value from a ResultSet using the specified column label and wraps it in an {@link OptionalChar}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -219,7 +220,7 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
     }
 
     /**
-     * Sets a parameter in a PreparedStatement to the value contained in an {@link OptionalChar}. 
+     * Sets a parameter in a PreparedStatement to the value contained in an {@link OptionalChar}.
      * If the OptionalChar is {@code null} or empty, sets the parameter to SQL NULL.
      *
      * <p><b>Usage Examples:</b></p>

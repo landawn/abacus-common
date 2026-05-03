@@ -25,29 +25,13 @@ import java.lang.annotation.Target;
  * This annotation serves as a warning to developers that the API is not yet stable and should be used
  * with caution in production code.
  *
- * <p>Beta APIs are provided to allow early access and gather feedback from developers. They may have:</p>
+ * <p>Beta APIs are provided to allow early access and to gather feedback from developers. They may have:</p>
  * <ul>
- *   <li>Incomplete or evolving documentation</li>
- *   <li>Limited testing coverage</li>
- *   <li>Breaking changes without prior notice</li>
- *   <li>Performance or stability issues</li>
- *   <li>Missing features that will be added later</li>
- * </ul>
- *
- * <p>This annotation can be applied to:</p>
- * <ul>
- *   <li>Types (classes, interfaces, enums, annotations)</li>
- *   <li>Methods and constructors</li>
- *   <li>Fields</li>
- *   <li>Other annotations</li>
- * </ul>
- *
- * <p><b>Usage recommendations:</b></p>
- * <ul>
- *   <li>Use beta APIs for experimentation and evaluation</li>
- *   <li>Provide feedback to help improve the API</li>
- *   <li>Be prepared to update your code when the API changes</li>
- *   <li>Avoid using beta APIs in critical production systems</li>
+ *   <li>Incomplete or evolving documentation.</li>
+ *   <li>Limited testing coverage.</li>
+ *   <li>Breaking changes without prior notice.</li>
+ *   <li>Performance or stability issues.</li>
+ *   <li>Missing features that will be added later.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
@@ -59,7 +43,7 @@ import java.lang.annotation.Target;
  * }</pre>
  *
  * @see Internal
- * @see Deprecated
+ * @see java.lang.Deprecated
  */
 @Documented
 @Retention(value = RetentionPolicy.CLASS)

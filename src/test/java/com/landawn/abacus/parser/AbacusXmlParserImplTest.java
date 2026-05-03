@@ -760,4 +760,120 @@ public class AbacusXmlParserImplTest extends TestBase {
 
     // TODO: Remaining AbacusXmlParserImpl.XmlSAXHandler gaps are in internal recursive SAX startElement/endElement branches that are not practical to isolate without purpose-built parser fixtures.
 
+    // -----------------------------------------------------------------------
+    // Bug-fix regression tests – Bug 2: stale StringBuilder drops first CHARACTERS chunk
+    // -----------------------------------------------------------------------
+
+    /**
+     * Bug fix: the StAX readByStreamParserBody() method accumulates split CHARACTERS
+     * events in a shared StringBuilder {@code sb}.  After each accumulation the
+     * builder is cleared with {@code sb.setLength(0)}, but ONLY when
+     * {@code sb.length() > text.length()}.  When that condition is false {@code sb}
+     * retains stale content.  On the next property whose value also triggers
+     * multi-CHARACTERS accumulation the {@code else if (sb.isEmpty())} branch was
+     * skipped (because sb was non-empty), so the initial {@code text} fragment was
+     * silently dropped.
+     *
+     * The fix restructures the branch so {@code text} is always prepended when
+     * {@code sb} is empty, regardless of whether it was explicitly cleared or was
+     * freshly allocated.
+     *
+     * This test validates that a bean with two String properties round-trips
+     * correctly via StAX – if either property's first text-chunk is lost the
+     * assertion will fail.
+     */
+    @Test
+    public void bugFix_staleStringBuilder_multipleStringProps_roundTripsCorrectly() {
+        if (!ParserFactory.isAbacusXmlParserAvailable()) {
+            return;
+        }
+        // Use a bean with two distinct non-empty string fields so any silent
+        // truncation of either field is immediately detectable.
+        Person original = new Person("GivenName", 42);
+        XmlParser parser = new AbacusXmlParserImpl(XmlParserType.StAX);
+
+        String xml = parser.serialize(original, new XmlSerConfig().setTagByPropertyName(true));
+        assertNotNull(xml);
+
+        Person restored = parser.deserialize(xml, new XmlDeserConfig(), Person.class);
+        assertNotNull(restored);
+        assertEquals(original.getName(), restored.getName(),
+                "name must survive the StAX round-trip; stale-sb bug would truncate it");
+        assertEquals(original.getAge(), restored.getAge(),
+                "age must survive the StAX round-trip");
+    }
+
+    /**
+     * Same StAX round-trip for a list of strings to exercise the
+     * COLLECTION/CHARACTERS accumulation path which had the identical stale-sb bug.
+     */
+    @Test
+    public void bugFix_staleStringBuilder_collectionOfStrings_roundTripsCorrectly() {
+        if (!ParserFactory.isAbacusXmlParserAvailable()) {
+            return;
+        }
+        XmlParser parser = new AbacusXmlParserImpl(XmlParserType.StAX);
+        List<String> original = Arrays.asList(
+                "firstElement_withSomeLengthToExerciseSbAccumulation",
+                "secondElement_alsoWithSomeLengthToExerciseSbAccumulation",
+                "thirdElement");
+
+        String xml = parser.serialize(original,
+                new XmlSerConfig().setTagByPropertyName(true).setWriteTypeInfo(true));
+        assertNotNull(xml);
+
+        @SuppressWarnings("unchecked")
+        List<String> restored = parser.deserialize(xml,
+                new XmlDeserConfig().setElementType(String.class), List.class);
+
+        assertNotNull(restored);
+        assertEquals(original.size(), restored.size(), "Restored list must have same size");
+        for (int i = 0; i < original.size(); i++) {
+            assertEquals(original.get(i), restored.get(i),
+                    "Element " + i + " must survive the StAX round-trip");
+        }
+    }
+
+    /**
+     * Verify the InputStream StAX path also round-trips correctly.
+     */
+    @Test
+    public void bugFix_staleStringBuilder_staxFromInputStream_roundTripsCorrectly() {
+        if (!ParserFactory.isAbacusXmlParserAvailable()) {
+            return;
+        }
+        XmlParser parser = new AbacusXmlParserImpl(XmlParserType.StAX);
+        Person original = new Person("InputFirst", 99);
+
+        String xml = parser.serialize(original, new XmlSerConfig().setTagByPropertyName(true));
+        assertNotNull(xml);
+
+        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
+        Person restored = parser.deserialize(bais, new XmlDeserConfig(), Person.class);
+        assertNotNull(restored);
+        assertEquals(original.getName(), restored.getName());
+        assertEquals(original.getAge(), restored.getAge());
+    }
+
+    /**
+     * Verify the Reader StAX path also round-trips correctly.
+     */
+    @Test
+    public void bugFix_staleStringBuilder_staxFromReader_roundTripsCorrectly() {
+        if (!ParserFactory.isAbacusXmlParserAvailable()) {
+            return;
+        }
+        XmlParser parser = new AbacusXmlParserImpl(XmlParserType.StAX);
+        Person original = new Person("ReaderFirst", 55);
+
+        String xml = parser.serialize(original, new XmlSerConfig().setTagByPropertyName(true));
+        assertNotNull(xml);
+
+        StringReader reader = new StringReader(xml);
+        Person restored = parser.deserialize(reader, new XmlDeserConfig(), Person.class);
+        assertNotNull(restored);
+        assertEquals(original.getName(), restored.getName());
+        assertEquals(original.getAge(), restored.getAge());
+    }
+
 }

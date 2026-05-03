@@ -103,10 +103,8 @@ import com.landawn.abacus.util.stream.ShortStream;
  * audioSamples.parallelSort();   // Parallel sort for large datasets
  * int index = audioSamples.binarySearch((short) 1024);   // Fast lookup
  *
- * // Type conversions for different precision needs
+ * // Type conversions
  * IntList intValues = audioSamples.toIntList();   // Convert to int (no precision loss)
- * LongList longValues = audioSamples.toLongList();   // Convert to long (no precision loss)
- * FloatList floatValues = audioSamples.toFloatList();   // Convert to float
  * short[] primitiveArray = audioSamples.toArray();   // To primitive array
  * List<Short> boxedList = audioSamples.boxed();   // To boxed collection
  * }</pre>
@@ -135,7 +133,7 @@ import com.landawn.abacus.util.stream.ShortStream;
  * <ul>
  *   <li><b>Range Generation:</b> {@code range()}, {@code rangeClosed()} for arithmetic sequences</li>
  *   <li><b>Mathematical Functions:</b> {@code min()}, {@code max()}, {@code median()}</li>
- *   <li><b>Type Conversions:</b> {@code toIntList()}, {@code toLongList()}, {@code toFloatList()}, {@code toDoubleList()}</li>
+ *   <li><b>Type Conversions:</b> {@code toIntList()}</li>
  *   <li><b>Random Generation:</b> {@code random()} methods for test data and simulations</li>
  *   <li><b>Bulk Updates:</b> {@code replaceAll()}, {@code replaceIf()} for value transformations</li>
  * </ul>
@@ -154,9 +152,6 @@ import com.landawn.abacus.util.stream.ShortStream;
  * <ul>
  *   <li><b>{@code toArray()}:</b> Convert to primitive short array</li>
  *   <li><b>{@code toIntList()}:</b> Convert to IntList with promoted values</li>
- *   <li><b>{@code toLongList()}:</b> Convert to LongList with promoted values</li>
- *   <li><b>{@code toFloatList()}:</b> Convert to FloatList with promoted values</li>
- *   <li><b>{@code toDoubleList()}:</b> Convert to DoubleList with promoted values</li>
  *   <li><b>{@code boxed()}:</b> Convert to {@code List<Short>}</li>
  *   <li><b>{@code stream()}:</b> Convert to ShortStream for functional processing</li>
  * </ul>
@@ -175,7 +170,7 @@ import com.landawn.abacus.util.stream.ShortStream;
  * <ul>
  *   <li><b>Not Thread-Safe:</b> This implementation is not synchronized</li>
  *   <li><b>External Synchronization:</b> Required for concurrent access</li>
- *   <li><b>Fail-Fast Iterators:</b> Detect concurrent modifications</li>
+ *   <li><b>Iterators:</b> Not fail-fast; concurrent modification yields undefined results</li>
  *   <li><b>Read-Only Access:</b> Multiple threads can safely read simultaneously</li>
  * </ul>
  *
@@ -1091,14 +1086,14 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * The elements from fromIndex (inclusive) to toIndex (exclusive) are moved
      * so that the element originally at fromIndex will be at newPositionAfterMove.
      * Other elements are shifted as necessary to accommodate the move.
-     * 
-     * <p><b>Usage Examples:</b></p> 
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortList list = ShortList.of((short) 0, (short) 1, (Short) 2, (Short) 3, (Short) 4, (Short) 5);
      * list.moveRange(1, 3, 3);   // Moves elements [1, 2] to position starting at index 3
      * // Result: [0, 3, 4, 1, 2, 5]
      * }</pre>
-     * 
+     *
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
      * @param newPositionAfterMove the index where the first element of the range
@@ -1108,6 +1103,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      */
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
+        N.checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, size);
         N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
     }
 
@@ -1464,7 +1460,6 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @see #difference(ShortList)
      * @see #symmetricDifference(ShortList)
      * @see N#intersection(short[], short[])
-     * @see N#intersection(int[], int[])
      */
     @Override
     public ShortList intersection(final ShortList b) {
@@ -1511,7 +1506,6 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @see #difference(short[])
      * @see #symmetricDifference(short[])
      * @see N#intersection(short[], short[])
-     * @see N#intersection(int[], int[])
      */
     @Override
     public ShortList intersection(final short[] b) {
@@ -1547,7 +1541,6 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @see #symmetricDifference(ShortList)
      * @see #intersection(ShortList)
      * @see N#difference(short[], short[])
-     * @see N#difference(int[], int[])
      */
     @Override
     public ShortList difference(final ShortList b) {
@@ -1594,7 +1587,6 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @see #symmetricDifference(short[])
      * @see #intersection(short[])
      * @see N#difference(short[], short[])
-     * @see N#difference(int[], int[])
      */
     @Override
     public ShortList difference(final short[] b) {
@@ -1634,7 +1626,6 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @see #difference(ShortList)
      * @see #intersection(ShortList)
      * @see N#symmetricDifference(short[], short[])
-     * @see N#symmetricDifference(int[], int[])
      */
     @Override
     public ShortList symmetricDifference(final ShortList b) {
@@ -1695,7 +1686,6 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @see #difference(short[])
      * @see #intersection(short[])
      * @see N#symmetricDifference(short[], short[])
-     * @see N#symmetricDifference(int[], int[])
      */
     @Override
     public ShortList symmetricDifference(final short[] b) {
@@ -1861,11 +1851,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Returns the median value of all elements in this list.
-     * 
+     *
      * <p>The median is the middle value when the elements are sorted in ascending order. For lists with
      * an odd number of elements, this is the exact middle element. For lists with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
-     * 
+     *
      * @return an OptionalShort containing the median value if the list is non-empty, or an empty OptionalShort if the list is empty
      */
     public OptionalShort median() {
@@ -1874,7 +1864,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Returns the median value of elements within the specified range of this list.
-     * 
+     *
      * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
      * For ranges with an odd number of elements, this returns the exact middle element when sorted.
      * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
@@ -1892,7 +1882,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Performs the given action for each element in this list.
-     * 
+     *
      * <p>The action is performed on each element in order, from the first element
      * to the last element.</p>
      *
@@ -1944,7 +1934,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Returns the first element in this list wrapped in an OptionalShort.
-     * 
+     *
      * @return an OptionalShort containing the first element, or empty if the list is empty
      */
     public OptionalShort first() {
@@ -1953,7 +1943,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Returns the last element in this list wrapped in an OptionalShort.
-     * 
+     *
      * @return an OptionalShort containing the last element, or empty if the list is empty
      */
     public OptionalShort last() {
@@ -1962,7 +1952,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Returns a new ShortList containing only the distinct elements from the specified range.
-     * 
+     *
      * <p>Duplicate elements are removed, keeping only the first occurrence of each value.
      * The order of the remaining elements is preserved.</p>
      *
@@ -1994,7 +1984,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Checks whether the elements in this list are sorted in ascending order.
-     * 
+     *
      * @return {@code true} if the list is sorted in ascending order or is empty, {@code false} otherwise
      */
     @Override
@@ -2004,7 +1994,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Sorts all elements in this list in ascending order.
-     * 
+     *
      * <p>This method modifies the list in place. After sorting, the elements will be
      * arranged from smallest to largest value.</p>
      */
@@ -2017,7 +2007,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Sorts all elements in this list in ascending order using a parallel sort algorithm.
-     * 
+     *
      * <p>This method uses a parallel sorting algorithm which may be more efficient
      * for large lists on multi-core systems. The list is modified in place.</p>
      */
@@ -2029,7 +2019,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Sorts all elements in this list in descending order.
-     * 
+     *
      * <p>This method first sorts the list in ascending order, then reverses it to achieve
      * descending order. The list is modified in place.</p>
      */
@@ -2043,7 +2033,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Searches for the specified value using binary search algorithm.
-     * 
+     *
      * <p>The list must be sorted in ascending order prior to making this call.
      * If it is not sorted, the results are undefined.</p>
      *
@@ -2057,7 +2047,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Searches for the specified value in the given range using binary search algorithm.
-     * 
+     *
      * <p>The specified range of the list must be sorted in ascending order prior to making
      * this call. If it is not sorted, the results are undefined.</p>
      *
@@ -2076,7 +2066,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Reverses the order of all elements in this list.
-     * 
+     *
      * <p>After calling this method, the first element becomes the last,
      * the second becomes the second-to-last, and so on.</p>
      */
@@ -2089,7 +2079,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Reverses the order of elements in the specified range of this list.
-     * 
+     *
      * <p>Elements from fromIndex (inclusive) to toIndex (exclusive) are reversed.
      * Elements outside this range are not affected.</p>
      *
@@ -2109,8 +2099,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Rotates all elements in this list by the specified distance.
      * After calling rotate(distance), the element at index i will be moved to
-     * index (i + distance) % size. 
-     * 
+     * index (i + distance) % size.
+     *
      * <p>Positive values of distance rotate elements towards higher indices (right rotation),
      * while negative values rotate towards lower indices (left rotation).
      * The list is modified in place.</p>
@@ -2128,7 +2118,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Randomly shuffles the elements in this list.
-     * 
+     *
      * <p>After shuffling, each permutation of the list elements is equally likely.
      * This method uses the default source of randomness.</p>
      */
@@ -2141,7 +2131,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Randomly shuffles the elements in this list using the specified random number generator.
-     * 
+     *
      * <p>After shuffling, each permutation of the list elements is equally likely,
      * assuming the provided Random instance produces uniformly distributed values.</p>
      *
@@ -2156,7 +2146,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Swaps the elements at the specified positions in this list.
-     * 
+     *
      * <p>If the specified positions are the same, the list is not modified.</p>
      *
      * @param i the index of the first element to swap
@@ -2173,10 +2163,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Creates and returns a new ShortList containing all elements of this list.
-     * 
+     *
      * <p>The returned list is a shallow copy; it contains the same element values
      * but is a distinct list instance.</p>
-     * 
+     *
      * @return a new ShortList containing all elements of this list
      */
     @Override
@@ -2186,7 +2176,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Creates and returns a new ShortList containing elements from the specified range.
-     * 
+     *
      * <p>The returned list contains elements from fromIndex (inclusive) to toIndex (exclusive)
      * of this list. The returned list is independent of this list.</p>
      *
@@ -2204,7 +2194,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Creates and returns a new ShortList containing elements from the specified range with the given step.
-     * 
+     *
      * <p>The returned list contains elements starting at fromIndex, then fromIndex + step,
      * fromIndex + 2*step, and so on, up to but not including toIndex. If step is negative,
      * the elements are selected in reverse order.</p>
@@ -2226,7 +2216,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Splits this list into consecutive subsequences of the specified size.
-     * 
+     *
      * <p>Returns a List of ShortList instances, where each inner list (except possibly the last)
      * has the specified size. The last list may have fewer elements if the range size is not
      * evenly divisible by the specified size.</p>
@@ -2255,7 +2245,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Trims the capacity of this list to its current size.
-     * 
+     *
      * <p>If the capacity of this list is larger than its current size, the capacity
      * is reduced to match the size. This operation minimizes the memory footprint
      * of the list.</p>
@@ -2306,10 +2296,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Returns a List containing all elements of this list as boxed Short objects.
-     * 
+     *
      * <p>This method converts each primitive short value to its corresponding
      * Short wrapper object.</p>
-     * 
+     *
      * @return a new List&lt;Short&gt; containing all elements as boxed values
      */
     @Override
@@ -2319,7 +2309,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Returns a List containing elements from the specified range as boxed Short objects.
-     * 
+     *
      * <p>This method converts each primitive short value in the range to its corresponding
      * Short wrapper object.</p>
      *
@@ -2353,7 +2343,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Converts this ShortList to an IntList.
-     * 
+     *
      * <p>Each short value is widened to an int value. The resulting IntList
      * contains the same number of elements as this list.</p>
      *
@@ -2421,10 +2411,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Returns an iterator over the elements in this list.
-     * 
+     *
      * <p>The iterator returns elements in order from first to last. The iterator
      * does not support element removal.</p>
-     * 
+     *
      * @return a ShortIterator over the elements in this list
      */
     @Override
@@ -2438,9 +2428,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Returns a ShortStream with this list as its source.
-     * 
+     *
      * <p>The stream provides access to all elements in the list in order.</p>
-     * 
+     *
      * @return a sequential ShortStream over the elements in this list
      */
     public ShortStream stream() {
@@ -2449,7 +2439,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Returns a ShortStream for the specified range of this list.
-     * 
+     *
      * <p>The stream provides access to elements from fromIndex (inclusive) to
      * toIndex (exclusive) in order.</p>
      *
@@ -2466,7 +2456,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Returns the first element in this list.
-     * 
+     *
      * <p>This method provides direct access to the first element without wrapping
      * in an Optional.</p>
      *
@@ -2481,7 +2471,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Returns the last element in this list.
-     * 
+     *
      * <p>This method provides direct access to the last element without wrapping
      * in an Optional.</p>
      *
@@ -2496,7 +2486,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Inserts the specified element at the beginning of this list.
-     * 
+     *
      * <p>Shifts the element currently at position 0 and any subsequent elements
      * to the right (adds one to their indices).</p>
      *
@@ -2508,7 +2498,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Appends the specified element to the end of this list.
-     * 
+     *
      * <p>This method is equivalent to add(e).</p>
      *
      * @param e the element to add at the end of the list
@@ -2519,7 +2509,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Removes and returns the first element from this list.
-     * 
+     *
      * <p>Shifts any subsequent elements to the left (subtracts one from their indices).</p>
      *
      * @return the first short value that was removed from the list
@@ -2545,10 +2535,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Returns the hash code value for this list.
-     * 
+     *
      * <p>The hash code is calculated based on the elements in the list and their order.
      * Two lists with the same elements in the same order will have the same hash code.</p>
-     * 
+     *
      * @return the hash code value for this list
      */
     @Override
@@ -2558,7 +2548,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Compares this list with the specified object for equality.
-     * 
+     *
      * <p>Returns {@code true} if and only if the specified object is also a ShortList,
      * both lists have the same size, and all corresponding pairs of elements
      * are equal.</p>
@@ -2582,11 +2572,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Returns a string representation of this list.
-     * 
+     *
      * <p>The string representation consists of the list's elements, enclosed in
      * square brackets ("[]"). Adjacent elements are separated by comma and space ", ".
      * Elements are converted to strings by String.valueOf(short).</p>
-     * 
+     *
      * @return a string representation of this list
      */
     @Override

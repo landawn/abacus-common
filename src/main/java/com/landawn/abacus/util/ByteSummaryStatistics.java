@@ -18,14 +18,14 @@ import com.landawn.abacus.util.function.ByteConsumer;
 /**
  * A state object for collecting statistics such as count, min, max, sum, and average
  * for a stream of byte values.
- * 
- * <p>This class is designed to work with byte streams and can be used as a 
+ *
+ * <p>This class is designed to work with byte streams and can be used as a
  * reduction target for stream operations. It maintains running statistics that
  * can be queried at any time.</p>
- * 
+ *
  * <p>This implementation is not thread-safe. If used in parallel stream operations,
  * proper synchronization or thread-safe alternatives should be used.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ByteSummaryStatistics stats = new ByteSummaryStatistics();
@@ -35,7 +35,7 @@ import com.landawn.abacus.util.function.ByteConsumer;
  * System.out.println("Count: " + stats.getCount());   // Count: 3
  * System.out.println("Average: " + stats.getAverage());   // Average: 20.0
  * }</pre>
- * 
+ *
  * @see ByteConsumer
  */
 public class ByteSummaryStatistics implements ByteConsumer {
@@ -51,7 +51,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
     /**
      * Constructs an empty instance with zero count, zero sum,
      * {@code Byte.MAX_VALUE} min, and {@code Byte.MIN_VALUE} max.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteSummaryStatistics stats = new ByteSummaryStatistics();
@@ -62,10 +62,10 @@ public class ByteSummaryStatistics implements ByteConsumer {
 
     /**
      * Constructs an instance with the specified initial values.
-     * 
+     *
      * <p>This constructor is useful when creating a summary from pre-calculated
      * statistics or when merging multiple summaries.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteSummaryStatistics stats = new ByteSummaryStatistics(5, (byte)10, (byte)50, 150);
@@ -76,7 +76,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * @param min the minimum value
      * @param max the maximum value
      * @param sum the sum of all values
-     * @throws IllegalArgumentException if count is negative or minimum is greater than maximum 
+     * @throws IllegalArgumentException if count is negative or minimum is greater than maximum
      */
     public ByteSummaryStatistics(final long count, final byte min, final byte max, final long sum) {
         if (count < 0) {
@@ -95,11 +95,11 @@ public class ByteSummaryStatistics implements ByteConsumer {
 
     /**
      * Records a new byte value into the summary statistics.
-     * 
+     *
      * <p>This method updates all statistics (count, sum, min, max) to include
      * the new value. It implements the {@link ByteConsumer} interface, making
      * this class suitable for use with stream reduction operations.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteSummaryStatistics stats = new ByteSummaryStatistics();
@@ -120,21 +120,21 @@ public class ByteSummaryStatistics implements ByteConsumer {
 
     /**
      * Combines the state of another {@code ByteSummaryStatistics} into this one.
-     * 
+     *
      * <p>This method is useful when parallelizing statistics collection or when
      * merging statistics from multiple sources. After combining, this instance
      * will reflect statistics for all values from both instances.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteSummaryStatistics stats1 = new ByteSummaryStatistics();
      * stats1.accept((byte) 10);
      * stats1.accept((byte) 20);
-     * 
+     *
      * ByteSummaryStatistics stats2 = new ByteSummaryStatistics();
      * stats2.accept((byte) 30);
      * stats2.accept((byte) 40);
-     * 
+     *
      * stats1.combine(stats2);
      * System.out.println(stats1.getCount());   // 4
      * System.out.println(stats1.getSum());     // 100
@@ -152,7 +152,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
     /**
      * Returns the minimum value recorded, or {@code Byte.MAX_VALUE} if no
      * values have been recorded.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteSummaryStatistics stats = new ByteSummaryStatistics();
@@ -171,7 +171,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
     /**
      * Returns the maximum value recorded, or {@code Byte.MIN_VALUE} if no
      * values have been recorded.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteSummaryStatistics stats = new ByteSummaryStatistics();
@@ -189,7 +189,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
 
     /**
      * Returns the count of values recorded.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteSummaryStatistics stats = new ByteSummaryStatistics();
@@ -207,10 +207,10 @@ public class ByteSummaryStatistics implements ByteConsumer {
 
     /**
      * Returns the sum of values recorded.
-     * 
+     *
      * <p>Note that the sum is maintained as a {@code long} to avoid overflow
      * for large numbers of byte values.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteSummaryStatistics stats = new ByteSummaryStatistics();
@@ -220,18 +220,18 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * System.out.println(stats.getSum());   // 60
      * }</pre>
      *
-     * @return the sum of values, as a {@code Long}
+     * @return the sum of values, as a {@code long}
      */
-    public final Long getSum() {
+    public final long getSum() {
         return sum;
     }
 
     /**
      * Returns the arithmetic mean of values recorded, or zero if no values
      * have been recorded.
-     * 
+     *
      * <p>The average is calculated as a {@code double} to preserve precision.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteSummaryStatistics stats = new ByteSummaryStatistics();
@@ -249,10 +249,10 @@ public class ByteSummaryStatistics implements ByteConsumer {
 
     /**
      * Returns a string representation of this summary, including all statistics.
-     * 
+     *
      * <p>The format includes min, max, count, sum, and average values in a
      * readable format.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteSummaryStatistics stats = new ByteSummaryStatistics();
@@ -261,7 +261,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * System.out.println(stats.toString());
      * // {min=10, max=20, count=2, sum=30, average=15.000000}
      * }</pre>
-     * 
+     *
      * @return a string representation of this summary
      */
     @Override

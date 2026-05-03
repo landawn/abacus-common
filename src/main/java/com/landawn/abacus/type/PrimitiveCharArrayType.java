@@ -19,6 +19,7 @@ import java.io.Reader;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.List;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedSQLException;
@@ -27,8 +28,8 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
-import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Strings;
 
 /**
  * Type handler for primitive char arrays (char[]).
@@ -42,13 +43,17 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
     public static final String CHAR_ARRAY = char[].class.getSimpleName();
 
     private final Type<Character> elementType;
-    private final Type<Character>[] parameterTypes;
+    private final List<Type<?>> parameterTypes;
 
+    /**
+     * Constructs a new PrimitiveCharArrayType instance.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
+     */
     PrimitiveCharArrayType() {
         super(CHAR_ARRAY);
 
         elementType = TypeFactory.getType(char.class);
-        parameterTypes = new Type[] { elementType };
+        parameterTypes = List.of(elementType);
     }
 
     /**
@@ -74,11 +79,11 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
     /**
      * Returns the parameter types associated with this array type.
      *
-     * @return an array containing the Character Type that describes the elements of this array type
+     * @return an immutable list containing the Character Type that describes the elements of this array type
      * @see #elementType()
      */
     @Override
-    public Type<Character>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 
@@ -182,6 +187,8 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
         } else if (obj instanceof Reader reader) {
             return IOUtil.readAllChars(reader);
         } else if (obj instanceof Clob clob) {
+            RuntimeException primaryException = null;
+
             try {
                 final long len = clob.length();
                 if (len > Integer.MAX_VALUE) {
@@ -189,12 +196,21 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
                 }
                 return clob.getSubString(1, (int) len).toCharArray();
             } catch (final SQLException e) {
-                throw new UncheckedSQLException(e);
+                primaryException = new UncheckedSQLException(e);
+                throw primaryException;
+            } catch (final RuntimeException e) {
+                primaryException = e;
+                throw primaryException;
             } finally {
                 try {
                     clob.free();
                 } catch (final SQLException e) {
-                    throw new UncheckedSQLException(e); //NOSONAR
+                    final UncheckedSQLException freeException = new UncheckedSQLException(e);
+                    if (primaryException != null) {
+                        primaryException.addSuppressed(freeException);
+                    } else {
+                        throw freeException; //NOSONAR
+                    }
                 }
             }
         } else {

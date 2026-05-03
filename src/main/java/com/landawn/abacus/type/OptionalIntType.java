@@ -18,9 +18,10 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.u.OptionalInt;
 
 /**
- * Type handler for {@link OptionalInt} objects, providing serialization, deserialization,
- * and database interaction capabilities for optional integer values. This handler manages
- * the conversion between database integer values and OptionalInt wrapper objects.
+ * Type handler for {@link OptionalInt} objects from the {@code com.landawn.abacus.util.u} package,
+ * providing serialization, deserialization, and database interaction capabilities for optional integer values.
+ * Note: this handles the abacus-specific {@code OptionalInt}, not {@code java.util.OptionalInt}.
+ * This handler manages the conversion between database integer values and {@link OptionalInt} wrapper objects.
  */
 public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
 
@@ -28,8 +29,7 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
 
     /**
      * Constructs a new OptionalIntType instance.
-     * This constructor is protected to allow subclassing while maintaining controlled instantiation
-     * through the TypeFactory.
+     * Instances are normally obtained via the TypeFactory rather than constructed directly.
      */
     protected OptionalIntType() {
         super(OPTIONAL_INT);

@@ -23,23 +23,23 @@ import java.lang.annotation.Target;
 
 /**
  * Marks a field as transient, indicating it should be excluded from persistence operations.
- * Fields annotated with {@link Transient} will be ignored during database operations such as
- * {@code insert}, {@code update}, and {@code select} when working with entity objects.
+ * Fields annotated with {@code @Transient} will be ignored during database operations such as
+ * {@code INSERT}, {@code UPDATE}, and {@code SELECT} when working with entity objects.
  *
  * <p>Common use cases for transient fields:</p>
  * <ul>
- *   <li>Calculated or derived values that shouldn't be stored</li>
- *   <li>Temporary state or cache data</li>
- *   <li>Runtime-only metadata</li>
- *   <li>Fields that are populated from other sources</li>
- *   <li>Security-sensitive data that shouldn't be persisted</li>
+ *   <li>Calculated or derived values that should not be stored.</li>
+ *   <li>Temporary state or cache data.</li>
+ *   <li>Runtime-only metadata.</li>
+ *   <li>Fields that are populated from other sources.</li>
+ *   <li>Security-sensitive data that should not be persisted.</li>
  * </ul>
  *
  * <p>Important notes:</p>
  * <ul>
  *   <li>This annotation only affects persistence operations, not serialization.</li>
  *   <li>For serialization exclusion, use {@link JsonXmlField#ignore() JsonXmlField(ignore = true)}.</li>
- *   <li>Transient fields may still be included in {@link Object#toString() toString()}, {@link Object#equals(Object) equals()}, and {@link Object#hashCode() hashCode()}.</li>
+ *   <li>Transient fields may still be included in {@link Object#toString()}, {@link Object#equals(Object)}, and {@link Object#hashCode()}.</li>
  *   <li>The field will still occupy memory in the object instance.</li>
  * </ul>
  *

@@ -14,10 +14,12 @@
 
 package com.landawn.abacus.type;
 
+import java.util.List;
+
 import com.landawn.abacus.util.ClassUtil;
+import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Sheet;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.SK;
 
 /**
  * Type handler for Sheet, which represents a two-dimensional table structure with row keys,
@@ -33,7 +35,7 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
 
     private final Class<Sheet<R, C, E>> typeClass;
 
-    private final Type<?>[] parameterTypes;
+    private final List<Type<?>> parameterTypes;
 
     /**
      * Constructs a SheetType with the specified type names for row keys, column keys, and values.
@@ -57,7 +59,7 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
         declaringName = getTypeName(Sheet.class, rowKeyTypeName, columnKeyTypeName, elementTypeName, true);
 
         typeClass = (Class) Sheet.class;
-        parameterTypes = new Type[] { TypeFactory.getType(rowKeyTypeName), TypeFactory.getType(columnKeyTypeName), TypeFactory.getType(elementTypeName) };
+        parameterTypes = List.of(TypeFactory.getType(rowKeyTypeName), TypeFactory.getType(columnKeyTypeName), TypeFactory.getType(elementTypeName));
     }
 
     /**
@@ -96,22 +98,22 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
     }
 
     /**
-     * Returns an array containing the Type instances for the parameter types of this Sheet.
-     * The array contains three elements: row key type, column key type, and element type.
+     * Returns an immutable list containing the Type instances for the parameter types of this Sheet.
+     * The list contains three elements: row key type, column key type, and element type.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SheetType<String, Integer, Double> type = new SheetType<>("String", "Integer", "Double");
-     * Type<?>[] paramTypes = type.parameterTypes();
-     * // paramTypes[0] is Type for String (row keys)
-     * // paramTypes[1] is Type for Integer (column keys)
-     * // paramTypes[2] is Type for Double (elements)
+     * List<Type<?>> paramTypes = type.parameterTypes();
+     * // paramTypes.get(0) is Type for String (row keys)
+     * // paramTypes.get(1) is Type for Integer (column keys)
+     * // paramTypes.get(2) is Type for Double (elements)
      * }</pre>
      *
-     * @return an array with Type instances for row key, column key, and element types
+     * @return an immutable list with Type instances for row key, column key, and element types
      */
     @Override
-    public Type<?>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 
@@ -134,8 +136,9 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
     }
 
     /**
-     * Indicates whether this type is serializable.
-     * SheetType does not support standard serialization.
+     * Indicates whether this type is directly serializable to a primitive string representation.
+     * {@code SheetType} is not directly serializable; it uses the specialized
+     * {@link SerializationType#SHEET} serialization path instead.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -144,7 +147,7 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * // serializable is false
      * }</pre>
      *
-     * @return {@code false}, indicating this type is not serializable
+     * @return {@code false}, indicating this type uses specialized sheet-based serialization
      */
     @Override
     public boolean isSerializable() {

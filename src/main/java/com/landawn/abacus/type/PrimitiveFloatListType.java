@@ -15,6 +15,7 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
+import java.util.List;
 
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
@@ -22,9 +23,11 @@ import com.landawn.abacus.util.FloatList;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for FloatList objects.
- * Provides functionality for serialization and deserialization of FloatList instances
- * by delegating to the underlying float array type handler.
+ * Type handler for {@link FloatList} objects, which is a primitive-backed list of {@code float} values.
+ * Provides serialization and deserialization of {@link FloatList} instances by delegating to the
+ * underlying {@code float[]} array type handler.
+ * String representations use the format {@code [1.5, 2.7, 3.14]} with comma-separated elements
+ * enclosed in square brackets.
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveFloatListType extends AbstractPrimitiveListType<FloatList> {
@@ -34,8 +37,13 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
     private final Type<float[]> arrayType = Type.of(float[].class);
 
     private final Type<Float> elementType = Type.of(float.class);
-    private final Type<Float>[] parameterTypes = new Type[] { elementType };
+    private final List<Type<?>> parameterTypes = List.of(elementType);
 
+    /**
+     * Constructs a new PrimitiveFloatListType instance.
+     * This constructor is protected to allow subclassing while maintaining controlled instantiation
+     * through the TypeFactory.
+     */
     protected PrimitiveFloatListType() {
         super(FLOAT_LIST);
     }
@@ -77,11 +85,11 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
     /**
      * Returns the parameter types associated with this list type.
      *
-     * @return an array containing the Float Type that describes the elements of this list type
+     * @return an immutable list containing the Float Type that describes the elements of this list type
      * @see #elementType()
      */
     @Override
-    public Type<Float>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 

@@ -15,6 +15,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -106,10 +107,10 @@ public class NullableTypeTest extends TestBase {
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = nullableStringType.parameterTypes();
+        List<Type<?>> paramTypes = nullableStringType.parameterTypes();
         assertNotNull(paramTypes);
-        assertEquals(1, paramTypes.length);
-        assertEquals("String", paramTypes[0].name());
+        assertEquals(1, paramTypes.size());
+        assertEquals("String", paramTypes.get(0).name());
     }
 
     @Test

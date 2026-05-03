@@ -15,6 +15,7 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 import com.landawn.abacus.parser.JsonXmlSerConfig;
@@ -37,20 +38,26 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
 
     private final Class<ImmutableSet<E>> typeClass;
 
-    private final Type<E>[] parameterTypes;
+    private final List<Type<?>> parameterTypes;
 
     private final Type<E> elementType;
 
     private final Type<Set<E>> setType;
 
+    /**
+     * Package-private constructor for ImmutableSetType.
+     * This constructor is called by the TypeFactory to create ImmutableSet&lt;E&gt; type instances.
+     *
+     * @param parameterTypeName the name of the element type parameter
+     */
     @SuppressWarnings("rawtypes")
     ImmutableSetType(final String parameterTypeName) {
         super(getTypeName(ImmutableSet.class, parameterTypeName, false));
 
         typeClass = (Class) ImmutableSet.class;
         declaringName = getTypeName(ImmutableSet.class, parameterTypeName, true);
-        parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
-        elementType = parameterTypes[0];
+        elementType = TypeFactory.getType(parameterTypeName);
+        parameterTypes = List.of(elementType);
         setType = TypeFactory.getType("Set<" + parameterTypeName + ">");
     }
 
@@ -87,13 +94,13 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
     }
 
     /**
-     * Returns an array containing the parameter types of this generic immutable set type.
-     * For immutable set types, this array contains a single element representing the element type.
+     * Returns an immutable list containing the parameter types of this generic immutable set type.
+     * For immutable set types, this list contains a single element representing the element type.
      *
-     * @return an array containing the element type as the only parameter type
+     * @return an immutable list containing the element type as the only parameter type
      */
     @Override
-    public Type<E>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 
@@ -119,6 +126,12 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
         return true;
     }
 
+    /**
+     * Indicates whether this type is a generic type with type parameters.
+     * ImmutableSet types are always parameterized with an element type.
+     *
+     * @return {@code true}, as ImmutableSet is a generic type
+     */
     @Override
     public boolean isParameterizedType() {
         return true;
@@ -147,27 +160,11 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
     }
 
     /**
-     * Converts an immutable set to its string representation.
-     * Delegates the serialization to the underlying set type handler.
+     * Serializes an {@link ImmutableSet} to its string representation by delegating to the
+     * underlying set type handler.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<ImmutableSet<String>> type = TypeFactory.getType("ImmutableSet<String>");
-     * ImmutableSet<String> set = ImmutableSet.of("apple", "banana", "cherry");
-     * String result = type.stringOf(set);
-     * // Returns: ["apple","banana","cherry"] (order may vary)
-     *
-     * ImmutableSet<Integer> intSet = ImmutableSet.of(1, 2, 3);
-     * Type<ImmutableSet<Integer>> intType = TypeFactory.getType("ImmutableSet<Integer>");
-     * result = intType.stringOf(intSet);
-     * // Returns: [1,2,3] (order may vary)
-     *
-     * result = type.stringOf(null);
-     * // Returns: null
-     * }</pre>
-     *
-     * @param x the immutable set to convert to string
-     * @return the string representation of the immutable set, or {@code null} if the input is null
+     * @param x the immutable set to serialize; may be {@code null}
+     * @return the string representation, or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final ImmutableSet<E> x) {
@@ -175,26 +172,12 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
     }
 
     /**
-     * Converts a string representation back to an immutable set instance.
-     * First deserializes to a mutable set using the set type handler,
-     * then wraps it in an ImmutableSet to ensure immutability.
+     * Deserializes a string into an {@link ImmutableSet} instance.
+     * First deserializes to a mutable set via the underlying set type handler,
+     * then wraps it in an {@link ImmutableSet}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<ImmutableSet<String>> type = TypeFactory.getType("ImmutableSet<String>");
-     * ImmutableSet<String> result = type.valueOf("[\"apple\",\"banana\",\"cherry\"]");
-     * // Returns: ImmutableSet containing [apple, banana, cherry]
-     *
-     * Type<ImmutableSet<Integer>> intType = TypeFactory.getType("ImmutableSet<Integer>");
-     * ImmutableSet<Integer> intResult = intType.valueOf("[1,2,3]");
-     * // Returns: ImmutableSet containing [1, 2, 3]
-     *
-     * result = type.valueOf(null);
-     * // Returns: null
-     * }</pre>
-     *
-     * @param str the string to parse
-     * @return a new immutable set instance containing the parsed elements, or {@code null} if the input is null
+     * @param str the string to parse; may be {@code null}
+     * @return a new {@link ImmutableSet} containing the parsed elements, or {@code null} if the input is {@code null}
      */
     @Override
     public ImmutableSet<E> valueOf(final String str) {
@@ -204,20 +187,11 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
     }
 
     /**
-     * Appends the string representation of an immutable set to an Appendable.
-     * Delegates to the underlying set type handler for the actual appending logic.
+     * Appends the string representation of an {@link ImmutableSet} to an {@link Appendable},
+     * delegating to the underlying set type handler.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<ImmutableSet<String>> type = TypeFactory.getType("ImmutableSet<String>");
-     * StringBuilder sb = new StringBuilder();
-     * ImmutableSet<String> set = ImmutableSet.of("apple", "banana");
-     * type.appendTo(sb, set);
-     * // sb contains: ["apple","banana"] (order may vary)
-     * }</pre>
-     *
-     * @param writer the Appendable to write to
-     * @param x the immutable set to append
+     * @param writer the {@link Appendable} to write to
+     * @param x the immutable set to append; may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
@@ -226,23 +200,12 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
     }
 
     /**
-     * Writes the character representation of an immutable set to a CharacterWriter.
-     * Delegates to the underlying set type handler for the actual writing logic.
+     * Writes the character representation of an {@link ImmutableSet} to a {@link CharacterWriter},
+     * delegating to the underlying set type handler.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<ImmutableSet<String>> type = TypeFactory.getType("ImmutableSet<String>");
-     * CharacterWriter writer = new CharacterWriter();
-     * JsonXmlSerConfig config = JsonXmlSerConfig.of();
-     * ImmutableSet<String> set = ImmutableSet.of("apple", "banana");
-     * type.writeCharacter(writer, set, config);
-     * String result = writer.toString();
-     * // result: ["apple","banana"] (order may vary)
-     * }</pre>
-     *
-     * @param writer the CharacterWriter to write to
-     * @param x the immutable set to write
-     * @param config the serialization configuration to use
+     * @param writer the {@link CharacterWriter} to write to
+     * @param x the immutable set to write; may be {@code null}
+     * @param config the serialization configuration to use; may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override

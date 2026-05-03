@@ -60,7 +60,7 @@ public interface ShortTriPredicate extends Throwables.ShortTriPredicate<RuntimeE
      * @param a the first input argument
      * @param b the second input argument
      * @param c the third input argument
-     * @return {@code true} if the input arguments match the predicate, otherwise {@code false} if the predicate evaluation fails
+     * @return {@code true} if the input arguments match the predicate, {@code false} otherwise
      */
     @Override
     boolean test(short a, short b, short c);
@@ -97,8 +97,9 @@ public interface ShortTriPredicate extends Throwables.ShortTriPredicate<RuntimeE
      * boolean result = combined.test((short) 10, (short) 20, (short) 30);   // returns true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ANDed with this predicate
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default ShortTriPredicate and(final ShortTriPredicate other) {
         return (a, b, c) -> test(a, b, c) && other.test(a, b, c);
@@ -120,8 +121,9 @@ public interface ShortTriPredicate extends Throwables.ShortTriPredicate<RuntimeE
      * boolean result = combined.test((short) 1, (short) 0, (short) 3);   // returns true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ORed with this predicate
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default ShortTriPredicate or(final ShortTriPredicate other) {
         return (a, b, c) -> test(a, b, c) || other.test(a, b, c);

@@ -50,7 +50,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
 
     final Class<T> typeClass;
     final boolean isGenericType;
-    final Type<?>[] parameterTypes;
+    final List<Type<?>> parameterTypes;
 
     final Field jsonValueField;
     final Method jsonValueMethod;
@@ -64,10 +64,27 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     final Function<T, Object> valueExtractor;
     final boolean isObjectType;
 
+    /**
+     * Constructs a {@code SingleValueType} using the canonical class name as the type name.
+     *
+     * @param typeClass the class of the type to handle
+     */
     protected SingleValueType(final Class<T> typeClass) {
         this(ClassUtil.getCanonicalClassName(typeClass), typeClass);
     }
 
+    /**
+     * Constructs a {@code SingleValueType} with an explicit type name.
+     * Inspects the class for {@code @JsonXmlValue}/{@code @JsonXmlCreator} (or Jackson equivalent)
+     * annotations and, if absent, attempts to auto-detect a single-field value pattern
+     * by scanning constructors, factory methods, and getter methods.
+     *
+     * @param typeName the type name string (may include generic parameters)
+     * @param typeClass the class of the type to handle
+     * @throws RuntimeException if {@code @JsonXmlValue} and {@code @JsonXmlCreator} annotations
+     *                          are not present as a matched pair, or if the creator/value-type
+     *                          constraints are violated
+     */
     @SuppressWarnings("null")
     protected SingleValueType(final String typeName, final Class<T> typeClass) {
         super(typeName);
@@ -75,11 +92,14 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
 
         final TypeAttrParser attrs = TypeAttrParser.parse(typeName);
         isGenericType = typeName.indexOf('<') > 0 && typeName.indexOf('>') > 0; //NOSONAR
-        parameterTypes = new Type<?>[attrs.getTypeParameters().length];
+        final String[] paramTypeNames = attrs.getTypeParameters();
+        final Type<?>[] paramTypeArr = new Type<?>[paramTypeNames.length];
 
-        for (int i = 0, len = parameterTypes.length; i < len; i++) {
-            parameterTypes[i] = TypeFactory.getType(attrs.getTypeParameters()[i]);
+        for (int i = 0, len = paramTypeArr.length; i < len; i++) {
+            paramTypeArr[i] = TypeFactory.getType(paramTypeNames[i]);
         }
+
+        parameterTypes = List.of(paramTypeArr);
 
         Field localJsonValueField = null;
         Method localJsonValueMethod = null;
@@ -214,12 +234,12 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     }
 
     /**
-     * Returns the array of parameter types for generic types.
+     * Returns the immutable list of parameter types for generic types.
      *
-     * @return an array of Type objects representing the type parameters, or an empty array if not generic
+     * @return an immutable list of Type objects representing the type parameters, or an empty list if not generic
      */
     @Override
-    public Type<?>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 
@@ -523,7 +543,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * @param <T> the type to analyze
      * @param typeClass the class to analyze for value extraction patterns
      * @return a tuple containing the value type, creator function, and value extractor function,
-     *         or {@code null} if no suitable pattern is found
+     *         or a tuple of {@code (null, null, null)} if no suitable pattern is found
      */
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     static <T> Tuple3<Type<Object>, Function<String, T>, Function<T, Object>> getCreatorAndValueExtractor(final Class<T> typeClass) {

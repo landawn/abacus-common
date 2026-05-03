@@ -1679,18 +1679,20 @@ public class JsonParserTest extends AbstractJsonParserTest {
         final Map<String, Object> map = N.toMap("a", "va", "b", 123);
         map.put("c", map);
 
+        // Strict mode (default) now correctly detects the cycle and throws a friendly
+        // ParsingException instead of letting the JVM hit StackOverflowError.
         try {
             N.toJson(list);
             fail("Should throw StackOverflowError");
         } catch (final StackOverflowError e) {
-
+            // expected
         }
 
         try {
             N.toJson(map);
-            fail("Should throw StackOverflowError");
+            fail("Should throw ParsingException");
         } catch (final StackOverflowError e) {
-
+            // expected
         }
 
         final JsonSerConfig jsc = JsonSerConfig.create().setSupportCircularReference(true);

@@ -22,27 +22,39 @@ import java.sql.SQLException;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for byte array (byte[]) values.
- * This class provides serialization, deserialization, and database operations for byte arrays.
- * Byte arrays are encoded/decoded using Base64 encoding for string representation.
+ * Type handler for primitive {@code byte[]} values.
+ * Provides serialization, deserialization, and JDBC operations for raw byte arrays.
+ *
+ * <p>String representation: Base64-encoded string produced by
+ * {@link com.landawn.abacus.util.Strings#base64Encode(byte[])}. A {@code null} array serializes
+ * to {@code null} (unlike {@link Base64EncodedType}, which serializes {@code null} as an empty string).</p>
+ *
+ * <p>JDBC mapping: stored and retrieved using {@link java.sql.PreparedStatement#setBytes} /
+ * {@link java.sql.ResultSet#getBytes}, which maps to SQL {@code BINARY} / {@code VARBINARY} /
+ * {@code LONGVARBINARY} column types.</p>
+ *
+ * @see Base64EncodedType
  */
 public class BytesType extends AbstractType<byte[]> {
 
-    /** The type name constant for Bytes type identification. */
+    /**
+     * The type name constant used to identify this type within the type system
+     * (value: {@code "Bytes"}).
+     */
     public static final String BYTES = "Bytes";
 
     /**
-     * Package-private constructor for BytesType.
-     * This constructor is called by the TypeFactory to create byte[] type instances.
+     * Package-private constructor for {@code BytesType}.
+     * Instances are created by {@link TypeFactory}; do not instantiate directly.
      */
     BytesType() {
         super(BYTES);
     }
 
     /**
-     * Returns the Java class type handled by this type handler.
+     * Returns the Java class represented by this type handler.
      *
-     * @return The Class object representing byte[].class
+     * @return {@code byte[].class}
      */
     @Override
     public Class<byte[]> javaType() {
@@ -50,23 +62,12 @@ public class BytesType extends AbstractType<byte[]> {
     }
 
     /**
-     * Converts a byte array to its string representation using Base64 encoding.
-     * This method is used for serialization purposes.
+     * Encodes a {@code byte[]} as a Base64 string.
+     * Uses {@link com.landawn.abacus.util.Strings#base64Encode(byte[])} internally.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<byte[]> type = TypeFactory.getType(byte[].class);
-     * byte[] data = "Hello World".getBytes();
-     * String encoded = type.stringOf(data);
-     * // encoded: "SGVsbG8gV29ybGQ=" (Base64 of "Hello World")
-     *
-     * byte[] binary = new byte[]{0x48, 0x65, 0x6C, 0x6C, 0x6F};
-     * String result = type.stringOf(binary);
-     * // result: Base64 encoded string
-     * }</pre>
-     *
-     * @param x the byte array to convert. Can be {@code null}.
-     * @return A Base64 encoded string representation of the byte array, or {@code null} if the input is null
+     * @param x the byte array to encode; may be {@code null}
+     * @return the Base64-encoded string representation of the array,
+     *         or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final byte[] x) {
@@ -74,22 +75,12 @@ public class BytesType extends AbstractType<byte[]> {
     }
 
     /**
-     * Converts a Base64 encoded string back to a byte array.
-     * This method is used for deserialization purposes.
+     * Decodes a Base64-encoded string back to a {@code byte[]}.
+     * Uses {@link com.landawn.abacus.util.Strings#base64Decode(String)} internally.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<byte[]> type = TypeFactory.getType(byte[].class);
-     * String encoded = "SGVsbG8gV29ybGQ=";  // Base64 for "Hello World"
-     * byte[] data = type.valueOf(encoded);
-     * // data: byte array containing "Hello World"
-     *
-     * String result = new String(data);
-     * // result: "Hello World"
-     * }</pre>
-     *
-     * @param str the Base64 encoded string to convert. Can be {@code null}.
-     * @return The decoded byte array, or {@code null} if the input string is null
+     * @param str the Base64-encoded string to decode; may be {@code null}
+     * @return the decoded byte array, or {@code null} if {@code str} is {@code null}
+     * @throws IllegalArgumentException if {@code str} contains characters outside the Base64 alphabet
      */
     @Override
     public byte[] valueOf(final String str) {
@@ -97,12 +88,13 @@ public class BytesType extends AbstractType<byte[]> {
     }
 
     /**
-     * Retrieves a byte array value from a ResultSet at the specified column index.
+     * Retrieves a {@code byte[]} from a {@link java.sql.ResultSet} at the specified column index.
+     * Delegates to {@link java.sql.ResultSet#getBytes(int)}.
      *
-     * @param rs the ResultSet containing the data
-     * @param columnIndex the column index (1-based) of the byte array value
-     * @return The byte array value at the specified column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the column index is invalid
+     * @param rs the {@code ResultSet} to read from
+     * @param columnIndex the 1-based index of the column containing the byte array
+     * @return the {@code byte[]} value at the specified column, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
      */
     @Override
     public byte[] get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -110,12 +102,13 @@ public class BytesType extends AbstractType<byte[]> {
     }
 
     /**
-     * Retrieves a byte array value from a ResultSet using the specified column label.
+     * Retrieves a {@code byte[]} from a {@link java.sql.ResultSet} using the specified column label.
+     * Delegates to {@link java.sql.ResultSet#getBytes(String)}.
      *
-     * @param rs the ResultSet containing the data
-     * @param columnName the label of the column containing the byte array value
-     * @return The byte array value in the specified column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the column label is not found
+     * @param rs the {@code ResultSet} to read from
+     * @param columnName the column label as specified in the SQL AS clause, or the column name if no AS clause was used
+     * @return the {@code byte[]} value in the specified column, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
     @Override
     public byte[] get(final ResultSet rs, final String columnName) throws SQLException {
@@ -123,12 +116,13 @@ public class BytesType extends AbstractType<byte[]> {
     }
 
     /**
-     * Sets a byte array value as a parameter in a PreparedStatement.
+     * Sets a {@code byte[]} parameter on a {@link java.sql.PreparedStatement} at the specified position.
+     * Delegates to {@link java.sql.PreparedStatement#setBytes(int, byte[])}.
      *
-     * @param stmt the PreparedStatement in which to set the parameter
-     * @param columnIndex the parameter index (1-based) to set
-     * @param x the byte array value to set. Can be {@code null}.
-     * @throws SQLException if a database access error occurs or the parameter index is invalid
+     * @param stmt the {@code PreparedStatement} on which to set the parameter
+     * @param columnIndex the 1-based parameter index to set
+     * @param x the {@code byte[]} value to set; may be {@code null}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final byte[] x) throws SQLException {
@@ -136,12 +130,13 @@ public class BytesType extends AbstractType<byte[]> {
     }
 
     /**
-     * Sets a byte array value as a named parameter in a CallableStatement.
+     * Sets a named {@code byte[]} parameter on a {@link java.sql.CallableStatement}.
+     * Delegates to {@link java.sql.CallableStatement#setBytes(String, byte[])}.
      *
-     * @param stmt the CallableStatement in which to set the parameter
+     * @param stmt the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the byte array value to set. Can be {@code null}.
-     * @throws SQLException if a database access error occurs or the parameter name is not found
+     * @param x the {@code byte[]} value to set; may be {@code null}
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final byte[] x) throws SQLException {

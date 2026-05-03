@@ -37,7 +37,7 @@ import com.landawn.abacus.util.Tuple.Tuple5;
 
 public class Tuple5TypeTest extends TestBase {
 
-    private final Tuple5Type type = new Tuple5Type("String", "String", "String", "String", "String");
+    private final Tuple5Type<String, String, String, String, String> type = new Tuple5Type("String", "String", "String", "String", "String");
 
     @Test
     public void test_valueOf_String() {
@@ -57,7 +57,7 @@ public class Tuple5TypeTest extends TestBase {
         Tuple5<String, String, String, String, String> t = Tuple.of("a", "b", "c", "d", "e");
         String json = type.stringOf(t);
         @SuppressWarnings("unchecked")
-        Tuple5<String, String, String, String, String> result = (Tuple5<String, String, String, String, String>) type.valueOf(json);
+        Tuple5<String, String, String, String, String> result = type.valueOf(json);
         assertNotNull(result);
         assertEquals("a", result._1);
         assertEquals("e", result._5);

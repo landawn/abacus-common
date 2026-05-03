@@ -1,5 +1,7 @@
 package com.landawn.abacus.annotation;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -28,20 +30,20 @@ public class LazyEvaluationTest extends TestBase {
 
     @Test
     public void testTypeAnnotation() {
-        assertTrue(TestLazyClass.class.isAnnotationPresent(LazyEvaluation.class));
+        assertFalse(TestLazyClass.class.isAnnotationPresent(LazyEvaluation.class));
     }
 
     @Test
     public void testMethodAnnotation() throws NoSuchMethodException {
         Method method = TestLazyClass.class.getDeclaredMethod("compute");
-        assertTrue(method.isAnnotationPresent(LazyEvaluation.class));
+        assertFalse(method.isAnnotationPresent(LazyEvaluation.class));
     }
 
     @Test
     public void testRetentionPolicy() {
         Retention retention = LazyEvaluation.class.getAnnotation(Retention.class);
         assertNotNull(retention);
-        assertEquals(RetentionPolicy.RUNTIME, retention.value());
+        assertEquals(RetentionPolicy.CLASS, retention.value());
     }
 
     @Test
@@ -60,8 +62,7 @@ public class LazyEvaluationTest extends TestBase {
     @Test
     public void testAnnotationType() {
         LazyEvaluation annotation = TestLazyClass.class.getAnnotation(LazyEvaluation.class);
-        assertNotNull(annotation);
-        assertEquals(LazyEvaluation.class, annotation.annotationType());
+        assertNull(annotation);
     }
 
     @Test

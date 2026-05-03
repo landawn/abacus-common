@@ -15,14 +15,17 @@
 package com.landawn.abacus.type;
 
 /**
- * The Abstract base class for primitive array types in the type system.
+ * The abstract base class for primitive array types in the type system.
  * <p>
  * This class provides common functionality for handling primitive arrays
- * ({@code int[]}, {@code double[]}, {@code boolean[]}, etc.) with optimized implementations for
- * hash code calculation, equality checking, and string conversion.
+ * ({@code int[]}, {@code long[]}, {@code double[]}, {@code boolean[]}, {@code byte[]}, etc.)
+ * with optimized implementations for hash code calculation, deep equality checking,
+ * and string/deep-string conversion.
+ * Primitive arrays are distinguished from object arrays via {@link #isPrimitiveArray()}.
  * </p>
  *
- * @param <T> the primitive array type (e.g., {@code int[]}, {@code double[]}, {@code boolean[]})
+ * @param <T> the primitive array type (e.g., {@code int[]}, {@code long[]}, {@code double[]}, {@code boolean[]})
+ * @see AbstractArrayType
  */
 public abstract class AbstractPrimitiveArrayType<T> extends AbstractArrayType<T> {
 
@@ -36,13 +39,10 @@ public abstract class AbstractPrimitiveArrayType<T> extends AbstractArrayType<T>
     }
 
     /**
-     * Checks if this type represents a primitive array.
-     * <p>
-     * This method always returns {@code true} for primitive array types,
-     * distinguishing them from object arrays.
-     * </p>
+     * Returns {@code true} because this type represents a primitive array,
+     * distinguishing it from object array types.
      *
-     * @return {@code true}, indicating this is a primitive array type
+     * @return {@code true}
      */
     @Override
     public boolean isPrimitiveArray() {
@@ -84,7 +84,7 @@ public abstract class AbstractPrimitiveArrayType<T> extends AbstractArrayType<T>
      * Converts a primitive array to its string representation.
      * <p>
      * Returns "null" if the array is {@code null}, otherwise delegates
-     * to the {@link #stringOf(Object)} method for the actual conversion.
+     * to {@code stringOf(T)} for the actual conversion.
      * </p>
      *
      * @param x the primitive array

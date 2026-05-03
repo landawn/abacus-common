@@ -21,12 +21,12 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
- * 
  * Provides methods for traversing a graph or tree structure in various orders.
  * This class wraps Google Guava's Traverser functionality and adapts it to work with
- * abacus-common Stream API for more convenient iteration.
- * 
+ * the abacus-common Stream API for more convenient iteration.
+ *
+ * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
+ *
  * <p>This class supports two main types of graph structures:
  * <ul>
  *   <li><b>Trees</b>: Directed acyclic graphs where there is at most one path between any two nodes.
@@ -34,14 +34,14 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>General Graphs</b>: May contain cycles and multiple paths between nodes.
  *       Use {@link #forGraph(Function)} for these structures.</li>
  * </ul>
- * 
+ *
  * <p>Three traversal orders are supported:
  * <ul>
  *   <li><b>Breadth-First</b>: Visits all nodes at depth n before visiting nodes at depth n+1</li>
  *   <li><b>Depth-First Pre-Order</b>: Visits nodes as they are first encountered</li>
  *   <li><b>Depth-First Post-Order</b>: Visits nodes after all their descendants have been visited</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Traverse a file system
@@ -58,7 +58,7 @@ import com.landawn.abacus.util.stream.Stream;
  * Traverser<TreeNode> treeTraverser = Traverser.forTree(node -> node.getChildren());
  * Stream<TreeNode> allNodes = treeTraverser.depthFirstPreOrder(root);
  * }</pre>
- * 
+ *
  * @param <T> the type of nodes in the graph
  * @see <a href="http://google.github.io/guava/releases/23.3-android/api/docs/">Guava Documentation</a>
  */
@@ -68,25 +68,25 @@ public final class Traverser<T> {
      * A pre-configured traverser for traversing file system directories and files.
      * This traverser treats the file system as a tree where directories are internal nodes
      * and files are leaf nodes.
-     * 
+     *
      * <p>The traverser uses {@link File#listFiles()} to get children of directories.
      * Files (non-directories) are treated as leaf nodes with no children.
      * If a directory cannot be read, it is treated as having no children.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find all .java files in a directory tree
      * Traverser.FILES.breadthFirst(new File("src"))
      *     .filter(f -> f.getName().endsWith(".java"))
      *     .forEach(System.out::println);
-     * 
+     *
      * // Count total size of all files
      * long totalSize = Traverser.FILES.depthFirstPreOrder(new File("/home/user"))
      *     .filter(File::isFile)
      *     .mapToLong(File::length)
      *     .sum();
      * }</pre>
-     * 
+     *
      * <p><b>Note:</b> This traverser may follow symbolic links, which could lead to
      * infinite loops if there are circular symbolic links in the file system.
      */
@@ -100,7 +100,7 @@ public final class Traverser<T> {
     /**
      * Creates a new Traverser wrapping a Guava traverser.
      * This constructor is private to ensure traversers are created through the factory methods.
-     * 
+     *
      * @param gTraverser the Guava traverser to wrap
      */
     private Traverser(final com.google.common.graph.Traverser<T> gTraverser) {
@@ -110,7 +110,7 @@ public final class Traverser<T> {
     /**
      * Creates a new traverser for a directed acyclic graph that has at most one path from the start
      * node to any node reachable from the start node, such as a tree.
-     * 
+     *
      * <p>This method is optimized for tree-like structures and will perform better than
      * {@link #forGraph(Function)} when the graph is known to be a tree. The optimization
      * comes from not needing to track visited nodes.
@@ -167,7 +167,7 @@ public final class Traverser<T> {
      * <pre>{@code
      * Traverser.forTree(node -> Arrays.asList(leftChild(node), rightChild(node)));
      * }</pre>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Traverse an organizational hierarchy

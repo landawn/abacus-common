@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -45,9 +47,9 @@ public class GuavaMultimapTypeTest extends TestBase {
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = multimapType.parameterTypes();
+        List<Type<?>> paramTypes = multimapType.parameterTypes();
         assertNotNull(paramTypes);
-        assertEquals(2, paramTypes.length);
+        assertEquals(2, paramTypes.size());
     }
 
     @Test
@@ -71,7 +73,7 @@ public class GuavaMultimapTypeTest extends TestBase {
         mm.put("x", 1);
         mm.put("x", 2);
         mm.put("y", 3);
-        String json = multimapType.stringOf((Multimap<String, Integer>) mm);
+        String json = multimapType.stringOf(mm);
         assertNotNull(json);
         assertTrue(json.contains("x"));
     }

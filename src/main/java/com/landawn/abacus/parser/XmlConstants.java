@@ -18,7 +18,7 @@ package com.landawn.abacus.parser;
  * Constants used for XML parsing and serialization operations.
  * This class contains predefined XML element names, attributes, and tags used throughout
  * the XML processing framework.
- * 
+ *
  * <p>The constants are organized into categories:
  * <ul>
  *   <li>Basic XML attributes and values (IS_NULL, TRUE, FALSE, etc.)</li>
@@ -27,7 +27,7 @@ package com.landawn.abacus.parser;
  *   <li>Entity and property elements (ENTITY, PROPERTY, etc.)</li>
  *   <li>SOAP envelope elements</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Using constants for XML serialization
@@ -35,7 +35,7 @@ package com.landawn.abacus.parser;
  * // ... write array elements
  * writer.write(XmlConstants.ARRAY_ELE_END);
  * }</pre>
- * 
+ *
  */
 public class XmlConstants {
 
@@ -713,8 +713,10 @@ public class XmlConstants {
     public static final String SOAP_HEADER_ELE_END = "</soap:Header>";
 
     /**
-     * Constant representing the body element name in uppercase. Note that the actual SOAP body
-     * element tags use {@code "Body"} (see {@link #SOAP_BODY_ELE_START}).
+     * Uppercase string constant {@code "BODY"} used for case-insensitive matching of the SOAP body
+     * element name. The actual SOAP body XML tags use mixed-case (see {@link #SOAP_BODY_ELE_START}
+     * and {@link #SOAP_BODY_ELE_END}); this constant is intended for comparisons such as
+     * {@code localName.equalsIgnoreCase(BODY)}.
      * Value: {@code "BODY"}.
      */
     public static final String BODY = "BODY";

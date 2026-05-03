@@ -344,7 +344,7 @@ public class ParallelArrayDoubleStreamTest extends TestBase {
     public void testFlatMapDoubleArray() {
         DoubleStream stream = createDoubleStream(new double[] { 1.0, 2.0 });
         DoubleFunction<double[]> mapper = d -> new double[] { d, d + 0.5 };
-        List<Double> result = stream.flatmap(mapper).toList();
+        List<Double> result = stream.flatMapArray(mapper).toList();
         assertEquals(4, result.size());
         assertTrue(result.contains(1.0));
         assertTrue(result.contains(1.5));
@@ -355,13 +355,13 @@ public class ParallelArrayDoubleStreamTest extends TestBase {
     @Test
     @DisplayName("Test flatmap with array method")
     public void testFlatmapArray() {
-        DoubleStream flattened = parallelStream.flatmap(d -> new double[] { d, d * 2 });
+        DoubleStream flattened = parallelStream.flatMapArray(d -> new double[] { d, d * 2 });
         double[] result = flattened.sorted().toArray();
 
         assertEquals(20, result.length);
 
         parallelStream = createDoubleStream(new double[] { 1.0, 2.0, 3.0 });
-        flattened = parallelStream.flatmap(d -> d % 2 == 0 ? new double[] { d } : new double[0]);
+        flattened = parallelStream.flatMapArray(d -> d % 2 == 0 ? new double[] { d } : new double[0]);
         assertArrayEquals(new double[] { 2.0 }, flattened.toArray());
     }
 
@@ -375,8 +375,33 @@ public class ParallelArrayDoubleStreamTest extends TestBase {
 
     @Test
     public void testFlatmap_ParallelPath() {
-        long count = createDoubleStream(TEST_ARRAY).flatmap(d -> new double[] { d, d * 10 }).count();
+        long count = createDoubleStream(TEST_ARRAY).flatMapArray(d -> new double[] { d, d * 10 }).count();
         assertEquals(52, count);
+    }
+
+    @Test
+    public void testFlatmapCollection_ParallelPath() {
+        long count = createDoubleStream(TEST_ARRAY).flatmap(d -> java.util.Arrays.asList(d, d * 10)).count();
+        assertEquals(TEST_ARRAY.length * 2L, count);
+    }
+
+    @Test
+    public void testFlatmapCollection() {
+        // sequential fallback (small)
+        double[] r = createDoubleStream(new double[] { 1.0, 2.0 }).flatmap(d -> java.util.Arrays.asList(d, d * 10)).toArray();
+        java.util.Arrays.sort(r);
+        assertArrayEquals(new double[] { 1.0, 2.0, 10.0, 20.0 }, r, 0.0001);
+
+        // empty
+        assertEquals(0, createDoubleStream(new double[] {}).flatmap(d -> java.util.Arrays.asList((Double) d)).count());
+        assertEquals(0, createDoubleStream(TEST_ARRAY).flatmap(d -> java.util.Collections.<Double> emptyList()).count());
+        assertEquals(0, createDoubleStream(TEST_ARRAY).flatmap(d -> (java.util.Collection<Double>) null).count());
+
+        // null elements -> 0d
+        double[] withNulls = createDoubleStream(new double[] { 1.0, 2.0 }).flatmap(d -> java.util.Arrays.asList((Double) null, d)).toArray();
+        assertEquals(4, withNulls.length);
+        java.util.Arrays.sort(withNulls);
+        assertArrayEquals(new double[] { 0.0, 0.0, 1.0, 2.0 }, withNulls, 0.0001);
     }
 
     @Test
@@ -402,7 +427,7 @@ public class ParallelArrayDoubleStreamTest extends TestBase {
 
     @Test
     public void testFlatmapArray_SequentialFallback() {
-        List<Double> result = createSingleElementDoubleStream(2.0).flatmap(d -> new double[] { d, d * 2.0 }).toList();
+        List<Double> result = createSingleElementDoubleStream(2.0).flatMapArray(d -> new double[] { d, d * 2.0 }).toList();
         assertEquals(2, result.size());
         assertTrue(result.contains(2.0));
         assertTrue(result.contains(4.0));

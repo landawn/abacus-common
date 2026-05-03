@@ -24,16 +24,16 @@ import com.landawn.abacus.annotation.Beta;
  * ImmutableCollection is an abstract base class for immutable collection implementations.
  * This class extends AbstractCollection and implements the Immutable interface,
  * representing a collection that cannot be modified once created.
- * 
+ *
  * <p>All mutating operations (add, remove, clear, etc.) will throw UnsupportedOperationException.
  * The collection provides read-only access to its elements through standard collection methods
  * like contains(), size(), and iterator().</p>
- * 
+ *
  * <p>This class serves as the base for other immutable collection types in the framework,
  * such as ImmutableList and ImmutableSet. It should not be instantiated directly;
  * use the static factory method {@link #wrap(Collection)} or the specific immutable
  * collection types instead.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Collection<String> mutable = Arrays.asList("a", "b", "c");
@@ -52,20 +52,27 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
 
     final Collection<E> coll;
 
+    /**
+     * Constructs an ImmutableCollection backed by the provided collection.
+     * The collection is stored as-is; subclasses are responsible for wrapping it
+     * in an unmodifiable view if necessary.
+     *
+     * @param c the collection to back this ImmutableCollection; must not be {@code null}
+     */
     protected ImmutableCollection(final Collection<? extends E> c) {
         coll = (Collection<E>) c;
     }
 
     /**
-     * Wraps the given collection into an ImmutableCollection. If the given collection is {@code null}, 
-     * an empty ImmutableList is returned. If the given collection is already an instance of 
-     * ImmutableCollection, it is directly returned. Otherwise, returns a new ImmutableCollection 
-     * backed by the provided Collection. 
-     * 
+     * Wraps the given collection into an ImmutableCollection. If the given collection is {@code null},
+     * an empty ImmutableList is returned. If the given collection is already an instance of
+     * ImmutableCollection, it is directly returned. Otherwise, returns a new ImmutableCollection
+     * backed by the provided Collection.
+     *
      * <p><b>Warning:</b> Changes to the specified Collection will be reflected in the ImmutableCollection.
      * This method does not create a defensive copy. For a {@code true} immutable copy, use the specific
      * immutable collection type's copyOf method (e.g., {@link ImmutableList#copyOf}).</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> mutableList = new ArrayList<>();
@@ -218,11 +225,11 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     /**
      * Returns an iterator over the elements in this collection.
      * The iterator provides read-only access and does not support the remove() operation.
-     * 
+     *
      * <p>The order of elements returned by the iterator depends on the underlying
      * collection type. For ordered collections (like List), the iteration order
      * is predictable. For unordered collections (like Set), the order may vary.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableCollection<Integer> numbers = ImmutableList.of(1, 2, 3);
@@ -243,7 +250,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * Returns the number of elements in this collection. If this collection
      * contains more than {@code Integer.MAX_VALUE} elements, returns
      * {@code Integer.MAX_VALUE}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableCollection<String> collection = ImmutableList.of("x", "y", "z");
@@ -261,9 +268,9 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * Returns an array containing all of the elements in this collection.
      * The returned array will be "safe" in that no references to it are maintained
      * by this collection. The caller is thus free to modify the returned array.
-     * 
+     *
      * <p>This method acts as bridge between array-based and collection-based APIs.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableCollection<String> collection = ImmutableList.of("a", "b", "c");
@@ -284,11 +291,11 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * If the collection fits in the specified array, it is returned therein.
      * Otherwise, a new array is allocated with the runtime type of the specified
      * array and the size of this collection.
-     * 
+     *
      * <p>If this collection fits in the specified array with room to spare
      * (i.e., the array has more elements than this collection), the element in
      * the array immediately following the end of the collection is set to {@code null}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableCollection<String> collection = ImmutableList.of("x", "y", "z");
@@ -310,14 +317,11 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     }
 
     /**
-     * Compares the specified object with this collection for equality. 
-     * Returns {@code true} if the specified object is also a collection, 
-     * the two collections have the same size, and every member of the 
-     * specified collection is contained in this collection (or equivalently, 
-     * every member of this collection is contained in the specified collection).
-     * This definition ensures that the equals method works properly across 
-     * different implementations of the Collection interface.
-     * 
+     * Compares the specified object with this collection for equality.
+     * The exact equality semantics depend on the concrete type of the underlying collection:
+     * for list-backed collections, order matters; for set-backed collections, only membership
+     * matters. This method delegates to the underlying collection's {@code equals} implementation.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableCollection<Integer> col1 = ImmutableList.of(1, 2, 3);
@@ -346,7 +350,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     /**
      * Returns the hash code value for this collection. The hash code of a
      * collection is defined to be the hash code of the underlying collection.
-     * 
+     *
      * <p>This ensures that {@code c1.equals(c2)} implies that
      * {@code c1.hashCode()==c2.hashCode()} for any two collections
      * {@code c1} and {@code c2}, as required by the general contract
@@ -363,7 +367,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * Returns a string representation of this collection. The string
      * representation consists of the string representation of the underlying
      * collection.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableCollection<Integer> collection = ImmutableList.of(1, 2, 3);

@@ -36,16 +36,9 @@ public class MutableByteType extends NumberType<MutableByte> {
     }
 
     /**
-     * Returns the Class object representing the MutableByte type.
+     * Returns the {@link Class} object representing the {@link MutableByte} type.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableByte> type = TypeFactory.getType(MutableByte.class);
-     * Class<MutableByte> clazz = type.javaType();
-     * // Returns: MutableByte.class
-     * }</pre>
-     *
-     * @return The Class object for MutableByte
+     * @return {@code MutableByte.class}
      */
     @Override
     public Class<MutableByte> javaType() {
@@ -53,27 +46,10 @@ public class MutableByteType extends NumberType<MutableByte> {
     }
 
     /**
-     * Converts a MutableByte object to its string representation.
-     * The byte value is converted to a decimal string.
+     * Converts a {@link MutableByte} object to its decimal string representation.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableByte> type = TypeFactory.getType(MutableByte.class);
-     *
-     * MutableByte mb = MutableByte.of((byte) 42);
-     * String result = type.stringOf(mb);
-     * // Returns: "42"
-     *
-     * mb = MutableByte.of((byte) -10);
-     * result = type.stringOf(mb);
-     * // Returns: "-10"
-     *
-     * result = type.stringOf(null);
-     * // Returns: null
-     * }</pre>
-     *
-     * @param x The MutableByte object to convert
-     * @return The string representation of the byte value, or {@code null} if the input is null
+     * @param x the {@code MutableByte} object to convert, may be {@code null}
+     * @return the decimal string representation of the byte value, or {@code null} if the input is {@code null}
      */
     @Override
     public String stringOf(final MutableByte x) {
@@ -81,28 +57,11 @@ public class MutableByteType extends NumberType<MutableByte> {
     }
 
     /**
-     * Parses a string to create a MutableByte object.
-     * The string is parsed as a byte value.
+     * Parses a string to create a {@link MutableByte} object.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableByte> type = TypeFactory.getType(MutableByte.class);
-     *
-     * MutableByte result = type.valueOf("42");
-     * // Returns: MutableByte with value 42
-     *
-     * result = type.valueOf("-10");
-     * // Returns: MutableByte with value -10
-     *
-     * result = type.valueOf(null);
-     * // Returns: null
-     *
-     * result = type.valueOf("");
-     * // Returns: null
-     * }</pre>
-     *
-     * @param str The string to parse
-     * @return A MutableByte containing the parsed value, or {@code null} if the input is {@code null} or empty
+     * @param str the string to parse, may be {@code null} or empty
+     * @return a {@code MutableByte} containing the parsed byte value,
+     *         or {@code null} if the input is {@code null} or empty
      * @throws NumberFormatException if the string cannot be parsed as a byte
      */
     @Override
@@ -111,27 +70,15 @@ public class MutableByteType extends NumberType<MutableByte> {
     }
 
     /**
-     * Retrieves a MutableByte value from a ResultSet at the specified column index.
-     * The database byte value is wrapped in a MutableByte object.
+     * Retrieves a byte value from the specified column in the {@link ResultSet}
+     * and wraps it in a {@link MutableByte}.
+     * Returns {@code null} if the column value is SQL {@code NULL} (detected via {@link ResultSet#wasNull()}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableByte> type = TypeFactory.getType(MutableByte.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     *
-     * // Column contains byte value 42
-     * MutableByte mb = type.get(rs, 1);
-     * // Returns: MutableByte with value 42
-     *
-     * // Column contains byte value -10
-     * mb = type.get(rs, 2);
-     * // Returns: MutableByte with value -10
-     * }</pre>
-     *
-     * @param rs The ResultSet containing the data
-     * @param columnIndex The column index (1-based) to retrieve the value from
-     * @return A MutableByte containing the retrieved value
-     * @throws SQLException if a database access error occurs or the column index is invalid
+     * @param rs the {@code ResultSet} containing the data
+     * @param columnIndex the 1-based index of the column to retrieve
+     * @return a {@code MutableByte} wrapping the retrieved value,
+     *         or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public MutableByte get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -141,27 +88,15 @@ public class MutableByteType extends NumberType<MutableByte> {
     }
 
     /**
-     * Retrieves a MutableByte value from a ResultSet using the specified column label.
-     * The database byte value is wrapped in a MutableByte object.
+     * Retrieves a byte value from the specified column in the {@link ResultSet}
+     * and wraps it in a {@link MutableByte}.
+     * Returns {@code null} if the column value is SQL {@code NULL} (detected via {@link ResultSet#wasNull()}).
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableByte> type = TypeFactory.getType(MutableByte.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     *
-     * // Column "status_code" contains byte value 1
-     * MutableByte mb = type.get(rs, "status_code");
-     * // Returns: MutableByte with value 1
-     *
-     * // Column "priority" contains byte value 5
-     * mb = type.get(rs, "priority");
-     * // Returns: MutableByte with value 5
-     * }</pre>
-     *
-     * @param rs The ResultSet containing the data
-     * @param columnName The label of the column to retrieve the value from
-     * @return A MutableByte containing the retrieved value
-     * @throws SQLException if a database access error occurs or the column label is not found
+     * @param rs the {@code ResultSet} containing the data
+     * @param columnName the label of the column to retrieve (as specified in the SQL AS clause)
+     * @return a {@code MutableByte} wrapping the retrieved value,
+     *         or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
     @Override
     public MutableByte get(final ResultSet rs, final String columnName) throws SQLException {
@@ -171,26 +106,14 @@ public class MutableByteType extends NumberType<MutableByte> {
     }
 
     /**
-     * Sets a MutableByte parameter in a PreparedStatement at the specified position.
-     * If the MutableByte is {@code null}, SQL NULL is set. Otherwise, the wrapped byte value is stored.
+     * Sets a {@link MutableByte} parameter in a {@link PreparedStatement} at the specified index.
+     * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#TINYINT}) is set;
+     * otherwise the wrapped byte value is stored.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableByte> type = TypeFactory.getType(MutableByte.class);
-     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
-     *
-     * MutableByte mb = MutableByte.of((byte) 1);
-     * type.set(stmt, 2, mb);
-     * // Sets parameter to 1
-     *
-     * type.set(stmt, 2, null);
-     * // Sets parameter to SQL NULL
-     * }</pre>
-     *
-     * @param stmt The PreparedStatement to set the parameter on
-     * @param columnIndex The parameter index (1-based) to set
-     * @param x The MutableByte value to set
-     * @throws SQLException if a database access error occurs or the parameter index is invalid
+     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param columnIndex the 1-based index of the parameter to set
+     * @param x the {@code MutableByte} value to set, or {@code null} to set SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final MutableByte x) throws SQLException {
@@ -202,26 +125,14 @@ public class MutableByteType extends NumberType<MutableByte> {
     }
 
     /**
-     * Sets a MutableByte parameter in a CallableStatement using the specified parameter name.
-     * If the MutableByte is {@code null}, SQL NULL is set. Otherwise, the wrapped byte value is stored.
+     * Sets a {@link MutableByte} parameter in a {@link CallableStatement} by name.
+     * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#TINYINT}) is set;
+     * otherwise the wrapped byte value is stored.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableByte> type = TypeFactory.getType(MutableByte.class);
-     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
-     *
-     * MutableByte mb = MutableByte.of((byte) 1);
-     * type.set(stmt, "p_status", mb);
-     * // Sets parameter to 1
-     *
-     * type.set(stmt, "p_priority", null);
-     * // Sets parameter to SQL NULL
-     * }</pre>
-     *
-     * @param stmt The CallableStatement to set the parameter on
-     * @param parameterName The name of the parameter to set
-     * @param x The MutableByte value to set
-     * @throws SQLException if a database access error occurs or the parameter name is not found
+     * @param stmt the {@code CallableStatement} to set the parameter on
+     * @param parameterName the name of the parameter to set
+     * @param x the {@code MutableByte} value to set, or {@code null} to set SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final MutableByte x) throws SQLException {
@@ -233,30 +144,11 @@ public class MutableByteType extends NumberType<MutableByte> {
     }
 
     /**
-     * Appends the string representation of a MutableByte to an Appendable.
-     * The value is written as a decimal string or "null".
+     * Appends the decimal string representation of a {@link MutableByte} to an {@link Appendable}.
+     * Writes {@code "null"} when {@code x} is {@code null}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableByte> type = TypeFactory.getType(MutableByte.class);
-     * StringBuilder sb = new StringBuilder();
-     *
-     * MutableByte mb = MutableByte.of((byte) 42);
-     * type.appendTo(sb, mb);
-     * // sb contains: "42"
-     *
-     * sb.setLength(0);
-     * mb = MutableByte.of((byte) -10);
-     * type.appendTo(sb, mb);
-     * // sb contains: "-10"
-     *
-     * sb.setLength(0);
-     * type.appendTo(sb, null);
-     * // sb contains: "null"
-     * }</pre>
-     *
-     * @param appendable The Appendable to write to
-     * @param x The MutableByte to append
+     * @param appendable the target to write to
+     * @param x the {@code MutableByte} to append, may be {@code null}
      * @throws IOException if an I/O error occurs while appending
      */
     @Override
@@ -269,29 +161,13 @@ public class MutableByteType extends NumberType<MutableByte> {
     }
 
     /**
-     * Writes the character representation of a MutableByte to a CharacterWriter.
-     * The value is written as numeric characters or the {@code null} character array.
-     * This method is optimized for character-based writing.
+     * Writes the byte value of a {@link MutableByte} to a {@link CharacterWriter}.
+     * Writes the {@code NULL_CHAR_ARRAY} when {@code x} is {@code null}.
+     * The {@code config} parameter is not used for byte values.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<MutableByte> type = TypeFactory.getType(MutableByte.class);
-     * CharacterWriter writer = new CharacterWriter();
-     *
-     * MutableByte mb = MutableByte.of((byte) 42);
-     * type.writeCharacter(writer, mb, null);
-     * String result = writer.toString();
-     * // result: "42"
-     *
-     * writer.reset();
-     * type.writeCharacter(writer, null, null);
-     * result = writer.toString();
-     * // result: "null"
-     * }</pre>
-     *
-     * @param writer The CharacterWriter to write to
-     * @param x The MutableByte to write
-     * @param config The serialization configuration (currently unused for byte values)
+     * @param writer the {@code CharacterWriter} to write to
+     * @param x the {@code MutableByte} to write, may be {@code null}
+     * @param config the serialization configuration (unused for byte values)
      * @throws IOException if an I/O error occurs while writing
      */
     @Override

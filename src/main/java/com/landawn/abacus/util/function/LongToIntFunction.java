@@ -72,8 +72,9 @@ public interface LongToIntFunction extends Throwables.LongToIntFunction<RuntimeE
      *   <li>Information about the magnitude may be lost</li>
      * </ul>
      *
-     * @param value the function argument as a long
-     * @return the function result as an int
+     * @param value the {@code long} function argument
+     * @return the {@code int} result of applying this function to the argument; values outside
+     *         the {@code int} range will be truncated to the low-order 32 bits
      */
     @Override
     int applyAsInt(long value);

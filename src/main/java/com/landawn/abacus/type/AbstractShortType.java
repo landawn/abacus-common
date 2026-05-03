@@ -28,13 +28,16 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
 /**
- * The Abstract base class for {@code short} types in the type system.
+ * The abstract base class for {@code short} types in the type system.
  * <p>
  * This class provides common functionality for handling {@code short} values,
- * including conversion, database operations, and serialization.
- * Note that this class uses {@code Number} as its generic type to allow for both
- * primitive {@code short} and {@code Short} wrapper handling.
+ * including string/character-array parsing, JDBC read/write operations, and serialization.
+ * This class uses {@code Number} as its generic type parameter so that both the primitive
+ * {@code short} type and the {@code Short} wrapper type can share this implementation.
+ * Concrete subclasses cover each of those two variants.
  * </p>
+ *
+ * @see ShortType
  */
 public abstract class AbstractShortType extends NumberType<Number> {
 
@@ -74,20 +77,11 @@ public abstract class AbstractShortType extends NumberType<Number> {
      * <ul>
      *   <li>Empty or {@code null} strings return the default value</li>
      *   <li>Strings ending with 'l', 'L', 'f', 'F', 'd', or 'D' have the suffix stripped before parsing</li>
-     *   <li>Valid numeric strings are parsed to {@code short} values</li>
+     *   <li>Valid numeric strings are parsed to {@code Short} values</li>
      * </ul>
      *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * Type<Short> type = TypeFactory.getType(Short.class);
-     * Short value1 = type.valueOf("32767");   // returns 32767 (max short value)
-     * Short value2 = type.valueOf("100");     // returns 100
-     * Short value3 = type.valueOf("42L");     // returns 42 (suffix stripped)
-     * Short value4 = type.valueOf("");        // returns default value
-     * }</pre>
-     *
      * @param str the string to convert
-     * @return the {@code Short} value
+     * @return the {@code Short} value, or the default value if {@code str} is empty or {@code null}
      * @throws NumberFormatException if the string cannot be parsed as a {@code short}
      */
     @Override
@@ -113,22 +107,13 @@ public abstract class AbstractShortType extends NumberType<Number> {
 
     /**
      * Converts a character array to a {@code Short} value.
-     * <p>
-     * Parses the character array as an integer and checks if it's within short range
+     * Parses the character array as an integer and checks that the result is within short range
      * ({@code Short.MIN_VALUE} to {@code Short.MAX_VALUE}).
-     * </p>
      *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * Type<Short> type = TypeFactory.getType(Short.class);
-     * char[] buffer = "1000".toCharArray();
-     * Short value = type.valueOf(buffer, 0, 4);   // returns 1000
-     * }</pre>
-     *
-     * @param cbuf the character array to convert
-     * @param offset the starting position in the array
+     * @param cbuf the character array to convert, may be {@code null}
+     * @param offset the starting position in the array (0-based)
      * @param len the number of characters to read
-     * @return the {@code Short} value, or default value if input is {@code null} or empty
+     * @return the {@code Short} value, or the default value if {@code cbuf} is {@code null} or {@code len} is {@code 0}
      * @throws NumberFormatException if the value is out of short range or not a valid number
      */
     @Override
@@ -147,21 +132,9 @@ public abstract class AbstractShortType extends NumberType<Number> {
     }
 
     /**
-     * Checks if this type represents a {@code short} type.
-     * <p>
-     * This method always returns {@code true} for {@code short} types.
-     * </p>
+     * Returns {@code true} because this type represents a {@code short}/{@code Short} type.
      *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * Type<Short> type = TypeFactory.getType(Short.class);
-     * if (type.isShort()) {
-     *     // Handle short type specific logic
-     *     System.out.println("This is a short type");
-     * }
-     * }</pre>
-     *
-     * @return {@code true}, indicating this is a {@code short} type
+     * @return {@code true}
      */
     @Override
     public boolean isShort() {
@@ -170,25 +143,12 @@ public abstract class AbstractShortType extends NumberType<Number> {
 
     /**
      * Retrieves a {@code short} value from a {@code ResultSet} at the specified column index.
-     * <p>
-     * This method uses {@code rs.getShort()} which returns {@code 0} for SQL {@code NULL} values.
+     * Uses {@link java.sql.ResultSet#getShort(int)} which returns {@code 0} for SQL {@code NULL} values.
      * Subclasses may override this to return {@code null} for SQL {@code NULL} values.
-     * </p>
-     *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * // For primitive short types
-     * Type<Short> type = TypeFactory.getType(short.class);
-     * short value = type.get(rs, 1);   // Returns 0 for SQL NULL
-     *
-     * // For wrapper Short types
-     * Type<Short> type = TypeFactory.getType(Short.class);
-     * Short value = type.get(rs, 1);   // Returns null for SQL NULL (overridden in subclass)
-     * }</pre>
      *
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the column index (1-based)
-     * @return the {@code short} value at the specified column; returns {@code 0} if SQL {@code NULL} (may be overridden by subclasses to return {@code null})
+     * @return the {@code short} value at the specified column, or {@code 0} if SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the {@code columnIndex} is invalid
      */
     @Override
@@ -198,25 +158,12 @@ public abstract class AbstractShortType extends NumberType<Number> {
 
     /**
      * Retrieves a {@code short} value from a {@code ResultSet} using the specified column label.
-     * <p>
-     * This method uses {@code rs.getShort()} which returns {@code 0} for SQL {@code NULL} values.
+     * Uses {@link java.sql.ResultSet#getShort(String)} which returns {@code 0} for SQL {@code NULL} values.
      * Subclasses may override this to return {@code null} for SQL {@code NULL} values.
-     * </p>
-     *
-     * <p>Usage Examples:</p>
-     * <pre>{@code
-     * // For primitive short types
-     * Type<Short> type = TypeFactory.getType(short.class);
-     * short value = type.get(rs, "port");   // Returns 0 for SQL NULL
-     *
-     * // For wrapper Short types
-     * Type<Short> type = TypeFactory.getType(Short.class);
-     * Short value = type.get(rs, "port");   // Returns null for SQL NULL (overridden in subclass)
-     * }</pre>
      *
      * @param rs the {@code ResultSet} to read from
      * @param columnName the column label
-     * @return the {@code short} value at the specified column; returns {@code 0} if SQL {@code NULL} (may be overridden by subclasses to return {@code null})
+     * @return the {@code short} value at the specified column, or {@code 0} if SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the {@code columnName} is not found
      */
     @Override
@@ -268,9 +215,7 @@ public abstract class AbstractShortType extends NumberType<Number> {
 
     /**
      * Appends the string representation of a {@code short} value to an {@code Appendable}.
-     * <p>
      * Writes "null" if the value is {@code null}, otherwise writes the numeric value.
-     * </p>
      *
      * @param appendable the {@code Appendable} to write to
      * @param x the {@code Number} value to append as {@code short}

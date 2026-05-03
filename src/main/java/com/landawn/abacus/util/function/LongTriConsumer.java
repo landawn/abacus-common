@@ -59,9 +59,9 @@ public interface LongTriConsumer extends Throwables.LongTriConsumer<RuntimeExcep
      *   <li>Performing batch operations with three parameters</li>
      * </ul>
      *
-     * @param a the first input argument
-     * @param b the second input argument
-     * @param c the third input argument
+     * @param a the first {@code long} input argument
+     * @param b the second {@code long} input argument
+     * @param c the third {@code long} input argument
      */
     @Override
     void accept(long a, long b, long c);
@@ -93,6 +93,7 @@ public interface LongTriConsumer extends Throwables.LongTriConsumer<RuntimeExcep
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code LongTriConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
+     * @throws NullPointerException if {@code after} is null
      */
     default LongTriConsumer andThen(final LongTriConsumer after) {
         return (a, b, c) -> {

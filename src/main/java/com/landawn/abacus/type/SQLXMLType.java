@@ -21,12 +21,19 @@ import java.sql.SQLException;
 import java.sql.SQLXML;
 
 /**
- * Type handler for {@link java.sql.SQLXML} objects, providing conversion between SQLXML and its string representation.
+ * Type handler for {@link java.sql.SQLXML} objects. Provides JDBC support for reading SQLXML values
+ * from a {@link ResultSet} and binding them to {@link PreparedStatement}/{@link CallableStatement} parameters.
+ * SQLXML instances are database-managed and cannot be created from or converted to a plain string;
+ * {@link #stringOf(SQLXML)} and {@link #valueOf(String)} therefore throw {@link UnsupportedOperationException}.
  */
 public class SQLXMLType extends AbstractType<SQLXML> {
 
     public static final String SQL_XML = SQLXML.class.getSimpleName();
 
+    /**
+     * Constructs a new SQLXMLType instance.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
+     */
     SQLXMLType() {
         super(SQL_XML);
     }

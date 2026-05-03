@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -960,6 +961,7 @@ public class EscapeUtilTest extends TestBase {
 
     @Test
     public void testUnescapeCsv_QuotedWithoutSpecialChars() {
+        Assertions.assertEquals("\"simple\"", StringEscapeUtils.unescapeCsv("\"simple\""));
         Assertions.assertEquals("\"simple\"", EscapeUtil.unescapeCsv("\"simple\""));
     }
 

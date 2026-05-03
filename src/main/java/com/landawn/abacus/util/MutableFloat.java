@@ -20,24 +20,24 @@ import java.io.Serial;
 
 /**
  * A mutable wrapper for a {@code float} value, providing methods to modify the wrapped value.
- * 
+ *
  * <p>This class is useful in scenarios where you need to pass a float by reference,
  * accumulate float values in lambda expressions, or store frequently changing float values
  * in collections without creating new Float objects.</p>
- * 
+ *
  * <p><strong>Note: This class is NOT thread-safe.</strong> If multiple threads access a
  * MutableFloat instance concurrently, and at least one thread modifies it, external
  * synchronization is required.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * MutableFloat sum = MutableFloat.of(0.0f);
  * floatList.forEach(value -> sum.add(value));
  * System.out.println("Total: " + sum.value());
  * }</pre>
- * 
+ *
  * <p>Note: This class is adapted from Apache Commons Lang.</p>
- * 
+ *
  * @version $Id: MutableFloat.java 1669791 2015-03-28 15:22:59Z britter $
  * @see Float
  * @see Number
@@ -56,7 +56,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     /**
      * Constructs a new MutableFloat with the default value of zero.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = new MutableFloat();   // value is 0.0f
@@ -67,12 +67,12 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     /**
      * Constructs a new MutableFloat with the specified initial value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = new MutableFloat(3.14f);   // value is 3.14f
      * }</pre>
-     * 
+     *
      * @param value the initial value to store
      */
     MutableFloat(final float value) {
@@ -82,12 +82,12 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Creates a new MutableFloat instance with the specified value.
      * This is a factory method that provides a more fluent way to create instances.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat temperature = MutableFloat.of(98.6f);
      * }</pre>
-     * 
+     *
      * @param value the initial value
      * @return a new MutableFloat instance containing the specified value
      */
@@ -97,13 +97,13 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     /**
      * Returns the current float value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(42.5f);
      * float val = num.value();   // returns 42.5f
      * }</pre>
-     * 
+     *
      * @return the current float value
      */
     public float value() {
@@ -113,9 +113,9 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     //-----------------------------------------------------------------------
 
     /**
-     * Gets the value as a Float instance.
+     * Gets the value as a primitive float.
      *
-     * @return the current value
+     * @return the current float value
      * @deprecated replaced by {@link #value()}.
      */
     @Deprecated
@@ -147,13 +147,13 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     /**
      * Returns the current value and then sets the new value.
-     * This is an atomic-like operation for single-threaded use.
      *
-     * <p>This method is useful when you need both the old and new values in a single operation,
+     * <p>This method is useful when you need both the old and new values in a single call,
      * such as calculating deltas or maintaining state transitions.</p>
      *
-     * <p><strong>Note:</strong> While this operation appears atomic, this class is NOT thread-safe.
-     * For multi-threaded scenarios, use {@link java.util.concurrent.atomic.AtomicReference} with Float.</p>
+     * <p><strong>Note:</strong> this is not atomic and this class is NOT thread-safe.
+     * For multi-threaded scenarios, use {@link java.util.concurrent.atomic.AtomicReference} with Float
+     * or external synchronization.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -248,13 +248,13 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     /**
      * Checks whether the float value is the special NaN (Not a Number) value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(Float.NaN);
      * boolean isNaN = num.isNaN();   // returns true
      * }</pre>
-     * 
+     *
      * @return {@code true} if the value is NaN, {@code false} otherwise
      */
     public boolean isNaN() {
@@ -263,13 +263,13 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     /**
      * Checks whether the float value is infinite (positive or negative infinity).
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(Float.POSITIVE_INFINITY);
      * boolean isInf = num.isInfinite();   // returns true
      * }</pre>
-     * 
+     *
      * @return {@code true} if the value is infinite, {@code false} otherwise
      */
     public boolean isInfinite() {
@@ -280,7 +280,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     /**
      * Increments the value by one.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
@@ -293,7 +293,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     /**
      * Decrements the value by one.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
@@ -362,13 +362,13 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     /**
      * Returns the current value and then increments it by one.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
      * float old = num.getAndIncrement();   // returns 10.5f, value is now 11.5f
      * }</pre>
-     * 
+     *
      * @return the value before incrementing
      */
     public float getAndIncrement() {
@@ -377,13 +377,13 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     /**
      * Returns the current value and then decrements it by one.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
      * float old = num.getAndDecrement();   // returns 10.5f, value is now 9.5f
      * }</pre>
-     * 
+     *
      * @return the value before decrementing
      */
     public float getAndDecrement() {
@@ -392,13 +392,13 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     /**
      * Increments the value by one and then returns it.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
      * float newVal = num.incrementAndGet();   // returns 11.5f, value is now 11.5f
      * }</pre>
-     * 
+     *
      * @return the value after incrementing
      */
     public float incrementAndGet() {
@@ -407,13 +407,13 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     /**
      * Decrements the value by one and then returns it.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
      * float newVal = num.decrementAndGet();   // returns 9.5f, value is now 9.5f
      * }</pre>
-     * 
+     *
      * @return the value after decrementing
      */
     public float decrementAndGet() {
@@ -526,8 +526,9 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     /**
      * Returns the value of this MutableFloat as a float.
+     * This is an exact representation of the stored value with no conversion.
      *
-     * @return the value as a float
+     * @return the float value represented by this object
      */
     @Override
     public float floatValue() {
@@ -535,9 +536,10 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     }
 
     /**
-     * Returns the value of this MutableFloat as a double.
+     * Returns the value of this MutableFloat as a double after a widening primitive conversion.
+     * The conversion is exact for all float values that are representable as double.
      *
-     * @return the value as a double
+     * @return the numeric value represented by this object after conversion to type double
      */
     @Override
     public double doubleValue() {
@@ -590,11 +592,11 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * the argument is not {@code null} and is a {@code MutableFloat} object that represents
      * a float that has the identical bit pattern to the bit pattern of the float represented
      * by this object.
-     * 
+     *
      * <p>For this purpose, two float values are considered to be the same if and only if the
      * method {@link Float#floatToIntBits(float)} returns the same int value when applied to each.
      * This definition allows hash tables to operate properly.</p>
-     * 
+     *
      * <p>Note that in most cases, for two instances of class {@code MutableFloat}, {@code f1}
      * and {@code f2}, the value of {@code f1.equals(f2)} is {@code true} if and only if
      * {@code f1.floatValue() == f2.floatValue()} also has the value {@code true}. However,
@@ -607,7 +609,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * or vice versa, the {@code equal} test has the value {@code false}, even though
      * {@code 0.0f==-0.0f} has the value {@code true}. This allows hashtables to operate properly.</li>
      * </ul>
-     * 
+     *
      * @param obj the object to compare with, {@code null} returns false
      * @return {@code true} if the objects are the same; {@code false} otherwise
      * @see java.lang.Float#floatToIntBits(float)
@@ -633,13 +635,13 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     /**
      * Returns the String representation of this MutableFloat's value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(3.14f);
      * String str = num.toString();   // returns "3.14"
      * }</pre>
-     * 
+     *
      * @return the String representation of the current value
      */
     @Override

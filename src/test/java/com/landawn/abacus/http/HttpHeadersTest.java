@@ -176,8 +176,9 @@ public class HttpHeadersTest extends TestBase {
 
     @Test
     public void testValueOfCollection() {
+        // RFC 7230 §3.2.2 — multi-value HTTP headers are joined by comma, not semicolon.
         String value = HttpHeaders.valueOf(Arrays.asList("gzip", "deflate"));
-        assertEquals("gzip; deflate", value);
+        assertEquals("gzip, deflate", value);
     }
 
     @Test

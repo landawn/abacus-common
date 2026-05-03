@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -218,9 +219,40 @@ public class KryoParserTest extends TestBase {
         assertEquals("hello", result);
     }
 
+    /**
+     * Bug fix: KryoParser.write(Object,KryoSerConfig,Output) previously called
+     * kryo.writeObject(output, obj) even when obj was null.  Kryo's writeObject
+     * does NOT accept null and throws NullPointerException.  The fix routes null
+     * objects through kryo.writeClassAndObject(), which handles null safely.
+     * Serializing null and then deserializing (with class info in stream) must
+     * round-trip correctly instead of blowing up.
+     */
     @Test
-    public void testSerializeNull() {
-        assertThrows(IllegalArgumentException.class, () -> parser.serialize(null, (KryoSerConfig) null));
+    public void testSerializeNullDoesNotThrow() {
+        // Serializing null via writeClassAndObject should not throw.
+        // Use writeClass=true (default behaviour after the null-routing fix) so the
+        // reader can use readClassAndObject to get null back.
+        KryoSerConfig serConfig = KryoSerConfig.create().setWriteClass(true);
+        assertDoesNotThrow(() -> {
+            String serialized = parser.serialize(null, serConfig);
+            assertNotNull(serialized);
+            // Deserialise back – target class null means readClassAndObject.
+            Object result = parser.deserialize(serialized, null, (Class<Object>) null);
+            assertNull(result);
+        });
+    }
+
+    /**
+     * Verify that a non-null object serialized without writeClass still round-trips
+     * correctly after the null-routing fix.
+     */
+    @Test
+    public void testSerializeNonNullWithoutWriteClass() {
+        TestObject original = new TestObject("roundtrip", 42);
+        String serialized = parser.serialize(original, (KryoSerConfig) null);
+        assertNotNull(serialized);
+        TestObject restored = parser.deserialize(serialized, null, TestObject.class);
+        assertEquals(original, restored);
     }
 
     @Test

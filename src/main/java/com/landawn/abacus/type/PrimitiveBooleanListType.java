@@ -15,6 +15,7 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
+import java.util.List;
 
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BooleanList;
@@ -22,9 +23,11 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for BooleanList objects.
- * Provides functionality for serialization and deserialization of BooleanList instances
- * by delegating to the underlying boolean array type handler.
+ * Type handler for {@link BooleanList} objects, which is a primitive-backed list of {@code boolean} values.
+ * Provides serialization and deserialization of {@link BooleanList} instances by delegating to the
+ * underlying {@code boolean[]} array type handler.
+ * String representations use the format {@code [true, false, true]} with comma-separated elements
+ * enclosed in square brackets.
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<BooleanList> {
@@ -34,7 +37,7 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
     private final Type<boolean[]> arrayType = Type.of(boolean[].class);
 
     private final Type<Boolean> elementType = Type.of(boolean.class);
-    private final Type<Boolean>[] parameterTypes = new Type[] { elementType };
+    private final List<Type<?>> parameterTypes = List.of(elementType);
 
     /**
      * Constructs a new PrimitiveBooleanListType instance.
@@ -68,11 +71,11 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
     /**
      * Returns the parameter types associated with this list type.
      *
-     * @return an array containing the Boolean Type that describes the elements of this list type
+     * @return an immutable list containing the Boolean Type that describes the elements of this list type
      * @see #elementType()
      */
     @Override
-    public Type<Boolean>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 

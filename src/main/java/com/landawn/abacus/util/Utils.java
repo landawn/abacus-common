@@ -26,25 +26,27 @@ import com.landawn.abacus.type.Type;
  * Internal utility class that provides commonly used static instances of parsers, serialization configurations,
  * and type objects for the abacus-common framework. This class serves as a centralized registry for frequently
  * accessed objects to improve performance and reduce object creation overhead.
- * 
+ *
  * <p>This class is package-private and intended for internal use only within the util package.
- * It provides lazy initialization of parsers to avoid potential NoClassDefFoundError issues
- * when certain parser implementations may not be available on the classpath.</p>
- * 
+ * Optional parsers (XML, Kryo) are conditionally created via {@link ParserFactory} availability
+ * checks, so a missing dependency on the classpath leaves the corresponding field as {@code null}
+ * rather than throwing a {@link NoClassDefFoundError} at class-loading time.</p>
+ *
  * <p>Key components provided:</p>
  * <ul>
  *   <li><strong>Parsers:</strong> Pre-configured instances of JSON, XML, and Kryo parsers</li>
  *   <li><strong>Serialization Configs:</strong> Common configurations for JSON and XML serialization</li>
- *   <li><strong>Type Objects:</strong> Cached Type instances for primitive types</li>
+ *   <li><strong>Type Objects:</strong> Cached {@link Type} instances for primitive types</li>
  * </ul>
- * 
+ *
  * <p>The parser instances are conditionally initialized based on availability:</p>
  * <ul>
  *   <li>JSON parser is always available</li>
- *   <li>XML parsers are only initialized if XML libraries are present</li>
- *   <li>Kryo parser is only initialized if Kryo library is present</li>
+ *   <li>XML parsers ({@code abacusXmlParser}, {@code xmlParser}) are non-{@code null} only if the
+ *       corresponding XML libraries are present on the classpath</li>
+ *   <li>{@code kryoParser} is non-{@code null} only if the Kryo library is present on the classpath</li>
  * </ul>
- * 
+ *
  * @see ParserFactory
  * @see JsonSerConfig
  * @see XmlSerConfig

@@ -64,8 +64,8 @@ public interface LongToFloatFunction {
      * 24 bits of precision for the significand, which means that long values requiring
      * more than 24 bits of precision will lose accuracy in the conversion.
      *
-     * @param value the function argument as a long
-     * @return the function result as a float
+     * @param value the {@code long} function argument
+     * @return the {@code float} result of applying this function to the argument
      */
     float applyAsFloat(long value);
 }

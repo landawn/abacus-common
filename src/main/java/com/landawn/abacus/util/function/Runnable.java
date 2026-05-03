@@ -22,9 +22,12 @@ import com.landawn.abacus.util.Throwables;
  * and {@link Throwables.Runnable}, providing compatibility with the standard Java
  * Runnable interface while adding exception handling capabilities.
  *
- * <p>This interface is particularly useful in contexts where you need to execute
- * code that may throw checked exceptions, but still want to use it in places that
- * expect a standard {@link java.lang.Runnable}.
+ * <p>Unlike {@link java.lang.Runnable}, whose {@code run()} contract says nothing about
+ * exceptions, this interface is parameterized over {@code RuntimeException}, meaning the
+ * {@code run()} method may only propagate unchecked exceptions.  Lambdas that need to
+ * throw checked exceptions should use {@link Throwables.Runnable} with an appropriate
+ * exception type instead. Instances of this interface are directly usable wherever a
+ * {@code java.lang.Runnable} is expected (e.g., {@link Thread}, {@link java.util.concurrent.Executor}).
  *
  * <p>This is a functional interface whose functional method is {@link #run()}.
  *

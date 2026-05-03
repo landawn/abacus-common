@@ -76,10 +76,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.Fn.BiConsumers;
 import com.landawn.abacus.util.Fn.BiFunctions;
 import com.landawn.abacus.util.Fn.BiPredicates;
 import com.landawn.abacus.util.Fn.Consumers;
-import com.landawn.abacus.util.Fn.BiConsumers;
 import com.landawn.abacus.util.Fn.Entries;
 import com.landawn.abacus.util.Fn.FB;
 import com.landawn.abacus.util.Fn.FC;
@@ -90,18 +90,6 @@ import com.landawn.abacus.util.Fn.FL;
 import com.landawn.abacus.util.Fn.FS;
 import com.landawn.abacus.util.Fn.Functions;
 import com.landawn.abacus.util.Fn.Predicates;
-import com.landawn.abacus.util.function.ByteBiFunction;
-import com.landawn.abacus.util.function.CharBiFunction;
-import com.landawn.abacus.util.function.DoubleBiFunction;
-import com.landawn.abacus.util.function.FloatBiFunction;
-import com.landawn.abacus.util.function.IntBiObjConsumer;
-import com.landawn.abacus.util.function.IntBiObjFunction;
-import com.landawn.abacus.util.function.IntBiObjPredicate;
-import com.landawn.abacus.util.function.IntObjConsumer;
-import com.landawn.abacus.util.function.IntObjFunction;
-import com.landawn.abacus.util.function.IntObjPredicate;
-import com.landawn.abacus.util.function.LongBiFunction;
-import com.landawn.abacus.util.function.ShortBiFunction;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableArray;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 import com.landawn.abacus.util.Tuple.Tuple1;
@@ -121,23 +109,29 @@ import com.landawn.abacus.util.function.BiFunction;
 import com.landawn.abacus.util.function.BiPredicate;
 import com.landawn.abacus.util.function.BinaryOperator;
 import com.landawn.abacus.util.function.BooleanSupplier;
+import com.landawn.abacus.util.function.ByteBiFunction;
 import com.landawn.abacus.util.function.ByteBinaryOperator;
 import com.landawn.abacus.util.function.Callable;
+import com.landawn.abacus.util.function.CharBiFunction;
 import com.landawn.abacus.util.function.CharBiPredicate;
 import com.landawn.abacus.util.function.CharBinaryOperator;
 import com.landawn.abacus.util.function.CharPredicate;
 import com.landawn.abacus.util.function.Consumer;
+import com.landawn.abacus.util.function.DoubleBiFunction;
 import com.landawn.abacus.util.function.DoubleBinaryOperator;
+import com.landawn.abacus.util.function.FloatBiFunction;
 import com.landawn.abacus.util.function.FloatBinaryOperator;
 import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.IntBiFunction;
 import com.landawn.abacus.util.function.IntBinaryOperator;
 import com.landawn.abacus.util.function.IntFunction;
+import com.landawn.abacus.util.function.LongBiFunction;
 import com.landawn.abacus.util.function.LongBinaryOperator;
 import com.landawn.abacus.util.function.LongSupplier;
 import com.landawn.abacus.util.function.Predicate;
 import com.landawn.abacus.util.function.QuadFunction;
 import com.landawn.abacus.util.function.Runnable;
+import com.landawn.abacus.util.function.ShortBiFunction;
 import com.landawn.abacus.util.function.ShortBinaryOperator;
 import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.function.ToByteFunction;
@@ -1053,7 +1047,7 @@ public class FnTest extends TestBase {
     @Test
     public void testKkv() {
         Keyed<String, Integer> keyedKey = Keyed.of("key", 123);
-        Map.Entry<Keyed<String, Integer>, String> entry = CommonUtil.newEntry(keyedKey, "value");
+        Map.Entry<Keyed<String, Integer>, String> entry = N.newEntry(keyedKey, "value");
         assertEquals(123, Fn.<String, Integer, String> kkv().apply(entry));
     }
 
@@ -1141,7 +1135,7 @@ public class FnTest extends TestBase {
 
     @Test
     public void testKeyAndValue() {
-        Map.Entry<String, Integer> entry = CommonUtil.newEntry("key", 123);
+        Map.Entry<String, Integer> entry = N.newEntry("key", 123);
         assertEquals("key", Fn.<String, Integer> key().apply(entry));
         assertEquals(123, Fn.<String, Integer> value().apply(entry));
     }
@@ -1159,7 +1153,7 @@ public class FnTest extends TestBase {
 
     @Test
     public void testKey() {
-        Map.Entry<String, Integer> entry = CommonUtil.newImmutableEntry("key", 100);
+        Map.Entry<String, Integer> entry = N.newImmutableEntry("key", 100);
         Throwables.Function<Map.Entry<String, Integer>, String, RuntimeException> keyFunc = Fnn.key();
         Assertions.assertEquals("key", keyFunc.apply(entry));
     }
@@ -1171,7 +1165,7 @@ public class FnTest extends TestBase {
 
     @Test
     public void testValue() {
-        Map.Entry<String, Integer> entry = CommonUtil.newImmutableEntry("key", 100);
+        Map.Entry<String, Integer> entry = N.newImmutableEntry("key", 100);
         Throwables.Function<Map.Entry<String, Integer>, Integer, RuntimeException> valueFunc = Fnn.value();
         Assertions.assertEquals(100, valueFunc.apply(entry));
     }
@@ -1199,7 +1193,7 @@ public class FnTest extends TestBase {
 
     @Test
     public void testInverse() {
-        Map.Entry<String, Integer> entry = CommonUtil.newEntry("key", 123);
+        Map.Entry<String, Integer> entry = N.newEntry("key", 123);
         Map.Entry<Integer, String> inverted = Fn.<String, Integer> invert().apply(entry);
         assertEquals(123, inverted.getKey());
         assertEquals("key", inverted.getValue());
@@ -1219,7 +1213,7 @@ public class FnTest extends TestBase {
 
     @Test
     public void testEntryFunctions() {
-        Map.Entry<String, Integer> entry = CommonUtil.newEntry("key", 10);
+        Map.Entry<String, Integer> entry = N.newEntry("key", 10);
         assertTrue(Fn.<String, Integer> testByKey(k -> k.equals("key")).test(entry));
         assertTrue(Fn.<String, Integer> testByValue(v -> v > 5).test(entry));
 
@@ -1237,7 +1231,7 @@ public class FnTest extends TestBase {
 
     @Test
     public void testEntryKeyVal() {
-        Map.Entry<String, Integer> entry = CommonUtil.newEntry("key", 3);
+        Map.Entry<String, Integer> entry = N.newEntry("key", 3);
         assertTrue(Fn.<String, Integer> testKeyVal((k, v) -> k.length() == v).test(entry));
 
         AtomicReference<String> ref = new AtomicReference<>();
@@ -4010,8 +4004,8 @@ public class FnTest extends TestBase {
 
     @Test
     public void testTestByKey() {
-        Map.Entry<String, Integer> entry1 = CommonUtil.newImmutableEntry("key1", 100);
-        Map.Entry<String, Integer> entry2 = CommonUtil.newImmutableEntry("key2", 200);
+        Map.Entry<String, Integer> entry1 = N.newImmutableEntry("key1", 100);
+        Map.Entry<String, Integer> entry2 = N.newImmutableEntry("key2", 200);
 
         Throwables.Predicate<Map.Entry<String, Integer>, RuntimeException> predicate = Fnn.testByKey(k -> k.equals("key1"));
 
@@ -4044,8 +4038,8 @@ public class FnTest extends TestBase {
 
     @Test
     public void testTestByValue() {
-        Map.Entry<String, Integer> entry1 = CommonUtil.newImmutableEntry("key1", 100);
-        Map.Entry<String, Integer> entry2 = CommonUtil.newImmutableEntry("key2", 200);
+        Map.Entry<String, Integer> entry1 = N.newImmutableEntry("key1", 100);
+        Map.Entry<String, Integer> entry2 = N.newImmutableEntry("key2", 200);
 
         Throwables.Predicate<Map.Entry<String, Integer>, RuntimeException> predicate = Fnn.testByValue(v -> v > 150);
 
@@ -4064,7 +4058,7 @@ public class FnTest extends TestBase {
 
     @Test
     public void testAcceptByKey() {
-        Map.Entry<String, Integer> entry = CommonUtil.newImmutableEntry("key", 100);
+        Map.Entry<String, Integer> entry = N.newImmutableEntry("key", 100);
         final String[] result = { "" };
 
         Throwables.Consumer<Map.Entry<String, Integer>, RuntimeException> consumer = Fnn.acceptByKey(k -> result[0] = k);
@@ -4084,7 +4078,7 @@ public class FnTest extends TestBase {
 
     @Test
     public void testAcceptByValue() {
-        Map.Entry<String, Integer> entry = CommonUtil.newImmutableEntry("key", 100);
+        Map.Entry<String, Integer> entry = N.newImmutableEntry("key", 100);
         final int[] result = { 0 };
 
         Throwables.Consumer<Map.Entry<String, Integer>, RuntimeException> consumer = Fnn.acceptByValue(v -> result[0] = v);
@@ -4103,7 +4097,7 @@ public class FnTest extends TestBase {
 
     @Test
     public void testApplyByKey() {
-        Map.Entry<String, Integer> entry = CommonUtil.newImmutableEntry("key", 100);
+        Map.Entry<String, Integer> entry = N.newImmutableEntry("key", 100);
 
         Throwables.Function<Map.Entry<String, Integer>, String, RuntimeException> func = Fnn.applyByKey(k -> k.toUpperCase());
 
@@ -4120,7 +4114,7 @@ public class FnTest extends TestBase {
 
     @Test
     public void testApplyByValue() {
-        Map.Entry<String, Integer> entry = CommonUtil.newImmutableEntry("key", 100);
+        Map.Entry<String, Integer> entry = N.newImmutableEntry("key", 100);
 
         Throwables.Function<Map.Entry<String, Integer>, Integer, RuntimeException> func = Fnn.applyByValue(v -> v * 2);
 
@@ -4131,7 +4125,7 @@ public class FnTest extends TestBase {
 
     @Test
     public void testMapKeyAndValue() {
-        Map.Entry<String, Integer> entry = CommonUtil.newEntry("key", 10);
+        Map.Entry<String, Integer> entry = N.newEntry("key", 10);
         Map.Entry<Integer, Integer> newKeyEntry = Fn.<String, Integer, Integer> mapKey(String::length).apply(entry);
         assertEquals(3, newKeyEntry.getKey());
         assertEquals(10, newKeyEntry.getValue());
@@ -5178,8 +5172,8 @@ public class FnTest extends TestBase {
 
     @Test
     public void testMinByKey() {
-        Map.Entry<Integer, String> entry1 = CommonUtil.newImmutableEntry(10, "ten");
-        Map.Entry<Integer, String> entry2 = CommonUtil.newImmutableEntry(5, "five");
+        Map.Entry<Integer, String> entry1 = N.newImmutableEntry(10, "ten");
+        Map.Entry<Integer, String> entry2 = N.newImmutableEntry(5, "five");
 
         Throwables.BinaryOperator<Map.Entry<Integer, String>, RuntimeException> minOp = Fnn.minByKey();
         Assertions.assertEquals(entry2, minOp.apply(entry1, entry2));
@@ -5188,8 +5182,8 @@ public class FnTest extends TestBase {
 
     @Test
     public void testMinByValue() {
-        Map.Entry<String, Integer> entry1 = CommonUtil.newImmutableEntry("ten", 10);
-        Map.Entry<String, Integer> entry2 = CommonUtil.newImmutableEntry("five", 5);
+        Map.Entry<String, Integer> entry1 = N.newImmutableEntry("ten", 10);
+        Map.Entry<String, Integer> entry2 = N.newImmutableEntry("five", 5);
 
         Throwables.BinaryOperator<Map.Entry<String, Integer>, RuntimeException> minOp = Fnn.minByValue();
         Assertions.assertEquals(entry2, minOp.apply(entry1, entry2));
@@ -5243,8 +5237,8 @@ public class FnTest extends TestBase {
 
     @Test
     public void testMaxByKey() {
-        Map.Entry<Integer, String> entry1 = CommonUtil.newImmutableEntry(10, "ten");
-        Map.Entry<Integer, String> entry2 = CommonUtil.newImmutableEntry(5, "five");
+        Map.Entry<Integer, String> entry1 = N.newImmutableEntry(10, "ten");
+        Map.Entry<Integer, String> entry2 = N.newImmutableEntry(5, "five");
 
         Throwables.BinaryOperator<Map.Entry<Integer, String>, RuntimeException> maxOp = Fnn.maxByKey();
         Assertions.assertEquals(entry1, maxOp.apply(entry1, entry2));
@@ -5253,8 +5247,8 @@ public class FnTest extends TestBase {
 
     @Test
     public void testMaxByValue() {
-        Map.Entry<String, Integer> entry1 = CommonUtil.newImmutableEntry("ten", 10);
-        Map.Entry<String, Integer> entry2 = CommonUtil.newImmutableEntry("five", 5);
+        Map.Entry<String, Integer> entry1 = N.newImmutableEntry("ten", 10);
+        Map.Entry<String, Integer> entry2 = N.newImmutableEntry("five", 5);
 
         Throwables.BinaryOperator<Map.Entry<String, Integer>, RuntimeException> maxOp = Fnn.maxByValue();
         Assertions.assertEquals(entry1, maxOp.apply(entry1, entry2));
@@ -5559,7 +5553,7 @@ public class FnTest extends TestBase {
 
     @Test
     public void testP() {
-        Map.Entry<String, Integer> entry = CommonUtil.newEntry("a", 1);
+        Map.Entry<String, Integer> entry = N.newEntry("a", 1);
         assertTrue(Entries.<String, Integer> p((k, v) -> k.equals("a") && v == 1).test(entry));
     }
 
@@ -5686,7 +5680,7 @@ public class FnTest extends TestBase {
 
     @Test
     public void testC() {
-        Map.Entry<String, Integer> entry = CommonUtil.newEntry("a", 1);
+        Map.Entry<String, Integer> entry = N.newEntry("a", 1);
         AtomicReference<String> ref = new AtomicReference<>();
         Entries.<String, Integer> c((k, v) -> ref.set(k + v)).accept(entry);
         assertEquals("a1", ref.get());
@@ -5803,7 +5797,7 @@ public class FnTest extends TestBase {
 
     @Test
     public void testF() {
-        Map.Entry<String, Integer> entry = CommonUtil.newEntry("a", 1);
+        Map.Entry<String, Integer> entry = N.newEntry("a", 1);
         assertEquals("a1", Entries.<String, Integer, String> f((k, v) -> k + v).apply(entry));
     }
 

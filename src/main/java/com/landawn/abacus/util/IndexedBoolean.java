@@ -16,12 +16,12 @@ package com.landawn.abacus.util;
 
 /**
  * Represents a primitive boolean value paired with an index position.
- * 
+ *
  * <p>This class is a specialized version of {@link Indexed} for primitive boolean values,
  * providing better performance by avoiding boxing/unboxing overhead.</p>
- * 
+ *
  * <p>The class is immutable and extends {@link AbstractIndexed}.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedBoolean indexedBool = IndexedBoolean.of(true, 5);
@@ -55,7 +55,7 @@ public final class IndexedBoolean extends AbstractIndexed {
 
     /**
      * Creates a new IndexedBoolean instance with the specified value and index.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedBoolean indexed = IndexedBoolean.of(true, 5);
@@ -74,9 +74,9 @@ public final class IndexedBoolean extends AbstractIndexed {
 
     /**
      * Creates a new IndexedBoolean instance with the specified value and index.
-     * 
+     *
      * <p>This overload accepts a long index for cases where the index might exceed Integer.MAX_VALUE.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedBoolean indexed = IndexedBoolean.of(true, 5000000000L);
@@ -95,7 +95,7 @@ public final class IndexedBoolean extends AbstractIndexed {
 
     /**
      * Returns the boolean value stored in this IndexedBoolean instance.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedBoolean indexed = IndexedBoolean.of(true, 5);
@@ -110,11 +110,12 @@ public final class IndexedBoolean extends AbstractIndexed {
 
     /**
      * Returns the hash code of this IndexedBoolean instance.
-     * 
-     * <p>The hash code is computed based on both the index and the value.
-     * The formula ensures that {@code true} and {@code false} values at the same index have different hash codes.</p>
      *
-     * @return the hash code
+     * <p>The hash code is computed based on both the index and the value.
+     * The formula ensures that {@code true} and {@code false} values at the same index
+     * produce different hash codes.</p>
+     *
+     * @return the hash code value for this object
      */
     @Override
     public int hashCode() {
@@ -123,15 +124,15 @@ public final class IndexedBoolean extends AbstractIndexed {
 
     /**
      * Checks if this IndexedBoolean instance is equal to another object.
-     * 
+     *
      * <p>Two IndexedBoolean instances are equal if they have the same index and value.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedBoolean indexed1 = IndexedBoolean.of(true, 5);
      * IndexedBoolean indexed2 = IndexedBoolean.of(true, 5);
      * IndexedBoolean indexed3 = IndexedBoolean.of(false, 5);
-     * 
+     *
      * indexed1.equals(indexed2);   // true
      * indexed1.equals(indexed3);   // false
      * }</pre>
@@ -146,16 +147,16 @@ public final class IndexedBoolean extends AbstractIndexed {
 
     /**
      * Returns a string representation of this IndexedBoolean instance.
-     * 
-     * <p>The format is: [index]=value</p>
-     * 
+     *
+     * <p>The format is: {@code [index]=value}</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedBoolean indexed = IndexedBoolean.of(true, 5);
      * System.out.println(indexed);   // prints: [5]=true
      * }</pre>
      *
-     * @return a string representation in the format [index]=value
+     * @return a string representation in the format {@code [index]=value}
      */
     @Override
     public String toString() {

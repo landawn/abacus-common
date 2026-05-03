@@ -212,7 +212,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
     /**
      * Returns a Set view of the keys contained in this pool.
      * The returned set is a snapshot and will not reflect subsequent changes to the pool.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Set<String> keys = pool.keySet();
@@ -220,7 +220,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      *     System.out.println("Pool contains key: " + key);
      * }
      * }</pre>
-     * 
+     *
      * @return a set containing all keys currently in the pool
      * @throws IllegalStateException if the pool has been closed
      */
@@ -229,7 +229,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
     /**
      * Returns a Collection view of the values contained in this pool.
      * The returned collection is a snapshot and will not reflect subsequent changes to the pool.
-     * 
+     *
      * @return a collection containing all values currently in the pool
      * @throws IllegalStateException if the pool has been closed
      */
@@ -237,7 +237,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
 
     /**
      * Checks if this pool contains a mapping for the specified key.
-     * 
+     *
      * @param key the key whose presence in this pool is to be tested
      * @return {@code true} if this pool contains a mapping for the specified key, {@code false} otherwise
      * @throws IllegalStateException if the pool has been closed
@@ -247,7 +247,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
     /**
      * Interface for measuring the memory size of key-value pairs in the pool.
      * This allows the pool to enforce memory-based capacity limits.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MemoryMeasure<String, CachedData> measure = (key, data) ->
@@ -259,7 +259,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      *     measure
      * );
      * }</pre>
-     * 
+     *
      * @param <K> the type of keys
      * @param <E> the type of values being measured
      */
@@ -268,7 +268,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
         /**
          * Calculates the memory size of the given key-value pair in bytes.
          * The returned value is used to track total memory usage and enforce memory limits.
-         * 
+         *
          * @param key the key part of the pair, never {@code null} when called by the pool
          * @param value the value part of the pair, never {@code null} when called by the pool
          * @return the combined size of the key-value pair in bytes, should be non-negative

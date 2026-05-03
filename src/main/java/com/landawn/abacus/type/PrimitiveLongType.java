@@ -15,14 +15,25 @@
 package com.landawn.abacus.type;
 
 /**
- * Type handler for primitive long values.
- * This class handles the primitive long type specifically, as opposed to the Long wrapper class.
- * It provides type information and default value handling for long primitives.
+ * Type handler for the primitive {@code long} type, as opposed to the {@link Long} wrapper class.
+ * It provides type information and default value handling for {@code long} primitives.
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Type<Long> type = TypeFactory.getType(long.class);
+ *
+ * // Convert string to long
+ * Long value = type.valueOf("123456789");   // Returns 123456789L
+ *
+ * // Get default value
  * Long defaultVal = type.defaultValue();   // Returns 0L
+ *
+ * // Read from database
+ * try (ResultSet rs = stmt.executeQuery("SELECT user_id FROM users")) {
+ *     if (rs.next()) {
+ *         Long userId = type.get(rs, 1);
+ *     }
+ * }
  * }</pre>
  */
 @SuppressWarnings("java:S2160")
@@ -32,6 +43,10 @@ public final class PrimitiveLongType extends AbstractLongType {
 
     private static final Long DEFAULT_VALUE = 0L;
 
+    /**
+     * Constructs a new PrimitiveLongType instance.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
+     */
     PrimitiveLongType() {
         super(LONG);
     }

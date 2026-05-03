@@ -36,7 +36,8 @@ import com.landawn.abacus.util.Tuple.Tuple7;
 
 public class Tuple7TypeTest extends TestBase {
 
-    private final Tuple7Type type = new Tuple7Type("String", "String", "String", "String", "String", "String", "String");
+    private final Tuple7Type<String, String, String, String, String, String, String> type = new Tuple7Type("String", "String", "String", "String", "String",
+            "String", "String");
 
     @Test
     public void test_valueOf_Null() {
@@ -53,8 +54,7 @@ public class Tuple7TypeTest extends TestBase {
         Tuple7<String, String, String, String, String, String, String> t = Tuple.of("a", "b", "c", "d", "e", "f", "g");
         String json = type.stringOf(t);
         @SuppressWarnings("unchecked")
-        Tuple7<String, String, String, String, String, String, String> result = (Tuple7<String, String, String, String, String, String, String>) type
-                .valueOf(json);
+        Tuple7<String, String, String, String, String, String, String> result = type.valueOf(json);
         assertNotNull(result);
         assertEquals("a", result._1);
         assertEquals("g", result._7);

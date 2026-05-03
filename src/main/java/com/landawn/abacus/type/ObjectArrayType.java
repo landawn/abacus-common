@@ -18,6 +18,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
+import java.util.List;
 
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonDeserConfig;
@@ -29,8 +30,8 @@ import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
-import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Strings;
 
 /**
  * Type handler for object arrays, providing serialization, deserialization,
@@ -69,7 +70,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     protected final Class<T[]> typeClass;
 
     protected final Type<T> elementType;
-    protected final Type<T>[] parameterTypes;
+    protected final List<Type<?>> parameterTypes;
 
     protected final JsonDeserConfig jdc;
 
@@ -84,7 +85,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
         typeClass = arrayClass;
         elementType = TypeFactory.getType(arrayClass.getComponentType());
-        this.parameterTypes = new Type[] { elementType };
+        this.parameterTypes = List.of(elementType);
 
         jdc = JsonDeserConfig.create().setElementType(elementType);
     }
@@ -100,7 +101,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
         typeClass = (Class<T[]>) N.newArray(elementType.javaType(), 0).getClass();
         this.elementType = elementType;
-        this.parameterTypes = new Type[] { elementType };
+        this.parameterTypes = List.of(elementType);
 
         jdc = JsonDeserConfig.create().setElementType(elementType);
     }
@@ -125,8 +126,14 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
         return elementType;
     }
 
+    /**
+     * Gets the immutable list of parameter types for this generic array type.
+     * For object arrays, this returns a single-element list containing the element type.
+     *
+     * @return an immutable list containing the element type
+     */
     @Override
-    public Type<T>[] parameterTypes() {
+    public List<Type<?>> parameterTypes() {
         return parameterTypes;
     }
 

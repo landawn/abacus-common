@@ -22,7 +22,6 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>This is a functional interface whose functional method is {@link #test(Object, Object, int)}.
  *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <T> the type of the first object argument to the predicate
@@ -80,6 +79,7 @@ public interface BiObjIntPredicate<T, U> extends Throwables.BiObjIntPredicate<T,
      *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default BiObjIntPredicate<T, U> and(final BiObjIntPredicate<? super T, ? super U> other) {
         return (t, u, i) -> test(t, u, i) && other.test(t, u, i);
@@ -102,6 +102,7 @@ public interface BiObjIntPredicate<T, U> extends Throwables.BiObjIntPredicate<T,
      *
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     default BiObjIntPredicate<T, U> or(final BiObjIntPredicate<? super T, ? super U> other) {
         return (t, u, i) -> test(t, u, i) || other.test(t, u, i);

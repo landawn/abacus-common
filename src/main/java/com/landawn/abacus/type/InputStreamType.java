@@ -29,15 +29,15 @@ import java.sql.SQLException;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
-import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
 
 /**
  * Type handler for InputStream and its subclasses.
  * This class provides serialization, deserialization, and database access capabilities for InputStream instances.
- * InputStreams are serialized as base64-encoded strings for text-based storage and transmission.
+ * InputStreams are serialized by reading all their bytes and decoding them as a string using the platform default charset.
  * Note that the InputStream content is consumed during serialization.
  */
 @SuppressWarnings("java:S2160")
@@ -80,16 +80,9 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
-     * Returns the Class object representing the InputStream type handled by this type handler.
+     * Returns the Java class represented by this type handler.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<InputStream> type = TypeFactory.getType(InputStream.class);
-     * Class<InputStream> clazz = type.javaType();
-     * // Returns: InputStream.class
-     * }</pre>
-     *
-     * @return the Class object for InputStream or its subclass
+     * @return {@code InputStream.class} or a concrete subclass thereof
      */
     @Override
     public Class<InputStream> javaType() {
@@ -108,21 +101,11 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
-     * Converts an InputStream to its string representation.
-     * The stream is read completely and its contents are converted to a string.
+     * Reads the entire contents of an {@link InputStream} and returns them as a string.
      * Note that this operation consumes the stream.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<InputStream> type = TypeFactory.getType(InputStream.class);
-     * InputStream stream = new ByteArrayInputStream("Hello, World!".getBytes());
-     * String result = type.stringOf(stream);
-     * // Returns: "Hello, World!"
-     * // Note: stream is now consumed
-     * }</pre>
-     *
-     * @param x the InputStream to convert to string
-     * @return the string representation of the stream contents, or {@code null} if the input is null
+     * @param x the {@link InputStream} to read; may be {@code null}
+     * @return the stream contents as a string, or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final InputStream x) {
@@ -132,19 +115,12 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
-     * Converts a string back to an InputStream instance.
-     * Creates the appropriate InputStream subclass based on the configured constructors.
-     * If no specific constructors are available, returns a ByteArrayInputStream.
+     * Converts a string to an {@link InputStream} by encoding it with the default charset.
+     * Creates the appropriate subclass based on the constructors discovered at construction time;
+     * falls back to {@link ByteArrayInputStream} if no suitable constructor is available.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<InputStream> type = TypeFactory.getType(InputStream.class);
-     * InputStream stream = type.valueOf("Hello, World!");
-     * // Returns: ByteArrayInputStream containing "Hello, World!" bytes
-     * }</pre>
-     *
-     * @param str the string to convert
-     * @return a new InputStream containing the string bytes, or {@code null} if the input is null
+     * @param str the string to convert; may be {@code null}
+     * @return a new {@link InputStream} containing the encoded bytes, or {@code null} if {@code str} is {@code null}
      */
     @Override
     public InputStream valueOf(final String str) {
@@ -165,26 +141,13 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
-     * Converts various object types to an InputStream.
-     * Handles Blob objects by extracting their binary stream.
-     * Other objects are converted to string first, then to InputStream.
+     * Converts an arbitrary object to an {@link InputStream}.
+     * {@link Blob} instances are converted via {@link Blob#getBinaryStream()};
+     * all other objects are first converted to a string and then to a stream via {@link #valueOf(String)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<InputStream> type = TypeFactory.getType(InputStream.class);
-     *
-     * // From String
-     * InputStream stream1 = type.valueOf("Hello");
-     *
-     * // From Blob (in database context)
-     * Blob blob = new javax.sql.rowset.serial.SerialBlob(new byte[] { 1, 2, 3 });
-     * InputStream stream2 = type.valueOf(blob);
-     * // Returns the blob's binary stream
-     * }</pre>
-     *
-     * @param obj the object to convert to InputStream
-     * @return an InputStream representation of the object, or {@code null} if the input is null
-     * @throws UncheckedSQLException if a SQLException occurs while reading from a Blob
+     * @param obj the object to convert; may be {@code null}
+     * @return an {@link InputStream} representation of the object, or {@code null} if {@code obj} is {@code null}
+     * @throws com.landawn.abacus.exception.UncheckedSQLException if a {@link java.sql.SQLException} occurs while reading from a {@link Blob}
      */
     @SuppressFBWarnings
     @Override
@@ -203,21 +166,13 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
-     * Retrieves an InputStream from the specified column in a ResultSet.
-     * Uses the getBinaryStream method to read binary data as a stream.
+     * Retrieves an {@link InputStream} from the specified column in a {@link ResultSet}
+     * via {@link ResultSet#getBinaryStream(int)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<InputStream> type = TypeFactory.getType(InputStream.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * InputStream stream = type.get(rs, 1);
-     * // Returns binary stream from column 1
-     * }</pre>
-     *
-     * @param rs the ResultSet to read from
-     * @param columnIndex the index of the column to read (1-based)
-     * @return the InputStream from the column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param rs the {@link ResultSet} to read from
+     * @param columnIndex the 1-based column index
+     * @return the binary stream from the column, or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
     public InputStream get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -225,21 +180,13 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
-     * Retrieves an InputStream from the specified column in a ResultSet using the column label.
-     * Uses the getBinaryStream method to read binary data as a stream.
+     * Retrieves an {@link InputStream} from the specified column in a {@link ResultSet} using the column label,
+     * via {@link ResultSet#getBinaryStream(String)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<InputStream> type = TypeFactory.getType(InputStream.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
-     * InputStream stream = type.get(rs, "file_content");
-     * // Returns binary stream from "file_content" column
-     * }</pre>
-     *
-     * @param rs the ResultSet to read from
-     * @param columnName the label of the column to read
-     * @return the InputStream from the column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnName is not found
+     * @param rs the {@link ResultSet} to read from
+     * @param columnName the label of the column to retrieve
+     * @return the binary stream from the column, or {@code null} if the column value is SQL {@code NULL}
+     * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
     public InputStream get(final ResultSet rs, final String columnName) throws SQLException {
@@ -247,22 +194,12 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
-     * Sets an InputStream parameter in a PreparedStatement.
-     * The stream will be read when the statement is executed.
+     * Sets an {@link InputStream} value as a binary-stream parameter in a {@link PreparedStatement}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<InputStream> type = TypeFactory.getType(InputStream.class);
-     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
-     * InputStream stream = new ByteArrayInputStream("Hello".getBytes());
-     * type.set(stmt, 2, stream);
-     * stmt.executeUpdate();
-     * }</pre>
-     *
-     * @param stmt the PreparedStatement to set the parameter on
-     * @param columnIndex the index of the parameter to set (1-based)
-     * @param x the InputStream to set, or null
-     * @throws SQLException if a database access error occurs
+     * @param stmt the {@link PreparedStatement} in which to set the parameter
+     * @param columnIndex the 1-based parameter index
+     * @param x the {@link InputStream} to set; may be {@code null}
+     * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x) throws SQLException {
@@ -270,22 +207,12 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
-     * Sets an InputStream parameter in a CallableStatement using a parameter name.
-     * The stream will be read when the statement is executed.
+     * Sets an {@link InputStream} value as a named binary-stream parameter in a {@link CallableStatement}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<InputStream> type = TypeFactory.getType(InputStream.class);
-     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
-     * InputStream stream = new FileInputStream("document.pdf");
-     * type.set(stmt, "file_content", stream);
-     * stmt.execute();
-     * }</pre>
-     *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param stmt the {@link CallableStatement} in which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the InputStream to set, or null
-     * @throws SQLException if a database access error occurs
+     * @param x the {@link InputStream} to set; may be {@code null}
+     * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final InputStream x) throws SQLException {
@@ -293,23 +220,14 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
-     * Sets an InputStream parameter in a PreparedStatement with a specified length.
-     * The stream will be read when the statement is executed, up to the specified length.
+     * Sets an {@link InputStream} value as a binary-stream parameter in a {@link PreparedStatement},
+     * reading at most {@code sqlTypeOrLength} bytes from the stream.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<InputStream> type = TypeFactory.getType(InputStream.class);
-     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
-     * InputStream stream = new FileInputStream("document.pdf");
-     * type.set(stmt, 2, stream, 1024);  // read up to 1024 bytes
-     * stmt.executeUpdate();
-     * }</pre>
-     *
-     * @param stmt the PreparedStatement to set the parameter on
-     * @param columnIndex the index of the parameter to set (1-based)
-     * @param x the InputStream to set, or null
-     * @param sqlTypeOrLength the length of the stream in bytes
-     * @throws SQLException if a database access error occurs
+     * @param stmt the {@link PreparedStatement} in which to set the parameter
+     * @param columnIndex the 1-based parameter index
+     * @param x the {@link InputStream} to set; may be {@code null}
+     * @param sqlTypeOrLength the maximum number of bytes to read from the stream
+     * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x, final int sqlTypeOrLength) throws SQLException {
@@ -317,23 +235,14 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
-     * Sets an InputStream parameter in a CallableStatement with a specified length.
-     * The stream will be read when the statement is executed, up to the specified length.
+     * Sets an {@link InputStream} value as a named binary-stream parameter in a {@link CallableStatement},
+     * reading at most {@code sqlTypeOrLength} bytes from the stream.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<InputStream> type = TypeFactory.getType(InputStream.class);
-     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
-     * InputStream stream = new FileInputStream("document.pdf");
-     * type.set(stmt, "file_content", stream, 2048);  // read up to 2048 bytes
-     * stmt.execute();
-     * }</pre>
-     *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param stmt the {@link CallableStatement} in which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the InputStream to set, or null
-     * @param sqlTypeOrLength the length of the stream in bytes
-     * @throws SQLException if a database access error occurs
+     * @param x the {@link InputStream} to set; may be {@code null}
+     * @param sqlTypeOrLength the maximum number of bytes to read from the stream
+     * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final InputStream x, final int sqlTypeOrLength) throws SQLException {
@@ -341,23 +250,13 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
-     * Appends the content of an InputStream to an Appendable.
-     * If the Appendable is a Writer, the stream is efficiently copied using character encoding.
-     * Otherwise, the entire stream is read into a string first.
+     * Appends the content of an {@link InputStream} to an {@link Appendable}.
+     * If the target is a {@link java.io.Writer}, the stream is copied directly using character encoding;
+     * otherwise the stream is read to a string first.
      * Note that this operation consumes the stream.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<InputStream> type = TypeFactory.getType(InputStream.class);
-     * StringBuilder sb = new StringBuilder();
-     * InputStream stream = new ByteArrayInputStream("Hello".getBytes());
-     * type.appendTo(sb, stream);
-     * // sb contains: "Hello"
-     * // Note: stream is now consumed
-     * }</pre>
-     *
-     * @param appendable the Appendable to write to
-     * @param x the InputStream to read from
+     * @param appendable the {@link Appendable} to write to
+     * @param x the {@link InputStream} to read from; may be {@code null}
      * @throws IOException if an I/O error occurs during reading or writing
      */
     @Override
@@ -374,27 +273,13 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
-     * Writes the character representation of an InputStream to a CharacterWriter.
-     * The stream is read completely and converted to a string before writing.
-     * Handles quotation marks if specified in the configuration.
-     * Note that this operation consumes the stream.
+     * Writes the string content of an {@link InputStream} to a {@link CharacterWriter}.
+     * The stream is fully consumed and converted to a string.
+     * If {@code config} specifies a string quotation character, the output is quoted.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<InputStream> type = TypeFactory.getType(InputStream.class);
-     * CharacterWriter writer = new CharacterWriter();
-     * InputStream stream = new ByteArrayInputStream("Hello".getBytes());
-     * JsonXmlSerConfig config =
-     *     JsonXmlSerConfig.of().setStringQuotation('"');
-     * type.writeCharacter(writer, stream, config);
-     * String result = writer.toString();
-     * // result: "Hello" (with quotes)
-     * // Note: stream is now consumed
-     * }</pre>
-     *
-     * @param writer the CharacterWriter to write to
-     * @param x the InputStream to write
-     * @param config the serialization configuration to use
+     * @param writer the {@link CharacterWriter} to write to
+     * @param x the {@link InputStream} to write; may be {@code null}
+     * @param config the serialization configuration to use; may be {@code null}
      * @throws IOException if an I/O error occurs during reading or writing
      */
     @Override
@@ -403,10 +288,10 @@ public class InputStreamType extends AbstractType<InputStream> {
             writer.write(NULL_CHAR_ARRAY);
         } else {
             if ((config == null) || (config.getStringQuotation() == 0)) {
-                writer.write(stringOf(x));
+                writer.writeCharacter(stringOf(x));
             } else {
                 writer.write(config.getStringQuotation());
-                writer.write(stringOf(x));
+                writer.writeCharacter(stringOf(x));
                 writer.write(config.getStringQuotation());
             }
         }

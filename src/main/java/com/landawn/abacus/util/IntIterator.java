@@ -27,14 +27,14 @@ import com.landawn.abacus.util.stream.IntStream;
  * A specialized iterator for primitive int values, providing better performance than Iterator&lt;Integer&gt;
  * by avoiding boxing/unboxing overhead. This abstract class provides various utility methods for
  * creating, transforming, and consuming int iterators.
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IntIterator iter = IntIterator.of(1, 2, 3, 4, 5);
  * while (iter.hasNext()) {
  *     System.out.println(iter.nextInt());
  * }
- * 
+ *
  * // Using functional operations
  * int sum = IntIterator.of(1, 2, 3, 4, 5)
  *     .filter(x -> x % 2 == 0)
@@ -58,7 +58,11 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * An empty IntIterator that has no elements.
+     * A singleton empty {@code IntIterator} instance that contains no elements.
+     * This iterator's {@code hasNext()} always returns {@code false}, and {@code nextInt()}
+     * always throws {@link NoSuchElementException}.
+     *
+     * @see #empty()
      */
     public static final IntIterator EMPTY = new IntIterator() {
         @Override
@@ -174,7 +178,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Creates a deferred IntIterator that is initialized lazily using the provided Supplier.
      * The Supplier is called only when the first method of the iterator is invoked.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntIterator iter = IntIterator.defer(() -> IntIterator.of(computeExpensiveArray()));
@@ -224,13 +228,13 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
 
     /**
      * Creates an infinite IntIterator that generates values using the provided IntSupplier.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Random rand = new Random();
      * IntIterator randomInts = IntIterator.generate(rand::nextInt);
      * // Generates infinite random integers
-     * 
+     *
      * IntIterator constants = IntIterator.generate(() -> 42);
      * // Generates infinite stream of 42
      * }</pre>
@@ -257,7 +261,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
 
     /**
      * Creates an IntIterator that generates values while a condition is {@code true}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] counter = {0};
@@ -312,14 +316,14 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
 
     /**
      * Returns the next int value in the iteration.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntIterator iter = IntIterator.of(1, 2, 3);
      * int first = iter.nextInt();    // 1
      * int second = iter.nextInt();   // 2
      * }</pre>
-     * 
+     *
      * @return the next int value
      * @throws NoSuchElementException if the iteration has no more elements
      */
@@ -441,7 +445,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
 
     /**
      * Filters elements based on the given predicate.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntIterator iter = IntIterator.of(1, 2, 3, 4, 5);
@@ -544,7 +548,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
 
     /**
      * Converts this iterator to an IntStream for further processing.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int sum = IntIterator.of(1, 2, 3, 4, 5)
@@ -552,7 +556,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      *     .filter(x -> x > 2)
      *     .sum();   // sum = 12
      * }</pre>
-     * 
+     *
      * @return an IntStream backed by this iterator
      */
     public IntStream stream() {
@@ -562,7 +566,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Returns an iterator that provides indexed access to elements.
      * Each element is paired with its index starting from 0.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntIterator.of(10, 20, 30)
@@ -570,7 +574,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      *     .foreachRemaining(idx -> System.out.println(idx.index() + ": " + idx.value()));
      * // Prints: 0: 10, 1: 20, 2: 30
      * }</pre>
-     * 
+     *
      * @return an ObjIterator of IndexedInt elements
      */
     @Beta
@@ -581,7 +585,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Returns an iterator that provides indexed access to elements.
      * Each element is paired with its index starting from the specified value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntIterator.of(10, 20, 30)
@@ -618,7 +622,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Performs the given action for each remaining element.
      *
-     * @param action the action to perform 
+     * @param action the action to perform
      * @deprecated use {@link #foreachRemaining(Throwables.IntConsumer)} instead to avoid boxing
      */
     @Deprecated
@@ -678,6 +682,8 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each index-value pair, must not be null
      * @throws IllegalArgumentException if action is null
+     * @throws IllegalStateException if the iterator contains more than {@link Integer#MAX_VALUE} elements,
+     *         causing the index to overflow
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntIntConsumer<E> action) throws IllegalArgumentException, E {
