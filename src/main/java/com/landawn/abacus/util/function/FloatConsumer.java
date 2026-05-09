@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -61,6 +63,7 @@ public interface FloatConsumer extends Throwables.FloatConsumer<RuntimeException
      * @throws NullPointerException if {@code after} is null
      */
     default FloatConsumer andThen(final FloatConsumer after) {
+        Objects.requireNonNull(after);
         return value -> {
             accept(value);
             after.accept(value);

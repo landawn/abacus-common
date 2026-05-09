@@ -9605,4 +9605,200 @@ public class FnTest extends TestBase {
         assertEquals("hello world", sb.toString());
     }
 
+    // --- Tests for atMost overflow safety (regression for getAndDecrement underflow) ---
+
+    @Test
+    public void testAtMost_doesNotUnderflowOnLongStreams() {
+        // After exhausting the count, all subsequent calls must return false,
+        // even after billions of invocations. Prior to the fix this used getAndDecrement,
+        // which could eventually wrap around past Integer.MIN_VALUE back to positive.
+        Predicate<Object> p = Fn.atMost(3);
+        assertTrue(p.test(null));
+        assertTrue(p.test(null));
+        assertTrue(p.test(null));
+        for (int i = 0; i < 10_000; i++) {
+            assertFalse(p.test(null), "atMost should not return true after the limit is reached");
+        }
+    }
+
+    @Test
+    public void testAtMost_zero_alwaysFalse() {
+        Predicate<Object> p = Fn.atMost(0);
+        assertFalse(p.test("a"));
+        assertFalse(p.test("b"));
+    }
+
+    @Test
+    public void testAtMost_throwsOnNegative() {
+        assertThrows(IllegalArgumentException.class, () -> Fn.atMost(-1));
+    }
+
+    // --- between (deprecated) is documented as strictly between (exclusive on both ends) ---
+
+    @Test
+    public void testBetween_isStrictlyExclusive() {
+        @SuppressWarnings("deprecation")
+        Predicate<Integer> p = Fn.between(1, 5);
+        assertFalse(p.test(1));
+        assertFalse(p.test(5));
+        assertTrue(p.test(2));
+        assertTrue(p.test(4));
+    }
+
+    @Test
+    public void testBetweenInclusiveBoundaryFamily() {
+        // Sanity-check all four boundary variants.
+        assertFalse(Fn.gtAndLt(1, 5).test(1));
+        assertFalse(Fn.gtAndLt(1, 5).test(5));
+        assertTrue(Fn.gtAndLt(1, 5).test(3));
+
+        assertTrue(Fn.geAndLt(1, 5).test(1));
+        assertFalse(Fn.geAndLt(1, 5).test(5));
+
+        assertTrue(Fn.geAndLe(1, 5).test(1));
+        assertTrue(Fn.geAndLe(1, 5).test(5));
+
+        assertFalse(Fn.gtAndLe(1, 5).test(1));
+        assertTrue(Fn.gtAndLe(1, 5).test(5));
+    }
+
+    // --- Memoize: null caching, exception caching policy ---
+
+    @Test
+    public void testMemoizeFunction_doesNotCacheException() {
+        AtomicInteger calls = new AtomicInteger(0);
+        Function<String, String> f = Fn.memoize(s -> {
+            calls.incrementAndGet();
+            if ("bad".equals(s)) {
+                throw new RuntimeException("boom");
+            }
+            return s + "!";
+        });
+        assertThrows(RuntimeException.class, () -> f.apply("bad"));
+        // a thrown call must NOT poison the cache: calling with a different key still works
+        assertEquals("ok!", f.apply("ok"));
+        // and a retry of the bad key re-invokes the function (proves no error was cached)
+        assertThrows(RuntimeException.class, () -> f.apply("bad"));
+        assertTrue(calls.get() >= 3, "function must be re-invoked after exception");
+    }
+
+    @Test
+    public void testMemoizeFunction_nullExceptionNotCached() {
+        AtomicInteger calls = new AtomicInteger(0);
+        Function<Object, String> f = Fn.memoize(o -> {
+            int n = calls.incrementAndGet();
+            if (n == 1) {
+                throw new RuntimeException("first failure");
+            }
+            return "ok";
+        });
+        assertThrows(RuntimeException.class, () -> f.apply(null));
+        assertEquals("ok", f.apply(null));
+        assertEquals("ok", f.apply(null));
+        assertEquals(2, calls.get(), "second null call should compute once, then cache");
+    }
+
+    // --- Predicate combinators: not + null ---
+
+    @Test
+    public void testNot_npeOnNull() {
+        assertThrows(IllegalArgumentException.class, () -> Fn.not((java.util.function.Predicate<Object>) null));
+    }
+
+    // --- close: Runnable should close at most once even under concurrent invocation ---
+
+    @Test
+    public void testCloseRunnable_idempotent() {
+        MyCloseable c = new MyCloseable();
+        Runnable r = Fn.close(c);
+        r.run();
+        r.run();
+        r.run();
+        assertEquals(1, c.getCloseCount());
+    }
+
+    @Test
+    public void testCloseAll_idempotent() {
+        MyCloseable a = new MyCloseable();
+        MyCloseable b = new MyCloseable();
+        Runnable r = Fn.closeAll(a, b);
+        r.run();
+        r.run();
+        assertEquals(1, a.getCloseCount());
+        assertEquals(1, b.getCloseCount());
+    }
+
+    // --- limitThenFilter / filterThenLimit ordering distinction ---
+
+    @Test
+    public void testLimitThenFilter_testsFirstNOnly() {
+        // Test only first 3 elements, of those keep evens.
+        // Stream: 1,2,3,4,5,6 -> first 3 = [1,2,3], evens among first 3 = [2]
+        Predicate<Integer> p = Fn.limitThenFilter(3, x -> x % 2 == 0);
+        java.util.List<Integer> kept = new java.util.ArrayList<>();
+        for (int n : new int[] { 1, 2, 3, 4, 5, 6 }) {
+            if (p.test(n)) {
+                kept.add(n);
+            }
+        }
+        assertEquals(java.util.Arrays.asList(2), kept);
+    }
+
+    @Test
+    public void testFilterThenLimit_keepsFirstNMatches() {
+        // Test ALL elements, but keep only the first 3 evens.
+        Predicate<Integer> p = Fn.filterThenLimit(x -> x % 2 == 0, 3);
+        java.util.List<Integer> kept = new java.util.ArrayList<>();
+        for (int n : new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }) {
+            if (p.test(n)) {
+                kept.add(n);
+            }
+        }
+        assertEquals(java.util.Arrays.asList(2, 4, 6), kept);
+    }
+
+    // --- alwaysTrue / alwaysFalse: stateless and shared ---
+
+    @Test
+    public void testAlwaysTrue_alwaysFalse_sharedSingletons() {
+        assertSame(Fn.alwaysTrue(), Fn.alwaysTrue());
+        assertSame(Fn.alwaysFalse(), Fn.alwaysFalse());
+        assertTrue(Fn.alwaysTrue().test("x"));
+        assertTrue(Fn.alwaysTrue().test(null));
+        assertFalse(Fn.alwaysFalse().test("x"));
+        assertFalse(Fn.alwaysFalse().test(null));
+    }
+
+    // --- identity: same singleton, returns input unchanged ---
+
+    @Test
+    public void testIdentity_returnsInputUnchanged() {
+        Function<Object, Object> id = Fn.identity();
+        Object o = new Object();
+        assertSame(o, id.apply(o));
+        assertNull(id.apply(null));
+        assertSame(Fn.identity(), Fn.identity());
+    }
+
+    // Regression test: Fn.mc must accept a plain JDK BiConsumer lambda
+    // (the lambda only implements j.u.f.BiConsumer, not abacus' BiConsumer).
+    @Test
+    public void testMc_acceptsJdkBiConsumerLambda() {
+        // This lambda implements only java.util.function.BiConsumer (not the abacus subtype).
+        java.util.function.BiConsumer<String, java.util.function.Consumer<Character>> mapper = (s, c) -> {
+            for (char ch : s.toCharArray()) {
+                c.accept(ch);
+            }
+        };
+
+        java.util.function.BiConsumer<String, java.util.function.Consumer<Character>> result = Fn.mc(mapper);
+        assertNotNull(result);
+
+        List<Character> chars = new ArrayList<>();
+        Consumer<Character> consumer = chars::add;
+        result.accept("ab", consumer);
+        assertEquals(Arrays.asList('a', 'b'), chars);
+
+        assertThrows(IllegalArgumentException.class, () -> Fn.mc(null));
+    }
 }

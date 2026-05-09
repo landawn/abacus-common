@@ -136,6 +136,9 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
 
     static final Type<Map<String, Object>> propsMapType = TypeFactory.getType("Map<String, Object>");
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String serialize(final Object obj) {
         return serialize(obj, (SC) null);

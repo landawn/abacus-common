@@ -44,4 +44,10 @@ public class ObjIntPredicateTest extends TestBase {
     public void testFunctionalInterface() {
         assertNotNull(ObjIntPredicate.class.getAnnotation(FunctionalInterface.class));
     }
+
+    @Test
+    public void testAndNullThrowsImmediately() {
+        ObjIntPredicate<String> instance = (a, b) -> false;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((ObjIntPredicate) null));
+    }
 }

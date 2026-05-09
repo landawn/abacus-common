@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -111,6 +113,7 @@ public interface LongNFunction<R> extends Throwables.LongNFunction<R, RuntimeExc
      */
     @Override
     default <V> LongNFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+        Objects.requireNonNull(after);
         return args -> after.apply(apply(args));
     }
 }

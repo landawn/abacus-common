@@ -106,4 +106,10 @@ public class FloatBiConsumerTest extends TestBase {
         assertEquals("first", executionOrder.get(0));
         assertEquals("second", executionOrder.get(1));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        FloatBiConsumer instance = (a, b) -> {};
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((FloatBiConsumer) null));
+    }
 }

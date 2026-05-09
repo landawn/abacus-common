@@ -1187,7 +1187,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
 
         /**
          * <p>
-         * Gets a suitable hash code for the range.
+         * Gets a suitable hash code for this lower endpoint.
          * </p>
          *
          * @return a hash code value for this object
@@ -1200,11 +1200,11 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
 
         /**
          * <p>
-         * Compares this range to another object to test if they are equal.
+         * Compares this lower endpoint to another object to test if they are equal.
          * </p>
          *
          * <p>
-         * To be equal, the minimum and maximum values must be equal, which ignores any differences in the comparator.
+         * To be equal, both the value and the closed/open flag must be equal.
          * </p>
          *
          * @param obj the reference object with which to compare

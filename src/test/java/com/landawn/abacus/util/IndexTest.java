@@ -4471,18 +4471,20 @@ public class IndexTest extends TestBase {
     @Test
     public void testAllOf_doubleWithTolerance() {
         double[] array = { 1.0, 1.05, 2.0, 1.1, 0.95 };
+        // Use 0.11 rather than 0.1: |1.1 - 1.0| evaluates to ~0.10000000000000009 in IEEE-754,
+        // so a tolerance of exactly 0.1 excludes index 3. 0.11 keeps the test off the FP boundary.
         BitSet expected = new BitSet();
         expected.set(0);
         expected.set(1);
         expected.set(3);
         expected.set(4);
-        assertEquals(expected, Index.allOf(array, 1.0, 0.1));
+        assertEquals(expected, Index.allOf(array, 1.0, 0.11));
 
         BitSet expectedFromIndex = new BitSet();
         expectedFromIndex.set(1);
         expectedFromIndex.set(3);
         expectedFromIndex.set(4);
-        assertEquals(expectedFromIndex, Index.allOf(array, 1.0, 0.1, 1));
+        assertEquals(expectedFromIndex, Index.allOf(array, 1.0, 0.11, 1));
     }
 
     @Test
@@ -4779,6 +4781,102 @@ public class IndexTest extends TestBase {
         assertTrue(result.get(2)); // "c"
         assertTrue(result.get(3)); // "d"
         assertTrue(result.get(4)); // "e"
+    }
+
+    // === Review-driven additions ===
+
+    @Test
+    public void test_allOf_doubleArray_tolerance_NaN_consistency() {
+        // BUG FIX: allOf(double[], NaN, tolerance) used to use min/max range comparison which returns false for NaN,
+        // while of(...) and last(...) use Numbers.fuzzyEquals which treats NaN==NaN as true.
+        // After fix, allOf is consistent with of/last: NaN matches NaN.
+        double[] arr = { 1.0, Double.NaN, 2.0, Double.NaN, 5.0 };
+        BitSet result = Index.allOf(arr, Double.NaN, 0.1);
+        assertEquals(2, result.cardinality());
+        assertTrue(result.get(1));
+        assertTrue(result.get(3));
+
+        // Sanity: of/last/allOf all agree
+        assertEquals(OptionalInt.of(1), Index.of(arr, Double.NaN, 0.1));
+        assertEquals(OptionalInt.of(3), Index.last(arr, Double.NaN, 0.1));
+    }
+
+    @Test
+    public void test_allOf_doubleArray_tolerance_infinity() {
+        // Infinities of the same sign should match each other under fuzzyEquals (which Index.of uses).
+        double[] arr = { Double.POSITIVE_INFINITY, 1.0, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY };
+        BitSet result = Index.allOf(arr, Double.POSITIVE_INFINITY, 0.0);
+        assertEquals(2, result.cardinality());
+        assertTrue(result.get(0));
+        assertTrue(result.get(2));
+    }
+
+    @Test
+    public void test_allOf_doubleArray_tolerance_negative_throws() {
+        // Numbers.fuzzyEquals throws on negative tolerance; allOf now propagates this.
+        double[] arr = { 1.0, 2.0, 3.0 };
+        assertThrows(IllegalArgumentException.class, () -> Index.allOf(arr, 2.0, -0.1));
+    }
+
+    @Test
+    public void test_of_floatArray_negativeZero() {
+        // Float.compare(-0.0f, 0.0f) != 0; Index.of uses Float.compare so the two are distinguished.
+        float[] arr = { -0.0f, 0.0f };
+        assertEquals(OptionalInt.of(0), Index.of(arr, -0.0f));
+        assertEquals(OptionalInt.of(1), Index.of(arr, 0.0f));
+    }
+
+    @Test
+    public void test_of_doubleArray_negativeZero() {
+        double[] arr = { -0.0d, 0.0d };
+        assertEquals(OptionalInt.of(0), Index.of(arr, -0.0d));
+        assertEquals(OptionalInt.of(1), Index.of(arr, 0.0d));
+    }
+
+    @Test
+    public void test_of_floatArray_NaN_uses_compare_not_equals() {
+        // Float.NaN == Float.NaN is false but Float.compare(NaN, NaN) == 0; Index.of must find NaN.
+        float[] arr = { 1.0f, Float.NaN, 2.0f };
+        assertEquals(OptionalInt.of(1), Index.of(arr, Float.NaN));
+        assertEquals(OptionalInt.of(1), Index.last(arr, Float.NaN));
+        BitSet all = Index.allOf(arr, Float.NaN);
+        assertEquals(1, all.cardinality());
+        assertTrue(all.get(1));
+    }
+
+    @Test
+    public void test_of_negativeFromIndex_treatedAsZero() {
+        int[] arr = { 5, 10, 5 };
+        assertEquals(OptionalInt.of(0), Index.of(arr, 5, -3));
+        assertEquals(OptionalInt.of(0), Index.of(arr, 5, Integer.MIN_VALUE));
+    }
+
+    @Test
+    public void test_lastOf_startIndexFromBack_outOfRange() {
+        // startIndexFromBack >= len should still find the last occurrence (entire array searched).
+        int[] arr = { 1, 2, 3, 2, 1 };
+        assertEquals(OptionalInt.of(3), Index.last(arr, 2, 100));
+        assertEquals(OptionalInt.of(3), Index.last(arr, 2, Integer.MAX_VALUE));
+    }
+
+    @Test
+    public void test_emptyArray_returnsEmpty_allTypes() {
+        assertFalse(Index.of(new boolean[0], true).isPresent());
+        assertFalse(Index.of(new char[0], 'a').isPresent());
+        assertFalse(Index.of(new byte[0], (byte) 1).isPresent());
+        assertFalse(Index.of(new short[0], (short) 1).isPresent());
+        assertFalse(Index.of(new int[0], 1).isPresent());
+        assertFalse(Index.of(new long[0], 1L).isPresent());
+        assertFalse(Index.of(new float[0], 1.0f).isPresent());
+        assertFalse(Index.of(new double[0], 1.0d).isPresent());
+        assertFalse(Index.of(new Object[0], "x").isPresent());
+
+        assertFalse(Index.last(new boolean[0], true).isPresent());
+        assertFalse(Index.last(new int[0], 1).isPresent());
+        assertFalse(Index.last(new Object[0], "x").isPresent());
+
+        assertEquals(0, Index.allOf(new int[0], 1).cardinality());
+        assertEquals(0, Index.allOf(new Object[0], "x").cardinality());
     }
 
 }

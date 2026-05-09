@@ -1966,8 +1966,6 @@ public abstract class Tuple<TP> implements Immutable {
          * Converts this Tuple3 to a Triple with the same elements.
          * Triple is another representation of a three-element container.
          *
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Tuple3<String, Integer, Boolean> tuple = Tuple.of("A", 1, true);
@@ -1984,8 +1982,6 @@ public abstract class Tuple<TP> implements Immutable {
          * Creates a new Tuple3 with the elements in reversed order.
          * The first element becomes the third, the third element becomes the first,
          * and the second element remains in the middle position.
-         *
-         *
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2021,8 +2017,6 @@ public abstract class Tuple<TP> implements Immutable {
          * Performs the given tri-consumer action on the three elements of this tuple.
          * The elements are passed to the tri-consumer as separate arguments.
          *
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Tuple3<String, Integer, Boolean> data = Tuple.of("John", 30, true);
@@ -2041,8 +2035,6 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * Applies the given tri-function to the three elements of this tuple and returns the result.
          * The elements are passed to the tri-function as separate arguments.
-         *
-         *
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2065,8 +2057,6 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * Returns an Optional containing this tuple if all three elements match the given tri-predicate,
          * otherwise returns an empty Optional.
-         *
-         *
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2268,8 +2258,6 @@ public abstract class Tuple<TP> implements Immutable {
          * Creates a new Tuple4 with the elements in reversed order.
          * The first element becomes the fourth, the fourth element becomes the first,
          * the second element becomes the third, and the third element becomes the second.
-         *
-         *
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2491,8 +2479,6 @@ public abstract class Tuple<TP> implements Immutable {
          * The first element becomes the fifth, the fifth element becomes the first,
          * the second element becomes the fourth, the fourth element becomes the second,
          * and the third element remains in the middle position.
-         *
-         *
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2721,8 +2707,6 @@ public abstract class Tuple<TP> implements Immutable {
          * Creates a new Tuple6 with the elements in reversed order.
          * Elements are rearranged so the first becomes the sixth,
          * the second becomes the fifth, and so on.
-         *
-         *
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2961,8 +2945,6 @@ public abstract class Tuple<TP> implements Immutable {
          * Creates a new Tuple7 with the elements in reversed order.
          * The ordering is completely reversed: first becomes seventh,
          * second becomes sixth, and so on.
-         *
-         *
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -3208,8 +3190,6 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * Creates a new Tuple8 with the elements in reversed order.
          * All elements are reversed: first becomes eighth, second becomes seventh, etc.
-         *
-         *
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code

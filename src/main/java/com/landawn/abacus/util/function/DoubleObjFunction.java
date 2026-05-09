@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -61,7 +63,7 @@ public interface DoubleObjFunction<T, R> extends Throwables.DoubleObjFunction<T,
      * DoubleObjFunction<String, String> formatter = (val, unit) -> val + " " + unit;
      * Function<String, Integer> length = String::length;
      * DoubleObjFunction<String, Integer> composed = formatter.andThen(length);
-     * Integer result = composed.apply(3.14, "meters");   // Returns 10
+     * Integer result = composed.apply(3.14, "meters");   // Returns 11
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function
@@ -70,6 +72,7 @@ public interface DoubleObjFunction<T, R> extends Throwables.DoubleObjFunction<T,
      * @throws NullPointerException if {@code after} is null
      */
     default <V> DoubleObjFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+        Objects.requireNonNull(after);
         return (i, t) -> after.apply(apply(i, t));
     }
 }

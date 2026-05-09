@@ -22310,4 +22310,43 @@ public class CommonUtilTest extends TestBase {
         assertFalse(N.registerConverter(source.getClass(), (obj, targetClass) -> obj));
     }
 
+    @Test
+    @DisplayName("compareUnsigned ranged: zero-length range returns 0 even when one side is empty (regression)")
+    public void testCompareUnsignedRanged_ZeroLength() {
+        // byte[] - zero-length range should return 0 regardless of source array contents (consistent with Arrays.compareUnsigned)
+        assertEquals(0, N.compareUnsigned(new byte[0], 0, new byte[] { 1, 2, 3 }, 0, 0));
+        assertEquals(0, N.compareUnsigned(new byte[] { 1, 2, 3 }, 0, new byte[0], 0, 0));
+        assertEquals(0, N.compareUnsigned(new byte[] { 1, 2, 3 }, 1, new byte[] { 4, 5, 6 }, 1, 0));
+
+        // short[]
+        assertEquals(0, N.compareUnsigned(new short[0], 0, new short[] { 1, 2, 3 }, 0, 0));
+        assertEquals(0, N.compareUnsigned(new short[] { 1, 2, 3 }, 0, new short[0], 0, 0));
+
+        // int[]
+        assertEquals(0, N.compareUnsigned(new int[0], 0, new int[] { 1, 2, 3 }, 0, 0));
+        assertEquals(0, N.compareUnsigned(new int[] { 1, 2, 3 }, 0, new int[0], 0, 0));
+
+        // long[]
+        assertEquals(0, N.compareUnsigned(new long[0], 0, new long[] { 1L, 2L, 3L }, 0, 0));
+        assertEquals(0, N.compareUnsigned(new long[] { 1L, 2L, 3L }, 0, new long[0], 0, 0));
+    }
+
+    @Test
+    @DisplayName("compareUnsigned ranged: actual unsigned comparison")
+    public void testCompareUnsignedRanged_NonZero() {
+        // -1 as unsigned is the largest byte, so should be > 1 unsigned
+        assertTrue(N.compareUnsigned(new byte[] { (byte) -1 }, 0, new byte[] { (byte) 1 }, 0, 1) > 0);
+        // Equal
+        assertEquals(0, N.compareUnsigned(new byte[] { 1, 2, 3 }, 0, new byte[] { 1, 2, 3 }, 0, 3));
+        // Same array, same offset, len > 0
+        final byte[] arr = { 1, 2, 3 };
+        assertEquals(0, N.compareUnsigned(arr, 0, arr, 0, 3));
+
+        // int[] unsigned: -1 (0xFFFFFFFF) > 1 unsigned
+        assertTrue(N.compareUnsigned(new int[] { -1 }, 0, new int[] { 1 }, 0, 1) > 0);
+
+        // long[] unsigned: -1L > 1L unsigned
+        assertTrue(N.compareUnsigned(new long[] { -1L }, 0, new long[] { 1L }, 0, 1) > 0);
+    }
+
 }

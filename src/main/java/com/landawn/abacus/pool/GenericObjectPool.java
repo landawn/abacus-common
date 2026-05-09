@@ -485,15 +485,18 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * Retrieves and removes an object from the pool.
      * Objects are taken from the head of the deque (LIFO order).
      *
-     * <p>If the retrieved object has expired, it will be destroyed and the method
-     * will return {@code null}. The object's activity print is updated to reflect this access.
+     * <p>The method scans head-to-tail discarding any expired objects (each expired object is
+     * destroyed with {@link Caller#EVICT}) until a valid object is found or the pool is
+     * exhausted. When a valid object is returned, its activity print's last access time and
+     * access count are updated to reflect this access. {@code null} is returned only when no
+     * valid object remains in the pool.
      *
      * <p>This method performs the following operations:</p>
      * <ol>
-     *   <li>Removes an object from the head of the pool (LIFO)</li>
-     *   <li>Checks if the object has expired</li>
-     *   <li>If expired: destroys the object, returns {@code null}</li>
-     *   <li>If valid: updates last access time and access count, returns the object</li>
+     *   <li>While the pool is non-empty, pops an object from the head (LIFO)</li>
+     *   <li>If the popped object has expired, destroys it and continues with the next</li>
+     *   <li>Otherwise updates last access time and access count, then returns the object</li>
+     *   <li>If the pool becomes empty before a valid object is found, returns {@code null}</li>
      * </ol>
      *
      * <p><b>Usage Examples:</b></p>
@@ -523,6 +526,13 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         lock.lock();
 
         try {
+            // Re-check inside the lock: a concurrent close() could have set isClosed and
+            // started removeAll() between the unlocked check above and our lock acquisition.
+            // Without this check, take() would happily pop and return an element that close()
+            // will not destroy (since the snapshot was taken before our pop), leaking it and
+            // handing a "live" element back from a closed pool.
+            assertNotClosed();
+
             while (pool.size() > 0) {
                 element = pool.pop();
 
@@ -537,12 +547,23 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                     activityPrint.updateAccessCount();
 
                     if (memoryMeasure != null) {
-                        final long elementMemorySize = memoryMeasure.sizeOf(element);
+                        // Wrap memoryMeasure call: a user-supplied sizeOf that throws after we
+                        // popped the element would otherwise propagate the exception while leaving
+                        // the popped element neither in the pool nor returned to the caller — a
+                        // pure leak (its destroy() never fires). Log and continue with totalDataSize
+                        // unchanged; better to drift one accounting unit than leak a live resource.
+                        try {
+                            final long elementMemorySize = memoryMeasure.sizeOf(element);
 
-                        if (elementMemorySize < 0) {
-                            logger.warn("Memory measure returned negative size for element: " + elementMemorySize);
-                        } else {
-                            totalDataSize.addAndGet(-elementMemorySize); //NOSONAR
+                            if (elementMemorySize < 0) {
+                                logger.warn("Memory measure returned negative size for element: " + elementMemorySize);
+                            } else {
+                                totalDataSize.addAndGet(-elementMemorySize); //NOSONAR
+                            }
+                        } catch (final Exception ex) {
+                            if (logger.isWarnEnabled()) {
+                                logger.warn("Error measuring memory size during take: " + ExceptionUtil.getErrorMessage(ex, true));
+                            }
                         }
                     }
 
@@ -606,12 +627,20 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                         activityPrint.updateAccessCount();
 
                         if (memoryMeasure != null) {
-                            final long elementMemorySize = memoryMeasure.sizeOf(element);
+                            // See take(): never let a user sizeOf() throw after we've popped — that
+                            // would leak the live element. Log and continue.
+                            try {
+                                final long elementMemorySize = memoryMeasure.sizeOf(element);
 
-                            if (elementMemorySize < 0) {
-                                logger.warn("Memory measure returned negative size for element: " + elementMemorySize);
-                            } else {
-                                totalDataSize.addAndGet(-elementMemorySize); //NOSONAR
+                                if (elementMemorySize < 0) {
+                                    logger.warn("Memory measure returned negative size for element: " + elementMemorySize);
+                                } else {
+                                    totalDataSize.addAndGet(-elementMemorySize); //NOSONAR
+                                }
+                            } catch (final Exception ex) {
+                                if (logger.isWarnEnabled()) {
+                                    logger.warn("Error measuring memory size during take: " + ExceptionUtil.getErrorMessage(ex, true));
+                                }
                             }
                         }
                     }
@@ -621,6 +650,11 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                     if (element != null) {
                         return element;
                     }
+
+                    // Just popped an expired element. Skip awaiting and re-check the
+                    // pool — there may still be valid elements ready to take. Otherwise
+                    // we would block on notEmpty even though no producer needs to signal.
+                    continue;
                 }
 
                 if (nanos <= 0) {

@@ -188,4 +188,10 @@ public class LongBiPredicateTest extends TestBase {
         assertTrue(predicate.test(5L, 5L)); // 5 == 5
         assertFalse(predicate.test(5L, 10L)); // 5 < 10 AND 5 != 10
     }
+
+    @Test
+    public void testAndNullThrowsImmediately() {
+        LongBiPredicate instance = (a, b) -> false;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((LongBiPredicate) null));
+    }
 }

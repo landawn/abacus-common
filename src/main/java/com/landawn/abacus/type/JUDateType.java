@@ -37,6 +37,7 @@ import com.landawn.abacus.util.N;
 @SuppressWarnings({ "java:S1942", "java:S2143", "java:S2160" })
 public class JUDateType extends AbstractDateType<Date> {
 
+    /** The type name constant for {@link java.util.Date} type identification (disambiguates from {@code java.sql.Date}). */
     public static final String JU_DATE = "JUDate";
 
     private static final String declaringName = Date.class.getCanonicalName();

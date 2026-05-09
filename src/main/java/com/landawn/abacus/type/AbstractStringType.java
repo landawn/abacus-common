@@ -40,6 +40,7 @@ import com.landawn.abacus.util.Strings;
  * </p>
  *
  * @see StringType
+ * @see AbstractCharSequenceType
  */
 public abstract class AbstractStringType extends AbstractCharSequenceType<String> {
 

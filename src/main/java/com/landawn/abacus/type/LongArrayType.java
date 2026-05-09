@@ -81,10 +81,12 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * Parses a string to create a Long array.
      * The string should be in the format "[value1, value2, ...]" where each value is either a long number or "null".
      * The method handles:
-     * - {@code null} input returns null
-     * - Empty string or "[]" returns an empty Long array
-     * - Values of "null" (case-sensitive, exactly 4 characters) are converted to {@code null} elements
-     * - Other values are parsed as Long objects
+     * <ul>
+     *   <li>{@code null}, empty, or blank input returns {@code null}</li>
+     *   <li>{@code "[]"} returns an empty {@code Long[]} array</li>
+     *   <li>Values of {@code "null"} (case-sensitive, exactly 4 characters) are converted to {@code null} elements</li>
+     *   <li>Other values are parsed as {@code Long} objects</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -107,8 +109,8 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * }</pre>
      *
      * @param str The string to parse
-     * @return The parsed Long array, or {@code null} if the input is null
-     * @throws NumberFormatException if any {@code non-null} value cannot be parsed as a Long
+     * @return The parsed Long array, or {@code null} if the input is {@code null}, empty, or blank
+     * @throws NumberFormatException if any non-{@code null} value cannot be parsed as a {@code Long}
      */
     @Override
     public Long[] valueOf(final String str) {

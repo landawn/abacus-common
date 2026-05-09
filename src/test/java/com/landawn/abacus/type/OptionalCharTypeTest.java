@@ -254,4 +254,14 @@ public class OptionalCharTypeTest extends TestBase {
         optionalCharType.writeCharacter(writer, opt, null);
         verify(writer).writeCharacter('*');
     }
+
+    @Test
+    public void testWriteCharacterEscapesSingleQuoteWhenQuotedBySingleQuote() throws IOException {
+        when(config.getCharQuotation()).thenReturn('\'');
+        OptionalChar opt = OptionalChar.of('\'');
+        optionalCharType.writeCharacter(writer, opt, config);
+        verify(writer, times(2)).write('\'');
+        verify(writer).write('\\');
+        verify(writer).writeCharacter('\'');
+    }
 }

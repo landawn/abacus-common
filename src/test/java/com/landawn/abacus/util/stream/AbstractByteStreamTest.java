@@ -1906,4 +1906,29 @@ public class AbstractByteStreamTest extends TestBase {
 
     // TODO: Remaining AbstractByteStream anonymous ByteIterator coverage belongs to internal iterator implementations that are already exercised indirectly through the public ByteStream API.
 
+    @Test
+    public void testReversedRotatedReverseSorted_CountExhaustsIterator() {
+        // reversed(): count() must consume all remaining elements
+        ByteIteratorEx revIter = (ByteIteratorEx) createAbstractStream((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).reversed().iteratorEx();
+        assertEquals(5L, revIter.count());
+        assertFalse(revIter.hasNext());
+
+        // rotated(): count() must consume all remaining elements
+        ByteIteratorEx rotIter = (ByteIteratorEx) createAbstractStream((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).rotated(2).iteratorEx();
+        assertEquals(5L, rotIter.count());
+        assertFalse(rotIter.hasNext());
+
+        // reverseSorted(): count() must consume all remaining elements
+        ByteIteratorEx rsIter = (ByteIteratorEx) createAbstractStream((byte) 3, (byte) 1, (byte) 4, (byte) 1, (byte) 5).reverseSorted().iteratorEx();
+        assertEquals(5L, rsIter.count());
+        assertFalse(rsIter.hasNext());
+
+        // After consuming a few elements first, count() returns the remaining count and exhausts the iterator
+        ByteIteratorEx revIter2 = (ByteIteratorEx) createAbstractStream((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).reversed().iteratorEx();
+        revIter2.nextByte();
+        revIter2.nextByte();
+        assertEquals(3L, revIter2.count());
+        assertFalse(revIter2.hasNext());
+    }
+
 }

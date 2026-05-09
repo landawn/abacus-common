@@ -79,25 +79,25 @@ public final class PrefixSearchTable<K, V> {
 
         return EntryStream.of(new Iterator<Map.Entry<List<K>, V>>() {
             private Map<K, Node<K, V>> remaining = nodes;
-            private int cusor = 0;
+            private int cursor = 0;
             private Map.Entry<List<K>, V> next;
 
             @Override
             public boolean hasNext() {
-                if (next == null && remaining != null && cusor < compoundKey.size()) {
-                    while (remaining != null && cusor < compoundKey.size()) {
-                        Node<K, V> node = remaining.get(requireNonNull(compoundKey.get(cusor)));
+                if (next == null && remaining != null && cursor < compoundKey.size()) {
+                    while (remaining != null && cursor < compoundKey.size()) {
+                        Node<K, V> node = remaining.get(requireNonNull(compoundKey.get(cursor)));
 
                         if (node == null) {
                             remaining = null;
                             break;
                         }
 
-                        cusor++;
+                        cursor++;
                         remaining = node.children;
 
                         if (node.value != null) {
-                            next = new AbstractMap.SimpleImmutableEntry<>(unmodifiableList(compoundKey.subList(0, cusor)), node.value);
+                            next = new AbstractMap.SimpleImmutableEntry<>(unmodifiableList(compoundKey.subList(0, cursor)), node.value);
                             break;
                         }
                     }

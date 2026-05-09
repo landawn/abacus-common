@@ -1046,4 +1046,252 @@ public class GenericKeyedObjectPoolTest extends TestBase {
             memPool.close();
         }
     }
+
+    /**
+     * Bug: get() checks isClosed only BEFORE acquiring the lock. A concurrent close() can
+     * set isClosed=true and release the lock before invoking removeAll() to drain the pool.
+     * A get() that won the race for the lock between those two steps could read a "live"
+     * element out of a pool already marked closed. Fix: re-check assertNotClosed() inside
+     * the lock.
+     */
+    @Test
+    public void testGet_raceWithClose_doesNotReturnElementFromClosedPool() throws Exception {
+        final TestPoolable v = new TestPoolable("racing");
+        pool.put("K", v);
+
+        final java.util.concurrent.locks.ReentrantLock poolLock = pool.lock;
+        final CountDownLatch holderHasLock = new CountDownLatch(1);
+        final CountDownLatch mayProceed = new CountDownLatch(1);
+
+        Thread holder = new Thread(() -> {
+            poolLock.lock();
+            try {
+                holderHasLock.countDown();
+                mayProceed.await();
+                pool.isClosed = true;
+            } catch (InterruptedException ignored) {
+                Thread.currentThread().interrupt();
+            } finally {
+                poolLock.unlock();
+            }
+        });
+        holder.start();
+        holderHasLock.await();
+
+        java.util.concurrent.atomic.AtomicBoolean threwISE = new java.util.concurrent.atomic.AtomicBoolean(false);
+        java.util.concurrent.atomic.AtomicBoolean returned = new java.util.concurrent.atomic.AtomicBoolean(false);
+        Thread getter = new Thread(() -> {
+            try {
+                TestPoolable t = pool.get("K");
+                if (t != null) {
+                    returned.set(true);
+                }
+            } catch (IllegalStateException e) {
+                threwISE.set(true);
+            }
+        });
+        getter.start();
+
+        Thread.sleep(50);
+        mayProceed.countDown();
+        holder.join();
+        getter.join();
+
+        assertTrue(threwISE.get(), "get() must throw IllegalStateException when isClosed was set under the lock");
+        assertFalse(returned.get(), "get() must not return an element from a pool already marked closed");
+    }
+
+    /**
+     * Bug: remove() has the same race as get() — assertNotClosed runs only outside the lock.
+     */
+    @Test
+    public void testRemove_raceWithClose_throwsAfterCloseUnderLock() throws Exception {
+        pool.put("K", new TestPoolable("racing"));
+
+        final java.util.concurrent.locks.ReentrantLock poolLock = pool.lock;
+        final CountDownLatch holderHasLock = new CountDownLatch(1);
+        final CountDownLatch mayProceed = new CountDownLatch(1);
+
+        Thread holder = new Thread(() -> {
+            poolLock.lock();
+            try {
+                holderHasLock.countDown();
+                mayProceed.await();
+                pool.isClosed = true;
+            } catch (InterruptedException ignored) {
+                Thread.currentThread().interrupt();
+            } finally {
+                poolLock.unlock();
+            }
+        });
+        holder.start();
+        holderHasLock.await();
+
+        java.util.concurrent.atomic.AtomicBoolean threwISE = new java.util.concurrent.atomic.AtomicBoolean(false);
+        java.util.concurrent.atomic.AtomicBoolean returned = new java.util.concurrent.atomic.AtomicBoolean(false);
+        Thread remover = new Thread(() -> {
+            try {
+                TestPoolable t = pool.remove("K");
+                if (t != null) {
+                    returned.set(true);
+                }
+            } catch (IllegalStateException e) {
+                threwISE.set(true);
+            }
+        });
+        remover.start();
+
+        Thread.sleep(50);
+        mayProceed.countDown();
+        holder.join();
+        remover.join();
+
+        assertTrue(threwISE.get(), "remove() must throw IllegalStateException when isClosed was set under the lock");
+        assertFalse(returned.get(), "remove() must not return an element from a pool already marked closed");
+    }
+
+    /**
+     * Bug: peek() has the same race as get() — assertNotClosed runs only outside the lock.
+     */
+    @Test
+    public void testPeek_raceWithClose_throwsAfterCloseUnderLock() throws Exception {
+        pool.put("K", new TestPoolable("racing"));
+
+        final java.util.concurrent.locks.ReentrantLock poolLock = pool.lock;
+        final CountDownLatch holderHasLock = new CountDownLatch(1);
+        final CountDownLatch mayProceed = new CountDownLatch(1);
+
+        Thread holder = new Thread(() -> {
+            poolLock.lock();
+            try {
+                holderHasLock.countDown();
+                mayProceed.await();
+                pool.isClosed = true;
+            } catch (InterruptedException ignored) {
+                Thread.currentThread().interrupt();
+            } finally {
+                poolLock.unlock();
+            }
+        });
+        holder.start();
+        holderHasLock.await();
+
+        java.util.concurrent.atomic.AtomicBoolean threwISE = new java.util.concurrent.atomic.AtomicBoolean(false);
+        java.util.concurrent.atomic.AtomicBoolean returned = new java.util.concurrent.atomic.AtomicBoolean(false);
+        Thread peeker = new Thread(() -> {
+            try {
+                TestPoolable t = pool.peek("K");
+                if (t != null) {
+                    returned.set(true);
+                }
+            } catch (IllegalStateException e) {
+                threwISE.set(true);
+            }
+        });
+        peeker.start();
+
+        Thread.sleep(50);
+        mayProceed.countDown();
+        holder.join();
+        peeker.join();
+
+        assertTrue(threwISE.get(), "peek() must throw IllegalStateException when isClosed was set under the lock");
+        assertFalse(returned.get(), "peek() must not return an element from a pool already marked closed");
+    }
+
+    /**
+     * Regression test for remove() leaking the entry when memoryMeasure.sizeOf() throws.
+     *
+     * <p>Before the fix, an unchecked exception thrown by a user-supplied MemoryMeasure during
+     * remove() propagated out of the method while the entry had already been removed from the
+     * internal map — never returned to the caller, never destroyed, leaked. The fix wraps
+     * sizeOf() in a try/catch so the removed entry is still returned and the caller remains
+     * responsible for it.
+     */
+    @Test
+    public void testRemoveDoesNotLeakElementWhenMemoryMeasureThrows() {
+        final java.util.concurrent.atomic.AtomicBoolean throwOnNext = new java.util.concurrent.atomic.AtomicBoolean(false);
+        final KeyedObjectPool.MemoryMeasure<String, TestPoolable> conditionalMeasure = (k, v) -> {
+            if (throwOnNext.get()) {
+                throw new RuntimeException("simulated sizeOf failure on remove");
+            }
+            return 0L;
+        };
+
+        GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f, 1024L * 1024L,
+                conditionalMeasure);
+        try {
+            TestPoolable original = new TestPoolable("memMeasureRemove");
+            assertTrue(p.put("k1", original));
+            assertEquals(1, p.size());
+
+            throwOnNext.set(true);
+
+            // Pre-fix: remove() throws RuntimeException and the entry is leaked (gone from map,
+            // never returned, never destroyed). Post-fix: remove() catches and returns the entry.
+            TestPoolable removed = p.remove("k1");
+            assertNotNull(removed, "remove() must return the entry even if memoryMeasure.sizeOf() throws");
+            assertEquals("memMeasureRemove", removed.getValue());
+            assertFalse(removed.isDestroyed(), "remove() must not destroy the returned element (caller owns it)");
+            assertEquals(0, p.size());
+        } finally {
+            p.close();
+        }
+    }
+
+    /**
+     * Regression test for equals() reading the other pool's internal map without holding its
+     * lock. Before the fix, GenericKeyedObjectPool.equals(other) iterated other.pool while only
+     * locking this.lock — a thread mutating `other` concurrently could trigger
+     * ConcurrentModificationException or a torn comparison. The fix snapshots both pools under
+     * their own locks before comparing.
+     */
+    @Test
+    public void testEqualsIsSafeUnderConcurrentMutationOfOtherPool() throws InterruptedException {
+        final GenericKeyedObjectPool<String, TestPoolable> p1 = new GenericKeyedObjectPool<>(1000, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        final GenericKeyedObjectPool<String, TestPoolable> p2 = new GenericKeyedObjectPool<>(1000, 0, EvictionPolicy.LAST_ACCESS_TIME);
+
+        // Seed both pools so equals() actually has to iterate.
+        for (int i = 0; i < 200; i++) {
+            p1.put("k" + i, new TestPoolable("v" + i));
+            p2.put("k" + i, new TestPoolable("v" + i));
+        }
+
+        final java.util.concurrent.atomic.AtomicBoolean stop = new java.util.concurrent.atomic.AtomicBoolean(false);
+        final java.util.concurrent.atomic.AtomicReference<Throwable> mutatorFailure = new java.util.concurrent.atomic.AtomicReference<>();
+        Thread mutator = new Thread(() -> {
+            int n = 0;
+            try {
+                while (!stop.get()) {
+                    final String key = "k" + (n++ % 200);
+                    p2.remove(key);
+                    p2.put(key, new TestPoolable("vv" + n));
+                }
+            } catch (Throwable t) {
+                mutatorFailure.set(t);
+            }
+        });
+        mutator.start();
+
+        final java.util.concurrent.atomic.AtomicReference<Throwable> equalsFailure = new java.util.concurrent.atomic.AtomicReference<>();
+        try {
+            // Many equals() invocations against the concurrently-mutating p2.
+            for (int i = 0; i < 500; i++) {
+                try {
+                    p1.equals(p2);
+                } catch (Throwable t) {
+                    equalsFailure.set(t);
+                    break;
+                }
+            }
+        } finally {
+            stop.set(true);
+            mutator.join();
+        }
+
+        assertNull(equalsFailure.get(), "equals() must not throw when the other pool is concurrently mutated; got: " + equalsFailure.get());
+        assertNull(mutatorFailure.get(), "concurrent mutator must not have crashed; got: " + mutatorFailure.get());
+        p1.close();
+        p2.close();
+    }
 }

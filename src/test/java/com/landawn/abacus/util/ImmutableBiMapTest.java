@@ -584,44 +584,44 @@ public class ImmutableBiMapTest extends TestBase {
     }
 
     @Test
-    public void testInverted_BidirectionalConsistency() {
+    public void testInverse_BidirectionalConsistency() {
         ImmutableBiMap<String, Integer> biMap = ImmutableBiMap.of("one", 1, "two", 2, "three", 3);
-        ImmutableBiMap<Integer, String> inverted = biMap.inverted();
+        ImmutableBiMap<Integer, String> inverse = biMap.inverse();
 
-        // Verify consistency: inverted.get(v) should return the key from biMap that maps to v
+        // Verify consistency: inverse.get(v) should return the key from biMap that maps to v
         for (java.util.Map.Entry<String, Integer> entry : biMap.entrySet()) {
-            Assertions.assertEquals(entry.getKey(), inverted.get(entry.getValue()));
-            Assertions.assertEquals(entry.getValue(), inverted.getByValue(entry.getKey()));
+            Assertions.assertEquals(entry.getKey(), inverse.get(entry.getValue()));
+            Assertions.assertEquals(entry.getValue(), inverse.getByValue(entry.getKey()));
         }
     }
 
     @Test
-    public void testInverted() {
+    public void testInverse() {
         ImmutableBiMap<String, Integer> biMap = ImmutableBiMap.of("one", 1, "two", 2, "three", 3);
-        ImmutableBiMap<Integer, String> inverted = biMap.inverted();
+        ImmutableBiMap<Integer, String> inverse = biMap.inverse();
 
-        assertNotNull(inverted);
-        assertEquals(3, inverted.size());
-        assertEquals("one", inverted.get(1));
-        assertEquals("two", inverted.get(2));
-        assertEquals("three", inverted.get(3));
-        assertEquals(1, inverted.getByValue("one"));
+        assertNotNull(inverse);
+        assertEquals(3, inverse.size());
+        assertEquals("one", inverse.get(1));
+        assertEquals("two", inverse.get(2));
+        assertEquals("three", inverse.get(3));
+        assertEquals(1, inverse.getByValue("one"));
     }
 
     @Test
-    public void testInverted_CachedInstance() {
+    public void testInverse_CachedInstance() {
         ImmutableBiMap<String, Integer> biMap = ImmutableBiMap.of("a", 1, "b", 2);
-        ImmutableBiMap<Integer, String> inverted1 = biMap.inverted();
-        ImmutableBiMap<Integer, String> inverted2 = biMap.inverted();
-        assertSame(inverted1, inverted2);
+        ImmutableBiMap<Integer, String> inverse1 = biMap.inverse();
+        ImmutableBiMap<Integer, String> inverse2 = biMap.inverse();
+        assertSame(inverse1, inverse2);
     }
 
     @Test
-    public void testInverted_Empty() {
+    public void testInverse_Empty() {
         ImmutableBiMap<String, Integer> empty = ImmutableBiMap.empty();
-        ImmutableBiMap<Integer, String> inverted = empty.inverted();
-        Assertions.assertNotNull(inverted);
-        Assertions.assertTrue(inverted.isEmpty());
+        ImmutableBiMap<Integer, String> inverse = empty.inverse();
+        Assertions.assertNotNull(inverse);
+        Assertions.assertTrue(inverse.isEmpty());
     }
 
     @Test

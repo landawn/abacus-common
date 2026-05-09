@@ -21,7 +21,8 @@ import com.landawn.abacus.util.Strings;
 /**
  * Type handler for {@link com.landawn.abacus.util.MutableShort} objects, providing
  * serialization, deserialization, and database interaction capabilities for
- * mutable short wrapper objects.
+ * mutable {@code short} wrapper objects. Values are serialized as the unwrapped
+ * numeric short (identical to {@link ShortType}).
  *
  * @see com.landawn.abacus.util.MutableShort
  * @see NumberType
@@ -31,8 +32,9 @@ public class MutableShortType extends NumberType<MutableShort> {
     public static final String MUTABLE_SHORT = MutableShort.class.getSimpleName();
 
     /**
-     * Package-private constructor for MutableShortType.
-     * This constructor is called by subclasses to create MutableShort type instances.
+     * Protected constructor for MutableShortType.
+     * This constructor is invoked by the type system (typically via {@link TypeFactory})
+     * when registering the {@link MutableShort} type handler.
      */
     protected MutableShortType() {
         super(MUTABLE_SHORT);

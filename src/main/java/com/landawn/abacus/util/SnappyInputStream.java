@@ -120,6 +120,12 @@ public final class SnappyInputStream extends InputStream {
      */
     @Override
     public int read(final byte[] b, final int off, final int len) throws IOException {
+        // Enforce InputStream.read(byte[], int, int) contract: org.xerial.snappy.SnappyInputStream
+        // does not validate bounds and silently returns 0 for negative len, so we validate here.
+        if (off < 0 || len < 0 || len > b.length - off) {
+            throw new IndexOutOfBoundsException("off=" + off + ", len=" + len + ", b.length=" + b.length);
+        }
+
         return in.read(b, off, len);
     }
 

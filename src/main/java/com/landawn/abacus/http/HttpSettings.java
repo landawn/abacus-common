@@ -27,8 +27,13 @@ import com.landawn.abacus.util.Strings;
  * This class provides a fluent interface for configuring various HTTP request parameters
  * including timeouts, headers, SSL settings, proxy configuration, and content format.
  *
- * <p>HttpSettings can be used with both HttpClient and HttpRequest to customize request behavior.
- * Settings can be applied globally to an HttpClient instance or per-request.</p>
+ * <p>{@code HttpSettings} can be used with both {@link HttpClient} and {@link HttpRequest} to
+ * customize request behavior. Settings can be applied globally to an {@code HttpClient} instance
+ * or per-request.</p>
+ *
+ * <p><b>Thread-safety:</b> Instances of this class are mutable and are not thread-safe.
+ * Construct or {@link #copy() copy} a dedicated instance per thread, or apply external
+ * synchronization if a single instance is shared across threads.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -51,6 +56,7 @@ import com.landawn.abacus.util.Strings;
  * @see HttpClient
  * @see HttpRequest
  * @see HttpHeaders
+ * @see ContentFormat
  */
 public final class HttpSettings {
 
@@ -393,9 +399,10 @@ public final class HttpSettings {
     /**
      * Gets the Content-Type header value.
      * If not explicitly set but a content format is configured,
-     * the content type will be derived from the content format.
+     * the content type will be derived from the content format and stored
+     * back into the headers as a side-effect.
      *
-     * @return The Content-Type header value, or {@code null} if not set
+     * @return The Content-Type header value, or {@code null} if not set and no content format is configured
      */
     public String getContentType() {
         String contentType = HttpUtil.getContentType(headers);
@@ -439,9 +446,10 @@ public final class HttpSettings {
     /**
      * Gets the Content-Encoding header value.
      * If not explicitly set but a content format is configured,
-     * the content encoding will be derived from the content format.
+     * the content encoding will be derived from the content format and stored
+     * back into the headers as a side-effect.
      *
-     * @return The Content-Encoding header value, or {@code null} if not set
+     * @return The Content-Encoding header value, or {@code null} if not set and no content format is configured
      */
     public String getContentEncoding() {
         String contentEncoding = HttpUtil.getContentEncoding(headers);

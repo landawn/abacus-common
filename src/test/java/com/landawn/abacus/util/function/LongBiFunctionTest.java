@@ -128,4 +128,10 @@ public class LongBiFunctionTest extends TestBase {
 
         assertEquals("30", result); // (20 - 5) * 2 = 30
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        LongBiFunction<String> instance = (a, b) -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

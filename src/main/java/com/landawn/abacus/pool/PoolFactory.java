@@ -265,9 +265,9 @@ public final class PoolFactory { //NOSONAR
      * @param <E> the type of pooled values, must implement Poolable
      * @param capacity the maximum number of key-value pairs the pool can hold
      * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction
-     * @param evictionPolicy the policy to use for selecting entries to evict (default: LAST_ACCESS_TIME)
-     * @param autoBalance whether to automatically remove entries when the pool is full (default: true)
-     * @param balanceFactor the proportion of entries to remove during balancing, typically 0.1 to 0.5 (default: 0.2)
+     * @param evictionPolicy the policy to use for selecting entries to evict
+     * @param autoBalance whether to automatically remove entries when the pool is full
+     * @param balanceFactor the proportion of entries to remove during balancing, typically 0.1 to 0.5
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no memory limit
      * @param memoryMeasure the function to calculate memory size of key-value pairs, or {@code null} if not using memory limits
      * @return a new KeyedObjectPool instance with full configuration

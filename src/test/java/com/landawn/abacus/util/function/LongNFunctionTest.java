@@ -216,4 +216,10 @@ public class LongNFunctionTest extends TestBase {
 
         assertEquals(2, result);
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        LongNFunction<String> instance = a -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

@@ -1148,7 +1148,7 @@ public class FilenameUtilTest extends TestBase {
     }
 
     @Test
-    public void testGetExtension_NoExtension() {
+    public void testGetExtension_NoExtension_2() {
         Assertions.assertEquals("", FilenameUtil.getExtension("filename"));
         Assertions.assertEquals("", FilenameUtil.getExtension("/path/to/file"));
     }
@@ -1778,4 +1778,82 @@ public class FilenameUtilTest extends TestBase {
         Assertions.assertTrue(FilenameUtil.wildcardMatch("abcdefghi", "a*c*f*i", IOCase.SENSITIVE));
     }
 
+    // ---------------------------------------------------------------------
+    //  Edge-case regression tests for getName / getBaseName / getExtension
+    //  on hidden files, multi-dot names, trailing slash, and Windows paths.
+    // ---------------------------------------------------------------------
+
+    @Test
+    public void testGetExtension_HiddenFile_DotGitignore() {
+        // Hidden Unix-style file name beginning with a dot. Apache Commons IO
+        // semantics: ".gitignore" has extension "gitignore" and base name "".
+        Assertions.assertEquals("gitignore", FilenameUtil.getExtension(".gitignore"));
+        Assertions.assertEquals("", FilenameUtil.getBaseName(".gitignore"));
+        Assertions.assertEquals(".gitignore", FilenameUtil.getName(".gitignore"));
+    }
+
+    @Test
+    public void testGetExtension_NoExtension() {
+        Assertions.assertEquals("", FilenameUtil.getExtension("README"));
+        Assertions.assertEquals("README", FilenameUtil.getBaseName("README"));
+    }
+
+    @Test
+    public void testGetExtension_MultiDot() {
+        // Only the LAST dot starts the extension.
+        Assertions.assertEquals("gz", FilenameUtil.getExtension("archive.tar.gz"));
+        Assertions.assertEquals("archive.tar", FilenameUtil.getBaseName("archive.tar.gz"));
+    }
+
+    @Test
+    public void testGetName_TrailingSlashIsEmpty() {
+        Assertions.assertEquals("", FilenameUtil.getName("a/b/c/"));
+        Assertions.assertEquals("", FilenameUtil.getName("a/b/c\\"));
+    }
+
+    @Test
+    public void testGetExtension_DotInDirectoryNoFileExtension() {
+        // Trailing component has no dot, but a parent does — must return empty.
+        Assertions.assertEquals("", FilenameUtil.getExtension("a.b/c"));
+        Assertions.assertEquals("", FilenameUtil.getExtension("a.b\\c"));
+    }
+
+    @Test
+    public void testGetName_WindowsAbsolute() {
+        Assertions.assertEquals("file.txt", FilenameUtil.getName("C:\\foo\\bar\\file.txt"));
+        Assertions.assertEquals("file.txt", FilenameUtil.getName("C:/foo/bar/file.txt"));
+    }
+
+    @Test
+    public void testConcat_SecondArgAbsoluteOverridesBase() {
+        // When the second argument has its own prefix, it is treated as absolute.
+        // Force Unix separators in normalize via the system separator we get back.
+        String result = FilenameUtil.concat("/foo", "/bar");
+        Assertions.assertNotNull(result);
+        // Expect "/bar" with system separators.
+        Assertions.assertEquals(FilenameUtil.separatorsToSystem("/bar"), result);
+    }
+
+    @Test
+    public void testConcat_RelativeAppendedToBase() {
+        Assertions.assertEquals(FilenameUtil.separatorsToSystem("/foo/bar"), FilenameUtil.concat("/foo", "bar"));
+        Assertions.assertEquals(FilenameUtil.separatorsToSystem("/foo/bar"), FilenameUtil.concat("/foo/", "bar"));
+    }
+
+    @Test
+    public void testConcat_TraversalAboveRootIsNull() {
+        Assertions.assertNull(FilenameUtil.concat("/foo/", "../../bar"));
+    }
+
+    @Test
+    public void testNormalize_TraversalAboveRootIsNull() {
+        Assertions.assertNull(FilenameUtil.normalize("/../"));
+        Assertions.assertNull(FilenameUtil.normalize("../foo"));
+    }
+
+    @Test
+    public void testNormalize_NullByteRejected() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> FilenameUtil.normalize("foo bar"));
+    }
 }

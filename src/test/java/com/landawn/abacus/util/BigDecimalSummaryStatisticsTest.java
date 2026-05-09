@@ -380,4 +380,22 @@ public class BigDecimalSummaryStatisticsTest extends TestBase {
         assertTrue(str.contains("count=0"));
     }
 
+    @Test
+    public void testConstructorWithNullSumNormalizedToZero() {
+        // Null sum passed to constructor should be normalized to ZERO so that
+        // subsequent accept() calls do not fail with NullPointerException.
+        BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics(0L, null, null, null);
+        assertEquals(0L, stats.getCount());
+        assertEquals(BigDecimal.ZERO, stats.getSum());
+        assertNull(stats.getMin());
+        assertNull(stats.getMax());
+
+        // Should not throw NPE - sum was normalized internally.
+        stats.accept(new BigDecimal("5"));
+        assertEquals(1L, stats.getCount());
+        assertEquals(new BigDecimal("5"), stats.getSum());
+        assertEquals(new BigDecimal("5"), stats.getMin());
+        assertEquals(new BigDecimal("5"), stats.getMax());
+    }
+
 }

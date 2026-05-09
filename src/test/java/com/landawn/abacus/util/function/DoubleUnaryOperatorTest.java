@@ -140,4 +140,10 @@ public class DoubleUnaryOperatorTest extends TestBase {
         assertEquals(-5.0, identity.applyAsDouble(-5.0), 0.0001);
         assertEquals(0.0, identity.applyAsDouble(0.0), 0.0001);
     }
+
+    @Test
+    public void testComposeNullThrowsImmediately() {
+        DoubleUnaryOperator instance = a -> 0d;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.compose((java.util.function.DoubleUnaryOperator) null));
+    }
 }

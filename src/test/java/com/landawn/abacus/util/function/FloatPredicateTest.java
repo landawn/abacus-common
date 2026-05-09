@@ -177,4 +177,10 @@ public class FloatPredicateTest extends TestBase {
         assertTrue(FloatPredicate.NOT_NEGATIVE.test(1.0f));
         assertFalse(FloatPredicate.NOT_NEGATIVE.test(-1.0f));
     }
+
+    @Test
+    public void testAndNullThrowsImmediately() {
+        FloatPredicate instance = a -> false;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((FloatPredicate) null));
+    }
 }

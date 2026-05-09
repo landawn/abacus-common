@@ -920,4 +920,83 @@ public class FnnTest extends TestBase {
         assertNotNull(result);
         assertEquals("result_new", result.call());
     }
+
+    // --- atMost: regression for getAndDecrement underflow ---
+
+    @Test
+    public void testAtMost_doesNotUnderflowOnLongStreams() throws Exception {
+        Throwables.Predicate<Object, Exception> p = Fnn.atMost(2);
+        assertTrue(p.test(null));
+        assertTrue(p.test(null));
+        for (int i = 0; i < 10_000; i++) {
+            assertFalse(p.test(null));
+        }
+    }
+
+    @Test
+    public void testAtMost_zeroIsAlwaysFalse() throws Exception {
+        Throwables.Predicate<Object, Exception> p = Fnn.atMost(0);
+        assertFalse(p.test("a"));
+        assertFalse(p.test("b"));
+    }
+
+    @Test
+    public void testAtMost_throwsOnNegative() {
+        assertThrows(IllegalArgumentException.class, () -> Fnn.atMost(-1));
+    }
+
+    // --- memoize(Function): null caching + exception not cached ---
+
+    @Test
+    public void testMemoizeFunction_nullInputAndOutputCached() throws Exception {
+        java.util.concurrent.atomic.AtomicInteger calls = new java.util.concurrent.atomic.AtomicInteger();
+        Throwables.Function<String, String, Exception> f = Fnn.memoize(s -> {
+            calls.incrementAndGet();
+            return s == null ? null : s.toUpperCase();
+        });
+        assertNull(f.apply(null));
+        assertNull(f.apply(null));
+        assertEquals(1, calls.get(), "null input cached only once");
+        assertEquals("X", f.apply("x"));
+        assertEquals("X", f.apply("x"));
+        assertEquals(2, calls.get(), "non-null input cached only once");
+    }
+
+    @Test
+    public void testMemoizeFunction_doesNotCacheException() throws Exception {
+        java.util.concurrent.atomic.AtomicInteger calls = new java.util.concurrent.atomic.AtomicInteger();
+        Throwables.Function<String, String, Exception> f = Fnn.memoize(s -> {
+            int n = calls.incrementAndGet();
+            if (n == 1) {
+                throw new IOException("boom");
+            }
+            return s + "!";
+        });
+        assertThrows(IOException.class, () -> f.apply("k"));
+        assertEquals("k!", f.apply("k"));
+        assertEquals("k!", f.apply("k"));
+        assertEquals(2, calls.get(), "exception path must not cache, success path caches");
+    }
+
+    // --- alwaysTrue / alwaysFalse / identity ---
+
+    @Test
+    public void testAlwaysTrueFalse_sharedSingleton() throws Exception {
+        Throwables.Predicate<Object, Exception> t = Fnn.alwaysTrue();
+        Throwables.Predicate<Object, Exception> f = Fnn.alwaysFalse();
+        assertTrue(t.test(null));
+        assertTrue(t.test("x"));
+        assertFalse(f.test(null));
+        assertFalse(f.test("x"));
+        assertSame(Fnn.alwaysTrue(), Fnn.alwaysTrue());
+        assertSame(Fnn.alwaysFalse(), Fnn.alwaysFalse());
+    }
+
+    @Test
+    public void testIdentity_returnsInputUnchanged() throws Exception {
+        Throwables.Function<Object, Object, Exception> id = Fnn.identity();
+        Object o = new Object();
+        assertSame(o, id.apply(o));
+        assertNull(id.apply(null));
+    }
 }

@@ -153,4 +153,10 @@ public class BooleanFunctionTest extends TestBase {
         assertNotNull(BooleanFunction.identity().apply(true));
         assertNotNull(BooleanFunction.identity().apply(false));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        BooleanFunction<String> instance = a -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

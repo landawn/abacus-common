@@ -1119,4 +1119,193 @@ public class GenericObjectPoolTest extends TestBase {
         assertEquals(2, stats.missCount());
         assertEquals(5, stats.getCount(), "getCount must equal hitCount + missCount");
     }
+
+    /**
+     * Regression: timed take(timeout) must keep popping expired entries instead of
+     * blocking on notEmpty.awaitNanos after each one. Before the fix, the loop
+     * would await between expired pops and time out even when valid elements
+     * remained behind the expired ones.
+     */
+    @Test
+    public void testTakeTimed_skipsExpiredAndReturnsValidImmediately() throws InterruptedException {
+        // Already-expired entries: liveTime small enough to be expired by the time we call take.
+        TestPoolable expired1 = new TestPoolable("expired1", 1, 1);
+        TestPoolable expired2 = new TestPoolable("expired2", 1, 1);
+        TestPoolable valid = new TestPoolable("valid"); // default 10000ms live
+
+        pool.add(valid);
+        pool.add(expired1);
+        pool.add(expired2);
+
+        // Sleep long enough for the short-lived entries to expire.
+        Thread.sleep(20);
+
+        long start = System.nanoTime();
+        TestPoolable result = pool.take(2, TimeUnit.SECONDS);
+        long elapsedMillis = (System.nanoTime() - start) / 1_000_000;
+
+        assertNotNull(result, "Should return the valid element");
+        assertEquals("valid", result.getId());
+        // Should return well under the 2s timeout — the bug fix means we re-check
+        // the pool synchronously instead of waiting on notEmpty between expired pops.
+        assertTrue(elapsedMillis < 500, "take() must not await between expired pops, elapsed=" + elapsedMillis + "ms");
+
+        assertTrue(expired1.isDestroyed() || expired2.isDestroyed(), "expired entries must be destroyed");
+    }
+
+    /**
+     * Regression: timed take(timeout) returning null when the pool only contains
+     * expired entries should not consume the entire timeout — the expired ones
+     * are popped synchronously, then we await briefly for a refill that never comes.
+     */
+    @Test
+    public void testTakeTimed_allExpired_returnsNullPromptly() throws InterruptedException {
+        for (int i = 0; i < 5; i++) {
+            pool.add(new TestPoolable("expired" + i, 1, 1));
+        }
+        Thread.sleep(20);
+
+        long start = System.nanoTime();
+        TestPoolable result = pool.take(100, TimeUnit.MILLISECONDS);
+        long elapsedMillis = (System.nanoTime() - start) / 1_000_000;
+
+        assertNull(result, "Should return null since no valid entry exists");
+        // Should be roughly bounded by the timeout (~100ms), not by 5×timeout under the old bug.
+        assertTrue(elapsedMillis < 500, "take() must not multiply wait time by expired-count, elapsed=" + elapsedMillis + "ms");
+    }
+
+    /**
+     * Bug: take() (no timeout) checks isClosed only BEFORE acquiring the lock. A concurrent
+     * close() can set isClosed=true and release the lock before invoking removeAll() to drain
+     * the pool. A take() that won the race for the lock between those two steps can pop and
+     * return a "live" element from a pool that is already marked closed — and the pre-snapshot
+     * taken by removeAll() will not destroy it, leaking the element. The fix is to re-check
+     * assertNotClosed() inside the lock (matching what add() and take(timeout) already do).
+     */
+    @Test
+    public void testTake_raceWithClose_doesNotReturnElementFromClosedPool() throws Exception {
+        final TestPoolable element = new TestPoolable("racing");
+        pool.add(element);
+
+        // Manually drive the close() race window by holding the pool's lock from a
+        // background thread, then mark isClosed=true while take() is parked at lock.lock(),
+        // then release. This deterministically reproduces the race that close() opens
+        // between releasing the lock and calling removeAll().
+        final java.util.concurrent.locks.ReentrantLock poolLock = pool.lock;
+        final CountDownLatch holderHasLock = new CountDownLatch(1);
+        final CountDownLatch takeMayProceed = new CountDownLatch(1);
+
+        Thread holder = new Thread(() -> {
+            poolLock.lock();
+            try {
+                holderHasLock.countDown();
+                takeMayProceed.await();
+                // Mimic close()'s first phase: set isClosed=true while still holding the lock.
+                pool.isClosed = true;
+            } catch (InterruptedException ignored) {
+                Thread.currentThread().interrupt();
+            } finally {
+                poolLock.unlock();
+            }
+        });
+        holder.start();
+        holderHasLock.await();
+
+        // take() will pass its outer assertNotClosed() (still false), then block on lock.lock().
+        AtomicBoolean threwISE = new AtomicBoolean(false);
+        AtomicBoolean returnedElement = new AtomicBoolean(false);
+        Thread taker = new Thread(() -> {
+            try {
+                TestPoolable t = pool.take();
+                if (t != null) {
+                    returnedElement.set(true);
+                }
+            } catch (IllegalStateException e) {
+                threwISE.set(true);
+            }
+        });
+        taker.start();
+
+        // Give taker a moment to reach lock.lock() and park.
+        Thread.sleep(50);
+        // Now release; holder will set isClosed=true and unlock; taker proceeds with the lock.
+        takeMayProceed.countDown();
+        holder.join();
+        taker.join();
+
+        assertTrue(threwISE.get(), "take() must throw IllegalStateException when isClosed was set under the lock");
+        assertFalse(returnedElement.get(), "take() must not return an element from a pool already marked closed");
+        // Cleanup: pool.isClosed is true; calling close() again is a no-op per idempotency contract.
+    }
+
+    /**
+     * Regression test for take() leaking the popped element when memoryMeasure.sizeOf() throws.
+     *
+     * <p>Before the fix, an unchecked exception thrown by a user-supplied MemoryMeasure during
+     * take() propagated out of the method while the element had already been popped from the
+     * internal deque — never returned to the caller, never destroyed, leaked. The fix wraps the
+     * sizeOf() call in a try/catch so the popped element is still returned and the caller
+     * remains responsible for it.
+     */
+    @Test
+    public void testTakeDoesNotLeakElementWhenMemoryMeasureThrows() {
+        // Build a measure that returns 0 on add but throws once on take.
+        final AtomicBoolean throwOnNext = new AtomicBoolean(false);
+        final ObjectPool.MemoryMeasure<TestPoolable> conditionalMeasure = e -> {
+            if (throwOnNext.get()) {
+                throw new RuntimeException("simulated sizeOf failure on take");
+            }
+            return 0L;
+        };
+
+        GenericObjectPool<TestPoolable> p2 = new GenericObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f, 1024L * 1024L, conditionalMeasure);
+        try {
+            TestPoolable original = new TestPoolable("memMeasureTake");
+            assertTrue(p2.add(original));
+            assertEquals(1, p2.size());
+
+            // Now arm the measure to throw on the next sizeOf invocation (which take() will make).
+            throwOnNext.set(true);
+
+            // Pre-fix: take() throws RuntimeException and the element is leaked (gone from pool,
+            // never returned, never destroyed). Post-fix: take() catches, returns the element.
+            TestPoolable popped = p2.take();
+            assertNotNull(popped, "take() must return the popped element even if memoryMeasure.sizeOf() throws");
+            assertEquals("memMeasureTake", popped.getId());
+            assertFalse(popped.isDestroyed(), "Successfully taken element must not be destroyed");
+            assertEquals(0, p2.size());
+        } finally {
+            p2.close();
+        }
+    }
+
+    /**
+     * Same regression as above, but for take(timeout, unit).
+     */
+    @Test
+    public void testTakeWithTimeoutDoesNotLeakElementWhenMemoryMeasureThrows() throws InterruptedException {
+        final AtomicBoolean throwOnNext = new AtomicBoolean(false);
+        final ObjectPool.MemoryMeasure<TestPoolable> conditionalMeasure = e -> {
+            if (throwOnNext.get()) {
+                throw new RuntimeException("simulated sizeOf failure on take(timeout)");
+            }
+            return 0L;
+        };
+
+        GenericObjectPool<TestPoolable> p = new GenericObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f, 1024L * 1024L, conditionalMeasure);
+        try {
+            TestPoolable original = new TestPoolable("memMeasureTakeTimeout");
+            assertTrue(p.add(original));
+
+            throwOnNext.set(true);
+
+            TestPoolable popped = p.take(1, TimeUnit.SECONDS);
+            assertNotNull(popped, "take(timeout) must return the popped element even if memoryMeasure.sizeOf() throws");
+            assertEquals("memMeasureTakeTimeout", popped.getId());
+            assertFalse(popped.isDestroyed());
+            assertEquals(0, p.size());
+        } finally {
+            p.close();
+        }
+    }
 }

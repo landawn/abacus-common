@@ -28,12 +28,22 @@ import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
 
 /**
- * Abstract base type handler for {@link Number} subclasses, providing common functionality
+ * Generic type handler for {@link Number} subclasses, providing common functionality
  * for numeric type handling including serialization, deserialization, and type conversions.
- * This class uses reflection to automatically discover factory methods or constructors
- * for creating instances from strings.
+ * <p>
+ * This handler is suitable for any {@link Number} subclass (including {@link java.math.BigDecimal}
+ * and {@link java.math.BigInteger} as well as user-defined numeric types) that does not have a
+ * dedicated {@link Type} implementation. It uses reflection to discover, in order:
+ * <ol>
+ *   <li>a public static factory method on the type class (such as {@code valueOf(String)}) that
+ *       returns an instance of the type;</li>
+ *   <li>a public static method taking a single numeric/{@code String} argument that returns the type;</li>
+ *   <li>a public single-argument constructor accepting either a {@code String} or a numeric value.</li>
+ * </ol>
+ * If none of those is found, {@link #valueOf(String)} throws
+ * {@link UnsupportedOperationException} when called with a non-empty input.
  *
- * @param <T> the specific Number subclass this type handler manages
+ * @param <T> the specific {@code Number} subclass this type handler manages
  */
 public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
 

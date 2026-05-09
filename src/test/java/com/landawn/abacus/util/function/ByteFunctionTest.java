@@ -112,4 +112,10 @@ public class ByteFunctionTest extends TestBase {
     public void testFunctionalInterface() {
         assertNotNull(ByteFunction.class.getAnnotation(FunctionalInterface.class));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        ByteFunction<String> instance = a -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

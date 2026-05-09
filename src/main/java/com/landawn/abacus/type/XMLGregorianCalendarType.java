@@ -72,6 +72,9 @@ import com.landawn.abacus.util.Strings;
  */
 public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar> {
 
+    /**
+     * The type name identifier for {@link XMLGregorianCalendar} type (the simple class name).
+     */
     public static final String XML_GREGORIAN_CALENDAR = XMLGregorianCalendar.class.getSimpleName();
 
     /**

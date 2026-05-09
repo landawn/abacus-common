@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 /**
  * Represents an operation that accepts a variable number of {@code boolean}-valued arguments and returns no result.
  * This is the N-arity specialization of {@link BooleanConsumer}.
@@ -60,6 +62,7 @@ public interface BooleanNConsumer {
      * @throws NullPointerException if {@code after} is null
      */
     default BooleanNConsumer andThen(final BooleanNConsumer after) {
+        Objects.requireNonNull(after);
         return args -> {
             accept(args);
             after.accept(args);

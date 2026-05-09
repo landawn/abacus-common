@@ -159,4 +159,10 @@ public class BiObjIntConsumerTest extends TestBase {
         assertEquals(1, results.size()); // First consumer should have executed
         assertEquals("test", results.get(0));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        BiObjIntConsumer<String, String> instance = (a, b, c) -> {};
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((BiObjIntConsumer) null));
+    }
 }

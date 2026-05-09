@@ -50,6 +50,9 @@ import java.lang.annotation.Target;
  *     }
  * }
  * }</pre>
+ *
+ * @see JsonXmlField
+ * @see Column
  */
 @Documented
 @Target(value = { ElementType.TYPE, ElementType.METHOD, ElementType.FIELD })
@@ -57,10 +60,11 @@ import java.lang.annotation.Target;
 public @interface AccessFieldByMethod {
 
     /**
-     * Reserved for future use. Currently unused; the presence of the annotation alone
-     * is sufficient to indicate that field access should be performed via getter/setter methods.
+     * Reserved for future use; currently has no effect on the framework's behavior.
+     * The presence of the {@code @AccessFieldByMethod} annotation alone is sufficient to
+     * indicate that field access should be performed via getter/setter methods.
      *
-     * @return always an empty string (the default)
+     * @return the (currently unused) configuration value; defaults to an empty string
      */
     String value() default "";
 }

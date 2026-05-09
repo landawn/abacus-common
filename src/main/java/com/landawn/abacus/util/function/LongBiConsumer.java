@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -83,6 +85,7 @@ public interface LongBiConsumer extends Throwables.LongBiConsumer<RuntimeExcepti
      * @throws NullPointerException if {@code after} is null
      */
     default LongBiConsumer andThen(final LongBiConsumer after) {
+        Objects.requireNonNull(after);
         return (a, b) -> {
             accept(a, b);
             after.accept(a, b);

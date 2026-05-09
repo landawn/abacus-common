@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 /**
  * Represents an operation that accepts a variable number of byte-valued arguments and returns no result.
  * This is a functional interface designed to consume byte arrays of any length.
@@ -67,6 +69,7 @@ public interface ByteNConsumer {
      * @throws NullPointerException if {@code after} is null
      */
     default ByteNConsumer andThen(final ByteNConsumer after) {
+        Objects.requireNonNull(after);
         return args -> {
             accept(args);
             after.accept(args);

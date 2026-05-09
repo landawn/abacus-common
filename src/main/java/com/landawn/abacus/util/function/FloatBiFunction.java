@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -90,6 +92,7 @@ public interface FloatBiFunction<R> extends Throwables.FloatBiFunction<R, Runtim
      * @throws NullPointerException if {@code after} is null
      */
     default <V> FloatBiFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+        Objects.requireNonNull(after);
         return (a, b) -> after.apply(apply(a, b));
     }
 }

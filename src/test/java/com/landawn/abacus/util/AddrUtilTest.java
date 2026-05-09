@@ -500,4 +500,38 @@ public class AddrUtilTest extends AbstractTest {
         Assertions.assertThrows(IllegalArgumentException.class, () -> AddrUtil.getAddressFromUrl(url));
     }
 
+    // --- Tests added during code review ---
+
+    @Test
+    public void testGetAddressList_String_BracketedIPv6_NoClosingBracket() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> AddrUtil.getAddressList("[::1:11211"));
+    }
+
+    @Test
+    public void testGetAddressList_String_BracketedIPv6_NoOpeningBracket() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> AddrUtil.getAddressList("::1]:11211"));
+    }
+
+    @Test
+    public void testGetAddressList_Collection_BracketedIPv6_NoClosingBracket() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> AddrUtil.getAddressList(Arrays.asList("[::1:11211")));
+    }
+
+    @Test
+    public void testGetAddressList_Collection_BracketedIPv6_NoOpeningBracket() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> AddrUtil.getAddressList(Arrays.asList("::1]:11211")));
+    }
+
+    @Test
+    public void testGetAddressList_String_EmptyHostInBrackets() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> AddrUtil.getAddressList("[]:8080"));
+    }
+
+    @Test
+    public void testGetAddressList_String_BracketedIPv6Valid() {
+        List<InetSocketAddress> addrs = AddrUtil.getAddressList("[::1]:11211");
+        Assertions.assertEquals(1, addrs.size());
+        Assertions.assertEquals(11211, addrs.get(0).getPort());
+    }
+
 }

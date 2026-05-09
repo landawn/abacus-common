@@ -4356,6 +4356,24 @@ public class NumbersTest extends TestBase {
         assertThrows(ArithmeticException.class, () -> Numbers.divide(7L, 0L, RoundingMode.DOWN));
     }
 
+    /**
+     * {@code Numbers.divide(int, int, RoundingMode)} explicitly throws {@link ArithmeticException}
+     * for {@code Integer.MIN_VALUE / -1}; the long counterpart must reject the analogous
+     * {@code Long.MIN_VALUE / -1L} overflow rather than silently returning {@code Long.MIN_VALUE}.
+     */
+    @Test
+    public void testDivide_Long_MinValueDividedByMinusOne_Overflow() {
+        // The int overload throws; the long overload should be consistent.
+        assertThrows(ArithmeticException.class, () -> Numbers.divide(Integer.MIN_VALUE, -1, RoundingMode.HALF_UP));
+        for (final RoundingMode mode : RoundingMode.values()) {
+            assertThrows(ArithmeticException.class, () -> Numbers.divide(Long.MIN_VALUE, -1L, mode),
+                    "divide(Long.MIN_VALUE, -1L, " + mode + ") should overflow");
+        }
+        // Sanity-check unrelated cases still work.
+        assertEquals(Long.MAX_VALUE, Numbers.divide(Long.MAX_VALUE, 1L, RoundingMode.UNNECESSARY));
+        assertEquals(-Long.MAX_VALUE, Numbers.divide(Long.MIN_VALUE + 1, 1L, RoundingMode.UNNECESSARY));
+    }
+
     @Test
     public void testMod_long_int() {
         assertEquals(3, Numbers.mod(7L, 4));

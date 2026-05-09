@@ -78,4 +78,10 @@ public class CharTriFunctionTest extends TestBase {
     public void testFunctionalInterface() {
         assertNotNull(CharTriFunction.class.getAnnotation(FunctionalInterface.class));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        CharTriFunction<String> instance = (a, b, c) -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

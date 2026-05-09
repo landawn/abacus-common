@@ -2365,25 +2365,29 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return create(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
-    private static final Supplier<Holder<Optional<Object>>> onlyOne_supplier = () -> Holder.of(Optional.empty());
+    // Use the NONE sentinel to distinguish "no element yet" from "element present (possibly null)".
+    // Using Optional.empty() as the sentinel breaks duplicate detection when the first element is null,
+    // because Optional.ofNullable(null) is also empty.
+    private static final Supplier<Holder<Object>> onlyOne_supplier = () -> Holder.of(NONE);
 
-    private static final BiConsumer<Holder<Optional<Object>>, Object> onlyOne_accumulator = (holder, val) -> {
-        if (holder.value().isPresent()) {
+    private static final BiConsumer<Holder<Object>, Object> onlyOne_accumulator = (holder, val) -> {
+        if (holder.value() != NONE) {
             throw new TooManyElementsException("Duplicate values");
         }
 
-        holder.setValue(Optional.ofNullable(val));
+        holder.setValue(val);
     };
 
-    private static final BinaryOperator<Holder<Optional<Object>>> onlyOne_combiner = (t, u) -> {
-        if (t.value().isPresent() && u.value().isPresent()) {
+    private static final BinaryOperator<Holder<Object>> onlyOne_combiner = (t, u) -> {
+        if (t.value() != NONE && u.value() != NONE) {
             throw new TooManyElementsException("Duplicate values");
         }
 
-        return t.value().isPresent() ? t : u;
+        return t.value() != NONE ? t : u;
     };
 
-    private static final Function<Holder<Optional<Object>>, Optional<Object>> onlyOne_finisher = Holder::value;
+    private static final Function<Holder<Object>, Optional<Object>> onlyOne_finisher = h -> h.value() == NONE ? Optional.empty()
+            : Optional.ofNullable(h.value());
 
     /**
      * Returns a {@code Collector} that expects exactly one element and returns it wrapped
@@ -2411,10 +2415,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, Optional<T>> onlyOne() {
-        final Supplier<Holder<Optional<T>>> supplier = (Supplier) onlyOne_supplier;
-        final BiConsumer<Holder<Optional<T>>, T> accumulator = (BiConsumer) onlyOne_accumulator;
-        final BinaryOperator<Holder<Optional<T>>> combiner = (BinaryOperator) onlyOne_combiner;
-        final Function<Holder<Optional<T>>, Optional<T>> finisher = (Function) onlyOne_finisher;
+        final Supplier<Holder<T>> supplier = (Supplier) onlyOne_supplier;
+        final BiConsumer<Holder<T>, T> accumulator = (BiConsumer) onlyOne_accumulator;
+        final BinaryOperator<Holder<T>> combiner = (BinaryOperator) onlyOne_combiner;
+        final Function<Holder<T>, Optional<T>> finisher = (Function) onlyOne_finisher;
 
         return create(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
@@ -2468,7 +2472,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return t.value() != NONE ? t : u;
     };
 
-    private static final Function<Holder<Object>, Optional<Object>> first_last_finisher = t -> t.value() == NONE ? Optional.empty() : Optional.of(t.value());
+    // Use Optional.ofNullable so that a null first/last element does not cause an NPE in the finisher.
+    private static final Function<Holder<Object>, Optional<Object>> first_last_finisher = t -> t.value() == NONE ? Optional.empty()
+            : Optional.ofNullable(t.value());
 
     /**
      * Returns a {@code Collector} that collects the first element of a sequential stream
@@ -8381,6 +8387,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * all aspects of the collection process. The collector is suitable for parallel streams
      * and produces a thread-safe result.</p>
      *
+     * <p><b>Note on null values:</b> Unlike {@link #toMap(Function, Function, BinaryOperator, Supplier) toMap},
+     * this collector does <i>not</i> perform null-safe merging. It delegates directly to
+     * {@link ConcurrentMap#merge(Object, Object, BiFunction)}, which by contract throws a
+     * {@code NullPointerException} if either the key or the value is {@code null}. The default
+     * {@link java.util.concurrent.ConcurrentHashMap} (and most {@link ConcurrentMap} implementations)
+     * additionally forbid null keys and null values entirely. Callers that need to collect
+     * {@code null} values should use {@link #toMap(Function, Function, BinaryOperator, Supplier) toMap}
+     * with a null-permitting map factory instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a ConcurrentSkipListMap with custom merge logic
@@ -8429,7 +8444,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *     .collect(Collectors.toBiMap(
      *         String::length,
      *         Function.identity()));
-     * // Can retrieve key by value: result.inverted().get("apple") returns 5
+     * // Can retrieve key by value: result.inverse().get("apple") returns 5
      * }</pre>
      *
      * @param <T> the type of input elements

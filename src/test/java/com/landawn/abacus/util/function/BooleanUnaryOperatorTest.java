@@ -127,4 +127,10 @@ public class BooleanUnaryOperatorTest extends TestBase {
         assertFalse(constantFalse.applyAsBoolean(true));
         assertFalse(constantFalse.applyAsBoolean(false));
     }
+
+    @Test
+    public void testComposeNullThrowsImmediately() {
+        BooleanUnaryOperator instance = a -> false;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.compose((BooleanUnaryOperator) null));
+    }
 }

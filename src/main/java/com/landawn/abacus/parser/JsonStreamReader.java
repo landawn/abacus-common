@@ -26,7 +26,10 @@ import com.landawn.abacus.util.SK;
 
 /**
  * A stream-based JSON reader that reads from {@link Reader}/{@link java.io.InputStream} sources.
- * Extends {@link JsonStringReader} to support reading JSON data from character streams.
+ * Extends {@link JsonStringReader} to support reading JSON data from character streams by
+ * incrementally refilling the read buffer as input is consumed.
+ *
+ * <p>This is an internal class and is not thread-safe; instances must not be shared across threads.</p>
  */
 class JsonStreamReader extends JsonStringReader {
 
@@ -55,8 +58,9 @@ class JsonStreamReader extends JsonStringReader {
     }
 
     /**
-     * Creates a JSON reader that parses JSON content from a character stream.
+     * Creates a {@code JsonReader} that parses JSON content from a character stream.
      * This method provides streaming JSON parsing capabilities for efficient processing of large JSON documents.
+     * The returned reader does not perform any I/O until tokens are requested.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -70,7 +74,6 @@ class JsonStreamReader extends JsonStringReader {
      * @param rbuf the read buffer for streaming input (recommended size: 8192 or larger)
      * @param cbuf the character buffer for token processing (recommended size: 8192 or larger)
      * @return a {@code JsonReader} instance configured for streaming JSON parsing
-     * @throws UncheckedIOException if an I/O error occurs during initial setup
      */
     public static JsonReader parse(final Reader reader, final char[] rbuf, final char[] cbuf) {
 

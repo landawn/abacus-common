@@ -113,10 +113,12 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
     /**
      * Parses a string to create a LocalTime object.
      * The method supports multiple formats:
-     * - Empty string returns null
-     * - "SYS_TIME" returns the current LocalTime
-     * - Numeric strings are treated as milliseconds since epoch
-     * - ISO-8601 formatted strings are parsed directly
+     * <ul>
+     *   <li>{@code null}, empty, or blank string returns {@code null}</li>
+     *   <li>{@code "SYS_TIME"} returns the current {@code LocalTime}</li>
+     *   <li>Numeric strings are treated as milliseconds since the epoch</li>
+     *   <li>ISO-8601 formatted strings are parsed directly</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -126,8 +128,10 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
      * LocalTime time3 = type.valueOf("1609459200000");
      * }</pre>
      *
-     * @param str The string to parse
-     * @return The parsed LocalTime object, or {@code null} if the input is {@code null} or empty
+     * @param str the string to parse
+     * @return the parsed {@code LocalTime} object, or {@code null} if the input is {@code null}, empty, or blank
+     * @throws java.time.format.DateTimeParseException if the string is not a valid millisecond
+     *         number nor an ISO-8601 {@code LocalTime} representation
      */
     @Override
     public LocalTime valueOf(final String str) {

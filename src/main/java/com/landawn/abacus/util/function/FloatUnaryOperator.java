@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -68,6 +70,7 @@ public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<Runtim
      * @see #andThen(FloatUnaryOperator)
      */
     default FloatUnaryOperator compose(final FloatUnaryOperator before) {
+        Objects.requireNonNull(before);
         return v -> applyAsFloat(before.applyAsFloat(v));
     }
 
@@ -85,6 +88,7 @@ public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<Runtim
      * @see #compose(FloatUnaryOperator)
      */
     default FloatUnaryOperator andThen(final FloatUnaryOperator after) {
+        Objects.requireNonNull(after);
         return t -> after.applyAsFloat(applyAsFloat(t));
     }
 

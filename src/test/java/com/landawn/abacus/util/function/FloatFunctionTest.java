@@ -67,4 +67,10 @@ public class FloatFunctionTest extends TestBase {
         final Float result = identity.apply(123.45f);
         assertEquals(123.45f, result, 0.001f);
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        FloatFunction<String> instance = a -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

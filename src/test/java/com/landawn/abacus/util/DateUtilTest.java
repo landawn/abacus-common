@@ -18,6 +18,26 @@ import com.landawn.abacus.util.Dates.DTF;
 
 public class DateUtilTest extends AbstractTest {
 
+    /**
+     * ISO8601Util.parse now accepts the timezone-less ISO-8601 forms its Javadoc lists,
+     * defaulting to UTC. Pre-fix it threw "No time zone indicator" for them.
+     */
+    @Test
+    public void iso8601Util_parse_acceptsTimezoneLessForm() {
+        java.text.ParsePosition pos = new java.text.ParsePosition(0);
+        Date d = com.landawn.abacus.util.ISO8601Util.parse("2026-05-07T10:30:45", pos);
+        assertNotNull(d);
+        // Should be interpreted in UTC: 2026-05-07T10:30:45Z.
+        java.util.Calendar c = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
+        c.setTime(d);
+        assertEquals(2026, c.get(java.util.Calendar.YEAR));
+        assertEquals(java.util.Calendar.MAY, c.get(java.util.Calendar.MONTH));
+        assertEquals(7, c.get(java.util.Calendar.DAY_OF_MONTH));
+        assertEquals(10, c.get(java.util.Calendar.HOUR_OF_DAY));
+        assertEquals(30, c.get(java.util.Calendar.MINUTE));
+        assertEquals(45, c.get(java.util.Calendar.SECOND));
+    }
+
     @Test
     public void test_perf() {
         final Date date = new Date();

@@ -188,4 +188,10 @@ public class BooleanNFunctionTest extends TestBase {
 
         assertThrows(RuntimeException.class, () -> chainedFunction.apply(true, false));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        BooleanNFunction<String> instance = a -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

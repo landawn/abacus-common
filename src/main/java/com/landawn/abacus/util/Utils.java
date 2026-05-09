@@ -53,7 +53,7 @@ import com.landawn.abacus.type.Type;
  */
 final class Utils {
 
-    // lazy initialization to avoid: NoClassDefFoundError: Could not initialize class com.landawn.abacus.parser.JsonParserImpl
+    // Eagerly initialized; ParserFactory.createJsonParser() must always be available.
     static final JsonParser jsonParser = ParserFactory.createJsonParser();
 
     static final XmlParser abacusXmlParser = ParserFactory.isAbacusXmlParserAvailable() ? ParserFactory.createAbacusXmlParser() : null;

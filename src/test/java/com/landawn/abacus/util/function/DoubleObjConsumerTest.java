@@ -169,4 +169,10 @@ public class DoubleObjConsumerTest extends TestBase {
     public void testFunctionalInterface() {
         assertNotNull(DoubleObjConsumer.class.getAnnotation(FunctionalInterface.class));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        DoubleObjConsumer<String> instance = (a, b) -> {};
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((DoubleObjConsumer) null));
+    }
 }

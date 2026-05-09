@@ -62,6 +62,9 @@ import java.sql.SQLException;
  */
 public class RefType extends AbstractType<Ref> {
 
+    /**
+     * The type name identifier for SQL Ref type, equal to the simple class name {@code "Ref"}.
+     */
     public static final String REF = Ref.class.getSimpleName();
 
     /**

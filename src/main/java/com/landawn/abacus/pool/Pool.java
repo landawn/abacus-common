@@ -71,12 +71,18 @@ public interface Pool extends Serializable, AutoCloseable {
     boolean isEmpty();
 
     /**
-     * Removes a portion of objects from the pool to free up space.
+     * Removes a portion of objects from the pool to free up space, selecting victims according
+     * to the pool's configured {@link EvictionPolicy}. The fraction of objects removed is
+     * determined by the pool's balance factor (the proportion of the current size, with at
+     * least one object removed when the pool is non-empty).
      *
-     * <p>This method is typically called when the pool is full and auto-balancing
-     * is enabled. The number of objects removed is determined by the pool's
-     * balance factor configuration. Objects are selected for removal based on
-     * the pool's eviction policy.
+     * <p>This method is invoked automatically by the pool when {@code autoBalance} is enabled
+     * and a put/add finds the pool at capacity. It can also be called explicitly to proactively
+     * shed objects.
+     *
+     * <p>Note that this method does <em>not</em> target only expired objects — periodic
+     * removal of expired objects is performed by the pool's scheduled eviction task and is not
+     * exposed through this API.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

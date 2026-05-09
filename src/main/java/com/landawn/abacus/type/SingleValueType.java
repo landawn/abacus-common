@@ -44,6 +44,19 @@ import com.landawn.abacus.util.TypeAttrParser;
  * serialization and deserialization support for types that contain a single wrapped value,
  * with support for JSON/XML annotations and automatic value extraction/creation.
  *
+ * <p>The wrapped value is discovered, in order of precedence:
+ * <ol>
+ *   <li>Via the framework's {@link com.landawn.abacus.annotation.JsonXmlValue}/
+ *       {@link com.landawn.abacus.annotation.JsonXmlCreator} annotations (or the equivalent
+ *       Jackson {@code @JsonValue}/{@code @JsonCreator} annotations).</li>
+ *   <li>By scanning the class for a single non-static, non-final field whose type is accepted by
+ *       a public single-arg constructor or static factory method, plus a matching public getter or
+ *       publicly accessible field for value extraction.</li>
+ * </ol>
+ * If neither pattern is detected and the type is not an enum, the handler falls back to a generic
+ * object handling mode in which {@link #stringOf(Object)} delegates to the value's runtime type
+ * and {@link #valueOf(String)} returns the input string unchanged (cast to {@code T}).
+ *
  * @param <T> the type being handled
  */
 abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR

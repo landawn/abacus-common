@@ -37,18 +37,23 @@ import com.landawn.abacus.util.stream.Stream;
 /**
  * Utility class for working with HTTP Archive (HAR) files.
  *
- * <p>HAR (HTTP Archive) is a JSON-formatted archive file format for logging of a web browser's
- * interaction with a site. This utility provides methods to parse HAR files and replay the
- * captured HTTP requests.</p>
+ * <p>HAR (HTTP Archive) is a JSON-formatted archive format for logging a web browser's
+ * interaction with a site. This utility provides methods to parse HAR content and replay the
+ * captured HTTP requests, optionally filtering them by URL.</p>
  *
  * <p>Key features:</p>
  * <ul>
- *   <li>Parse HAR files and extract HTTP request information</li>
- *   <li>Filter requests by URL patterns</li>
- *   <li>Replay captured requests with the same headers and body</li>
- *   <li>Support for curl command generation from HAR entries</li>
- *   <li>Configurable HTTP header filtering</li>
+ *   <li>Parse HAR files (or HAR JSON strings) and extract HTTP request information</li>
+ *   <li>Filter requests by URL with a {@link Predicate}</li>
+ *   <li>Replay captured requests with their original method, headers, and body</li>
+ *   <li>Optional curl command generation/logging for replayed requests</li>
+ *   <li>Configurable per-thread HTTP header filtering</li>
  * </ul>
+ *
+ * <p><b>Thread Safety:</b> This class is a stateless utility ({@code final} with a private
+ * constructor). Configuration applied via {@link #setThreadLocalHeaderFilter(BiPredicate)} and the
+ * {@code configureCurlLoggingForCurrentThread(...)} methods is stored in {@link ThreadLocal}
+ * variables and only affects calls made on the same thread.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -62,6 +67,8 @@ import com.landawn.abacus.util.stream.Stream;
  * );
  * }</pre>
  *
+ * @see HttpRequest
+ * @see HttpResponse
  * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
  * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
  */
@@ -226,7 +233,7 @@ public final class HARUtil {
      * @param har the HAR file containing captured HTTP requests.
      * @param targetUrl the exact URL to match in the HAR file.
      * @return the response body as a string.
-     * @throws RuntimeException if no matching URL is found in the HAR file.
+     * @throws java.util.NoSuchElementException if no entry in the HAR file matches {@code targetUrl}.
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
      */
@@ -252,7 +259,7 @@ public final class HARUtil {
      * @param har the HAR file containing captured HTTP requests.
      * @param filterForTargetUrl predicate to test URLs; the first matching URL's request will be sent.
      * @return the response body as a string.
-     * @throws RuntimeException if no matching URL is found in the HAR file.
+     * @throws java.util.NoSuchElementException if no entry in the HAR file matches {@code filterForTargetUrl}.
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
      */
@@ -274,7 +281,7 @@ public final class HARUtil {
      * @param har the HAR content as a JSON string.
      * @param targetUrl the exact URL to match in the HAR content.
      * @return the response body as a string.
-     * @throws RuntimeException if no matching URL is found in the HAR content.
+     * @throws java.util.NoSuchElementException if no entry in the HAR content matches {@code targetUrl}.
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
      */
@@ -305,7 +312,7 @@ public final class HARUtil {
      * @param har the HAR content as a JSON string.
      * @param filterForTargetUrl predicate to test URLs; the first matching URL's request will be sent.
      * @return the response body as a string.
-     * @throws RuntimeException if no matching URL is found in the HAR content.
+     * @throws java.util.NoSuchElementException if no entry in the HAR content matches {@code filterForTargetUrl}.
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
      */
@@ -462,8 +469,8 @@ public final class HARUtil {
      * @param requestEntry the HAR request entry map containing request details.
      * @param responseClass the class to deserialize the response into.
      * @return the response deserialized into the specified type.
-     * @throws IllegalArgumentException if the HTTP method in the request entry is invalid.
-     * @throws RuntimeException if the HTTP request execution fails.
+     * @throws IllegalArgumentException if the request entry has no {@code method} field, or the value is not a recognized {@link HttpMethod}.
+     * @throws com.landawn.abacus.exception.UncheckedIOException if the HTTP request execution fails with an I/O error.
      */
     public static <T> T sendRequestByRequestEntry(final Map<String, Object> requestEntry, final Class<T> responseClass) {
         final String url = getRequestUrl(requestEntry);
@@ -583,7 +590,13 @@ public final class HARUtil {
      * @throws IllegalArgumentException if the method value from the request entry is not a valid {@code HttpMethod}.
      */
     public static HttpMethod getHttpMethodByRequestEntry(final Map<String, Object> requestEntry) {
-        return HttpMethod.valueOf(requestEntry.get("method").toString().toUpperCase());
+        final Object method = requestEntry.get("method");
+
+        if (method == null) {
+            throw new IllegalArgumentException("HAR request entry has no \"method\" field");
+        }
+
+        return HttpMethod.valueOf(method.toString().toUpperCase(java.util.Locale.ROOT));
     }
 
     /**

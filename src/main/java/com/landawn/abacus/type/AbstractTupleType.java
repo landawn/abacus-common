@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 
-import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
@@ -33,10 +32,10 @@ import com.landawn.abacus.util.Tuple;
  * Abstract base class shared by every {@code TupleNType} (Tuple1Type ... Tuple9Type).
  * <p>
  * Concrete subclasses provide the type name, the Java {@link Class} of the wrapped tuple,
- * the per-element {@link Type} array, and a {@link #fromArray(Object[])} factory that
- * rebuilds a typed tuple from its deserialized element array. All other behaviour
- * (serialisation, deserialisation with per-element type conversion, JSON {@code [...]} formatting)
- * is implemented once here.
+ * the per-element {@link Type} list, and a {@link #fromArray(Object[])} factory that
+ * rebuilds a typed tuple from its deserialized element array. All other behavior
+ * (serialization, deserialization with per-element type conversion, and JSON {@code [...]}
+ * formatting) is implemented once here.
  *
  * @param <T> the concrete {@link Tuple} subtype handled by this type
  */
@@ -206,8 +205,6 @@ abstract class AbstractTupleType<T extends Tuple<T>> extends AbstractType<T> {
                 if (!isBufferedWriter) {
                     bw.flush();
                 }
-            } catch (final IOException e) {
-                throw new UncheckedIOException(e);
             } finally {
                 if (!isBufferedWriter) {
                     Objectory.recycle((BufferedWriter) bw);
@@ -252,20 +249,16 @@ abstract class AbstractTupleType<T extends Tuple<T>> extends AbstractType<T> {
 
         final Object[] elements = x.toArray();
 
-        try {
-            writer.write(SK._BRACKET_L);
+        writer.write(SK._BRACKET_L);
 
-            for (int i = 0; i < elements.length; i++) {
-                if (i > 0) {
-                    writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-                }
-                writeElementCharacter(writer, parameterTypes.get(i), elements[i], config);
+        for (int i = 0; i < elements.length; i++) {
+            if (i > 0) {
+                writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
             }
-
-            writer.write(SK._BRACKET_R);
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
+            writeElementCharacter(writer, parameterTypes.get(i), elements[i], config);
         }
+
+        writer.write(SK._BRACKET_R);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })

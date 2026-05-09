@@ -130,4 +130,10 @@ public class ShortBiFunctionTest extends TestBase {
         assertEquals("15.0", combined.apply((short) 5, (short) 5));
         assertEquals("22.5", combined.apply((short) 10, (short) 5));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        ShortBiFunction<String> instance = (a, b) -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

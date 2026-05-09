@@ -883,6 +883,42 @@ public class CollectorsTest extends TestBase {
         assertThrows(TooManyElementsException.class, () -> Stream.of(1, 2, 3, 2, 4).collect(Collectors.onlyOne(i -> i == 2)));
     }
 
+    /**
+     * Bug fix regression: previously {@code onlyOne()} used Optional.empty() as a sentinel for
+     * "not yet seen", which collapses with the result of seeing a single null element. As a
+     * result, a stream containing two elements where the first is null silently returned the
+     * second element instead of throwing TooManyElementsException.
+     */
+    @Test
+    public void testOnlyOne_FirstElementNull_DetectsDuplicate() {
+        // First element is null, second is non-null -> must throw, not silently return 5.
+        assertThrows(TooManyElementsException.class,
+                () -> Stream.of((Integer) null, 5).collect(Collectors.onlyOne()));
+
+        // Both null also counts as duplicate.
+        assertThrows(TooManyElementsException.class,
+                () -> Stream.of((Integer) null, (Integer) null).collect(Collectors.onlyOne()));
+
+        // A single null element returns empty Optional (matches first()/last() semantics).
+        Optional<Integer> singleNull = Stream.<Integer> of((Integer) null).collect(Collectors.onlyOne());
+        assertFalse(singleNull.isPresent());
+    }
+
+    /**
+     * Bug fix regression: {@code first()} and {@code last()} previously used Optional.of(value)
+     * in the finisher, which throws NPE if the captured first/last element happened to be null.
+     */
+    @Test
+    public void testFirstLast_NullElement_NoNPE() {
+        // first() over a stream whose first element is null must not NPE.
+        Optional<Integer> first = Stream.of((Integer) null, 1, 2).collect(Collectors.first());
+        assertFalse(first.isPresent());
+
+        // last() over a stream whose last element is null must not NPE.
+        Optional<Integer> last = Stream.of(1, 2, (Integer) null).collect(Collectors.last());
+        assertFalse(last.isPresent());
+    }
+
     @Test
     public void testFirst() {
         Optional<String> result = stringList.stream().collect(Collectors.first());

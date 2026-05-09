@@ -190,10 +190,24 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
             return null; // NOSONAR
         }
 
-        // Determine the value collection type: use parameterTypes.get(2) if available, otherwise parameterTypes.get(1)
-        final Type<?> valueCollectionType = parameterTypes.size() > 2 ? parameterTypes.get(2) : parameterTypes.get(1);
+        // Decide Set- vs List-backed multimap. Prefer the declared multimap class, since
+        // parameterTypes.get(1) is the *element* type when the type name omits the value
+        // collection (e.g. "Multimap<K, E>" via SetMultimap/ListMultimap) — checking
+        // Set.class.isAssignableFrom against the element would always be false.
+        final boolean useSet;
+        if (SetMultimap.class.isAssignableFrom(typeClass)) {
+            useSet = true;
+        } else if (ListMultimap.class.isAssignableFrom(typeClass)) {
+            useSet = false;
+        } else if (parameterTypes.size() > 2) {
+            useSet = Set.class.isAssignableFrom(parameterTypes.get(2).javaType());
+        } else {
+            // size == 2 with valueElementTypeName empty: parameterTypes.get(1) is the value-collection Type
+            final Type<?> second = parameterTypes.get(1);
+            useSet = second instanceof CollectionType && Set.class.isAssignableFrom(second.javaType());
+        }
 
-        if (Set.class.isAssignableFrom(valueCollectionType.javaType())) {
+        if (useSet) {
             final Multimap<K, E, V> multiMap = (Multimap<K, E, V>) N.newLinkedSetMultimap(map.size());
 
             for (final Map.Entry<K, Collection<E>> entry : map.entrySet()) {

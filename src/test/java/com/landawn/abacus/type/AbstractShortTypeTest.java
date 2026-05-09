@@ -164,4 +164,17 @@ public class AbstractShortTypeTest extends TestBase {
         shortType.writeCharacter(writer, null, config);
         verify(writer).write((short) 0);
     }
+
+    // Bug: appendTo previously called x.toString() for any Number,
+    // diverging from stringOf which truncates to short via shortValue().
+    @Test
+    public void testAppendTo_TruncatesNonShortNumberToShortRange() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        // 70000 as a Long would render "70000" via toString(), but this is a Short type;
+        // 70000 truncated to short is 70000 - 65536 = 4464.
+        final Long large = Long.valueOf(70000L);
+        shortType.appendTo(sb, large);
+        assertEquals(shortType.stringOf(large), sb.toString());
+        assertEquals("4464", sb.toString());
+    }
 }

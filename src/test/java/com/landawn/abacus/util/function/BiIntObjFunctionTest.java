@@ -147,4 +147,10 @@ public class BiIntObjFunctionTest extends TestBase {
 
         assertThrows(RuntimeException.class, () -> chainedFunction.apply(5, 10, "test"));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        BiIntObjFunction<String, String> instance = (a, b, c) -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

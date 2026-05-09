@@ -183,9 +183,9 @@ public class UncheckedSQLException extends UncheckedException {
      *
      * <p>Common uses include:</p>
      * <ul>
-     *   <li>Identifying specific database constraint violations</li>
-     *   <li>Detecting known database-specific errors for specialized handling</li>
-     *   <li>Detailed logging of database operations</li>
+     *   <li>Identifying specific database constraint violations.</li>
+     *   <li>Detecting known database-specific errors for specialized handling.</li>
+     *   <li>Detailed logging of database operations.</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -203,7 +203,8 @@ public class UncheckedSQLException extends UncheckedException {
      * }
      * }</pre>
      *
-     * @return the vendor-specific error code from the wrapped {@code SQLException}
+     * @return the vendor-specific error code from the wrapped {@code SQLException},
+     *         or {@code 0} if no error code was set on the wrapped exception
      * @see #getSQLState()
      * @see SQLException#getErrorCode()
      */

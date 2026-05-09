@@ -22,9 +22,9 @@ import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple1;
 
 /**
- * Type handler for {@link Tuple1} objects. This class provides serialization and
- * deserialization support for Tuple1 instances, which contain a single value.
- * The serialization format is a JSON array: [value].
+ * Type handler for {@link Tuple1} objects.
+ * This class provides serialization and deserialization support for 1-element tuple instances.
+ * The serialization format is a JSON array: {@code [t1]}.
  *
  * @param <T1> the type of the single element in the tuple
  */

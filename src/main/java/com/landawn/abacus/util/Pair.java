@@ -574,7 +574,9 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * of at least 2, it is used directly; otherwise, a new array of the same type
      * with length 2 is created.
      *
-     * <p>This method follows the contract of {@link java.util.Collection#toArray(Object[])}.</p>
+     * <p><b>Note:</b> Unlike {@link java.util.Collection#toArray(Object[])}, this method does
+     * <em>not</em> null-terminate the returned array when the supplied array has length &gt; 2;
+     * any elements at indices &gt;= 2 are left untouched.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -582,8 +584,9 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * // Using an array with sufficient size
      * String[] existing = new String[3];
+     * existing[2] = "untouched";
      * String[] result = pair.toArray(existing);
-     * // result == existing, result[0] = "Hello", result[1] = "World", result[2] = null
+     * // result == existing, result[0] = "Hello", result[1] = "World", result[2] = "untouched" (unchanged)
      *
      * // Using an array with insufficient size
      * String[] small = new String[1];

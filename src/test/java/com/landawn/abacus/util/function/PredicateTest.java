@@ -140,4 +140,10 @@ public class PredicateTest extends TestBase {
         com.landawn.abacus.util.Throwables.Predicate<String, ?> throwablePredicate = predicate.toThrowable();
         assertNotNull(throwablePredicate);
     }
+
+    @Test
+    public void testAndNullThrowsImmediately() {
+        Predicate<String> instance = a -> false;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((java.util.function.Predicate) null));
+    }
 }

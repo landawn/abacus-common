@@ -148,4 +148,10 @@ public class ShortFunctionTest extends TestBase {
         // For values in the cache range, should be same object
         assertSame(result1, result2);
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        ShortFunction<String> instance = a -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

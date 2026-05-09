@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -75,6 +77,7 @@ public interface ByteNFunction<R> extends Throwables.ByteNFunction<R, RuntimeExc
      */
     @Override
     default <V> ByteNFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+        Objects.requireNonNull(after);
         return args -> after.apply(apply(args));
     }
 }

@@ -226,4 +226,22 @@ public class BigIntegerSummaryStatisticsTest extends TestBase {
         assertTrue(str.contains("average="));
     }
 
+    @Test
+    public void testConstructorWithNullSumNormalizedToZero() {
+        // Null sum passed to constructor should be normalized to ZERO so that
+        // subsequent accept() calls do not fail with NullPointerException.
+        BigIntegerSummaryStatistics stats = new BigIntegerSummaryStatistics(0L, null, null, null);
+        assertEquals(0L, stats.getCount());
+        assertEquals(BigInteger.ZERO, stats.getSum());
+        assertNull(stats.getMin());
+        assertNull(stats.getMax());
+
+        // Should not throw NPE - sum was normalized internally.
+        stats.accept(new BigInteger("7"));
+        assertEquals(1L, stats.getCount());
+        assertEquals(new BigInteger("7"), stats.getSum());
+        assertEquals(new BigInteger("7"), stats.getMin());
+        assertEquals(new BigInteger("7"), stats.getMax());
+    }
+
 }

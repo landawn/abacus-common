@@ -29,7 +29,7 @@ import java.io.Writer;
  *   <li>&gt; becomes &amp;gt;</li>
  *   <li>" becomes &amp;quot;</li>
  *   <li>' becomes &amp;apos;</li>
- *   <li>Control characters (0x00-0x1F) are escaped as numeric character references</li>
+ *   <li>Control characters (0x00-0x1F) and the DEL character (0x7F) are escaped as numeric character references</li>
  * </ul>
  *
  * <p>This writer is designed for high-performance XML generation and automatically

@@ -543,4 +543,36 @@ public class EnumerationsTest extends TestBase {
         Assertions.assertNotNull(list);
         Assertions.assertTrue(list.isEmpty());
     }
+
+    /** Direct nextElement() without prior hasMoreElements() must still work and not skip elements. */
+    @Test
+    public void testConcatCollection_NextWithoutHasMore() {
+        List<Enumeration<Integer>> enums = new ArrayList<>();
+        enums.add(Enumerations.of(1, 2));
+        enums.add(Enumerations.of(3));
+        Enumeration<Integer> e = Enumerations.concat(enums);
+        Assertions.assertEquals(1, e.nextElement());
+        Assertions.assertEquals(2, e.nextElement());
+        Assertions.assertEquals(3, e.nextElement());
+        Assertions.assertFalse(e.hasMoreElements());
+        Assertions.assertThrows(NoSuchElementException.class, e::nextElement);
+    }
+
+    /** Empty Enumeration in the middle of concat must be skipped without breaking next(). */
+    @Test
+    public void testConcatVarargs_EmptyMiddleEnumerationSkipped() {
+        Enumeration<String> result = Enumerations.concat(Enumerations.of("a"), Enumerations.empty(), Enumerations.of("b"));
+        Assertions.assertEquals("a", result.nextElement());
+        Assertions.assertEquals("b", result.nextElement());
+        Assertions.assertFalse(result.hasMoreElements());
+    }
+
+    /** create(Iterator) must propagate NoSuchElementException when the wrapped iterator is exhausted. */
+    @Test
+    public void testCreateFromIterator_ExhaustedThrowsNoSuchElement() {
+        Enumeration<Integer> e = Enumerations.create(Arrays.asList(1).iterator());
+        e.nextElement();
+        Assertions.assertFalse(e.hasMoreElements());
+        Assertions.assertThrows(NoSuchElementException.class, e::nextElement);
+    }
 }

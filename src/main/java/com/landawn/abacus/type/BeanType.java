@@ -63,7 +63,7 @@ public final class BeanType<T> extends AbstractType<T> {
     /**
      * Returns the Java reflection {@code Type} for the bean type.
      * For non-generic beans this is the same as {@link #javaType()};
-     * for generic beans it is the full parameterised type.
+     * for generic beans it is the full parameterized type.
      *
      * @return the reflection {@code Type} for the bean type {@code T}
      */

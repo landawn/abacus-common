@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractParserTest;
@@ -467,4 +468,50 @@ public class NamingPolicyTest extends AbstractParserTest {
         assertEquals(NamingPolicy.NO_CHANGE, NamingPolicy.valueOf("NO_CHANGE"));
     }
 
+    @Test
+    public void test_convert_null_returnsNullForAllPolicies() {
+        for (NamingPolicy p : NamingPolicy.values()) {
+            Assertions.assertNull(p.convert(null), "policy=" + p);
+        }
+    }
+
+    @Test
+    public void test_convert_singleChar() {
+        assertEquals("a", NamingPolicy.CAMEL_CASE.convert("a"));
+        assertEquals("a", NamingPolicy.CAMEL_CASE.convert("A"));
+        assertEquals("A", NamingPolicy.UPPER_CAMEL_CASE.convert("a"));
+        assertEquals("A", NamingPolicy.UPPER_CAMEL_CASE.convert("A"));
+        assertEquals("a", NamingPolicy.SNAKE_CASE.convert("A"));
+        assertEquals("A", NamingPolicy.SCREAMING_SNAKE_CASE.convert("a"));
+        assertEquals("a", NamingPolicy.KEBAB_CASE.convert("A"));
+        assertEquals("A", NamingPolicy.NO_CHANGE.convert("A"));
+    }
+
+    @Test
+    public void test_convert_unicodeLetters() {
+        // Unicode letters: "café_au_lait" → camelCase. Non-ASCII letters should not break the converter.
+        String result = NamingPolicy.CAMEL_CASE.convert("café_au_lait");
+        Assertions.assertNotNull(result);
+        // Snake-case round trip on a string containing accented letters should not throw.
+        Assertions.assertNotNull(NamingPolicy.SNAKE_CASE.convert("caféAuLait"));
+        Assertions.assertNotNull(NamingPolicy.KEBAB_CASE.convert("caféAuLait"));
+    }
+
+    @Test
+    public void test_convert_onlySeparators() {
+        // String of only separators should not crash and should yield empty/blank-ish output.
+        Assertions.assertNotNull(NamingPolicy.CAMEL_CASE.convert("___"));
+        Assertions.assertNotNull(NamingPolicy.UPPER_CAMEL_CASE.convert("___"));
+        Assertions.assertNotNull(NamingPolicy.SNAKE_CASE.convert("___"));
+        Assertions.assertNotNull(NamingPolicy.CAMEL_CASE.convert("---"));
+        Assertions.assertNotNull(NamingPolicy.UPPER_CAMEL_CASE.convert("---"));
+        Assertions.assertNotNull(NamingPolicy.SNAKE_CASE.convert("---"));
+    }
+
+    @Test
+    public void test_convert_leadingAndTrailingHyphens() {
+        // Leading/trailing hyphens — should not produce odd casing or trip an off-by-one.
+        assertEquals("userName", NamingPolicy.CAMEL_CASE.convert("-user-name-"));
+        assertEquals("UserName", NamingPolicy.UPPER_CAMEL_CASE.convert("-user-name-"));
+    }
 }

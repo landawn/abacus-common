@@ -23,7 +23,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Charsets;
@@ -119,7 +118,7 @@ public class AsciiStreamType extends InputStreamType {
 
     /**
      * Sets an ASCII {@link java.io.InputStream} parameter on a {@link java.sql.PreparedStatement} at the given position,
-     * with an explicit byte-length hint that the JDBC driver may use for optimisation.
+     * with an explicit byte-length hint that the JDBC driver may use for optimization.
      * Delegates to {@link java.sql.PreparedStatement#setAsciiStream(int, java.io.InputStream, int)}.
      *
      * @param stmt the {@code PreparedStatement} on which to set the parameter
@@ -135,7 +134,7 @@ public class AsciiStreamType extends InputStreamType {
 
     /**
      * Sets a named ASCII {@link java.io.InputStream} parameter on a {@link java.sql.CallableStatement},
-     * with an explicit byte-length hint that the JDBC driver may use for optimisation.
+     * with an explicit byte-length hint that the JDBC driver may use for optimization.
      * Delegates to {@link java.sql.CallableStatement#setAsciiStream(String, java.io.InputStream, int)}.
      *
      * @param stmt the {@code CallableStatement} on which to set the parameter
@@ -203,8 +202,6 @@ public class AsciiStreamType extends InputStreamType {
                 while (IOUtil.EOF != (count = IOUtil.read(reader, buf, 0, buf.length))) {
                     writer.writeCharacter(buf, 0, count);
                 }
-            } catch (final IOException e) {
-                throw new UncheckedIOException(e);
             } finally {
                 Objectory.recycle(buf);
             }

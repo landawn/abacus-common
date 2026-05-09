@@ -21,7 +21,8 @@ import com.landawn.abacus.util.Strings;
 /**
  * Type handler for {@link com.landawn.abacus.util.MutableFloat} objects, providing
  * serialization, deserialization, and database interaction capabilities for
- * mutable float wrapper objects.
+ * mutable {@code float} wrapper objects. Values are serialized as the unwrapped
+ * numeric float (identical to {@link FloatType}).
  *
  * @see com.landawn.abacus.util.MutableFloat
  * @see NumberType
@@ -31,8 +32,9 @@ public class MutableFloatType extends NumberType<MutableFloat> {
     public static final String MUTABLE_FLOAT = MutableFloat.class.getSimpleName();
 
     /**
-     * Package-private constructor for MutableFloatType.
-     * This constructor is called by subclasses to create MutableFloat type instances.
+     * Protected constructor for MutableFloatType.
+     * This constructor is invoked by the type system (typically via {@link TypeFactory})
+     * when registering the {@link MutableFloat} type handler.
      */
     protected MutableFloatType() {
         super(MUTABLE_FLOAT);

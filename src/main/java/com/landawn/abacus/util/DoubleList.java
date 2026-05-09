@@ -2131,7 +2131,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @param distance the distance to rotate the list. Positive values rotate right,
      *                 negative values rotate left
-     * @see N#rotate(int[], int)
+     * @see N#rotate(double[], int)
      */
     @Override
     public void rotate(final int distance) {
@@ -2253,7 +2253,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return a new {@code DoubleList} containing the selected elements
      * @throws IndexOutOfBoundsException if the indices are out of range
      * @throws IllegalArgumentException if {@code step} is zero
-     * @see N#copyOfRange(int[], int, int, int)
+     * @see N#copyOfRange(double[], int, int, int)
      */
     @Override
     public DoubleList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {

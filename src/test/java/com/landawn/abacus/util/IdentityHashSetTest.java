@@ -376,4 +376,91 @@ public class IdentityHashSetTest extends TestBase {
     public void testConstructorWithNegativeCapacity() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> new IdentityHashSet<>(-1));
     }
+
+    /**
+     * Two IdentityHashSets containing the same logical elements but different references
+     * must NOT be equal: identity semantics require the SAME object references.
+     */
+    @Test
+    public void testEquals_DifferentReferencesEqualByValue_NotEqualByIdentity() {
+        IdentityHashSet<String> a = new IdentityHashSet<>();
+        IdentityHashSet<String> b = new IdentityHashSet<>();
+        a.add(new String("x"));
+        b.add(new String("x"));
+        Assertions.assertNotEquals(a, b);
+    }
+
+    /**
+     * hashCode must be the sum of identity hash codes (not Object.hashCode()), and must be
+     * consistent with equals for this class.
+     */
+    @Test
+    public void testHashCode_UsesIdentityHashCode() {
+        IdentityHashSet<String> a = new IdentityHashSet<>();
+        IdentityHashSet<String> b = new IdentityHashSet<>();
+        String s = new String("x");
+        a.add(s);
+        b.add(s);
+        Assertions.assertEquals(a, b);
+        Assertions.assertEquals(a.hashCode(), b.hashCode());
+
+        // Two distinct String objects with equal content typically have different identity hashes.
+        // The set's hashCode should reflect identity, not value.
+        IdentityHashSet<String> c = new IdentityHashSet<>();
+        c.add(new String("x"));
+        // a and c contain equal-by-equals objects but different references - hashes are
+        // very unlikely to collide (System.identityHashCode is essentially a JVM-assigned value).
+        // We don't assert non-equality of hash code (collisions theoretically possible) but
+        // do assert the sets are not equal:
+        Assertions.assertNotEquals(a, c);
+    }
+
+    /**
+     * Iterator must traverse without seeing the same element twice and stop after all
+     * elements are consumed; calling next() past the end throws NoSuchElementException.
+     */
+    @Test
+    public void testIterator_ExhaustionThrowsNoSuchElement() {
+        IdentityHashSet<String> set = new IdentityHashSet<>();
+        set.add("a");
+        Iterator<String> it = set.iterator();
+        Assertions.assertTrue(it.hasNext());
+        it.next();
+        Assertions.assertFalse(it.hasNext());
+        Assertions.assertThrows(java.util.NoSuchElementException.class, it::next);
+    }
+
+    /**
+     * IdentityHashMap iterators are fail-fast - confirm the identity set surfaces this behavior.
+     */
+    @Test
+    public void testIterator_FailFastOnConcurrentModification() {
+        IdentityHashSet<String> set = new IdentityHashSet<>();
+        set.add("a");
+        set.add("b");
+        Iterator<String> it = set.iterator();
+        it.next();
+        set.add("c");
+        Assertions.assertThrows(java.util.ConcurrentModificationException.class, it::next);
+    }
+
+    /** Adding the same reference twice should leave size unchanged - rehash is irrelevant for identity. */
+    @Test
+    public void testRehash_UnderManyInsertions() {
+        IdentityHashSet<Object> set = new IdentityHashSet<>(2);
+        Object[] refs = new Object[256];
+        for (int i = 0; i < refs.length; i++) {
+            refs[i] = new Object();
+            Assertions.assertTrue(set.add(refs[i]));
+        }
+        Assertions.assertEquals(refs.length, set.size());
+        for (Object r : refs) {
+            Assertions.assertTrue(set.contains(r));
+        }
+        // Re-adding same refs is a no-op
+        for (Object r : refs) {
+            Assertions.assertFalse(set.add(r));
+        }
+        Assertions.assertEquals(refs.length, set.size());
+    }
 }

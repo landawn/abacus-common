@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -74,6 +76,7 @@ public interface IntFunction<R> extends Throwables.IntFunction<R, RuntimeExcepti
      * @throws NullPointerException if {@code after} is null
      */
     default <V> IntFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+        Objects.requireNonNull(after);
         return t -> after.apply(apply(t));
     }
 

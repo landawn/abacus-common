@@ -33,6 +33,9 @@ import com.landawn.abacus.util.Strings;
 @SuppressWarnings("java:S2160")
 public class XMLType<T> extends AbstractType<T> {
 
+    /**
+     * The type name prefix for XML-encoded types (e.g., {@code "XML<Map>"}, {@code "XML<User>"}).
+     */
     public static final String XML = "XML";
 
     private final String declaringName;

@@ -1475,4 +1475,79 @@ public class StreamBaseTest extends TestBase {
 
     // TODO: Remaining StreamBase coverage gaps are private array/list optimization paths and async collector internals that are not directly observable through the stable public API.
 
+    @Test
+    public void testLocalRunnable_ConcurrentRun_InvokesAtMostOnce() throws Exception {
+        // Wrap a Runnable and concurrently invoke run() from many threads using a CountDownLatch
+        // to start them simultaneously. The underlying handler must execute AT MOST ONCE.
+        final int threadCount = 32;
+        final AtomicInteger invocationCount = new AtomicInteger(0);
+        final Runnable handler = invocationCount::incrementAndGet;
+        final LocalRunnable wrapped = LocalRunnable.wrap(handler);
+
+        final java.util.concurrent.CountDownLatch startLatch = new java.util.concurrent.CountDownLatch(1);
+        final java.util.concurrent.CountDownLatch doneLatch = new java.util.concurrent.CountDownLatch(threadCount);
+        final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+
+        try {
+            for (int i = 0; i < threadCount; i++) {
+                executor.submit(() -> {
+                    try {
+                        startLatch.await();
+                        wrapped.run();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    } finally {
+                        doneLatch.countDown();
+                    }
+                });
+            }
+
+            // Release all threads simultaneously
+            startLatch.countDown();
+            Assertions.assertTrue(doneLatch.await(10, java.util.concurrent.TimeUnit.SECONDS));
+        } finally {
+            executor.shutdownNow();
+        }
+
+        Assertions.assertEquals(1, invocationCount.get(), "Underlying handler must be invoked exactly once across concurrent run() calls");
+
+        // Subsequent run() calls remain a no-op
+        wrapped.run();
+        Assertions.assertEquals(1, invocationCount.get());
+    }
+
+    @Test
+    public void testLocalRunnable_ConcurrentRun_AutoCloseableInvokesAtMostOnce() throws Exception {
+        final int threadCount = 32;
+        final AtomicInteger closeCount = new AtomicInteger(0);
+        final AutoCloseable closeable = closeCount::incrementAndGet;
+        final LocalRunnable wrapped = LocalRunnable.wrap(closeable);
+
+        final java.util.concurrent.CountDownLatch startLatch = new java.util.concurrent.CountDownLatch(1);
+        final java.util.concurrent.CountDownLatch doneLatch = new java.util.concurrent.CountDownLatch(threadCount);
+        final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+
+        try {
+            for (int i = 0; i < threadCount; i++) {
+                executor.submit(() -> {
+                    try {
+                        startLatch.await();
+                        wrapped.run();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    } finally {
+                        doneLatch.countDown();
+                    }
+                });
+            }
+
+            startLatch.countDown();
+            Assertions.assertTrue(doneLatch.await(10, java.util.concurrent.TimeUnit.SECONDS));
+        } finally {
+            executor.shutdownNow();
+        }
+
+        Assertions.assertEquals(1, closeCount.get(), "Underlying AutoCloseable must be closed exactly once across concurrent run() calls");
+    }
+
 }

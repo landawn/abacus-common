@@ -5559,6 +5559,31 @@ public class StringsTest extends AbstractTest {
         assertEquals(-1, Strings.lastIndexOf(null, "b", ",", 0));
     }
 
+    /**
+     * Regression: lastIndexOf(str, value, delimiter, startIndexFromBack) must not
+     * return a position past startIndexFromBack. Before the fix, the leading-
+     * delimiter branch returned the start-of-delimiter position from
+     * String.lastIndexOf(), then added delimiter.length() — pushing the result
+     * past the user-supplied search bound when the value was at the end of the string.
+     * Per the documented example: lastIndexOf("test value test", "test", " ", 10) == 0.
+     */
+    @Test
+    public void testLastIndexOf_WithDelimiter_doesNotExceedStartIndexFromBack() {
+        // Documented example from Javadoc.
+        assertEquals(0, Strings.lastIndexOf("test value test", "test", " ", 10));
+
+        // The trailing "hello" at position 6 is the right answer when bounded at 10,
+        // not the trailing "hello" at position 12.
+        assertEquals(6, Strings.lastIndexOf("hello hello hello", "hello", " ", 10));
+
+        // Multi-char delimiter case: the trailing token must respect the bound.
+        assertEquals(0, Strings.lastIndexOf("abc :: xyz :: abc", "abc", " :: ", 10));
+
+        // Within-bounds matches still resolve correctly.
+        assertEquals(13, Strings.lastIndexOf("apple,banana,apple", "apple", ",", 20));
+        assertEquals(0, Strings.lastIndexOf("apple,banana,apple", "apple", ",", 10));
+    }
+
     @Test
     @DisplayName("Test lastIndexOfIgnoreCase()")
     public void testLastIndexOfIgnoreCase() {
@@ -8087,6 +8112,29 @@ public class StringsTest extends AbstractTest {
         // substringAfterLast(str, delimiter, exclusiveEndIndex)
         assertEquals("ell", Strings.substringAfterLast("hello", "h", 4));
         assertNull(Strings.substringAfterLast(null, "h", 4));
+    }
+
+    @Test
+    public void testSubstringAfterLast_endIndexBeyondLength() {
+        // exclusiveEndIndex greater than str.length() should not throw StringIndexOutOfBoundsException
+        // and should be treated as if it were equal to str.length().
+        assertEquals("def", Strings.substringAfterLast("abc.def", ".", 100));
+        assertEquals("def", Strings.substringAfterLast("abc.def", ".", 7));
+        assertEquals("c", Strings.substringAfterLast("a.b.c", ".", Integer.MAX_VALUE));
+    }
+
+    @Test
+    public void testSubstringBetween_charDelimiter_endIndexBeyondLength() {
+        // exclusiveEndIndex greater than str.length() should not throw StringIndexOutOfBoundsException.
+        assertEquals("sr", Strings.substringBetween("u@sr", '@', 100));
+        assertEquals("ello", Strings.substringBetween("Hello", 'H', Integer.MAX_VALUE));
+    }
+
+    @Test
+    public void testSubstringBetween_stringDelimiter_endIndexBeyondLength() {
+        // exclusiveEndIndex greater than str.length() should not throw StringIndexOutOfBoundsException.
+        assertEquals("c", Strings.substringBetween("ab@c", "@", 100));
+        assertEquals("ello", Strings.substringBetween("Hello", "H", Integer.MAX_VALUE));
     }
 
     @Test
@@ -11691,6 +11739,226 @@ public class StringsTest extends AbstractTest {
         assertFalse(StrUtil.createNumber("abc").isPresent());
         assertFalse(StrUtil.createNumber("").isPresent());
         assertFalse(StrUtil.createNumber(null).isPresent());
+    }
+
+    // ----------------------------------------------------------------------
+    // Regression tests added during code review
+    // ----------------------------------------------------------------------
+
+    /**
+     * Regression: {@link Strings#trim(String)} previously short-circuited via
+     * {@link Character#isWhitespace(char)}, which is NOT equivalent to the
+     * predicate used by {@link String#trim()} (chars &lt;= 0x20). Low control
+     * characters such as ,  are NOT considered whitespace by
+     * Character#isWhitespace, but ARE removed by String#trim. The bug caused
+     * Strings.trim to return the input unchanged in those cases.
+     */
+    @Test
+    public void testTrim_LowControlCharsRegression() {
+        //  is ENQ, char value 5 -> trimmed by String#trim, NOT a Java whitespace char.
+        assertEquals("abc", Strings.trim("abc"));
+        assertEquals("abc", Strings.trim("abc"));
+        assertEquals("abc", Strings.trim("abc"));
+        assertEquals("", Strings.trim(""));
+        // Non-breaking space (U+00A0) is > 0x20 and NOT trimmed by String#trim.
+        assertEquals(" abc ", Strings.trim(" abc "));
+    }
+
+    @Test
+    public void testIsBlank_NonBreakingSpace() {
+        // Character.isWhitespace(NBSP) is false -> isBlank returns false.
+        assertFalse(Strings.isBlank(" "));
+        // Standard whitespace IS considered blank.
+        assertTrue(Strings.isBlank(" \t\n\r\f"));
+    }
+
+    @Test
+    public void testRepeat_EdgeCases() {
+        assertEquals("", Strings.repeat('a', 0));
+        assertEquals("a", Strings.repeat('a', 1));
+        assertEquals("aaa", Strings.repeat('a', 3));
+        assertThrows(IllegalArgumentException.class, () -> Strings.repeat('a', -1));
+        assertThrows(IllegalArgumentException.class, () -> Strings.repeat("a", -1));
+        assertEquals("", Strings.repeat((String) null, 5));
+        assertEquals("", Strings.repeat("", 5));
+        // delimiter overload
+        assertEquals("a-a-a", Strings.repeat("a", 3, "-"));
+        assertEquals("", Strings.repeat("a", 0, "-"));
+        // prefix/suffix
+        assertEquals("[a,a,a]", Strings.repeat("a", 3, ",", "[", "]"));
+        assertEquals("[]", Strings.repeat("a", 0, ",", "[", "]"));
+    }
+
+    @Test
+    public void testCountMatches_NonOverlapping() {
+        // Documented as non-overlapping: aaaa contains 2 non-overlapping "aa"s.
+        assertEquals(2, Strings.countMatches("aaaa", "aa"));
+        assertEquals(3, Strings.countMatches("aaaaaa", "aa"));
+        assertEquals(0, Strings.countMatches("", "aa"));
+        assertEquals(0, Strings.countMatches("aaaa", ""));
+        assertEquals(0, Strings.countMatches(null, "aa"));
+        assertEquals(0, Strings.countMatches("aaaa", null));
+    }
+
+    @Test
+    public void testReplace_EmptyTargetNoInfiniteLoop() {
+        // Empty target should be a no-op (NOT every-position insert / infinite loop).
+        assertEquals("abc", Strings.replaceAll("abc", "", "X"));
+        assertEquals("abc", Strings.replaceFirst("abc", "", "X"));
+    }
+
+    @Test
+    public void testIndexOf_EmptyPattern() {
+        // Mirrors String#indexOf semantics: empty pattern is found at index 0.
+        assertEquals(0, Strings.indexOf("hello", ""));
+        assertEquals(0, Strings.indexOf("", ""));
+        // Null pattern -> NOT_FOUND.
+        assertEquals(N.INDEX_NOT_FOUND, Strings.indexOf("hello", (String) null));
+        assertEquals(N.INDEX_NOT_FOUND, Strings.indexOf((String) null, ""));
+    }
+
+    @Test
+    public void testSubstring_OutOfBoundsReturnsNull() {
+        // Negative or out-of-range indices return null instead of throwing.
+        assertNull(Strings.substring(null, 0));
+        assertNull(Strings.substring("abc", -1));
+        assertNull(Strings.substring("abc", 4));
+        assertEquals("", Strings.substring("abc", 3));
+        // 2-arg: end > length is clamped.
+        assertEquals("bc", Strings.substring("abc", 1, 100));
+        assertNull(Strings.substring("abc", 2, 1));
+    }
+
+    @Test
+    public void testSubstringBeforeAfter_NotFound() {
+        assertNull(Strings.substringAfter("hello", '@'));
+        assertNull(Strings.substringAfter("hello", "@@"));
+        assertNull(Strings.substringBefore("hello", '@'));
+        assertNull(Strings.substringBefore("hello", "@@"));
+        assertEquals("hello", Strings.substringAfter("hello", ""));
+    }
+
+    @Test
+    public void testRotate_LargeAndNegativeShifts() {
+        assertEquals("abcdefg", Strings.rotate("abcdefg", 0));
+        assertEquals("abcdefg", Strings.rotate("abcdefg", 7));
+        assertEquals("abcdefg", Strings.rotate("abcdefg", -7));
+        assertEquals("fgabcde", Strings.rotate("abcdefg", 2));
+        assertEquals("cdefgab", Strings.rotate("abcdefg", -2));
+        assertEquals("fgabcde", Strings.rotate("abcdefg", 9));
+        assertEquals("cdefgab", Strings.rotate("abcdefg", -9));
+        assertNull(Strings.rotate(null, 5));
+        assertEquals("", Strings.rotate("", 5));
+    }
+
+    @Test
+    public void testReverse_SurrogatePairsPreserved() {
+        // Single supplementary code-point should NOT be split into two malformed surrogates.
+        // U+1F600 = grinning face emoji.
+        final String emoji = new String(Character.toChars(0x1F600));
+        final String input = "a" + emoji + "b";
+        final String reversed = Strings.reverse(input);
+        assertEquals("b" + emoji + "a", reversed);
+        // Round-trip
+        assertEquals(input, Strings.reverse(reversed));
+    }
+
+    @Test
+    public void testCenter_PaddingDistribution() {
+        assertEquals(" ab ", Strings.center("ab", 4));
+        // Odd extra: extra goes on the right.
+        assertEquals(" a  ", Strings.center("a", 4));
+        assertEquals("    ", Strings.center("", 4));
+        assertEquals("    ", Strings.center((String) null, 4));
+        assertEquals("abcd", Strings.center("abcd", 2));
+        assertThrows(IllegalArgumentException.class, () -> Strings.center("a", -1));
+    }
+
+    @Test
+    public void testPadStart_LeftPadding() {
+        // padStart adds padding on the LEFT.
+        assertEquals("    a", Strings.padStart("a", 5));
+        assertEquals("0000a", Strings.padStart("a", 5, '0'));
+        assertEquals("a", Strings.padStart("a", 1));
+        // null becomes empty, then padded.
+        assertEquals("---", Strings.padStart(null, 3, '-'));
+    }
+
+    @Test
+    public void testPadEnd_RightPadding() {
+        assertEquals("a    ", Strings.padEnd("a", 5));
+        assertEquals("a0000", Strings.padEnd("a", 5, '0'));
+        assertEquals("a", Strings.padEnd("a", 1));
+        assertEquals("---", Strings.padEnd(null, 3, '-'));
+    }
+
+    @Test
+    public void testCapitalize_Edge() {
+        assertNull(Strings.capitalize(null));
+        assertEquals("", Strings.capitalize(""));
+        assertEquals("A", Strings.capitalize("a"));
+        assertEquals("Cat", Strings.capitalize("cat"));
+        assertEquals("Cat", Strings.capitalize("Cat"));
+    }
+
+    @Test
+    public void testSwapCase_NoLocale() {
+        // swapCase should NOT depend on the default Locale (Turkish-i bug avoidance).
+        // We don't switch the default Locale here, but we verify that ASCII swap is stable.
+        assertEquals("hELLO wORLD", Strings.swapCase("Hello World"));
+        assertEquals("", Strings.swapCase(""));
+        assertNull(Strings.swapCase(null));
+    }
+
+    @Test
+    public void testToCamelCase_AllCapsAndEmpty() {
+        assertNull(Strings.toCamelCase(null));
+        assertEquals("", Strings.toCamelCase(""));
+        assertEquals("helloWorld", Strings.toCamelCase("hello_world"));
+        assertEquals("helloWorld", Strings.toCamelCase("HELLO_WORLD"));
+        assertEquals("helloWorld", Strings.toCamelCase("Hello_World"));
+    }
+
+    @Test
+    public void testIndexOfDifference_EmptyArrays() {
+        assertEquals(N.INDEX_NOT_FOUND, Strings.indexOfDifference((String[]) null));
+        assertEquals(N.INDEX_NOT_FOUND, Strings.indexOfDifference(new String[0]));
+        assertEquals(N.INDEX_NOT_FOUND, Strings.indexOfDifference(new String[] { "abc" }));
+        assertEquals(N.INDEX_NOT_FOUND, Strings.indexOfDifference(new String[] { null, null }));
+        assertEquals(N.INDEX_NOT_FOUND, Strings.indexOfDifference(new String[] { "", "" }));
+    }
+
+    @Test
+    public void testJoin_NullArrayAndElements() {
+        // Null array -> empty.
+        assertEquals("", Strings.join((Object[]) null, ", "));
+        // Null elements rendered as "null".
+        assertEquals("a, null, b", Strings.join(new Object[] { "a", null, "b" }, ", "));
+        // Empty array with prefix/suffix.
+        assertEquals("[]", Strings.join(new Object[0], ", ", "[", "]"));
+    }
+
+    @Test
+    public void testParseBoolean_NullSafe() {
+        assertFalse(Strings.parseBoolean(null));
+        assertFalse(Strings.parseBoolean(""));
+        assertFalse(Strings.parseBoolean("false"));
+        assertFalse(Strings.parseBoolean("yes"));
+        assertTrue(Strings.parseBoolean("true"));
+        assertTrue(Strings.parseBoolean("True"));
+        assertTrue(Strings.parseBoolean("TRUE"));
+    }
+
+    @Test
+    public void testAbbreviate_TooSmallWidthThrows() {
+        // maxWidth must be at least abbrevMarker.length + 1.
+        assertThrows(IllegalArgumentException.class, () -> Strings.abbreviate("abcdefg", 3));
+        assertThrows(IllegalArgumentException.class, () -> Strings.abbreviate("abcdefg", "...", 3));
+        // OK boundaries.
+        assertEquals("a...", Strings.abbreviate("abcdefg", 4));
+        assertEquals("abcdefg", Strings.abbreviate("abcdefg", 7));
+        assertEquals("abcdefg", Strings.abbreviate("abcdefg", 8));
+        assertNull(Strings.abbreviate(null, 4));
     }
 
 }

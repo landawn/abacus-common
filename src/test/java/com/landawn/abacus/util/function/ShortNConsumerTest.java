@@ -188,4 +188,10 @@ public class ShortNConsumerTest extends TestBase {
         assertEquals(10, results[1]);
         assertEquals(20, results[2]);
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        ShortNConsumer instance = a -> {};
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((ShortNConsumer) null));
+    }
 }

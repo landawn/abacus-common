@@ -10638,7 +10638,7 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * ImmutableBiMap<DayOfWeek, String> dayMap = N.enumMapOf(DayOfWeek.class);
      * // dayMap.get(DayOfWeek.MONDAY) returns "MONDAY"
-     * // dayMap.inverted().get("MONDAY") returns DayOfWeek.MONDAY
+     * // dayMap.inverse().get("MONDAY") returns DayOfWeek.MONDAY
      * }</pre>
      *
      * @param <E> the type of the enum constants. This should be an enum type.
@@ -12345,7 +12345,7 @@ sealed class CommonUtil permits N {
      * biMap.put("one", 1);
      * biMap.put("two", 2);
      * biMap.get("one");          // returns 1
-     * biMap.inverted().get(1);   // returns "one"
+     * biMap.inverse().get(1);   // returns "one"
      * }</pre>
      *
      * @param <K> the type of keys maintained by this map
@@ -13352,7 +13352,7 @@ sealed class CommonUtil permits N {
      *                            If set to {@code true}, all Datasets in the collection must have the same columns.
      *                            If set to {@code false}, the Datasets in the collection can have different columns.
      * @return a new Dataset which is the result of merging all the Datasets in the provided collection.
-     * @throws IllegalArgumentException if the provided collection is {@code null} or empty or {@code requiresSameColumns} is {@code true} and the {@code Datasets} in {@code dss} don't have the same the same column names.
+     * @throws IllegalArgumentException if the provided collection is {@code null} or empty or {@code requiresSameColumns} is {@code true} and the {@code Datasets} in {@code dss} don't have the same column names.
      */
     public static Dataset merge(final Collection<? extends Dataset> dss, final boolean requiresSameColumns) throws IllegalArgumentException {
         checkArgNotEmpty(dss, cs.datasets);
@@ -13534,7 +13534,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-    * com.landawn.abacus.util.stream.Stream<Integer> stream = com.landawn.abacus.util.stream.Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+     * com.landawn.abacus.util.stream.Stream<Integer> stream = com.landawn.abacus.util.stream.Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
      * ObjIterator<Integer> slice = N.slice(stream.iterator(), 2, 7);
      * // Returns [3, 4, 5, 6, 7]
      * }</pre>
@@ -16378,8 +16378,6 @@ sealed class CommonUtil permits N {
      * extracted by applying the keyExtractor function to the element. If duplicate keys
      * are produced, the later value overwrites the earlier one.</p>
      *
-     * <p>If duplicate keys are produced, the later value overwrites the earlier one.</p>
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> names = N.toList("Alice", "Bob", "Charlie");
@@ -18660,7 +18658,7 @@ sealed class CommonUtil permits N {
      *
      * @param a the first boolean value
      * @param b the second boolean value
-     * @return 0 if both values are equal, 1 if the first value is {@code true} and the second is {@code false}, -1 if the first value is {@code false} and the second is true
+     * @return 0 if both values are equal, 1 if the first value is {@code true} and the second is {@code false}, -1 if the first value is {@code false} and the second is {@code true}
      */
     public static int compare(final boolean a, final boolean b) {
         return (a == b) ? 0 : (a ? 1 : -1);
@@ -19284,10 +19282,8 @@ sealed class CommonUtil permits N {
         checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
-        if (isEmpty(a)) {
-            return isEmpty(b) ? 0 : -1;
-        } else if (isEmpty(b)) {
-            return 1;
+        if (len == 0) {
+            return 0;
         }
 
         return Arrays.compareUnsigned(a, fromIndexA, fromIndexA + len, b, fromIndexB, fromIndexB + len);
@@ -19404,10 +19400,8 @@ sealed class CommonUtil permits N {
         checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
-        if (isEmpty(a)) {
-            return isEmpty(b) ? 0 : -1;
-        } else if (isEmpty(b)) {
-            return 1;
+        if (len == 0) {
+            return 0;
         }
 
         return Arrays.compareUnsigned(a, fromIndexA, fromIndexA + len, b, fromIndexB, fromIndexB + len);
@@ -19524,10 +19518,8 @@ sealed class CommonUtil permits N {
         checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
-        if (isEmpty(a)) {
-            return isEmpty(b) ? 0 : -1;
-        } else if (isEmpty(b)) {
-            return 1;
+        if (len == 0) {
+            return 0;
         }
 
         return Arrays.compareUnsigned(a, fromIndexA, fromIndexA + len, b, fromIndexB, fromIndexB + len);
@@ -19644,10 +19636,8 @@ sealed class CommonUtil permits N {
         checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
-        if (isEmpty(a)) {
-            return isEmpty(b) ? 0 : -1;
-        } else if (isEmpty(b)) {
-            return 1;
+        if (len == 0) {
+            return 0;
         }
 
         return Arrays.compareUnsigned(a, fromIndexA, fromIndexA + len, b, fromIndexB, fromIndexB + len);
@@ -22507,8 +22497,6 @@ sealed class CommonUtil permits N {
      *   <li>They contain exactly the same elements with the same frequencies in any order</li>
      * </ul>
      *
-     * <p>For example:
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] a = {1, 2, 3, 2};
@@ -24515,9 +24503,9 @@ sealed class CommonUtil permits N {
      * int[] a = {1, 2, 3, 4, 5};
      * rotate(a, -1);   // a => [2, 3, 4, 5, 1]
      *
-     * // Rotate by a distance larger than the stream size
+     * // Rotate by a distance larger than the array size
      * int[] a = {1, 2, 3, 4, 5};
-     * rotate(a, 7);   // a => [4, 5, 1, 2, 3], same as rotated(2) due to modulo operation
+     * rotate(a, 7);   // a => [4, 5, 1, 2, 3], same as rotate(2) due to modulo operation
      * }</pre>
      *
      * <p>The rotation is performed in-place, modifying the original array.
@@ -25784,7 +25772,7 @@ sealed class CommonUtil permits N {
     /**
      * Swaps the left and right elements in the specified triple.
      *
-     * @param <T> the type of the elements in the triple
+     * @param <T> the type of the left and right elements in the triple
      * @param <M> the type of the middle element in the triple
      * @param triple the triple whose elements are to be swapped
      */
@@ -25797,7 +25785,7 @@ sealed class CommonUtil permits N {
     /**
      * Swaps the left and right elements in the specified triple if the specified predicate is {@code true}.
      *
-     * @param <T> the type of the elements in the triple
+     * @param <T> the type of the left and right elements in the triple
      * @param <M> the type of the middle element in the triple
      * @param triple the triple whose elements are to be swapped
      * @param predicate the predicate to determine if the elements should be swapped
@@ -26259,7 +26247,7 @@ sealed class CommonUtil permits N {
     //    }
 
     /**
-     * Appends the provided object to the beginning of the list till the list has at least the specified minimum size.
+     * Prepends the provided object to the beginning of the list until the list has at least the specified minimum size.
      *
      * @param <T> the type of the elements in the list
      * @param list the list to be padded
@@ -29835,8 +29823,8 @@ sealed class CommonUtil permits N {
      *
      * // Sort a range from index 2 to 6 (exclusive)
      * parallelSort(array, 2, 6);
-     * // Result: array = {'z', 'y', 'v', 'w', 'x', 'u', 't', 's'}
-     * //                              ^^^^^^^^^ sorted range
+     * // Result: array = {'z', 'y', 'u', 'v', 'w', 'x', 't', 's'}
+     * //                              ^^^^^^^^^^^^^^^^ sorted range
      *
      * // Sort the entire array except first and last element
      * parallelSort(array, 1, array.length - 1);
@@ -29918,7 +29906,7 @@ sealed class CommonUtil permits N {
      *
      * // Sort a range from index 2 to 6 (exclusive)
      * parallelSort(array, 2, 6);
-     * // Result: array = {30, 10, 20, 40, 50, 15, 25, 35}
+     * // Result: array = {30, 10, 15, 20, 40, 50, 25, 35}
      * }</pre>
      *
      * @param a the array to be sorted - may be {@code null} (in which case the method returns immediately)

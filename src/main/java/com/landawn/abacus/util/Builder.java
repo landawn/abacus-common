@@ -3754,7 +3754,7 @@ public class Builder<T> {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * ComparisonBuilder.create()
+         * Builder
          *     .compare("apple", "banana")
          *     .result();   // returns negative value
          * }</pre>
@@ -3780,12 +3780,9 @@ public class Builder<T> {
          * <p>If the comparator is {@code null}, the natural ordering is used (objects must
          * implement Comparable). This allows for flexible comparison strategies.</p>
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * ComparisonBuilder.create()
+         * Builder
          *     .compare(person1, person2, Comparator.comparing(Person::getAge))
          *     .result();
          * }</pre>
@@ -3822,12 +3819,9 @@ public class Builder<T> {
          *   <li>non-null values are compared using compareTo</li>
          * </ul>
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * ComparisonBuilder.create()
+         * Builder
          *     .compareNullLess(null, "value")
          *     .result();   // returns -1
          * }</pre>
@@ -3858,12 +3852,9 @@ public class Builder<T> {
          *   <li>non-null values are compared using compareTo</li>
          * </ul>
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * ComparisonBuilder.create()
+         * Builder
          *     .compareNullBigger("value", null)
          *     .result();   // returns -1
          * }</pre>
@@ -3893,12 +3884,9 @@ public class Builder<T> {
          *   <li>equal values return 0</li>
          * </ul>
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * ComparisonBuilder.create()
+         * Builder
          *     .compareFalseLess(false, true)
          *     .result();   // returns -1
          * }</pre>
@@ -3927,12 +3915,9 @@ public class Builder<T> {
          *   <li>equal values return 0</li>
          * </ul>
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * ComparisonBuilder.create()
+         * Builder
          *     .compareTrueLess(true, false)
          *     .result();   // returns -1
          * }</pre>
@@ -3954,12 +3939,9 @@ public class Builder<T> {
          * If the result of this comparison chain has not already been determined,
          * this method compares the char values based on their numeric values.
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * ComparisonBuilder.create()
+         * Builder
          *     .compare('a', 'b')
          *     .result();   // returns -1
          * }</pre>
@@ -3981,12 +3963,9 @@ public class Builder<T> {
          * If the result of this comparison chain has not already been determined,
          * this method compares the byte values.
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * ComparisonBuilder.create()
+         * Builder
          *     .compare((byte)10, (byte)20)
          *     .result();   // returns -1
          * }</pre>
@@ -4008,12 +3987,9 @@ public class Builder<T> {
          * If the result of this comparison chain has not already been determined,
          * this method compares the short values.
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * ComparisonBuilder.create()
+         * Builder
          *     .compare((short)100, (short)200)
          *     .result();   // returns -1
          * }</pre>
@@ -4037,7 +4013,7 @@ public class Builder<T> {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * ComparisonBuilder.create()
+         * Builder
          *     .compare(42, 100)
          *     .result();   // returns -1
          * }</pre>
@@ -4059,12 +4035,9 @@ public class Builder<T> {
          * If the result of this comparison chain has not already been determined,
          * this method compares the long values.
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * ComparisonBuilder.create()
+         * Builder
          *     .compare(1000L, 2000L)
          *     .result();   // returns -1
          * }</pre>
@@ -4092,12 +4065,9 @@ public class Builder<T> {
          *   <li>0.0f is considered greater than -0.0f</li>
          * </ul>
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * ComparisonBuilder.create()
+         * Builder
          *     .compare(1.5f, 2.5f)
          *     .result();   // returns -1
          * }</pre>
@@ -4122,12 +4092,9 @@ public class Builder<T> {
          * <p>Values are considered equal if their absolute difference is less than
          * or equal to the specified tolerance.</p>
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * ComparisonBuilder.create()
+         * Builder
          *     .compare(1.0001f, 1.0002f, 0.001f)
          *     .result();   // returns 0 (considered equal)
          * }</pre>
@@ -4156,12 +4123,9 @@ public class Builder<T> {
          *   <li>0.0d is considered greater than -0.0d</li>
          * </ul>
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * ComparisonBuilder.create()
+         * Builder
          *     .compare(1.5, 2.5)
          *     .result();   // returns -1
          * }</pre>
@@ -4186,12 +4150,9 @@ public class Builder<T> {
          * <p>Values are considered equal if their absolute difference is less than
          * or equal to the specified tolerance.</p>
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * ComparisonBuilder.create()
+         * Builder
          *     .compare(1.00001, 1.00002, 0.0001)
          *     .result();   // returns 0 (considered equal)
          * }</pre>
@@ -4219,12 +4180,9 @@ public class Builder<T> {
          *   <li>Returns a positive value if the first value is greater than the second</li>
          * </ul>
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * int comparison = ComparisonBuilder.create()
+         * int comparison = Builder
          *     .compare(obj1.getName(), obj2.getName())
          *     .compare(obj1.getAge(), obj2.getAge())
          *     .result();
@@ -4259,8 +4217,6 @@ public class Builder<T> {
      * <p><strong>Thread Safety:</strong> This class is not thread-safe and should
      * not be shared between threads.</p>
      *
-     * <p><strong>Example usage:</strong></p>
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean equal = Builder
@@ -4287,12 +4243,9 @@ public class Builder<T> {
          * <p>This method handles {@code null} values gracefully, considering two null
          * values as equal.</p>
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * EquivalenceBuilder.create()
+         * Builder
          *     .equals("hello", "hello")
          *     .equals(null, null)
          *     .result();   // returns true
@@ -4317,12 +4270,9 @@ public class Builder<T> {
          *
          * <p>This allows for custom equality logic beyond standard equals() method.</p>
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * EquivalenceBuilder.create()
+         * Builder
          *     .equals(str1, str2, (a, b) -> a.equalsIgnoreCase(b))
          *     .result();
          * }</pre>
@@ -4349,12 +4299,9 @@ public class Builder<T> {
          * If the result of this equivalence chain has not already been determined
          * to be {@code false}, this method checks if the two boolean values are equal.
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * EquivalenceBuilder.create()
+         * Builder
          *     .equals(true, true)
          *     .equals(false, false)
          *     .result();   // returns true
@@ -4377,12 +4324,9 @@ public class Builder<T> {
          * If the result of this equivalence chain has not already been determined
          * to be {@code false}, this method checks if the two char values are equal.
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * EquivalenceBuilder.create()
+         * Builder
          *     .equals('a', 'a')
          *     .equals('X', 'X')
          *     .result();   // returns true
@@ -4405,12 +4349,9 @@ public class Builder<T> {
          * If the result of this equivalence chain has not already been determined
          * to be {@code false}, this method checks if the two byte values are equal.
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * EquivalenceBuilder.create()
+         * Builder
          *     .equals((byte)10, (byte)10)
          *     .result();   // returns true
          * }</pre>
@@ -4432,12 +4373,9 @@ public class Builder<T> {
          * If the result of this equivalence chain has not already been determined
          * to be {@code false}, this method checks if the two short values are equal.
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * EquivalenceBuilder.create()
+         * Builder
          *     .equals((short)100, (short)100)
          *     .result();   // returns true
          * }</pre>
@@ -4459,12 +4397,9 @@ public class Builder<T> {
          * If the result of this equivalence chain has not already been determined
          * to be {@code false}, this method checks if the two int values are equal.
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * EquivalenceBuilder.create()
+         * Builder
          *     .equals(42, 42)
          *     .equals(100, 100)
          *     .result();   // returns true
@@ -4487,12 +4422,9 @@ public class Builder<T> {
          * If the result of this equivalence chain has not already been determined
          * to be {@code false}, this method checks if the two long values are equal.
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * EquivalenceBuilder.create()
+         * Builder
          *     .equals(1000L, 1000L)
          *     .result();   // returns true
          * }</pre>
@@ -4517,12 +4449,9 @@ public class Builder<T> {
          * <p>This method correctly handles special float values including NaN,
          * positive and negative infinity, and distinguishes between 0.0f and -0.0f.</p>
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * EquivalenceBuilder.create()
+         * Builder
          *     .equals(1.5f, 1.5f)
          *     .equals(Float.NaN, Float.NaN)
          *     .result();   // returns true
@@ -4548,12 +4477,9 @@ public class Builder<T> {
          * <p>Values are considered equal if their absolute difference is less than
          * or equal to the specified tolerance.</p>
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * EquivalenceBuilder.create()
+         * Builder
          *     .equals(1.0001f, 1.0002f, 0.001f)
          *     .result();   // returns true
          * }</pre>
@@ -4579,12 +4505,9 @@ public class Builder<T> {
          * <p>This method correctly handles special double values including NaN,
          * positive and negative infinity, and distinguishes between 0.0d and -0.0d.</p>
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * EquivalenceBuilder.create()
+         * Builder
          *     .equals(1.5, 1.5)
          *     .equals(Double.NaN, Double.NaN)
          *     .result();   // returns true
@@ -4610,12 +4533,9 @@ public class Builder<T> {
          * <p>Values are considered equal if their absolute difference is less than
          * or equal to the specified tolerance.</p>
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * EquivalenceBuilder.create()
+         * Builder
          *     .equals(1.00001, 1.00002, 0.0001)
          *     .result();   // returns true
          * }</pre>
@@ -4639,12 +4559,9 @@ public class Builder<T> {
          * <p>Returns {@code true} if and only if all comparisons in the chain returned {@code true}.
          * If any comparison returned {@code false}, this method returns {@code false}.</p>
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * boolean areEqual = EquivalenceBuilder.create()
+         * boolean areEqual = Builder
          *     .equals(obj1.getField1(), obj2.getField1())
          *     .equals(obj1.getField2(), obj2.getField2())
          *     .result();
@@ -4674,8 +4591,6 @@ public class Builder<T> {
      * <p><strong>Thread Safety:</strong> This class is not thread-safe and should
      * not be shared between threads.</p>
      *
-     * <p><strong>Example usage:</strong></p>
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int hashCode = Builder
@@ -4702,12 +4617,9 @@ public class Builder<T> {
          * <p>The hash code is updated using the formula:
          * {@code result = result * 31 + hashCode(value)}</p>
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * HashCodeBuilder.create()
+         * Builder
          *     .hash("Hello")
          *     .hash(null)
          *     .hash(42)
@@ -4731,12 +4643,9 @@ public class Builder<T> {
          * <p>The hash code is updated using the formula:
          * {@code result = result * 31 + func.applyAsInt(value)}</p>
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * HashCodeBuilder.create()
+         * Builder
          *     .hash(person, p -> p.getId())
          *     .hash(name, String::length)
          *     .result();
@@ -4760,12 +4669,9 @@ public class Builder<T> {
          * Adds the hash code of a boolean value to the running hash code.
          * {@code true} is mapped to 1231 and {@code false} to 1237, following Java conventions.
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * HashCodeBuilder.create()
+         * Builder
          *     .hash(true)
          *     .hash(false)
          *     .result();
@@ -4784,12 +4690,9 @@ public class Builder<T> {
          * Adds the hash code of a char value to the running hash code.
          * The char value is used directly as its hash code.
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * HashCodeBuilder.create()
+         * Builder
          *     .hash('A')
          *     .hash('Z')
          *     .result();
@@ -4808,12 +4711,9 @@ public class Builder<T> {
          * Adds the hash code of a byte value to the running hash code.
          * The byte value is used directly as its hash code.
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * HashCodeBuilder.create()
+         * Builder
          *     .hash((byte)10)
          *     .hash((byte)20)
          *     .result();
@@ -4832,12 +4732,9 @@ public class Builder<T> {
          * Adds the hash code of a short value to the running hash code.
          * The short value is used directly as its hash code.
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * HashCodeBuilder.create()
+         * Builder
          *     .hash((short)100)
          *     .hash((short)200)
          *     .result();
@@ -4856,12 +4753,9 @@ public class Builder<T> {
          * Adds the hash code of an int value to the running hash code.
          * The int value is used directly as its hash code.
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * HashCodeBuilder.create()
+         * Builder
          *     .hash(42)
          *     .hash(100)
          *     .result();
@@ -4880,12 +4774,9 @@ public class Builder<T> {
          * Adds the hash code of a long value to the running hash code.
          * The hash code is computed as {@code (int)(value ^ (value >>> 32))}.
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * HashCodeBuilder.create()
+         * Builder
          *     .hash(1000L)
          *     .hash(2000L)
          *     .result();
@@ -4904,12 +4795,9 @@ public class Builder<T> {
          * Adds the hash code of a float value to the running hash code.
          * The hash code is computed using {@link Float#floatToIntBits(float)}.
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * HashCodeBuilder.create()
+         * Builder
          *     .hash(1.5f)
          *     .hash(2.5f)
          *     .result();
@@ -4929,12 +4817,9 @@ public class Builder<T> {
          * The hash code is computed using {@link Double#doubleToLongBits(double)}
          * and then converting to int.
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * HashCodeBuilder.create()
+         * Builder
          *     .hash(1.5)
          *     .hash(2.5)
          *     .result();
@@ -4956,14 +4841,11 @@ public class Builder<T> {
          * each value's contribution is multiplied by 31 and added to the total.
          * This provides good distribution for use in hash-based collections.</p>
          *
-         * <p><strong>Example:</strong></p>
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * @Override
          * public int hashCode() {
-         *     return HashCodeBuilder.create()
+         *     return Builder
          *         .hash(field1)
          *         .hash(field2)
          *         .hash(field3)

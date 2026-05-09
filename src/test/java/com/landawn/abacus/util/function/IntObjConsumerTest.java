@@ -60,4 +60,10 @@ public class IntObjConsumerTest extends TestBase {
         assertEquals(10, result.left().intValue());
         assertEquals("value", result.right());
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        IntObjConsumer<String> instance = (a, b) -> {};
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((IntObjConsumer) null));
+    }
 }

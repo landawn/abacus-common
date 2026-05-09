@@ -313,12 +313,15 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
 
     /**
      * Writes the character representation of an {@link OptionalChar} to a CharacterWriter.
-     * Optionally quotes the character based on the serialization configuration.
-     * This method is typically used for JSON/XML serialization.
+     * Writes {@code "null"} if {@code x} is {@code null} or empty. Otherwise, if the
+     * serialization configuration specifies a non-zero character quotation, the contained
+     * character is wrapped in that quotation; when the wrapped character is a single quote
+     * and the configured quotation is also a single quote, an escaping backslash is emitted
+     * before it. This method is typically used for JSON/XML serialization.
      *
      * @param writer the CharacterWriter to write to
      * @param x the OptionalChar value to write
-     * @param config the serialization configuration specifying character quotation
+     * @param config the serialization configuration specifying character quotation; may be {@code null}
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
@@ -332,6 +335,11 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
                 writer.writeCharacter(x.get());
             } else {
                 writer.write(ch);
+
+                if (x.get() == '\'' && ch == '\'') {
+                    writer.write('\\');
+                }
+
                 writer.writeCharacter(x.get());
                 writer.write(ch);
             }

@@ -67,4 +67,10 @@ public class FloatBiFunctionTest extends TestBase {
 
         assertEquals("Result: 30.8", result);
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        FloatBiFunction<String> instance = (a, b) -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

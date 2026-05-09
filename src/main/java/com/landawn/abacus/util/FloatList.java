@@ -2048,7 +2048,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      *
      * @param distance the distance to rotate the list. Positive values rotate right,
      *                 negative values rotate left
-     * @see N#rotate(int[], int)
+     * @see N#rotate(float[], int)
      */
     @Override
     public void rotate(final int distance) {

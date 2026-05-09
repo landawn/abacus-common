@@ -19,6 +19,7 @@ package com.landawn.abacus.util;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1363,9 +1364,10 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Retrieves all the values in the row identified by the specified row key.
      * <p>
-     * Returns an immutable list containing all values in the specified row, in the order
-     * corresponding to the column keys. The list may contain {@code null} values if cells
-     * in the row are empty.
+     * Returns an immutable list view containing all values in the specified row, in the order
+     * corresponding to the column keys. Values are read lazily from this Sheet by row index and
+     * column index when the returned list is accessed. The list may contain {@code null} values
+     * if cells in the row are empty or this Sheet has not been initialized with values.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1378,12 +1380,12 @@ public final class Sheet<R, C, V> implements Cloneable {
      *         {4, null, 6}
      *     }
      * );
-     * List<Integer> row1 = sheet.rowValues("row1");   // [1, 2, 3]
-     * List<Integer> row2 = sheet.rowValues("row2");   // [4, null, 6]
+     * ImmutableList<Integer> row1 = sheet.rowValues("row1");   // [1, 2, 3]
+     * ImmutableList<Integer> row2 = sheet.rowValues("row2");   // [4, null, 6]
      * }</pre>
      *
      * @param rowKey the row key identifying the row to retrieve
-     * @return an immutable list of values in the row, in column order
+     * @return a lazy immutable list view of values in the row, in column order
      * @throws IllegalArgumentException if the row key does not exist in this Sheet
      * @see #columnValues(Object)
      * @see #setRow(Object, Collection)
@@ -1391,21 +1393,35 @@ public final class Sheet<R, C, V> implements Cloneable {
      */
     public ImmutableList<V> rowValues(final R rowKey) throws IllegalArgumentException {
         final int columnLength = columnCount();
-        final List<V> row = new ArrayList<>(columnLength);
+        final boolean wasInitialized = _isInitialized;
+        final int rowIndex;
 
-        if (_isInitialized) {
-            final int rowIndex = getRowIndex(rowKey);
-
-            for (int columnIndex = 0; columnIndex < columnLength; columnIndex++) {
-                row.add(_columnList.get(columnIndex).get(rowIndex));
-            }
+        if (wasInitialized) {
+            rowIndex = getRowIndex(rowKey);
         } else {
             checkRowKey(rowKey);
-
-            N.fill(row, 0, columnLength, null);
+            rowIndex = -1;
         }
 
-        return ImmutableList.wrap(row);
+        return new ImmutableList<>(new AbstractList<V>() {
+            @Override
+            public V get(final int columnIndex) {
+                if (columnIndex < 0 || columnIndex >= columnLength) {
+                    throw new IndexOutOfBoundsException("Index " + columnIndex + " out of bounds for length " + columnLength);
+                }
+
+                if (!_isInitialized) {
+                    return null;
+                }
+
+                return _columnList.get(columnIndex).get(wasInitialized ? rowIndex : getRowIndex(rowKey));
+            }
+
+            @Override
+            public int size() {
+                return columnLength;
+            }
+        }, true);
     }
 
     /**
@@ -2069,10 +2085,24 @@ public final class Sheet<R, C, V> implements Cloneable {
 
         init();
 
+        final List<V> existing = _columnList.get(columnIndex);
         if (N.isEmpty(column)) {
-            N.fill(_columnList.get(columnIndex), 0, rowLength, null);
+            N.fill(existing, 0, rowLength, null);
         } else {
-            _columnList.set(columnIndex, new ArrayList<>(column));
+            // Mutate in place rather than replace, so that previously returned column views remain consistent.
+            int i = 0;
+            for (final V v : column) {
+                if (i < existing.size()) {
+                    existing.set(i, v);
+                } else {
+                    existing.add(v);
+                }
+                i++;
+            }
+            // Trim any tail entries beyond the expected row length (defensive; should not trigger in normal use).
+            while (existing.size() > rowLength) {
+                existing.remove(existing.size() - 1);
+            }
         }
     }
 
@@ -6741,7 +6771,28 @@ public final class Sheet<R, C, V> implements Cloneable {
         int result = 1;
         result = prime * result + ((_rowKeySet == null) ? 0 : _rowKeySet.hashCode());
         result = prime * result + ((_columnKeySet == null) ? 0 : _columnKeySet.hashCode());
-        return prime * result + (_isInitialized ? _columnList.hashCode() : 0);
+        // Note: when uninitialized, all cells are conceptually null. An initialized but all-null
+        // _columnList must hash the same as an uninitialized sheet to keep equals/hashCode consistent.
+        if (_isInitialized && hasAnyNonNullValue()) {
+            result = prime * result + _columnList.hashCode();
+        } else {
+            result = prime * result;
+        }
+        return result;
+    }
+
+    private boolean hasAnyNonNullValue() {
+        if (!_isInitialized) {
+            return false;
+        }
+        for (final List<V> column : _columnList) {
+            for (final V e : column) {
+                if (e != null) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -6785,8 +6836,21 @@ public final class Sheet<R, C, V> implements Cloneable {
 
         final Sheet<R, C, V> other = (Sheet<R, C, V>) obj;
 
-        return N.equals(other._rowKeySet, _rowKeySet) && N.equals(other._columnKeySet, _columnKeySet) && (_isInitialized == other._isInitialized)
-                && (!_isInitialized || N.equals(other._columnList, _columnList));
+        if (!N.equals(other._rowKeySet, _rowKeySet) || !N.equals(other._columnKeySet, _columnKeySet)) {
+            return false;
+        }
+
+        // Treat an uninitialized sheet as equivalent to an initialized one with all-null cells.
+        if (_isInitialized && other._isInitialized) {
+            return N.equals(other._columnList, _columnList);
+        }
+
+        if (!_isInitialized && !other._isInitialized) {
+            return true;
+        }
+
+        // Exactly one is initialized: equal only if the initialized side has no non-null values.
+        return _isInitialized ? !hasAnyNonNullValue() : !other.hasAnyNonNullValue();
     }
 
     /**

@@ -38,6 +38,7 @@ import com.landawn.abacus.util.Strings;
  * </p>
  *
  * @see ShortType
+ * @see PrimitiveShortType
  */
 public abstract class AbstractShortType extends NumberType<Number> {
 
@@ -75,12 +76,13 @@ public abstract class AbstractShortType extends NumberType<Number> {
      * This method handles various string formats:
      * </p>
      * <ul>
-     *   <li>Empty or {@code null} strings return the default value</li>
-     *   <li>Strings ending with 'l', 'L', 'f', 'F', 'd', or 'D' have the suffix stripped before parsing</li>
-     *   <li>Valid numeric strings are parsed to {@code Short} values</li>
+     *   <li>Empty or {@code null} strings return the default value.</li>
+     *   <li>If parsing fails and the string ends with {@code 'l'}, {@code 'L'}, {@code 'f'},
+     *       {@code 'F'}, {@code 'd'}, or {@code 'D'}, the suffix is stripped and parsing is retried.</li>
+     *   <li>Valid numeric strings are parsed to {@code Short} values.</li>
      * </ul>
      *
-     * @param str the string to convert
+     * @param str the string to convert, may be {@code null}
      * @return the {@code Short} value, or the default value if {@code str} is empty or {@code null}
      * @throws NumberFormatException if the string cannot be parsed as a {@code short}
      */
@@ -106,15 +108,15 @@ public abstract class AbstractShortType extends NumberType<Number> {
     }
 
     /**
-     * Converts a character array to a {@code Short} value.
-     * Parses the character array as an integer and checks that the result is within short range
+     * Converts a region of the specified character array to a {@code Short} value.
+     * Parses the region as an integer and checks that the result is within {@code short} range
      * ({@code Short.MIN_VALUE} to {@code Short.MAX_VALUE}).
      *
      * @param cbuf the character array to convert, may be {@code null}
      * @param offset the starting position in the array (0-based)
      * @param len the number of characters to read
      * @return the {@code Short} value, or the default value if {@code cbuf} is {@code null} or {@code len} is {@code 0}
-     * @throws NumberFormatException if the value is out of short range or not a valid number
+     * @throws NumberFormatException if the value is out of {@code short} range or not a valid number
      */
     @Override
     public Short valueOf(final char[] cbuf, final int offset, final int len) {
@@ -226,7 +228,7 @@ public abstract class AbstractShortType extends NumberType<Number> {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            appendable.append(x.toString());
+            appendable.append(N.stringOf(x.shortValue()));
         }
     }
 

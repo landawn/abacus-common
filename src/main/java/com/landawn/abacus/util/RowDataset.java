@@ -23,6 +23,7 @@ import java.io.OutputStream;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1126,6 +1127,10 @@ public final class RowDataset implements Dataset, Cloneable {
             }
         }
 
+        if (N.containsDuplicates(newColumnNames)) {
+            throw new IllegalArgumentException("Duplicated new column names found in: " + newColumnNames);
+        }
+
         final int size = size();
 
         for (final Collection<?> column : newColumns) {
@@ -1179,7 +1184,9 @@ public final class RowDataset implements Dataset, Cloneable {
             return;
         }
 
-        final int[] columnIndexes = checkColumnNames(columnNames);
+        // Validate first; then build a sorted, deduplicated array so duplicates in the input don't shift indices.
+        final int[] tmp = checkColumnNames(columnNames);
+        final int[] columnIndexes = N.distinct(tmp);
         N.sort(columnIndexes);
 
         for (int i = 0, len = columnIndexes.length; i < len; i++) {
@@ -1353,6 +1360,10 @@ public final class RowDataset implements Dataset, Cloneable {
             throw new IllegalArgumentException("Column names: " + N.intersection(_columnNameList, newColumnNames) + " already are included in this data set.");
         }
 
+        if (N.containsDuplicates(newColumnNames)) {
+            throw new IllegalArgumentException("Duplicated new column names found in: " + newColumnNames);
+        }
+
         final Function<Object, List<Object>> divideFuncToUse = (Function<Object, List<Object>>) divideFunc;
         final int newColumnsLen = newColumnNames.size();
         final List<List<Object>> newColumns = new ArrayList<>(newColumnsLen);
@@ -1402,6 +1413,10 @@ public final class RowDataset implements Dataset, Cloneable {
             throw new IllegalArgumentException("Column names: " + N.intersection(_columnNameList, newColumnNames) + " already are included in this data set.");
         }
 
+        if (N.containsDuplicates(newColumnNames)) {
+            throw new IllegalArgumentException("Duplicated new column names found in: " + newColumnNames);
+        }
+
         final BiConsumer<Object, Object[]> outputToUse = (BiConsumer<Object, Object[]>) output;
         final int newColumnsLen = newColumnNames.size();
         final List<List<Object>> newColumns = new ArrayList<>(newColumnsLen);
@@ -1441,6 +1456,10 @@ public final class RowDataset implements Dataset, Cloneable {
         checkNewColumnName(newColumnNames._1);
         checkNewColumnName(newColumnNames._2);
 
+        if (N.equals(newColumnNames._1, newColumnNames._2)) {
+            throw new IllegalArgumentException("Duplicated new column names found in: " + newColumnNames);
+        }
+
         final BiConsumer<Object, Pair<Object, Object>> outputToUse = (BiConsumer<Object, Pair<Object, Object>>) output;
         final List<Object> newColumn1 = new ArrayList<>(size());
         final List<Object> newColumn2 = new ArrayList<>(size());
@@ -1476,6 +1495,11 @@ public final class RowDataset implements Dataset, Cloneable {
         checkNewColumnName(newColumnNames._1);
         checkNewColumnName(newColumnNames._2);
         checkNewColumnName(newColumnNames._3);
+
+        if (N.equals(newColumnNames._1, newColumnNames._2) || N.equals(newColumnNames._1, newColumnNames._3)
+                || N.equals(newColumnNames._2, newColumnNames._3)) {
+            throw new IllegalArgumentException("Duplicated new column names found in: " + newColumnNames);
+        }
 
         final BiConsumer<Object, Triple<Object, Object, Object>> outputToUse = (BiConsumer<Object, Triple<Object, Object, Object>>) output;
         final List<Object> newColumn1 = new ArrayList<>(size());
@@ -1533,6 +1557,7 @@ public final class RowDataset implements Dataset, Cloneable {
 
         final int size = size();
         N.checkPositionIndex(newRowPosition, size);
+        N.checkArgNotNull(row, ROW);
 
         final Class<?> rowClass = row.getClass();
         final Type<?> rowType = Type.of(rowClass);
@@ -1650,6 +1675,10 @@ public final class RowDataset implements Dataset, Cloneable {
         if (rows.size() == 1) {
             addRow(newRowPosition, firstRow);
             return;
+        }
+
+        if (firstRow == null) {
+            throw new IllegalArgumentException("The rows to be added cannot contain null elements");
         }
 
         final int columnCount = columnCount();
@@ -2165,8 +2194,20 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     @Override
-    public Object[] getRow(final int rowIndex) {
-        return getRow(rowIndex, Object[].class);
+    public ImmutableList<Object> getRow(final int rowIndex) {
+        checkRowIndex(rowIndex);
+
+        return new ImmutableList<>(new AbstractList<>() {
+            @Override
+            public Object get(final int columnIndex) {
+                return _columnList.get(columnIndex).get(rowIndex);
+            }
+
+            @Override
+            public int size() {
+                return _columnList.size();
+            }
+        }, true);
     }
 
     @Override
@@ -5892,7 +5933,7 @@ public final class RowDataset implements Dataset, Cloneable {
             newColumnList.add(new ArrayList<>(N.min(max, (size == 0) ? 0 : ((int) (size * 0.8) + 1))));
         }
 
-        if (size == 0) {
+        if (size == 0 || max == 0) {
             return new RowDataset(newColumnNameList, newColumnList, _properties);
         }
 
@@ -5944,7 +5985,7 @@ public final class RowDataset implements Dataset, Cloneable {
             newColumnList.add(new ArrayList<>(N.min(max, (size == 0) ? 0 : ((int) (size * 0.8) + 1))));
         }
 
-        if (size == 0) {
+        if (size == 0 || max == 0) {
             return new RowDataset(newColumnNameList, newColumnList, _properties);
         }
 

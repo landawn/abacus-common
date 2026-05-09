@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -150,6 +152,7 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
      * @throws NullPointerException if {@code other} is null
      */
     default ShortPredicate and(final ShortPredicate other) {
+        Objects.requireNonNull(other);
         return t -> test(t) && other.test(t);
     }
 
@@ -174,6 +177,7 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
      * @throws NullPointerException if {@code other} is null
      */
     default ShortPredicate or(final ShortPredicate other) {
+        Objects.requireNonNull(other);
         return t -> test(t) || other.test(t);
     }
 

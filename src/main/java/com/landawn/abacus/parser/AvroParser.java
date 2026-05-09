@@ -114,7 +114,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * String base64Encoded = parser.serialize(user, config);
      * }</pre>
      *
-     * @param obj the object to serialize (may be {@code null} depending on implementation)
+     * @param obj the object to serialize (may be {@code null}; serializes nothing in that case)
      * @param config the serialization configuration to use (must contain schema if obj is not SpecificRecord)
      * @return the Base64 encoded string representation of the serialized object
      * @throws IllegalArgumentException if schema is not specified for non-SpecificRecord objects
@@ -148,7 +148,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * parser.serialize(users, config, new File("users.avro"));
      * }</pre>
      *
-     * @param obj the object to serialize (may be {@code null} depending on implementation)
+     * @param obj the object to serialize (may be {@code null}; serializes nothing in that case)
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the output file to write to (must not be {@code null})
      * @throws UncheckedIOException if an I/O error occurs during file writing
@@ -202,7 +202,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * parser.serialize(person, config, outputStream);
      * }</pre>
      *
-     * @param obj the object to serialize (may be {@code null} depending on implementation)
+     * @param obj the object to serialize (may be {@code null}; serializes nothing in that case)
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the output stream to write to (must not be {@code null})
      * @throws IllegalArgumentException if schema is not specified for non-SpecificRecord objects

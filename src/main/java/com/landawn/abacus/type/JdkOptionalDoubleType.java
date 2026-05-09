@@ -18,13 +18,16 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for java.util.OptionalDouble.
- * This class provides serialization, deserialization, and database access capabilities for OptionalDouble instances.
- * OptionalDouble is a container that may or may not contain a double value.
- * Empty optionals are represented as {@code null} in serialized form.
+ * Type handler for {@link java.util.OptionalDouble}, the JDK primitive-double optional wrapper.
+ * This class provides serialization, deserialization, and database access capabilities for
+ * {@link OptionalDouble} instances. {@link OptionalDouble} is a container that may or may not
+ * contain a {@code double} value; this handler unboxes the underlying primitive on read/write.
+ * Empty optionals (and {@code null} references) are represented as {@code null} in serialized form
+ * and as SQL {@code NULL} in database form.
  */
 public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
 
+    /** The type name constant for {@link OptionalDouble} (JDK) type identification. */
     public static final String OPTIONAL_DOUBLE = "JdkOptionalDouble";
 
     /**

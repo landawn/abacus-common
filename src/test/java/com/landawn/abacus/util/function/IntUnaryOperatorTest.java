@@ -151,4 +151,10 @@ public class IntUnaryOperatorTest extends TestBase {
         assertEquals(Integer.MAX_VALUE, identity.applyAsInt(Integer.MAX_VALUE));
         assertEquals(Integer.MIN_VALUE, identity.applyAsInt(Integer.MIN_VALUE));
     }
+
+    @Test
+    public void testComposeNullThrowsImmediately() {
+        IntUnaryOperator instance = a -> 0;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.compose((java.util.function.IntUnaryOperator) null));
+    }
 }

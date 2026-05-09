@@ -137,6 +137,13 @@ public final class BrotliInputStream extends InputStream {
      */
     @Override
     public int read(final byte[] b, final int off, final int len) throws IOException {
+        // Enforce InputStream.read(byte[], int, int) contract: bad offset/length must throw
+        // IndexOutOfBoundsException. The underlying org.brotli.dec.BrotliInputStream throws
+        // IllegalArgumentException, so we validate first to surface the correct exception type.
+        if (off < 0 || len < 0 || len > b.length - off) {
+            throw new IndexOutOfBoundsException("off=" + off + ", len=" + len + ", b.length=" + b.length);
+        }
+
         return in.read(b, off, len);
     }
 

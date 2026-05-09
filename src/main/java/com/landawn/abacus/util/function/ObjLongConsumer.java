@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -91,6 +93,7 @@ public interface ObjLongConsumer<T> extends Throwables.ObjLongConsumer<T, Runtim
      * @throws NullPointerException if {@code after} is null
      */
     default ObjLongConsumer<T> andThen(final ObjLongConsumer<? super T> after) {
+        Objects.requireNonNull(after);
         return (t, u) -> {
             accept(t, u);
             after.accept(t, u);

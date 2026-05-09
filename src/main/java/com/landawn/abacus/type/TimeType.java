@@ -91,7 +91,8 @@ public class TimeType extends AbstractDateType<Time> {
 
     /**
      * Creates a Time from its string representation.
-     * Supports parsing various time formats and the special value "sysTime" for current time.
+     * Supports parsing various time formats and the special value {@code "SYS_TIME"} (case-insensitive,
+     * also accepted as {@code "sysTime"}) for the current system time.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

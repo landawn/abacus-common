@@ -21,7 +21,10 @@ import com.landawn.abacus.util.Strings;
  * Type handler for {@link com.landawn.abacus.util.MutableChar} objects.
  * <p>
  * This class provides serialization, deserialization, and database operations for
- * MutableChar instances, which are mutable wrappers around primitive char values.
+ * {@code MutableChar} instances, which are mutable wrappers around primitive
+ * {@code char} values. Values are serialized as the unwrapped character
+ * (identical to {@link CharacterType}); database storage uses SQL {@code INTEGER}
+ * for the character's numeric code point.
  *
  * @see com.landawn.abacus.util.MutableChar
  * @see AbstractType
@@ -193,6 +196,11 @@ public class MutableCharType extends AbstractType<MutableChar> {
                 writer.writeCharacter(x.value());
             } else {
                 writer.write(ch);
+
+                if (x.value() == '\'' && ch == '\'') {
+                    writer.write('\\');
+                }
+
                 writer.writeCharacter(x.value());
                 writer.write(ch);
             }

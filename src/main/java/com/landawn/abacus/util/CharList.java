@@ -2126,7 +2126,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @param distance the distance to rotate the list. Positive values rotate right,
      *                 negative values rotate left
-     * @see N#rotate(int[], int)
+     * @see N#rotate(char[], int)
      */
     @Override
     public void rotate(final int distance) {
@@ -2258,7 +2258,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return a new CharList containing the selected elements
      * @throws IndexOutOfBoundsException if the indices are out of range
      * @throws IllegalArgumentException if {@code step} is 0
-     * @see N#copyOfRange(int[], int, int, int)
+     * @see N#copyOfRange(char[], int, int, int)
      */
     @Override
     public CharList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {

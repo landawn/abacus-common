@@ -1290,7 +1290,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-    * com.landawn.abacus.util.stream.Stream<String> words = com.landawn.abacus.util.stream.Stream.of("hello", "world", "java", "stream");
+     * com.landawn.abacus.util.stream.Stream<String> words = com.landawn.abacus.util.stream.Stream.of("hello", "world", "java", "stream");
      * Set<String> searchFor = Set.of("hello", "java");
      * boolean result = N.containsAll(words.iterator(), searchFor);   // Returns true (iterator consumed)
      * }</pre>
@@ -1400,7 +1400,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-    * com.landawn.abacus.util.stream.Stream<String> words = com.landawn.abacus.util.stream.Stream.of("hello", "world", "java", "stream");
+     * com.landawn.abacus.util.stream.Stream<String> words = com.landawn.abacus.util.stream.Stream.of("hello", "world", "java", "stream");
      * Set<String> keywords = Set.of("java", "python", "c++");
      * boolean result = N.containsAny(words.iterator(), keywords);   // Returns true (iterator consumed)
      * }</pre>
@@ -1504,7 +1504,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-    * com.landawn.abacus.util.stream.Stream<String> userInput = com.landawn.abacus.util.stream.Stream.of("hello", "world", "test");
+     * com.landawn.abacus.util.stream.Stream<String> userInput = com.landawn.abacus.util.stream.Stream.of("hello", "world", "test");
      * Set<String> forbidden = Set.of("admin", "root", "system");
      * boolean result = N.containsNone(userInput.iterator(), forbidden);   // Returns true (iterator consumed)
      * }</pre>
@@ -3969,7 +3969,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Flattens a two-dimensional array into an one-dimensional array.
+     * Flattens a two-dimensional array into a one-dimensional array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3992,7 +3992,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Flattens a two-dimensional array into an one-dimensional array.
+     * Flattens a two-dimensional array into a one-dimensional array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4033,7 +4033,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Flattens an {@code Iterable} of {@code Iterable<T>} into an one-dimensional List.
+     * Flattens an {@code Iterable} of {@code Iterable<T>} into a one-dimensional List.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4055,7 +4055,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Flattens an {@code Iterable} of {@code Iterable<T>} into an one-dimensional Collection.
+     * Flattens an {@code Iterable} of {@code Iterable<T>} into a one-dimensional Collection.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4104,7 +4104,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Flattens an {@code Iterator} of {@code Iterator<T>} into an one-dimensional Iterator.
+     * Flattens an {@code Iterator} of {@code Iterator<T>} into a one-dimensional Iterator.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -11111,7 +11111,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns a new array with the first occurrence of the specified value removed.
-     * Returns an empty array if the input array is {@code null} or empty.
+     * Returns the input array itself if it is {@code null} or empty.
      * Returns a clone of the array if the value is not found.
      * The original array remains unchanged.
      *
@@ -11125,7 +11125,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the array
      * @param a the array from which to remove the value
      * @param valueToRemove the value to remove
-     * @return a new array with the first occurrence removed, or empty array if input is null/empty
+     * @return a new array with the first occurrence removed, or the input array itself if input is {@code null} or empty
      * @throws IllegalArgumentException if an illegal argument is provided
      * @see #removeAll(Object[], Object...)
      * @see #removeAt(Object[], int)
@@ -12949,8 +12949,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> T[] removeDuplicates(final T[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        if (isEmpty(a) || fromIndex == toIndex) {
+        if (isEmpty(a)) {
             return a;
+        } else if (fromIndex == toIndex) {
+            return (T[]) newArray(a.getClass().getComponentType(), 0);
         } else if (toIndex - fromIndex <= 1) {
             return copyOfRange(a, fromIndex, toIndex);
         }
@@ -18447,8 +18449,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * String[] words = {"zebra", "apple", "mango"};
      * String min = N.min(words, String.CASE_INSENSITIVE_ORDER);   // Returns "apple"
      *
-     * // Custom comparator for length
-     * String shortest = N.min(words, Comparator.comparing(String::length));   // Returns "apple" or "mango"
+     * // Custom comparator for length (all three have length 5)
+     * String shortest = N.min(words, Comparator.comparing(String::length));   // Returns "zebra" (first encountered with the smallest length)
      *
      * // Reverse order
      * String max = N.min(words, Comparator.reverseOrder());   // Returns "zebra"
@@ -18479,7 +18481,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * String min = N.min(words, 1, 4, String.CASE_INSENSITIVE_ORDER);   // Returns "banana" (from index 1 to 3)
      *
      * // Custom comparator for length
-     * String shortest = N.min(words, 0, 3, Comparator.comparing(String::length));   // Returns "zebra" or "mango"
+     * String shortest = N.min(words, 0, 3, Comparator.comparing(String::length));   // Returns "apple" (first encountered with the smallest length)
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -18560,7 +18562,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * String min = N.min(words, 1, 4, String.CASE_INSENSITIVE_ORDER);   // Returns "banana" (from index 1 to 3)
      *
      * // Custom comparator for length
-     * String shortest = N.min(words, 0, 3, Comparator.comparing(String::length));   // Returns "zebra" or "mango"
+     * String shortest = N.min(words, 0, 3, Comparator.comparing(String::length));   // Returns "apple" (first encountered with the smallest length)
      * }</pre>
      *
      * @param <T> the type of elements in the collection
@@ -18663,8 +18665,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Iterable<String> words = Arrays.asList("zebra", "apple", "mango");
      * String min = N.min(words, String.CASE_INSENSITIVE_ORDER);   // Returns "apple"
      *
-     * // Custom comparator for length
-     * String shortest = N.min(words, Comparator.comparing(String::length));   // Returns "apple" or "mango"
+     * // Custom comparator for length (all three have length 5)
+     * String shortest = N.min(words, Comparator.comparing(String::length));   // Returns "zebra" (first encountered with the smallest length)
      * }</pre>
      *
      * @param <T> the type of elements in the iterable
@@ -18721,9 +18723,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Iterator<String> words = Arrays.asList("zebra", "apple", "mango").iterator();
      * String min = N.min(words, String.CASE_INSENSITIVE_ORDER);   // Returns "apple"
      *
-     * // Custom comparator for length
+     * // Custom comparator for length (all three have length 5)
      * Iterator<String> words2 = Arrays.asList("zebra", "apple", "mango").iterator();
-     * String shortest = N.min(words2, Comparator.comparing(String::length));   // Returns "apple" or "mango"
+     * String shortest = N.min(words2, Comparator.comparing(String::length));   // Returns "zebra" (first encountered with the smallest length)
      * }</pre>
      *
      * @param <T> the type of elements in the iterator
@@ -29883,7 +29885,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] words = {"apple", "banana", "cherry"};
-     * boolean result = N.anyMatch(words, s -> s.length() > 6);
+     * boolean result = N.anyMatch(words, s -> s.length() > 5);
      * // Returns true (banana, cherry)
      * }</pre>
      *
@@ -31036,7 +31038,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Merges multiple iterables into a list in which the order of the elements is determined by the given selector function.
      *
      * @param <T> the type of elements in the iterables
-     * @param c the collection of iterable to merge
+     * @param c the collection of iterables to merge
      * @param nextSelector a function that determines the next element to add to the result list
      * @return a list containing the merged elements from all iterables. An empty list is returned if all iterables are {@code null} or empty.
      * @see #concat(Collection)
@@ -31052,7 +31054,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of elements in the iterables
      * @param <C> the type of the resulting collection
-     * @param c the collection of iterable to merge
+     * @param c the collection of iterables to merge
      * @param nextSelector a function that determines the next element to add to the result collection
      * @param supplier the supplier used to create the returned collection
      * @return a collection containing the merged elements from all iterables. An empty collection created by the specified {@code supplier} is returned if all iterables are {@code null} or empty.
@@ -35527,13 +35529,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * The {@code flatMapper2} function maps each element of type {@code T2} to an {@code Iterable} of elements of type {@code T3}.
      * The {@code action} is then performed for each triple of elements from the original iterable and the resulting iterables.
      *
-     * @param <T> the type of the elements in the collection
+     * @param <T> the type of the elements in the iterable
      * @param <T2> the type of the elements in the iterable returned by the flatMapper
      * @param <T3> the type of the elements in the iterable returned by the flatMapper2
      * @param <E> the type of the exception that the flatMapper may throw
      * @param <E2> the type of the exception that the flatMapper2 may throw
      * @param <E3> the type of the exception that the action may throw
-     * @param c the collection whose elements are to be processed
+     * @param c the iterable whose elements are to be processed
      * @param flatMapper the function to apply to each element in the given iterable to produce an iterable of elements of type T2
      * @param flatMapper2 the function to apply to each element in the iterable of type T2 to produce an iterable of elements of type T3
      * @param action the action to be performed for each triple of elements from the given iterable and the resulting iterables
@@ -36888,13 +36890,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * String[] values = {"A", "B", "C"};
      * N.forEachPair(values, (first, second) ->
      *     System.out.println(first + " -> " + second));
-     * // Prints: A -> B, B -> C, C -> null
+     * // Prints: A -> B, B -> C
      * }</pre>
      *
      * @param <T> the type of elements in the array
      * @param <E> the type of exception that the action may throw
      * @param a the array to iterate
-     * @param action the action to execute, receiving consecutive element pairs (last element paired with {@code null} if odd length)
+     * @param action the action to execute, receiving consecutive element pairs
      * @throws E if the action throws an exception
      * @see #forEachPair(Object[], int, Throwables.BiConsumer)
      * @see #forEachPair(Iterable, Throwables.BiConsumer)
@@ -36956,7 +36958,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the iterable
      * @param <E> the type of exception that the action may throw
      * @param c the iterable to iterate
-     * @param action the action to execute, receiving consecutive element pairs (last element paired with {@code null} if odd length)
+     * @param action the action to execute, receiving consecutive element pairs
      * @throws E if the action throws an exception
      * @see #forEachPair(Iterable, int, Throwables.BiConsumer)
      * @see #forEachPair(Object[], Throwables.BiConsumer)
@@ -37014,7 +37016,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the iterator
      * @param <E> the type of exception that the action may throw
      * @param iter the iterator to iterate
-     * @param action the action to execute, receiving consecutive element pairs (last element paired with {@code null} if odd length)
+     * @param action the action to execute, receiving consecutive element pairs
      * @throws E if the action throws an exception
      * @see #forEachPair(Iterator, int, Throwables.BiConsumer)
      * @see #forEachPair(Iterable, Throwables.BiConsumer)
@@ -37089,13 +37091,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * String[] names = {"A", "B", "C", "D", "E"};
      * N.forEachTriple(names, (first, second, third) ->
      *     System.out.println(first + "-" + second + "-" + third));
-     * // Prints: A-B-C, B-C-D, C-D-E, D-E-null, E-null-null
+     * // Prints: A-B-C, B-C-D, C-D-E
      * }</pre>
      *
      * @param <T> the type of elements in the array
      * @param <E> the type of exception that the action may throw
      * @param a the array to iterate
-     * @param action the action to execute, receiving consecutive element triples (missing elements replaced with {@code null})
+     * @param action the action to execute, receiving consecutive element triples
      * @throws E if the action throws an exception
      * @see #forEachTriple(Object[], int, Throwables.TriConsumer)
      * @see #forEachPair(Object[], Throwables.BiConsumer)
@@ -37146,13 +37148,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * List<String> names = Arrays.asList("A", "B", "C", "D", "E");
      * N.forEachTriple(names, (first, second, third) ->
      *     System.out.println(first + "-" + second + "-" + third));
-     * // Prints: A-B-C, B-C-D, C-D-E, D-E-null, E-null-null
+     * // Prints: A-B-C, B-C-D, C-D-E
      * }</pre>
      *
      * @param <T> the type of elements in the iterable
      * @param <E> the type of exception that the action may throw
      * @param c the iterable to iterate
-     * @param action the action to execute, receiving consecutive element triples (missing elements replaced with {@code null})
+     * @param action the action to execute, receiving consecutive element triples
      * @throws E if the action throws an exception
      * @see #forEachTriple(Iterable, int, Throwables.TriConsumer)
      * @see #forEachPair(Iterable, Throwables.BiConsumer)
@@ -37204,13 +37206,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Iterator<String> iter = Arrays.asList("A", "B", "C", "D", "E").iterator();
      * N.forEachTriple(iter, (first, second, third) ->
      *     System.out.println(first + "-" + second + "-" + third));
-     * // Prints: A-B-C, B-C-D, C-D-E, D-E-null, E-null-null
+     * // Prints: A-B-C, B-C-D, C-D-E
      * }</pre>
      *
      * @param <T> the type of elements in the iterator
      * @param <E> the type of exception that the action may throw
      * @param iter the iterator to iterate
-     * @param action the action to execute, receiving consecutive element triples (missing elements replaced with {@code null})
+     * @param action the action to execute, receiving consecutive element triples
      * @throws E if the action throws an exception
      * @see #forEachTriple(Iterator, int, Throwables.TriConsumer)
      * @see #forEachPair(Iterator, Throwables.BiConsumer)
@@ -38635,6 +38637,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, E extends Exception> void runByBatch(final T[] a, final int batchSize, final Throwables.Consumer<? super List<T>, E> batchAction)
             throws IllegalArgumentException, E {
+        checkArgPositive(batchSize, cs.batchSize);
+
         if (isEmpty(a)) {
             return;
         }
@@ -38772,6 +38776,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, E extends Exception, E2 extends Exception> void runByBatch(final T[] a, final int batchSize,
             final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> batchAction) throws IllegalArgumentException, E, E2 {
+        checkArgPositive(batchSize, cs.batchSize);
+
         if (isEmpty(a)) {
             return;
         }
@@ -38811,6 +38817,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, E extends Exception, E2 extends Exception> void runByBatch(final Iterable<? extends T> iter, final int batchSize,
             final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> batchAction) throws IllegalArgumentException, E, E2 {
+        checkArgPositive(batchSize, cs.batchSize);
+
         if (N.isEmpty(iter)) {
             return;
         }
@@ -38901,6 +38909,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, R, E extends Exception> List<R> callByBatch(final T[] a, final int batchSize,
             final Throwables.Function<? super List<T>, R, E> batchAction) throws IllegalArgumentException, E {
+        checkArgPositive(batchSize, cs.batchSize);
+
         if (isEmpty(a)) {
             return new ArrayList<>();
         }
@@ -39053,6 +39063,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, R, E extends Exception, E2 extends Exception> List<R> callByBatch(final T[] a, final int batchSize,
             final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Callable<? extends R, E2> batchAction)
             throws IllegalArgumentException, E, E2 {
+        checkArgPositive(batchSize, cs.batchSize);
+
         if (isEmpty(a)) {
             return new ArrayList<>();
         }
@@ -39096,6 +39108,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, R, E extends Exception, E2 extends Exception> List<R> callByBatch(final Iterable<? extends T> iter, final int batchSize,
             final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Callable<? extends R, E2> batchAction)
             throws IllegalArgumentException, E, E2 {
+        checkArgPositive(batchSize, cs.batchSize);
+
         if (N.isEmpty(iter)) {
             return new ArrayList<>();
         }

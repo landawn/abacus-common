@@ -38,6 +38,7 @@ import com.landawn.abacus.util.Strings;
  * </p>
  *
  * @see IntegerType
+ * @see PrimitiveIntType
  */
 public abstract class AbstractIntegerType extends NumberType<Number> {
 
@@ -75,12 +76,13 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      * This method handles various string formats:
      * </p>
      * <ul>
-     *   <li>Empty or {@code null} strings return the default value</li>
-     *   <li>Strings ending with 'l', 'L', 'f', 'F', 'd', or 'D' have the suffix stripped before parsing</li>
-     *   <li>Valid numeric strings are parsed to {@code Integer} values</li>
+     *   <li>Empty or {@code null} strings return the default value.</li>
+     *   <li>If parsing fails and the string ends with {@code 'l'}, {@code 'L'}, {@code 'f'},
+     *       {@code 'F'}, {@code 'd'}, or {@code 'D'}, the suffix is stripped and parsing is retried.</li>
+     *   <li>Valid numeric strings are parsed to {@code Integer} values.</li>
      * </ul>
      *
-     * @param str the string to convert
+     * @param str the string to convert, may be {@code null}
      * @return the {@code Integer} value, or the default value if {@code str} is empty or {@code null}
      * @throws NumberFormatException if the string cannot be parsed as an {@code int}
      */
@@ -215,7 +217,7 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            appendable.append(x.toString());
+            appendable.append(N.stringOf(x.intValue()));
         }
     }
 

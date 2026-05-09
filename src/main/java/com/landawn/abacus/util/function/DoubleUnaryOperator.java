@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -87,6 +89,7 @@ public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<Runt
      */
     @Override
     default DoubleUnaryOperator compose(final java.util.function.DoubleUnaryOperator before) {
+        Objects.requireNonNull(before);
         return (final double v) -> applyAsDouble(before.applyAsDouble(v));
     }
 
@@ -116,6 +119,7 @@ public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<Runt
      */
     @Override
     default DoubleUnaryOperator andThen(final java.util.function.DoubleUnaryOperator after) {
+        Objects.requireNonNull(after);
         return (final double t) -> after.applyAsDouble(applyAsDouble(t));
     }
 

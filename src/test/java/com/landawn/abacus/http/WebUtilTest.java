@@ -748,4 +748,43 @@ public class WebUtilTest extends TestBase {
         WebUtil.setContentTypeByRequestBodyType("", headers);
         assertNull(headers.get(HttpHeaders.Names.CONTENT_TYPE));
     }
+
+    @Test
+    public void testCurl2HttpRequestMethodCaseInsensitiveInTurkishLocale() {
+        // Regression: methods like "options" / "patch" with lowercase 'i' must be uppercased
+        // using a locale-independent mapping. With Locale.getDefault() set to Turkish, the
+        // default toUpperCase() converts 'i' -> 'İ' (U+0130), which would prevent
+        // HttpMethod.valueOf(...) and httpMethodMap.containsValue(...) from matching.
+        final java.util.Locale prev = java.util.Locale.getDefault();
+        try {
+            java.util.Locale.setDefault(new java.util.Locale("tr", "TR"));
+
+            final String curl = "curl -X options https://api.example.com/users";
+            final String result = WebUtil.curlToHttpRequestCode(curl);
+
+            assertNotNull(result);
+            assertTrue(result.contains(".execute(HttpMethod.OPTIONS)"),
+                    "Expected OPTIONS handling regardless of default locale, but got:\n" + result);
+        } finally {
+            java.util.Locale.setDefault(prev);
+        }
+    }
+
+    @Test
+    public void testCurl2OkHttpRequestMethodCaseInsensitiveInTurkishLocale() {
+        // Same regression for the OkHttp generator path.
+        final java.util.Locale prev = java.util.Locale.getDefault();
+        try {
+            java.util.Locale.setDefault(new java.util.Locale("tr", "TR"));
+
+            final String curl = "curl -X options https://api.example.com/users";
+            final String result = WebUtil.curlToOkHttpRequestCode(curl);
+
+            assertNotNull(result);
+            assertTrue(result.contains(".execute(HttpMethod.OPTIONS)"),
+                    "Expected OPTIONS handling regardless of default locale, but got:\n" + result);
+        } finally {
+            java.util.Locale.setDefault(prev);
+        }
+    }
 }

@@ -18,6 +18,10 @@ package com.landawn.abacus.type;
  * Type handler for the primitive {@code float} type, as opposed to the {@link Float} wrapper class.
  * It provides type information and default value handling for {@code float} primitives.
  *
+ * <p>The key distinction from {@code FloatType} (which handles {@link Float}) is the default value:
+ * {@link #defaultValue()} returns {@code 0.0f} (matching the JLS default for {@code float}),
+ * whereas the wrapper type's default is {@code null}.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Type<Float> type = TypeFactory.getType(float.class);

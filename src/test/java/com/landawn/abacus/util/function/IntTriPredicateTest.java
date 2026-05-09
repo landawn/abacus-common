@@ -71,4 +71,10 @@ public class IntTriPredicateTest extends TestBase {
         assertTrue(combined.test(0, 1, 2));
         assertTrue(combined.test(1, 2, 3));
     }
+
+    @Test
+    public void testAndNullThrowsImmediately() {
+        IntTriPredicate instance = (a, b, c) -> false;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((IntTriPredicate) null));
+    }
 }

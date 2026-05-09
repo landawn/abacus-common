@@ -159,4 +159,10 @@ public class DoubleFunctionTest extends TestBase {
         DoubleFunction<Double> box2 = DoubleFunction.BOX;
         assertSame(box1, box2);
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        DoubleFunction<String> instance = a -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

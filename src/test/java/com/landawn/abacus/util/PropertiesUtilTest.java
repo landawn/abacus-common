@@ -1867,4 +1867,57 @@ public class PropertiesUtilTest extends TestBase {
         assertTrue(content.contains("@Deprecated"));
         assertTrue(content.contains("@Override"));
     }
+
+    // --- Regression tests for review fixes ---
+
+    @Test
+    public void testLoadFromXml_emptyTypedElementDoesNotNpe() throws IOException {
+        // Bug fix: previously NPE when an XML text element with a numeric type attribute
+        // had empty content (Type.valueOf("") returns null), then propValue.getClass() / toString().
+        File xmlFile = tempDir.resolve("empty-typed.xml").toFile();
+        try (FileWriter w = new FileWriter(xmlFile)) {
+            w.write("<?xml version=\"1.0\"?>\n<config><port type=\"Integer\"></port><name>foo</name></config>");
+        }
+
+        Properties<String, Object> props = PropertiesUtil.loadFromXml(xmlFile);
+        assertNotNull(props);
+        // Empty typed element parses to null without throwing
+        assertNull(props.get("port"));
+        assertEquals("foo", props.get("name"));
+    }
+
+    @Test
+    public void testStoreToXml_outputStreamIsFlushed() throws IOException {
+        // Bug fix: storeToXml(OutputStream) used to wrap stream in OutputStreamWriter and
+        // never flush it — buffered chars were lost when caller closed the underlying stream.
+        Properties<String, Object> props = new Properties<>();
+        props.put("name", "Alice");
+        props.put("port", 8080);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PropertiesUtil.storeToXml(props, "config", true, baos);
+
+        String xml = baos.toString(StandardCharsets.UTF_8);
+        assertTrue(xml.contains("<config"), "expected root tag, got: " + xml);
+        assertTrue(xml.contains(">Alice</name>"), "expected name element, got: " + xml);
+        assertTrue(xml.contains("</config>"), "expected closing root, got: " + xml);
+    }
+
+    @Test
+    public void testXmlToJava_writesUtf8() throws IOException {
+        // Bug fix: xmlToJava previously used platform-default charset for the .java file.
+        // Generated source must be UTF-8 to ensure non-ASCII identifiers/comments survive.
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><config><name>café</name></config>";
+
+        String srcPath = tempDir.resolve("src-utf8").toFile().getAbsolutePath();
+        new File(srcPath).mkdirs();
+
+        PropertiesUtil.xmlToJava(xml, srcPath, "com.utf8", "Utf8Config", false);
+
+        File generatedFile = new File(srcPath + File.separator + "com" + File.separator + "utf8", "Utf8Config.java");
+        // Read back as raw bytes and decode as UTF-8 — the file should be valid UTF-8.
+        byte[] bytes = Files.readAllBytes(generatedFile.toPath());
+        String content = new String(bytes, StandardCharsets.UTF_8);
+        assertTrue(content.contains("public class Utf8Config"));
+    }
 }

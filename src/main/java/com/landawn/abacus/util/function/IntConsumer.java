@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -71,6 +73,7 @@ public interface IntConsumer extends Throwables.IntConsumer<RuntimeException>, j
      */
     @Override
     default IntConsumer andThen(final java.util.function.IntConsumer after) {
+        Objects.requireNonNull(after);
         return (final int value) -> {
             accept(value);
             after.accept(value);

@@ -67,8 +67,10 @@ class SLF4JLogger extends AbstractLogger {
      * <p>If the obtained logger implements LocationAwareLogger, it will be used for
      * WARN and ERROR level logging to provide accurate caller location information.</p>
      *
-     * <p><b>Note:</b> This class is package-private and this constructor should not be called directly
-     * from outside the logging package. Use {@link LoggerFactory#getLogger(Class)} or {@link LoggerFactory#getLogger(String)} instead.</p>
+     * <p><b>Note:</b> The enclosing class is package-private, so this constructor cannot be invoked
+     * from outside the {@code com.landawn.abacus.logging} package. Use
+     * {@link LoggerFactory#getLogger(Class)} or {@link LoggerFactory#getLogger(String)} to obtain
+     * logger instances from application code.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -90,6 +92,16 @@ class SLF4JLogger extends AbstractLogger {
         locationAwareLogger = loggerImpl instanceof LocationAwareLogger ? ((LocationAwareLogger) loggerImpl) : null;
     }
 
+    /**
+     * Package-private constructor that wraps a pre-existing SLF4J logger instance.
+     *
+     * <p>Intended primarily for testing and advanced scenarios where a specific SLF4J logger
+     * needs to be wrapped without going through {@link org.slf4j.LoggerFactory}.</p>
+     *
+     * @param name the name of the logger
+     * @param loggerImpl the SLF4J logger instance to delegate to; if it implements
+     *                   {@link LocationAwareLogger}, location-aware logging is used
+     */
     SLF4JLogger(final String name, final org.slf4j.Logger loggerImpl) {
         super(name);
         this.loggerImpl = loggerImpl;

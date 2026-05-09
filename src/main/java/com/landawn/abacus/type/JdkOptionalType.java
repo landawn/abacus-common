@@ -32,6 +32,7 @@ import com.landawn.abacus.util.SK;
 @SuppressWarnings("java:S2160")
 public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
 
+    /** The type name constant for {@link Optional} (JDK) type identification. */
     public static final String OPTIONAL = "JdkOptional";
 
     private final String declaringName;

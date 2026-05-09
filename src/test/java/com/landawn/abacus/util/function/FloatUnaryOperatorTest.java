@@ -91,4 +91,10 @@ public class FloatUnaryOperatorTest extends TestBase {
         assertEquals(0f, identity.applyAsFloat(0f), 0.001f);
         assertEquals(-10.5f, identity.applyAsFloat(-10.5f), 0.001f);
     }
+
+    @Test
+    public void testComposeNullThrowsImmediately() {
+        FloatUnaryOperator instance = a -> 0f;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.compose((FloatUnaryOperator) null));
+    }
 }

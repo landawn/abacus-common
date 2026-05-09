@@ -33,7 +33,7 @@ import java.io.Writer;
  *   <li>Control characters (U+0000 through U+001F) and U+007F are escaped
  *       as {@code \\uXXXX} sequences</li>
  *   <li>Line separator (U+2028) and paragraph separator (U+2029) are escaped
- *       as {@code  } and {@code  } to prevent JavaScript syntax errors</li>
+ *       as {@code \u2028} and {@code \u2029} to prevent JavaScript syntax errors</li>
  * </ul>
  *
  * <p>This writer also provides HTML-safe character replacements for environments where

@@ -153,4 +153,14 @@ public class MutableCharTypeTest extends TestBase {
         mutableCharType.writeCharacter(characterWriter, MutableChar.of('S'), config);
         assertNotNull(config);
     }
+
+    @Test
+    public void testWriteCharacterEscapesSingleQuoteWhenQuotedBySingleQuote() throws IOException {
+        JsonXmlSerConfig<?> config = Mockito.mock(JsonXmlSerConfig.class);
+        Mockito.when(config.getCharQuotation()).thenReturn('\'');
+        mutableCharType.writeCharacter(characterWriter, MutableChar.of('\''), config);
+        Mockito.verify(characterWriter, Mockito.times(2)).write('\'');
+        Mockito.verify(characterWriter).write('\\');
+        Mockito.verify(characterWriter).writeCharacter('\'');
+    }
 }

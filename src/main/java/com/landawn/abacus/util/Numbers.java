@@ -5348,6 +5348,10 @@ public final class Numbers {
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     public static long divide(final long p, final long q, final RoundingMode mode) throws IllegalArgumentException {
         N.checkArgNotNull(mode);
+        // Long.MIN_VALUE / -1 silently overflows back to Long.MIN_VALUE in Java.
+        if (p == Long.MIN_VALUE && q == -1L) {
+            throw new ArithmeticException("long overflow");
+        }
         final long div = p / q; // throws if q == 0
         final long rem = p - q * div; // equals p % q
 

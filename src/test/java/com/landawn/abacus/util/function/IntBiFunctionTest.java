@@ -75,4 +75,10 @@ public class IntBiFunctionTest extends TestBase {
         assertEquals("Result: 30", combined.apply(5, 6));
         assertEquals("Result: 0", combined.apply(0, 10));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        IntBiFunction<String> instance = (a, b) -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

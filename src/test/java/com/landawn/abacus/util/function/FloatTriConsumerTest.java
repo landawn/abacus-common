@@ -45,4 +45,10 @@ public class FloatTriConsumerTest extends TestBase {
         assertEquals(9.0f, results.get(0), 0.001f); // 2+3+4
         assertEquals(24.0f, results.get(1), 0.001f); // 2*3*4
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        FloatTriConsumer instance = (a, b, c) -> {};
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((FloatTriConsumer) null));
+    }
 }

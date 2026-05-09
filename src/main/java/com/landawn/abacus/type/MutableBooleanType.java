@@ -21,7 +21,9 @@ import com.landawn.abacus.util.Strings;
  * Type handler for {@link com.landawn.abacus.util.MutableBoolean} objects.
  * <p>
  * This class provides serialization, deserialization, and database operations for
- * MutableBoolean instances, which are mutable wrappers around primitive boolean values.
+ * {@code MutableBoolean} instances, which are mutable wrappers around primitive
+ * {@code boolean} values. Values are serialized as the unwrapped {@code boolean}
+ * (i.e., {@code "true"} or {@code "false"}, identical to {@link BooleanType}).
  *
  * @see com.landawn.abacus.util.MutableBoolean
  * @see AbstractType

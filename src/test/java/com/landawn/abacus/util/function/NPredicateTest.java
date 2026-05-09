@@ -215,4 +215,10 @@ public class NPredicateTest extends TestBase {
     public void testFunctionalInterface() {
         assertNotNull(NPredicate.class.getAnnotation(FunctionalInterface.class));
     }
+
+    @Test
+    public void testAndNullThrowsImmediately() {
+        NPredicate<String> instance = a -> false;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((NPredicate) null));
+    }
 }

@@ -172,4 +172,10 @@ public class BiPredicateTest extends TestBase {
         assertTrue(throwablePredicate.test(42, 42));
         assertFalse(throwablePredicate.test(42, 43));
     }
+
+    @Test
+    public void testAndNullThrowsImmediately() {
+        BiPredicate<String, String> instance = (a, b) -> false;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((java.util.function.BiPredicate) null));
+    }
 }

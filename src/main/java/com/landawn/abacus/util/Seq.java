@@ -3498,11 +3498,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <pre>{@code
      * Seq<String, Exception> names = Seq.of("Alice", "Bob", "Charlie", "David");
      * Seq<String, Exception> shortNames = names.filter(
-     *     name -> name.length() <= 4,
+     *     name -> name.length() <= 3,
      *     droppedName -> System.out.println("Filtered out: " + droppedName)
      * );
-     * // Prints: "Filtered out: Alice", "Filtered out: Charlie"
-     * // Result: ["Bob", "David"]
+     * // Prints: "Filtered out: Alice", "Filtered out: Charlie", "Filtered out: David"
+     * // Result: ["Bob"]
      * }</pre>
      *
      * @param predicate the predicate to apply to each element to determine if it should be included
@@ -3749,9 +3749,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Seq<String, Exception> words = Seq.of("hello", "HELLO", "world", "WORLD");
-     * Seq<String, Exception> distinct = words.distinct((a, b) -> a.toUpperCase());
-     * // Result: ["HELLO", "WORLD"] (keeps the uppercase versions)
+     * Seq<Integer, Exception> numbers = Seq.of(1, 2, 1, 3, 2, 4);
+     * Seq<Integer, Exception> distinct = numbers.distinct((a, b) -> a + b);
+     * // Duplicates are merged via the merge function (here, summed):
+     * // 1 + 1 = 2, 2 + 2 = 4
+     * // Result: [2, 4, 3, 4] (one entry per distinct element, in encounter order)
      * }</pre>
      *
      * @param mergeFunction the function to merge elements that are considered equal
@@ -7928,6 +7930,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         assertNotClosed();
         checkArgNotNegative(n, cs.n);
 
+        if (n == 0) {
+            return limit(0);
+        }
+
         return top(n, (Comparator<T>) Comparators.nullsFirst());
     }
 
@@ -10092,7 +10098,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 return Optional.of(elements.next());
             }
 
-            comparator = comparator == null ? (Comparator<T>) Comparators.nullsLast() : comparator;
             T candidate = elements.next();
             T next = null;
 
@@ -10360,7 +10365,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a <b>short-circuiting terminal operation</b>.</p>
      *
-     * <p>Implementation note: This is equivalent to {@code {@code atLeast} <= stream.filter(predicate).limit(atMost + 1).count() <= atMost}</p>
+     * <p>Implementation note: This is equivalent to {@code atLeast <= stream.filter(predicate).limit(atMost + 1).count() <= atMost}</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

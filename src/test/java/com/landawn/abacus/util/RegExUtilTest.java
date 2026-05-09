@@ -2045,4 +2045,41 @@ public class RegExUtilTest extends AbstractTest {
         assertTrue(RegExUtil.find("test[file]", "\\["));
     }
 
+    // -------- Bug-fix regression tests (replaceLast where rightmost match starts at 0 / extends to position 0) --------
+
+    @Test
+    @DisplayName("replaceLast: leftmost equivalent of rightmost match extends to index 0 (single match)")
+    public void testReplaceLast_matchAtStart_singleMatch() {
+        // The only match starts at index 0; before the fix, this returned the source unchanged.
+        assertEquals("Xhello", RegExUtil.replaceLast("123hello", "\\d+", "X"));
+        assertEquals("Xhello", RegExUtil.replaceLast("123hello", Pattern.compile("\\d+"), "X"));
+        assertEquals("Yxy", RegExUtil.replaceLast("0xy", "\\d+", "Y"));
+    }
+
+    @Test
+    @DisplayName("replaceLast: rightmost greedy match extends back to index 0")
+    public void testReplaceLast_rightmostMatchExtendsToZero() {
+        // \w+ matches the whole string; before the fix, the loop terminated without
+        // applying replacement because matcher.start() never became < 0.
+        assertEquals("X", RegExUtil.replaceLast("Hello", "\\w+", "X"));
+        assertEquals("X", RegExUtil.replaceLast("Hello", Pattern.compile("\\w+"), "X"));
+    }
+
+    @Test
+    @DisplayName("replaceLast with Function/IntBiFunction handles match starting at index 0")
+    public void testReplaceLast_matchAtStart_withReplacers() {
+        assertEquals("[123]hello", RegExUtil.replaceLast("123hello", "\\d+", m -> "[" + m + "]"));
+        assertEquals("[0,3]hello", RegExUtil.replaceLast("123hello", "\\d+", (s, e) -> "[" + s + "," + e + "]"));
+        assertEquals("[123]hello", RegExUtil.replaceLast("123hello", Pattern.compile("\\d+"), m -> "[" + m + "]"));
+        assertEquals("[0,3]hello", RegExUtil.replaceLast("123hello", Pattern.compile("\\d+"), (s, e) -> "[" + s + "," + e + "]"));
+    }
+
+    @Test
+    @DisplayName("replaceLast: existing behavior preserved when match doesn't extend to index 0")
+    public void testReplaceLast_regressionForOtherCases() {
+        assertEquals("Hello123WorldX", RegExUtil.replaceLast("Hello123World456", "\\d+", "X"));
+        assertEquals("HelloWorld", RegExUtil.replaceLast("HelloWorld", "\\d+", "X"));
+        assertEquals("HelloXWorld", RegExUtil.replaceLast("Hello123World", "\\d+", "X"));
+    }
+
 }

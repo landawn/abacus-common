@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -85,6 +87,7 @@ public interface LongObjFunction<T, R> extends Throwables.LongObjFunction<T, R, 
      * @throws NullPointerException if {@code after} is null
      */
     default <V> LongObjFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+        Objects.requireNonNull(after);
         return (i, t) -> after.apply(apply(i, t));
     }
 }

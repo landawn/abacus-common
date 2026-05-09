@@ -1714,7 +1714,7 @@ public final class IOUtil {
 
     /**
      * Reads up to a specified number of characters from an {@code InputStream} into a character array, starting from a given character offset, using the platform's default charset.
-     * This method will skip the specified number of bytes from the stream before starting to read.
+     * This method will skip the specified number of characters from the stream before starting to read.
      * The input stream is not closed by this method.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1743,7 +1743,7 @@ public final class IOUtil {
 
     /**
      * Reads up to a specified number of characters from an {@code InputStream} into a character array, starting from a given character offset, using the specified character set.
-     * This method will skip the specified number of bytes from the stream before starting to read.
+     * This method will skip the specified number of characters from the stream before starting to read.
      * The input stream is not closed by this method.
      *
      * <p><b>Usage Examples:</b></p>
@@ -3324,7 +3324,7 @@ public final class IOUtil {
      *
      * @param lines the Iterator containing the objects to be written.
      * @param output the File where the objects' string representations are to be written, must not be {@code null}.
-     *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, it will be overwritten. If the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @see N#toString(Object)
      */
@@ -3433,7 +3433,7 @@ public final class IOUtil {
      *
      * @param lines the Iterable containing the objects to be written.
      * @param output the File where the objects' string representations are to be written, must not be {@code null}.
-     *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, it will be overwritten. If the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @see N#toString(Object)
      */
@@ -3846,12 +3846,12 @@ public final class IOUtil {
     }
 
     /**
-     * Writes the string representation of a CharSequence to a Writer.
+     * Writes the string representation of a CharSequence to a Writer, optionally flushing the writer.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (Writer writer = new FileWriter("output.txt")) {
-     *     IOUtil.write("Hello, World!", writer);
+     *     IOUtil.write("Hello, World!", writer, true);
      * }
      * }</pre>
      *
@@ -5896,11 +5896,11 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FilenameUtil.removeExtension("foo.txt");       // Returns "foo"
-     * FilenameUtil.removeExtension("a\\b\\c.jpg");   // Returns "a\\b\\c"
-     * FilenameUtil.removeExtension("a\\b\\c");       // Returns "a\\b\\c"
-     * FilenameUtil.removeExtension("a.b\\c");        // Returns "a.b\\c"
-     * FilenameUtil.removeExtension(null)            = null
+     * IOUtil.getNameWithoutExtension("foo.txt");       // Returns "foo"
+     * IOUtil.getNameWithoutExtension("a\\b\\c.jpg");   // Returns "a\\b\\c"
+     * IOUtil.getNameWithoutExtension("a\\b\\c");       // Returns "a\\b\\c"
+     * IOUtil.getNameWithoutExtension("a.b\\c");        // Returns "a.b\\c"
+     * IOUtil.getNameWithoutExtension(null);            // Returns null
      * }</pre>
      *
      * @param fileName the filename to query, {@code null} returns null.
@@ -7376,15 +7376,19 @@ public final class IOUtil {
                 continue;
             }
 
+            // Treat symlinks as files (copy the link target's bytes once); never recurse into them
+            // to avoid infinite loops on cyclic symlinks and to avoid escaping the source tree.
+            final boolean isSymlink = Files.isSymbolicLink(subFile.toPath());
+
             if (filter.test(srcDir, subFile)) {
                 final File dest = new File(destDir, subFile.getName());
 
-                if (subFile.isDirectory()) {
+                if (subFile.isDirectory() && !isSymlink) {
                     doCopyDirectory(subFile, dest, preserveFileDate, Fn.BiPredicates.alwaysTrue());
                 } else {
                     doCopyFile(subFile, dest, preserveFileDate);
                 }
-            } else if (subFile.isDirectory()) {
+            } else if (subFile.isDirectory() && !isSymlink) {
                 final File dest = new File(destDir, subFile.getName());
                 doCopyDirectory(subFile, dest, preserveFileDate, filter);
             }
@@ -7458,7 +7462,7 @@ public final class IOUtil {
      * is {@code null}, nothing happens.
      *
      * @param file the File that may need parents, which may be {@code null}.
-     * @return the parent directory, or {@code null} if the given File does have a parent.
+     * @return {@code true} if the parent directory exists or was successfully created; {@code false} otherwise.
      */
     private static boolean createParentDirectories(final File file) {
         return mkdirsIfNotExists(getParentFile(file));
@@ -9230,8 +9234,6 @@ public final class IOUtil {
                     close(output);
                 }
             }
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
         } finally {
             Objectory.recycle(buf);
 
@@ -9602,7 +9604,8 @@ public final class IOUtil {
                 files.add(file);
             }
 
-            if (recursively && file.isDirectory()) {
+            // Avoid infinite recursion on cyclic symbolic links: don't descend into symlinked directories.
+            if (recursively && file.isDirectory() && !Files.isSymbolicLink(file.toPath())) {
                 //noinspection ConstantValue
                 files.addAll(listFiles(file, recursively, filter));
             }
@@ -11014,10 +11017,10 @@ public final class IOUtil {
      * Converts a CharSequence to a byte array using the specified charset.
      *
      * @param cs      the CharSequence to convert.
-     * @param charset the charset to use for encoding.
+     * @param charset the charset to use for encoding; if {@code null}, the platform's default charset is used.
      * @return the byte array representation of the CharSequence.
      */
     private static byte[] toByteArray(final CharSequence cs, final Charset charset) {
-        return String.valueOf(cs).getBytes(charset);
+        return String.valueOf(cs).getBytes(checkCharset(charset));
     }
 }

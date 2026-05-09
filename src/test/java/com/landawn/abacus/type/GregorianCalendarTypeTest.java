@@ -60,6 +60,16 @@ public class GregorianCalendarTypeTest extends TestBase {
     }
 
     @Test
+    public void testValueOfStringHandlesNullLiteral() {
+        // Bug: previously valueOf("null") tried to parse the literal string "null" as a date,
+        // which threw an exception. Other Calendar/Date type handlers treat the "null" literal
+        // (case-insensitive) as a null value via isNullDateTime; GregorianCalendarType should match.
+        assertNull(gregorianCalendarType.valueOf("null"));
+        assertNull(gregorianCalendarType.valueOf("NULL"));
+        assertNull(gregorianCalendarType.valueOf("Null"));
+    }
+
+    @Test
     public void testValueOfCharArray() {
         assertNull(gregorianCalendarType.valueOf(null, 0, 0));
 

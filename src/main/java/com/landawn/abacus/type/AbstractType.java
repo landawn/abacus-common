@@ -35,13 +35,44 @@ import com.landawn.abacus.util.TypeAttrParser;
 /**
  * The abstract base class for all types in the type system.
  * <p>
- * This class provides default implementations for most {@code Type} interface methods
+ * This class provides default implementations for most {@link Type} interface methods
  * and defines common constants and utility methods used across all type implementations.
  * Concrete type classes should extend this class and override methods as needed
  * for their specific type handling.
  * </p>
  *
+ * <p>The default implementations exposed here include:</p>
+ * <ul>
+ *   <li>String serialization via {@link #stringOf(Object)} / {@link #valueOf(String)} (subclasses
+ *       must implement these); {@link #valueOf(Object)} and {@link #valueOf(char[], int, int)}
+ *       have generic default implementations that delegate through string form.</li>
+ *   <li>JDBC integration via {@link #get(ResultSet, int)}, {@link #get(ResultSet, String)},
+ *       and {@link #set(PreparedStatement, int, Object)}; the default JDBC mapping treats values
+ *       as {@code VARCHAR}, so subclasses with native JDBC support (numbers, dates, blobs) should
+ *       override these.</li>
+ *   <li>Append/write operations via {@link #appendTo(Appendable, Object)} and
+ *       {@link #writeCharacter(CharacterWriter, Object, JsonXmlSerConfig)}, both honoring the
+ *       textual {@code "null"} marker for {@code null} values.</li>
+ *   <li>Type classification predicates ({@link #isPrimitive()}, {@link #isNumber()},
+ *       {@link #isDate()}, etc.) which all return {@code false} by default; subclasses override
+ *       only the predicates relevant to their category.</li>
+ * </ul>
+ *
+ * <p>Specialised abstract subclasses anchor distinct families of concrete types, including:</p>
+ * <ul>
+ *   <li>{@link AbstractPrimaryType} &mdash; primitive wrappers, {@link AbstractCharSequenceType}
+ *       and {@code Character}/{@code Boolean} types.</li>
+ *   <li>{@link AbstractDateType}, {@link AbstractTemporalType}, {@link AbstractJodaDateTimeType}
+ *       &mdash; date/time families.</li>
+ *   <li>{@link AbstractArrayType}, {@link AbstractPrimitiveArrayType} &mdash; array types.</li>
+ *   <li>{@link AbstractPrimitiveListType} &mdash; specialized primitive {@code List}-like types.</li>
+ *   <li>{@link AbstractAtomicType} &mdash; {@code java.util.concurrent.atomic} wrappers.</li>
+ *   <li>{@link AbstractOptionalType} &mdash; {@code Optional}/{@code Nullable} containers.</li>
+ *   <li>{@link AbstractTupleType} &mdash; {@code TupleN} types.</li>
+ * </ul>
+ *
  * @param <T> the Java type that this {@code Type} represents
+ * @see Type
  */
 public abstract class AbstractType<T> implements Type<T> {
 
@@ -111,11 +142,15 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Constructs an {@code AbstractType} with the specified type name.
      * <p>
-     * The constructor normalizes the type name by extracting the simple class name
-     * for common Java packages ({@code java.lang}, {@code java.util}, {@code java.time}, {@code com.landawn.abacus}).
+     * The constructor normalizes the type name by stripping the package qualifier and
+     * keeping only the simple class name for types that live in well-known packages
+     * ({@code java.lang}, {@code java.util}, {@code java.time}, {@code com.landawn.abacus}).
+     * Generic type parameters (the {@code <...>} suffix) are preserved. The XML-safe form
+     * is derived from the normalized name with {@code <} and {@code >} escaped to
+     * {@code &lt;} and {@code &gt;}.
      * </p>
      *
-     * @param typeName the fully qualified or simple type name
+     * @param typeName the fully qualified or simple type name (may include generic parameters)
      */
     protected AbstractType(final String typeName) {
         String simpleName = typeName;
@@ -699,12 +734,17 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Compares two values of this type.
-     * Only supported for comparable types.
+     * Compares two values of this type using their natural ordering.
+     * <p>
+     * {@code null} values are treated as less than non-{@code null} values; two {@code null}
+     * arguments compare equal. This default implementation is only supported when
+     * {@link #isComparable()} returns {@code true}.
+     * </p>
      *
-     * @param x the first value
-     * @param y the second value
-     * @return negative if x &lt; y, zero if x equals y, positive if x &gt; y
+     * @param x the first value, may be {@code null}
+     * @param y the second value, may be {@code null}
+     * @return a negative integer if {@code x} is less than {@code y}, zero if they are equal,
+     *         or a positive integer if {@code x} is greater than {@code y}
      * @throws UnsupportedOperationException if this type is not comparable
      */
     @SuppressWarnings("unchecked")
@@ -718,13 +758,17 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Converts an object to this type.
+     * Converts an arbitrary object to a value of this type.
+     * <p>
      * Default implementation serializes the object to a string using the type-specific
-     * {@link #stringOf} method of the object's actual runtime type, then parses that
-     * string using {@link #valueOf(String)}.
+     * {@link #stringOf(Object)} method of the object's actual runtime type, then parses
+     * that string using {@link #valueOf(String)}. Subclasses that can perform a more
+     * efficient or more accurate conversion should override this method.
+     * </p>
      *
-     * @param obj the object to convert
-     * @return the converted value
+     * @param obj the object to convert, may be {@code null}
+     * @return the converted value, or the result of {@code valueOf((String) null)} if {@code obj}
+     *         is {@code null} (typically {@code null} or this type's default)
      */
     @Override
     public T valueOf(final Object obj) {
@@ -732,13 +776,16 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Converts a character array to this type.
-     * Default implementation creates a string from the character array
-     * and delegates to {@link #valueOf(String)}.
+     * Converts a region of a character array to a value of this type.
+     * <p>
+     * Default implementation builds a {@link String} from the {@code [offset, offset+len)}
+     * range of {@code cbuf} and delegates to {@link #valueOf(String)}.
+     * If {@code cbuf} is {@code null}, this method delegates to {@code valueOf((String) null)}.
+     * </p>
      *
-     * @param cbuf the character array
-     * @param offset the starting position
-     * @param len the number of characters
+     * @param cbuf the character array, may be {@code null}
+     * @param offset the starting position within {@code cbuf}
+     * @param len the number of characters to read
      * @return the converted value
      */
     @Override
@@ -747,12 +794,17 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Retrieves a value of this type from a ResultSet.
-     * Default implementation gets the value as a string and converts it.
+     * Retrieves a value of this type from a {@link ResultSet} by column index.
+     * <p>
+     * Default implementation reads the column via {@link ResultSet#getString(int)} and
+     * converts the result through {@link #valueOf(String)}. SQL {@code NULL} columns yield
+     * a {@code null} string, which {@code valueOf} typically converts to this type's
+     * default value (often {@code null}).
+     * </p>
      *
-     * @param rs the ResultSet
+     * @param rs the {@code ResultSet} to read from
      * @param columnIndex the column index (1-based)
-     * @return the retrieved value
+     * @return the retrieved value, possibly {@code null}
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -761,12 +813,17 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Retrieves a value of this type from a ResultSet by column label.
-     * Default implementation gets the value as a string and converts it.
+     * Retrieves a value of this type from a {@link ResultSet} by column label.
+     * <p>
+     * Default implementation reads the column via {@link ResultSet#getString(String)} and
+     * converts the result through {@link #valueOf(String)}. SQL {@code NULL} columns yield
+     * a {@code null} string, which {@code valueOf} typically converts to this type's
+     * default value (often {@code null}).
+     * </p>
      *
-     * @param rs the ResultSet
+     * @param rs the {@code ResultSet} to read from
      * @param columnName the column label
-     * @return the retrieved value
+     * @return the retrieved value, possibly {@code null}
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -775,14 +832,18 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Sets a parameter value in a PreparedStatement.
+     * Sets a parameter value in a {@link PreparedStatement} by index.
+     * <p>
      * Default implementation converts the value to its string representation via
-     * {@link #stringOf(Object)} and sets it as a {@code VARCHAR} using
-     * {@link PreparedStatement#setString}.
+     * {@link #stringOf(Object)} and binds it as a {@code VARCHAR} using
+     * {@link PreparedStatement#setString(int, String)}. A {@code null} {@code x} is
+     * therefore bound as SQL {@code NULL}. Subclasses with a more specific JDBC mapping
+     * (numbers, dates, blobs, etc.) should override this method.
+     * </p>
      *
-     * @param stmt the PreparedStatement
+     * @param stmt the {@code PreparedStatement}
      * @param columnIndex the parameter index (1-based)
-     * @param x the value to set
+     * @param x the value to set, may be {@code null}
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -791,12 +852,16 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Sets a parameter value in a CallableStatement.
+     * Sets a parameter value in a {@link CallableStatement} by name.
+     * <p>
      * Default implementation converts the value to its string representation via
-     * {@link #stringOf(Object)} and sets it as a {@code VARCHAR} using
-     * {@link CallableStatement#setString}.
+     * {@link #stringOf(Object)} and binds it as a {@code VARCHAR} using
+     * {@link CallableStatement#setString(String, String)}. A {@code null} {@code x} is
+     * therefore bound as SQL {@code NULL}. Subclasses with a more specific JDBC mapping
+     * should override this method.
+     * </p>
      *
-     * @param stmt the CallableStatement
+     * @param stmt the {@code CallableStatement}
      * @param parameterName the parameter name
      * @param x the value to set
      * @throws SQLException if a database access error occurs
@@ -807,13 +872,17 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Sets a parameter value in a PreparedStatement with SQL type.
-     * Default implementation ignores the SQL type and delegates to {@link #set(PreparedStatement, int, Object)}.
+     * Sets a parameter value in a {@link PreparedStatement} with the given SQL type or length.
+     * <p>
+     * Default implementation ignores {@code sqlTypeOrLength} and delegates to
+     * {@link #set(PreparedStatement, int, Object)}. Subclasses that require the SQL type
+     * or column size (e.g., {@code Clob}, {@code Blob}, large strings) should override.
+     * </p>
      *
-     * @param stmt the PreparedStatement
+     * @param stmt the {@code PreparedStatement}
      * @param columnIndex the parameter index (1-based)
-     * @param x the value to set
-     * @param sqlTypeOrLength the SQL type or length (ignored in default implementation)
+     * @param x the value to set, may be {@code null}
+     * @param sqlTypeOrLength the {@code java.sql.Types} code or column length (ignored by default)
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -822,13 +891,17 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Sets a parameter value in a CallableStatement with SQL type.
-     * Default implementation ignores the SQL type and delegates to {@link #set(CallableStatement, String, Object)}.
+     * Sets a parameter value in a {@link CallableStatement} with the given SQL type or length.
+     * <p>
+     * Default implementation ignores {@code sqlTypeOrLength} and delegates to
+     * {@link #set(CallableStatement, String, Object)}. Subclasses that require the SQL type
+     * or column size should override.
+     * </p>
      *
-     * @param stmt the CallableStatement
+     * @param stmt the {@code CallableStatement}
      * @param parameterName the parameter name
-     * @param x the value to set
-     * @param sqlTypeOrLength the SQL type or length (ignored in default implementation)
+     * @param x the value to set, may be {@code null}
+     * @param sqlTypeOrLength the {@code java.sql.Types} code or column length (ignored by default)
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -1009,10 +1082,14 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Checks if this type equals another object.
-     * Two types are equal if they have the same name, declaring name, and class.
+     * <p>
+     * Two {@code AbstractType} instances are considered equal if they have the same
+     * {@link #name()}, {@link #declaringName()}, and {@link #javaType()}. Returns
+     * {@code false} for any object that is not an {@code AbstractType}.
+     * </p>
      *
      * @param obj the object to compare
-     * @return {@code true} if the objects are equal types
+     * @return {@code true} if {@code obj} is an equivalent type, {@code false} otherwise
      */
     @Override
     public boolean equals(final Object obj) {
@@ -1174,16 +1251,21 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Parses an integer from a character array.
-     * Optimized for common cases with direct parsing for lengths 1-9.
-     * Supports negative numbers and optional sign characters.
+     * Parses an integer from a region of a character array.
+     * <p>
+     * Optimized fast path for lengths 1&ndash;9 (parses digits inline); longer regions
+     * fall back to {@link Numbers#toInt(String)}. A trailing type suffix
+     * ({@code l}, {@code L}, {@code f}, {@code F}, {@code d}, {@code D}) is accepted and
+     * ignored. Supports an optional leading sign ({@code '+'} or {@code '-'}).
+     * Returns {@code 0} when {@code cbuf} is {@code null} or {@code len == 0}.
+     * </p>
      *
-     * @param cbuf the character array
-     * @param offset the starting position
+     * @param cbuf the character array; may be {@code null}
+     * @param offset the starting position within {@code cbuf}
      * @param len the number of characters to parse
      * @return the parsed integer value
      * @throws NumberFormatException if the characters cannot be parsed as an integer
-     * @throws IllegalArgumentException if offset or len is negative
+     * @throws IllegalArgumentException if {@code offset} or {@code len} is negative
      * @see Integer#parseInt(String)
      */
     protected static int parseInt(final char[] cbuf, final int offset, int len) throws NumberFormatException {
@@ -1243,16 +1325,21 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Parses a long from a character array.
-     * Optimized for common cases with direct parsing for lengths 1-18.
-     * Supports negative numbers and optional sign characters.
+     * Parses a long from a region of a character array.
+     * <p>
+     * Optimized fast path for lengths 1&ndash;18 (parses digits inline); longer regions
+     * fall back to {@link Numbers#toLong(String)}. A trailing type suffix
+     * ({@code l}, {@code L}, {@code f}, {@code F}, {@code d}, {@code D}) is accepted and
+     * ignored. Supports an optional leading sign ({@code '+'} or {@code '-'}).
+     * Returns {@code 0L} when {@code cbuf} is {@code null} or {@code len == 0}.
+     * </p>
      *
-     * @param cbuf the character array
-     * @param offset the starting position
+     * @param cbuf the character array; may be {@code null}
+     * @param offset the starting position within {@code cbuf}
      * @param len the number of characters to parse
      * @return the parsed long value
      * @throws NumberFormatException if the characters cannot be parsed as a long
-     * @throws IllegalArgumentException if offset or len is negative
+     * @throws IllegalArgumentException if {@code offset} or {@code len} is negative
      * @see Long#parseLong(String)
      */
     protected static long parseLong(final char[] cbuf, final int offset, int len) throws NumberFormatException {
@@ -1331,8 +1418,9 @@ public abstract class AbstractType<T> implements Type<T> {
      * returns {@code true} only if the string equals "true" (case-insensitive).
      * </p>
      *
-     * @param str the string to parse, must not be {@code null}
-     * @return a {@code Boolean} representing the parsed value
+     * @param str the string to parse; must not be {@code null}
+     * @return a non-{@code null} {@code Boolean} representing the parsed value
+     * @throws NullPointerException if {@code str} is {@code null}
      * @see Boolean#valueOf(String)
      */
     protected Boolean parseBoolean(final String str) {
@@ -1399,8 +1487,11 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Calculates buffer size for string operations.
-     * Prevents integer overflow by checking against MAX_VALUE.
+     * Calculates a buffer size for string operations, capped at {@link Integer#MAX_VALUE}.
+     * <p>
+     * Prevents integer overflow by clamping the result when {@code len * elementPlusDelimiterLen}
+     * would exceed {@link Integer#MAX_VALUE}.
+     * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

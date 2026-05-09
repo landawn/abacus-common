@@ -194,4 +194,10 @@ public class BooleanPredicateTest extends TestBase {
         assertNotNull(BooleanPredicate.IS_TRUE);
         assertNotNull(BooleanPredicate.IS_FALSE);
     }
+
+    @Test
+    public void testAndNullThrowsImmediately() {
+        BooleanPredicate instance = a -> false;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((BooleanPredicate) null));
+    }
 }

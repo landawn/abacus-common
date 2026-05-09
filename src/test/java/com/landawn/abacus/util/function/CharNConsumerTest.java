@@ -146,4 +146,10 @@ public class CharNConsumerTest extends TestBase {
     public void testFunctionalInterface() {
         assertNotNull(CharNConsumer.class.getAnnotation(FunctionalInterface.class));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        CharNConsumer instance = a -> {};
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((CharNConsumer) null));
+    }
 }

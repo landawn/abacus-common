@@ -101,4 +101,10 @@ public class ByteUnaryOperatorTest extends TestBase {
     public void testFunctionalInterface() {
         assertNotNull(ByteUnaryOperator.class.getAnnotation(FunctionalInterface.class));
     }
+
+    @Test
+    public void testComposeNullThrowsImmediately() {
+        ByteUnaryOperator instance = a -> (byte) 0;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.compose((ByteUnaryOperator) null));
+    }
 }

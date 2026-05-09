@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -66,6 +68,7 @@ public interface BiObjIntConsumer<T, U> extends Throwables.BiObjIntConsumer<T, U
      * @throws NullPointerException if {@code after} is null
      */
     default BiObjIntConsumer<T, U> andThen(final BiObjIntConsumer<? super T, ? super U> after) {
+        Objects.requireNonNull(after);
         return (t, u, i) -> {
             accept(t, u, i);
             after.accept(t, u, i);

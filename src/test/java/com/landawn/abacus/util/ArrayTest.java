@@ -8529,4 +8529,242 @@ public class ArrayTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Array.transpose(jagged));
     }
 
+    // === Additional review tests ===
+
+    @Test
+    public void testRange_byte_minToMaxBoundary() {
+        // byte range from MIN_VALUE to MAX_VALUE: diff = 255 fits in int
+        byte[] full = Array.range(Byte.MIN_VALUE, Byte.MAX_VALUE);
+        assertEquals(255, full.length);
+        assertEquals(Byte.MIN_VALUE, full[0]);
+        assertEquals((byte) (Byte.MAX_VALUE - 1), full[254]);
+    }
+
+    @Test
+    public void testRangeClosed_byte_minToMaxBoundary() {
+        byte[] full = Array.rangeClosed(Byte.MIN_VALUE, Byte.MAX_VALUE);
+        assertEquals(256, full.length);
+        assertEquals(Byte.MIN_VALUE, full[0]);
+        assertEquals(Byte.MAX_VALUE, full[255]);
+    }
+
+    @Test
+    public void testRange_int_zeroLengthAtBoundary() {
+        // start == end => empty
+        assertEquals(0, Array.range(Integer.MAX_VALUE, Integer.MAX_VALUE).length);
+        assertEquals(0, Array.range(Integer.MIN_VALUE, Integer.MIN_VALUE).length);
+        // start > end => empty
+        assertEquals(0, Array.range(5, 0).length);
+    }
+
+    @Test
+    public void testRangeClosed_int_singleElementAtMax() {
+        int[] one = Array.rangeClosed(Integer.MAX_VALUE, Integer.MAX_VALUE);
+        assertArrayEquals(new int[] { Integer.MAX_VALUE }, one);
+    }
+
+    @Test
+    public void testRangeClosed_int_singleElementAtMin() {
+        int[] one = Array.rangeClosed(Integer.MIN_VALUE, Integer.MIN_VALUE);
+        assertArrayEquals(new int[] { Integer.MIN_VALUE }, one);
+    }
+
+    @Test
+    public void testRangeClosed_long_minToMaxOverflowIAE() {
+        // (max - min + 1) overflows long => detected via range <= 0
+        assertThrows(IllegalArgumentException.class, () -> Array.rangeClosed(Long.MIN_VALUE, Long.MAX_VALUE));
+    }
+
+    @Test
+    public void testRange_long_zeroEmptyRangeNoOverflow() {
+        // start == end => empty regardless of magnitude
+        assertEquals(0, Array.range(Long.MIN_VALUE, Long.MIN_VALUE).length);
+        assertEquals(0, Array.range(Long.MAX_VALUE, Long.MAX_VALUE).length);
+    }
+
+    @Test
+    public void testRangeClosed_int_inconsistentStepDirectionEmpty() {
+        // step direction inconsistent with bounds => empty array
+        assertArrayEquals(new int[0], Array.rangeClosed(0, 10, -1));
+        assertArrayEquals(new int[0], Array.rangeClosed(10, 0, 1));
+    }
+
+    @Test
+    public void testRangeClosed_int_zeroByThrows() {
+        assertThrows(IllegalArgumentException.class, () -> Array.rangeClosed(0, 10, 0));
+    }
+
+    @Test
+    public void testRepeat_emptyArrayAnyN() {
+        // repeating empty by any n yields empty (no overflow even if n very large)
+        assertEquals(0, Array.repeat(new int[0], Integer.MAX_VALUE).length);
+        assertEquals(0, Array.repeat(new String[0], Integer.MAX_VALUE, String.class).length);
+    }
+
+    @Test
+    public void testRepeat_negativeNThrows() {
+        assertThrows(IllegalArgumentException.class, () -> Array.repeat(true, -1));
+        assertThrows(IllegalArgumentException.class, () -> Array.repeat('a', -1));
+        assertThrows(IllegalArgumentException.class, () -> Array.repeat((byte) 1, -1));
+        assertThrows(IllegalArgumentException.class, () -> Array.repeat((short) 1, -1));
+        assertThrows(IllegalArgumentException.class, () -> Array.repeat(1, -1));
+        assertThrows(IllegalArgumentException.class, () -> Array.repeat(1L, -1));
+        assertThrows(IllegalArgumentException.class, () -> Array.repeat(1.0f, -1));
+        assertThrows(IllegalArgumentException.class, () -> Array.repeat(1.0, -1));
+        assertThrows(IllegalArgumentException.class, () -> Array.repeat("x", -1));
+        assertThrows(IllegalArgumentException.class, () -> Array.repeat(new int[] { 1 }, -1));
+        assertThrows(IllegalArgumentException.class, () -> Array.repeatNonNull("x", -1));
+    }
+
+    @Test
+    public void testAsList_isBackedByArray_notDefensiveCopy() {
+        String[] arr = { "a", "b", "c" };
+        List<String> list = Array.asList(arr);
+        list.set(1, "B");
+        assertEquals("B", arr[1]); // mutations propagate
+        arr[2] = "C";
+        assertEquals("C", list.get(2));
+    }
+
+    @Test
+    public void testBox_emptyArrayReturnsCachedEmpty() {
+        // box of empty input => empty wrapper array (not null)
+        assertArrayEquals(new Boolean[0], Array.box(new boolean[0]));
+        assertArrayEquals(new Integer[0], Array.box(new int[0]));
+        assertArrayEquals(new Long[0], Array.box(new long[0]));
+        assertArrayEquals(new Double[0], Array.box(new double[0]));
+    }
+
+    @Test
+    public void testBox_nullReturnsNull() {
+        assertNull(Array.box((boolean[]) null));
+        assertNull(Array.box((char[]) null));
+        assertNull(Array.box((byte[]) null));
+        assertNull(Array.box((short[]) null));
+        assertNull(Array.box((int[]) null));
+        assertNull(Array.box((long[]) null));
+        assertNull(Array.box((float[]) null));
+        assertNull(Array.box((double[]) null));
+    }
+
+    @Test
+    public void testBox_rangeOnNullArray_returnsNull_doesNotThrowOOBE() {
+        // Documented contract: null array yields null (bounds check only when non-null)
+        assertNull(Array.box((int[]) null, 0, 0));
+        assertNull(Array.box((boolean[]) null, 0, 5));
+        assertNull(Array.box((double[]) null, 1, 2));
+    }
+
+    @Test
+    public void testUnbox_rangeOnNullArray_returnsNull_doesNotThrowOOBE() {
+        assertNull(Array.unbox((Integer[]) null, 0, 5, 0));
+        assertNull(Array.unbox((Boolean[]) null, 0, 0, false));
+        assertNull(Array.unbox((Double[]) null, 1, 2, 0.0));
+    }
+
+    @Test
+    public void testUnbox_nullElementsReplacedByDefault() {
+        Integer[] in = { 1, null, 3, null };
+        int[] out = Array.unbox(in, -7);
+        assertArrayEquals(new int[] { 1, -7, 3, -7 }, out);
+
+        // Without default, null replaced by 0 (per docs)
+        int[] out0 = Array.unbox(new Integer[] { 1, null, 3 });
+        assertArrayEquals(new int[] { 1, 0, 3 }, out0);
+    }
+
+    @Test
+    public void testUnbox_floatNaN_preserved() {
+        Float[] in = { Float.NaN, 1.0f, null, Float.NEGATIVE_INFINITY };
+        float[] out = Array.unbox(in, 0.0f);
+        assertTrue(Float.isNaN(out[0]));
+        assertEquals(1.0f, out[1]);
+        assertEquals(0.0f, out[2]);
+        assertEquals(Float.NEGATIVE_INFINITY, out[3]);
+    }
+
+    @Test
+    public void testUnbox_doubleNaN_preserved() {
+        Double[] in = { Double.NaN, 1.0, null, Double.POSITIVE_INFINITY };
+        double[] out = Array.unbox(in, 0.0);
+        assertTrue(Double.isNaN(out[0]));
+        assertEquals(1.0, out[1]);
+        assertEquals(0.0, out[2]);
+        assertEquals(Double.POSITIVE_INFINITY, out[3]);
+    }
+
+    @Test
+    public void testTranspose_singleEmptyRow_returnsZeroRowsByOneCol() {
+        int[][] a = { {} };
+        int[][] t = Array.transpose(a);
+        // 1 row x 0 col transposed => 0 rows x 1 col
+        assertEquals(0, t.length);
+    }
+
+    @Test
+    public void testTranspose_emptyOuter_clonesInput() {
+        int[][] a = new int[0][];
+        int[][] t = Array.transpose(a);
+        assertEquals(0, t.length);
+        assertNotSame(a, t); // clone is returned, not same instance
+    }
+
+    @Test
+    public void testConcat2D_bothNull_returnsNull_consistencyWithDoc() {
+        // Generic concat2D: documented to return null when both null (differs from primitive 2D concat)
+        assertNull(Array.concat2D((String[][]) null, (String[][]) null));
+        assertNull(Array.concat3D((String[][][]) null, (String[][][]) null));
+    }
+
+    @Test
+    public void testConcat_primitive2D_bothNull_returnsEmpty() {
+        // Primitive 2D concat: documented to return empty array when both null
+        assertNotNull(Array.concat((int[][]) null, (int[][]) null));
+        assertEquals(0, Array.concat((int[][]) null, (int[][]) null).length);
+        assertEquals(0, Array.concat((boolean[][]) null, (boolean[][]) null).length);
+        assertEquals(0, Array.concat((double[][]) null, (double[][]) null).length);
+    }
+
+    @Test
+    public void testOf_primitiveOverloadIdentity() {
+        // Array.of returns input directly (no copy)
+        int[] a = { 1, 2, 3 };
+        assertSame(a, Array.of(a));
+
+        long[] b = { 1L, 2L };
+        assertSame(b, Array.of(b));
+
+        double[] c = { 1.0, 2.0 };
+        assertSame(c, Array.of(c));
+    }
+
+    @Test
+    public void testOf_typedOverloadsTypePreserved() {
+        // Typed overloads (CharSequence, Date, Calendar, Temporal, Enum) preserve concrete type
+        String[] strs = Array.of("a", "b");
+        assertEquals(String.class, strs.getClass().getComponentType());
+
+        java.time.DayOfWeek[] days = Array.of(java.time.DayOfWeek.MONDAY, java.time.DayOfWeek.FRIDAY);
+        assertEquals(java.time.DayOfWeek.class, days.getClass().getComponentType());
+    }
+
+    @Test
+    public void testGetLength_primitiveAndObjectAndNull() {
+        assertEquals(0, Array.getLength(null));
+        assertEquals(3, Array.getLength(new int[] { 1, 2, 3 }));
+        assertEquals(2, Array.getLength(new String[] { "a", "b" }));
+        assertEquals(0, Array.getLength(new int[0]));
+    }
+
+    @Test
+    public void testRandom_rangeBounds() {
+        int[] r = Array.random(0, 10, 1000);
+        for (int v : r) {
+            assertTrue(v >= 0 && v < 10);
+        }
+        // start>=end throws
+        assertThrows(IllegalArgumentException.class, () -> Array.random(5, 5, 10));
+        assertThrows(IllegalArgumentException.class, () -> Array.random(10, 5, 10));
+    }
+
 }

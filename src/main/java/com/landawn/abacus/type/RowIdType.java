@@ -72,6 +72,9 @@ import com.landawn.abacus.util.CharacterWriter;
  */
 public class RowIdType extends AbstractType<RowId> {
 
+    /**
+     * The type name identifier for SQL RowId type, equal to the simple class name {@code "RowId"}.
+     */
     public static final String ROW_ID = RowId.class.getSimpleName();
 
     /**

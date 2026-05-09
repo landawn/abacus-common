@@ -182,7 +182,9 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * Retrieves and removes an object from the pool, or returns {@code null} if the pool is empty.
      * The object's activity print is updated to reflect this access.
      *
-     * <p>If the retrieved object has expired, it will be destroyed and {@code null} will be returned.
+     * <p>Expired objects encountered during the take are destroyed (with {@link Poolable.Caller#EVICT})
+     * and skipped over; this method only returns {@code null} once no valid object remains in the
+     * pool.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

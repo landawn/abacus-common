@@ -287,10 +287,10 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int count = 0;
+     * int[] count = {0};
      * CharIterator iter = CharIterator.generate(
-     *     () -> count < 3,
-     *     () -> (char)('A' + count++)
+     *     () -> count[0] < 3,
+     *     () -> (char)('A' + count[0]++)
      * );
      * // Generates 'A', 'B', 'C'
      * }</pre>

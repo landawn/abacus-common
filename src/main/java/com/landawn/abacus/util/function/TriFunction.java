@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -87,6 +89,7 @@ public interface TriFunction<A, B, C, R> extends Throwables.TriFunction<A, B, C,
      * @throws NullPointerException if {@code after} is null
      */
     default <V> TriFunction<A, B, C, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+        Objects.requireNonNull(after);
         return (a, b, c) -> after.apply(apply(a, b, c));
     }
 

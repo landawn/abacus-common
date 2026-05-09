@@ -228,7 +228,7 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
 
     /**
      * Writes a {@code Byte[]} array to a {@link CharacterWriter} in bracket-enclosed format.
-     * Uses the writer's optimised byte-write method for non-null elements.
+     * Uses the writer's optimized byte-write method for non-null elements.
      * The format is identical to {@link #appendTo(Appendable, Byte[])}.
      * {@code config} is not used.
      *

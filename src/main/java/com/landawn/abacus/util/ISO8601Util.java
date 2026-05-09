@@ -310,47 +310,57 @@ final class ISO8601Util {
             }
 
             // extract timezone
+            TimeZone timezone;
+
             if (date.length() <= offset) {
-                throw new IllegalArgumentException("No time zone indicator");
-            }
-
-            TimeZone timezone = null;
-            final char timezoneIndicator = date.charAt(offset);
-
-            if (timezoneIndicator == 'Z') {
+                // No timezone indicator. The Javadoc lists "yyyy-MM-ddTHH:mm:ss" and
+                // "yyyy-MM-ddTHH:mm:ss.SSS" as supported forms; default to UTC for those
+                // rather than throwing — matches the documented set of accepted formats.
                 timezone = TIMEZONE_Z;
-                offset += 1;
-            } else if (timezoneIndicator == '+' || timezoneIndicator == '-') {
-                final String timezoneOffset = date.substring(offset);
-                offset += timezoneOffset.length();
-                // 18-Jun-2015, tatu: Minor simplification, skip offset of "+0000"/"+00:00"
-                if ("+0000".equals(timezoneOffset) || "+00:00".equals(timezoneOffset)) {
+            } else {
+                final char timezoneIndicator = date.charAt(offset);
+
+                if (timezoneIndicator == 'Z') {
                     timezone = TIMEZONE_Z;
-                } else {
-                    // 18-Jun-2015, tatu: Looks like offsets only work from GMT, not UTC...
-                    //    not sure why, but that's the way it looks. Further, Javadocs for
-                    //    `java.util.TimeZone` specifically instruct use of GMT as base for
-                    //    custom timezones... odd.
-                    final String timezoneId = "GMT" + timezoneOffset;
-                    //                    String timezoneId = "UTC" + timezoneOffset;
+                    offset += 1;
+                } else if (timezoneIndicator == '+' || timezoneIndicator == '-') {
+                    final String timezoneOffset = date.substring(offset);
+                    offset += timezoneOffset.length();
+                    // 18-Jun-2015, tatu: Minor simplification, skip offset of "+0000"/"+00:00"
+                    if ("+0000".equals(timezoneOffset) || "+00:00".equals(timezoneOffset)) {
+                        timezone = TIMEZONE_Z;
+                    } else {
+                        // 18-Jun-2015, tatu: Looks like offsets only work from GMT, not UTC...
+                        //    not sure why, but that's the way it looks. Further, Javadocs for
+                        //    `java.util.TimeZone` specifically instruct use of GMT as base for
+                        //    custom timezones... odd.
+                        final String timezoneId = "GMT" + timezoneOffset;
+                        //                    String timezoneId = "UTC" + timezoneOffset;
 
-                    timezone = TimeZone.getTimeZone(timezoneId);
+                        timezone = TimeZone.getTimeZone(timezoneId);
 
-                    final String act = timezone.getID();
-                    if (!act.equals(timezoneId)) {
-                        /* 22-Jan-2015, tatu: Looks like canonical version has colons, but we may be given
-                         *    one without. If so, don't sweat.
-                         *   Yes, very inefficient. Hopefully not hit often.
-                         *   If it becomes a perf problem, add <i>loose</i> comparison instead.
-                         */
-                        final String cleaned = act.replace(":", "");
-                        if (!cleaned.equals(timezoneId)) {
-                            throw new IndexOutOfBoundsException("Mismatching time zone indicator: " + timezoneId + " given, resolves to " + timezone.getID());
+                        final String act = timezone.getID();
+                        if (!act.equals(timezoneId)) {
+                            /* 22-Jan-2015, tatu: Looks like canonical version has colons, but we may be given
+                             *    one without. If so, don't sweat.
+                             *   Yes, very inefficient. Hopefully not hit often.
+                             *   If it becomes a perf problem, add <i>loose</i> comparison instead.
+                             */
+                            final String cleaned = act.replace(":", "");
+                            if (!cleaned.equals(timezoneId)) {
+                                // Use IllegalArgumentException for input-validation failures
+                                // rather than IndexOutOfBoundsException — the surrounding catch
+                                // wraps everything as IllegalArgumentException anyway, but
+                                // throwing the right type keeps stack traces meaningful if the
+                                // wrapper is removed later.
+                                throw new IllegalArgumentException(
+                                        "Mismatching time zone indicator: " + timezoneId + " given, resolves to " + timezone.getID());
+                            }
                         }
                     }
+                } else {
+                    throw new IllegalArgumentException("Invalid time zone indicator '" + timezoneIndicator + "'");
                 }
-            } else {
-                throw new IndexOutOfBoundsException("Invalid time zone indicator '" + timezoneIndicator + "'");
             }
 
             final Calendar calendar = new GregorianCalendar(timezone);

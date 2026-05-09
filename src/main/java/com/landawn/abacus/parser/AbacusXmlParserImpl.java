@@ -3010,8 +3010,10 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      *
      * <p>This handler maintains parse state via stacks of node types, values, and property metadata
      * as SAX events arrive. After parsing completes, the result is accessible through
-     * {@link #resultHolder}. Instances are pooled and re-used; call the package-private
-     * initialisation method before use and {@link #reset()} is invoked automatically on recycle.</p>
+     * {@code resultHolder}. Instances are pooled and re-used; configuration must be initialised via
+     * {@code setConfig(XmlDeserConfig)} (along with the {@code nodeTypes} and {@code inputType}
+     * fields) before parsing, and {@code reset()} is invoked when the handler is returned to the
+     * pool.</p>
      *
      * @param <T> the target object type produced by this SAX handler
      */

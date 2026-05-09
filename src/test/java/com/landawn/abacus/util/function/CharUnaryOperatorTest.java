@@ -97,4 +97,10 @@ public class CharUnaryOperatorTest extends TestBase {
     public void testFunctionalInterface() {
         assertNotNull(CharUnaryOperator.class.getAnnotation(FunctionalInterface.class));
     }
+
+    @Test
+    public void testComposeNullThrowsImmediately() {
+        CharUnaryOperator instance = a -> 'a';
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.compose((CharUnaryOperator) null));
+    }
 }

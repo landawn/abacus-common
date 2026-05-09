@@ -64,4 +64,10 @@ public class BooleanTriFunctionTest extends TestBase {
 
         assertThrows(RuntimeException.class, () -> chainedFunction.apply(true, false, true));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        BooleanTriFunction<String> instance = (a, b, c) -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

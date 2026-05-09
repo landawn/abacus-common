@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.logging;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -55,8 +56,8 @@ public final class LoggerFactory {
 
     private static final String JAVA_VM_VENDOR = System.getProperty("java.vm.vendor");
 
-    private static final boolean IS_ANDROID_PLATFORM = (JAVA_VENDOR != null && JAVA_VENDOR.toUpperCase().contains("ANDROID"))
-            || (JAVA_VM_VENDOR != null && JAVA_VM_VENDOR.toUpperCase().contains("ANDROID"));
+    private static final boolean IS_ANDROID_PLATFORM = (JAVA_VENDOR != null && JAVA_VENDOR.toUpperCase(Locale.ROOT).contains("ANDROID"))
+            || (JAVA_VM_VENDOR != null && JAVA_VM_VENDOR.toUpperCase(Locale.ROOT).contains("ANDROID"));
 
     private static final Logger jdkLogger = new JdkLogger(LoggerFactory.class.getName());
 
@@ -87,8 +88,9 @@ public final class LoggerFactory {
      * }
      * }</pre>
      *
-     * @param clazz the class for which to get the logger
+     * @param clazz the class for which to get the logger; must not be {@code null}
      * @return a Logger instance for the specified class
+     * @throws NullPointerException if {@code clazz} is {@code null}
      */
     public static synchronized Logger getLogger(final Class<?> clazz) {
         return getLogger(clazz.getName());
@@ -115,8 +117,9 @@ public final class LoggerFactory {
      * logger.warn("Configuration not found, using defaults");
      * }</pre>
      *
-     * @param name the name of the logger
+     * @param name the name of the logger; must not be {@code null}
      * @return a Logger instance for the specified name
+     * @throws NullPointerException if {@code name} is {@code null}
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     @SuppressWarnings("fallthrough")

@@ -993,4 +993,19 @@ public class IteratorCharStreamTest extends TestBase {
     public void testGenerateNull() {
         assertThrows(IllegalArgumentException.class, () -> CharStream.generate(null));
     }
+
+    @Test
+    public void testKthLargest_SortedFastPath() {
+        char[] data = { 'a', 'b', 'c', 'd', 'e' };
+        // sorted ascending: kthLargest(1) = last element ('e')
+        assertEquals('e', createCharStream(data).sorted().kthLargest(1).get());
+        // kthLargest(N) = first element ('a')
+        assertEquals('a', createCharStream(data).sorted().kthLargest(5).get());
+        // middle
+        assertEquals('c', createCharStream(data).sorted().kthLargest(3).get());
+        // kthLargest(N+1) = empty
+        assertFalse(createCharStream(data).sorted().kthLargest(6).isPresent());
+        // result must match non-sorted path on the same data
+        assertEquals(createCharStream(data).kthLargest(2).get(), createCharStream(data).sorted().kthLargest(2).get());
+    }
 }

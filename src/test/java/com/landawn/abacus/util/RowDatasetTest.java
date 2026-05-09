@@ -2554,14 +2554,16 @@ public class RowDatasetTest extends TestBase {
     }
 
     @Test
-    public void testGetRowAsArray() {
+    public void testGetRowAsImmutableList() {
         final RowDataset dataset = createThreeRowScoreDataset();
-        Object[] row = dataset.getRow(0);
-        Assertions.assertEquals(4, row.length);
-        Assertions.assertEquals(1, row[0]);
-        Assertions.assertEquals("John", row[1]);
-        Assertions.assertEquals(25, row[2]);
-        Assertions.assertEquals(85.5, row[3]);
+        List<Object> row = dataset.getRow(0);
+        Assertions.assertTrue(row instanceof ImmutableList);
+        Assertions.assertTrue(((ImmutableList<?>) row).list instanceof java.util.AbstractList);
+        Assertions.assertEquals(4, row.size());
+        Assertions.assertEquals(1, row.get(0));
+        Assertions.assertEquals("John", row.get(1));
+        Assertions.assertEquals(25, row.get(2));
+        Assertions.assertEquals(85.5, row.get(3));
     }
 
     @Test
@@ -2609,11 +2611,11 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     public void testGetRow() {
-        Object[] row = dataset.getRow(0);
+        ImmutableList<Object> row = dataset.getRow(0);
         assertNotNull(row);
-        assertEquals(4, row.length);
-        assertEquals(1, row[0]);
-        assertEquals("Alice", row[1]);
+        assertEquals(4, row.size());
+        assertEquals(1, row.get(0));
+        assertEquals("Alice", row.get(1));
     }
 
     @Test
@@ -7270,6 +7272,120 @@ public class RowDatasetTest extends TestBase {
 
         assertNotNull(result);
         assertEquals(0, result.size());
+    }
+
+    @Test
+    public void testDivideColumn_DuplicateNewColumnNames_Tuple2() {
+        final List<String> cols = new ArrayList<>(Arrays.asList("id", "val"));
+        final List<List<Object>> data = new ArrayList<>();
+        data.add(new ArrayList<>(Arrays.asList(1, 2)));
+        data.add(new ArrayList<>(Arrays.asList("a-b", "c-d")));
+        final RowDataset ds = new RowDataset(cols, data);
+
+        assertThrows(IllegalArgumentException.class, () -> ds.divideColumn("val", new Tuple2<>("dup", "dup"),
+                (BiConsumer<Object, Pair<Object, Object>>) (v, p) -> {
+                    final String[] parts = ((String) v).split("-");
+                    p.set(parts[0], parts[1]);
+                }));
+
+        // dataset must not be mutated by the failed call
+        assertEquals(2, ds.columnCount());
+        assertEquals(2, ds.size());
+        assertTrue(ds.containsColumn("val"));
+    }
+
+    @Test
+    public void testDivideColumn_DuplicateNewColumnNames_Tuple3() {
+        final List<String> cols = new ArrayList<>(Arrays.asList("id", "val"));
+        final List<List<Object>> data = new ArrayList<>();
+        data.add(new ArrayList<>(Arrays.asList(1, 2)));
+        data.add(new ArrayList<>(Arrays.asList("a-b-c", "d-e-f")));
+        final RowDataset ds = new RowDataset(cols, data);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> ds.divideColumn("val", new Tuple3<>("x", "y", "x"), (BiConsumer<Object, Triple<Object, Object, Object>>) (v, t) -> {
+                    final String[] parts = ((String) v).split("-");
+                    t.set(parts[0], parts[1], parts[2]);
+                }));
+
+        assertEquals(2, ds.columnCount());
+        assertTrue(ds.containsColumn("val"));
+    }
+
+    @Test
+    public void testDivideColumn_DuplicateNewColumnNames_Collection_Function() {
+        final List<String> cols = new ArrayList<>(Arrays.asList("id", "val"));
+        final List<List<Object>> data = new ArrayList<>();
+        data.add(new ArrayList<>(Arrays.asList(1, 2)));
+        data.add(new ArrayList<>(Arrays.asList("a-b", "c-d")));
+        final RowDataset ds = new RowDataset(cols, data);
+
+        assertThrows(IllegalArgumentException.class, () -> ds.divideColumn("val", Arrays.asList("dup", "dup"),
+                (Function<Object, ? extends List<?>>) v -> Arrays.asList(((String) v).split("-"))));
+
+        assertEquals(2, ds.columnCount());
+        assertTrue(ds.containsColumn("val"));
+    }
+
+    @Test
+    public void testDivideColumn_DuplicateNewColumnNames_Collection_BiConsumer() {
+        final List<String> cols = new ArrayList<>(Arrays.asList("id", "val"));
+        final List<List<Object>> data = new ArrayList<>();
+        data.add(new ArrayList<>(Arrays.asList(1, 2)));
+        data.add(new ArrayList<>(Arrays.asList("a-b", "c-d")));
+        final RowDataset ds = new RowDataset(cols, data);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> ds.divideColumn("val", Arrays.asList("dup", "dup"), (BiConsumer<Object, Object[]>) (v, out) -> {
+                    final String[] parts = ((String) v).split("-");
+                    out[0] = parts[0];
+                    out[1] = parts[1];
+                }));
+
+        assertEquals(2, ds.columnCount());
+        assertTrue(ds.containsColumn("val"));
+    }
+
+    @Test
+    public void testRemoveColumns_DuplicateNamesInInput() {
+        final List<String> cols = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
+        final List<List<Object>> data = new ArrayList<>();
+        data.add(new ArrayList<>(Arrays.asList(1, 2)));
+        data.add(new ArrayList<>(Arrays.asList(3, 4)));
+        data.add(new ArrayList<>(Arrays.asList(5, 6)));
+        data.add(new ArrayList<>(Arrays.asList(7, 8)));
+        final RowDataset ds = new RowDataset(cols, data);
+
+        // duplicate "c" in input should not corrupt the dataset by removing wrong columns
+        ds.removeColumns(Arrays.asList("c", "c"));
+
+        // expect remaining columns to be [a, b, d] in order
+        assertEquals(3, ds.columnCount());
+        assertTrue(ds.containsColumn("a"));
+        assertTrue(ds.containsColumn("b"));
+        assertTrue(ds.containsColumn("d"));
+        assertFalse(ds.containsColumn("c"));
+        // verify data alignment is preserved
+        assertEquals((Integer) 1, ds.get(0, ds.getColumnIndex("a")));
+        assertEquals((Integer) 3, ds.get(0, ds.getColumnIndex("b")));
+        assertEquals((Integer) 7, ds.get(0, ds.getColumnIndex("d")));
+    }
+
+    @Test
+    public void testAddColumns_DuplicateNewColumnNames() {
+        final List<String> cols = new ArrayList<>(Arrays.asList("id"));
+        final List<List<Object>> data = new ArrayList<>();
+        data.add(new ArrayList<>(Arrays.asList(1, 2, 3)));
+        final RowDataset ds = new RowDataset(cols, data);
+
+        final List<String> newNames = Arrays.asList("dup", "dup");
+        final List<Collection<?>> newCols = new ArrayList<>();
+        newCols.add(Arrays.asList("a", "b", "c"));
+        newCols.add(Arrays.asList("x", "y", "z"));
+
+        assertThrows(IllegalArgumentException.class, () -> ds.addColumns(newNames, newCols));
+
+        assertEquals(1, ds.columnCount());
     }
 
 }

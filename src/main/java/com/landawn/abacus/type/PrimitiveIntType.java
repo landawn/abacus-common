@@ -18,6 +18,10 @@ package com.landawn.abacus.type;
  * Type handler for the primitive {@code int} type, as opposed to the {@link Integer} wrapper class.
  * It provides type information and default value handling for {@code int} primitives.
  *
+ * <p>The key distinction from {@code IntegerType} (which handles {@link Integer}) is the default value:
+ * {@link #defaultValue()} returns {@code 0} (matching the JLS default for {@code int}),
+ * whereas the wrapper type's default is {@code null}.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Type<Integer> type = TypeFactory.getType(int.class);

@@ -125,4 +125,10 @@ public class ObjBiIntFunctionTest extends TestBase {
     public void testFunctionalInterface() {
         assertNotNull(ObjBiIntFunction.class.getAnnotation(FunctionalInterface.class));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        ObjBiIntFunction<String, String> instance = (a, b, c) -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

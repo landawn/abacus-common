@@ -1978,7 +1978,7 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the Iterators.
-     * @param c the collection of iterator to be concatenated.
+     * @param c the collection of iterators to be concatenated.
      * @return an ObjIterator that will iterate over the elements of each provided Iterator in order.
      */
     public static <T> ObjIterator<T> concat(final Collection<? extends Iterator<? extends T>> c) {

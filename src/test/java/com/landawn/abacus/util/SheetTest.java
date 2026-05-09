@@ -718,12 +718,18 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testGetRow() {
-        ImmutableList<Integer> row = sheet.rowValues("row1");
+        List<Integer> row = sheet.rowValues("row1");
         assertNotNull(row);
+        assertTrue(row instanceof ImmutableList);
+        assertTrue(((ImmutableList<?>) row).list instanceof java.util.AbstractList);
+        assertFalse(((ImmutableList<?>) row).list instanceof ArrayList);
         assertEquals(3, row.size());
         assertEquals(Integer.valueOf(1), row.get(0));
         assertEquals(Integer.valueOf(2), row.get(1));
         assertEquals(Integer.valueOf(3), row.get(2));
+
+        sheet.set("row1", "col2", 20);
+        assertEquals(Integer.valueOf(20), row.get(1));
     }
 
     @Test
@@ -829,6 +835,11 @@ public class SheetTest extends AbstractTest {
     public void testGetRowInvalidKey() {
         assertThrows(IllegalArgumentException.class, () -> {
             sheet.rowValues("invalidRow");
+        });
+
+        Sheet<String, String, Integer> uninitializedSheet = new Sheet<>(rowKeys, columnKeys);
+        assertThrows(IllegalArgumentException.class, () -> {
+            uninitializedSheet.rowValues("invalidRow");
         });
     }
 
@@ -1279,22 +1290,34 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testRowValues() {
-        ImmutableList<Integer> row = sheet.rowValues("row1");
+        List<Integer> row = sheet.rowValues("row1");
         assertNotNull(row);
+        assertTrue(row instanceof ImmutableList);
+        assertTrue(((ImmutableList<?>) row).list instanceof java.util.AbstractList);
+        assertFalse(((ImmutableList<?>) row).list instanceof ArrayList);
         assertEquals(3, row.size());
         assertEquals(Integer.valueOf(1), row.get(0));
         assertEquals(Integer.valueOf(2), row.get(1));
         assertEquals(Integer.valueOf(3), row.get(2));
+
+        sheet.set("row1", "col3", 30);
+        assertEquals(Integer.valueOf(30), row.get(2));
     }
 
     @Test
     public void testRowValues_UninitializedSheet() {
         Sheet<String, String, Integer> uninitSheet = new Sheet<>(rowKeys, columnKeys);
-        ImmutableList<Integer> row = uninitSheet.rowValues("row1");
+        List<Integer> row = uninitSheet.rowValues("row1");
+        assertTrue(row instanceof ImmutableList);
+        assertTrue(((ImmutableList<?>) row).list instanceof java.util.AbstractList);
+        assertFalse(((ImmutableList<?>) row).list instanceof ArrayList);
         assertEquals(3, row.size());
         assertNull(row.get(0));
         assertNull(row.get(1));
         assertNull(row.get(2));
+
+        uninitSheet.set("row1", "col2", 20);
+        assertEquals(Integer.valueOf(20), row.get(1));
     }
 
     @Test
@@ -5906,4 +5929,223 @@ public class SheetTest extends AbstractTest {
         assertSame(Point.ZERO, p1);
     }
 
+    // -------- Bug fix: equals / hashCode must treat uninitialized vs initialized-all-null as equal --------
+
+    @Test
+    public void testEquals_InitializedAllNullVsUninitialized_ShouldBeEqual() {
+        Sheet<String, String, Integer> uninit = new Sheet<>(rowKeys, columnKeys);
+        Sheet<String, String, Integer> initAllNull = new Sheet<>(rowKeys, columnKeys);
+        // Force initialization by setting a cell to null (this triggers init() internally)
+        initAllNull.set("row1", "col1", null);
+        assertTrue(initAllNull.equals(uninit), "initialized all-null sheet should equal uninitialized sheet with same keys");
+        assertTrue(uninit.equals(initAllNull), "equals should be symmetric");
+        assertEquals(uninit.hashCode(), initAllNull.hashCode(), "hashCode must be consistent with equals");
+    }
+
+    @Test
+    public void testEquals_InitializedWithNonNullVsUninitialized_ShouldNotBeEqual() {
+        Sheet<String, String, Integer> uninit = new Sheet<>(rowKeys, columnKeys);
+        Sheet<String, String, Integer> initWithValue = new Sheet<>(rowKeys, columnKeys);
+        initWithValue.set("row1", "col1", 42);
+        assertFalse(initWithValue.equals(uninit));
+        assertFalse(uninit.equals(initWithValue));
+    }
+
+    @Test
+    public void testEquals_InitializedAllNullSheets_ShouldBeEqual() {
+        Sheet<String, String, Integer> a = new Sheet<>(rowKeys, columnKeys);
+        Sheet<String, String, Integer> b = new Sheet<>(rowKeys, columnKeys);
+        a.set(0, 0, null);
+        b.set(1, 1, null);
+        assertEquals(a, b);
+        assertEquals(a.hashCode(), b.hashCode());
+    }
+
+    @Test
+    public void testEquals_TransposedNotEqual() {
+        // A 2x3 sheet and its transposed 3x2 sheet should not be equal as the row/column keys differ.
+        Sheet<String, String, Integer> orig = Sheet.rows(Arrays.asList("r1", "r2"), Arrays.asList("c1", "c2", "c3"),
+                new Integer[][] { { 1, 2, 3 }, { 4, 5, 6 } });
+        Sheet<String, String, Integer> tr = orig.transpose();
+        assertNotEquals(orig, tr);
+    }
+
+    // -------- transpose round-trip --------
+
+    @Test
+    public void testTranspose_RoundTripPreservesData() {
+        Sheet<String, String, Integer> orig = Sheet.rows(Arrays.asList("r1", "r2", "r3"), Arrays.asList("c1", "c2"),
+                new Integer[][] { { 1, 2 }, { 3, 4 }, { 5, 6 } });
+        Sheet<String, String, Integer> roundTrip = orig.transpose().transpose();
+        assertEquals(orig, roundTrip);
+        // verify each cell
+        for (String r : orig.rowKeySet()) {
+            for (String c : orig.columnKeySet()) {
+                assertEquals(orig.get(r, c), roundTrip.get(r, c));
+            }
+        }
+    }
+
+    @Test
+    public void testTranspose_NonSquareDataPreserved() {
+        Sheet<String, String, Integer> orig = Sheet.rows(Arrays.asList("r1", "r2"), Arrays.asList("c1", "c2", "c3"),
+                new Integer[][] { { 1, 2, 3 }, { 4, 5, 6 } });
+        Sheet<String, String, Integer> tr = orig.transpose();
+        assertEquals(3, tr.rowCount());
+        assertEquals(2, tr.columnCount());
+        // Cell at (oldRow=r1, oldCol=c2) == 2; in transposed: (newRow=c2, newCol=r1)
+        assertEquals(Integer.valueOf(2), tr.get("c2", "r1"));
+        assertEquals(Integer.valueOf(6), tr.get("c3", "r2"));
+    }
+
+    // -------- copy independence (deep wrt nested column lists) --------
+
+    @Test
+    public void testCopy_StructuralIndependence() {
+        Sheet<String, String, Integer> orig = Sheet.rows(rowKeys, columnKeys, sampleData);
+        Sheet<String, String, Integer> copy = orig.copy();
+        copy.set("row1", "col1", 999);
+        assertEquals(Integer.valueOf(1), orig.get("row1", "col1"));
+        assertEquals(Integer.valueOf(999), copy.get("row1", "col1"));
+    }
+
+    // -------- Bug fix: setColumn should keep previously returned column views consistent --------
+
+    @Test
+    public void testSetColumn_KeepsLiveViewConsistent_FixedBug() {
+        Sheet<String, String, Integer> s = Sheet.rows(rowKeys, columnKeys, sampleData);
+        ImmutableList<Integer> view = s.columnValues("col1");
+        assertEquals(Integer.valueOf(1), view.get(0));
+        s.setColumn("col1", Arrays.asList(100, 200, 300));
+        // After in-place setColumn, the previously obtained view should reflect new values.
+        assertEquals(Integer.valueOf(100), view.get(0));
+        assertEquals(Integer.valueOf(200), view.get(1));
+        assertEquals(Integer.valueOf(300), view.get(2));
+    }
+
+    @Test
+    public void testSetColumn_EmptyKeepsLiveViewConsistent() {
+        Sheet<String, String, Integer> s = Sheet.rows(rowKeys, columnKeys, sampleData);
+        ImmutableList<Integer> view = s.columnValues("col1");
+        s.setColumn("col1", Collections.emptyList());
+        assertNull(view.get(0));
+        assertNull(view.get(1));
+        assertNull(view.get(2));
+    }
+
+    // -------- Frozen sheet: defense against modification through views --------
+
+    @Test
+    public void testFrozenSheet_CannotModifyThroughSet() {
+        Sheet<String, String, Integer> s = Sheet.rows(rowKeys, columnKeys, sampleData);
+        s.freeze();
+        assertThrows(IllegalStateException.class, () -> s.set("row1", "col1", 99));
+        assertThrows(IllegalStateException.class, () -> s.remove("row1", "col1"));
+        assertThrows(IllegalStateException.class, () -> s.addRow("rowX", Arrays.asList(1, 2, 3)));
+        assertThrows(IllegalStateException.class, () -> s.removeRow("row1"));
+    }
+
+    @Test
+    public void testFrozenSheet_RowKeySetIsImmutable() {
+        Sheet<String, String, Integer> s = Sheet.rows(rowKeys, columnKeys, sampleData);
+        s.freeze();
+        ImmutableSet<String> rks = s.rowKeySet();
+        assertThrows(UnsupportedOperationException.class, () -> rks.add("rowX"));
+        ImmutableSet<String> cks = s.columnKeySet();
+        assertThrows(UnsupportedOperationException.class, () -> cks.add("colX"));
+    }
+
+    // -------- get/set absent key handling --------
+
+    @Test
+    public void testGet_AbsentRowKey_ThrowsIAE() {
+        assertThrows(IllegalArgumentException.class, () -> sheet.get("missing", "col1"));
+    }
+
+    @Test
+    public void testGet_AbsentColumnKey_ThrowsIAE() {
+        assertThrows(IllegalArgumentException.class, () -> sheet.get("row1", "missing"));
+    }
+
+    @Test
+    public void testSet_NullValueAllowed() {
+        Sheet<String, String, Integer> s = Sheet.rows(rowKeys, columnKeys, sampleData);
+        Integer prev = s.set("row1", "col1", null);
+        assertEquals(Integer.valueOf(1), prev);
+        assertNull(s.get("row1", "col1"));
+        assertTrue(s.isNull("row1", "col1"));
+    }
+
+    // -------- remove does not shrink dimensions --------
+
+    @Test
+    public void testRemove_DoesNotShrinkSheet() {
+        Sheet<String, String, Integer> s = Sheet.rows(rowKeys, columnKeys, sampleData);
+        int rows = s.rowCount();
+        int cols = s.columnCount();
+        s.remove("row1", "col1");
+        assertEquals(rows, s.rowCount());
+        assertEquals(cols, s.columnCount());
+        assertNull(s.get("row1", "col1"));
+        assertTrue(s.containsCell("row1", "col1"));
+    }
+
+    // -------- isEmpty / size semantics --------
+
+    @Test
+    public void testIsEmpty_RowsButNoColumns() {
+        Sheet<String, String, Integer> s = new Sheet<>(rowKeys, Collections.emptyList());
+        assertTrue(s.isEmpty());
+    }
+
+    @Test
+    public void testIsEmpty_ColumnsButNoRows() {
+        Sheet<String, String, Integer> s = new Sheet<>(Collections.emptyList(), columnKeys);
+        assertTrue(s.isEmpty());
+    }
+
+    // -------- putAll merge semantics --------
+
+    @Test
+    public void testPutAll_OverwritesMatchingCells() {
+        Sheet<String, String, Integer> target = Sheet.rows(rowKeys, columnKeys, sampleData);
+        Sheet<String, String, Integer> source = Sheet.rows(Arrays.asList("row1"), Arrays.asList("col1", "col3"), new Integer[][] { { 100, 300 } });
+        target.putAll(source);
+        assertEquals(Integer.valueOf(100), target.get("row1", "col1"));
+        assertEquals(Integer.valueOf(2), target.get("row1", "col2"));
+        assertEquals(Integer.valueOf(300), target.get("row1", "col3"));
+        // row2/row3 untouched
+        assertEquals(Integer.valueOf(4), target.get("row2", "col1"));
+    }
+
+    @Test
+    public void testPutAll_RejectsUnknownKeys() {
+        Sheet<String, String, Integer> target = Sheet.rows(rowKeys, columnKeys, sampleData);
+        Sheet<String, String, Integer> source = Sheet.rows(Arrays.asList("rowZ"), Arrays.asList("col1"), new Integer[][] { { 9 } });
+        assertThrows(IllegalArgumentException.class, () -> target.putAll(source));
+    }
+
+    // -------- cellSet equivalent: cellsByRow yields all triples --------
+
+    @Test
+    public void testCellsByRow_YieldsAllTriples() {
+        Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1", "r2"), Arrays.asList("c1", "c2"), new Integer[][] { { 1, 2 }, { 3, 4 } });
+        List<Sheet.Cell<String, String, Integer>> cells = s.cellsByRow().toList();
+        assertEquals(4, cells.size());
+        assertEquals(Sheet.Cell.of("r1", "c1", 1), cells.get(0));
+        assertEquals(Sheet.Cell.of("r1", "c2", 2), cells.get(1));
+        assertEquals(Sheet.Cell.of("r2", "c1", 3), cells.get(2));
+        assertEquals(Sheet.Cell.of("r2", "c2", 4), cells.get(3));
+    }
+
+    // -------- iteration order consistency --------
+
+    @Test
+    public void testIterationOrder_PreservesInsertion() {
+        Sheet<String, String, Integer> s = new Sheet<>(Arrays.asList("z", "a", "m"), Arrays.asList("y", "b", "n"));
+        List<String> rk = new ArrayList<>(s.rowKeySet());
+        assertEquals(Arrays.asList("z", "a", "m"), rk);
+        List<String> ck = new ArrayList<>(s.columnKeySet());
+        assertEquals(Arrays.asList("y", "b", "n"), ck);
+    }
 }

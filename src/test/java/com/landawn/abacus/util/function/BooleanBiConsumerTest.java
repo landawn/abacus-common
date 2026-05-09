@@ -165,4 +165,10 @@ public class BooleanBiConsumerTest extends TestBase {
         assertThrows(RuntimeException.class, () -> chainedConsumer.accept(true, false));
         assertEquals(1, results.size()); // First consumer should have executed
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        BooleanBiConsumer instance = (a, b) -> {};
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((BooleanBiConsumer) null));
+    }
 }

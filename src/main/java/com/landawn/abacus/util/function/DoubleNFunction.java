@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -81,6 +83,7 @@ public interface DoubleNFunction<R> extends Throwables.DoubleNFunction<R, Runtim
      */
     @Override
     default <V> DoubleNFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+        Objects.requireNonNull(after);
         return args -> after.apply(apply(args));
     }
 }

@@ -184,7 +184,7 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
     /**
      * Writes an {@link java.util.concurrent.atomic.AtomicInteger} value to a {@link CharacterWriter}.
      * Writes the literal {@code "null"} character array if {@code x} is {@code null}; otherwise
-     * uses the writer's optimised {@code writeInt} method with the contained integer value.
+     * uses the writer's optimized {@code writeInt} method with the contained integer value.
      * {@code config} is not used.
      *
      * @param writer the {@code CharacterWriter} to write to

@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.Throwables;
 
@@ -83,6 +85,7 @@ public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeE
      */
     @Override
     default BiPredicate<T, U> and(final java.util.function.BiPredicate<? super T, ? super U> other) {
+        Objects.requireNonNull(other);
         return (t, u) -> test(t, u) && other.test(t, u);
     }
 
@@ -107,6 +110,7 @@ public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeE
      */
     @Override
     default BiPredicate<T, U> or(final java.util.function.BiPredicate<? super T, ? super U> other) {
+        Objects.requireNonNull(other);
         return (t, u) -> test(t, u) || other.test(t, u);
     }
 

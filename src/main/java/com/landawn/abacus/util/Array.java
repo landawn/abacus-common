@@ -1243,7 +1243,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = Array.range('a', 'z', 2);      // returns {'a', 'c', 'e', ..., 'y'}
-     * char[] reverse = Array.range('z', 'a', -3);   // returns {'z', 'w', 't', ..., 'd'}
+     * char[] reverse = Array.range('z', 'a', -3);   // returns {'z', 'w', 't', ..., 'b'}
      * char[] digits = Array.range('0', '9', 3);     // returns {'0', '3', '6'}
      * }</pre>
      *
@@ -1673,8 +1673,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * char[] chars = Array.rangeClosed('a', 'z', 2);      // returns {'a', 'c', 'e', ..., 'y', 'z'}
-     * char[] reverse = Array.rangeClosed('z', 'a', -3);   // returns {'z', 'w', 't', ..., 'c', 'a'}
+     * char[] chars = Array.rangeClosed('a', 'z', 2);      // returns {'a', 'c', 'e', ..., 'y'}
+     * char[] reverse = Array.rangeClosed('z', 'a', -3);   // returns {'z', 'w', 't', ..., 'b'}
      * char[] single = Array.rangeClosed('x', 'x', 5);     // returns {'x'}
      * }</pre>
      *
@@ -4768,7 +4768,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <pre>{@code
      * Boolean[] objects = {true, null, false};
      * boolean[] primitives = Array.unbox(objects, true);   // returns {true, true, false}
-     * boolean[] zeros = Array.unbox(objects, false);       // returns {true, false, false}
+     * boolean[] withFalse = Array.unbox(objects, false);   // returns {true, false, false}
      * }</pre>
      *
      * @param a the array of Boolean objects to be converted.

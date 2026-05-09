@@ -192,7 +192,10 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
             return empty();
         }
 
-        return of(List.of(a));
+        // Use Arrays.asList instead of List.of: List.of rejects null elements with NPE,
+        // which is inconsistent with the array-backed of(T[], int, int) overload that
+        // accepts nulls.
+        return of(Arrays.asList(a));
     }
 
     /**

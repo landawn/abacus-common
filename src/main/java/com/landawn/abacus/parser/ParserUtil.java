@@ -30,6 +30,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.TypeVariable;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.time.Instant;
@@ -2401,7 +2402,11 @@ public final class ParserUtil {
             }
 
             final String numberFormatStr = Strings.trim(getNumberFormat(field, jsonXmlConfig));
-            numberFormat = Strings.isEmpty(numberFormatStr) ? null : new DecimalFormat(numberFormatStr);
+            // Use Locale.ROOT-derived symbols so the wire format ("#,##0.00") parses/formats
+            // identically on every JVM. Default-locale DecimalFormat would write "1.234,56" on
+            // de_DE (German) and "1,234.56" elsewhere, breaking round-trips across systems.
+            numberFormat = Strings.isEmpty(numberFormatStr) ? null
+                    : new DecimalFormat(numberFormatStr, DecimalFormatSymbols.getInstance(java.util.Locale.ROOT));
 
             hasFormat = Strings.isNotEmpty(dateFormat) || numberFormat != null;
 

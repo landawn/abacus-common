@@ -47,7 +47,7 @@ import com.landawn.abacus.util.Strings;
  * between enum values and their string/numeric representations. The type handler can be configured
  * to use either the enum's ordinal value, its name, or a custom code for serialization.</p>
  *
- * @param <T> the enum type, must extend Enum&lt;T&gt;
+ * @param <T> the enum type, must extend {@code Enum<T>}
  */
 @SuppressWarnings("java:S2160")
 public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {

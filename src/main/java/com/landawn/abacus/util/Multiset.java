@@ -1347,7 +1347,11 @@ public final class Multiset<E> implements Collection<E> {
             return oldValue;
         }
 
-        final int newValue = remappingFunction.apply(e, oldValue);
+        // Box the result so a null return from the remapping function — interpreted as
+        // "remove the entry" per java.util.Map.computeIfPresent semantics — does not NPE
+        // during auto-unboxing.
+        final Integer remapped = remappingFunction.apply(e, oldValue);
+        final int newValue = remapped == null ? 0 : remapped;
 
         if (newValue > 0) {
             setCount(e, newValue);
@@ -1381,7 +1385,9 @@ public final class Multiset<E> implements Collection<E> {
         N.checkArgNotNull(remappingFunction);
 
         final int oldValue = getCount(key);
-        final int newValue = remappingFunction.apply(key, oldValue);
+        // Box to allow null return — treated as "remove" per java.util.Map.compute semantics.
+        final Integer remapped = remappingFunction.apply(key, oldValue);
+        final int newValue = remapped == null ? 0 : remapped;
 
         if (newValue > 0) {
             setCount(key, newValue);
@@ -1418,7 +1424,10 @@ public final class Multiset<E> implements Collection<E> {
         N.checkArgNotNull(remappingFunction);
 
         final int oldValue = getCount(key);
-        final int newValue = (oldValue == 0) ? value : remappingFunction.apply(oldValue, value);
+        // Box to allow null return from the remapping function — treated as "remove" per
+        // java.util.Map.merge semantics.
+        final Integer remapped = (oldValue == 0) ? Integer.valueOf(value) : remappingFunction.apply(oldValue, value);
+        final int newValue = remapped == null ? 0 : remapped;
 
         if (newValue > 0) {
             setCount(key, newValue);
@@ -1814,6 +1823,12 @@ public final class Multiset<E> implements Collection<E> {
             occurrences = entry.getValue().value();
             N.fill(ret, idx, idx + occurrences, entry.getKey());
             idx += occurrences;
+        }
+
+        // Collection.toArray(T[]) contract: when the supplied array is larger than the
+        // collection, array[size()] must be set to null as the end-of-data sentinel.
+        if (ret.length > size) {
+            ret[size] = null;
         }
 
         return ret;

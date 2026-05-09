@@ -61,7 +61,9 @@ public final class DataSourceUtil {
 
     static final Logger logger = LoggerFactory.getLogger(DataSourceUtil.class);
 
-    private static boolean isInSpring = true;
+    // volatile because releaseConnection writes this from any thread on a NoClassDefFoundError;
+    // without it, other threads may keep reading the stale `true` indefinitely.
+    private static volatile boolean isInSpring = true;
 
     static {
         try {
@@ -433,7 +435,7 @@ public final class DataSourceUtil {
      * @param rs the ResultSet to close, may be null
      * @param closeStatement if {@code true}, also closes the Statement that created the ResultSet
      */
-    public static void closeQuietly(final ResultSet rs, final boolean closeStatement) throws UncheckedSQLException {
+    public static void closeQuietly(final ResultSet rs, final boolean closeStatement) {
         closeQuietly(rs, closeStatement, false);
     }
 

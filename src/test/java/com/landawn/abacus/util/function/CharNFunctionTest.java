@@ -153,4 +153,10 @@ public class CharNFunctionTest extends TestBase {
     public void testFunctionalInterface() {
         assertNotNull(CharNFunction.class.getAnnotation(FunctionalInterface.class));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        CharNFunction<String> instance = a -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

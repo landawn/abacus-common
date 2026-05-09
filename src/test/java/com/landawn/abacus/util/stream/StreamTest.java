@@ -2050,7 +2050,6 @@ public class StreamTest extends AbstractTest {
         assertEquals(Arrays.asList("A", "B", "C"), result);
     }
 
-
     @Test
     public void testStreamCreatedAfterThrowIfEmpty() {
         assertEquals(5, Stream.of(1, 2, 3, 4, 5).throwIfEmpty().count());
@@ -6297,6 +6296,236 @@ public class StreamTest extends AbstractTest {
         List<Pair<Integer, List<Integer>>> result = Stream.<Integer> empty().joinByRange(list2.iterator(), (a, b) -> Math.abs(a - b) <= 1).toList();
         assertTrue(result.isEmpty());
     }
+
+    //    @Test
+    //    public void test_window_late_01() {
+    //
+    //        {
+    //            N.println(Strings.repeat("=", 120));
+    //            final long startTimeMillis = System.currentTimeMillis();
+    //
+    //            final long windowInMillis = 1000;
+    //            final long slideInMillis = 500;
+    //
+    //            List<Timed<String>> list = N.toList(Timed.of("cat dog", startTimeMillis + 200), Timed.of("dog dog", startTimeMillis + 300),
+    //                    Timed.of("owl cat", startTimeMillis + 700), Timed.of("dog", startTimeMillis + 400), Timed.of("owl", startTimeMillis + 1300));
+    //
+    //            final WindowHandler<Timed<String>, Multiset<String>> windowHandler = WindowHandler.of(Timed::timestamp);
+    //
+    //            Stream.of(list).peek(it -> {
+    //                if (it.value().equals("dog")) {
+    //                    N.sleep(startTimeMillis + 1100 - System.currentTimeMillis());
+    //                } else {
+    //                    N.sleep(it.timestamp() - System.currentTimeMillis());
+    //                }
+    //            })
+    //                    .window(Duration.ofMillis(windowInMillis), Duration.ofMillis(slideInMillis), () -> startTimeMillis, windowHandler,
+    //                            Collectors.flatmapping(it -> Array.asList(Strings.split(it.value(), " ")), Collectors.toCollection(N::newMultiset)))
+    //                    .toList()
+    //                    .forEach(it -> N.println(it.toMapSortedByKey(Comparators.naturalOrder())));
+    //        }
+    //
+    //        {
+    //            N.println(Strings.repeat("=", 120));
+    //            final long startTimeMillis = System.currentTimeMillis();
+    //
+    //            final long windowInMillis = 1000;
+    //            final long slideInMillis = 500;
+    //
+    //            List<Timed<String>> list = N.toList(Timed.of("cat dog", startTimeMillis + 200), Timed.of("dog dog", startTimeMillis + 300),
+    //                    Timed.of("owl cat", startTimeMillis + 700), Timed.of("owl", startTimeMillis + 1100), Timed.of("dog", startTimeMillis + 400),
+    //                    Timed.of("owl", startTimeMillis + 1300));
+    //
+    //            final WindowHandler<Timed<String>, Multiset<String>> windowHandler = WindowHandler.of(Timed::timestamp);
+    //
+    //            Stream.of(list).peek(it -> {
+    //                if (it.value().equals("dog")) {
+    //                    N.sleep(startTimeMillis + 1100 - System.currentTimeMillis());
+    //                } else {
+    //                    N.sleep(it.timestamp() - System.currentTimeMillis());
+    //                }
+    //            })
+    //                    .window(Duration.ofMillis(windowInMillis), Duration.ofMillis(slideInMillis), () -> startTimeMillis, windowHandler,
+    //                            Collectors.flatmapping(it -> Array.asList(Strings.split(it.value(), " ")), Collectors.toCollection(N::newMultiset)))
+    //                    .toList()
+    //                    .forEach(it -> N.println(it.toMapSortedByKey(Comparators.naturalOrder())));
+    //        }
+    //
+    //        {
+    //
+    //            N.println(Strings.repeat("=", 120));
+    //            final long startTimeMillis = System.currentTimeMillis();
+    //
+    //            final long windowInMillis = 1000;
+    //            final long slideInMillis = 500;
+    //
+    //            final WindowHandler<Timed<String>, Multiset<String>> windowHandler = WindowHandler.<Timed<String>, Multiset<String>> builder()
+    //                    .timeExtractor(Timed::timestamp)
+    //                    .onLateData((element, windowResultContainer) -> windowResultContainer.addAll(Array.asList(Strings.split(element.value(), " "))))
+    //                    .build();
+    //
+    //            List<Timed<String>> list = N.toList(Timed.of("cat dog", startTimeMillis + 200), Timed.of("dog dog", startTimeMillis + 300),
+    //                    Timed.of("owl cat", startTimeMillis + 700), Timed.of("dog", startTimeMillis + 400), Timed.of("owl", startTimeMillis + 1300));
+    //
+    //            Stream.of(list).peek(it -> {
+    //                if (it.value().equals("dog")) {
+    //                    N.sleep(startTimeMillis + 1100 - System.currentTimeMillis());
+    //                } else {
+    //                    N.sleep(it.timestamp() - System.currentTimeMillis());
+    //                }
+    //            })
+    //                    .window(Duration.ofMillis(windowInMillis), Duration.ofMillis(slideInMillis), () -> startTimeMillis, windowHandler,
+    //                            Collectors.flatmapping(it -> Array.asList(Strings.split(it.value(), " ")), Collectors.toCollection(N::newMultiset)))
+    //                    .toList()
+    //                    .forEach(it -> N.println(it.toMapSortedByKey(Comparators.naturalOrder())));
+    //        }
+    //
+    //        {
+    //
+    //            N.println(Strings.repeat("=", 120));
+    //            final long startTimeMillis = System.currentTimeMillis();
+    //
+    //            final long windowInMillis = 1000;
+    //            final long slideInMillis = 500;
+    //
+    //            final WindowHandler<Timed<String>, Multiset<String>> windowHandler = WindowHandler.<Timed<String>, Multiset<String>> builder()
+    //                    .timeExtractor(Timed::timestamp)
+    //                    .delayForLateData(true)
+    //                    .onLateData((element, windowResultContainer) -> windowResultContainer.addAll(Array.asList(Strings.split(element.value(), " "))))
+    //                    .build();
+    //
+    //            List<Timed<String>> list = N.toList(Timed.of("cat dog", startTimeMillis + 200), Timed.of("dog dog", startTimeMillis + 300),
+    //                    Timed.of("owl cat", startTimeMillis + 700), Timed.of("dog", startTimeMillis + 400), Timed.of("owl", startTimeMillis + 1300));
+    //
+    //            Stream.of(list).peek(it -> {
+    //                if (it.value().equals("dog")) {
+    //                    N.sleep(startTimeMillis + 1100 - System.currentTimeMillis());
+    //                } else {
+    //                    N.sleep(it.timestamp() - System.currentTimeMillis());
+    //                }
+    //            })
+    //                    .window(Duration.ofMillis(windowInMillis), Duration.ofMillis(slideInMillis), () -> startTimeMillis, windowHandler,
+    //                            Collectors.flatmapping(it -> Array.asList(Strings.split(it.value(), " ")), Collectors.toCollection(N::newMultiset)))
+    //                    .forEach(it -> N.println(it.toMapSortedByKey(Comparators.naturalOrder())));
+    //        }
+    //
+    //        {
+    //
+    //            N.println(Strings.repeat("=", 120));
+    //            final long startTimeMillis = System.currentTimeMillis();
+    //
+    //            final long windowInMillis = 1000;
+    //            final long slideInMillis = 500;
+    //
+    //            final WindowHandler<Timed<String>, Multiset<String>> windowHandler = WindowHandler.<Timed<String>, Multiset<String>> builder()
+    //                    .cacheSizeForLateData(10)
+    //                    .delayForLateData(false)
+    //                    .timeExtractor(Timed::timestamp)
+    //                    .onLateData((element, windowResultContainer) -> windowResultContainer.addAll(Array.asList(Strings.split(element.value(), " "))))
+    //                    .build();
+    //
+    //            List<Timed<String>> list = N.toList(Timed.of("cat dog", startTimeMillis + 200), Timed.of("dog dog", startTimeMillis + 300),
+    //                    Timed.of("owl cat", startTimeMillis + 700), Timed.of("dog", startTimeMillis + 600), Timed.of("owl", startTimeMillis + 1300));
+    //
+    //            Stream.of(list).peek(it -> {
+    //                if (it.value().equals("dog")) {
+    //                    N.sleep(startTimeMillis + 1100 - System.currentTimeMillis());
+    //                } else {
+    //                    N.sleep(it.timestamp() - System.currentTimeMillis());
+    //                }
+    //            })
+    //                    .window(Duration.ofMillis(windowInMillis), Duration.ofMillis(slideInMillis), () -> startTimeMillis, windowHandler,
+    //                            Collectors.flatmapping(it -> Array.asList(Strings.split(it.value(), " ")), Collectors.toCollection(N::newMultiset)))
+    //                    .toList()
+    //                    .forEach(it -> N.println(it.toMapSortedByKey(Comparators.naturalOrder())));
+    //        }
+    //
+    //        {
+    //
+    //            N.println(Strings.repeat("=", 120));
+    //            final long startTimeMillis = System.currentTimeMillis();
+    //
+    //            final long windowInMillis = 1000;
+    //            final long slideInMillis = 200;
+    //
+    //            final WindowHandler<Timed<String>, Multiset<String>> windowHandler = WindowHandler.<Timed<String>, Multiset<String>> builder()
+    //                    .cacheSizeForLateData(10)
+    //                    .delayForLateData(false)
+    //                    .timeExtractor(Timed::timestamp)
+    //                    .onLateData((element, windowResultContainer) -> windowResultContainer.addAll(Array.asList(Strings.split(element.value(), " "))))
+    //                    .build();
+    //
+    //            List<Timed<String>> list = new ArrayList<>(30);
+    //
+    //            for (int i = 0; i < 30; i++) {
+    //                list.add(Timed.of("cat", startTimeMillis + i * 100));
+    //            }
+    //
+    //            list.add(10, Timed.of("doggy", startTimeMillis + 20 * 100));
+    //
+    //            Stream.of(list)
+    //                    .peek(it -> N.sleep(it.timestamp() - System.currentTimeMillis()))
+    //                    .window(Duration.ofMillis(windowInMillis), Duration.ofMillis(slideInMillis), () -> startTimeMillis, windowHandler,
+    //                            Collectors.flatmapping(it -> Array.asList(Strings.split(it.value(), " ")), Collectors.toCollection(N::newMultiset)))
+    //                    .toList()
+    //                    .forEach(it -> N.println(it.toMapSortedByKey(Comparators.naturalOrder())));
+    //        }
+    //    }
+
+    //    @Test
+    //    public void test_window_02() throws Exception {
+    //        assertDoesNotThrow(() -> {
+    //            Stream.range(1, 10).peek(it -> {
+    //                if (it == 7 || it == 8) {
+    //                    N.sleep(3000);
+    //                } else if (it % 2 == 0) {
+    //                    N.sleep(200);
+    //                }
+    //
+    //                N.println(System.currentTimeMillis() + ": " + it);
+    //            }).window(Duration.ofMillis(1000), Collectors.toList()).map(Timed::of).forEach(Fn.println());
+    //
+    //            N.println(Strings.repeat("=", 80));
+    //
+    //            N.println(Strings.repeat("=", 80));
+    //
+    //            Stream.range(1, 10).peek(it -> {
+    //                if (it == 7 || it == 8) {
+    //                    N.sleep(3000);
+    //                } else if (it % 2 == 0) {
+    //                    N.sleep(200);
+    //                }
+    //
+    //            }).window(Duration.ofMillis(1000), Collectors.toList()).maxWait(Duration.ofMillis(1000), N.emptyList()).map(Timed::of).forEach(Fn.println());
+    //
+    //            N.println(Strings.repeat("=", 80));
+    //
+    //            N.println(Strings.repeat("=", 80));
+    //            Stream.range(1, 10).peek(it -> {
+    //                if (it == 7 || it == 8) {
+    //                    N.sleep(3000);
+    //                } else if (it % 2 == 0) {
+    //                    N.sleep(200);
+    //                }
+    //
+    //                N.println(System.currentTimeMillis() + ": " + it);
+    //            }).window((f, l, cn) -> 500, (f, l, n, cn) -> cn <= 3, Suppliers.ofList()).map(Timed::of).forEach(Fn.println());
+    //
+    //            N.println(Strings.repeat("=", 80));
+    //
+    //            Stream.range(1, 10).peek(it -> {
+    //                if (it == 7 || it == 8) {
+    //                    N.sleep(3000);
+    //                } else if (it % 2 == 0) {
+    //                    N.sleep(200);
+    //                }
+    //
+    //                N.println(System.currentTimeMillis() + ": " + it);
+    //            }).window((f, l, n, cn) -> cn <= 3, Suppliers.ofList()).map(Timed::of).forEach(Fn.println());
+    //
+    //            N.println(Strings.repeat("=", 80));
+    //        });
+    //    }
 
     @Test
     public void testAsyncRun() throws Exception {
@@ -12316,7 +12545,6 @@ public class StreamTest extends AbstractTest {
         assertEquals(5, Stream.iterate(1, x -> x + 1).limit(5).count());
     }
 
-
     @Test
     public void test_ArrayDeque() {
         final ArrayDeque<Integer> queue = new ArrayDeque<>(10);
@@ -12360,6 +12588,29 @@ public class StreamTest extends AbstractTest {
         }
     }
 
-    // TODO: Remaining Stream$5/Stream$6 gaps are anonymous iterator branches for async windowing/merge internals that require deterministic scheduler control beyond the current unit-test harness.
+    @Test
+    public void testZipIteratorsWithNullIteratorInCollection() {
+        List<Iterator<Integer>> iterators = new ArrayList<>();
+        iterators.add(Arrays.asList(1, 2, 3).iterator());
+        iterators.add(null);
+        iterators.add(Arrays.asList(10, 20, 30).iterator());
+
+        // No-defaults zipIterators should be consistent with concatIterators: null iterators treated as empty.
+        // Since one iterator is null/empty, zip stops immediately and returns empty.
+        Function<List<Integer>, Integer> sumFn = list -> list.stream().mapToInt(Integer::intValue).sum();
+        List<Integer> result = Stream.zipIterators(iterators, sumFn).toList();
+        assertEquals(Collections.emptyList(), result);
+    }
+
+    @Test
+    public void testZipIteratorsAllNonNullStillWorks() {
+        List<Iterator<Integer>> iterators = new ArrayList<>();
+        iterators.add(Arrays.asList(1, 2, 3).iterator());
+        iterators.add(Arrays.asList(10, 20, 30).iterator());
+
+        Function<List<Integer>, Integer> sumFn = list -> list.stream().mapToInt(Integer::intValue).sum();
+        List<Integer> result = Stream.zipIterators(iterators, sumFn).toList();
+        assertEquals(Arrays.asList(11, 22, 33), result);
+    }
 
 }

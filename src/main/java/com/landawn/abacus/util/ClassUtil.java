@@ -1123,7 +1123,7 @@ public final class ClassUtil {
      *     "com.example.impl",
      *     false,  // Non-recursive
      *     true,
-     *     cls -> !cls.isInterface() && !cls.isAbstract()
+     *     cls -> !cls.isInterface() && !Modifier.isAbstract(cls.getModifiers())
      * );
      * }</pre>
      *
@@ -2323,7 +2323,7 @@ public final class ClassUtil {
      *
      * @param cls the class to be checked
      * @return {@code true} if the specified class is a bean class, {@code false} otherwise
-     * @deprecated Use {@link Beans#isBeanClass(Class<?>)} instead
+     * @deprecated Use {@link Beans#isBeanClass(Class)} instead
      */
     @Deprecated
     public static boolean isBeanClass(final Class<?> cls) {
@@ -2342,7 +2342,7 @@ public final class ClassUtil {
      *
      * @param cls the class to be checked
      * @return {@code true} if the specified class is a record class, {@code false} otherwise
-     * @deprecated Use {@link Beans#isRecordClass(Class<?>)} instead
+     * @deprecated Use {@link Beans#isRecordClass(Class)} instead
      */
     @Deprecated
     public static boolean isRecordClass(final Class<?> cls) {
@@ -2587,6 +2587,10 @@ public final class ClassUtil {
                 return constructor.newInstance(declaringClass).in(declaringClass).unreflectSpecial(method, declaringClass);
             } catch (final Exception ex) {
                 try {
+                    if (lookup == null) {
+                        lookup = MethodHandles.lookup();
+                    }
+
                     return lookup.findSpecial(declaringClass, method.getName(), MethodType.methodType(method.getReturnType(), method.getParameterTypes()),
                             declaringClass);
                 } catch (final Exception exx) {

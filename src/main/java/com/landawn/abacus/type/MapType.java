@@ -74,10 +74,12 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
 
     /**
      * Returns the declaring name of this {@code Map} type.
-     * The declaring name uses simple (non-fully-qualified) class names for the map class
-     * and its key and value type parameters.
+     * The declaring name uses simple (non-fully-qualified) class names; for concrete
+     * implementation classes it is rendered using the {@code Map} interface (e.g., a
+     * {@code LinkedHashMap} type yields {@code "Map<KeyDeclaringName, ValueDeclaringName>"}).
+     * Map interfaces (e.g., {@code SortedMap}) keep their own simple name.
      *
-     * @return the declaring name in the format {@code "MapClass<KeyDeclaringName, ValueDeclaringName>"}
+     * @return the declaring name in the format {@code "MapInterface<KeyDeclaringName, ValueDeclaringName>"}
      */
     @Override
     public String declaringName() {

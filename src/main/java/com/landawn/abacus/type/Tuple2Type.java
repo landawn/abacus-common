@@ -23,8 +23,9 @@ import com.landawn.abacus.util.Tuple.Tuple2;
 
 /**
  * Type handler for {@link Tuple2} objects.
- * This class provides serialization and deserialization support for tuple instances
- * containing two elements of potentially different types.
+ * This class provides serialization and deserialization support for 2-element tuple instances
+ * containing elements of potentially different types. The serialization format is a JSON array:
+ * {@code [t1, t2]}.
  *
  * @param <T1> the type of the first element in the tuple
  * @param <T2> the type of the second element in the tuple

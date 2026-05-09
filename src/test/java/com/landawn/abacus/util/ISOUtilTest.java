@@ -266,11 +266,13 @@ public class ISOUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test parse with missing timezone indicator should throw exception")
+    @DisplayName("Test parse with missing timezone indicator defaults to UTC")
     public void testParseMissingTimezone() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            ISO8601Util.parse("2024-01-15T14:30:45");
-        });
+        Date parsed = ISO8601Util.parse("2024-01-15T14:30:45");
+        Calendar expected = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        expected.clear();
+        expected.set(2024, Calendar.JANUARY, 15, 14, 30, 45);
+        assertEquals(expected.getTime(), parsed);
     }
 
     @Test

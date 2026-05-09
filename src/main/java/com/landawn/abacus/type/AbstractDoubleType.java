@@ -37,6 +37,7 @@ import com.landawn.abacus.util.Strings;
  * </p>
  *
  * @see DoubleType
+ * @see PrimitiveDoubleType
  */
 public abstract class AbstractDoubleType extends NumberType<Number> {
 
@@ -74,12 +75,14 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      * This method handles various string formats:
      * </p>
      * <ul>
-     *   <li>Empty or {@code null} strings return the default value</li>
-     *   <li>Strings ending with 'l', 'L', 'f', 'F', 'd', or 'D' have the suffix stripped before parsing</li>
-     *   <li>Valid numeric strings are parsed to {@code Double} values</li>
+     *   <li>Empty or {@code null} strings return the default value.</li>
+     *   <li>The string is trimmed of leading and trailing whitespace before parsing.</li>
+     *   <li>If parsing fails and the trimmed string ends with {@code 'l'}, {@code 'L'}, {@code 'f'},
+     *       {@code 'F'}, {@code 'd'}, or {@code 'D'}, the suffix is stripped and parsing is retried.</li>
+     *   <li>Valid numeric strings are parsed to {@code Double} values.</li>
      * </ul>
      *
-     * @param str the string to convert
+     * @param str the string to convert, may be {@code null}
      * @return the {@code Double} value, or the default value if {@code str} is empty or {@code null}
      * @throws NumberFormatException if the string cannot be parsed as a {@code double}
      */

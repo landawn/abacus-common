@@ -28,6 +28,9 @@ import java.sql.SQLXML;
  */
 public class SQLXMLType extends AbstractType<SQLXML> {
 
+    /**
+     * The type name identifier for SQLXML type, equal to the simple class name {@code "SQLXML"}.
+     */
     public static final String SQL_XML = SQLXML.class.getSimpleName();
 
     /**

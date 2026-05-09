@@ -607,4 +607,69 @@ public class ObjectPoolTest extends TestBase {
     public void testConstructorInvalidCapacity() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> new ObjectPool<>(-1));
     }
+
+    /**
+     * Concurrent reads and writes must not corrupt the map, lose updates, or block readers.
+     * This is the core contract of ObjectPool's lock-free read path.
+     */
+    @Test
+    public void testConcurrentReadAndWrite_NoCorruption() throws InterruptedException {
+        final ObjectPool<Integer, Integer> pool = new ObjectPool<>(256);
+        final int writers = 4;
+        final int writesPerThread = 200;
+
+        Thread[] writerThreads = new Thread[writers];
+        for (int t = 0; t < writers; t++) {
+            final int offset = t * writesPerThread;
+            writerThreads[t] = new Thread(() -> {
+                for (int i = 0; i < writesPerThread; i++) {
+                    pool.put(offset + i, (offset + i) * 2);
+                }
+            });
+        }
+        // Reader thread continually iterates while writers run
+        final Thread reader = new Thread(() -> {
+            for (int i = 0; i < 1000; i++) {
+                pool.size();
+                pool.containsKey(i);
+                pool.get(i);
+            }
+        });
+        for (Thread w : writerThreads) {
+            w.start();
+        }
+        reader.start();
+        for (Thread w : writerThreads) {
+            w.join();
+        }
+        reader.join();
+
+        Assertions.assertEquals(writers * writesPerThread, pool.size());
+        for (int t = 0; t < writers; t++) {
+            for (int i = 0; i < writesPerThread; i++) {
+                int key = t * writesPerThread + i;
+                Assertions.assertEquals(key * 2, pool.get(key));
+            }
+        }
+    }
+
+    /**
+     * containsValue(null) must return false (not throw) - documented behavior that
+     * differs from the underlying ConcurrentHashMap.
+     */
+    @Test
+    public void testContainsValue_NullReturnsFalse() {
+        ObjectPool<String, Integer> pool = new ObjectPool<>(8);
+        Assertions.assertFalse(pool.containsValue(null));
+        pool.put("a", 1);
+        Assertions.assertFalse(pool.containsValue(null));
+    }
+
+    /** Equals must be reflexive, symmetric with another ObjectPool, and false against null. */
+    @Test
+    public void testEquals_NullAndDifferentType() {
+        ObjectPool<String, Integer> pool = new ObjectPool<>(4);
+        Assertions.assertFalse(pool.equals(null));
+        Assertions.assertNotEquals(pool, "not-a-map");
+    }
 }

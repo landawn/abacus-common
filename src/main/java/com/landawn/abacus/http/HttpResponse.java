@@ -29,12 +29,16 @@ import com.landawn.abacus.util.URLEncodedUtil;
 import com.landawn.abacus.util.cs;
 
 /**
- * Represents an HTTP response containing status code, headers, and body.
+ * Represents an immutable HTTP response containing status code, headers, and body.
  * This class encapsulates all the information returned from an HTTP request,
  * including timing information, response status, headers, and the response body.
  *
  * <p>The response body is stored as a byte array and can be deserialized to various types
- * using the {@code body(Class)} or {@code body(Type)} methods.</p>
+ * using the {@link #body(Class)} or {@link #body(Type)} methods. {@link #body()} and
+ * {@link #headers()} return defensive copies (or unmodifiable views) so the internal state
+ * cannot be altered through them.</p>
+ *
+ * <p><b>Thread Safety:</b> Instances are effectively immutable and safe to share between threads.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -55,6 +59,7 @@ import com.landawn.abacus.util.cs;
  *
  * @see HttpClient
  * @see HttpRequest
+ * @see HttpHeaders
  */
 public class HttpResponse {
     private final String requestUrl;
@@ -174,6 +179,7 @@ public class HttpResponse {
     /**
      * Gets all response headers as a map.
      * Each header name maps to a list of values, as headers can have multiple values.
+     * The returned map and its value lists are unmodifiable.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -181,7 +187,7 @@ public class HttpResponse {
      * List<String> contentType = headers.get("Content-Type");
      * }</pre>
      *
-     * @return A map of header names to their values
+     * @return an unmodifiable map of header names to their values, or {@code null} if no headers were received
      */
     public Map<String, List<String>> headers() {
         return headers;
@@ -206,12 +212,15 @@ public class HttpResponse {
 
     /**
      * Deserializes the response body to the specified type.
-     * The deserialization method is determined by the Content-Type header of the response.
+     * The deserialization method is determined by the {@code Content-Type} header of the response.
      * Supported types include:
      * <ul>
-     *   <li>String.class - Returns the body as a UTF-8 string</li>
-     *   <li>byte[].class - Returns the raw bytes</li>
-     *   <li>Any other class - Deserializes based on content type (JSON, XML, etc.)</li>
+     *   <li>{@code String.class} - returns the body decoded with the response charset
+     *       (derived from the {@code Content-Type} header, defaulting to UTF-8 if absent)</li>
+     *   <li>{@code byte[].class} - returns a copy of the raw response bytes</li>
+     *   <li>Any other class - deserializes based on content format (JSON, XML, Kryo,
+     *       form URL-encoded). For unknown/{@code NONE} content formats a best-effort
+     *       {@link N#convert(Object, Class)} is attempted before falling through to the JSON parser.</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -227,9 +236,9 @@ public class HttpResponse {
      * }</pre>
      *
      * @param <T> The type to deserialize to
-     * @param resultClass The class of the expected response object
-     * @return The deserialized response body
-     * @throws IllegalArgumentException if resultClass is null
+     * @param resultClass The class of the expected response object. Must not be {@code null}.
+     * @return The deserialized response body, or {@code null} if no body was received
+     * @throws IllegalArgumentException if {@code resultClass} is {@code null}
      */
     public <T> T body(final Class<T> resultClass) throws IllegalArgumentException {
         N.checkArgNotNull(resultClass, cs.resultClass);
@@ -248,14 +257,29 @@ public class HttpResponse {
             } else if (bodyFormat == ContentFormat.FORM_URL_ENCODED) {
                 return URLEncodedUtil.decode(new String(body, respCharset), resultClass);
             } else {
-                return HttpUtil.getParser(bodyFormat).deserialize(new String(body, respCharset), resultClass);
+                // For NONE / unrecognized content formats, the configured parser falls back to
+                // JSON. That works for JSON-shaped bodies but produces confusing parse errors
+                // for plain-text responses being decoded into scalar types. Try a direct String
+                // conversion first via N.convert (handles primitives, enums, dates, etc.) and
+                // fall through to the parser only when N.convert can't handle the target type.
+                final String text = new String(body, respCharset);
+                if (bodyFormat == null || bodyFormat == ContentFormat.NONE) {
+                    try {
+                        return N.convert(text, resultClass);
+                    } catch (final RuntimeException ignored) {
+                        // N.convert can't handle compound types (beans, collections); fall through.
+                    }
+                }
+                return HttpUtil.getParser(bodyFormat).deserialize(text, resultClass);
             }
         }
     }
 
     /**
      * Deserializes the response body to the specified parameterized type.
-     * This method is useful for deserializing to generic types like List&lt;User&gt; or Map&lt;String, Object&gt;.
+     * This method is useful for deserializing to generic types like {@code List<User>} or {@code Map<String, Object>}.
+     * The body bytes are decoded using the response charset derived from the {@code Content-Type}
+     * header (defaulting to UTF-8 if absent) before parsing.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -272,9 +296,9 @@ public class HttpResponse {
      * }</pre>
      *
      * @param <T> The type to deserialize to
-     * @param resultType The type information including generic parameters
-     * @return The deserialized response body
-     * @throws IllegalArgumentException if resultType is null
+     * @param resultType The type information including generic parameters. Must not be {@code null}.
+     * @return The deserialized response body, or {@code null} if no body was received
+     * @throws IllegalArgumentException if {@code resultType} is {@code null}
      */
     public <T> T body(final Type<T> resultType) throws IllegalArgumentException {
         N.checkArgNotNull(resultType, cs.resultType);
@@ -292,12 +316,22 @@ public class HttpResponse {
                 return HttpUtil.kryoParser.deserialize(new ByteArrayInputStream(body), null, resultType);
             } else if (bodyFormat == ContentFormat.FORM_URL_ENCODED) {
                 return N.convert(URLEncodedUtil.decode(new String(body, respCharset), resultType.javaType()), resultType);
-            } else if (bodyFormat.name().contains("JSON")) {
+            } else if (bodyFormat != null && bodyFormat.name().contains("JSON")) {
                 return N.fromJson(new String(body, respCharset), resultType);
-            } else if (bodyFormat.name().contains("XML")) {
+            } else if (bodyFormat != null && bodyFormat.name().contains("XML")) {
                 return N.fromXml(new String(body, respCharset), resultType);
             } else {
-                return HttpUtil.getParser(bodyFormat).deserialize(new String(body, respCharset), resultType);
+                // Same defensive path as body(Class): for NONE / unknown formats, try a String
+                // conversion before falling through to the JSON parser default.
+                final String text = new String(body, respCharset);
+                if (bodyFormat == null || bodyFormat == ContentFormat.NONE) {
+                    try {
+                        return N.convert(text, resultType);
+                    } catch (final RuntimeException ignored) {
+                        // Fall through to parser path for compound types.
+                    }
+                }
+                return HttpUtil.getParser(bodyFormat).deserialize(text, resultType);
             }
         }
     }

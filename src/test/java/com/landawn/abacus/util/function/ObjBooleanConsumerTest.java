@@ -120,4 +120,10 @@ public class ObjBooleanConsumerTest extends TestBase {
     public void testFunctionalInterface() {
         assertNotNull(ObjBooleanConsumer.class.getAnnotation(FunctionalInterface.class));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        ObjBooleanConsumer<String> instance = (a, b) -> {};
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((ObjBooleanConsumer) null));
+    }
 }

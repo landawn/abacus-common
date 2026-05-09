@@ -108,7 +108,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
         }
 
         this.count = count;
-        this.sum = sum;
+        this.sum = sum == null ? BigDecimal.ZERO : sum;
         this.min = min;
         this.max = max;
     }

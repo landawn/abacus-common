@@ -36,6 +36,7 @@ import com.landawn.abacus.util.Strings;
  * </p>
  *
  * @see CharacterType
+ * @see PrimitiveCharType
  */
 public abstract class AbstractCharacterType extends AbstractPrimaryType<Character> {
 
@@ -67,11 +68,12 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
      * <ul>
      *   <li>Empty or {@code null} strings return the default value.</li>
      *   <li>Single character strings return that character.</li>
-     *   <li>Numeric strings are parsed as character codes.</li>
+     *   <li>Multi-character strings are parsed as a numeric character code.</li>
      * </ul>
      *
-     * @param str the string to convert
-     * @return the {@code Character} value, or default value if the input is empty or {@code null}
+     * @param str the string to convert, may be {@code null}
+     * @return the {@code Character} value, or the default value if the input is empty or {@code null}
+     * @throws NumberFormatException if a multi-character string cannot be parsed as a numeric character code
      */
     @Override
     public Character valueOf(final String str) {
@@ -83,14 +85,15 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
     }
 
     /**
-     * Converts the specified character array to a {@code Character} value.
-     * <p>For single character arrays, returns that character directly.
-     * For longer arrays, parses the content as a numeric character code.</p>
+     * Converts a region of the specified character array to a {@code Character} value.
+     * <p>For a single character region, returns that character directly.
+     * For longer regions, parses the content as a numeric character code.</p>
      *
-     * @param cbuf the character array to convert
-     * @param offset the starting position in the array
+     * @param cbuf the character array to convert, may be {@code null}
+     * @param offset the starting position in the array (0-based)
      * @param len the number of characters to read
-     * @return the {@code Character} value, or default value if the input is {@code null} or empty
+     * @return the {@code Character} value, or the default value if {@code cbuf} is {@code null} or {@code len} is {@code 0}
+     * @throws NumberFormatException if a multi-character region cannot be parsed as a numeric character code
      */
     @Override
     public Character valueOf(final char[] cbuf, final int offset, final int len) {

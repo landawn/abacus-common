@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 /**
  * Represents an operation that accepts a variable number of short-valued arguments and returns no result.
  * This is the variable-arity specialization of {@link ShortConsumer}.
@@ -81,6 +83,7 @@ public interface ShortNConsumer {
      * @throws NullPointerException if {@code after} is null
      */
     default ShortNConsumer andThen(final ShortNConsumer after) {
+        Objects.requireNonNull(after);
         return args -> {
             accept(args);
             after.accept(args);

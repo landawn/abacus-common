@@ -18,6 +18,10 @@ package com.landawn.abacus.type;
  * Type handler for the primitive {@code double} type, as opposed to the {@link Double} wrapper class.
  * It provides type information and default value handling for {@code double} primitives.
  *
+ * <p>The key distinction from {@code DoubleType} (which handles {@link Double}) is the default value:
+ * {@link #defaultValue()} returns {@code 0.0d} (matching the JLS default for {@code double}),
+ * whereas the wrapper type's default is {@code null}.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Type<Double> type = TypeFactory.getType(double.class);

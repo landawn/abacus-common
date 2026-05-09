@@ -45,11 +45,7 @@ import java.lang.annotation.Target;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * public class UserRepository {
- *     /**
- *      * Finds a user by username.
- *      * @param username the username to search for
- *      * @return the User if found, null if not found
- *      {@literal *}/
+ *     // Finds a user by username; returns the User if found, null otherwise.
  *     @MayReturnNull
  *     public User findByUsername(String username) {
  *         return database.query("SELECT * FROM users WHERE username = ?", username);

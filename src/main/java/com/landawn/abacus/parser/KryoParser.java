@@ -221,6 +221,9 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
 
     private final List<Kryo> kryoPool = new ArrayList<>(POOL_SIZE);
 
+    /**
+     * Package-private constructor. Use {@link ParserFactory#createKryoParser()} to obtain instances.
+     */
     KryoParser() {
     }
 
@@ -1156,6 +1159,13 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * The Kryo instance is configured with registration not required, allowing serialization
      * of unregistered classes (though registered classes perform better).
      *
+     * <p>The Kryo instance includes registrations from (in order):</p>
+     * <ul>
+     *   <li>Built-in types (primitives, collections, common Java types, etc.)</li>
+     *   <li>Globally registered types via {@link ParserFactory}</li>
+     *   <li>Instance-specific registered types via {@link #register} methods</li>
+     * </ul>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Kryo kryo = parser.createKryo();
@@ -1167,13 +1177,6 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * }</pre>
      *
      * @return a configured Kryo instance ready for use
-     *
-     * <p>The Kryo instance includes registrations from (in order):</p>
-     * <ul>
-     *   <li>Built-in types (primitives, collections, common Java types, etc.)</li>
-     *   <li>Globally registered types via {@link ParserFactory}</li>
-     *   <li>Instance-specific registered types via {@link #register} methods</li>
-     * </ul>
      */
     protected Kryo createKryo() {
         synchronized (kryoPool) {
@@ -1248,6 +1251,13 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * created by this parser instance and if the pool is not at maximum capacity.
      * Recycling Kryo instances improves performance by avoiding repeated initialization.
      *
+     * <p>The Kryo instance will not be recycled if:</p>
+     * <ul>
+     *   <li>The kryo instance is {@code null}</li>
+     *   <li>The kryo instance was not created by this parser (not in xPool)</li>
+     *   <li>The pool is already at maximum capacity</li>
+     * </ul>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Kryo kryo = parser.createKryo();
@@ -1259,13 +1269,6 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * }</pre>
      *
      * @param kryo the Kryo instance to recycle (may be {@code null})
-     *
-     * <p>The Kryo instance will not be recycled if:</p>
-     * <ul>
-     *   <li>The kryo instance is {@code null}</li>
-     *   <li>The kryo instance was not created by this parser (not in xPool)</li>
-     *   <li>The pool is already at maximum capacity</li>
-     * </ul>
      */
     void recycle(final Kryo kryo) {
         if (kryo == null) {
@@ -1312,6 +1315,13 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * allowing it to be reused by future operations. The output's stream is set to {@code null}
      * before pooling to prevent resource leaks.
      *
+     * <p>The output will not be recycled if:</p>
+     * <ul>
+     *   <li>The output is {@code null}</li>
+     *   <li>The output's buffer exceeds the default buffer size</li>
+     *   <li>The pool is already at maximum capacity</li>
+     * </ul>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Output out = KryoParser.createOutput();
@@ -1323,13 +1333,6 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * }</pre>
      *
      * @param output the {@code Output} instance to recycle (may be {@code null})
-     *
-     * <p>The output will not be recycled if:</p>
-     * <ul>
-     *   <li>The output is {@code null}</li>
-     *   <li>The output's buffer exceeds the default buffer size</li>
-     *   <li>The pool is already at maximum capacity</li>
-     * </ul>
      */
     static void recycle(final Output output) {
         if ((output == null) || ((output.getBuffer() != null) && (output.getBuffer().length > BUFFER_SIZE))) {
@@ -1377,6 +1380,13 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * allowing it to be reused by future operations. The input's stream is set to {@code null}
      * before pooling to prevent resource leaks.
      *
+     * <p>The input will not be recycled if:</p>
+     * <ul>
+     *   <li>The input is {@code null}</li>
+     *   <li>The input's buffer exceeds the default buffer size</li>
+     *   <li>The pool is already at maximum capacity</li>
+     * </ul>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Input in = KryoParser.createInput();
@@ -1388,13 +1398,6 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * }</pre>
      *
      * @param input the {@code Input} instance to recycle (may be {@code null})
-     *
-     * <p>The input will not be recycled if:</p>
-     * <ul>
-     *   <li>The input is {@code null}</li>
-     *   <li>The input's buffer exceeds the default buffer size</li>
-     *   <li>The pool is already at maximum capacity</li>
-     * </ul>
      */
     static void recycle(final Input input) {
         if ((input == null) || ((input.getBuffer() != null) && (input.getBuffer().length > BUFFER_SIZE))) {

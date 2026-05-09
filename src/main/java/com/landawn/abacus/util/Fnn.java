@@ -529,7 +529,7 @@ public final class Fnn {
     }
 
     /**
-     * Returns a Function that converts its input to a String representation using {@link String#valueOf(Object)}.
+     * Returns a Function that converts its input to a String representation using {@link N#toString(Object)}.
      * This function handles {@code null} inputs safely, returning the string {@code "null"} for {@code null} input.
      * The conversion never throws exceptions despite the generic exception type parameter.
      *
@@ -545,8 +545,8 @@ public final class Fnn {
      *
      * @param <T> the type of the input to the function
      * @param <E> the type of exception that may be thrown (though none will be)
-     * @return a function that converts its input to a String using {@code String.valueOf()}
-     * @see String#valueOf(Object)
+     * @return a function that converts its input to a String using {@link N#toString(Object)}
+     * @see N#toString(Object)
      */
     public static <T, E extends Exception> Throwables.Function<T, String, E> toStr() {
         return Fn.TO_STRING;
@@ -1740,7 +1740,7 @@ public final class Fnn {
 
             @Override
             public boolean test(final T t) {
-                return counter.getAndDecrement() > 0;
+                return counter.getAndUpdate(i -> i > 0 ? i - 1 : 0) > 0;
             }
         };
     }

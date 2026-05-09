@@ -55,8 +55,10 @@ class JdkLogger extends AbstractLogger {
      *
      * <p>The name is passed directly to the underlying {@code java.util.logging.Logger}.</p>
      *
-     * <p><b>Note:</b> This class is package-private and this constructor should not be called directly
-     * from outside the logging package. Use {@link LoggerFactory#getLogger(Class)} or {@link LoggerFactory#getLogger(String)} instead.</p>
+     * <p><b>Note:</b> The enclosing class is package-private, so this constructor cannot be invoked
+     * from outside the {@code com.landawn.abacus.logging} package. Use
+     * {@link LoggerFactory#getLogger(Class)} or {@link LoggerFactory#getLogger(String)} to obtain
+     * logger instances from application code.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

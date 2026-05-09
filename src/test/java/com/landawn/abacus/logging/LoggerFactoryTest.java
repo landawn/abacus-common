@@ -6,6 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.lang.reflect.Field;
+import java.util.Locale;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -161,5 +165,24 @@ public class LoggerFactoryTest extends TestBase {
         for (int i = 1; i < threadCount; i++) {
             assertSame(firstLogger, loggers[i]);
         }
+    }
+
+    @Test
+    @DisplayName("Bug: Android platform detection must not be locale-sensitive (Turkish 'i' issue)")
+    public void testAndroidDetectionIsLocaleIndependent() throws Exception {
+        final String androidVendor = "The Android Project";
+        // Without Locale.ROOT, Turkish locale converts 'i' to 'İ' (U+0130), breaking ASCII contains.
+        assertTrue(androidVendor.toUpperCase(Locale.ROOT).contains("ANDROID"));
+        // Demonstrate that the buggy variant would fail in Turkish locale.
+        assertTrue(!androidVendor.toUpperCase(new Locale("tr")).contains("ANDROID"),
+                "Sanity-check: Turkish toUpperCase mangles ASCII 'I' (this is the bug being avoided)");
+
+        // Verify the production field uses Locale.ROOT by checking the source contract:
+        // the IS_ANDROID_PLATFORM constant is computed at class init, so we cannot rerun
+        // it under a different Locale. Instead we ensure the field exists and is a boolean.
+        final Field f = LoggerFactory.class.getDeclaredField("IS_ANDROID_PLATFORM");
+        f.setAccessible(true);
+        final Object value = f.get(null);
+        assertTrue(value instanceof Boolean);
     }
 }

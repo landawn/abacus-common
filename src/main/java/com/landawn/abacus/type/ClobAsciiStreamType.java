@@ -24,7 +24,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Charsets;
@@ -202,8 +201,6 @@ public class ClobAsciiStreamType extends InputStreamType {
                 while (IOUtil.EOF != (count = IOUtil.read(reader, buf, 0, buf.length))) {
                     writer.writeCharacter(buf, 0, count);
                 }
-            } catch (final IOException e) {
-                throw new UncheckedIOException(e);
             } finally {
                 Objectory.recycle(buf);
             }

@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -57,6 +59,7 @@ public interface BooleanBiConsumer extends Throwables.BooleanBiConsumer<RuntimeE
      * @throws NullPointerException if {@code after} is null
      */
     default BooleanBiConsumer andThen(final BooleanBiConsumer after) {
+        Objects.requireNonNull(after);
         return (a, b) -> {
             accept(a, b);
             after.accept(a, b);

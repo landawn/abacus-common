@@ -3761,4 +3761,114 @@ public class ThrowablesTest extends TestBase {
         assertEquals("Avg: 2.5", floatBiFunc.apply(2.0f, 3.0f));
     }
 
+    // === Tests for review fixes / additional coverage ===
+
+    // FloatToIntFunction must produce an int (regression: it used to return double).
+    @Test
+    public void testFloatToIntFunction_ReturnsInt() throws Exception {
+        Throwables.FloatToIntFunction<Exception> fn = f -> Math.round(f);
+        int result = fn.applyAsInt(3.7f);
+        assertEquals(4, result);
+        // Verify the type is genuinely int via a strict equality check on a primitive.
+        int boxed = fn.applyAsInt(3.14f);
+        assertEquals(3, boxed);
+    }
+
+    // FloatToLongFunction must produce a long (regression: it used to return double).
+    @Test
+    public void testFloatToLongFunction_ReturnsLong() throws Exception {
+        Throwables.FloatToLongFunction<Exception> fn = f -> (long) f;
+        long result = fn.applyAsLong(3.99f);
+        assertEquals(3L, result);
+        // Truncation of large float fits in long.
+        long big = fn.applyAsLong(1e9f);
+        assertEquals(1_000_000_000L, big);
+    }
+
+    // Verify andThen semantics: this-then-after, not after-then-this.
+    @Test
+    public void testNFunction_andThen_OrderIsThisThenAfter() throws Throwable {
+        Throwables.NFunction<Integer, Integer, Exception> doubleFirst = args -> {
+            int sum = 0;
+            for (Integer i : args) {
+                sum += i;
+            }
+            return sum * 2;
+        };
+        // After receives the doubled sum and adds 1.
+        Throwables.NFunction<Integer, Integer, Exception> chained = doubleFirst.andThen(r -> r + 1);
+        // sum(1,2,3)=6 -> *2 = 12 -> +1 = 13. If ordering were reversed (after first), 1+2+3=6, after(6)=7, doubled=14.
+        assertEquals(13, chained.apply(1, 2, 3).intValue());
+    }
+
+    @Test
+    public void testIntNFunction_andThen_OrderIsThisThenAfter() throws Throwable {
+        Throwables.IntNFunction<Integer, Exception> sumFn = args -> {
+            int s = 0;
+            for (int i : args) {
+                s += i;
+            }
+            return s;
+        };
+        Throwables.IntNFunction<String, Exception> chained = sumFn.andThen(r -> "=" + r);
+        assertEquals("=10", chained.apply(1, 2, 3, 4));
+    }
+
+    // Verify Predicate.negate handles checked-exception path correctly.
+    @Test
+    public void testPredicate_negate_PropagatesException() {
+        Throwables.Predicate<Integer, IOException> throwing = i -> {
+            throw new IOException("boom");
+        };
+        Throwables.Predicate<Integer, IOException> negated = throwing.negate();
+        IOException ex = assertThrows(IOException.class, () -> negated.test(1));
+        assertEquals("boom", ex.getMessage());
+    }
+
+    // Verify Runnable.unchecked wraps checked exceptions in RuntimeException.
+    @Test
+    public void testRunnable_unchecked_WrapsChecked() {
+        Throwables.Runnable<IOException> throwing = () -> {
+            throw new IOException("io-fail");
+        };
+        com.landawn.abacus.util.function.Runnable wrapped = throwing.unchecked();
+        RuntimeException re = assertThrows(RuntimeException.class, wrapped::run);
+        assertNotNull(re);
+    }
+
+    // Verify Supplier.unchecked propagates value when no exception.
+    @Test
+    public void testSupplier_unchecked_PropagatesValue() {
+        Throwables.Supplier<String, IOException> ok = () -> "value";
+        com.landawn.abacus.util.function.Supplier<String> wrapped = ok.unchecked();
+        assertEquals("value", wrapped.get());
+    }
+
+    // Verify Function.unchecked correctly wraps and applies.
+    @Test
+    public void testFunction_unchecked_AppliesCorrectly() {
+        Throwables.Function<Integer, Integer, IOException> sq = i -> i * i;
+        com.landawn.abacus.util.function.Function<Integer, Integer> wrapped = sq.unchecked();
+        assertEquals(25, wrapped.apply(5).intValue());
+    }
+
+    // Verify Consumer.unchecked side-effects work.
+    @Test
+    public void testConsumer_unchecked_SideEffects() {
+        AtomicInteger sink = new AtomicInteger();
+        Throwables.Consumer<Integer, IOException> c = sink::set;
+        com.landawn.abacus.util.function.Consumer<Integer> wrapped = c.unchecked();
+        wrapped.accept(42);
+        assertEquals(42, sink.get());
+    }
+
+    // Iterator.advance with negative or zero is a no-op (should not consume).
+    @Test
+    public void testIterator_advance_NonPositive() throws Exception {
+        Throwables.Iterator<Integer, Exception> it = Throwables.Iterator.of(new Integer[] { 1, 2, 3 }, 0, 3);
+        it.advance(0);
+        assertEquals(1, it.next().intValue());
+        it.advance(-5);
+        assertEquals(2, it.next().intValue());
+    }
 }

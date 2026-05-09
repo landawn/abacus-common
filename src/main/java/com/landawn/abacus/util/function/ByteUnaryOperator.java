@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -57,6 +59,7 @@ public interface ByteUnaryOperator extends Throwables.ByteUnaryOperator<RuntimeE
      * @see #andThen(ByteUnaryOperator)
      */
     default ByteUnaryOperator compose(final ByteUnaryOperator before) {
+        Objects.requireNonNull(before);
         return v -> applyAsByte(before.applyAsByte(v));
     }
 
@@ -73,6 +76,7 @@ public interface ByteUnaryOperator extends Throwables.ByteUnaryOperator<RuntimeE
      * @see #compose(ByteUnaryOperator)
      */
     default ByteUnaryOperator andThen(final ByteUnaryOperator after) {
+        Objects.requireNonNull(after);
         return t -> after.applyAsByte(applyAsByte(t));
     }
 

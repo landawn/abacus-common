@@ -2213,4 +2213,51 @@ public class ParserUtilTest extends AbstractTest {
 
     // TODO: Remaining ParserUtil.ASMPropInfo gaps are ReflectASM-specific generated access paths that are not meaningfully isolated beyond public ParserUtil/PropInfo coverage.
 
+    public static class NumberFormatBean {
+        @JsonXmlField(numberFormat = "#,##0.00")
+        private double price;
+
+        public double getPrice() {
+            return price;
+        }
+
+        public void setPrice(double price) {
+            this.price = price;
+        }
+    }
+
+    /**
+     * Verifies that {@code @JsonXmlField(numberFormat=...)} produces locale-independent output.
+     * Without an explicit locale, {@code new DecimalFormat(pattern)} uses the JVM default locale,
+     * so the same pattern would render "1.234,56" on de_DE and "1,234.56" on en_US, breaking
+     * cross-locale round-trips.
+     */
+    @Test
+    public void test_numberFormat_isLocaleIndependent() {
+        final java.util.Locale prev = java.util.Locale.getDefault();
+        try {
+            // Switch to a locale whose grouping/decimal separators differ from Locale.ROOT (en_US).
+            // German uses '.' for grouping and ',' for decimal -- the inverse of ROOT.
+            java.util.Locale.setDefault(java.util.Locale.GERMANY);
+
+            final BeanInfo beanInfo = ParserUtil.getBeanInfo(NumberFormatBean.class);
+            final PropInfo propInfo = beanInfo.getPropInfo("price");
+            assertNotNull(propInfo);
+            assertNotNull(propInfo.numberFormat);
+
+            final String formatted;
+            synchronized (propInfo.numberFormat) {
+                formatted = propInfo.numberFormat.format(1234.56d);
+            }
+
+            // Must use Locale.ROOT (en_US) symbols regardless of default locale: comma grouping, dot decimal.
+            assertEquals("1,234.56", formatted);
+        } finally {
+            java.util.Locale.setDefault(prev);
+            // Force the BeanInfo cache to drop the entry so subsequent tests build fresh metadata
+            // tied to whatever locale is active when they run.
+            ParserUtil.refreshBeanPropInfo(NumberFormatBean.class);
+        }
+    }
+
 }

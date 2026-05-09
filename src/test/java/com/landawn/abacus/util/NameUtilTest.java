@@ -118,4 +118,11 @@ public class NameUtilTest extends TestBase {
         Assertions.assertEquals("a", NameUtil.getParentName("a.b"));
         Assertions.assertEquals("ab", NameUtil.getParentName("ab.c"));
     }
+
+    @Test
+    public void testCacheName_Null() {
+        // Bug fix: cacheName(null, ...) should not throw NPE
+        Assertions.assertNull(NameUtil.cacheName(null, false));
+        Assertions.assertNull(NameUtil.cacheName(null, true));
+    }
 }

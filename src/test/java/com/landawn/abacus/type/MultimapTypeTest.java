@@ -108,4 +108,33 @@ public class MultimapTypeTest extends TestBase {
         assertEquals(1, result.get("key2").size());
     }
 
+    /**
+     * Regression: when only the key + element types are specified (the typical
+     * "ListMultimap<K,V>"/"SetMultimap<K,V>" form), parameterTypes.get(1) is
+     * the element type, NOT a collection type. The old code unconditionally
+     * checked Set.class.isAssignableFrom against the element, so the resulting
+     * concrete multimap implementation was always ListMultimap-backed —
+     * dropping the Set semantics that SetMultimap callers depend on
+     * (e.g. duplicate values would have been kept). The fix bases the decision
+     * on the declared multimap class first.
+     */
+    @Test
+    public void testValueOf_setMultimapDeducedFromDeclaredClass_dropsDuplicates() {
+        // The SetMultimap declaration must produce a Set-backed multimap, so
+        // duplicate values in the JSON array collapse. If the bug regressed,
+        // the values collection size would be 3 (List behaviour) instead of 2.
+        SetMultimap<String, Integer> result = setMultimapType.valueOf("{\"key1\":[1,2,1]}");
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.get("key1") instanceof Set);
+        assertEquals(2, result.get("key1").size(), "SetMultimap must collapse duplicates; got " + result.get("key1"));
+    }
+
+    @Test
+    public void testValueOf_listMultimapDeducedFromDeclaredClass_keepsDuplicates() {
+        // Mirror test for ListMultimap — duplicates must be preserved.
+        ListMultimap<String, Integer> result = listMultimapType.valueOf("{\"key1\":[1,2,1]}");
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.get("key1") instanceof List);
+        assertEquals(3, result.get("key1").size(), "ListMultimap must keep duplicates; got " + result.get("key1"));
+    }
 }

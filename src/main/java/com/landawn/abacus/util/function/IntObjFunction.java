@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -67,7 +69,7 @@ public interface IntObjFunction<T, R> extends Throwables.IntObjFunction<T, R, Ru
      * Function<String, Integer> getLength = String::length;
      *
      * IntObjFunction<String, Integer> concatAndGetLength = concat.andThen(getLength);
-     * Integer result = concatAndGetLength.apply(5, "Item");   // Returns 10 (length of "Item[5]")
+     * Integer result = concatAndGetLength.apply(5, "Item");   // Returns 7 (length of "Item[5]")
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function
@@ -77,6 +79,7 @@ public interface IntObjFunction<T, R> extends Throwables.IntObjFunction<T, R, Ru
      * @throws NullPointerException if {@code after} is null
      */
     default <V> IntObjFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+        Objects.requireNonNull(after);
         return (i, t) -> after.apply(apply(i, t));
     }
 }

@@ -28,6 +28,15 @@ import com.landawn.abacus.util.u.Optional;
  * The class provides methods to set and get the value, as well as other utility methods for operations like checking if the value is {@code null},
  * updating the value, and performing actions if the value is not {@code null}.
  *
+ * <p><b>Thread safety:</b> The internal value field is declared {@code volatile}, so individual
+ * reads via {@link #value()} / {@link #getValue()} and individual writes via {@link #setValue(Object)}
+ * have happens-before semantics across threads. However, compound operations such as
+ * {@link #getAndSet(Object)}, {@link #setAndGet(Object)}, {@link #getAndUpdate(Throwables.UnaryOperator)},
+ * {@link #updateAndGet(Throwables.UnaryOperator)} and {@link #setIf(Throwables.Predicate, Object)} are
+ * <em>not</em> atomic and do not provide compare-and-set semantics. If multiple threads use this class
+ * concurrently and at least one performs a compound update, external synchronization (or a different
+ * primitive such as {@link java.util.concurrent.atomic.AtomicReference}) is required.</p>
+ *
  * @param <T> The type of the value this Holder can hold.
  * @see com.landawn.abacus.util.u.Optional
  * @see com.landawn.abacus.util.u.Nullable

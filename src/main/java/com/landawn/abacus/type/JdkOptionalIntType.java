@@ -18,13 +18,16 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for java.util.OptionalInt.
- * This class provides serialization, deserialization, and database access capabilities for OptionalInt instances.
- * OptionalInt is a container that may or may not contain an int value.
- * Empty optionals are represented as {@code null} in serialized form.
+ * Type handler for {@link java.util.OptionalInt}, the JDK primitive-int optional wrapper.
+ * This class provides serialization, deserialization, and database access capabilities for
+ * {@link OptionalInt} instances. {@link OptionalInt} is a container that may or may not contain
+ * an {@code int} value; this handler unboxes the underlying primitive on read/write.
+ * Empty optionals (and {@code null} references) are represented as {@code null} in serialized form
+ * and as SQL {@code NULL} in database form.
  */
 public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
 
+    /** The type name constant for {@link OptionalInt} (JDK) type identification. */
     public static final String OPTIONAL_INT = "JdkOptionalInt";
 
     /**

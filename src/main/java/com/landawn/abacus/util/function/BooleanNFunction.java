@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -61,6 +63,7 @@ public interface BooleanNFunction<R> extends Throwables.BooleanNFunction<R, Runt
      */
     @Override
     default <V> BooleanNFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+        Objects.requireNonNull(after);
         return args -> after.apply(apply(args));
     }
 }

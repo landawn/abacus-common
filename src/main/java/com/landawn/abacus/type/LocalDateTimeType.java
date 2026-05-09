@@ -122,13 +122,13 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
 
     /**
      * Parses a string to create a LocalDateTime object.
-     * This method supports multiple string formats with intelligent format detection.
-     *
-     * The method supports multiple formats:
-     * - Empty string returns null
-     * - "SYS_TIME" returns the current LocalDateTime
-     * - Numeric strings are treated as milliseconds since epoch
-     * - ISO-8601 formatted strings are parsed directly
+     * This method supports multiple string formats with intelligent format detection:
+     * <ul>
+     *   <li>{@code null}, empty, or blank string returns {@code null}</li>
+     *   <li>{@code "SYS_TIME"} returns the current {@code LocalDateTime}</li>
+     *   <li>Numeric strings are treated as milliseconds since the epoch</li>
+     *   <li>ISO-8601 formatted strings are parsed directly</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -144,8 +144,10 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * LocalDateTime dt3 = type.valueOf("SYS_TIME");
      * }</pre>
      *
-     * @param str The string to parse
-     * @return The parsed LocalDateTime object, or {@code null} if the input is {@code null} or empty
+     * @param str the string to parse
+     * @return the parsed {@code LocalDateTime} object, or {@code null} if the input is {@code null}, empty, or blank
+     * @throws java.time.format.DateTimeParseException if the string is not a valid millisecond
+     *         number nor an ISO-8601 {@code LocalDateTime} representation
      */
     @Override
     public LocalDateTime valueOf(final String str) {

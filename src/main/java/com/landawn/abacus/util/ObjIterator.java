@@ -62,9 +62,10 @@ import com.landawn.abacus.util.stream.Stream;
  *     .toList();
  *
  * // Generate values
+ * int[] count = {0};
  * ObjIterator<Integer> counter = ObjIterator.generate(
- *     () -> count++ < 10,  // hasNext
- *     () -> count          // next
+ *     () -> count[0] < 10,  // hasNext
+ *     () -> count[0]++      // next
  * );
  * }</pre>
  *
@@ -214,11 +215,17 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
 
             @Override
             public <A> A[] toArray(A[] output) {
-                if (output.length < toIndex - cursor) {
-                    output = N.copyOf(output, toIndex - cursor);
+                final int remaining = toIndex - cursor;
+
+                if (output.length < remaining) {
+                    output = N.copyOf(output, remaining);
+                } else if (output.length > remaining) {
+                    // Collection.toArray(T[]) contract: when the array is larger than the
+                    // collection, set array[size()] to null as the end-of-data sentinel.
+                    output[remaining] = null;
                 }
 
-                N.copy(a, cursor, output, 0, toIndex - cursor);
+                N.copy(a, cursor, output, 0, remaining);
 
                 cursor = toIndex; // Move cursor to the end after copying.
 

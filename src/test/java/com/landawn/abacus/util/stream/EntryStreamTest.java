@@ -5834,4 +5834,99 @@ public class EntryStreamTest extends TestBase {
         assertEquals("Count: 5", result.get("APPLE"));
     }
 
+    // SUSPECT #2: findAny() must work in both sequential and parallel modes.
+    @Test
+    public void testFindAny_sequential_nonEmpty() {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("a", 1);
+        map.put("b", 2);
+
+        Optional<Map.Entry<String, Integer>> result = EntryStream.of(map).findAny();
+
+        assertTrue(result.isPresent());
+        assertEquals("a", result.get().getKey());
+        assertEquals(Integer.valueOf(1), result.get().getValue());
+    }
+
+    @Test
+    public void testFindAny_sequential_empty() {
+        Optional<Map.Entry<String, Integer>> result = EntryStream.<String, Integer> empty().findAny();
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testFindAny_parallel_nonEmpty() {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("a", 1);
+        map.put("b", 2);
+        map.put("c", 3);
+
+        Optional<Map.Entry<String, Integer>> result = EntryStream.of(map).parallel().findAny();
+
+        assertTrue(result.isPresent());
+        assertTrue(map.containsKey(result.get().getKey()));
+        assertEquals(map.get(result.get().getKey()), result.get().getValue());
+    }
+
+    @Test
+    public void testFindAny_parallel_empty() {
+        Optional<Map.Entry<String, Integer>> result = EntryStream.<String, Integer> empty().parallel().findAny();
+        assertFalse(result.isPresent());
+    }
+
+    // SUSPECT #3: keys() / values() must work in both sequential and parallel modes
+    // (annotation changed from @SequentialOnly to @ParallelSupported).
+    @Test
+    public void testKeys_sequential() {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("x", 10);
+        map.put("y", 20);
+        map.put("z", 30);
+
+        List<String> keys = EntryStream.of(map).keys().toList();
+        assertEquals(Arrays.asList("x", "y", "z"), keys);
+    }
+
+    @Test
+    public void testKeys_parallel() {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("x", 10);
+        map.put("y", 20);
+        map.put("z", 30);
+
+        // Use Iterator-based source so the internal _map field is null and parallel dispatch is exercised.
+        List<String> keys = EntryStream.<String, Integer> of(map.entrySet().iterator())
+                .parallel()
+                .keys()
+                .toList();
+        Set<String> keySet = new HashSet<>(keys);
+        assertEquals(new HashSet<>(Arrays.asList("x", "y", "z")), keySet);
+    }
+
+    @Test
+    public void testValues_sequential() {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("x", 10);
+        map.put("y", 20);
+        map.put("z", 30);
+
+        List<Integer> values = EntryStream.of(map).values().toList();
+        assertEquals(Arrays.asList(10, 20, 30), values);
+    }
+
+    @Test
+    public void testValues_parallel() {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("x", 10);
+        map.put("y", 20);
+        map.put("z", 30);
+
+        List<Integer> values = EntryStream.<String, Integer> of(map.entrySet().iterator())
+                .parallel()
+                .values()
+                .toList();
+        Set<Integer> valueSet = new HashSet<>(values);
+        assertEquals(new HashSet<>(Arrays.asList(10, 20, 30)), valueSet);
+    }
+
 }

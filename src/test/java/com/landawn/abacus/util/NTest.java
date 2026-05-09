@@ -22483,6 +22483,47 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
+    public void testBatchMethodsValidateBatchSizeOnEmptyInput() {
+        // Per contract, all run/callByBatch overloads should validate batchSize, even when input is empty/null.
+        // Previously, several Iterable/array variants returned silently for empty input, swallowing IAE.
+
+        final Integer[] emptyArray = new Integer[0];
+        final List<Integer> emptyList = new ArrayList<>();
+        final Throwables.Consumer<List<Integer>, RuntimeException> batchConsumer = batch -> {
+        };
+        final Throwables.IntObjConsumer<Integer, RuntimeException> elemConsumer = (i, v) -> {
+        };
+        final Throwables.Runnable<RuntimeException> noopRunnable = () -> {
+        };
+        final Throwables.Function<List<Integer>, Integer, RuntimeException> batchFn = batch -> 0;
+        final Throwables.Callable<Integer, RuntimeException> noopCallable = () -> 0;
+
+        // runByBatch(T[], int, Consumer)
+        assertThrows(IllegalArgumentException.class, () -> N.runByBatch(emptyArray, 0, batchConsumer));
+        assertThrows(IllegalArgumentException.class, () -> N.runByBatch(emptyArray, -3, batchConsumer));
+
+        // runByBatch(T[], int, IntObjConsumer, Runnable)
+        assertThrows(IllegalArgumentException.class, () -> N.runByBatch(emptyArray, 0, elemConsumer, noopRunnable));
+        assertThrows(IllegalArgumentException.class, () -> N.runByBatch(emptyArray, -1, elemConsumer, noopRunnable));
+
+        // runByBatch(Iterable, int, IntObjConsumer, Runnable)
+        assertThrows(IllegalArgumentException.class, () -> N.runByBatch((Iterable<Integer>) emptyList, 0, elemConsumer, noopRunnable));
+        assertThrows(IllegalArgumentException.class, () -> N.runByBatch((Iterable<Integer>) emptyList, -1, elemConsumer, noopRunnable));
+
+        // callByBatch(T[], int, Function)
+        assertThrows(IllegalArgumentException.class, () -> N.callByBatch(emptyArray, 0, batchFn));
+        assertThrows(IllegalArgumentException.class, () -> N.callByBatch(emptyArray, -1, batchFn));
+
+        // callByBatch(T[], int, IntObjConsumer, Callable)
+        assertThrows(IllegalArgumentException.class, () -> N.callByBatch(emptyArray, 0, elemConsumer, noopCallable));
+        assertThrows(IllegalArgumentException.class, () -> N.callByBatch(emptyArray, -1, elemConsumer, noopCallable));
+
+        // callByBatch(Iterable, int, IntObjConsumer, Callable)
+        assertThrows(IllegalArgumentException.class, () -> N.callByBatch((Iterable<Integer>) emptyList, 0, elemConsumer, noopCallable));
+        assertThrows(IllegalArgumentException.class, () -> N.callByBatch((Iterable<Integer>) emptyList, -1, elemConsumer, noopCallable));
+    }
+
+    @Test
     public void testRunByBatchWithElementConsumerException() {
         Integer[] array = { 1, 2, 3, 4, 5 };
         assertThrows(RuntimeException.class, () -> {
@@ -27558,4 +27599,125 @@ public class NTest extends AbstractParserTest {
         assertTrue(closed.contains(Percentage._99), "rangeClosed should contain _99");
     }
 
+    // -------------- bug-fix regression tests --------------
+
+    @org.junit.jupiter.api.Test
+    public void testRemoveDuplicatesObjectArrayEmptyRangeReturnsEmptyArrayNotOriginal() {
+        // Bug fix: removeDuplicates(T[], int, int, boolean) used to return the original array
+        // when fromIndex == toIndex, even though semantics is "distinct elements within [from, to)".
+        // It should return an empty array of the right component type, matching the primitive overloads.
+        String[] in = { "a", "b", "c" };
+        String[] empty = N.removeDuplicates(in, 0, 0, false);
+        assertNotNull(empty);
+        assertEquals(0, empty.length);
+        assertNotSame(in, empty, "must NOT return the original array for an empty range");
+        assertEquals(String.class, empty.getClass().getComponentType());
+
+        String[] empty2 = N.removeDuplicates(in, 1, 1, true);
+        assertEquals(0, empty2.length);
+        assertNotSame(in, empty2);
+        assertEquals(String.class, empty2.getClass().getComponentType());
+
+        // Null input — same-reference contract preserved.
+        assertEquals(N.EMPTY_STRING_ARRAY, N.removeDuplicates((String[]) null, 0, 0, false));
+
+        // Empty array input — input-or-empty.
+        String[] inEmpty = new String[0];
+        String[] outEmpty = N.removeDuplicates(inEmpty, 0, 0, false);
+        // Either same reference (preserves prior behavior for empty input) or an empty array — accept either,
+        // but it must be empty.
+        assertEquals(0, outEmpty.length);
+    }
+
+    // -------------- coverage tests for sleep/sum/average behavior --------------
+
+    @org.junit.jupiter.api.Test
+    public void testSleepNonPositiveReturnsImmediately() {
+        // Negative or zero millis must return promptly without throwing.
+        long t0 = System.nanoTime();
+        N.sleep(0);
+        N.sleep(-5);
+        N.sleep(-1, java.util.concurrent.TimeUnit.SECONDS);
+        N.sleepUninterruptibly(0);
+        N.sleepUninterruptibly(-5);
+        N.sleepUninterruptibly(-3, java.util.concurrent.TimeUnit.SECONDS);
+        long elapsedMs = (System.nanoTime() - t0) / 1_000_000L;
+        // 6 calls should complete well under a second on any sane machine.
+        assertTrue(elapsedMs < 1_000, "non-positive sleep took unexpectedly long: " + elapsedMs + " ms");
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testSumIntOverflowDetected() {
+        // Sum of ints overflowing into long, then toIntExact -> ArithmeticException.
+        int[] bigs = { Integer.MAX_VALUE, 1 };
+        assertThrows(ArithmeticException.class, () -> N.sum(bigs));
+        // The sumToLong path widens correctly.
+        assertEquals((long) Integer.MAX_VALUE + 1L, N.sumToLong(bigs));
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testAverageEmptyReturnsZeroNotNaN() {
+        // average over empty / null inputs must NOT divide by zero.
+        assertEquals(0d, N.average(new int[0]), 0.0);
+        assertEquals(0d, N.average((int[]) null), 0.0);
+        assertEquals(0d, N.average(new long[0]), 0.0);
+        assertEquals(0d, N.average(new double[0]), 0.0);
+        assertEquals(0d, N.average(new byte[] { 1, 2, 3 }, 1, 1), 0.0);
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testAverageByteWidensProperly() {
+        // average(byte[]) widens through long/double — no overflow on summation.
+        byte[] all = new byte[256];
+        java.util.Arrays.fill(all, Byte.MAX_VALUE);
+        assertEquals((double) Byte.MAX_VALUE, N.average(all), 0.0);
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testMinMaxFloatNaNPropagates() {
+        // Documented behavior: NaN propagates per Math.min/Math.max.
+        float[] withNaN = { 1.0f, Float.NaN, 3.0f };
+        assertTrue(Float.isNaN(N.min(withNaN)));
+        assertTrue(Float.isNaN(N.max(withNaN)));
+        // Excluding NaN by range should restore normal min/max.
+        assertEquals(1.0f, N.min(withNaN, 0, 1), 0.0f);
+        assertEquals(1.0f, N.max(withNaN, 0, 1), 0.0f);
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testMinEmptyArrayThrowsIAE() {
+        assertThrows(IllegalArgumentException.class, () -> N.min(new int[0]));
+        assertThrows(IllegalArgumentException.class, () -> N.max(new int[0]));
+        assertThrows(IllegalArgumentException.class, () -> N.min((int[]) null));
+        assertThrows(IllegalArgumentException.class, () -> N.max((int[]) null));
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testReplaceAllFloatUsesFloatCompareForNaN() {
+        // Float.NaN != Float.NaN by ==, but Float.compare(NaN, NaN) == 0,
+        // so replaceAll(float[], NaN, x) MUST replace NaN entries.
+        float[] arr = { 1.0f, Float.NaN, Float.NaN, 2.0f };
+        int n = N.replaceAll(arr, Float.NaN, 0.0f);
+        assertEquals(2, n);
+        assertEquals(0.0f, arr[1], 0.0f);
+        assertEquals(0.0f, arr[2], 0.0f);
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testRemoveAllOccurrencesFloatNaN() {
+        float[] arr = { 1.0f, Float.NaN, 2.0f, Float.NaN };
+        float[] result = N.removeAllOccurrences(arr, Float.NaN);
+        assertArrayEquals(new float[] { 1.0f, 2.0f }, result, 0.0f);
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testShuffleEmptyArrayDoesNotThrow() {
+        // Shuffle of empty/null array must be a no-op.
+        int[] empty = new int[0];
+        N.shuffle(empty);
+        assertEquals(0, empty.length);
+        Integer[] emptyObj = new Integer[0];
+        N.shuffle(emptyObj);
+        assertEquals(0, emptyObj.length);
+    }
 }

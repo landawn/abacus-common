@@ -22,8 +22,10 @@ import com.landawn.abacus.util.Sheet;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for Sheet, which represents a two-dimensional table structure with row keys,
- * column keys, and values. This class handles serialization and deserialization of Sheet instances.
+ * Type handler for {@link Sheet}, which represents a two-dimensional table structure with row keys,
+ * column keys, and cell values. This class handles JSON-based serialization and deserialization of
+ * Sheet instances; it does not support a flat string round-trip and reports
+ * {@link #isSerializable()} as {@code false}, delegating to {@link SerializationType#SHEET}.
  *
  * @param <R> the row key type
  * @param <C> the column key type

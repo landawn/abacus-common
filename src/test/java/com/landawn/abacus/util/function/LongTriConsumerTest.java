@@ -149,4 +149,10 @@ public class LongTriConsumerTest extends TestBase {
         assertEquals("first", executionOrder.get(0));
         assertEquals("second", executionOrder.get(1));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        LongTriConsumer instance = (a, b, c) -> {};
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((LongTriConsumer) null));
+    }
 }

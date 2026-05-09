@@ -803,4 +803,48 @@ public class AbstractLongStreamTest extends TestBase {
         assertFalse(iter.hasNext());
     }
 
+    @Test
+    public void testSummaryStatisticsAndPercentiles_NoOverflowOnSum() {
+        // LongSummaryStatistics.accept silently wraps long overflow in its sum, so
+        // summaryStatisticsAndPercentiles() must do the same — diverging behaviour
+        // (e.g. throwing ArithmeticException) would make one API fail on the same
+        // data the other handles cleanly.
+        stream = createLongStream(Long.MAX_VALUE, Long.MAX_VALUE);
+
+        Pair<LongSummaryStatistics, Optional<Map<Percentage, Long>>> result = stream.summaryStatisticsAndPercentiles();
+        LongSummaryStatistics stats = result.left();
+
+        assertEquals(2, stats.getCount());
+        assertEquals(Long.MAX_VALUE, stats.getMin());
+        assertEquals(Long.MAX_VALUE, stats.getMax());
+        // Long.MAX_VALUE + Long.MAX_VALUE wraps to -2 (silent overflow), matching JDK accept().
+        assertEquals(-2L, stats.getSum());
+        assertTrue(result.right().isPresent());
+    }
+
+    @Test
+    public void testReversedRotatedReverseSorted_CountExhaustsIterator() {
+        // reversed(): count() must consume all remaining elements
+        LongIteratorEx revIter = (LongIteratorEx) createLongStream(1L, 2L, 3L, 4L, 5L).reversed().iteratorEx();
+        assertEquals(5L, revIter.count());
+        assertFalse(revIter.hasNext());
+
+        // rotated(): count() must consume all remaining elements
+        LongIteratorEx rotIter = (LongIteratorEx) createLongStream(1L, 2L, 3L, 4L, 5L).rotated(2).iteratorEx();
+        assertEquals(5L, rotIter.count());
+        assertFalse(rotIter.hasNext());
+
+        // reverseSorted(): count() must consume all remaining elements
+        LongIteratorEx rsIter = (LongIteratorEx) createLongStream(3L, 1L, 4L, 1L, 5L).reverseSorted().iteratorEx();
+        assertEquals(5L, rsIter.count());
+        assertFalse(rsIter.hasNext());
+
+        // After consuming a few elements first, count() returns the remaining count and exhausts the iterator
+        LongIteratorEx revIter2 = (LongIteratorEx) createLongStream(1L, 2L, 3L, 4L, 5L).reversed().iteratorEx();
+        revIter2.nextLong();
+        revIter2.nextLong();
+        assertEquals(3L, revIter2.count());
+        assertFalse(revIter2.hasNext());
+    }
+
 }

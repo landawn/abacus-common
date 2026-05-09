@@ -138,4 +138,10 @@ public class ShortTriPredicateTest extends TestBase {
         assertTrue(combined.test((short) 0, (short) 2, (short) 4)); // both conditions
         assertFalse(combined.test((short) 1, (short) 2, (short) 4)); // neither condition
     }
+
+    @Test
+    public void testAndNullThrowsImmediately() {
+        ShortTriPredicate instance = (a, b, c) -> false;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((ShortTriPredicate) null));
+    }
 }

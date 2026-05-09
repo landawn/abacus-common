@@ -706,4 +706,29 @@ public class AbstractIntStreamTest extends TestBase {
         assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
     }
 
+    @Test
+    public void testReversedRotatedReverseSorted_CountExhaustsIterator() {
+        // reversed(): count() must consume all remaining elements
+        IntIteratorEx revIter = (IntIteratorEx) createIntStream(new int[] { 1, 2, 3, 4, 5 }).reversed().iteratorEx();
+        assertEquals(5L, revIter.count());
+        Assertions.assertFalse(revIter.hasNext());
+
+        // rotated(): count() must consume all remaining elements
+        IntIteratorEx rotIter = (IntIteratorEx) createIntStream(new int[] { 1, 2, 3, 4, 5 }).rotated(2).iteratorEx();
+        assertEquals(5L, rotIter.count());
+        Assertions.assertFalse(rotIter.hasNext());
+
+        // reverseSorted(): count() must consume all remaining elements
+        IntIteratorEx rsIter = (IntIteratorEx) createIntStream(new int[] { 3, 1, 4, 1, 5 }).reverseSorted().iteratorEx();
+        assertEquals(5L, rsIter.count());
+        Assertions.assertFalse(rsIter.hasNext());
+
+        // After consuming a few elements first, count() returns the remaining count and exhausts the iterator
+        IntIteratorEx revIter2 = (IntIteratorEx) createIntStream(new int[] { 1, 2, 3, 4, 5 }).reversed().iteratorEx();
+        revIter2.nextInt();
+        revIter2.nextInt();
+        assertEquals(3L, revIter2.count());
+        Assertions.assertFalse(revIter2.hasNext());
+    }
+
 }

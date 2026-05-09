@@ -4462,7 +4462,7 @@ public class NoCachingNoUpdatingTest extends TestBase {
         assertSame(target, result);
         assertEquals("a", result[0]);
         assertEquals("b", result[1]);
-        assertEquals("x", result[2]);
+        assertNull(result[2]);
         assertEquals("x", result[3]);
         assertEquals("x", result[4]);
     }

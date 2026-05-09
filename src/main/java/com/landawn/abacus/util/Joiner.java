@@ -508,7 +508,7 @@ public final class Joiner implements Closeable {
      * When enabled, the internal buffer will be obtained from and returned to an object pool.
      *
      * <p><b>Important:</b> When using cached buffer, you must call one of the terminal operations
-     * ({@link #toString()}, {@link #appendTo(Appendable)}, {@link #map(Function)}, {@link #mapIfNotEmpty(Function)},
+     * ({@link #toString()}, {@link #appendTo(Appendable)}, {@link #map(Function)}, {@link #mapIfNotEmpty(Function)})
      * or {@link #close()} to properly recycle the buffer.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2975,7 +2975,7 @@ public final class Joiner implements Closeable {
      *
      * @param <T> the type of the result
      * @param mapper the function to apply to the joined string if not empty
-     * @return a Optional containing the result, or empty if no elements were appended
+     * @return an Optional containing the result, or empty if no elements were appended
      * @throws IllegalArgumentException if mapper is null
      */
     @Beta

@@ -19,6 +19,10 @@ package com.landawn.abacus.type;
  * It provides type information and default value handling for {@code byte} primitives,
  * which map to the SQL {@code TINYINT} type.
  *
+ * <p>The key distinction from {@code ByteType} (which handles {@link Byte}) is the default value:
+ * {@link #defaultValue()} returns {@code (byte) 0} (matching the JLS default for {@code byte}),
+ * whereas the wrapper type's default is {@code null}.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Type<Byte> type = TypeFactory.getType(byte.class);

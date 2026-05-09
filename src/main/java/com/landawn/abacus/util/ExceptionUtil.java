@@ -391,6 +391,10 @@ public final class ExceptionUtil {
      * @return {@code true} if the exception or any cause is of the specified type
      */
     public static boolean hasCause(final Throwable e, final Class<? extends Throwable> targetExceptionType) {
+        if (e == null) {
+            return false;
+        }
+
         int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
         Throwable prevCause = null;
         Throwable cause = e;
@@ -425,6 +429,10 @@ public final class ExceptionUtil {
      * @return {@code true} if any exception in the cause chain matches the predicate
      */
     public static boolean hasCause(final Throwable e, final Predicate<? super Throwable> targetExceptionTester) {
+        if (e == null) {
+            return false;
+        }
+
         int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
         Throwable prevCause = null;
         Throwable cause = e;
@@ -458,6 +466,10 @@ public final class ExceptionUtil {
      * @return {@code true} if the exception chain contains a SQL-related exception
      */
     public static boolean hasSQLCause(final Throwable e) {
+        if (e == null) {
+            return false;
+        }
+
         int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
         Throwable prevCause = null;
         Throwable cause = e;
@@ -491,6 +503,10 @@ public final class ExceptionUtil {
      * @return {@code true} if the exception chain contains an IO-related exception
      */
     public static boolean hasIOCause(final Throwable e) {
+        if (e == null) {
+            return false;
+        }
+
         int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
         Throwable prevCause = null;
         Throwable cause = e;
@@ -545,14 +561,20 @@ public final class ExceptionUtil {
      * }
      * }</pre>
      *
-     * @param e the starting exception
-     * @return a list of all exceptions in the cause chain
+     * @param e the starting exception, which may be {@code null}
+     * @return a list of all exceptions in the cause chain; an empty list if {@code e} is {@code null}.
+     *         Cycles in the chain are detected via reference identity to prevent infinite loops.
      */
     public static List<Throwable> listCause(final Throwable e) {
         final List<Throwable> list = new ArrayList<>();
+        if (e == null) {
+            return list;
+        }
+
+        final java.util.Set<Throwable> seen = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
         Throwable cause = e;
 
-        while (cause != null && !list.contains(cause)) {
+        while (cause != null && seen.add(cause)) {
             list.add(cause);
             cause = cause.getCause();
         }
@@ -574,10 +596,14 @@ public final class ExceptionUtil {
      * }
      * }</pre>
      *
-     * @param e the exception to traverse
-     * @return the root cause or the input if no cause found
+     * @param e the exception to traverse, which may be {@code null}
+     * @return the root cause or the input if no cause found; {@code null} if {@code e} is {@code null}
      */
     public static Throwable firstCause(final Throwable e) {
+        if (e == null) {
+            return null;
+        }
+
         final java.util.Set<Throwable> seen = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
         seen.add(e);
         Throwable cause = e;
@@ -611,6 +637,10 @@ public final class ExceptionUtil {
      * @return an Optional containing the found exception, or empty if not found
      */
     public static <E extends Throwable> Optional<E> findCause(final Throwable e, final Class<? extends E> targetExceptionType) {
+        if (e == null) {
+            return Optional.empty();
+        }
+
         int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
         Throwable prevCause = null;
         Throwable cause = e;
@@ -649,6 +679,10 @@ public final class ExceptionUtil {
      * @return an Optional containing the found exception, or empty if not found
      */
     public static <E extends Throwable> Optional<E> findCause(final Throwable e, final Predicate<? super Throwable> targetExceptionTester) {
+        if (e == null) {
+            return Optional.empty();
+        }
+
         int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
         Throwable prevCause = null;
         Throwable cause = e;
@@ -710,8 +744,9 @@ public final class ExceptionUtil {
      * }
      * }</pre>
      *
-     * @param e the exception
-     * @return the error message, or the exception class name if no message is available
+     * @param e the exception, which may be {@code null}
+     * @return the error message, or the exception class name if no message is available;
+     *         returns an empty string if {@code e} is {@code null}
      */
     public static String getErrorMessage(final Throwable e) {
         return getErrorMessage(e, false);
@@ -731,11 +766,15 @@ public final class ExceptionUtil {
      * }
      * }</pre>
      *
-     * @param e the exception
+     * @param e the exception, which may be {@code null}
      * @param withExceptionClassName if {@code true}, prefixes the message with the exception class name
-     * @return the formatted error message
+     * @return the formatted error message; returns an empty string if {@code e} is {@code null}
      */
     public static String getErrorMessage(final Throwable e, final boolean withExceptionClassName) {
+        if (e == null) {
+            return Strings.EMPTY;
+        }
+
         String msg = e.getMessage();
 
         if (Strings.isEmpty(msg) && e.getCause() != null) {

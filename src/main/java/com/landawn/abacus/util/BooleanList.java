@@ -674,14 +674,14 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * Removes the first occurrence of the specified element from this list, if it is present.
      * If the list does not contain the element, it is unchanged.
      *
-     * <p>This method runs in linear time, as it may need to search through the entire list
+     * <p>This method runs in linear time, as it may need to search through the entire list.</p>
      * <p><b>Note:</b> This method removes by value. To remove by index, use {@link #removeAt(int)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList flags = BooleanList.of(true, false, true, false);
      * boolean removed = flags.remove(true);    // Returns true, list is now [false, true, false]
-     * boolean notFound = flags.remove(true);   // Returns true, list is now [false, false]
+     * boolean removedAgain = flags.remove(true);   // Returns true, list is now [false, false]
      * }</pre>
      *
      * @param e the element to be removed from this list, if present
@@ -1880,7 +1880,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @return {@code true} if this list contains duplicate elements, {@code false} otherwise.
      *         An empty list or a list with one element returns {@code false}.
-     *         A list with exactly two different boolean values (one {@code true} and one false) returns {@code false}.
+     *         A list with exactly two different boolean values (one {@code true} and one {@code false}) returns {@code false}.
      */
     @Override
     public boolean containsDuplicates() {
@@ -1990,7 +1990,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @param distance the distance to rotate the list. Positive values rotate right,
      *                 negative values rotate left
-     * @see N#rotate(int[], int)
+     * @see N#rotate(boolean[], int)
      */
     @Override
     public void rotate(final int distance) {
@@ -2087,7 +2087,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return a new {@code BooleanList} containing the sampled elements
      * @throws IndexOutOfBoundsException if the indices are out of range
      * @throws IllegalArgumentException if {@code step} is zero
-     * @see N#copyOfRange(int[], int, int, int)
+     * @see N#copyOfRange(boolean[], int, int, int)
      */
     @Override
     public BooleanList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {

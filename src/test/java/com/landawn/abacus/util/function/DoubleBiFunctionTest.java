@@ -71,4 +71,10 @@ public class DoubleBiFunctionTest extends TestBase {
         String result = composed.apply(1.0, 2.0);
         assertEquals("result=3.0", result);
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        DoubleBiFunction<String> instance = (a, b) -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

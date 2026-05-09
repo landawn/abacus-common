@@ -179,4 +179,10 @@ public class BiObjIntPredicateTest extends TestBase {
 
         assertTrue(combined.test("test", "value", 5)); // Should not throw exception
     }
+
+    @Test
+    public void testAndNullThrowsImmediately() {
+        BiObjIntPredicate<String, String> instance = (a, b, c) -> false;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((BiObjIntPredicate) null));
+    }
 }

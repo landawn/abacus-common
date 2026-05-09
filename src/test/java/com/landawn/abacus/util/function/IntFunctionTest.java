@@ -138,4 +138,10 @@ public class IntFunctionTest extends TestBase {
         Integer result2 = identity.apply(127);
         assertSame(result1, result2);
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        IntFunction<String> instance = a -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

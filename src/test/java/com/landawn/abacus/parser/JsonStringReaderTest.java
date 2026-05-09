@@ -836,4 +836,18 @@ public class JsonStringReaderTest extends TestBase {
         assertThrows(ParsingException.class, () -> reader.nextToken());
     }
 
+    // Bug fix: error message for invalid hex digit in unicode escape used the int code point
+    // (e.g. "'90'") instead of the printable char ("'Z'"). The JsonStreamReader sibling already
+    // formatted with (char) cast; JsonStringReader did not.
+    @Test
+    public void testReadEscapeCharacter_InvalidHexDigit_ErrorMessageContainsCharNotCodePoint() {
+        String json = "\"\\uZ000\"";
+        JsonReader reader = JsonStringReader.parse(json, cbuf);
+        reader.nextToken(); // START_DOUBLE_QUOTE
+        ParsingException ex = assertThrows(ParsingException.class, () -> reader.nextToken());
+        assertTrue(ex.getMessage().contains("'Z'"), "Expected message to contain readable char 'Z' but was: " + ex.getMessage());
+        assertFalse(ex.getMessage().contains("'" + (int) 'Z' + "'"),
+                "Message should not contain integer code point: " + ex.getMessage());
+    }
+
 }

@@ -160,4 +160,10 @@ public class LongTriPredicateTest extends TestBase {
         assertTrue(predicate.test(50L, 50L, 50L)); // all equal
         assertFalse(predicate.test(40L, 50L, 20L)); // sum >= 100 and not all equal
     }
+
+    @Test
+    public void testAndNullThrowsImmediately() {
+        LongTriPredicate instance = (a, b, c) -> false;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((LongTriPredicate) null));
+    }
 }

@@ -859,4 +859,17 @@ public class AbstractDoubleStreamTest extends TestBase {
         assertFalse(iter.hasNext());
     }
 
+    @Test
+    public void testSummaryStatisticsAndPercentiles_NaNPropagation() {
+        // DoubleSummaryStatistics.accept uses Math.min/Math.max so any NaN propagates
+        // into both min and max. summaryStatisticsAndPercentiles() must give the same
+        // result so the two APIs do not diverge for the same data.
+        Pair<DoubleSummaryStatistics, Optional<Map<Percentage, Double>>> result = createDoubleStream(new double[] { 1.0, 2.0, Double.NaN, 3.0 })
+                .summaryStatisticsAndPercentiles();
+        DoubleSummaryStatistics stats = result.left();
+        assertEquals(4, stats.getCount());
+        assertTrue(Double.isNaN(stats.getMin()), "min should be NaN when input contains NaN");
+        assertTrue(Double.isNaN(stats.getMax()), "max should be NaN when input contains NaN");
+    }
+
 }

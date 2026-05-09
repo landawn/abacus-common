@@ -151,4 +151,10 @@ public class ShortUnaryOperatorTest extends TestBase {
         assertEquals(Short.MAX_VALUE, identity.applyAsShort(Short.MAX_VALUE));
         assertEquals(Short.MIN_VALUE, identity.applyAsShort(Short.MIN_VALUE));
     }
+
+    @Test
+    public void testComposeNullThrowsImmediately() {
+        ShortUnaryOperator instance = a -> (short) 0;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.compose((ShortUnaryOperator) null));
+    }
 }

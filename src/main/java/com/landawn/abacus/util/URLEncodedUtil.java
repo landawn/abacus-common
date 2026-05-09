@@ -345,12 +345,12 @@ public final class URLEncodedUtil {
     private static final BitSet PUNCT = new BitSet(256);
 
     /**
-     * Characters which are safe to use in userinfo, i.e., {@link #UNRESERVED} plus {@link #PUNCT} ration
+     * Characters which are safe to use in userinfo, i.e., {@link #UNRESERVED} plus {@link #PUNCT}
      */
     private static final BitSet USERINFO = new BitSet(256);
 
     /**
-     * Characters which are safe to use in a path, i.e., {@link #UNRESERVED} plus {@link #PUNCT} ration plus / @
+     * Characters which are safe to use in a path, i.e., {@link #UNRESERVED} plus {@link #PUNCT} plus / @
      */
     private static final BitSet PATH_SAFE = new BitSet(256);
 
@@ -1335,7 +1335,7 @@ public final class URLEncodedUtil {
                     // Keep surrogate pairs intact when encoding non-ASCII characters.
                     final byte[] bytes;
 
-                    if (Character.isHighSurrogate(c) && cb.hasRemaining() && Character.isLowSurrogate(cb.charAt(cb.position()))) {
+                    if (Character.isHighSurrogate(c) && cb.hasRemaining() && Character.isLowSurrogate(cb.charAt(0))) {
                         bytes = new String(new char[] { c, cb.get() }).getBytes(charset);
                     } else {
                         bytes = String.valueOf(c).getBytes(charset);

@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -62,6 +64,7 @@ public interface BooleanTriConsumer extends Throwables.BooleanTriConsumer<Runtim
      * @throws NullPointerException if {@code after} is null
      */
     default BooleanTriConsumer andThen(final BooleanTriConsumer after) {
+        Objects.requireNonNull(after);
         return (a, b, c) -> {
             accept(a, b, c);
             after.accept(a, b, c);

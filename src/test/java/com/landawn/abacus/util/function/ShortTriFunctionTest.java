@@ -101,4 +101,10 @@ public class ShortTriFunctionTest extends TestBase {
         assertEquals("15.0", combined.apply((short) 2, (short) 3, (short) 5));
         assertEquals("0.0", combined.apply((short) 0, (short) 0, (short) 0));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        ShortTriFunction<String> instance = (a, b, c) -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

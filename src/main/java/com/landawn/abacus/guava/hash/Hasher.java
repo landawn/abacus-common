@@ -76,6 +76,7 @@ import com.google.common.hash.HashCode;
  * @author Kevin Bourrillion
  * @see HashFunction
  * @see HashCode
+ * @see com.google.common.hash.Hasher
  */
 public interface Hasher {
 

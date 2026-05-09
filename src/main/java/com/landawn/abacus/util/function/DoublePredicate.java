@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
@@ -107,6 +109,7 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
      */
     @Override
     default DoublePredicate and(final java.util.function.DoublePredicate other) {
+        Objects.requireNonNull(other);
         return value -> test(value) && other.test(value);
     }
 
@@ -122,6 +125,7 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
      */
     @Override
     default DoublePredicate or(final java.util.function.DoublePredicate other) {
+        Objects.requireNonNull(other);
         return value -> test(value) || other.test(value);
     }
 

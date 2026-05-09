@@ -61,4 +61,10 @@ public class IntTriConsumerTest extends TestBase {
         assertEquals(9, results[0]);
         assertEquals(24, results[1]);
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        IntTriConsumer instance = (a, b, c) -> {};
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((IntTriConsumer) null));
+    }
 }

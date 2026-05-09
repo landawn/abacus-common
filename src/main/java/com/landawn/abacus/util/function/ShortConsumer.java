@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -65,6 +67,7 @@ public interface ShortConsumer extends Throwables.ShortConsumer<RuntimeException
      * @throws NullPointerException if {@code after} is null
      */
     default ShortConsumer andThen(final ShortConsumer after) {
+        Objects.requireNonNull(after);
         return value -> {
             accept(value);
             after.accept(value);

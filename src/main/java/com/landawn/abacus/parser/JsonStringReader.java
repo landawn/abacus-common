@@ -41,7 +41,7 @@ import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
 
 /**
- * Internal implementation of {@code JsonReader} for parsing JSON from string sources.
+ * Internal implementation of {@link JsonReader} for parsing JSON from string sources.
  * This class provides efficient JSON parsing by working directly with character arrays
  * and minimizing object allocation during parsing.
  *
@@ -53,8 +53,8 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li>Optimized parsing of common JSON values ({@code true}, {@code false}, {@code null})</li>
  * </ul>
  *
- * <p>This is an internal class and should not be used directly by application code.</p>
- *
+ * <p>This is an internal class and should not be used directly by application code.
+ * Instances are not thread-safe and must not be shared across threads.</p>
  */
 class JsonStringReader extends AbstractJsonReader {
     private static final Logger logger = LoggerFactory.getLogger(JsonStringReader.class);
@@ -503,11 +503,13 @@ class JsonStringReader extends AbstractJsonReader {
     }
 
     /**
-     * Saves a character to the internal buffer, handling escape sequences and whitespace.
+     * Appends a character to the internal token buffer, handling escape sequences and skipping
+     * leading/intra-token whitespace. Whitespace characters ({@code ch <= 32}) are skipped, and
+     * a backslash triggers escape-sequence resolution via {@link #readEscapeCharacter()}.
      * This method manages the character buffer efficiently to minimize allocations.
      *
-     * @param ch the character to save
-     * @return the processed character (after escape handling)
+     * @param ch the input character to consider
+     * @return the unescaped character if {@code ch} was a backslash, otherwise the original {@code ch}
      */
     protected int saveChar(int ch) {
         if (nextChar > 0) {
@@ -707,9 +709,11 @@ class JsonStringReader extends AbstractJsonReader {
      */
 
     /**
-     * Increases the capacity of the internal character buffer.
+     * Increases the capacity of the internal character buffer (grows by ~1.75x).
      *
-     * @throws ParsingException if the buffer size exceeds the maximum capacity
+     * @throws ParsingException if the buffer cannot grow any further (i.e. the new capacity
+     *         would not exceed the current capacity, typically because {@link Integer#MAX_VALUE}
+     *         has been reached)
      */
     void enlargeCharBuffer() {
         final long newCapacityLong = (long) (cbufLen * 1.75);
@@ -761,7 +765,7 @@ class JsonStringReader extends AbstractJsonReader {
                     } else if ((c >= 'A') && (c <= 'F')) {
                         result += (char) (c - 'A' + 10);
                     } else {
-                        throw new ParsingException("Number format exception: invalid hex digit '" + c + "' in unicode escape sequence");
+                        throw new ParsingException("Number format exception: invalid hex digit '" + (char) c + "' in unicode escape sequence");
                     }
                 }
 

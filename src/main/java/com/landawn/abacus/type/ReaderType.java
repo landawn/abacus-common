@@ -77,6 +77,9 @@ import com.landawn.abacus.util.Objectory;
 @SuppressWarnings("java:S2160")
 public class ReaderType extends AbstractType<Reader> {
 
+    /**
+     * The type name identifier for Reader type, equal to the simple class name {@code "Reader"}.
+     */
     public static final String READER = Reader.class.getSimpleName();
 
     private final Class<Reader> typeClass;

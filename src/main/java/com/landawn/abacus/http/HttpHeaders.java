@@ -32,14 +32,21 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.cs;
 
 /**
- * A container for HTTP headers with a fluent API for setting and retrieving header values.
- * This class provides convenient methods for working with common HTTP headers and supports
- * all standard HTTP header fields as defined in various RFCs.
+ * A mutable container for HTTP headers with a fluent API for setting and retrieving header values.
+ * This class provides convenient methods for working with common HTTP headers and exposes
+ * constants for standard HTTP header field names (in {@link Names}) and common header values
+ * (in {@link Values}/{@link ReferrerPolicyValues}) as defined in various RFCs.
  *
- * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
+ * <p>Note: The {@link Names}, {@link Values}, and {@link ReferrerPolicyValues} constants were
+ * adapted from Google Guava under Apache License 2.0 and may be modified.</p>
  *
- * <p>Headers can be set individually or in bulk, and the class provides type-safe conversion
- * for various value types including strings, dates, collections, and numbers.</p>
+ * <p>Headers can be set individually or in bulk, and the class converts header values to their
+ * string representations on demand via {@link #valueOf(Object)}, with special handling for
+ * {@link java.util.Collection}, {@link java.util.Date}, and {@link java.time.Instant} values.</p>
+ *
+ * <p><b>Thread Safety:</b> Instances are <i>not</i> thread-safe. Configure a {@code HttpHeaders}
+ * instance from a single thread before sharing it with concurrent readers, or guard mutations
+ * externally.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -55,6 +62,7 @@ import com.landawn.abacus.util.cs;
  * }</pre>
  *
  * @see HttpClient
+ * @see HttpRequest
  * @see HttpSettings
  */
 public final class HttpHeaders {
@@ -596,18 +604,22 @@ public final class HttpHeaders {
     }
 
     /**
-     * Creates a new HttpHeaders instance from a Map of headers.
-     * The original map is used directly, not copied.
+     * Creates a new {@code HttpHeaders} instance backed by the supplied map.
+     * The original map is used directly, not copied; subsequent modifications to either the map
+     * or the returned {@code HttpHeaders} are visible to the other. Use {@link #copyOf(Map)} when
+     * an independent snapshot is desired. Note that the supplied map must therefore be mutable
+     * if you intend to call any setter or {@link #remove(String)} on the returned instance.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String, String> map = Map.of("Content-Type", "application/json");
+     * Map<String, String> map = new HashMap<>();
+     * map.put("Content-Type", "application/json");
      * HttpHeaders headers = HttpHeaders.of(map);
      * }</pre>
      *
      * @param headers the map of header names to values
-     * @return a new HttpHeaders instance backed by the provided map
-     * @throws IllegalArgumentException if headers is {@code null}
+     * @return a new {@code HttpHeaders} instance backed by the provided map
+     * @throws IllegalArgumentException if {@code headers} is {@code null}
      */
     public static HttpHeaders of(final Map<String, ?> headers) throws IllegalArgumentException {
         N.checkArgNotNull(headers);
@@ -643,8 +655,10 @@ public final class HttpHeaders {
 
     /**
      * Converts a header value to its string representation.
-     * Handles special cases for Collections (joined with "; "), Dates (formatted as HTTP date),
-     * and Instants (converted to Date then formatted). A {@code null} value is converted to an empty string.
+     * Handles special cases for {@link Collection} (joined with {@code ", "}), {@link Date}
+     * (formatted as an HTTP date), and {@link Instant} (converted to {@code Date} then formatted).
+     * A {@code null} value is converted to an empty string. {@link String} values are returned as-is;
+     * any other type is converted via {@link N#stringOf(Object)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

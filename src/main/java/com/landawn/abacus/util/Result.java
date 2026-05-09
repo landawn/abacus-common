@@ -891,9 +891,13 @@ public class Result<T, E extends Throwable> implements Immutable {
      * }</pre>
      *
      * @param <E2> the type of exception to be thrown.
-     * @param exception the exception to throw if this Result contains an exception, may be {@code null}.
+     * @param exception the exception to throw if this Result contains an exception. If
+     *                  {@code null} is supplied and this Result is a failure, a
+     *                  {@link NullPointerException} will be thrown by the JVM at the
+     *                  {@code throw} site.
      * @return the value contained in this Result if successful.
      * @throws E2 the provided exception if this Result contains an exception.
+     * @throws NullPointerException if {@code exception} is {@code null} and this Result is a failure.
      * @deprecated Use {@link #orElseThrow(Supplier)} instead for better performance (avoids creating exception if not needed).
      */
     @Deprecated

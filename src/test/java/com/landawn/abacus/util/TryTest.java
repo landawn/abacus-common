@@ -915,4 +915,78 @@ public class TryTest extends TestBase {
         assertEquals("handled", result);
         assertEquals(2, count.get());
     }
+
+    // ============== Suppressed-exception / close-in-finally semantics ==============
+
+    private static class ThrowOnClose implements AutoCloseable {
+        private final RuntimeException onClose;
+        private boolean closeCalled = false;
+
+        ThrowOnClose(RuntimeException onClose) {
+            this.onClose = onClose;
+        }
+
+        @Override
+        public void close() {
+            closeCalled = true;
+            if (onClose != null) {
+                throw onClose;
+            }
+        }
+    }
+
+    @Test
+    public void test_with_run_propagatesBodyExceptionWithCloseSuppressed() {
+        // Verifies the try-with-resources wiring: the body's exception is the primary
+        // exception, and the close() exception is attached as a suppressed exception.
+        RuntimeException bodyEx = new RuntimeException("body-failure");
+        RuntimeException closeEx = new RuntimeException("close-failure");
+        ThrowOnClose closeable = new ThrowOnClose(closeEx);
+
+        RuntimeException thrown = assertThrows(RuntimeException.class,
+                () -> Try.with(closeable).run(c -> { throw bodyEx; }));
+
+        assertTrue(closeable.closeCalled, "close() must run even when the body throws");
+        // ExceptionUtil.toRuntimeException may wrap; the body exception (or the wrap of it)
+        // is the primary cause, and the close exception must appear as suppressed somewhere
+        // in the cause/suppressed chain.
+        boolean foundClose = false;
+        Throwable t = thrown;
+        while (t != null && !foundClose) {
+            for (Throwable s : t.getSuppressed()) {
+                if (s == closeEx) {
+                    foundClose = true;
+                    break;
+                }
+            }
+            t = t.getCause();
+        }
+        assertTrue(foundClose, "close() exception must be attached as suppressed");
+    }
+
+    @Test
+    public void test_with_run_finalActionRunsOnSuccess() {
+        AtomicBoolean ran = new AtomicBoolean(false);
+        TestCloseable c = new TestCloseable();
+        Try.with(c, () -> ran.set(true)).run(x -> { /* no-op */ });
+        assertTrue(c.isClosed());
+        assertTrue(ran.get());
+    }
+
+    @Test
+    public void test_with_run_finalActionRunsAfterBodyException() {
+        AtomicBoolean ran = new AtomicBoolean(false);
+        TestCloseable c = new TestCloseable();
+        assertThrows(RuntimeException.class,
+                () -> Try.with(c, () -> ran.set(true)).run(x -> { throw new RuntimeException("boom"); }));
+        assertTrue(c.isClosed(), "resource still closed when body throws");
+        assertTrue(ran.get(), "finalAction must run in finally even when body throws");
+    }
+
+    @Test
+    public void test_with_supplier_run_supplierExceptionPropagates() {
+        // If the supplier throws, the failure must be propagated as a RuntimeException.
+        Throwables.Supplier<AutoCloseable, Exception> supplier = () -> { throw new java.io.IOException("supplier-fail"); };
+        assertThrows(RuntimeException.class, () -> Try.with(supplier).run(c -> fail("must not reach body")));
+    }
 }

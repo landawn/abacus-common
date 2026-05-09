@@ -1322,10 +1322,10 @@ public class DatasetTest extends AbstractTest {
         assertEquals("name", dataset.columnNames().get(2));
         assertEquals("age", dataset.columnNames().get(3));
 
-        assertEquals(50000.0, dataset.getRow(0)[0]);
-        assertEquals(1, dataset.getRow(0)[1]);
-        assertEquals("John", dataset.getRow(0)[2]);
-        assertEquals(25, dataset.getRow(0)[3]);
+        assertEquals(50000.0, dataset.getRow(0).get(0));
+        assertEquals(1, dataset.getRow(0).get(1));
+        assertEquals("John", dataset.getRow(0).get(2));
+        assertEquals(25, dataset.getRow(0).get(3));
     }
 
     @Test
@@ -1410,33 +1410,33 @@ public class DatasetTest extends AbstractTest {
     @DisplayName("Should move rows to beginning")
     public void testMoveRowsToBeginning() {
         dataset.moveRows(3, 5, 0);
-        assertEquals("Alice", dataset.getRow(0)[1]);
-        assertEquals("Charlie", dataset.getRow(1)[1]);
-        assertEquals("John", dataset.getRow(2)[1]);
-        assertEquals("Jane", dataset.getRow(3)[1]);
-        assertEquals("Bob", dataset.getRow(4)[1]);
+        assertEquals("Alice", dataset.getRow(0).get(1));
+        assertEquals("Charlie", dataset.getRow(1).get(1));
+        assertEquals("John", dataset.getRow(2).get(1));
+        assertEquals("Jane", dataset.getRow(3).get(1));
+        assertEquals("Bob", dataset.getRow(4).get(1));
     }
 
     @Test
     @DisplayName("Should move rows to end")
     public void testMoveRowsToEnd() {
         dataset.moveRows(0, 2, 3);
-        assertEquals("Bob", dataset.getRow(0)[1]);
-        assertEquals("Alice", dataset.getRow(1)[1]);
-        assertEquals("Charlie", dataset.getRow(2)[1]);
-        assertEquals("John", dataset.getRow(3)[1]);
-        assertEquals("Jane", dataset.getRow(4)[1]);
+        assertEquals("Bob", dataset.getRow(0).get(1));
+        assertEquals("Alice", dataset.getRow(1).get(1));
+        assertEquals("Charlie", dataset.getRow(2).get(1));
+        assertEquals("John", dataset.getRow(3).get(1));
+        assertEquals("Jane", dataset.getRow(4).get(1));
     }
 
     @Test
     @DisplayName("Should handle moving rows backward")
     public void testMoveRowsBackward() {
         dataset.moveRows(3, 5, 1);
-        assertEquals("John", dataset.getRow(0)[1]);
-        assertEquals("Alice", dataset.getRow(1)[1]);
-        assertEquals("Charlie", dataset.getRow(2)[1]);
-        assertEquals("Jane", dataset.getRow(3)[1]);
-        assertEquals("Bob", dataset.getRow(4)[1]);
+        assertEquals("John", dataset.getRow(0).get(1));
+        assertEquals("Alice", dataset.getRow(1).get(1));
+        assertEquals("Charlie", dataset.getRow(2).get(1));
+        assertEquals("Jane", dataset.getRow(3).get(1));
+        assertEquals("Bob", dataset.getRow(4).get(1));
     }
 
     @Test
@@ -1444,28 +1444,28 @@ public class DatasetTest extends AbstractTest {
     public void testMoveRowsEntireDataset() {
         List<String> originalNames = new ArrayList<>();
         for (int i = 0; i < dataset.size(); i++) {
-            originalNames.add((String) dataset.getRow(i)[1]);
+            originalNames.add((String) dataset.getRow(i).get(1));
         }
 
         dataset.moveRows(0, 5, 0);
 
         for (int i = 0; i < dataset.size(); i++) {
-            assertEquals(originalNames.get(i), dataset.getRow(i)[1]);
+            assertEquals(originalNames.get(i), dataset.getRow(i).get(1));
         }
     }
 
     @Test
     @DisplayName("Should verify row data after complex moves")
     public void testMoveRowsComplexDataVerification() {
-        Object[] originalRow0 = dataset.getRow(0);
-        Object[] originalRow2 = dataset.getRow(2);
-        Object[] originalRow4 = dataset.getRow(4);
+        Object[] originalRow0 = dataset.getRow(0, Object[].class);
+        Object[] originalRow2 = dataset.getRow(2, Object[].class);
+        Object[] originalRow4 = dataset.getRow(4, Object[].class);
 
         dataset.moveRows(2, 3, 4);
 
-        assertArrayEquals(originalRow0, dataset.getRow(0));
-        assertArrayEquals(originalRow2, dataset.getRow(4));
-        assertArrayEquals(originalRow4, dataset.getRow(3));
+        assertEquals(Arrays.asList(originalRow0), dataset.getRow(0));
+        assertEquals(Arrays.asList(originalRow2), dataset.getRow(4));
+        assertEquals(Arrays.asList(originalRow4), dataset.getRow(3));
     }
 
     @Test
@@ -1475,11 +1475,11 @@ public class DatasetTest extends AbstractTest {
         dataset.moveRows(0, 1, 2);
         dataset.println();
 
-        assertEquals("Alice", dataset.getRow(0)[1]);
-        assertEquals("Charlie", dataset.getRow(1)[1]);
-        assertEquals("John", dataset.getRow(2)[1]);
-        assertEquals("Jane", dataset.getRow(3)[1]);
-        assertEquals("Bob", dataset.getRow(4)[1]);
+        assertEquals("Alice", dataset.getRow(0).get(1));
+        assertEquals("Charlie", dataset.getRow(1).get(1));
+        assertEquals("John", dataset.getRow(2).get(1));
+        assertEquals("Jane", dataset.getRow(3).get(1));
+        assertEquals("Bob", dataset.getRow(4).get(1));
     }
 
     @Test
@@ -1501,11 +1501,11 @@ public class DatasetTest extends AbstractTest {
     @DisplayName("Should move single row within valid range")
     public void testMoveRowsSingleRow() {
         dataset.moveRows(0, 1, 3);
-        assertEquals("Jane", dataset.getRow(0)[1]);
-        assertEquals("Bob", dataset.getRow(1)[1]);
-        assertEquals("Alice", dataset.getRow(2)[1]);
-        assertEquals("John", dataset.getRow(3)[1]);
-        assertEquals("Charlie", dataset.getRow(4)[1]);
+        assertEquals("Jane", dataset.getRow(0).get(1));
+        assertEquals("Bob", dataset.getRow(1).get(1));
+        assertEquals("Alice", dataset.getRow(2).get(1));
+        assertEquals("John", dataset.getRow(3).get(1));
+        assertEquals("Charlie", dataset.getRow(4).get(1));
         assertEquals(5, dataset.size());
     }
 
@@ -1513,11 +1513,11 @@ public class DatasetTest extends AbstractTest {
     @DisplayName("Should move multiple consecutive rows")
     public void testMoveRowsMultipleRows() {
         dataset.moveRows(1, 3, 3);
-        assertEquals("John", dataset.getRow(0)[1]);
-        assertEquals("Alice", dataset.getRow(1)[1]);
-        assertEquals("Charlie", dataset.getRow(2)[1]);
-        assertEquals("Jane", dataset.getRow(3)[1]);
-        assertEquals("Bob", dataset.getRow(4)[1]);
+        assertEquals("John", dataset.getRow(0).get(1));
+        assertEquals("Alice", dataset.getRow(1).get(1));
+        assertEquals("Charlie", dataset.getRow(2).get(1));
+        assertEquals("Jane", dataset.getRow(3).get(1));
+        assertEquals("Bob", dataset.getRow(4).get(1));
         assertEquals(5, dataset.size());
     }
 
@@ -1526,13 +1526,13 @@ public class DatasetTest extends AbstractTest {
     public void testMoveRowsToSamePosition() {
         List<String> originalNames = new ArrayList<>();
         for (int i = 0; i < dataset.size(); i++) {
-            originalNames.add((String) dataset.getRow(i)[1]);
+            originalNames.add((String) dataset.getRow(i).get(1));
         }
 
         dataset.moveRows(1, 3, 1);
 
         for (int i = 0; i < dataset.size(); i++) {
-            assertEquals(originalNames.get(i), dataset.getRow(i)[1]);
+            assertEquals(originalNames.get(i), dataset.getRow(i).get(1));
         }
     }
 
@@ -1540,12 +1540,12 @@ public class DatasetTest extends AbstractTest {
     @DisplayName("Should handle edge case of moving last row")
     public void testMoveRowsLastRowEdgeCase() {
         dataset.moveRows(4, 5, 0);
-        assertEquals("Charlie", dataset.getRow(0)[1]);
-        assertEquals("John", dataset.getRow(1)[1]);
+        assertEquals("Charlie", dataset.getRow(0).get(1));
+        assertEquals("John", dataset.getRow(1).get(1));
 
         dataset.moveRows(0, 1, 4);
-        assertEquals("John", dataset.getRow(0)[1]);
-        assertEquals("Charlie", dataset.getRow(4)[1]);
+        assertEquals("John", dataset.getRow(0).get(1));
+        assertEquals("Charlie", dataset.getRow(4).get(1));
     }
 
     @Test
@@ -4036,7 +4036,7 @@ public class DatasetTest extends AbstractTest {
     }
 
     @Test
-    public void currentRowIndex_and_absolute() {
+    public void currentRowIndex_and_moveToRow() {
         assertEquals(0, sampleDataset.currentRowIndex());
         sampleDataset.moveToRow(1);
         assertEquals(1, sampleDataset.currentRowIndex());
@@ -4066,9 +4066,11 @@ public class DatasetTest extends AbstractTest {
     }
 
     @Test
-    public void getRow_asArray() {
-        Object[] row0 = sampleDataset.getRow(0);
-        assertArrayEquals(new Object[] { 1, "Alice", 30 }, row0);
+    public void getRow_asImmutableList() {
+        List<Object> row0 = sampleDataset.getRow(0);
+        assertTrue(row0 instanceof ImmutableList);
+        assertTrue(((ImmutableList<?>) row0).list instanceof java.util.AbstractList);
+        assertEquals(Arrays.asList(1, "Alice", 30), row0);
     }
 
     @Test
@@ -4121,10 +4123,10 @@ public class DatasetTest extends AbstractTest {
 
     @Test
     public void testGetRow() {
-        Object[] row = dataset.getRow(0);
-        assertEquals(4, row.length);
-        assertEquals(1, row[0]);
-        assertEquals("John", row[1]);
+        ImmutableList<Object> row = dataset.getRow(0);
+        assertEquals(4, row.size());
+        assertEquals(1, row.get(0));
+        assertEquals("John", row.get(1));
     }
 
     @Test
@@ -8635,6 +8637,132 @@ public class DatasetTest extends AbstractTest {
         invalidColumns.add(Arrays.asList("A", "B", "C", "D"));
 
         assertThrows(IllegalArgumentException.class, () -> new RowDataset(Arrays.asList("col1", "col2"), invalidColumns));
+    }
+
+    // ----- Bug-fix regression tests -----
+
+    @Test
+    @DisplayName("filter(column, predicate, max=0) must not return any matching rows")
+    public void testFilterSingleColumnWithZeroMax() {
+        // Predicate would match every row; with max=0 the result must be empty.
+        Dataset filtered = dataset.filter("age", (Integer age) -> true, 0);
+        assertEquals(0, filtered.size(), "filter with max=0 must yield 0 rows");
+        assertEquals(dataset.columnNames(), filtered.columnNames());
+    }
+
+    @Test
+    @DisplayName("filter(columns, predicate, max=0) must not return any matching rows")
+    public void testFilterMultiColumnWithZeroMax() {
+        Dataset filtered = dataset.filter(Arrays.asList("id", "age"), arr -> true, 0);
+        assertEquals(0, filtered.size(), "filter with max=0 must yield 0 rows");
+        assertEquals(dataset.columnNames(), filtered.columnNames());
+    }
+
+    @Test
+    @DisplayName("filter respects the max cap when many rows match")
+    public void testFilterRespectsMaxCap() {
+        Dataset filtered = dataset.filter("age", (Integer age) -> true, 2);
+        assertEquals(2, filtered.size());
+    }
+
+    @Test
+    @DisplayName("addRow(null) must throw IllegalArgumentException, not NullPointerException")
+    public void testAddRowNullThrowsIAE() {
+        Dataset ds = new RowDataset(new ArrayList<>(Arrays.asList("a", "b")),
+                new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(1)), new ArrayList<>(Arrays.asList(2)))));
+        assertThrows(IllegalArgumentException.class, () -> ds.addRow(null));
+        assertThrows(IllegalArgumentException.class, () -> ds.addRow(0, null));
+    }
+
+    @Test
+    @DisplayName("paginate(0) and negative page sizes must be rejected")
+    public void testPaginateInvalidPageSize() {
+        assertThrows(IllegalArgumentException.class, () -> dataset.paginate(0));
+        assertThrows(IllegalArgumentException.class, () -> dataset.paginate(-1));
+    }
+
+    @Test
+    @DisplayName("groupBy treats null keys as a single group (NULL_SENTINEL)")
+    public void testGroupByNullKeys() {
+        List<String> cols = new ArrayList<>(Arrays.asList("k", "v"));
+        List<List<Object>> data = new ArrayList<>();
+        data.add(new ArrayList<>(Arrays.asList(null, null, "x", "x", null)));
+        data.add(new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5)));
+        Dataset ds = new RowDataset(cols, data);
+        Dataset grouped = ds.groupBy(Arrays.asList("k"));
+        // Two distinct groups: null group and "x" group.
+        assertEquals(2, grouped.size());
+    }
+
+    @Test
+    @DisplayName("innerJoin treats null==null as a match (non-SQL semantics; documented behaviour)")
+    public void testInnerJoinNullKeyMatching() {
+        // The implementation uses NULL_SENTINEL for hash keys, so a null on the left matches a null on the right.
+        // This differs from SQL's NULL handling. This test pins the current contract.
+        Dataset left = new RowDataset(new ArrayList<>(Arrays.asList("k", "lv")),
+                new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(null, 1)), new ArrayList<>(Arrays.asList("L1", "L2")))));
+        Dataset right = new RowDataset(new ArrayList<>(Arrays.asList("k", "rv")),
+                new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(null, 1)), new ArrayList<>(Arrays.asList("R1", "R2")))));
+        Dataset joined = left.innerJoin(right, "k", "k");
+        assertEquals(2, joined.size());
+    }
+
+    @Test
+    @DisplayName("sortBy on a single column is stable for equal keys")
+    public void testSortByStableWithEqualKeys() {
+        // Two rows have the same age (28); their relative original order must be preserved.
+        // Original: (A,30) (B,28) (C,28) (D,31) → stable-sorted by age: (B,28) (C,28) (A,30) (D,31)
+        List<String> cols = new ArrayList<>(Arrays.asList("name", "age"));
+        List<List<Object>> data = new ArrayList<>();
+        data.add(new ArrayList<>(Arrays.asList("A", "B", "C", "D")));
+        data.add(new ArrayList<>(Arrays.asList(30, 28, 28, 31)));
+        Dataset ds = new RowDataset(cols, data);
+        ds.sortBy("age");
+        assertEquals("B", ds.moveToRow(0).get("name"));
+        assertEquals("C", ds.moveToRow(1).get("name"));
+        assertEquals("A", ds.moveToRow(2).get("name"));
+        assertEquals("D", ds.moveToRow(3).get("name"));
+    }
+
+    @Test
+    @DisplayName("copy makes a fresh column list — mutations don't leak across datasets")
+    public void testCopyIsolation() {
+        Dataset copy = dataset.copy();
+        copy.moveToRow(0).set("name", "MUTATED");
+        assertEquals("John", dataset.moveToRow(0).get("name"));
+        assertEquals("MUTATED", copy.moveToRow(0).get("name"));
+    }
+
+    @Test
+    @DisplayName("getColumn returns an immutable view backed by internal storage (no mutation)")
+    public void testGetColumnImmutability() {
+        ImmutableList<Object> col = dataset.getColumn("name");
+        assertThrows(UnsupportedOperationException.class, () -> col.add("X"));
+    }
+
+    @Test
+    @DisplayName("toMap with duplicate keys silently overwrites earlier values")
+    public void testToMapDuplicateKeysOverwrite() {
+        List<String> cols = new ArrayList<>(Arrays.asList("k", "v"));
+        List<List<Object>> data = new ArrayList<>();
+        data.add(new ArrayList<>(Arrays.asList("a", "a", "b")));
+        data.add(new ArrayList<>(Arrays.asList(1, 2, 3)));
+        Dataset ds = new RowDataset(cols, data);
+        Map<Object, Object> map = ds.toMap("k", "v");
+        assertEquals(2, map.size());
+        assertEquals(2, map.get("a")); // last write wins
+        assertEquals(3, map.get("b"));
+    }
+
+    @Test
+    @DisplayName("frozen dataset rejects mutations")
+    public void testFrozenIsImmutable() {
+        Dataset frozen = dataset.copy();
+        frozen.freeze();
+        assertTrue(frozen.isFrozen());
+        assertThrows(IllegalStateException.class, () -> frozen.addRow(new Object[] { 99, "X", 99, 0d }));
+        assertThrows(IllegalStateException.class, () -> frozen.removeRow(0));
+        assertThrows(IllegalStateException.class, () -> frozen.renameColumn("name", "renamed"));
     }
 
 }

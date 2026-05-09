@@ -619,4 +619,17 @@ public class AbstractFloatStreamTest extends TestBase {
         assertEquals(2.0f, iter.nextFloat());
     }
 
+    @Test
+    public void testSummaryStatisticsAndPercentiles_NaNPropagation() {
+        // FloatSummaryStatistics.accept uses Math.min/Math.max so any NaN propagates
+        // into both min and max. summaryStatisticsAndPercentiles() must give the same
+        // result so the two APIs do not diverge for the same data.
+        Pair<FloatSummaryStatistics, Optional<Map<Percentage, Float>>> result = createFloatStream(new float[] { 1.0f, 2.0f, Float.NaN, 3.0f })
+                .summaryStatisticsAndPercentiles();
+        FloatSummaryStatistics stats = result.left();
+        assertEquals(4, stats.getCount());
+        assertTrue(Float.isNaN(stats.getMin()), "min should be NaN when input contains NaN");
+        assertTrue(Float.isNaN(stats.getMax()), "max should be NaN when input contains NaN");
+    }
+
 }

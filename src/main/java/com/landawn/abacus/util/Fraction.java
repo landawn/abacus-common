@@ -464,8 +464,8 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fraction f1 = Fraction.of(1, 3, 4)    = 7/4
-     * Fraction f2 = Fraction.of(-2, 1, 3)   = -7/3
+     * Fraction f1 = Fraction.of(1, 3, 4);    // 7/4
+     * Fraction f2 = Fraction.of(-2, 1, 3);   // -7/3
      * }</pre>
      *
      * @param whole the whole number part
@@ -1447,7 +1447,10 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
                 toProperString = "0";
             } else if (numerator == denominator) {
                 toProperString = "1";
-            } else if (numerator == -1 * denominator) {
+                // The "is this -1?" check is done in the negative domain (mirroring the
+                // magnitude check below) so that denominator == Integer.MIN_VALUE — for which
+                // -1 * denominator silently overflows to MIN_VALUE — does not falsely match.
+            } else if (numerator < 0 && denominator != Integer.MIN_VALUE && numerator == -denominator) {
                 toProperString = "-1";
             } else if ((numerator > 0 ? -numerator : numerator) < -denominator) {
                 // note that we do the magnitude comparison test above with

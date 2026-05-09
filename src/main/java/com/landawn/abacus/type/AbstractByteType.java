@@ -38,6 +38,7 @@ import com.landawn.abacus.util.Strings;
  * </p>
  *
  * @see ByteType
+ * @see PrimitiveByteType
  */
 public abstract class AbstractByteType extends NumberType<Number> {
 
@@ -74,9 +75,9 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * </p>
      * <ul>
      *   <li>Empty or {@code null} strings — returns the default value.</li>
-     *   <li>Strings with a trailing type suffix ({@code l}, {@code L}, {@code f}, {@code F},
-     *       {@code d}, or {@code D}) — the suffix is stripped before parsing.</li>
-     *   <li>All other strings — parsed as a decimal byte value.</li>
+     *   <li>If parsing fails and the string ends with {@code 'l'}, {@code 'L'}, {@code 'f'},
+     *       {@code 'F'}, {@code 'd'}, or {@code 'D'}, the suffix is stripped and parsing is retried.</li>
+     *   <li>All other strings — parsed as a decimal {@code byte} value.</li>
      * </ul>
      *
      * @param str the string to convert, may be {@code null} or empty
@@ -105,15 +106,15 @@ public abstract class AbstractByteType extends NumberType<Number> {
     }
 
     /**
-     * Converts the specified character array to a {@code Byte} value.
-     * Parses the character array as an integer and checks that the result is within byte range
+     * Converts a region of the specified character array to a {@code Byte} value.
+     * Parses the region as an integer and checks that the result is within {@code byte} range
      * ({@code Byte.MIN_VALUE} to {@code Byte.MAX_VALUE}).
      *
      * @param cbuf the character array to convert, may be {@code null}
      * @param offset the starting position in the array (0-based)
      * @param len the number of characters to read
      * @return the {@code Byte} value, or the default value if {@code cbuf} is {@code null} or {@code len} is {@code 0}
-     * @throws NumberFormatException if the value is out of byte range or not a valid number
+     * @throws NumberFormatException if the value is out of {@code byte} range or not a valid number
      */
     @Override
     public Byte valueOf(final char[] cbuf, final int offset, final int len) {
@@ -221,7 +222,7 @@ public abstract class AbstractByteType extends NumberType<Number> {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            appendable.append(x.toString());
+            appendable.append(N.stringOf(x.byteValue()));
         }
     }
 

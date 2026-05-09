@@ -18,6 +18,10 @@ package com.landawn.abacus.type;
  * Type handler for the primitive {@code long} type, as opposed to the {@link Long} wrapper class.
  * It provides type information and default value handling for {@code long} primitives.
  *
+ * <p>The key distinction from {@code LongType} (which handles {@link Long}) is the default value:
+ * {@link #defaultValue()} returns {@code 0L} (matching the JLS default for {@code long}),
+ * whereas the wrapper type's default is {@code null}.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Type<Long> type = TypeFactory.getType(long.class);

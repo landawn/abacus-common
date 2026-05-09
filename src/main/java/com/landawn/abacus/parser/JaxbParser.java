@@ -117,7 +117,7 @@ final class JaxbParser extends AbstractXmlParser {
      * // Result: <?xml version="1.0"?><person><name>Alice</name><age>25</age></person>
      * }</pre>
      *
-     * @param obj the object to serialize (may be {@code null} depending on implementation)
+     * @param obj the object to serialize (may be {@code null}; an empty result is written in that case)
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @return the XML string representation of the serialized object, or empty string if obj is null
      * @throws ParsingException if ignoredPropNames is specified in config or if JAXB marshalling fails
@@ -153,7 +153,7 @@ final class JaxbParser extends AbstractXmlParser {
      * parser.serialize(person, null, outputFile);
      * }</pre>
      *
-     * @param obj the object to serialize (may be {@code null} depending on implementation)
+     * @param obj the object to serialize (may be {@code null}; an empty result is written in that case)
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the output file to write to (must not be {@code null})
      * @throws UncheckedIOException if an I/O error occurs during file writing
@@ -193,7 +193,7 @@ final class JaxbParser extends AbstractXmlParser {
      * }
      * }</pre>
      *
-     * @param obj the object to serialize (may be {@code null} depending on implementation)
+     * @param obj the object to serialize (may be {@code null}; an empty result is written in that case)
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the output stream to write to (must not be {@code null})
      * @throws UncheckedIOException if an I/O error occurs during stream writing
@@ -229,7 +229,7 @@ final class JaxbParser extends AbstractXmlParser {
      * String xml = sw.toString();
      * }</pre>
      *
-     * @param obj the object to serialize (may be {@code null} depending on implementation)
+     * @param obj the object to serialize (may be {@code null}; an empty result is written in that case)
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the writer to write to (must not be {@code null})
      * @throws UncheckedIOException if an I/O error occurs during writing
@@ -551,6 +551,10 @@ final class JaxbParser extends AbstractXmlParser {
      * disallow-doctype-decl, external-general/parameter-entities=false, no-load-external-dtd).
      * JAXB unmarshal(SAXSource) will use this XMLReader instead of constructing its own
      * unhardened parser, closing the XXE hole.
+     *
+     * @param is the input source containing the XML payload
+     * @return a SAXSource backed by a hardened {@code XMLReader}
+     * @throws ParsingException if a hardened XMLReader cannot be obtained
      */
     private static SAXSource toHardenedSAXSource(final InputSource is) {
         try {

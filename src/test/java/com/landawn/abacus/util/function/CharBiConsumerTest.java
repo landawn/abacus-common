@@ -107,4 +107,10 @@ public class CharBiConsumerTest extends TestBase {
     public void testFunctionalInterface() {
         assertNotNull(CharBiConsumer.class.getAnnotation(FunctionalInterface.class));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        CharBiConsumer instance = (a, b) -> {};
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((CharBiConsumer) null));
+    }
 }

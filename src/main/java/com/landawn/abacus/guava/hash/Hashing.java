@@ -69,6 +69,7 @@ import com.landawn.abacus.util.N;
  * @see HashFunction
  * @see HashCode
  * @see Hasher
+ * @see com.google.common.hash.Hashing
  */
 public final class Hashing {
 
@@ -705,8 +706,8 @@ public final class Hashing {
             if (hashFunction instanceof GuavaHashFunction guavaHashFunction) {
                 guavaHashFunctions.add(guavaHashFunction.gHashFunction);
             } else {
-                throw new IllegalArgumentException(
-                        "Unsupported HashFunction implementation: " + hashFunction.getClass().getName() + ". Use factory methods from Hashing.");
+                throw new IllegalArgumentException("Unsupported HashFunction implementation: "
+                        + (hashFunction == null ? "null" : hashFunction.getClass().getName()) + ". Use factory methods from Hashing.");
             }
         }
 

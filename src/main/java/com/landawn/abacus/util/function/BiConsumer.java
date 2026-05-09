@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.Throwables;
 
@@ -74,6 +76,7 @@ public interface BiConsumer<T, U> extends Throwables.BiConsumer<T, U, RuntimeExc
      */
     @Override
     default BiConsumer<T, U> andThen(final java.util.function.BiConsumer<? super T, ? super U> after) {
+        Objects.requireNonNull(after);
         return (t, u) -> {
             accept(t, u);
             after.accept(t, u);

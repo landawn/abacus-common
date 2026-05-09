@@ -11614,4 +11614,310 @@ public class SeqTest extends AbstractTest {
         assertTrue(true);
     }
 
+    // ===================================================================
+    // Review-driven boundary / contract tests (added 2026-05-08)
+    // ===================================================================
+
+    @Test
+    public void testReview_skipZero_returnsSameSequence() throws Exception {
+        // skip(0) should be a no-op; documented behaviour returns 'this'.
+        Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
+        Seq<Integer, Exception> skipped = seq.skip(0);
+        assertSame(seq, skipped);
+        assertEquals(Arrays.asList(1, 2, 3), skipped.toList());
+    }
+
+    @Test
+    public void testReview_skipNegative_throws() throws Exception {
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).skip(-1));
+    }
+
+    @Test
+    public void testReview_limitZero_returnsEmpty() throws Exception {
+        assertEquals(Collections.emptyList(), Seq.of(1, 2, 3).limit(0).toList());
+    }
+
+    @Test
+    public void testReview_limitLargerThanSize() throws Exception {
+        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2, 3).limit(100).toList());
+    }
+
+    @Test
+    public void testReview_limitNegative_throws() throws Exception {
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).limit(-5));
+    }
+
+    @Test
+    public void testReview_distinctWithNullElements() throws Exception {
+        // distinct uses hashKey() which maps null to a sentinel, so multiple nulls collapse to one.
+        List<Integer> result = Seq.of(1, null, 2, null, 1, 3).distinct().toList();
+        assertEquals(4, result.size());
+        assertTrue(result.contains(null));
+        assertTrue(result.contains(1));
+        assertTrue(result.contains(2));
+        assertTrue(result.contains(3));
+    }
+
+    @Test
+    public void testReview_distinctByWithNullKey() throws Exception {
+        List<String> result = Seq.of("a", "bb", "c", "dd").distinctBy(s -> s.length() == 1 ? null : s.length()).toList();
+        // first len=1 ('a') with null-key kept, first len=2 ('bb') kept; later duplicates dropped
+        assertEquals(Arrays.asList("a", "bb"), result);
+    }
+
+    @Test
+    public void testReview_toMap_duplicateKey_throws() throws Exception {
+        // Default Seq.toMap uses throwingMerger and throws on duplicate keys.
+        assertThrows(IllegalStateException.class,
+                () -> Seq.of("a", "b", "a").toMap(java.util.function.Function.identity()::apply, java.util.function.Function.identity()::apply));
+    }
+
+    @Test
+    public void testReview_toMap_duplicateKey_withMergeFunction() throws Exception {
+        Map<Object, Integer> result = Seq.of("a", "b", "a")
+                .toMap(java.util.function.Function.identity()::apply, s -> 1, Integer::sum);
+        assertEquals(Integer.valueOf(2), result.get("a"));
+        assertEquals(Integer.valueOf(1), result.get("b"));
+    }
+
+    @Test
+    public void testReview_reduceEmpty_returnsEmptyOptional() throws Exception {
+        assertFalse(Seq.<Integer, Exception> empty().reduce(Integer::sum).isPresent());
+    }
+
+    @Test
+    public void testReview_reduceWithIdentity_emptySeqReturnsIdentity() throws Exception {
+        assertEquals(Integer.valueOf(42), Seq.<Integer, Exception> empty().reduce(42, Integer::sum));
+    }
+
+    @Test
+    public void testReview_minMaxEmpty_returnsEmpty() throws Exception {
+        assertFalse(Seq.<Integer, Exception> empty().min(Comparator.naturalOrder()).isPresent());
+        assertFalse(Seq.<Integer, Exception> empty().max(Comparator.naturalOrder()).isPresent());
+    }
+
+    @Test
+    public void testReview_minNullComparator_throws() throws Exception {
+        // After review-fix: min() validates the comparator via checkArgNotNull (asymmetric vs max() by design).
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).min(null));
+    }
+
+    @Test
+    public void testReview_maxNullComparator_usesNullsFirst() throws Exception {
+        // max() permits a null comparator and falls back to nullsFirst() ordering.
+        Optional<Integer> r = Seq.of(3, 1, 2).max(null);
+        assertTrue(r.isPresent());
+        assertEquals(Integer.valueOf(3), r.get());
+    }
+
+    @Test
+    public void testReview_allMatchEmpty_isVacuouslyTrue() throws Exception {
+        assertTrue(Seq.<Integer, Exception> empty().allMatch(n -> false));
+    }
+
+    @Test
+    public void testReview_anyMatchEmpty_isFalse() throws Exception {
+        assertFalse(Seq.<Integer, Exception> empty().anyMatch(n -> true));
+    }
+
+    @Test
+    public void testReview_noneMatchEmpty_isTrue() throws Exception {
+        assertTrue(Seq.<Integer, Exception> empty().noneMatch(n -> true));
+    }
+
+    @Test
+    public void testReview_sumInt_promotesToLong_noOverflow() throws Exception {
+        // Two MAX_VALUE ints would overflow as int, but sumInt returns long.
+        long total = Seq.of(Integer.MAX_VALUE, Integer.MAX_VALUE).sumInt(Integer::intValue);
+        assertEquals(2L * Integer.MAX_VALUE, total);
+    }
+
+    @Test
+    public void testReview_sumLong_canSilentlyOverflow_documented() throws Exception {
+        // sumLong does NOT detect overflow - documents current behaviour so a regression is detected if changed.
+        long total = Seq.of(Long.MAX_VALUE, 1L).sumLong(Long::longValue);
+        assertEquals(Long.MIN_VALUE, total); // wrap-around
+    }
+
+    @Test
+    public void testReview_averageInt_emptyReturnsEmpty() throws Exception {
+        assertFalse(Seq.<Integer, Exception> empty().averageInt(Integer::intValue).isPresent());
+    }
+
+    @Test
+    public void testReview_count_onEmpty() throws Exception {
+        assertEquals(0L, Seq.<Integer, Exception> empty().count());
+    }
+
+    @Test
+    public void testReview_peek_doesNotChangeContent() throws Exception {
+        AtomicInteger seen = new AtomicInteger();
+        List<Integer> r = Seq.of(1, 2, 3).peek(n -> seen.incrementAndGet()).toList();
+        assertEquals(Arrays.asList(1, 2, 3), r);
+        assertEquals(3, seen.get());
+    }
+
+    @Test
+    public void testReview_close_isIdempotent() {
+        AtomicInteger callCount = new AtomicInteger();
+        Seq<Integer, Exception> seq = Seq.of(1, 2, 3).onClose(callCount::incrementAndGet);
+        seq.close();
+        seq.close();
+        seq.close();
+        assertEquals(1, callCount.get());
+    }
+
+    @Test
+    public void testReview_terminalOpAfterClose_throws() throws Exception {
+        Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
+        seq.close();
+        assertThrows(IllegalStateException.class, seq::toList);
+    }
+
+    @Test
+    public void testReview_reuseConsumedSeq_throws() throws Exception {
+        Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
+        seq.toList();
+        // Once a terminal op has run, the seq is closed; further terminal ops must reject.
+        assertThrows(IllegalStateException.class, seq::toList);
+    }
+
+    @Test
+    public void testReview_zipWith_stopsAtShortest() throws Exception {
+        List<String> r = Seq.of(1, 2, 3, 4, 5)
+                .zipWith(Arrays.asList("a", "b", "c"), (i, s) -> i + s)
+                .toList();
+        assertEquals(Arrays.asList("1a", "2b", "3c"), r);
+    }
+
+    @Test
+    public void testReview_zipWithDefaults_padsToLongest() throws Exception {
+        List<String> r = Seq.of(1, 2)
+                .zipWith(Arrays.asList("a", "b", "c"), 0, "?", (i, s) -> i + s)
+                .toList();
+        assertEquals(Arrays.asList("1a", "2b", "0c"), r);
+    }
+
+    @Test
+    public void testReview_cycledZeroRounds_isEmpty() throws Exception {
+        assertEquals(Collections.emptyList(), Seq.of(1, 2, 3).cycled(0).toList());
+    }
+
+    @Test
+    public void testReview_cycledTwoRounds() throws Exception {
+        assertEquals(Arrays.asList(1, 2, 1, 2), Seq.of(1, 2).cycled(2).toList());
+    }
+
+    @Test
+    public void testReview_cycledOnEmptySource_terminates() throws Exception {
+        // Cycling an empty source should not loop forever.
+        assertEquals(Collections.emptyList(), Seq.<Integer, Exception> empty().cycled().limit(10).toList());
+    }
+
+    @Test
+    public void testReview_repeatZero_isEmpty() throws Exception {
+        assertEquals(Collections.emptyList(), Seq.repeat("x", 0).toList());
+    }
+
+    @Test
+    public void testReview_repeatNegative_throws() throws Exception {
+        assertThrows(IllegalArgumentException.class, () -> Seq.repeat("x", -1));
+    }
+
+    @Test
+    public void testReview_ofNullArray_isEmpty() throws Exception {
+        Integer[] a = null;
+        assertEquals(Collections.emptyList(), Seq.of(a).toList());
+    }
+
+    @Test
+    public void testReview_ofNullable_null() throws Exception {
+        assertEquals(Collections.emptyList(), Seq.ofNullable(null).toList());
+    }
+
+    @Test
+    public void testReview_ofNullable_present() throws Exception {
+        assertEquals(Collections.singletonList("x"), Seq.ofNullable("x").toList());
+    }
+
+    @Test
+    public void testReview_groupBy_nullKeyAllowed() throws Exception {
+        // Default groupBy uses HashMap and must allow null keys.
+        Map<Integer, List<String>> result = Seq.of("a", "bb", "c", "dd")
+                .groupBy(s -> s.length() == 1 ? null : s.length())
+                .toMap(Map.Entry::getKey, Map.Entry::getValue);
+        assertEquals(Arrays.asList("a", "c"), result.get(null));
+        assertEquals(Arrays.asList("bb", "dd"), result.get(2));
+    }
+
+    @Test
+    public void testReview_filterIsLazy_predicateNotCalledUntilTerminal() throws Exception {
+        AtomicBoolean called = new AtomicBoolean(false);
+        Seq<Integer, Exception> chain = Seq.of(1, 2, 3).filter(n -> {
+            called.set(true);
+            return true;
+        });
+        assertFalse(called.get(), "predicate should not run before terminal op");
+        chain.toList();
+        assertTrue(called.get());
+    }
+
+    @Test
+    public void testReview_mapIsLazy() throws Exception {
+        AtomicBoolean called = new AtomicBoolean(false);
+        Seq<Integer, Exception> chain = Seq.of(1, 2, 3).map(n -> {
+            called.set(true);
+            return n;
+        });
+        assertFalse(called.get());
+        chain.count();
+        assertTrue(called.get());
+    }
+
+    @Test
+    public void testReview_takeLastZero_isEmpty() throws Exception {
+        assertEquals(Collections.emptyList(), Seq.of(1, 2, 3).takeLast(0).toList());
+    }
+
+    @Test
+    public void testReview_skipLastLargerThanSize_isEmpty() throws Exception {
+        assertEquals(Collections.emptyList(), Seq.of(1, 2, 3).skipLast(10).toList());
+    }
+
+    @Test
+    public void testReview_distinctOnInfinite_terminatesWithLimit() throws Exception {
+        // An eventual repeat scheme - because Seq is sequential, distinct is implemented as a stateful filter and
+        // works correctly when downstream limit() short-circuits.
+        List<Integer> r = Seq.of(1, 2, 3).cycled().distinct().limit(3).toList();
+        assertEquals(Arrays.asList(1, 2, 3), r);
+    }
+
+    @Test
+    public void testReview_forEachPropagatesException() {
+        Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
+        Exception thrown = assertThrows(Exception.class, () -> seq.forEach(n -> {
+            if (n == 2) throw new IllegalStateException("boom");
+        }));
+        assertTrue(thrown instanceof IllegalStateException);
+    }
+
+    @Test
+    public void testReview_forEachClosesEvenOnException() {
+        AtomicBoolean closed = new AtomicBoolean();
+        Seq<Integer, Exception> seq = Seq.of(1, 2, 3).onClose(() -> closed.set(true));
+        try {
+            seq.forEach(n -> { throw new RuntimeException("x"); });
+        } catch (Exception ignore) {
+            // expected
+        }
+        assertTrue(closed.get());
+    }
+
+    @Test
+    public void testReview_topZero_returnsEmpty() throws Exception {
+        // Bug fix: top(int n) advertises "must not be negative" so n=0 should be allowed and yield an empty seq.
+        // Previously top(0) delegated to top(0, comparator) which used checkArgPositive and threw.
+        assertEquals(Collections.emptyList(), Seq.of(3, 1, 4, 1, 5, 9, 2, 6).top(0).toList());
+    }
+
 }

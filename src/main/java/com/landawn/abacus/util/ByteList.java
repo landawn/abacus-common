@@ -2248,7 +2248,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param distance the distance to rotate the list. Positive values rotate right,
      *                 negative values rotate left
-     * @see N#rotate(int[], int)
+     * @see N#rotate(byte[], int)
      */
     @Override
     public void rotate(final int distance) {

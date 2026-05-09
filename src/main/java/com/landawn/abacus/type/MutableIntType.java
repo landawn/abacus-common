@@ -22,7 +22,9 @@ import com.landawn.abacus.util.Strings;
  * Type handler for {@link com.landawn.abacus.util.MutableInt} objects.
  * <p>
  * This class provides serialization, deserialization, and database operations for
- * MutableInt instances, which are mutable wrappers around primitive int values.
+ * {@code MutableInt} instances, which are mutable wrappers around primitive
+ * {@code int} values. Values are serialized as the unwrapped numeric integer
+ * (identical to {@link IntegerType}).
  *
  * @see com.landawn.abacus.util.MutableInt
  * @see NumberType

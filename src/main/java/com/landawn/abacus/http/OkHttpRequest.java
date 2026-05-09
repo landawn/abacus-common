@@ -60,7 +60,12 @@ import okhttp3.ResponseBody;
  * This class provides a convenient API for building and executing HTTP requests with various features
  * such as headers, query parameters, request bodies, and authentication.
  *
- * <p>Note: This class contains the codes and docs copied from: <a href="https://square.github.io/okhttp/">OkHttp</a> under Apache License v2 and may be modified.
+ * <p>Note: This class contains code and docs copied from
+ * <a href="https://square.github.io/okhttp/">OkHttp</a> under Apache License v2, possibly with modifications.</p>
+ *
+ * <p><b>Thread-safety:</b> Instances of this class are mutable builders and are not thread-safe.
+ * Each request should be configured and executed from a single thread; the underlying OkHttp
+ * {@code OkHttpClient} is itself thread-safe and is reused across calls when possible.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -82,6 +87,7 @@ import okhttp3.ResponseBody;
  *
  * @see URLEncodedUtil
  * @see HttpHeaders
+ * @see HttpMethod
  */
 public final class OkHttpRequest {
 
@@ -1154,23 +1160,33 @@ public final class OkHttpRequest {
      *
      * @param <T> The type of the response object
      * @param httpMethod The HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
-     * @param resultClass The class of the expected response object
+     * @param resultClass The class of the expected response object. Must not be {@code null}.
+     *                    Use {@link Response Response.class} to receive the raw OkHttp response.
      * @return The deserialized response body
-     * @throws IllegalArgumentException if resultClass is HttpResponse (use OkHttp's {@code Response} class directly instead)
-     * @throws IOException if the request could not be executed or the response indicates an error
+     * @throws IllegalArgumentException if {@code resultClass} is {@code null} or is the abacus
+     *                                  {@link HttpResponse} type (use OkHttp's {@code Response} class directly instead)
+     * @throws IOException if the request could not be executed or the response indicates a non-2xx status
      */
     @Beta
     public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException, IOException {
         N.checkArgNotNull(resultClass, cs.resultClass);
         N.checkArgument(!HttpResponse.class.equals(resultClass), "Return type cannot be HttpResponse");
 
+        final boolean returningResponse = Response.class.equals(resultClass);
+
         Response resp = null;
 
         try {
             final Request request = createRequest(httpMethod);
-            resp = execute(request);
+            // Defer per-request client shutdown when handing the Response back to the caller —
+            // they need the client's dispatcher/connection-pool alive while reading the body.
+            resp = execute(request, returningResponse);
 
-            if (Response.class.equals(resultClass)) {
+            if (returningResponse) {
+                // Skip the finally cleanup: the caller owns the Response *and* the underlying
+                // per-request client. The client stays alive until the next call to a method on
+                // this OkHttpRequest (which calls doAfterExecution from its own finally) or until
+                // the OkHttpRequest is garbage-collected.
                 return (T) resp;
             }
 
@@ -1220,31 +1236,58 @@ public final class OkHttpRequest {
             }
         } finally {
             try {
-                if (!Response.class.equals(resultClass) && resp != null) {
+                if (!returningResponse && resp != null) {
                     IOUtil.close(resp);
                 }
             } finally {
-                doAfterExecution();
+                if (!returningResponse) {
+                    // Defer client shutdown: ownership transferred to the caller via the Response.
+                    doAfterExecution();
+                }
             }
         }
     }
 
-    private Response execute(final Request request) throws IOException {
+    private Response execute(final Request request, final boolean deferShutdown) throws IOException {
         if (httpClientBuilder != null) {
             final OkHttpClient builtClient = httpClientBuilder.build();
             try {
-                return builtClient.newCall(request).execute();
-            } finally {
-                // Shut down the per-request built client to release its thread pool and connection pool.
+                final Response response = builtClient.newCall(request).execute();
+                if (deferShutdown) {
+                    // Caller will own the Response (returns Response.class). We can't shut down
+                    // the per-request client now or the caller's body read will hit
+                    // RejectedExecutionException once OkHttp tries to dispatch the body callback.
+                    // Stash the client on the deferred-shutdown handle so close() releases it.
+                    pendingPerRequestClient = builtClient;
+                    return response;
+                }
                 builtClient.dispatcher().executorService().shutdown();
                 builtClient.connectionPool().evictAll();
+                return response;
+            } catch (final IOException | RuntimeException e) {
+                // Failure path: the response was never returned, so cleanup must happen here.
+                builtClient.dispatcher().executorService().shutdown();
+                builtClient.connectionPool().evictAll();
+                throw e;
             }
         } else {
             return httpClient.newCall(request).execute();
         }
     }
 
+    /** Stash for a per-request built {@link OkHttpClient} that must outlive {@code execute()} so that
+     *  the caller can drain a returned {@code Response.class} body. {@link #doAfterExecution()} clears it. */
+    private OkHttpClient pendingPerRequestClient;
+
     void doAfterExecution() {
+        if (pendingPerRequestClient != null) {
+            try {
+                pendingPerRequestClient.dispatcher().executorService().shutdown();
+                pendingPerRequestClient.connectionPool().evictAll();
+            } finally {
+                pendingPerRequestClient = null;
+            }
+        }
         if (closeHttpClientAfterExecution && httpClientBuilder == null && httpClient != DEFAULT_CLIENT) {
             // Shut down the caller-provided client to release its thread pool and connection pool.
             httpClient.dispatcher().executorService().shutdown();

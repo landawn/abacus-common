@@ -184,7 +184,7 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
     /**
      * Writes an {@link java.util.concurrent.atomic.AtomicLong} value to a {@link CharacterWriter}.
      * Writes the literal {@code "null"} character array if {@code x} is {@code null}; otherwise
-     * uses the writer's optimised {@code write(long)} method with the contained long value.
+     * uses the writer's optimized {@code write(long)} method with the contained long value.
      * {@code config} is not used.
      *
      * @param writer the {@code CharacterWriter} to write to

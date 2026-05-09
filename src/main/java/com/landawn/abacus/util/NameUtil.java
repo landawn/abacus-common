@@ -129,12 +129,16 @@ public final class NameUtil {
      * // The string is now interned and cached
      * }</pre>
      *
-     * @param name the name string to cache
+     * @param name the name string to cache, which may be {@code null}
      * @param force if {@code true}, ignores whether the name is already cached;
      *              if {@code false}, skips caching if already present
-     * @return the interned version of the name string
+     * @return the interned version of the name string, or {@code null} if {@code name} is {@code null}
      */
     public static String cacheName(String name, final boolean force) {
+        if (name == null) {
+            return null;
+        }
+
         synchronized (cachedNamePool) {
             if (cachedNamePool.size() < POOL_SIZE && (force || !cachedNamePool.containsKey(name))) {
                 name = name.intern();

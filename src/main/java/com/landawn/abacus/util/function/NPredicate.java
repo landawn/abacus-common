@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 /**
  * Represents a predicate (boolean-valued function) of a variable number of arguments.
  * This is a variable-arity (varargs) generalization of {@code Predicate}.
@@ -133,6 +135,7 @@ public interface NPredicate<T> {
      * @throws NullPointerException if {@code other} is null
      */
     default NPredicate<T> and(final NPredicate<? super T> other) {
+        Objects.requireNonNull(other);
         return t -> test(t) && other.test(t);
     }
 
@@ -171,6 +174,7 @@ public interface NPredicate<T> {
      * @throws NullPointerException if {@code other} is null
      */
     default NPredicate<T> or(final NPredicate<? super T> other) {
+        Objects.requireNonNull(other);
         return t -> test(t) || other.test(t);
     }
 }

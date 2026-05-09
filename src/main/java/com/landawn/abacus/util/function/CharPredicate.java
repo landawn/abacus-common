@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -136,6 +138,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      * @throws NullPointerException if {@code other} is null
      */
     default CharPredicate and(final CharPredicate other) {
+        Objects.requireNonNull(other);
         return t -> test(t) && other.test(t);
     }
 
@@ -157,6 +160,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      * @throws NullPointerException if {@code other} is null
      */
     default CharPredicate or(final CharPredicate other) {
+        Objects.requireNonNull(other);
         return t -> test(t) || other.test(t);
     }
 

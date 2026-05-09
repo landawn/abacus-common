@@ -54,7 +54,7 @@ public interface DoubleMapMultiConsumer extends java.util.stream.DoubleStream.Do
      *         }
      *     })
      *     .forEach(System.out::println);
-     * // Output: 0.0, 0.0, 1.0, 0.0, 1.0, 2.0
+     * // Output: 0.0, 1.0, 0.0, 1.0, 2.0, 0.0, 1.0, 2.0, 3.0
      * }</pre>
      *
      * @param value the source value to expand, transform, or suppress

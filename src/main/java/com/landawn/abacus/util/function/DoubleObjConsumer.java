@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -71,6 +73,7 @@ public interface DoubleObjConsumer<T> extends Throwables.DoubleObjConsumer<T, Ru
      * @throws NullPointerException if {@code after} is null
      */
     default DoubleObjConsumer<T> andThen(final DoubleObjConsumer<? super T> after) {
+        Objects.requireNonNull(after);
         return (i, t) -> {
             accept(i, t);
             after.accept(i, t);

@@ -288,17 +288,25 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
     @Override
     public void close() throws IOException {
         if (!closed) {
-            flush();
-
+            // Mark closed first so a flush failure doesn't leave the stream
+            // in a state where subsequent close() retries can leak the
+            // underlying Appendable. The underlying close is still attempted
+            // in a finally block so resources are released even if flush throws.
             closed = true;
 
-            if (appendable instanceof AutoCloseable) {
-                try {
-                    ((AutoCloseable) appendable).close();
-                } catch (final IOException e) {
-                    throw e;
-                } catch (final Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e, true);
+            try {
+                if (flushable) {
+                    ((Flushable) appendable).flush();
+                }
+            } finally {
+                if (appendable instanceof AutoCloseable) {
+                    try {
+                        ((AutoCloseable) appendable).close();
+                    } catch (final IOException e) {
+                        throw e;
+                    } catch (final Exception e) {
+                        throw ExceptionUtil.toRuntimeException(e, true);
+                    }
                 }
             }
         }

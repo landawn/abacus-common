@@ -548,6 +548,13 @@ public class HARUtilTest extends TestBase {
         assertEquals(HttpMethod.PUT, method);
     }
 
+    @Test
+    public void testGetHttpMethodByRequestEntry_missingMethodThrowsIllegalArgument() {
+        Map<String, Object> requestEntry = new HashMap<>();
+        // No "method" key - prior implementation NPE'd; should now match the JavaDoc contract.
+        assertThrows(IllegalArgumentException.class, () -> HARUtil.getHttpMethodByRequestEntry(requestEntry));
+    }
+
     // --- getHeadersByRequestEntry ---
 
     @Test

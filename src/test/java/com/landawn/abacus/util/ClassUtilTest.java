@@ -1749,6 +1749,26 @@ public class ClassUtilTest extends TestBase {
     }
 
     @Test
+    public void testCreateMethodHandle_neverThrowsNullPointerException() throws Exception {
+        // Regression test: createMethodHandle previously could throw NullPointerException
+        // when MethodHandles.privateLookupIn(...) failed on the first attempt and the
+        // fallback Lookup-via-private-constructor approach also failed: the third
+        // fallback dereferenced the still-null `lookup` variable.
+        // The contract is to either return a non-null MethodHandle or throw
+        // UnsupportedOperationException — never a raw NPE.
+        for (Method m : Object.class.getDeclaredMethods()) {
+            try {
+                MethodHandle mh = ClassUtil.createMethodHandle(m);
+                assertNotNull(mh);
+            } catch (UnsupportedOperationException e) {
+                // expected for some methods on locked-down JVMs/modules
+            } catch (NullPointerException npe) {
+                throw new AssertionError("createMethodHandle must not throw NullPointerException for method: " + m, npe);
+            }
+        }
+    }
+
+    @Test
     public void test_newNullSentinel() {
         Object nullMask = ClassUtil.newNullSentinel();
         assertNotNull(nullMask);

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -5412,6 +5413,265 @@ public class IteratorsTest extends TestBase {
         assertEquals(iterB.nextIndex(), iterA.nextIndex());
         assertEquals(iterB.previousIndex(), iterA.previousIndex());
         assertEquals(iterB.nextIndex(), iterA.nextIndex());
+    }
+
+    // ===================== concat: null iterators handled / lazy =====================
+
+    @Test
+    public void testConcat_NullIteratorEntriesHandled() {
+        Iterator<Integer> a = Arrays.asList(1, 2).iterator();
+        Iterator<Integer> b = null;
+        Iterator<Integer> c = Arrays.asList(3).iterator();
+        // Null iterators in the array should be skipped, not produce NPE.
+        ObjIterator<Integer> r = Iterators.concat(a, b, c);
+        assertEquals(Arrays.asList(1, 2, 3), r.toList());
+    }
+
+    @Test
+    public void testConcat_AllNulls() {
+        @SuppressWarnings("unchecked")
+        Iterator<Integer>[] all = new Iterator[] { null, null };
+        ObjIterator<Integer> r = Iterators.concat(all);
+        assertFalse(r.hasNext());
+    }
+
+    @Test
+    public void testConcat_EmptyVarargs() {
+        @SuppressWarnings("unchecked")
+        Iterator<String>[] empty = new Iterator[0];
+        ObjIterator<String> r = Iterators.concat(empty);
+        assertFalse(r.hasNext());
+    }
+
+    @Test
+    public void testConcat_LazyDoesNotConsumeFirstUntilNeeded() {
+        AtomicBoolean firstAdvanced = new AtomicBoolean(false);
+        Iterator<Integer> first = new Iterator<Integer>() {
+            final Iterator<Integer> inner = Arrays.asList(1, 2).iterator();
+
+            @Override
+            public boolean hasNext() {
+                return inner.hasNext();
+            }
+
+            @Override
+            public Integer next() {
+                firstAdvanced.set(true);
+                return inner.next();
+            }
+        };
+        Iterators.concat(first, Arrays.asList(3).iterator());
+        // Concat should not have advanced the source iterator at construction time.
+        assertFalse(firstAdvanced.get());
+    }
+
+    // ===================== cycle =====================
+
+    @Test
+    public void testCycle_EmptyArray_ReturnsEmpty() {
+        ObjIterator<Integer> r = Iterators.cycle(new Integer[0]);
+        assertFalse(r.hasNext());
+    }
+
+    @Test
+    public void testCycle_EmptyIterable_ReturnsEmpty() {
+        ObjIterator<Integer> r = Iterators.cycle(Collections.<Integer> emptyList());
+        assertFalse(r.hasNext());
+    }
+
+    @Test
+    public void testCycle_BasicArray() {
+        ObjIterator<Integer> r = Iterators.cycle(1, 2);
+        assertEquals(Arrays.asList(1, 2, 1, 2, 1), Iterators.limit(r, 5).toList());
+    }
+
+    @Test
+    public void testCycle_RoundsZero_Empty() {
+        ObjIterator<Integer> r = Iterators.cycle(Arrays.asList(1, 2, 3), 0);
+        assertFalse(r.hasNext());
+    }
+
+    @Test
+    public void testCycle_RoundsTwo() {
+        ObjIterator<Integer> r = Iterators.cycle(Arrays.asList(1, 2), 2);
+        assertEquals(Arrays.asList(1, 2, 1, 2), r.toList());
+    }
+
+    // ===================== distinct: null elements =====================
+
+    @Test
+    public void testDistinct_HandlesNullsExactlyOnce() {
+        Iterator<String> in = Arrays.asList("a", null, "b", null, "a").iterator();
+        ObjIterator<String> r = Iterators.distinct(in);
+        List<String> out = r.toList();
+        assertEquals(3, out.size());
+        assertEquals("a", out.get(0));
+        assertEquals(null, out.get(1));
+        assertEquals("b", out.get(2));
+    }
+
+    @Test
+    public void testDistinctBy_NullKey() {
+        Iterator<String> in = Arrays.asList("a", "bb", null, "ccc", "dd").iterator();
+        ObjIterator<String> r = Iterators.distinctBy(in, s -> s == null ? null : s.length());
+        List<String> out = r.toList();
+        // Keys: 1, 2, null, 3 -> all distinct (4 items kept)
+        assertEquals(4, out.size());
+    }
+
+    // ===================== filter / map / take/drop =====================
+
+    @Test
+    public void testFilter_NullIterator() {
+        ObjIterator<Integer> r = Iterators.filter((Iterator<Integer>) null, i -> true);
+        assertFalse(r.hasNext());
+    }
+
+    @Test
+    public void testFilter_PredicateMatchesNullElements() {
+        Iterator<String> in = Arrays.asList("a", null, "b").iterator();
+        ObjIterator<String> r = Iterators.filter(in, s -> s == null);
+        List<String> out = r.toList();
+        assertEquals(1, out.size());
+        assertNull(out.get(0));
+    }
+
+    @Test
+    public void testMap_NullIterator_Empty() {
+        ObjIterator<Integer> r = Iterators.map((Iterator<String>) null, String::length);
+        assertFalse(r.hasNext());
+    }
+
+    @Test
+    public void testTakeWhile_StopsAtFirstFalse() {
+        ObjIterator<Integer> r = Iterators.takeWhile(Arrays.asList(1, 2, 3, 1, 2).iterator(), i -> i < 3);
+        assertEquals(Arrays.asList(1, 2), r.toList());
+    }
+
+    @Test
+    public void testDropWhile_DropsLeadingMatching() {
+        ObjIterator<Integer> r = Iterators.dropWhile(Arrays.asList(1, 2, 3, 1, 2).iterator(), i -> i < 3);
+        assertEquals(Arrays.asList(3, 1, 2), r.toList());
+    }
+
+    // ===================== skip / limit =====================
+
+    @Test
+    public void testSkip_NGreaterThanRemaining_ReturnsEmpty() {
+        ObjIterator<Integer> r = Iterators.skip(Arrays.asList(1, 2, 3).iterator(), 10);
+        assertFalse(r.hasNext());
+    }
+
+    @Test
+    public void testSkip_Zero_ReturnsAll() {
+        ObjIterator<Integer> r = Iterators.skip(Arrays.asList(1, 2, 3).iterator(), 0);
+        assertEquals(Arrays.asList(1, 2, 3), r.toList());
+    }
+
+    @Test
+    public void testSkip_NegativeThrows() {
+        assertThrows(IllegalArgumentException.class, () -> Iterators.skip(Arrays.asList(1).iterator(), -1));
+    }
+
+    @Test
+    public void testLimit_Zero_ReturnsEmpty() {
+        ObjIterator<Integer> r = Iterators.limit(Arrays.asList(1, 2, 3).iterator(), 0);
+        assertFalse(r.hasNext());
+    }
+
+    @Test
+    public void testLimit_GreaterThanSize_ReturnsAll() {
+        ObjIterator<Integer> r = Iterators.limit(Arrays.asList(1, 2, 3).iterator(), 100);
+        assertEquals(Arrays.asList(1, 2, 3), r.toList());
+    }
+
+    @Test
+    public void testLimit_NegativeThrows() {
+        assertThrows(IllegalArgumentException.class, () -> Iterators.limit(Arrays.asList(1).iterator(), -1));
+    }
+
+    @Test
+    public void testSkipAndLimit_Basic() {
+        ObjIterator<Integer> r = Iterators.skipAndLimit(Arrays.asList(1, 2, 3, 4, 5).iterator(), 1, 3);
+        assertEquals(Arrays.asList(2, 3, 4), r.toList());
+    }
+
+    // ===================== skipNulls =====================
+
+    @Test
+    public void testSkipNulls_FiltersNulls() {
+        Iterator<String> in = Arrays.asList("a", null, "b", null).iterator();
+        ObjIterator<String> r = Iterators.skipNulls(in);
+        assertEquals(Arrays.asList("a", "b"), r.toList());
+    }
+
+    // ===================== merge sorted =====================
+
+    @Test
+    public void testMergeSorted_Equals_PrefersFirst() {
+        Iterator<Integer> a = Arrays.asList(1, 3, 5).iterator();
+        Iterator<Integer> b = Arrays.asList(3, 4, 6).iterator();
+        // With minFirst comparator (natural), equal elements: TAKE_FIRST first.
+        ObjIterator<Integer> r = Iterators.mergeSorted(a, b);
+        assertEquals(Arrays.asList(1, 3, 3, 4, 5, 6), r.toList());
+    }
+
+    // ===================== zip: shortest of inputs =====================
+
+    @Test
+    public void testZip_StopsAtShortest() {
+        Iterator<Integer> a = Arrays.asList(1, 2, 3).iterator();
+        Iterator<String> b = Arrays.asList("x", "y").iterator();
+        ObjIterator<String> r = Iterators.zip(a, b, (i, s) -> i + s);
+        assertEquals(Arrays.asList("1x", "2y"), r.toList());
+    }
+
+    @Test
+    public void testZip_NullIteratorTreatedAsEmpty() {
+        ObjIterator<String> r = Iterators.zip((Iterator<Integer>) null, Arrays.asList("a").iterator(), (i, s) -> i + s);
+        assertFalse(r.hasNext());
+    }
+
+    // ===================== consume-once iterators reused =====================
+
+    @Test
+    public void testConsumeOnce_AfterToList_IsEmpty() {
+        ObjIterator<Integer> r = Iterators.filter(Arrays.asList(1, 2, 3).iterator(), i -> true);
+        assertEquals(Arrays.asList(1, 2, 3), r.toList());
+        // Re-consuming a consume-once iterator is empty.
+        assertFalse(r.hasNext());
+    }
+
+    // ===================== count: predicate null check =====================
+
+    @Test
+    public void testCount_NullPredicateThrows() {
+        assertThrows(IllegalArgumentException.class, () -> Iterators.count(Arrays.asList(1, 2).iterator(), null));
+    }
+
+    // ===================== repeat / repeatElements edge =====================
+
+    @Test
+    public void testRepeat_ZeroTimes() {
+        ObjIterator<String> r = Iterators.repeat("x", 0);
+        assertFalse(r.hasNext());
+    }
+
+    @Test
+    public void testRepeat_Negative_Throws() {
+        assertThrows(IllegalArgumentException.class, () -> Iterators.repeat("x", -1));
+    }
+
+    @Test
+    public void testRepeatElementsToSize_EmptyCollection_ZeroSizeOk() {
+        ObjIterator<String> r = Iterators.repeatElementsToSize(Collections.<String> emptyList(), 0);
+        assertFalse(r.hasNext());
+    }
+
+    @Test
+    public void testRepeatElementsToSize_EmptyCollection_NonZeroThrows() {
+        assertThrows(IllegalArgumentException.class,
+                () -> Iterators.repeatElementsToSize(Collections.<String> emptyList(), 5));
     }
 
 }

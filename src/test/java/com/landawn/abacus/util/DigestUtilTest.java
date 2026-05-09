@@ -2092,4 +2092,78 @@ public class DigestUtilTest extends TestBase {
         assertArrayEquals(first, second);
     }
 
+    @Test
+    public void testNegativeByteHexEncoding() {
+        // Pin the (b & 0xFF) correctness for negative bytes: 0x80..0xFF.
+        // Any sign-extension bug would surface as wrong hex output here.
+        byte[] data = { (byte) 0x80, (byte) 0x81, (byte) 0xFE, (byte) 0xFF };
+        // SHA-256 of these bytes computed externally is deterministic; we instead
+        // round-trip through the Hex helper plus DigestUtil's own digest+hex pair.
+        String hex = DigestUtil.sha256Hex(data);
+        assertEquals(64, hex.length());
+        // Hex output must be entirely [0-9a-f] - never produce '-' from a negative byte.
+        assertTrue(hex.matches("[0-9a-f]+"), "hex output contains non-hex chars: " + hex);
+
+        String md5 = DigestUtil.md5Hex(data);
+        assertEquals(32, md5.length());
+        assertTrue(md5.matches("[0-9a-f]+"));
+
+        String sha1 = DigestUtil.sha1Hex(data);
+        assertEquals(40, sha1.length());
+        assertTrue(sha1.matches("[0-9a-f]+"));
+    }
+
+    @Test
+    public void testKnownVector_sha256_emptyString() {
+        // Standard SHA-256 vector for empty input.
+        String expected = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
+        assertEquals(expected, DigestUtil.sha256Hex(new byte[0]));
+        assertEquals(expected, DigestUtil.sha256Hex(""));
+    }
+
+    @Test
+    public void testKnownVector_md5_abc() {
+        // Standard MD5 vector "abc" -> 900150983cd24fb0d6963f7d28e17f72
+        assertEquals("900150983cd24fb0d6963f7d28e17f72", DigestUtil.md5Hex("abc"));
+    }
+
+    @Test
+    public void testKnownVector_sha1_abc() {
+        // Standard SHA-1 vector "abc" -> a9993e364706816aba3e25717850c26c9cd0d89d
+        assertEquals("a9993e364706816aba3e25717850c26c9cd0d89d", DigestUtil.sha1Hex("abc"));
+    }
+
+    @Test
+    public void testThreadSafety_concurrentDigests() throws InterruptedException {
+        // DigestUtil is documented as thread-safe because each call allocates a
+        // fresh MessageDigest. Pin that contract: many threads hashing distinct
+        // inputs must each get the deterministic expected hash.
+        final int numThreads = 16;
+        final int iterations = 250;
+        final Thread[] threads = new Thread[numThreads];
+        final boolean[] failures = new boolean[numThreads];
+
+        for (int t = 0; t < numThreads; t++) {
+            final int idx = t;
+            threads[t] = new Thread(() -> {
+                for (int i = 0; i < iterations; i++) {
+                    String input = "thread-" + idx + "-iter-" + i;
+                    String h1 = DigestUtil.sha256Hex(input);
+                    String h2 = DigestUtil.sha256Hex(input);
+                    if (!h1.equals(h2) || h1.length() != 64) {
+                        failures[idx] = true;
+                        return;
+                    }
+                }
+            });
+            threads[t].start();
+        }
+        for (Thread th : threads) {
+            th.join();
+        }
+        for (boolean f : failures) {
+            assertFalse(f, "DigestUtil produced inconsistent output under concurrency");
+        }
+    }
+
 }

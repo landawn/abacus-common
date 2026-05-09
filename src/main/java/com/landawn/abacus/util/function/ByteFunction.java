@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -58,8 +60,8 @@ public interface ByteFunction<R> extends Throwables.ByteFunction<R, RuntimeExcep
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteFunction<String> toHex = b -> String.format("%02X", b);
-     * String hex = toHex.apply((byte) 255);   // Returns "FF"
+     * ByteFunction<String> toHex = b -> String.format("%02X", b & 0xFF);
+     * String hex = toHex.apply((byte) -1);   // Returns "FF"
      *
      * ByteFunction<Integer> toUnsigned = b -> Byte.toUnsignedInt(b);
      * Integer unsigned = toUnsigned.apply((byte) -1);   // Returns 255
@@ -92,6 +94,7 @@ public interface ByteFunction<R> extends Throwables.ByteFunction<R, RuntimeExcep
      * @throws NullPointerException if {@code after} is null
      */
     default <V> ByteFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+        Objects.requireNonNull(after);
         return t -> after.apply(apply(t));
     }
 

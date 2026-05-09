@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -79,6 +81,7 @@ public interface IntBiObjFunction<T, U, R> extends Throwables.IntBiObjFunction<T
      * @throws NullPointerException if {@code after} is null
      */
     default <V> IntBiObjFunction<T, U, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+        Objects.requireNonNull(after);
         return (i, t, u) -> after.apply(apply(i, t, u));
     }
 }

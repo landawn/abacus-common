@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -64,6 +66,7 @@ public interface ByteBiConsumer extends Throwables.ByteBiConsumer<RuntimeExcepti
      * @throws NullPointerException if {@code after} is null
      */
     default ByteBiConsumer andThen(final ByteBiConsumer after) {
+        Objects.requireNonNull(after);
         return (a, b) -> {
             accept(a, b);
             after.accept(a, b);

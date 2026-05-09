@@ -129,6 +129,12 @@ public final class SnappyOutputStream extends OutputStream {
      */
     @Override
     public void write(final byte[] b, final int off, final int len) throws IOException {
+        // Enforce OutputStream.write(byte[], int, int) contract: org.xerial.snappy.SnappyOutputStream
+        // does not validate bounds and silently no-ops for negative len, so we validate here.
+        if (off < 0 || len < 0 || len > b.length - off) {
+            throw new IndexOutOfBoundsException("off=" + off + ", len=" + len + ", b.length=" + b.length);
+        }
+
         out.write(b, off, len);
     }
 

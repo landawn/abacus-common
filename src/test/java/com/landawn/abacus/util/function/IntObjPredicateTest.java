@@ -70,4 +70,10 @@ public class IntObjPredicateTest extends TestBase {
         assertTrue(combined.test(1, null));
         assertFalse(combined.test(1, "test"));
     }
+
+    @Test
+    public void testAndNullThrowsImmediately() {
+        IntObjPredicate<String> instance = (a, b) -> false;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((IntObjPredicate) null));
+    }
 }

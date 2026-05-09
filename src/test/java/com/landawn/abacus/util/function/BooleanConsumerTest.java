@@ -152,4 +152,10 @@ public class BooleanConsumerTest extends TestBase {
         assertThrows(RuntimeException.class, () -> chainedConsumer.accept(true));
         assertEquals(1, results.size()); // First consumer should have executed
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        BooleanConsumer instance = a -> {};
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((BooleanConsumer) null));
+    }
 }

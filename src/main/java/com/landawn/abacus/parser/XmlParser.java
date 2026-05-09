@@ -92,8 +92,8 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * @param <T> the type of the target object
      * @param source the DOM node containing the XML data to deserialize (must not be {@code null})
      * @param targetType the Type descriptor of the object to create (must not be {@code null})
-     * @return the deserialized object of type {@code T}, never {@code null}
-     * @throws IllegalArgumentException if source or targetType is {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
      */
     <T> T deserialize(Node source, Type<? extends T> targetType);
 
@@ -118,8 +118,8 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * @param <T> the type of the target object
      * @param source the DOM node containing the XML data to deserialize (must not be {@code null})
      * @param targetType the class of the object to create (must not be {@code null})
-     * @return the deserialized object of type {@code T}, never {@code null}
-     * @throws IllegalArgumentException if source or targetType is {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
      */
     <T> T deserialize(Node source, Class<? extends T> targetType);
 
@@ -149,8 +149,8 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * @param source the DOM node containing the XML data to deserialize (must not be {@code null})
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the Type descriptor of the object to create (must not be {@code null})
-     * @return the deserialized object of type {@code T}, never {@code null}
-     * @throws IllegalArgumentException if source or targetType is {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
      */
     <T> T deserialize(Node source, XmlDeserConfig config, Type<? extends T> targetType);
 
@@ -179,8 +179,8 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * @param source the DOM node containing the XML data to deserialize (must not be {@code null})
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the class of the object to create (must not be {@code null})
-     * @return the deserialized object of type {@code T}, never {@code null}
-     * @throws IllegalArgumentException if source or targetType is {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
      */
     <T> T deserialize(Node source, XmlDeserConfig config, Class<? extends T> targetType);
 

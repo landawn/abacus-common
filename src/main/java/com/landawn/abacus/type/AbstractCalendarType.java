@@ -34,6 +34,8 @@ import com.landawn.abacus.util.Dates;
  * </p>
  *
  * @param <T> the specific {@code Calendar} subtype (e.g., {@link java.util.Calendar}, {@link java.util.GregorianCalendar})
+ * @see CalendarType
+ * @see GregorianCalendarType
  */
 public abstract class AbstractCalendarType<T extends Calendar> extends AbstractType<T> {
 

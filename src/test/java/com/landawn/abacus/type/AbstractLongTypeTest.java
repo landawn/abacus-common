@@ -193,4 +193,17 @@ public class AbstractLongTypeTest extends TestBase {
         longType.writeCharacter(writer, 987654321L, config);
         verify(writer).write(987654321L);
     }
+
+    // Bug: appendTo previously called x.toString() for any Number,
+    // diverging from stringOf which uses longValue(). For BigInteger and similar Numbers
+    // the two methods now agree.
+    @Test
+    public void testAppendTo_UsesLongValueForNonLongNumber() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        // BigInteger that overflows long — longValue() truncates.
+        final java.math.BigInteger bi = java.math.BigInteger.valueOf(Long.MAX_VALUE).add(java.math.BigInteger.ONE);
+        longType.appendTo(sb, bi);
+        assertEquals(longType.stringOf(bi), sb.toString());
+        assertEquals(String.valueOf(bi.longValue()), sb.toString());
+    }
 }

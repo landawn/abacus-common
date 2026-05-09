@@ -124,4 +124,10 @@ public class LongTriFunctionTest extends TestBase {
 
         assertEquals(2, result);
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        LongTriFunction<String> instance = (a, b, c) -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

@@ -799,6 +799,14 @@ public class HashingTest extends TestBase {
     }
 
     @Test
+    @DisplayName("concatenating with null element throws IllegalArgumentException, not NPE")
+    public void testConcatenatingWithNullElementThrowsIAENotNPE() {
+        IllegalArgumentException iae = assertThrows(IllegalArgumentException.class,
+                () -> Hashing.concatenating(Arrays.asList(Hashing.sha256(), (HashFunction) null)));
+        assertTrue(iae.getMessage().contains("null"));
+    }
+
+    @Test
     @DisplayName("Test combineOrdered is order-dependent")
     public void testCombineOrderedOrderDependent() {
         HashCode hash1 = Hashing.murmur3_128().hash("test1");

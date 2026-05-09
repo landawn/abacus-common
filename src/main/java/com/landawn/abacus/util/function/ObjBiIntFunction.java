@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -63,7 +65,7 @@ public interface ObjBiIntFunction<T, R> extends Throwables.ObjBiIntFunction<T, R
      *   <li>Implementing lookup operations with two numeric keys</li>
      * </ul>
      *
-     * @param t the object first argument
+     * @param t the object argument
      * @param i the first int argument (often used as start index, row, or x-coordinate)
      * @param j the second int argument (often used as end index, column, or y-coordinate)
      * @return the function result of type R
@@ -100,6 +102,7 @@ public interface ObjBiIntFunction<T, R> extends Throwables.ObjBiIntFunction<T, R
      * @throws NullPointerException if {@code after} is null
      */
     default <V> ObjBiIntFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+        Objects.requireNonNull(after);
         return (t, i, j) -> after.apply(apply(t, i, j));
     }
 }

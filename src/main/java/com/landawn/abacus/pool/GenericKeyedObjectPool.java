@@ -385,6 +385,12 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         lock.lock();
 
         try {
+            // Re-check inside the lock: a concurrent close() could have set isClosed and
+            // started removeAll() between the unlocked check above and our lock acquisition.
+            // Without this check, get() would return a "live" element from a closed pool that
+            // close()'s pre-snapshot will not destroy.
+            assertNotClosed();
+
             element = pool.get(key);
 
             if (element != null) {
@@ -445,6 +451,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         lock.lock();
 
         try {
+            // Re-check inside the lock: see get() for rationale.
+            assertNotClosed();
+
             element = pool.remove(key);
 
             if (element != null) {
@@ -453,12 +462,23 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 activityPrint.updateAccessCount();
 
                 if (memoryMeasure != null) {
-                    final long keyValueMemorySize = memoryMeasure.sizeOf(key, element);
+                    // Wrap memoryMeasure call: if a user-supplied sizeOf throws after we've already
+                    // removed the entry from the map, the exception would propagate while leaving
+                    // the entry neither in the pool nor returned to the caller — a pure leak. Log
+                    // and continue with totalDataSize unchanged; better to drift one accounting
+                    // unit than leak a live resource.
+                    try {
+                        final long keyValueMemorySize = memoryMeasure.sizeOf(key, element);
 
-                    if (keyValueMemorySize >= 0) {
-                        totalDataSize.addAndGet(-keyValueMemorySize); //NOSONAR
-                    } else {
-                        logger.warn("Memory measure returned negative size for key/value: " + keyValueMemorySize);
+                        if (keyValueMemorySize >= 0) {
+                            totalDataSize.addAndGet(-keyValueMemorySize); //NOSONAR
+                        } else {
+                            logger.warn("Memory measure returned negative size for key/value: " + keyValueMemorySize);
+                        }
+                    } catch (final Exception ex) {
+                        if (logger.isWarnEnabled()) {
+                            logger.warn("Error measuring memory size during remove: " + ExceptionUtil.getErrorMessage(ex, true));
+                        }
                     }
                 }
 
@@ -511,6 +531,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         lock.lock();
 
         try {
+            // Re-check inside the lock: see get() for rationale.
+            assertNotClosed();
+
             final E element = pool.get(key);
 
             if (element != null) {
@@ -735,9 +758,22 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             return false;
         }
 
+        // Snapshot both maps under their OWN locks before comparing. Reading the other pool's
+        // map while only holding this.lock is a concurrent-modification hazard: the other pool
+        // can be mutated by an unrelated thread, producing ConcurrentModificationException or
+        // a torn comparison. Locking both pools simultaneously would also risk deadlock if two
+        // threads called a.equals(b) and b.equals(a) at the same time, so we snapshot
+        // independently.
+        final Map<K, E> snapshot = snapshot();
+        final Map<K, E> otherSnapshot = ((GenericKeyedObjectPool<K, E>) obj).snapshot();
+
+        return N.equals(snapshot, otherSnapshot);
+    }
+
+    private Map<K, E> snapshot() {
         lock.lock();
         try {
-            return N.equals(((GenericKeyedObjectPool<K, E>) obj).pool, pool);
+            return new HashMap<>(pool);
         } finally {
             lock.unlock();
         }

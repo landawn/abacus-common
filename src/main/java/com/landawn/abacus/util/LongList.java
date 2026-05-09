@@ -2273,7 +2273,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * @param distance the distance to rotate the list. Positive values rotate right,
      *                 negative values rotate left
-     * @see N#rotate(int[], int)
+     * @see N#rotate(long[], int)
      */
     @Override
     public void rotate(final int distance) {
@@ -2388,7 +2388,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @return a new {@code LongList} containing elements from the specified range at the specified intervals
      * @throws IndexOutOfBoundsException if the range is out of bounds
      * @throws IllegalArgumentException if {@code step} is not positive
-     * @see N#copyOfRange(int[], int, int, int)
+     * @see N#copyOfRange(long[], int, int, int)
      */
     @Override
     public LongList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {

@@ -33,6 +33,9 @@ import com.landawn.abacus.util.Strings;
  */
 public class UUIDType extends AbstractType<UUID> {
 
+    /**
+     * The type name identifier for {@link java.util.UUID} type (the simple class name {@code "UUID"}).
+     */
     public static final String UUID = "UUID";
 
     /**

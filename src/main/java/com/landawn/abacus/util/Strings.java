@@ -478,7 +478,7 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String guid = guid();   // returns something like "550e8400e29b41d4a716446655440000"
+     * String guid = uuidWithoutHyphens();   // returns something like "550e8400e29b41d4a716446655440000"
      *
      * // Common use cases
      * String sessionId = "SESSION_" + uuidWithoutHyphens();        // returns "SESSION_550e8400e29b41d4a716446655440000"
@@ -3238,7 +3238,11 @@ public final class Strings {
     }
 
     private static String toCamelCase(final String str, final String[] substrs) {
-        final int firstSplitorIndex = N.len(substrs) == 1 ? -1 : substrs[0].length() + 1;
+        if (N.isEmpty(substrs)) {
+            // Input is all separator characters (e.g., "___"); pattern split drops trailing empties and returns [].
+            return Strings.EMPTY;
+        }
+        final int firstSplitorIndex = substrs.length == 1 ? -1 : substrs[0].length() + 1;
 
         if (firstSplitorIndex >= 0) {
             final StringBuilder sb = Objectory.createStringBuilder(str.length());
@@ -3355,7 +3359,11 @@ public final class Strings {
     }
 
     private static String toUpperCamelCase(final String str, final String[] substrs) {
-        final int firstSplitorIndex = N.len(substrs) == 1 ? -1 : substrs[0].length() + 1;
+        if (N.isEmpty(substrs)) {
+            // Input is all separator characters (e.g., "---"); pattern split drops trailing empties and returns [].
+            return Strings.EMPTY;
+        }
+        final int firstSplitorIndex = substrs.length == 1 ? -1 : substrs[0].length() + 1;
 
         if (firstSplitorIndex >= 0) {
             final StringBuilder sb = Objectory.createStringBuilder(str.length());
@@ -5854,7 +5862,10 @@ public final class Strings {
      * @return the trimmed string, {@code null} if {@code null} String input
      */
     public static String trim(final String str) {
-        return isEmpty(str) || (!Character.isWhitespace(str.charAt(0)) && !Character.isWhitespace(str.charAt(str.length() - 1))) ? str : str.trim();
+        // Use the same predicate as String#trim (chars <= 0x20). Character.isWhitespace
+        // would incorrectly skip the trim() call for low control characters like 
+        // (which are not Java whitespace yet ARE removed by String.trim()).
+        return isEmpty(str) || (str.charAt(0) > ' ' && str.charAt(str.length() - 1) > ' ') ? str : str.trim();
     }
 
     /**
@@ -6683,7 +6694,7 @@ public final class Strings {
      * }</pre>
      *
      * @param str the String to truncate, may be {@code null}
-     * @param maxWidth maximum length of result String, must be positive
+     * @param maxWidth maximum length of result String, must be non-negative
      * @return truncated String, {@code null} if {@code null} String input
      * @throws IllegalArgumentException if {@code maxWidth} is less than 0
      * @see #truncate(String, int, int)
@@ -6718,7 +6729,7 @@ public final class Strings {
      *
      * @param str the String to truncate, may be {@code null}
      * @param offset left edge of source String
-     * @param maxWidth maximum length of result String, must be positive
+     * @param maxWidth maximum length of result String, must be non-negative
      * @return truncated String, {@code null} if {@code null} String input
      * @throws IllegalArgumentException if {@code offset} or {@code maxWidth} is less than 0
      * @see #truncate(String, int)
@@ -9449,7 +9460,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Strings.indexOfIgnoreCase("apple,APPLE,banana", "apple", ",", 0);   // returns 0
-     * Strings.indexOfIgnoreCase("apple,APPLE,banana", "apple", ",", 7);   // returns 6
+     * Strings.indexOfIgnoreCase("apple,APPLE,banana", "apple", ",", 1);   // returns 6
      * Strings.indexOfIgnoreCase("pineapple,apple", "apple", ",", 0);      // returns 10
      * Strings.indexOfIgnoreCase("test value test", "test", " ", 5);       // returns 11
      * }</pre>
@@ -9727,16 +9738,19 @@ public final class Strings {
             return N.INDEX_NOT_FOUND;
         }
 
-        int index = str.lastIndexOf(delimiter + valueToFind, startIndexFromBack);
+        // String.lastIndexOf returns the START position of the match (the leading delimiter);
+        // the valueToFind itself sits at index+delimiter.length(), so we must constrain the
+        // search so the valueToFind's position does not exceed startIndexFromBack.
+        int index = str.lastIndexOf(delimiter + valueToFind, startIndexFromBack - delimiterLen);
 
-        if (index >= 0 && index + delimiter.length() + valueToFind.length() == len) {
-            return index + delimiter.length();
+        if (index >= 0 && index + delimiterLen + substrLen == len) {
+            return index + delimiterLen;
         }
 
-        index = str.lastIndexOf(delimiter + valueToFind + delimiter, startIndexFromBack);
+        index = str.lastIndexOf(delimiter + valueToFind + delimiter, startIndexFromBack - delimiterLen);
 
         if (index >= 0) {
-            return index + delimiter.length();
+            return index + delimiterLen;
         }
 
         index = str.lastIndexOf(valueToFind, startIndexFromBack);
@@ -13019,11 +13033,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.substringAfter("Hello, World!", ", ", 10);   // returns "Wo"
-     * Strings.substringAfter("a-b-c-d", "-", 5);           // returns "b"
+     * Strings.substringAfter("Hello, World!", ", ", 10);   // returns "Wor"
+     * Strings.substringAfter("a-b-c-d", "-", 5);           // returns "b-c"
      * Strings.substringAfter("test", "t", 3);              // returns "es"
      * Strings.substringAfter("test", "", 2);               // returns "te" (empty delimiter)
-     * Strings.substringAfter("test", "st", 4);             // returns null (delimiter end > endIndex)
+     * Strings.substringAfter("test", "st", 3);             // returns null (delimiter end > endIndex)
      * Strings.substringAfter(null, "test", 5);             // returns null
      * }</pre>
      *
@@ -13201,7 +13215,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Strings.substringAfterLast("com.example.Test", ".", 11);   // returns "example"
-     * Strings.substringAfterLast("a.b.c.d", ".", 5);             // returns "b"
+     * Strings.substringAfterLast("a.b.c.d", ".", 5);             // returns "c"
      * Strings.substringAfterLast("hello", ".", 5);               // returns null (delimiter not found)
      * Strings.substringAfterLast("test.", ".", 5);               // returns "" (empty string after delimiter)
      * Strings.substringAfterLast(null, ".", 5);                  // returns null
@@ -13226,15 +13240,17 @@ public final class Strings {
             return null;
         }
 
+        // Clamp end index to the actual string length to avoid StringIndexOutOfBoundsException below.
+        final int endIndex = N.min(exclusiveEndIndex, str.length());
         final int lengthOfDelimiter = delimiterOfExclusiveBeginIndex.length();
 
-        final int index = str.lastIndexOf(delimiterOfExclusiveBeginIndex, exclusiveEndIndex - lengthOfDelimiter);
+        final int index = str.lastIndexOf(delimiterOfExclusiveBeginIndex, endIndex - lengthOfDelimiter);
 
-        if (index < 0 || index + lengthOfDelimiter > exclusiveEndIndex) {
+        if (index < 0 || index + lengthOfDelimiter > endIndex) {
             return null;
         }
 
-        return str.substring(index + lengthOfDelimiter, exclusiveEndIndex);
+        return str.substring(index + lengthOfDelimiter, endIndex);
     }
 
     /**
@@ -13302,8 +13318,8 @@ public final class Strings {
      * Strings.substringAfterAny("test", null);                    // returns null
      * Strings.substringAfterAny("test", new char[0]);             // returns null
      *
-     * Strings.substringAfterAny("abc", '\uDC00', 'a');            // throws IllegalArgumentException for Character.isLowSurrogate('\uDC00') is true
-     * Strings.substringAfterAny("abc", '\uDFFF', 'a');            // throws IllegalArgumentException for Character.isHighSurrogate('\uDFFF') is true
+     * Strings.substringAfterAny("abc", '\uDC00', 'a');            // throws IllegalArgumentException because Character.isLowSurrogate('\uDC00') is true
+     * Strings.substringAfterAny("abc", '\uDFFF', 'a');            // throws IllegalArgumentException because Character.isHighSurrogate('\uDFFF') is true
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -13750,8 +13766,8 @@ public final class Strings {
      * Strings.substringBeforeAny("test", null);                    // returns null
      * Strings.substringBeforeAny("test", new char[0]);             // returns null
      *
-     * Strings.substringBeforeAny("abc", '\uDC00', 'a');            // throws IllegalArgumentException for Character.isLowSurrogate('\uDC00') is true
-     * Strings.substringBeforeAny("abc", '\uDFFF', 'a');            // throws IllegalArgumentException for Character.isHighSurrogate('\uDFFF') is true
+     * Strings.substringBeforeAny("abc", '\uDC00', 'a');            // throws IllegalArgumentException because Character.isLowSurrogate('\uDC00') is true
+     * Strings.substringBeforeAny("abc", '\uDFFF', 'a');            // throws IllegalArgumentException because Character.isHighSurrogate('\uDFFF') is true
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -13995,7 +14011,8 @@ public final class Strings {
             return null;
         }
 
-        return str.substring(startIndex, exclusiveEndIndex);
+        // Clamp end index to the actual string length to avoid StringIndexOutOfBoundsException.
+        return str.substring(startIndex, N.min(exclusiveEndIndex, str.length()));
     }
 
     /**
@@ -14045,7 +14062,8 @@ public final class Strings {
             return null;
         }
 
-        return str.substring(startIndex, exclusiveEndIndex);
+        // Clamp end index to the actual string length to avoid StringIndexOutOfBoundsException.
+        return str.substring(startIndex, N.min(exclusiveEndIndex, str.length()));
     }
 
     /**
@@ -14360,7 +14378,7 @@ public final class Strings {
      * <pre>{@code
      * // Extract substring with dynamic end index
      * Strings.substringBetween("Hello World", 0, i -> i + 6);   // returns "ello "
-     * Strings.substringBetween("Hello World", 5, i -> i + 6);   // returns " World"
+     * Strings.substringBetween("Hello World", 5, i -> i + 6);   // returns "World"
      * Strings.substringBetween("Hello World", -1, i -> 5);      // returns "Hello"
      *
      * // Invalid cases
@@ -14750,7 +14768,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Search within specific range
-     * Strings.substringsBetween("a[b]c[d]e[f]", 2, 8, '[', ']');   // returns ["b", "d"]
+     * Strings.substringsBetween("a[b]c[d]e[f]", 2, 8, '[', ']');   // returns ["d"]
      * Strings.substringsBetween("(1)(2)(3)", 0, 6, '(', ')');      // returns ["1", "2"]
      * Strings.substringsBetween("no match", 0, 8, '[', ']');       // returns []
      *
@@ -14863,7 +14881,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Search within specific range
-     * Strings.substringsBetween("a<b>c<d>e<f>", 2, 10, "<", ">");        // returns ["b", "d"]
+     * Strings.substringsBetween("a<b>c<d>e<f>", 2, 10, "<", ">");        // returns ["d"]
      * Strings.substringsBetween("[[1]][[2]][[3]]", 0, 10, "[[", "]]");   // returns ["1", "2"]
      * Strings.substringsBetween("no match", 0, 8, "<", ">");             // returns []
      *
@@ -15042,7 +15060,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Search within specific range
-     * Strings.substringIndicesBetween("a[b]c[d]e[f]", 2, 8, '[', ']');   // returns [[3, 4], [6, 7]]
+     * Strings.substringIndicesBetween("a[b]c[d]e[f]", 2, 8, '[', ']');   // returns [[6, 7]]
      * Strings.substringIndicesBetween("(1)(2)(3)", 0, 6, '(', ')');      // returns [[1, 2], [4, 5]]
      * Strings.substringIndicesBetween("no match", 0, 8, '[', ']');       // returns []
      *
@@ -15173,7 +15191,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Search within specific range
-     * Strings.substringIndicesBetween("a<b>c<d>e<f>", 2, 10, "<", ">");        // returns [[3, 4], [6, 7]]
+     * Strings.substringIndicesBetween("a<b>c<d>e<f>", 2, 10, "<", ">");        // returns [[6, 7]]
      * Strings.substringIndicesBetween("[[1]][[2]][[3]]", 0, 10, "[[", "]]");   // returns [[2, 3], [7, 8]]
      * Strings.substringIndicesBetween("no match", 0, 8, "<", ">");             // returns []
      *
@@ -21115,8 +21133,8 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * StrUtil.substringAfter("hello world", " ", 8);      // returns Optional.of("wor")
-         * StrUtil.substringAfter("hello::world", "::", 10);   // returns Optional.of("world")
+         * StrUtil.substringAfter("hello world", " ", 8);      // returns Optional.of("wo")
+         * StrUtil.substringAfter("hello::world", "::", 10);   // returns Optional.of("wor")
          * StrUtil.substringAfter("hello", " ", 5);            // returns Optional.empty()
          * StrUtil.substringAfter("hello ", " ", 6);           // returns Optional.of("")
          * StrUtil.substringAfter(null, " ", 5);               // returns Optional.empty()
@@ -21193,7 +21211,7 @@ public final class Strings {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * StrUtil.substringAfterLast("com.example.Test", ".", 15);   // returns Optional.of("Tes")
-         * StrUtil.substringAfterLast("a::b::c::d", "::", 12);        // returns Optional.of("d")
+         * StrUtil.substringAfterLast("a::b::c::d", "::", 10);        // returns Optional.of("d")
          * StrUtil.substringAfterLast("hello", " ", 5);               // returns Optional.empty()
          * StrUtil.substringAfterLast("hello ", " ", 6);              // returns Optional.of("")
          * StrUtil.substringAfterLast(null, ".", 10);                 // returns Optional.empty()
@@ -22038,7 +22056,7 @@ public final class Strings {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * StrUtil.substringBetween("hello.world.java", '.', 11);   // returns Optional.of("world")
-         * StrUtil.substringBetween("hello.world.java", '.', 20);   // returns Optional.of("world.java")
+         * StrUtil.substringBetween("hello.world.java", '.', 16);   // returns Optional.of("world.java")
          * StrUtil.substringBetween("hello", '.', 10);              // returns Optional.empty()
          * StrUtil.substringBetween(null, '.', 10);                 // returns Optional.empty()
          * }</pre>
@@ -22065,8 +22083,8 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * StrUtil.substringBetween("hello::world::java", "::", 13);   // returns Optional.of("world")
-         * StrUtil.substringBetween("hello::world::java", "::", 20);   // returns Optional.of("world::java")
+         * StrUtil.substringBetween("hello::world::java", "::", 12);   // returns Optional.of("world")
+         * StrUtil.substringBetween("hello::world::java", "::", 18);   // returns Optional.of("world::java")
          * StrUtil.substringBetween("hello", "::", 10);                // returns Optional.empty()
          * StrUtil.substringBetween(null, "::", 10);                   // returns Optional.empty()
          * }</pre>

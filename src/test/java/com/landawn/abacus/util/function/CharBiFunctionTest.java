@@ -91,4 +91,10 @@ public class CharBiFunctionTest extends TestBase {
     public void testFunctionalInterface() {
         assertNotNull(CharBiFunction.class.getAnnotation(FunctionalInterface.class));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        CharBiFunction<String> instance = (a, b) -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

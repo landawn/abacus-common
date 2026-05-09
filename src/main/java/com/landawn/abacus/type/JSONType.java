@@ -36,6 +36,7 @@ import com.landawn.abacus.util.Strings;
 @SuppressWarnings("java:S2160")
 public class JSONType<T> extends AbstractType<T> {
 
+    /** The type name constant used as the {@code JSON<...>} prefix for JSON-wrapped type identification. */
     public static final String JSON = "JSON";
 
     private final String declaringName;

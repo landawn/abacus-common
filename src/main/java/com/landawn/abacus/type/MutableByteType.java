@@ -22,7 +22,9 @@ import com.landawn.abacus.util.Strings;
  * Type handler for {@link com.landawn.abacus.util.MutableByte} objects.
  * <p>
  * This class provides serialization, deserialization, and database operations for
- * MutableByte instances, which are mutable wrappers around primitive byte values.
+ * {@code MutableByte} instances, which are mutable wrappers around primitive
+ * {@code byte} values. Values are serialized as the unwrapped numeric byte
+ * (identical to {@link ByteType}).
  *
  * @see com.landawn.abacus.util.MutableByte
  * @see NumberType

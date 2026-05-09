@@ -18,6 +18,7 @@ package com.landawn.abacus.http;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -119,8 +120,8 @@ public final class WebUtil {
             final String inlineBody = extractInlineDataValue(token);
 
             if (httpMethod == null && (token.equals("-X") || token.equals("--request")) && i + 1 < size
-                    && httpMethodMap.containsValue(tokens.get(i + 1).toUpperCase())) {
-                httpMethod = HttpMethod.valueOf(tokens.get(++i).toUpperCase());
+                    && httpMethodMap.containsValue(tokens.get(i + 1).toUpperCase(Locale.ROOT))) {
+                httpMethod = HttpMethod.valueOf(tokens.get(++i).toUpperCase(Locale.ROOT));
             } else if (Strings.isEmpty(url) && (Strings.startsWithIgnoreCase(token, "https://") || Strings.startsWithIgnoreCase(token, "http://"))) {
                 url = token;
             } else if ((Strings.equals(token, "--header") || Strings.equals(token, "-H")) && i + 1 < size) {
@@ -281,8 +282,8 @@ public final class WebUtil {
             final String inlineBody = extractInlineDataValue(token);
 
             if (httpMethod == null && (token.equals("-X") || token.equals("--request")) && i + 1 < size
-                    && httpMethodMap.containsValue(tokens.get(i + 1).toUpperCase())) {
-                httpMethod = HttpMethod.valueOf(tokens.get(++i).toUpperCase());
+                    && httpMethodMap.containsValue(tokens.get(i + 1).toUpperCase(Locale.ROOT))) {
+                httpMethod = HttpMethod.valueOf(tokens.get(++i).toUpperCase(Locale.ROOT));
             } else if (Strings.isEmpty(url) && (Strings.startsWithIgnoreCase(token, "https://") || Strings.startsWithIgnoreCase(token, "http://"))) {
                 url = token;
             } else if ((Strings.equals(token, "--header") || Strings.equals(token, "-H")) && i + 1 < size) {

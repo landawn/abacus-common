@@ -1479,7 +1479,7 @@ public final class Maps {
     }
 
     /**
-     * Returns the List value to which the specified key is found, or an empty <b>immutable</b> List if the key is absent.
+     * Returns the List value to which the specified key is mapped, or an empty <b>immutable</b> List if the key is absent.
      * A key is considered absent if the map is empty, contains no mapping for the key, or the mapped value is {@code null}.
      *
      * <p><b>Important:</b> The empty List returned when the key is absent is <em>immutable</em> (via {@link N#emptyList()}).
@@ -1522,7 +1522,7 @@ public final class Maps {
     }
 
     /**
-     * Returns the Set value to which the specified key is found, or an empty <b>immutable</b> Set if the key is absent.
+     * Returns the Set value to which the specified key is mapped, or an empty <b>immutable</b> Set if the key is absent.
      * A key is considered absent if the map is empty, contains no mapping for the key, or the mapped value is {@code null}.
      *
      * <p><b>Important:</b> The empty Set returned when the key is absent is <em>immutable</em> (via {@link N#emptySet()}).
@@ -1564,7 +1564,7 @@ public final class Maps {
     }
 
     /**
-     * Returns the Map value to which the specified key is found, or an empty <b>immutable</b> Map if the key is absent.
+     * Returns the Map value to which the specified key is mapped, or an empty <b>immutable</b> Map if the key is absent.
      * A key is considered absent if the map is empty, contains no mapping for the key, or the mapped value is {@code null}.
      *
      * <p><b>Important:</b> The empty Map returned when the key is absent is <em>immutable</em> (via {@link N#emptyMap()}).
@@ -2506,7 +2506,7 @@ public final class Maps {
     }
 
     /**
-     * Returns the value to which the specified key is found if the value is not {@code null},
+     * Returns the value to which the specified key is mapped if the value is not {@code null},
      * or {@code defaultValue} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
      * If the mapped value is not of String type, underlying conversion will be executed by {@code N.stringOf(value)}.
      *
@@ -2667,7 +2667,7 @@ public final class Maps {
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
      * @param defaultValue the default value to return if the map is empty, contains no value for the key, or the value is {@code null}, must not be null.
-     * @return the value to which the specified key is found, or {@code defaultValue} if the map is empty, contains no value for the key, or the value is null.
+     * @return the value to which the specified key is mapped, or {@code defaultValue} if the map is empty, contains no value for the key, or the value is null.
      * @throws IllegalArgumentException if {@code defaultValue} is null.
      * @see #getOrDefaultIfAbsent(Map, Object, Object)
      * @see N#convert(Object, Class)

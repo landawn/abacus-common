@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -101,6 +103,7 @@ public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<Runtim
      * @throws NullPointerException if {@code other} is null
      */
     default BooleanBiPredicate and(final BooleanBiPredicate other) {
+        Objects.requireNonNull(other);
         return (a, b) -> test(a, b) && other.test(a, b);
     }
 
@@ -124,6 +127,7 @@ public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<Runtim
      * @throws NullPointerException if {@code other} is null
      */
     default BooleanBiPredicate or(final BooleanBiPredicate other) {
+        Objects.requireNonNull(other);
         return (a, b) -> test(a, b) || other.test(a, b);
     }
 }

@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -83,6 +85,7 @@ public interface IntTriConsumer extends Throwables.IntTriConsumer<RuntimeExcepti
      * @throws NullPointerException if {@code after} is null
      */
     default IntTriConsumer andThen(final IntTriConsumer after) {
+        Objects.requireNonNull(after);
         return (a, b, c) -> {
             accept(a, b, c);
             after.accept(a, b, c);

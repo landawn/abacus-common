@@ -112,4 +112,10 @@ public class ShortTriConsumerTest extends TestBase {
         assertEquals(5, results[1]);
         assertEquals(60, results[2]);
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        ShortTriConsumer instance = (a, b, c) -> {};
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((ShortTriConsumer) null));
+    }
 }

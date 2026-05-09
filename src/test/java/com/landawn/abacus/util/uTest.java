@@ -3516,4 +3516,309 @@ public class uTest extends TestBase {
         assertEquals("value", result.get());
     }
 
+    // --- Code-review-driven coverage tests (semantic guards) ---
+
+    @Test
+    @DisplayName("empty() returns the same singleton across calls")
+    public void testEmptySingletons() {
+        assertSame(u.Optional.empty(), u.Optional.empty());
+        assertSame(u.Nullable.empty(), u.Nullable.empty());
+        assertSame(OptionalBoolean.empty(), OptionalBoolean.empty());
+        assertSame(OptionalChar.empty(), OptionalChar.empty());
+        assertSame(OptionalByte.empty(), OptionalByte.empty());
+        assertSame(OptionalShort.empty(), OptionalShort.empty());
+        assertSame(OptionalInt.empty(), OptionalInt.empty());
+        assertSame(OptionalLong.empty(), OptionalLong.empty());
+        assertSame(OptionalFloat.empty(), OptionalFloat.empty());
+        assertSame(OptionalDouble.empty(), OptionalDouble.empty());
+    }
+
+    @Test
+    @DisplayName("Optional.of(null) throws NPE; Nullable.of(null) is present and null-valued")
+    public void testNullSemantics_OfFactories() {
+        assertThrows(NullPointerException.class, () -> Optional.of((Object) null));
+        Nullable<String> n = Nullable.of((String) null);
+        assertTrue(n.isPresent());
+        assertTrue(n.isNull());
+        assertNull(n.orElse("X"));
+        assertEquals("Nullable[null]", n.toString());
+    }
+
+    @Test
+    @DisplayName("Empty Nullable distinct from Nullable.of(null)")
+    public void testNullable_EmptyVsPresentNull() {
+        Nullable<String> empty = Nullable.empty();
+        Nullable<String> presentNull = Nullable.of((String) null);
+        assertFalse(empty.isPresent());
+        assertTrue(presentNull.isPresent());
+        assertNotEquals(empty, presentNull);
+    }
+
+    @Test
+    @DisplayName("equals across different Optional primitive types must be false")
+    public void testEquals_CrossPrimitiveType() {
+        // Same numeric value but different container type — must be unequal
+        assertNotEquals(OptionalInt.of(1), OptionalLong.of(1L));
+        assertNotEquals(OptionalInt.of(1), OptionalShort.of((short) 1));
+        assertNotEquals(OptionalInt.of(1), OptionalByte.of((byte) 1));
+        assertNotEquals(OptionalLong.of(1L), OptionalDouble.of(1d));
+        assertNotEquals(OptionalFloat.of(1f), OptionalDouble.of(1d));
+        assertNotEquals(OptionalChar.of((char) 65), OptionalInt.of(65));
+        // Empty across types
+        assertNotEquals(OptionalInt.empty(), OptionalLong.empty());
+        assertNotEquals(OptionalDouble.empty(), OptionalFloat.empty());
+        // u.Optional vs u.Nullable
+        assertNotEquals(Optional.of("x"), Nullable.of("x"));
+        // u.Optional vs java.util.Optional
+        assertNotEquals(Optional.of("x"), java.util.Optional.of("x"));
+    }
+
+    @Test
+    @DisplayName("orElseGet supplier MUST NOT be invoked when value is present")
+    public void testOrElseGet_NotInvokedIfPresent() {
+        AtomicBoolean called = new AtomicBoolean(false);
+        Supplier<String> s = () -> { called.set(true); return "fallback"; };
+
+        Optional.of("v").orElseGet(s);
+        assertFalse(called.get(), "Optional.orElseGet supplier invoked while value present");
+
+        Nullable.of("v").orElseGet(s);
+        assertFalse(called.get(), "Nullable.orElseGet supplier invoked while value present");
+
+        AtomicBoolean intCalled = new AtomicBoolean(false);
+        OptionalInt.of(42).orElseGet(() -> { intCalled.set(true); return 0; });
+        assertFalse(intCalled.get(), "OptionalInt.orElseGet supplier invoked while value present");
+
+        AtomicBoolean longCalled = new AtomicBoolean(false);
+        OptionalLong.of(42L).orElseGet(() -> { longCalled.set(true); return 0L; });
+        assertFalse(longCalled.get(), "OptionalLong.orElseGet supplier invoked while value present");
+
+        AtomicBoolean dblCalled = new AtomicBoolean(false);
+        OptionalDouble.of(1.0).orElseGet(() -> { dblCalled.set(true); return 0.0; });
+        assertFalse(dblCalled.get(), "OptionalDouble.orElseGet supplier invoked while value present");
+    }
+
+    @Test
+    @DisplayName("orElseThrow(supplier) MUST NOT invoke supplier when value is present")
+    public void testOrElseThrowSupplier_NotInvokedIfPresent() {
+        AtomicBoolean called = new AtomicBoolean(false);
+        Supplier<RuntimeException> exSup = () -> { called.set(true); return new RuntimeException(); };
+
+        Optional.of("v").orElseThrow(exSup);
+        assertFalse(called.get());
+        OptionalInt.of(1).orElseThrow(exSup);
+        assertFalse(called.get());
+        OptionalLong.of(1L).orElseThrow(exSup);
+        assertFalse(called.get());
+        OptionalDouble.of(1.0).orElseThrow(exSup);
+        assertFalse(called.get());
+    }
+
+    @Test
+    @DisplayName("or(supplier) MUST NOT invoke supplier when value is present and returns this")
+    public void testOr_NotInvokedIfPresent() {
+        AtomicBoolean called = new AtomicBoolean(false);
+        Optional<String> opt = Optional.of("v");
+        Optional<String> result = opt.or(() -> { called.set(true); return Optional.of("other"); });
+        assertFalse(called.get());
+        assertSame(opt, result);
+
+        AtomicBoolean intCalled = new AtomicBoolean(false);
+        OptionalInt iopt = OptionalInt.of(7);
+        OptionalInt iresult = iopt.or(() -> { intCalled.set(true); return OptionalInt.of(99); });
+        assertFalse(intCalled.get());
+        assertSame(iopt, iresult);
+    }
+
+    @Test
+    @DisplayName("map / flatMap / filter MUST NOT call function when empty")
+    public void testFunctionsNotCalledOnEmpty() {
+        AtomicBoolean mapped = new AtomicBoolean(false);
+        AtomicBoolean filtered = new AtomicBoolean(false);
+        AtomicBoolean flat = new AtomicBoolean(false);
+
+        Optional.<String> empty().map(s -> { mapped.set(true); return s; });
+        Optional.<String> empty().filter(s -> { filtered.set(true); return true; });
+        Optional.<String> empty().flatMap(s -> { flat.set(true); return Optional.of(s); });
+        assertFalse(mapped.get() || filtered.get() || flat.get());
+
+        AtomicBoolean intCalled = new AtomicBoolean(false);
+        OptionalInt.empty().map(i -> { intCalled.set(true); return i; });
+        OptionalInt.empty().filter(i -> { intCalled.set(true); return true; });
+        OptionalInt.empty().flatMap(i -> { intCalled.set(true); return OptionalInt.of(i); });
+        assertFalse(intCalled.get());
+    }
+
+    @Test
+    @DisplayName("ifPresent / ifPresentOrElse with null action throws IllegalArgumentException")
+    public void testIfPresent_NullAction() {
+        assertThrows(IllegalArgumentException.class, () -> Optional.of("v").ifPresent(null));
+        assertThrows(IllegalArgumentException.class, () -> Optional.<String> empty().ifPresent(null));
+        assertThrows(IllegalArgumentException.class, () -> OptionalInt.of(1).ifPresent(null));
+        assertThrows(IllegalArgumentException.class, () -> OptionalLong.of(1L).ifPresent(null));
+        assertThrows(IllegalArgumentException.class, () -> OptionalDouble.of(1.0).ifPresent(null));
+        assertThrows(IllegalArgumentException.class, () -> OptionalBoolean.of(true).ifPresent(null));
+        assertThrows(IllegalArgumentException.class, () -> Nullable.of("v").ifPresent(null));
+        assertThrows(IllegalArgumentException.class, () -> Optional.of("v").ifPresentOrElse(null, () -> {}));
+        assertThrows(IllegalArgumentException.class, () -> Optional.of("v").ifPresentOrElse(s -> {}, null));
+    }
+
+    @Test
+    @DisplayName("get/getAsXxx on empty throws NoSuchElementException")
+    public void testGetOnEmpty_NoSuchElement() {
+        assertThrows(NoSuchElementException.class, () -> Optional.empty().get());
+        assertThrows(NoSuchElementException.class, () -> Nullable.empty().get());
+        assertThrows(NoSuchElementException.class, () -> OptionalBoolean.empty().get());
+        assertThrows(NoSuchElementException.class, () -> OptionalBoolean.empty().getAsBoolean());
+        assertThrows(NoSuchElementException.class, () -> OptionalChar.empty().get());
+        assertThrows(NoSuchElementException.class, () -> OptionalChar.empty().getAsChar());
+        assertThrows(NoSuchElementException.class, () -> OptionalByte.empty().get());
+        assertThrows(NoSuchElementException.class, () -> OptionalByte.empty().getAsByte());
+        assertThrows(NoSuchElementException.class, () -> OptionalShort.empty().get());
+        assertThrows(NoSuchElementException.class, () -> OptionalShort.empty().getAsShort());
+        assertThrows(NoSuchElementException.class, () -> OptionalInt.empty().get());
+        assertThrows(NoSuchElementException.class, () -> OptionalInt.empty().getAsInt());
+        assertThrows(NoSuchElementException.class, () -> OptionalLong.empty().get());
+        assertThrows(NoSuchElementException.class, () -> OptionalLong.empty().getAsLong());
+        assertThrows(NoSuchElementException.class, () -> OptionalFloat.empty().get());
+        assertThrows(NoSuchElementException.class, () -> OptionalFloat.empty().getAsFloat());
+        assertThrows(NoSuchElementException.class, () -> OptionalDouble.empty().get());
+        assertThrows(NoSuchElementException.class, () -> OptionalDouble.empty().getAsDouble());
+    }
+
+    @Test
+    @DisplayName("isPresent and isEmpty are consistent (negation)")
+    public void testIsPresentIsEmptyConsistency() {
+        assertTrue(Optional.of("v").isPresent());
+        assertFalse(Optional.of("v").isEmpty());
+        assertFalse(Optional.empty().isPresent());
+        assertTrue(Optional.empty().isEmpty());
+
+        assertTrue(OptionalInt.of(1).isPresent());
+        assertFalse(OptionalInt.of(1).isEmpty());
+        assertFalse(OptionalInt.empty().isPresent());
+        assertTrue(OptionalInt.empty().isEmpty());
+
+        // Nullable: present-with-null is still present
+        assertTrue(Nullable.of((Object) null).isPresent());
+        assertFalse(Nullable.empty().isPresent());
+    }
+
+    @Test
+    @DisplayName("toString format consistency across types")
+    public void testToStringFormat() {
+        assertEquals("Optional[hello]", Optional.of("hello").toString());
+        assertEquals("Optional.empty", Optional.empty().toString());
+        assertEquals("Nullable[hello]", Nullable.of("hello").toString());
+        assertEquals("Nullable[null]", Nullable.of((String) null).toString());
+        assertEquals("Nullable.empty", Nullable.empty().toString());
+        assertEquals("OptionalBoolean[true]", OptionalBoolean.of(true).toString());
+        assertEquals("OptionalBoolean.empty", OptionalBoolean.empty().toString());
+        assertEquals("OptionalInt[42]", OptionalInt.of(42).toString());
+        assertEquals("OptionalInt.empty", OptionalInt.empty().toString());
+        assertEquals("OptionalLong[42]", OptionalLong.of(42L).toString());
+        assertEquals("OptionalLong.empty", OptionalLong.empty().toString());
+        assertEquals("OptionalDouble.empty", OptionalDouble.empty().toString());
+    }
+
+    @Test
+    @DisplayName("hashCode consistency with equals")
+    public void testHashCodeConsistency() {
+        assertEquals(OptionalInt.of(5).hashCode(), OptionalInt.of(5).hashCode());
+        assertEquals(OptionalInt.empty().hashCode(), OptionalInt.empty().hashCode());
+        assertEquals(Optional.of("x").hashCode(), Optional.of("x").hashCode());
+        assertEquals(Optional.empty().hashCode(), Optional.empty().hashCode());
+        assertEquals(Nullable.empty().hashCode(), Nullable.empty().hashCode());
+        assertEquals(0, Optional.empty().hashCode());
+        assertEquals(0, OptionalInt.empty().hashCode());
+    }
+
+    @Test
+    @DisplayName("stream() returns empty for empty, single-element for present")
+    public void testStreamSize() {
+        assertEquals(0L, Optional.empty().stream().count());
+        assertEquals(1L, Optional.of("a").stream().count());
+        assertEquals(0L, Nullable.empty().stream().count());
+        assertEquals(1L, Nullable.of((String) null).stream().count());
+        assertEquals(0L, OptionalInt.empty().stream().count());
+        assertEquals(1L, OptionalInt.of(1).stream().count());
+        assertEquals(0L, OptionalLong.empty().stream().count());
+        assertEquals(1L, OptionalLong.of(1L).stream().count());
+        assertEquals(0L, OptionalDouble.empty().stream().count());
+        assertEquals(1L, OptionalDouble.of(1.0).stream().count());
+    }
+
+    @Test
+    @DisplayName("toList / toSet / toImmutableList / toImmutableSet sizes")
+    public void testCollectionConversionSizes() {
+        assertTrue(Optional.empty().toList().isEmpty());
+        assertEquals(List.of("a"), Optional.of("a").toList());
+        assertTrue(OptionalInt.empty().toList().isEmpty());
+        assertEquals(1, OptionalInt.of(1).toList().size());
+        assertTrue(Optional.empty().toSet().isEmpty());
+        assertEquals(Set.of("a"), Optional.of("a").toSet());
+        assertTrue(Optional.empty().toImmutableList().isEmpty());
+        assertEquals(1, Optional.of("a").toImmutableList().size());
+        assertTrue(Optional.empty().toImmutableSet().isEmpty());
+        assertEquals(1, Optional.of("a").toImmutableSet().size());
+    }
+
+    @Test
+    @DisplayName("Boxed primitives unwrap correctly")
+    public void testBoxed_2() {
+        assertEquals(Optional.of(true), OptionalBoolean.of(true).boxed());
+        assertEquals(Optional.empty(), OptionalBoolean.empty().boxed());
+        assertEquals(Optional.of('A'), OptionalChar.of('A').boxed());
+        assertEquals(Optional.of((byte) 1), OptionalByte.of((byte) 1).boxed());
+        assertEquals(Optional.of((short) 1), OptionalShort.of((short) 1).boxed());
+        assertEquals(Optional.of(1), OptionalInt.of(1).boxed());
+        assertEquals(Optional.of(1L), OptionalLong.of(1L).boxed());
+        assertEquals(Optional.of(1.5f), OptionalFloat.of(1.5f).boxed());
+        assertEquals(Optional.of(1.5), OptionalDouble.of(1.5).boxed());
+    }
+
+    @Test
+    @DisplayName("ofNullable(null) returns empty for all primitive Optional types")
+    public void testOfNullable_Null() {
+        assertFalse(OptionalBoolean.ofNullable(null).isPresent());
+        assertFalse(OptionalChar.ofNullable(null).isPresent());
+        assertFalse(OptionalByte.ofNullable(null).isPresent());
+        assertFalse(OptionalShort.ofNullable(null).isPresent());
+        assertFalse(OptionalInt.ofNullable(null).isPresent());
+        assertFalse(OptionalLong.ofNullable(null).isPresent());
+        assertFalse(OptionalFloat.ofNullable(null).isPresent());
+        assertFalse(OptionalDouble.ofNullable(null).isPresent());
+        assertFalse(Optional.ofNullable(null).isPresent());
+    }
+
+    @Test
+    @DisplayName("flatMap returning null throws NullPointerException")
+    public void testFlatMap_NullResult() {
+        assertThrows(NullPointerException.class, () -> Optional.of("v").flatMap(s -> null));
+        assertThrows(NullPointerException.class, () -> OptionalInt.of(1).flatMap(i -> null));
+        assertThrows(NullPointerException.class, () -> OptionalLong.of(1L).flatMap(i -> null));
+        assertThrows(NullPointerException.class, () -> OptionalDouble.of(1d).flatMap(i -> null));
+        assertThrows(NullPointerException.class, () -> Nullable.of("v").flatMap(s -> null));
+    }
+
+    @Test
+    @DisplayName("or supplier returning null throws NullPointerException")
+    public void testOr_NullResult() {
+        assertThrows(NullPointerException.class, () -> Optional.empty().or(() -> null));
+        assertThrows(NullPointerException.class, () -> OptionalInt.empty().or(() -> null));
+        assertThrows(NullPointerException.class, () -> OptionalLong.empty().or(() -> null));
+        assertThrows(NullPointerException.class, () -> Nullable.empty().or(() -> null));
+    }
+
+    @Test
+    @DisplayName("OptionalInt cache returns same instance for cached values")
+    public void testIntCacheIdentity() {
+        // -256..1024 cached
+        assertSame(OptionalInt.of(0), OptionalInt.of(0));
+        assertSame(OptionalInt.of(-256), OptionalInt.of(-256));
+        assertSame(OptionalInt.of(1024), OptionalInt.of(1024));
+        // Outside cache: new instance each call (still equal)
+        assertNotSame(OptionalInt.of(99999), OptionalInt.of(99999));
+        assertEquals(OptionalInt.of(99999), OptionalInt.of(99999));
+    }
 }

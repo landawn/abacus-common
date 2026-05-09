@@ -64,10 +64,11 @@ import com.landawn.abacus.util.URLEncodedUtil;
  * serialization/deserialization, comprehensive error handling, and efficient resource management suitable for
  * high-throughput scenarios in microservice architectures, REST API clients, and web service integrations.</p>
  *
- * <p><b>⚠️ IMPORTANT - Thread Safety Guarantee:</b>
- * This class is designed to be completely thread-safe and can be safely shared across multiple threads
- * without external synchronization. All internal state is either immutable or properly synchronized,
- * making it suitable for concurrent usage in multi-threaded applications and web servers.</p>
+ * <p><b>Thread Safety Guarantee:</b>
+ * This class is designed to be thread-safe and can be safely shared across multiple threads
+ * without external synchronization. Configuration state (URL, timeouts, default {@link HttpSettings})
+ * is fixed at construction time and the per-request execution path uses independent connections,
+ * making instances suitable for concurrent usage in multi-threaded applications and web servers.</p>
  *
  * <p><b>Key Features and Capabilities:</b>
  * <ul>
@@ -119,7 +120,7 @@ import com.landawn.abacus.util.URLEncodedUtil;
  *   </tr>
  *   <tr>
  *     <td>Kryo Binary</td>
- *     <td>application/x-kryo</td>
+ *     <td>application/kryo</td>
  *     <td>Kryo serialization</td>
  *     <td>LZ4, Snappy</td>
  *   </tr>
@@ -144,8 +145,8 @@ import com.landawn.abacus.util.URLEncodedUtil;
  *   <li><b>PUT:</b> {@code put()}, {@code asyncPut()} - Resource replacement with full entity updates</li>
  *   <li><b>DELETE:</b> {@code delete()}, {@code asyncDelete()} - Resource deletion operations</li>
  *   <li><b>HEAD:</b> {@code head()}, {@code asyncHead()} - Metadata retrieval without response body</li>
- *   <li><b>PATCH:</b> {@code patch()}, {@code asyncPatch()} - Partial resource updates</li>
- *   <li><b>OPTIONS:</b> {@code options()}, {@code asyncOptions()} - Resource capability discovery</li>
+ *   <li><b>PATCH/OPTIONS:</b> Available via {@link #execute(HttpMethod, Object, HttpSettings, Class)} and
+ *       {@link #asyncExecute(HttpMethod, Object, HttpSettings, Class)} with the corresponding {@link HttpMethod}</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b>
@@ -266,11 +267,12 @@ import com.landawn.abacus.util.URLEncodedUtil;
  *
  * <p><b>Thread Safety and Concurrency:</b>
  * <ul>
- *   <li><b>Immutable Configuration:</b> HttpClient instances are immutable after creation</li>
- *   <li><b>Thread-Safe Operations:</b> All methods can be safely called from multiple threads</li>
- *   <li><b>Connection Isolation:</b> Each request uses independent connection resources</li>
+ *   <li><b>Effectively Immutable Configuration:</b> URL, timeouts, default {@link HttpSettings},
+ *       and the connection counter are fixed at construction time</li>
+ *   <li><b>Thread-Safe Operations:</b> All request methods can be safely called from multiple threads</li>
+ *   <li><b>Connection Isolation:</b> Each request opens and uses its own {@link HttpURLConnection}</li>
  *   <li><b>Async Execution:</b> Non-blocking operations with proper thread isolation</li>
- *   <li><b>Resource Management:</b> Thread-safe resource cleanup and connection management</li>
+ *   <li><b>Resource Management:</b> Per-request stream cleanup and shared connection-counter accounting</li>
  * </ul>
  *
  * <p><b>Integration with Frameworks and Libraries:</b>
@@ -1174,7 +1176,7 @@ public final class HttpClient {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String response = client.delete(String.class);
+     * DeleteResult result = client.delete(DeleteResult.class);
      * }</pre>
      *
      * @param <T> The type of the response object
@@ -1398,8 +1400,9 @@ public final class HttpClient {
     }
 
     /**
-     * Performs a HEAD request with default settings.
-     * HEAD requests are used to retrieve headers without the response body.
+     * Performs a HEAD request with this client's default settings.
+     * HEAD requests are used to retrieve headers without the response body. The response body
+     * (if any) is discarded.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2344,14 +2347,14 @@ public final class HttpClient {
      * HttpSettings settings = HttpSettings.create()
      *     .header("If-Match", "\"abc123\"")
      *     .setReadTimeout(30000);
-    * client.asyncPut(updateRequest, settings, User.class)
-    *     .thenRunAsync((user, exception) -> {
-    *         if (exception != null) {
-    *             System.err.println("Update failed: " + exception.getMessage());
-    *         } else {
-    *             System.out.println("Updated: " + user.getName());
-    *         }
-    *     });
+     * client.asyncPut(updateRequest, settings, User.class)
+     *     .thenRunAsync((user, exception) -> {
+     *         if (exception != null) {
+     *             System.err.println("Update failed: " + exception.getMessage());
+     *         } else {
+     *             System.out.println("Updated: " + user.getName());
+     *         }
+     *     });
      * }</pre>
      *
      * @param <T> The type of the response object
@@ -2503,11 +2506,29 @@ public final class HttpClient {
     }
 
     /**
-     * Closes this HTTP client and releases any resources.
-     * Note: Currently this method does nothing as connections are managed per-request.
-     * The method is provided for API consistency and future enhancements.
+     * Closes this HTTP client and releases any resources it owns.
+     *
+     * <p>Connections are managed per-request, so there are no pooled connections to drain here.
+     * However, if a custom {@link Executor} was passed to the factory and it is itself a
+     * {@link java.util.concurrent.ExecutorService ExecutorService}, this client wrapped it in
+     * its own {@link AsyncExecutor} — those wrapped services are shut down here so callers do
+     * not leak threads when they close the client. The shared default executor
+     * ({@code HttpUtil.DEFAULT_ASYNC_EXECUTOR}) is intentionally left alone since it is reused
+     * across clients.</p>
+     *
+     * <p>This method is idempotent and never throws.</p>
      */
     public synchronized void close() {
-        // do nothing.
+        if (_asyncExecutor != HttpUtil.DEFAULT_ASYNC_EXECUTOR) {
+            try {
+                final java.util.concurrent.Executor underlying = _asyncExecutor.getExecutor();
+                if (underlying instanceof java.util.concurrent.ExecutorService es) {
+                    es.shutdown();
+                }
+            } catch (final RuntimeException ignored) {
+                // Best-effort cleanup. Continue even if the executor refuses shutdown
+                // (e.g. SecurityManager) so close() remains idempotent and non-throwing.
+            }
+        }
     }
 }

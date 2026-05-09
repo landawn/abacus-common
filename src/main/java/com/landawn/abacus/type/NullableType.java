@@ -18,12 +18,20 @@ import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.u.Nullable;
 
 /**
- * Generic type handler for {@link Nullable} wrapper objects, providing serialization,
- * deserialization, and database interaction capabilities for {@code nullable} values of any type.
- * This type handler supports generic type parameters and delegates operations to the
- * appropriate element type handler.
+ * Generic type handler for {@link Nullable} wrapper objects from the {@code com.landawn.abacus.util.u}
+ * package, providing serialization, deserialization, and database interaction capabilities for
+ * nullable values of any type.
+ * <p>
+ * Unlike {@link com.landawn.abacus.util.u.Optional Optional} (handled by {@link OptionalType}),
+ * a {@code Nullable} can carry {@code null} as a valid present value:
+ * an "empty" {@code Nullable} (no value) and a {@code Nullable} holding {@code null} are
+ * distinct states. SQL {@code NULL} columns are mapped here to a present {@code Nullable}
+ * holding {@code null}, not to {@link Nullable#empty()}.
+ * <p>
+ * This type handler supports generic type parameters of the form {@code NullableType<T>}
+ * and delegates element serialization/deserialization to the appropriate element type handler.
  *
- * @param <T> the type of value wrapped by the Nullable
+ * @param <T> the type of value wrapped by the {@code Nullable}
  */
 @SuppressWarnings("java:S2160")
 public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {

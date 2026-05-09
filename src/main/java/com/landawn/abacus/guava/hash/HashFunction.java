@@ -90,6 +90,7 @@ import com.google.common.hash.HashCode;
  * @see Hashing
  * @see HashCode
  * @see Hasher
+ * @see com.google.common.hash.HashFunction
  */
 public interface HashFunction {
 

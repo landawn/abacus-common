@@ -739,4 +739,70 @@ public class ObjectoryTest extends TestBase {
             Objectory.recycle((java.io.BufferedReader) null);
         });
     }
+
+    /**
+     * Acquire/release contract: an object recycled to the pool should be reusable
+     * (i.e. cleared/reset) on the next createXxx() call. Tests that recycled state
+     * does not leak into subsequent acquisitions.
+     */
+    @Test
+    public void testStringBuilderAcquireReleaseReuseContract() {
+        StringBuilder a = Objectory.createStringBuilder();
+        a.append("LEAKAGE-TEST");
+        Objectory.recycle(a);
+
+        // Subsequent acquires - one of them may be the same instance, must be empty
+        StringBuilder b = Objectory.createStringBuilder();
+        Assertions.assertEquals(0, b.length());
+        b.append("ok");
+        Objectory.recycle(b);
+    }
+
+    /** Recycling fills the pool but never throws or loses elements. */
+    @Test
+    public void testRecycle_PoolExhaustion_NoExceptions() {
+        // Queue more StringBuilders than the buffer-pool capacity
+        for (int i = 0; i < 200; i++) {
+            StringBuilder sb = new StringBuilder(Objectory.BUFFER_SIZE / 2);
+            sb.append("x");
+            assertDoesNotThrow(() -> Objectory.recycle(sb));
+        }
+        // Pool still hands out empty/clean StringBuilders
+        StringBuilder sb = Objectory.createStringBuilder();
+        Assertions.assertEquals(0, sb.length());
+    }
+
+    /**
+     * Object array pool: recycled arrays of the same length should be reused with
+     * elements set to null (so prior contents do not leak).
+     */
+    @Test
+    public void testObjectArrayRecycle_ClearsContents() {
+        Object[] a = Objectory.createObjectArray(8);
+        for (int i = 0; i < a.length; i++) {
+            a[i] = "data-" + i;
+        }
+        Objectory.recycle(a);
+        // After recycle, the same array should be cleared (recycle nulls entries)
+        for (int i = 0; i < a.length; i++) {
+            Assertions.assertNull(a[i], "recycled array element should be nulled");
+        }
+    }
+
+    /** Negative array sizes must be rejected with IllegalArgumentException. */
+    @Test
+    public void testCreateObjectArray_NegativeSize() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Objectory.createObjectArray(-1));
+    }
+
+    /** Exhausting and re-recycling repeatedly must not leak or block. */
+    @Test
+    public void testListPool_RepeatedCycles() {
+        for (int i = 0; i < 500; i++) {
+            List<Integer> list = Objectory.createList();
+            Assertions.assertTrue(list.isEmpty());
+            list.add(i);
+            Objectory.recycle(list);
+        }
+    }
 }

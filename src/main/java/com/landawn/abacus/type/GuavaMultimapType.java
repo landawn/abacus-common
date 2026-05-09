@@ -42,11 +42,11 @@ import com.landawn.abacus.util.Strings;
  * Type handler for Google Guava Multimap implementations.
  * This class provides serialization and deserialization capabilities for various Guava Multimap types
  * including ListMultimap, SetMultimap, and their concrete implementations.
- * Multimaps are serialized as Map&lt;K, Collection&lt;V&gt;&gt; structures.
+ * Multimaps are serialized as {@code Map<K, Collection<V>>} structures.
  *
  * @param <K> the key type of the multimap
  * @param <V> the value type of the multimap
- * @param <T> the multimap type (must extend Multimap&lt;K, V&gt;)
+ * @param <T> the multimap type (must extend {@code Multimap<K, V>})
  */
 @SuppressWarnings("java:S2160")
 public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractType<T> {
@@ -223,10 +223,12 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
     /**
      * Creates a new instance of the appropriate multimap implementation.
      * Selects the concrete implementation based on the type class:
-     * - ArrayListMultimap for ListMultimap types
-     * - HashMultimap for SetMultimap types
-     * - TreeMultimap for SortedSetMultimap types
-     * - LinkedHashMultimap/LinkedListMultimap for ordered types
+     * <ul>
+     *   <li>{@link ArrayListMultimap} for {@link ListMultimap} types</li>
+     *   <li>{@link HashMultimap} for {@link SetMultimap} types</li>
+     *   <li>{@link TreeMultimap} for {@link SortedSetMultimap} types</li>
+     *   <li>{@link LinkedHashMultimap}/{@link LinkedListMultimap} for ordered types</li>
+     * </ul>
      * Falls back to reflection-based instantiation for custom implementations.
      *
      * @param keySize the expected number of keys

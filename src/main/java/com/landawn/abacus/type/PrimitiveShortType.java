@@ -18,6 +18,10 @@ package com.landawn.abacus.type;
  * Type handler for the primitive {@code short} type, as opposed to the {@link Short} wrapper class.
  * It provides type information and default value handling for {@code short} primitives.
  *
+ * <p>The key distinction from {@code ShortType} (which handles {@link Short}) is the default value:
+ * {@link #defaultValue()} returns {@code (short) 0} (matching the JLS default for {@code short}),
+ * whereas the wrapper type's default is {@code null}.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Type<Short> type = TypeFactory.getType(short.class);

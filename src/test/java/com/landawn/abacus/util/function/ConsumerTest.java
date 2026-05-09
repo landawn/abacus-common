@@ -117,4 +117,10 @@ public class ConsumerTest extends TestBase {
         com.landawn.abacus.util.Throwables.Consumer<String, ?> throwableConsumer = consumer.toThrowable();
         assertNotNull(throwableConsumer);
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        Consumer<String> instance = a -> {};
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Consumer) null));
+    }
 }

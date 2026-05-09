@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -95,6 +97,7 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
      */
     @Override
     default LongUnaryOperator compose(final java.util.function.LongUnaryOperator before) {
+        Objects.requireNonNull(before);
         return (final long v) -> applyAsLong(before.applyAsLong(v));
     }
 
@@ -123,6 +126,7 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
      */
     @Override
     default LongUnaryOperator andThen(final java.util.function.LongUnaryOperator after) {
+        Objects.requireNonNull(after);
         return (final long t) -> after.applyAsLong(applyAsLong(t));
     }
 

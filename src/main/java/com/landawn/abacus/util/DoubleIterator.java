@@ -279,10 +279,10 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int count = 0;
+     * int[] count = {0};
      * DoubleIterator iter = DoubleIterator.generate(
-     *     () -> count < 10,
-     *     () -> count++ * 1.5
+     *     () -> count[0] < 10,
+     *     () -> count[0]++ * 1.5
      * );
      * }</pre>
      *

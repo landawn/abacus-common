@@ -33,8 +33,8 @@ import com.landawn.abacus.type.Type;
  *   <li>{@link #END_BRACKET} - Closing bracket ']' for arrays</li>
  *   <li>{@link #START_DOUBLE_QUOTE} - Double quote '"' start</li>
  *   <li>{@link #END_DOUBLE_QUOTE} - Double quote '"' end</li>
- *   <li>{@link #START_SINGLE_QUOTE} - Single quote <i>\'</i> start</li>
- *   <li>{@link #END_SINGLE_QUOTE} - Single quote <i>\'</i> end</li>
+ *   <li>{@link #START_SINGLE_QUOTE} - Single quote {@code '} start</li>
+ *   <li>{@link #END_SINGLE_QUOTE} - Single quote {@code '} end</li>
  *   <li>{@link #COLON} - Colon ':' separator</li>
  *   <li>{@link #COMMA} - Comma ',' separator</li>
  * </ul>
@@ -85,13 +85,13 @@ interface JsonReader {
     int END_DOUBLE_QUOTE = 6;
 
     /**
-     * Start single quotation token <i>\'</i>. Indicates the beginning of a single-quoted string.
+     * Start single quotation token {@code '}. Indicates the beginning of a single-quoted string.
      * Note: Single quotes are not standard JSON but may be supported for flexibility.
      */
     int START_SINGLE_QUOTE = 7;
 
     /**
-     * End single quotation token <i>\'</i>. Indicates the end of a single-quoted string.
+     * End single quotation token {@code '}. Indicates the end of a single-quoted string.
      * Note: Single quotes are not standard JSON but may be supported for flexibility.
      */
     int END_SINGLE_QUOTE = 8;
@@ -109,22 +109,20 @@ interface JsonReader {
     // > 32 = ' ' (Space)
 
     /**
-     * Reads the previous token from the JSON input.
-     * This method allows backtracking to the last token read,
-     * which can be useful for re-evaluating or skipping tokens.
+     * Returns the identifier of the most recently read token from the JSON input.
+     * This method does <i>not</i> advance the reader or re-read the token; it simply
+     * returns the cached identifier of the token most recently produced by
+     * {@link #nextToken()} or {@link #nextToken(Type)}. It is useful for re-inspecting
+     * the previous token after a state transition.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int token = reader.nextToken();
-     * if (token == SOME_TOKEN) {
-     *     // Do something with the token
-     * } else {
-     *     // Backtrack to the previous token
-     *     reader.lastToken();
-     * }
+     * // ... later ...
+     * int previous = reader.lastToken(); // returns the same token without re-reading
      * }</pre>
      *
-     * @return the identifier of the previous token, or -1 if no previous token exists
+     * @return the identifier of the previous token, or {@code -1} ({@link #EOF}) if no token has been read yet
      */
     int lastToken();
 
@@ -134,7 +132,7 @@ interface JsonReader {
      * structural token in the JSON stream.
      *
      * <p>The returned value will be one of the defined token constants,
-     * or -1 if no next symbol is found (EOF).</p>
+     * or {@link #EOF} ({@code -1}) if no next symbol is found.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -144,15 +142,19 @@ interface JsonReader {
      * }
      * }</pre>
      *
-     * @return the token identifier, or -1 if no next symbol is found
+     * @return the token identifier, or {@link #EOF} ({@code -1}) if no next symbol is found
      * @throws UncheckedIOException if an I/O error occurs during reading
      */
     int nextToken() throws UncheckedIOException;
 
     /**
-     * Reads and returns the next token identifier of a specific type from the JSON input.
-     * This method allows reading tokens that match a specific type,
-     * which can be useful for parsing structured data.
+     * Reads and returns the next token identifier from the JSON input, providing the
+     * expected value type as a hint for primitive/numeric parsing.
+     *
+     * <p>The hint is used by the underlying numeric parser to choose between
+     * {@code Integer}/{@code Long}/{@code Float}/{@code Double} when no explicit type
+     * suffix is present. Pass the {@code String} type when no specific value type is
+     * known.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -160,8 +162,8 @@ interface JsonReader {
      * int token = reader.nextToken(intType);
      * }</pre>
      *
-     * @param nextTokenValueType the type of the next token to read
-     * @return the token identifier, or -1 if no next symbol is found
+     * @param nextTokenValueType the expected type of the next token's value (used as a parsing hint)
+     * @return the token identifier, or {@link #EOF} ({@code -1}) if no next symbol is found
      * @throws UncheckedIOException if an I/O error occurs during reading
      */
     int nextToken(Type<?> nextTokenValueType) throws UncheckedIOException;

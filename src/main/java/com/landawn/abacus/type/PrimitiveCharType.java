@@ -18,6 +18,10 @@ package com.landawn.abacus.type;
  * Type handler for the primitive {@code char} type, as opposed to the {@link Character} wrapper class.
  * It provides type information and default value handling for {@code char} primitives.
  *
+ * <p>The key distinction from {@code CharacterType} (which handles {@link Character}) is the default value:
+ * {@link #defaultValue()} returns {@code '\u0000'} (matching the JLS default for {@code char}),
+ * whereas the wrapper type's default is {@code null}.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Type<Character> type = TypeFactory.getType(char.class);

@@ -27,6 +27,9 @@ package com.landawn.abacus.http;
  * String contentType = format.contentType();   // returns "application/json"
  * String encoding = format.contentEncoding();   // returns "gzip"
  * }</pre>
+ *
+ * @see HttpUtil#getContentFormat(String, String)
+ * @see HttpSettings#setContentFormat(ContentFormat)
  */
 public enum ContentFormat {
     /** No content format specified. */

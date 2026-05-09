@@ -1089,4 +1089,18 @@ public class URLEncodedUtilTest extends AbstractTest {
         Assertions.assertEquals("=", URLEncodedUtil.NAME_VALUE_SEPARATOR);
     }
 
+    @Test
+    public void testDecodeWithSurrogatePairAfterAsciiPrefix() {
+        // Regression: in urlDecode the surrogate-pair peek used cb.charAt(cb.position())
+        // which is RELATIVE on CharBuffer (= absolute index 2*position) and so missed the
+        // low surrogate when the high surrogate was not at position 0. The non-ASCII chars
+        // were then encoded as two lone surrogates, producing replacement bytes after
+        // round-tripping through the charset.
+        // Use 'q' as the parameter name so the value (with the emoji) is decoded literally.
+        String emoji = new String(Character.toChars(0x1F600)); // grinning face: surrogate pair
+        String value = "ab" + emoji + "cd";
+        Map<String, String> decoded = URLEncodedUtil.decode("q=" + value);
+        assertEquals(value, decoded.get("q"));
+    }
+
 }

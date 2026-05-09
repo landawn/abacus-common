@@ -15,6 +15,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -113,6 +115,7 @@ public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, 
      * @throws NullPointerException if {@code after} is null
      */
     default <V> QuadFunction<A, B, C, D, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+        Objects.requireNonNull(after);
         return (a, b, c, d) -> after.apply(apply(a, b, c, d));
     }
 

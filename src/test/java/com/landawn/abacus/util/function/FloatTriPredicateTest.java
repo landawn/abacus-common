@@ -64,4 +64,10 @@ public class FloatTriPredicateTest extends TestBase {
     public void testConstant_ALWAYS_FALSE() {
         assertFalse(FloatTriPredicate.ALWAYS_FALSE.test(1.0f, 2.0f, 3.0f));
     }
+
+    @Test
+    public void testAndNullThrowsImmediately() {
+        FloatTriPredicate instance = (a, b, c) -> false;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((FloatTriPredicate) null));
+    }
 }

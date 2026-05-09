@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -60,6 +62,7 @@ public interface BooleanBiFunction<R> extends Throwables.BooleanBiFunction<R, Ru
      * @throws NullPointerException if {@code after} is null
      */
     default <V> BooleanBiFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+        Objects.requireNonNull(after);
         return (a, b) -> after.apply(apply(a, b));
     }
 }

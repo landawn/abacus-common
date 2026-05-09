@@ -36,6 +36,7 @@ import com.landawn.abacus.util.Strings;
  * </p>
  *
  * @see BooleanType
+ * @see PrimitiveBooleanType
  */
 public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
 
@@ -104,12 +105,14 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * This method handles various string formats:
      * <ul>
      *   <li>Empty or {@code null} strings return the default value.</li>
-     *   <li>Single character strings: 'Y', 'y', or '1' return {@code true}.</li>
-     *   <li>Other strings are parsed using {@link Boolean#valueOf(String)}.</li>
+     *   <li>Single character strings: {@code 'Y'}, {@code 'y'}, or {@code '1'} return {@code true};
+     *       any other single character returns {@code false}.</li>
+     *   <li>Other strings are parsed using {@link Boolean#valueOf(String)} (i.e. {@code true} only
+     *       if the string equals {@code "true"} case-insensitively).</li>
      * </ul>
      *
-     * @param str the string to convert
-     * @return the {@code Boolean} value, or default value if the input is empty or {@code null}
+     * @param str the string to convert, may be {@code null}
+     * @return the {@code Boolean} value, or the default value if the input is empty or {@code null}
      */
     @Override
     public Boolean valueOf(final String str) {

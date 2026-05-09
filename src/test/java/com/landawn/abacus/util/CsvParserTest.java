@@ -530,4 +530,133 @@ public class CsvParserTest extends TestBase {
         assertEquals(1024, CsvParser.INITIAL_READ_SIZE);
         assertEquals(128, CsvParser.READ_BUFFER_SIZE);
     }
+
+    // ===================== RFC 4180 edge case tests =====================
+
+    @Test
+    public void testRfc4180_EmbeddedCommaInQuotedField() throws ParsingException {
+        CsvParser parser = new CsvParser();
+        List<String> result = parser.parseLine("\"a,b\",c");
+        assertEquals(2, result.size());
+        assertEquals("a,b", result.get(0));
+        assertEquals("c", result.get(1));
+    }
+
+    @Test
+    public void testRfc4180_EmbeddedDoubleQuoteEscapedAsTwo() throws ParsingException {
+        CsvParser parser = new CsvParser();
+        // RFC 4180 says "" inside a quoted field represents a literal "
+        List<String> result = parser.parseLine("\"He said \"\"hi\"\" today\",x");
+        assertEquals(2, result.size());
+        assertEquals("He said \"hi\" today", result.get(0));
+        assertEquals("x", result.get(1));
+    }
+
+    @Test
+    public void testRfc4180_DoubleQuoteInsideUnquotedFieldNotUnescaped() throws ParsingException {
+        // "" inside an UNquoted field: the parser is lenient and treats them as literal characters
+        // (i.e., does NOT collapse to a single quote, since RFC 4180 only defines "" as an escape
+        // inside quoted fields). Two consecutive unquoted "" should be preserved verbatim.
+        CsvParser parser = new CsvParser();
+        List<String> result = parser.parseLine("a\"\"b,c");
+        assertEquals(2, result.size());
+        assertEquals("a\"\"b", result.get(0));
+        assertEquals("c", result.get(1));
+    }
+
+    @Test
+    public void testRfc4180_EmptyTrailingFieldFromTrailingDelimiter() throws ParsingException {
+        CsvParser parser = new CsvParser();
+        List<String> result = parser.parseLine("a,b,");
+        assertEquals(3, result.size());
+        assertEquals("", result.get(2));
+    }
+
+    @Test
+    public void testRfc4180_EmptyLine() throws ParsingException {
+        CsvParser parser = new CsvParser();
+        // An empty line yields a single empty field (not zero fields)
+        List<String> result = parser.parseLine("");
+        assertEquals(1, result.size());
+        assertEquals("", result.get(0));
+    }
+
+    @Test
+    public void testRfc4180_CarriageReturnInsideQuotedField() throws ParsingException {
+        CsvParser parser = new CsvParser();
+        // CR or CRLF inside a quoted field must be preserved (callers feed already-joined
+        // multi-line records into parseLine, but the chars themselves must round-trip)
+        List<String> result = parser.parseLine("a,\"line1\r\nline2\",c");
+        assertEquals(3, result.size());
+        assertEquals("line1\r\nline2", result.get(1));
+    }
+
+    @Test
+    public void testCarriageReturnAloneInsideQuotedField() throws ParsingException {
+        CsvParser parser = new CsvParser();
+        List<String> result = parser.parseLine("a,\"x\ry\",b");
+        assertEquals(3, result.size());
+        assertEquals("x\ry", result.get(1));
+    }
+
+    @Test
+    public void testNonDefaultQuoteCharEscaping() throws ParsingException {
+        // With ' as the quote char, doubling it should still escape it
+        CsvParser parser = new CsvParser(',', '\'', '\\');
+        List<String> result = parser.parseLine("'It''s ok',2");
+        assertEquals(2, result.size());
+        assertEquals("It's ok", result.get(0));
+        assertEquals("2", result.get(1));
+    }
+
+    @Test
+    public void testSemicolonDelimiter() throws ParsingException {
+        CsvParser parser = new CsvParser(';');
+        List<String> result = parser.parseLine("a;b;c");
+        assertEquals(3, result.size());
+    }
+
+    @Test
+    public void testParseIntFieldWithLeadingWhitespaceTrimmedByDefault() throws ParsingException {
+        // Default ignoreLeadingWhiteSpace=true -> "  42  " becomes "42" so Integer.parseInt works
+        CsvParser parser = new CsvParser();
+        List<String> result = parser.parseLine("  42  ,x");
+        assertEquals(2, result.size());
+        assertEquals(42, Integer.parseInt(result.get(0)));
+    }
+
+    @Test
+    public void testParseIntFieldRetainsWhitespaceWhenConfigured() throws ParsingException {
+        CsvParser parser = new CsvParser(',', '"', '\\', false, false);
+        List<String> result = parser.parseLine("  42  ,x");
+        assertEquals("  42  ", result.get(0));
+        assertThrows(NumberFormatException.class, () -> Integer.parseInt(result.get(0)));
+    }
+
+    @Test
+    public void testQuotedFieldWithSurroundingSpacesPreservesInnerSpaces() throws ParsingException {
+        // "  abc  " quoted -> inner spaces are part of the value
+        CsvParser parser = new CsvParser();
+        List<String> result = parser.parseLine("\"  abc  \",y");
+        assertEquals(2, result.size());
+        assertEquals("  abc  ", result.get(0));
+    }
+
+    @Test
+    public void testLineWithMixedDelimitersTreatsOthersAsLiterals() throws ParsingException {
+        // Comma is separator; semicolons inside fields are literal
+        CsvParser parser = new CsvParser();
+        List<String> result = parser.parseLine("a;b,c;d");
+        assertEquals(2, result.size());
+        assertEquals("a;b", result.get(0));
+        assertEquals("c;d", result.get(1));
+    }
+
+    @Test
+    public void testParseLineToArrayOverflow_throws() throws ParsingException {
+        // Pre-allocated output is too small for the parsed line; document the runtime failure
+        CsvParser parser = new CsvParser();
+        String[] output = new String[2];
+        assertThrows(ArrayIndexOutOfBoundsException.class, () -> parser.parseLineToArray("a,b,c,d", output));
+    }
 }

@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 /**
  * Represents an operation that accepts a variable number of float-valued arguments and returns no result.
  * This is the N-arity specialization of {@link FloatConsumer}.
@@ -83,6 +85,7 @@ public interface FloatNConsumer {
      * @throws NullPointerException if {@code after} is null
      */
     default FloatNConsumer andThen(final FloatNConsumer after) {
+        Objects.requireNonNull(after);
         return args -> {
             accept(args);
             after.accept(args);

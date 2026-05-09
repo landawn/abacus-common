@@ -166,8 +166,12 @@ public interface Poolable {
         VACATE(2),
 
         /**
-         * The object is being removed due to a remove(), replace, or clear() operation.
-         * This indicates explicit removal by user action.
+         * The object is being destroyed because it was replaced by a new entry under the same
+         * key (via {@link KeyedObjectPool#put(Object, Poolable)}) or because the pool is being
+         * cleared (via {@link Pool#clear()}). Note that
+         * {@link KeyedObjectPool#remove(Object)} does NOT trigger destruction with this caller —
+         * the caller of {@code remove} owns the returned element and is responsible for its
+         * cleanup.
          */
         REMOVE_REPLACE_CLEAR(3),
 

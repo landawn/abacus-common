@@ -374,4 +374,84 @@ public class CurlInterceptorTest extends TestBase {
         IOUtil.close(response);
     }
 
+    @Test
+    public void testInterceptCaseInsensitiveCharsetIsHonoredWhenReadingBody() throws IOException {
+        // Regression: prior code used String.contains("charset") which missed Content-Type values
+        // that spell the parameter as "Charset=..." (capitalized). The body would then be decoded
+        // with UTF-8 instead of the actual charset, so the round-tripped curl payload was wrong.
+        AtomicReference<String> capturedCurl = new AtomicReference<>();
+        CurlInterceptor interceptor = new CurlInterceptor(capturedCurl::set);
+
+        String text = "café";
+        MediaType iso = MediaType.parse("text/plain; Charset=ISO-8859-1");
+        RequestBody body = RequestBody.create(text, iso);
+
+        Request request = new Request.Builder().url("http://example.com").post(body).build();
+
+        Interceptor.Chain chain = new Interceptor.Chain() {
+            @Override
+            public Request request() {
+                return request;
+            }
+
+            @Override
+            public Response proceed(Request r) {
+                return new Response.Builder().request(r)
+                        .protocol(Protocol.HTTP_1_1)
+                        .code(200)
+                        .message("OK")
+                        .body(ResponseBody.create(MediaType.parse("text/plain"), "ok"))
+                        .build();
+            }
+
+            @Override
+            public Connection connection() {
+                return null;
+            }
+
+            @Override
+            public Call call() {
+                return null;
+            }
+
+            @Override
+            public int connectTimeoutMillis() {
+                return 0;
+            }
+
+            @Override
+            public Interceptor.Chain withConnectTimeout(int t, java.util.concurrent.TimeUnit u) {
+                return this;
+            }
+
+            @Override
+            public int readTimeoutMillis() {
+                return 0;
+            }
+
+            @Override
+            public Interceptor.Chain withReadTimeout(int t, java.util.concurrent.TimeUnit u) {
+                return this;
+            }
+
+            @Override
+            public int writeTimeoutMillis() {
+                return 0;
+            }
+
+            @Override
+            public Interceptor.Chain withWriteTimeout(int t, java.util.concurrent.TimeUnit u) {
+                return this;
+            }
+        };
+
+        Response response = interceptor.intercept(chain);
+        IOUtil.close(response);
+
+        String curl = capturedCurl.get();
+        assertNotNull(curl);
+        // The body "café" must round-trip via ISO-8859-1, not be mangled because of UTF-8 fallback.
+        assertTrue(curl.contains(text), "curl should contain decoded body, got: " + curl);
+    }
+
 }

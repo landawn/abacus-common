@@ -15,11 +15,14 @@
 package com.landawn.abacus.type;
 
 /**
- * Type handler for generic {@link Object} types, providing basic serialization,
- * deserialization, and type conversion capabilities. This is the most general
- * type handler that can handle any Java object.
+ * Type handler for {@link Object} (and arbitrary subtype) values, providing basic
+ * serialization, deserialization, and type conversion capabilities. This is the most
+ * general fallback {@link Type} implementation, used when no more specific handler is
+ * available for the runtime class. It inherits its behavior from {@link SingleValueType}.
  *
- * @param <T> the specific type, defaults to Object but can be parameterized
+ * @param <T> the specific Java class this type handler manages; defaults to {@link Object}
+ *            when constructed via the no-arg constructor, but may be parameterized to any
+ *            subclass via the protected constructors
  */
 public final class ObjectType<T> extends SingleValueType<T> {
 

@@ -2907,4 +2907,178 @@ public class CsvUtilTest extends TestBase {
         assertEquals("30", row[1]);
         assertEquals("NYC", row[2]);
     }
+
+    // ===================== Bug-fix and RFC 4180 regression tests =====================
+
+    @Test
+    @DisplayName("csvToJson must not close caller-provided Reader/Writer")
+    public void testCsvToJson_DoesNotCloseCallerStreams() {
+        String csv = "name,age\nJohn,30\nJane,25\n";
+        TrackingReader reader = new TrackingReader(new StringReader(csv));
+        TrackingWriter writer = new TrackingWriter(new StringWriter());
+
+        long count = CsvUtil.csvToJson(reader, null, writer, null);
+
+        assertEquals(2, count);
+        assertFalse(reader.closed, "csvToJson must not close the caller-provided Reader");
+        assertFalse(writer.closed, "csvToJson must not close the caller-provided Writer");
+        assertTrue(writer.delegate.toString().contains("\"name\":\"John\""));
+    }
+
+    @Test
+    @DisplayName("jsonToCsv must not close caller-provided Reader/Writer")
+    public void testJsonToCsv_DoesNotCloseCallerStreams() {
+        String json = "[{\"name\":\"John\",\"age\":30},{\"name\":\"Jane\",\"age\":25}]";
+        TrackingReader reader = new TrackingReader(new StringReader(json));
+        TrackingWriter writer = new TrackingWriter(new StringWriter());
+
+        long count = CsvUtil.jsonToCsv(reader, null, writer);
+
+        assertTrue(count >= 1);
+        assertFalse(reader.closed, "jsonToCsv must not close the caller-provided Reader");
+        assertFalse(writer.closed, "jsonToCsv must not close the caller-provided Writer");
+        assertTrue(writer.delegate.toString().length() > 0);
+    }
+
+    @Test
+    @DisplayName("load with quoted field containing comma and escaped quote")
+    public void testLoad_RFC4180EmbeddedSpecials() throws IOException {
+        File f = tempDir.resolve("rfc4180.csv").toFile();
+        // Note: BufferedReader.readLine() splits records on \n; embedded literal newlines inside
+        // quoted fields are not supported by the line-based loader. We test embedded comma and
+        // escaped-double-quote here.
+        Files.writeString(f.toPath(), "name,note\n\"Doe, John\",hello\n\"He said \"\"hi\"\"\",end\n");
+        Dataset ds = CsvUtil.load(f);
+        assertEquals(2, ds.size());
+        assertEquals("Doe, John", ds.get(0, 0));
+        assertEquals("hello", ds.get(0, 1));
+        assertEquals("He said \"hi\"", ds.get(1, 0));
+    }
+
+    @Test
+    @DisplayName("load with last line missing trailing newline")
+    public void testLoad_LastLineNoTrailingNewline() throws IOException {
+        File f = tempDir.resolve("noeol.csv").toFile();
+        Files.writeString(f.toPath(), "a,b,c\n1,2,3"); // no trailing \n
+        Dataset ds = CsvUtil.load(f);
+        assertEquals(1, ds.size());
+        assertEquals("1", ds.get(0, 0));
+        assertEquals("3", ds.get(0, 2));
+    }
+
+    @Test
+    @DisplayName("load duplicate header names: rejected by Dataset construction")
+    public void testLoad_DuplicateHeaderNames() throws IOException {
+        File f = tempDir.resolve("dup.csv").toFile();
+        Files.writeString(f.toPath(), "a,a,b\n1,2,3\n");
+        // Dataset disallows duplicate column names, so the loader surfaces it as IAE.
+        assertThrows(IllegalArgumentException.class, () -> CsvUtil.load(f));
+    }
+
+    @Test
+    @DisplayName("load with BOM in first column header")
+    public void testLoad_BomInHeader() throws IOException {
+        File f = tempDir.resolve("bom.csv").toFile();
+        // UTF-8 BOM + standard content
+        byte[] bom = new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF };
+        byte[] body = "id,name\n1,John\n".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        byte[] all = new byte[bom.length + body.length];
+        System.arraycopy(bom, 0, all, 0, bom.length);
+        System.arraycopy(body, 0, all, bom.length, body.length);
+        Files.write(f.toPath(), all);
+
+        Dataset ds = CsvUtil.load(f);
+        // The first column header still includes the BOM character because CsvUtil does not strip it.
+        // This documents current behavior so callers know to strip BOM up-front when targeting UTF-8.
+        String firstCol = ds.columnNames().get(0);
+        assertTrue(firstCol.endsWith("id"), "expected header to end with 'id', was: <" + firstCol + ">");
+        // If the header is exactly "id" the BOM has been silently stripped; otherwise it hasn't.
+        // Either way assert we can read a row.
+        assertEquals(1, ds.size());
+    }
+
+    @Test
+    @DisplayName("CSV_LINE_PARSER produces empty trailing field for trailing comma")
+    public void testTrailingCommaProducesEmptyField() {
+        String[] out = new String[4];
+        CsvUtil.CSV_LINE_PARSER.accept("a,b,c,", out);
+        assertEquals("a", out[0]);
+        assertEquals("b", out[1]);
+        assertEquals("c", out[2]);
+        assertEquals("", out[3]);
+    }
+
+    @Test
+    @DisplayName("CSV stream() closes the wrapped reader (closeReaderWhenStreamIsClosed=true)")
+    public void testStream_ClosesReaderWhenRequested() {
+        String csv = "id,name\n1,John\n2,Jane\n";
+        TrackingReader reader = new TrackingReader(new StringReader(csv));
+        try (Stream<Object[]> s = CsvUtil.stream(reader, Object[].class, true)) {
+            s.toList();
+        }
+        assertTrue(reader.closed, "stream(... closeReaderWhenStreamIsClosed=true) must close caller's Reader");
+    }
+
+    @Test
+    @DisplayName("CSV stream() does NOT close the reader when closeReaderWhenStreamIsClosed=false")
+    public void testStream_DoesNotCloseReaderWhenNotRequested() {
+        String csv = "id,name\n1,John\n";
+        TrackingReader reader = new TrackingReader(new StringReader(csv));
+        try (Stream<Object[]> s = CsvUtil.stream(reader, Object[].class, false)) {
+            s.toList();
+        }
+        assertFalse(reader.closed);
+    }
+
+    // --- Helpers ---
+
+    /**
+     * Reader wrapper that records whether close() was invoked.
+     */
+    private static final class TrackingReader extends Reader {
+        final Reader delegate;
+        boolean closed = false;
+
+        TrackingReader(Reader delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public int read(char[] cbuf, int off, int len) throws IOException {
+            return delegate.read(cbuf, off, len);
+        }
+
+        @Override
+        public void close() throws IOException {
+            closed = true;
+            delegate.close();
+        }
+    }
+
+    /**
+     * Writer wrapper that records whether close() was invoked.
+     */
+    private static final class TrackingWriter extends java.io.Writer {
+        final StringWriter delegate;
+        boolean closed = false;
+
+        TrackingWriter(StringWriter delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void write(char[] cbuf, int off, int len) {
+            delegate.write(cbuf, off, len);
+        }
+
+        @Override
+        public void flush() {
+            delegate.flush();
+        }
+
+        @Override
+        public void close() {
+            closed = true;
+        }
+    }
 }

@@ -143,8 +143,8 @@ import com.landawn.abacus.util.u.Nullable;
  * <p><b>Lazy Initialization Support:</b>
  * <ul>
  *   <li><b>LazyInitializer:</b> Thread-safe lazy initialization with exception handling</li>
- *   <li><b>Single Computation:</b> Ensures supplier is called exactly once</li>
- *   <li><b>Exception Caching:</b> Caches both successful results and thrown exceptions</li>
+ *   <li><b>Single Computation:</b> Ensures supplier is called exactly once on success</li>
+ *   <li><b>Result Caching:</b> Caches the successfully computed result for all subsequent accesses</li>
  *   <li><b>Memory Efficiency:</b> Minimal overhead until first access</li>
  * </ul>
  *
@@ -2315,41 +2315,35 @@ public final class Throwables {
     /**
      * The Interface FloatToIntFunction.
      *
-     * <p><b>Note:</b> Despite the name, this method currently returns {@code double}.
-     * This may be a known design choice for consistency with other float conversion functions.</p>
-     *
      * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface FloatToIntFunction<E extends Throwable> {
         /**
-         * Applies this function to the given float argument.
+         * Applies this function to the given float argument and produces an int result.
          *
          * @param value the float function argument
-         * @return the function result as a double
+         * @return the int function result
          * @throws E if an exception occurs during function application
          */
-        double applyAsInt(float value) throws E;
+        int applyAsInt(float value) throws E;
     }
 
     /**
      * The Interface FloatToLongFunction.
-     *
-     * <p><b>Note:</b> Despite the name, this method currently returns {@code double}.
-     * This may be a known design choice for consistency with other float conversion functions.</p>
      *
      * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface FloatToLongFunction<E extends Throwable> {
         /**
-         * Applies this function to the given float argument.
+         * Applies this function to the given float argument and produces a long result.
          *
          * @param value the float function argument
-         * @return the function result as a double
+         * @return the long function result
          * @throws E if an exception occurs during function application
          */
-        double applyAsLong(float value) throws E;
+        long applyAsLong(float value) throws E;
     }
 
     /**

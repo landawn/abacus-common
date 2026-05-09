@@ -268,4 +268,10 @@ public class LongPredicateTest extends TestBase {
         assertFalse(predicate.test(150L)); // positive but >= 100
         assertFalse(predicate.test(-10L)); // negative
     }
+
+    @Test
+    public void testAndNullThrowsImmediately() {
+        LongPredicate instance = a -> false;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((java.util.function.LongPredicate) null));
+    }
 }

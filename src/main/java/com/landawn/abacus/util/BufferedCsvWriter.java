@@ -25,11 +25,10 @@ import java.io.Writer;
  * <p>The writer handles the following CSV escaping rules:</p>
  * <ul>
  *   <li>Double quotes ({@code "}) are escaped as {@code ""} or {@code \"} depending on configuration</li>
- *   <li>Backslashes ({@code \}) are escaped as {@code \\}</li>
- *   <li>Tab characters ({@code \t}) are escaped as {@code \t}</li>
- *   <li>Newline characters ({@code \n}) are escaped as {@code \n}</li>
- *   <li>Carriage returns ({@code \r}) are escaped as {@code \r}</li>
- *   <li>Control characters and special Unicode characters (U+2028, U+2029) are properly escaped</li>
+ *   <li>Backslashes, tabs, newlines, carriage returns, backspaces, and form-feeds are passed through literally
+ *       (they are part of the quoted field's value per RFC 4180)</li>
+ *   <li>Control characters (U+0000 through U+001F, except those listed above, plus U+007F) are escaped as Unicode escapes</li>
+ *   <li>Special Unicode line separators (U+2028, U+2029) are escaped as {@code \u2028} and {@code \u2029}</li>
  * </ul>
  *
  * <p>The escape mode (double-quote vs backslash) is determined by the
@@ -87,15 +86,18 @@ public final class BufferedCsvWriter extends CharacterWriter {
             }
         }
 
-        // ...
+        // RFC 4180 escaping: only the quote character is escaped (by doubling). CR, LF, TAB,
+        // backspace, form-feed inside a quoted field must be passed through literally — they
+        // are part of the field's value, not control sequences. Setting REPLACEMENT_CHARS[c]
+        // to null leaves the character unmodified by writeCharacter().
         REPLACEMENT_CHARS['"'] = "\"\"".toCharArray();
         // REPLACEMENT_CHARS['\''] = "\\\'".toCharArray();
-        REPLACEMENT_CHARS['\\'] = "\\\\".toCharArray();
-        REPLACEMENT_CHARS['\t'] = "\\t".toCharArray();
-        REPLACEMENT_CHARS['\b'] = "\\b".toCharArray();
-        REPLACEMENT_CHARS['\n'] = "\\n".toCharArray();
-        REPLACEMENT_CHARS['\r'] = "\\r".toCharArray();
-        REPLACEMENT_CHARS['\f'] = "\\f".toCharArray();
+        REPLACEMENT_CHARS['\\'] = null;
+        REPLACEMENT_CHARS['\t'] = null;
+        REPLACEMENT_CHARS['\b'] = null;
+        REPLACEMENT_CHARS['\n'] = null;
+        REPLACEMENT_CHARS['\r'] = null;
+        REPLACEMENT_CHARS['\f'] = null;
 
         // ...
         REPLACEMENT_CHARS['\u2028'] = "\\u2028".toCharArray();

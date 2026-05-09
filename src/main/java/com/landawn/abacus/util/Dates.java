@@ -1051,7 +1051,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Date future = Dates.currentJUDatePlus(2, TimeUnit.DAYS);   // Current date + 2 days
-     * Date past = Dates.currentJUDatePlus(-1, TimeUnit.WEEKS);   // Current date - 1 week
+     * Date past = Dates.currentJUDatePlus(-7, TimeUnit.DAYS);    // Current date - 7 days
      * }</pre>
      *
      * @param amount the amount of time to add (positive) or subtract (negative).
@@ -2315,7 +2315,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
         return true;
     }
 
-    private static long parse(final String dateTime, final String format, final TimeZone timezone) {
+    static long parse(final String dateTime, final String format, final TimeZone timezone) {
         if ((format == null) && isPossibleLong(dateTime)) {
             try {
                 return Long.parseLong(dateTime);
@@ -4616,8 +4616,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return a negative integer, zero, or a positive integer as the first.
      * date is less than, equal to, or greater than the second.
      * @throws IllegalArgumentException if any argument is {@code null}.
-     * @see #truncate(Calendar, int)
-     * @see #truncatedCompareTo(java.util.Date, java.util.Date, int)
+     * @see #truncate(java.util.Date, int)
+     * @see #truncatedCompareTo(Calendar, Calendar, int)
      */
     public static int truncatedCompareTo(final java.util.Date date1, final java.util.Date date2, final int field) {
         return truncate(date1, field).compareTo(truncate(date2, field));
@@ -5814,10 +5814,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Date jan15 = Dates.parseDate("2023-01-15");
-     * int lastDay = Dates.getLastDayOfYear((jan15);   // 365 (non-leap year)
+     * int lastDay = Dates.getLastDayOfYear(jan15);   // 365 (non-leap year)
      *
      * Date feb15Leap = Dates.parseDate("2024-02-15");
-     * int lastDayLeap = Dates.getLastDayOfYear((feb15Leap);   // 366 (leap year)
+     * int lastDayLeap = Dates.getLastDayOfYear(feb15Leap);   // 366 (leap year)
      * }</pre>
      *
      * @param date the date to be evaluated. Must not be {@code null}.
@@ -6038,11 +6038,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
          *     2023, 12, 25, 15, 30, 45, 0,
          *     java.time.ZoneId.of("America/New_York"));
          *
-         * String formatted = DTF.ISO_ZONED_DATE_TIME_FORMAT.format(zonedDT);
+         * String formatted = DTF.ISO_ZONED_DATE_TIME.format(zonedDT);
          * // Result: "2023-12-25T15:30:45-05:00[America/New_York]"
          *
          * String zonedStr = "2023-12-25T14:25:30+05:30[Asia/Kolkata]";
-         * ZonedDateTime parsed = DTF.ISO_ZONED_DATE_TIME_FORMAT.parseToZonedDateTime(zonedStr);
+         * ZonedDateTime parsed = DTF.ISO_ZONED_DATE_TIME.parseToZonedDateTime(zonedStr);
          * }</pre>
          *
          * @see DateTimeFormatter#ISO_ZONED_DATE_TIME
@@ -6840,8 +6840,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * String timestampStr = "2023-12-25 14:30:45.123";
-         * Timestamp timestamp = DTF.LOCAL_TIMESTAMP.parseToTimestamp(timestampStr);
+         * String timestampStr = "2023-12-25T14:30:45.123Z";
+         * Timestamp timestamp = DTF.ISO_8601_TIMESTAMP.parseToTimestamp(timestampStr);
          * }</pre>
          *
          * @param text the CharSequence to parse. Must not be {@code null}.
@@ -6864,9 +6864,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * String timestampStr = "2023-12-25 14:30:45.123";
+         * String timestampStr = "2023-12-25T14:30:45.123Z";
          * TimeZone utc = TimeZone.getTimeZone("UTC");
-         * Timestamp timestamp = DTF.LOCAL_TIMESTAMP.parseToTimestamp(timestampStr, utc);
+         * Timestamp timestamp = DTF.ISO_8601_TIMESTAMP.parseToTimestamp(timestampStr, utc);
          * }</pre>
          *
          * @param text the CharSequence to parse. Must not be {@code null}.

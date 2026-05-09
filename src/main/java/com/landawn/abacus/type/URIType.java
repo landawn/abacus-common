@@ -52,6 +52,9 @@ import com.landawn.abacus.util.Strings;
  */
 public class URIType extends AbstractType<URI> {
 
+    /**
+     * The type name identifier for {@link java.net.URI} type (the simple class name {@code "URI"}).
+     */
     public static final String URI = URI.class.getSimpleName();
 
     /**

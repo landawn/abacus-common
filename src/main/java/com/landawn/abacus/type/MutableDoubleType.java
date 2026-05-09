@@ -22,7 +22,9 @@ import com.landawn.abacus.util.Strings;
  * Type handler for {@link com.landawn.abacus.util.MutableDouble} objects.
  * <p>
  * This class provides serialization, deserialization, and database operations for
- * MutableDouble instances, which are mutable wrappers around primitive double values.
+ * {@code MutableDouble} instances, which are mutable wrappers around primitive
+ * {@code double} values. Values are serialized as the unwrapped numeric double
+ * (identical to {@link DoubleType}).
  *
  * @see com.landawn.abacus.util.MutableDouble
  * @see NumberType

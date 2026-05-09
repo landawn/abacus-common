@@ -243,4 +243,61 @@ public class PrefixSearchTableTest extends TestBase {
         builder.add(Arrays.asList(1, 2, 3), "foo");
         assertThrows(IllegalArgumentException.class, () -> builder.add(Arrays.asList(1, 2, 3), "bar"));
     }
+
+    /**
+     * Adding the same compound key with the same value twice must be a no-op (not a conflict).
+     */
+    @Test
+    public void testAdd_sameValueRedundantAllowed() {
+        PrefixSearchTable<Integer, String> table = PrefixSearchTable.<Integer, String> builder()
+                .add(Arrays.asList(1, 2, 3), "foo")
+                .add(Arrays.asList(1, 2, 3), "foo")
+                .build();
+        assertEquals("foo", table.get(Arrays.asList(1, 2, 3)).get());
+    }
+
+    /**
+     * Verifies the longest-prefix-match contract when intermediate prefixes are NOT mapped.
+     * Only the longest registered prefix should be the value of get(); getAll() should yield
+     * only mapped prefixes, in ascending length order.
+     */
+    @Test
+    public void testGet_longestPrefixWhenIntermediateUnmapped() {
+        PrefixSearchTable<String, Integer> table = PrefixSearchTable.<String, Integer> builder()
+                .add(Arrays.asList("a"), 1)
+                .add(Arrays.asList("a", "b", "c"), 3)
+                .build();
+        // [a, b] is unmapped, but [a] and [a,b,c] are. Longest prefix of [a,b,c,d] is [a,b,c].
+        assertEquals(3, table.get(Arrays.asList("a", "b", "c", "d")).get());
+
+        Map<List<String>, Integer> all = table.getAll(Arrays.asList("a", "b", "c", "d")).toMap();
+        assertEquals(2, all.size());
+        assertEquals(1, all.get(Arrays.asList("a")));
+        assertEquals(3, all.get(Arrays.asList("a", "b", "c")));
+    }
+
+    /**
+     * Trie traversal must be case-sensitive when keys are case-sensitive Strings.
+     * Demonstrates that key equality is delegated to the K type's equals/hashCode.
+     */
+    @Test
+    public void testGet_caseSensitiveKeys() {
+        PrefixSearchTable<String, String> table = PrefixSearchTable.<String, String> builder()
+                .add(Arrays.asList("Foo", "Bar"), "match")
+                .build();
+        assertEquals("match", table.get(Arrays.asList("Foo", "Bar")).get());
+        // Different case must not match - equals on String is case-sensitive
+        assertTrue(table.get(Arrays.asList("foo", "bar")).isEmpty());
+        assertTrue(table.get(Arrays.asList("FOO", "BAR")).isEmpty());
+    }
+
+    /** Iterator returned by getAll throws NoSuchElementException after exhaustion. */
+    @Test
+    public void testGetAll_iteratorExhaustionThrows() {
+        PrefixSearchTable<Integer, String> table = PrefixSearchTable.<Integer, String> builder().add(Arrays.asList(1), "foo").build();
+        java.util.Iterator<Map.Entry<List<Integer>, String>> it = table.getAll(Arrays.asList(1)).iterator();
+        assertTrue(it.hasNext());
+        it.next();
+        assertThrows(java.util.NoSuchElementException.class, it::next);
+    }
 }

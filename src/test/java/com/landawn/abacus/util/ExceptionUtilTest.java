@@ -649,6 +649,21 @@ public class ExceptionUtilTest extends TestBase {
     }
 
     @Test
+    public void testHasCause_NullThrowable() {
+        // null Throwable should not throw NPE; consistent with firstCause/listCause
+        Assertions.assertFalse(ExceptionUtil.hasCause((Throwable) null, IOException.class));
+        Assertions.assertFalse(ExceptionUtil.hasCause((Throwable) null, ex -> true));
+        Assertions.assertFalse(ExceptionUtil.hasSQLCause((Throwable) null));
+        Assertions.assertFalse(ExceptionUtil.hasIOCause((Throwable) null));
+
+        Optional<IOException> ioResult = ExceptionUtil.findCause((Throwable) null, IOException.class);
+        Assertions.assertFalse(ioResult.isPresent());
+
+        Optional<Throwable> predResult = ExceptionUtil.findCause((Throwable) null, ex -> true);
+        Assertions.assertFalse(predResult.isPresent());
+    }
+
+    @Test
     public void testGetStackTrace() {
         Exception ex = new Exception("test exception");
         String stackTrace = ExceptionUtil.getStackTrace(ex);
@@ -780,5 +795,57 @@ public class ExceptionUtilTest extends TestBase {
         };
         String msg = ExceptionUtil.getErrorMessage(ex, false);
         Assertions.assertEquals("cause message", msg);
+    }
+
+    @Test
+    public void testGetErrorMessage_NullThrowable() {
+        // Bug fix: getErrorMessage(null) should not throw NPE
+        Assertions.assertEquals("", ExceptionUtil.getErrorMessage((Throwable) null));
+        Assertions.assertEquals("", ExceptionUtil.getErrorMessage((Throwable) null, true));
+        Assertions.assertEquals("", ExceptionUtil.getErrorMessage((Throwable) null, false));
+    }
+
+    @Test
+    public void testFirstCause_NullThrowable() {
+        // Bug fix: firstCause(null) should return null instead of NPE
+        Assertions.assertNull(ExceptionUtil.firstCause(null));
+    }
+
+    @Test
+    public void testListCause_NullThrowable() {
+        // Bug fix: listCause(null) should return empty list instead of NPE
+        List<Throwable> result = ExceptionUtil.listCause(null);
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testListCause_CircularChain() {
+        // Cycle detection in listCause should terminate cleanly using identity-based set
+        RuntimeException a = new RuntimeException("a");
+        RuntimeException b = new RuntimeException("b", a);
+        try {
+            Field causeField = Throwable.class.getDeclaredField("cause");
+            causeField.setAccessible(true);
+            causeField.set(a, b);
+        } catch (Exception ignored) {
+            return;
+        }
+        List<Throwable> causes = ExceptionUtil.listCause(a);
+        // Should contain a and b only (no infinite loop)
+        Assertions.assertEquals(2, causes.size());
+    }
+
+    @Test
+    public void testGetStackTrace_LongChain() {
+        // Smoke test for very long cause chain
+        Throwable t = new RuntimeException("root");
+        for (int i = 0; i < 50; i++) {
+            t = new RuntimeException("level-" + i, t);
+        }
+        String trace = ExceptionUtil.getStackTrace(t);
+        Assertions.assertNotNull(trace);
+        Assertions.assertTrue(trace.contains("root"));
+        Assertions.assertTrue(trace.contains("Caused by"));
     }
 }

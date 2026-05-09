@@ -139,4 +139,10 @@ public class ObjBiIntConsumerTest extends TestBase {
     public void testFunctionalInterface() {
         assertNotNull(ObjBiIntConsumer.class.getAnnotation(FunctionalInterface.class));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        ObjBiIntConsumer<String> instance = (a, b, c) -> {};
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((ObjBiIntConsumer) null));
+    }
 }

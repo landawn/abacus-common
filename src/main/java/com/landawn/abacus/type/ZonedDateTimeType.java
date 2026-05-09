@@ -76,6 +76,9 @@ import com.landawn.abacus.util.Numbers;
  */
 public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
 
+    /**
+     * The type name identifier for {@link ZonedDateTime} type (the simple class name).
+     */
     public static final String ZONED_DATE_TIME = ZonedDateTime.class.getSimpleName();
 
     /**

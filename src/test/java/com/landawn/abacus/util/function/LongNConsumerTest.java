@@ -26,4 +26,10 @@ public class LongNConsumerTest extends TestBase {
         assertEquals(20L, array[1]);
         assertEquals(30L, array[2]);
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        LongNConsumer instance = a -> {};
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((LongNConsumer) null));
+    }
 }

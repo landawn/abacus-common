@@ -148,4 +148,27 @@ public class AsciiStreamTypeTest extends TestBase {
         verify(writer, times(2)).write('"');
         verify(writer, atLeastOnce()).writeCharacter(any(char[].class), anyInt(), anyInt());
     }
+
+    // Bug: writeCharacter previously caught IOException and rethrew it as UncheckedIOException,
+    // even though the method already declares "throws IOException".
+    // Stream-read failures must propagate as the typed checked IOException.
+    @Test
+    public void testWriteCharacter_PropagatesIOExceptionFromStream() {
+        final IOException expected = new IOException("read failed");
+        final InputStream failing = new InputStream() {
+            @Override
+            public int read() throws IOException {
+                throw expected;
+            }
+
+            @Override
+            public int read(byte[] b, int off, int len) throws IOException {
+                throw expected;
+            }
+        };
+
+        IOException actual = org.junit.jupiter.api.Assertions.assertThrows(IOException.class,
+                () -> asciiStreamType.writeCharacter(writer, failing, null));
+        org.junit.jupiter.api.Assertions.assertSame(expected, actual);
+    }
 }

@@ -147,4 +147,10 @@ public class BiFunctionTest extends TestBase {
         Integer result = throwableBiFunction.apply(7, 6);
         assertEquals(42, result);
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        BiFunction<String, String, String> instance = (a, b) -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

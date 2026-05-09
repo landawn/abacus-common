@@ -1085,7 +1085,7 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * User user = new User("John", 0, "john@email.com");
+     * User user = new User("John", null, "john@email.com");
      *
      * // Get all properties
      * List<String> allProps = Beans.getPropNames(user, false);
@@ -2994,9 +2994,9 @@ public final class Beans {
      * Map<String, Object> snakeMap = Beans.beanToMap(user, props, NamingPolicy.SNAKE_CASE, HashMap::new);
      * // snakeMap: {first_name=John, last_name=Doe}
      *
-     * // Convert to UPPER_CASE
-     * Map<String, Object> upperMap = Beans.beanToMap(user, props, NamingPolicy.UPPER_CASE, HashMap::new);
-     * // upperMap: {FIRSTNAME=John, LASTNAME=Doe}
+     * // Convert to SCREAMING_SNAKE_CASE
+     * Map<String, Object> upperMap = Beans.beanToMap(user, props, NamingPolicy.SCREAMING_SNAKE_CASE, HashMap::new);
+     * // upperMap: {FIRST_NAME=John, LAST_NAME=Doe}
      * }</pre>
      *
      * @param <M> the type of the map to be returned.
@@ -3878,12 +3878,12 @@ public final class Beans {
      * user.setLastName("Doe");
      *
      * Map<String, Object> snakeCase = deepBeanToMap(user, false, null,
-     *     NamingPolicy.SNAKE_CASES);
+     *     NamingPolicy.SNAKE_CASE);
      * // snakeCase: {first_name=John, last_name=Doe}
      *
      * Map<String, Object> upperCase = deepBeanToMap(user, false, null,
-     *     NamingPolicy.UPPER_CASE);
-     * // upperCase: {FIRSTNAME=John, LASTNAME=Doe}
+     *     NamingPolicy.SCREAMING_SNAKE_CASE);
+     * // upperCase: {FIRST_NAME=John, LAST_NAME=Doe}
      * }</pre>
      *
      * @param bean the bean object to be converted into a Map.
@@ -3910,7 +3910,7 @@ public final class Beans {
      * Set<String> ignored = new HashSet<>(Arrays.asList("internalId"));
      *
      * LinkedHashMap<String, Object> result = deepBeanToMap(user, true, ignored,
-     *     NamingPolicy.SCREAMING_SNAKE_CASES,
+     *     NamingPolicy.SCREAMING_SNAKE_CASE,
      *     size -> new LinkedHashMap<>(size));
      * // result: {NAME=John, ADDRESS={CITY=NYC}} (ordered, uppercase with underscores)
      * }</pre>
@@ -4006,7 +4006,7 @@ public final class Beans {
      * Set<String> ignored = new HashSet<>(Arrays.asList("id"));
      *
      * Product product = new Product("Widget", 29.99, new Category("Electronics"));
-     * deepBeanToMap(product, true, ignored, NamingPolicy.UPPER_CASE, output);
+     * deepBeanToMap(product, true, ignored, NamingPolicy.SCREAMING_SNAKE_CASE, output);
      * // output: {CATEGORY={NAME=Electronics}, NAME=Widget, PRICE=29.99} (sorted)
      * }</pre>
      *
@@ -4214,7 +4214,7 @@ public final class Beans {
      *
      * Collection<String> select = Arrays.asList("firstName", "homeAddress");
      * Map<String, Object> snakeCase = beanToFlatMap(user, select,
-     *     NamingPolicy.SNAKE_CASES,
+     *     NamingPolicy.SNAKE_CASE,
      *     size -> new HashMap<>(size));
      * // snakeCase: {first_name=John, home_address.city=NYC}
      * }</pre>
@@ -4459,7 +4459,7 @@ public final class Beans {
      *
      * Set<String> ignored = new HashSet<>(Arrays.asList("internalId"));
      * Map<String, Object> result = beanToFlatMap(profile, true, ignored,
-     *     NamingPolicy.SNAKE_CASES);
+     *     NamingPolicy.SNAKE_CASE);
      * // result: {first_name=John, home_address.city=NYC}
      * // (last_login null excluded, internal_id ignored, snake_case keys)
      * }</pre>
@@ -4489,7 +4489,7 @@ public final class Beans {
      * Set<String> ignored = new HashSet<>(Arrays.asList("internalNotes"));
      *
      * LinkedHashMap<String, Object> result = beanToFlatMap(order, true, ignored,
-     *     NamingPolicy.SCREAMING_SNAKE_CASES,
+     *     NamingPolicy.SCREAMING_SNAKE_CASE,
      *     size -> new LinkedHashMap<>(size * 2));   // larger initial capacity
      * // result: {ORDER_ID=ORD-123, CUSTOMER.NAME=John,
      * //          CUSTOMER.ADDRESS.CITY=NYC, CUSTOMER.ADDRESS.ZIP_CODE=10001}
@@ -4591,8 +4591,8 @@ public final class Beans {
      * Document doc = new Document("Report", null,
      *     new Author("John", new Department("Research")));
      * beanToFlatMap(doc, true, ignored,
-     *     NamingPolicy.SNAKE_CASES, output);
-     * // output: {author.department.name=research, author.name=john, title=report}
+     *     NamingPolicy.SNAKE_CASE, output);
+     * // output: {author.department.name=Research, author.name=John, title=Report}
      * // (sorted keys, snake_case, version null excluded, metadata ignored)
      * }</pre>
      *
@@ -5341,11 +5341,11 @@ public final class Beans {
      * User updates = new User("Jane", 30);
      * updates.setScore(200);
      *
-     * // Only merge age and score, keeping the higher score
+     * // Only merge age and score, keeping the higher value when both are integers
      * Beans.copyInto(updates, existingUser,
      *     Arrays.asList("age", "score"),
      *     (srcVal, tgtVal) -> {
-     *         if ("score".equals(currentPropName) && srcVal instanceof Integer) {
+     *         if (srcVal instanceof Integer && tgtVal instanceof Integer) {
      *             return Math.max((Integer) srcVal, (Integer) tgtVal);
      *         }
      *         return srcVal;
@@ -5669,18 +5669,18 @@ public final class Beans {
      * Product source = new Product("New Product", 200, 15, "2024-01-01");
      * Product target = new Product("Old Product", 150, 10, "2023-01-01");
      *
-     * // Merge all except createdDate, using custom logic for quantities
+     * // Merge all except createdDate, using custom logic to add integer values
      * Beans.copyInto(source, target,
      *     true,
      *     N.asSet("createdDate"),
      *     (srcVal, tgtVal) -> {
-     *         // For quantities, add them together
-     *         if (srcVal instanceof Integer && "quantity".equals(currentPropName)) {
+     *         // For integer values, add them together
+     *         if (srcVal instanceof Integer && tgtVal instanceof Integer) {
      *             return ((Integer) srcVal) + ((Integer) tgtVal);
      *         }
      *         return srcVal;
      *     });
-     * // target: name="New Product", price=200, quantity=25, createdDate="2023-01-01"
+     * // target: name="New Product", price=350, quantity=25, createdDate="2023-01-01"
      * }</pre>
      *
      * @param <T> the type of the target bean

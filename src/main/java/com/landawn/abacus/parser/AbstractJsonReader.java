@@ -134,8 +134,8 @@ abstract class AbstractJsonReader implements JsonReader { //NOSONAR
     protected static final Type<String> strType = Type.of(String.class);
 
     /**
-     * Reads and returns the next token from the JSON input using {@code String} as the default expected type.
-     * This is a convenience method that delegates to {@link #nextToken(Type)} with the {@code String} type.
+     * Reads and returns the next token from the JSON input using {@code String} as the default expected
+     * value type hint. This is a convenience method that delegates to {@link #nextToken(Type)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -146,7 +146,7 @@ abstract class AbstractJsonReader implements JsonReader { //NOSONAR
      * }
      * }</pre>
      *
-     * @return the token identifier, or {@code -1} ({@link JsonReader#EOF}) if the end of input is reached
+     * @return the token identifier, or {@link JsonReader#EOF} ({@code -1}) if the end of input is reached
      * @throws UncheckedIOException if an I/O error occurs during reading
      */
     @Override

@@ -22,26 +22,32 @@ import java.sql.SQLException;
 import com.landawn.abacus.util.Password;
 
 /**
- * Type handler for password fields that automatically encrypts passwords before storing them in a database.
- * This type extends AbstractStringType and uses SHA-256 as the default encryption algorithm.
- * When setting password values in prepared statements or callable statements, the password is automatically
- * encrypted using the configured algorithm before being stored.
+ * Type handler for password fields that automatically hashes passwords before storing them in a database.
+ * This type extends {@link AbstractStringType} and uses SHA-256 as the default digest algorithm,
+ * delegating to {@link Password} which performs a one-way hash via {@link java.security.MessageDigest}
+ * and returns a Base64-encoded digest.
+ *
+ * <p>When setting password values via {@link #set(PreparedStatement, int, String)} or
+ * {@link #set(CallableStatement, String, String)}, the input plain-text password is hashed before
+ * being bound to the statement. Reads via {@link #get(ResultSet, int)} or
+ * {@link #get(ResultSet, String)} return the stored hashed value as-is; because hashing is one-way,
+ * there is no {@code stringOf}/{@code valueOf} round-trip that recovers the original plain-text password.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // Storing a password (automatically encrypted)
+ * // Storing a password (automatically hashed before being bound)
  * String plainPassword = "mySecretPassword";
  * PreparedStatement stmt = conn.prepareStatement("INSERT INTO users (username, password) VALUES (?, ?)");
  * stmt.setString(1, "john");
  *
  * Type<String> passwordType = TypeFactory.getType("Password");
- * passwordType.set(stmt, 2, plainPassword);   // Password is encrypted before storage
+ * passwordType.set(stmt, 2, plainPassword);   // Password is hashed before storage
  * stmt.executeUpdate();
  *
- * // Retrieving a password (returns encrypted form)
+ * // Retrieving a password (returns the stored hashed form)
  * ResultSet rs = stmt.executeQuery("SELECT password FROM users WHERE username = 'john'");
  * if (rs.next()) {
- *     String encryptedPassword = passwordType.get(rs, 1);   // Returns encrypted password
+ *     String hashedPassword = passwordType.get(rs, 1);   // Returns the hashed value
  * }
  * }</pre>
  */
@@ -55,7 +61,7 @@ public class PasswordType extends AbstractStringType {
     private final Password password; //NOSONAR
 
     /**
-     * Constructs a new PasswordType with the default SHA-256 encryption algorithm.
+     * Constructs a new PasswordType with the default SHA-256 hashing algorithm.
      * This constructor is package-private and intended to be called only by the TypeFactory.
      */
     PasswordType() {
@@ -63,11 +69,11 @@ public class PasswordType extends AbstractStringType {
     }
 
     /**
-     * Constructs a new PasswordType with the specified encryption algorithm.
-     * This constructor is protected to allow subclassing with custom encryption algorithms
+     * Constructs a new PasswordType with the specified hashing algorithm.
+     * This constructor is protected to allow subclassing with custom hashing algorithms
      * while maintaining controlled instantiation through the TypeFactory.
      *
-     * @param algorithm the encryption algorithm to use for password hashing (e.g., "SHA-256", "MD5")
+     * @param algorithm the message-digest algorithm to use for password hashing (e.g., "SHA-256", "MD5")
      */
     protected PasswordType(final String algorithm) {
         super(PASSWORD);
@@ -76,7 +82,7 @@ public class PasswordType extends AbstractStringType {
 
     /**
      * Retrieves a password value from a ResultSet at the specified column index.
-     * The password is returned as-is from the database (in its encrypted form).
+     * The password is returned as-is from the database (typically the previously stored hashed form).
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based)
@@ -90,7 +96,7 @@ public class PasswordType extends AbstractStringType {
 
     /**
      * Retrieves a password value from a ResultSet using the specified column label.
-     * The password is returned as-is from the database (in its encrypted form).
+     * The password is returned as-is from the database (typically the previously stored hashed form).
      *
      * @param rs the ResultSet to read from
      * @param columnName the column label/name
@@ -104,11 +110,11 @@ public class PasswordType extends AbstractStringType {
 
     /**
      * Sets a password value in a PreparedStatement at the specified parameter index.
-     * The password is automatically encrypted using the configured algorithm before being set.
+     * The plain-text password is automatically hashed using the configured algorithm before being bound.
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based)
-     * @param x the plain text password to encrypt and set
+     * @param x the plain-text password to hash and set
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -118,11 +124,11 @@ public class PasswordType extends AbstractStringType {
 
     /**
      * Sets a password value in a CallableStatement using the specified parameter name.
-     * The password is automatically encrypted using the configured algorithm before being set.
+     * The plain-text password is automatically hashed using the configured algorithm before being bound.
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter
-     * @param x the plain text password to encrypt and set
+     * @param x the plain-text password to hash and set
      * @throws SQLException if a database access error occurs
      */
     @Override

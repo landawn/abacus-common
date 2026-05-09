@@ -674,4 +674,38 @@ public class WrapperTest extends TestBase {
         assertEquals(null, map.get(Wrapper.of(new int[] { 9, 9, 9 })));
     }
 
+    @Test
+    public void test_arrayWrapper_equals_arrayContent_notIdentity() {
+        // Two distinct array instances with identical contents must be equal under
+        // Wrapper.of(Object) (deep array semantics).
+        int[] a = { 1, 2, 3 };
+        int[] b = { 1, 2, 3 };
+        assertNotNull(a);
+        assertTrue(a != b); // distinct references
+        Wrapper<int[]> wa = Wrapper.of(a);
+        Wrapper<int[]> wb = Wrapper.of(b);
+        assertTrue(wa.equals(wb));
+        assertTrue(wb.equals(wa));
+        assertEquals(wa.hashCode(), wb.hashCode());
+    }
+
+    @Test
+    public void test_customWrapper_identitySemantics_viaCustomFunctions() {
+        // Identity-style wrapper using System.identityHashCode + reference equality.
+        Object o1 = new Object();
+        Object o2 = new Object();
+        ToIntFunction<Object> idHash = System::identityHashCode;
+        BiPredicate<Object, Object> idEq = (x, y) -> x == y;
+
+        Wrapper<Object> w1 = Wrapper.of(o1, idHash, idEq);
+        Wrapper<Object> w1Same = Wrapper.of(o1, idHash, idEq);
+        Wrapper<Object> w2 = Wrapper.of(o2, idHash, idEq);
+
+        // Same wrapped reference => equal
+        assertTrue(w1.equals(w1Same));
+        assertEquals(w1.hashCode(), w1Same.hashCode());
+        // Distinct references => not equal even though both Object's default equals is identity
+        assertFalse(w1.equals(w2));
+    }
+
 }

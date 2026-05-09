@@ -80,9 +80,13 @@ import com.landawn.abacus.util.Strings;
  *   <li>SSL/TLS utilities</li>
  * </ul>
  *
+ * <p>This class cannot be instantiated.</p>
+ *
  * @see HttpClient
  * @see HttpRequest
  * @see HttpResponse
+ * @see HttpSettings
+ * @see ContentFormat
  */
 @Internal
 public final class HttpUtil {
@@ -961,11 +965,13 @@ public final class HttpUtil {
 
     /**
      * Gets the response ContentFormat based on response headers and request format.
-     * If the response doesn't specify a content type, falls back to the request format.
+     * If the response doesn't specify a Content-Type, falls back to the request format's content type.
+     * The Content-Encoding is always taken from the response headers (no fallback) to avoid
+     * incorrectly applying decompression to a response that wasn't compressed.
      *
      * @param respHeaders The response headers
-     * @param requestContentFormat The request content format (used as fallback)
-     * @return The response ContentFormat
+     * @param requestContentFormat The request content format (used only as a content-type fallback, may be {@code null})
+     * @return The response ContentFormat, or {@link ContentFormat#NONE} if neither could be determined
      */
     public static ContentFormat getResponseContentFormat(final Map<String, ?> respHeaders, final ContentFormat requestContentFormat) {
         String contentType = getContentType(respHeaders);
@@ -1243,10 +1249,10 @@ public final class HttpUtil {
      * This method disables all certificate and hostname verification by installing
      * a trust-all {@link TrustManager} and a permissive {@link HostnameVerifier}.
      *
-     * <b>WARNING: This is extremely insecure and should NEVER be used in production code.</b>
+     * <p><b>WARNING:</b> This is extremely insecure and should NEVER be used in production code.
      * It makes the application vulnerable to man-in-the-middle attacks.
      * This method is provided for testing purposes only and affects the default
-     * {@link HttpsURLConnection} behavior globally in the current JVM.
+     * {@link HttpsURLConnection} behavior globally in the current JVM.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

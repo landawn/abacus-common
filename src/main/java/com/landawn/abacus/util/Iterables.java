@@ -2056,8 +2056,8 @@ public final class Iterables {
     /**
      * Returns the median value of all elements in the specified array.
      *
-     * <p>The median is the middle value when the elements are sorted in ascending order. For array with
-     * an odd number of elements, this is the exact middle element. For array with an even number of
+     * <p>The median is the middle value when the elements are sorted in ascending order. For an array with
+     * an odd number of elements, this is the exact middle element. For an array with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2083,8 +2083,8 @@ public final class Iterables {
     /**
      * Returns the median value of all elements in the specified array.
      *
-     * <p>The median is the middle value when the elements are sorted in ascending order. For array with
-     * an odd number of elements, this is the exact middle element. For array with an even number of
+     * <p>The median is the middle value when the elements are sorted in ascending order. For an array with
+     * an odd number of elements, this is the exact middle element. For an array with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2111,8 +2111,8 @@ public final class Iterables {
     /**
      * Returns the median value of all elements in the specified collection.
      *
-     * <p>The median is the middle value when the elements are sorted in ascending order. For collection with
-     * an odd number of elements, this is the exact middle element. For collection with an even number of
+     * <p>The median is the middle value when the elements are sorted in ascending order. For a collection with
+     * an odd number of elements, this is the exact middle element. For a collection with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2566,7 +2566,7 @@ public final class Iterables {
 
     /**
      * Returns the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble}.
-     * If the specified range is empty ({@code fromIndex == toIndex}, it returns an empty {@code OptionalDouble}.
+     * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
      *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
@@ -2607,7 +2607,7 @@ public final class Iterables {
 
     /**
      * Returns the average of the integer values extracted from the elements in the specified range by the input {@code func} function as an {@code OptionalDouble}.
-     * If the specified range is empty ({@code fromIndex == toIndex}, it returns an empty {@code OptionalDouble}.
+     * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2638,7 +2638,7 @@ public final class Iterables {
 
     /**
      * Returns the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble}.
-     * If the specified range is empty ({@code fromIndex == toIndex}, it returns an empty {@code OptionalDouble}.
+     * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
      *
      * @param <T> the type of the elements.
      * @param c the collection of elements to evaluate.
@@ -2655,7 +2655,7 @@ public final class Iterables {
 
     /**
      * Returns the average of the integer values extracted from the elements in the specified range by the input {@code func} function as an {@code OptionalDouble}.
-     * If the specified range is empty ({@code fromIndex == toIndex}, it returns an empty {@code OptionalDouble}.
+     * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2739,7 +2739,16 @@ public final class Iterables {
             return OptionalDouble.empty();
         }
 
-        return OptionalDouble.of(N.averageInt(c, func));
+        // Iterate the same iterator we already advanced; calling c.iterator() again breaks
+        // single-use iterables (e.g., stream::iterator).
+        long sum = 0;
+        long count = 0;
+        do {
+            sum += func.applyAsInt(iter.next());
+            count++;
+        } while (iter.hasNext());
+
+        return OptionalDouble.of(((double) sum) / count);
     }
 
     /**
@@ -2757,13 +2766,13 @@ public final class Iterables {
 
     /**
      * Returns the average of the long values of the provided numbers in the specified range as an {@code OptionalDouble}.
-     * If the specified range is empty ({@code fromIndex == toIndex}, it returns an empty {@code OptionalDouble}.
+     * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
      *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
      * @param fromIndex the start index of the range, inclusive.
      * @param toIndex the end index of the range, exclusive.
-     * @return the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
+     * @return the average of the long values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length}).
      * @see N#averageLong(Number[], int, int)
      */
@@ -2791,14 +2800,14 @@ public final class Iterables {
 
     /**
      * Returns the average of the long values extracted from the elements in the specified range by the input {@code func} function as an {@code OptionalDouble}.
-     * If the specified range is empty ({@code fromIndex == toIndex}, it returns an empty {@code OptionalDouble}.
+     * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
      *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
      * @param fromIndex the start index of the range, inclusive.
      * @param toIndex the end index of the range, exclusive.
      * @param func the function to extract a long value from each element.
-     * @return the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
+     * @return the average of the long values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length}).
      * @see N#averageLong(Object[], int, int, ToLongFunction)
      */
@@ -2815,13 +2824,13 @@ public final class Iterables {
 
     /**
      * Returns the average of the long values of the provided numbers in the specified range as an {@code OptionalDouble}.
-     * If the specified range is empty ({@code fromIndex == toIndex}, it returns an empty {@code OptionalDouble}.
+     * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
      *
      * @param <T> the type of the elements.
      * @param c the collection of elements to evaluate.
      * @param fromIndex the start index of the range, inclusive.
      * @param toIndex the end index of the range, exclusive.
-     * @return the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
+     * @return the average of the long values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > c.size()}).
      * @see N#averageLong(Collection, int, int)
      */
@@ -2832,14 +2841,14 @@ public final class Iterables {
 
     /**
      * Returns the average of the long values extracted from the elements in the specified range by the input {@code func} function as an {@code OptionalDouble}.
-     * If the specified range is empty ({@code fromIndex == toIndex}, it returns an empty {@code OptionalDouble}.
+     * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
      *
      * @param <T> the type of the elements.
      * @param c the collection of elements to evaluate.
      * @param fromIndex the start index of the range, inclusive.
      * @param toIndex the end index of the range, exclusive.
      * @param func the function to extract a long value from each element.
-     * @return the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
+     * @return the average of the long values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > c.size()}).
      * @see N#averageLong(Collection, int, int, ToLongFunction)
      */
@@ -2902,7 +2911,16 @@ public final class Iterables {
             return OptionalDouble.empty();
         }
 
-        return OptionalDouble.of(N.averageLong(c, func));
+        // Iterate the same iterator we already advanced; calling c.iterator() again breaks
+        // single-use iterables (e.g., stream::iterator).
+        long sum = 0;
+        long count = 0;
+        do {
+            sum += func.applyAsLong(iter.next());
+            count++;
+        } while (iter.hasNext());
+
+        return OptionalDouble.of(((double) sum) / count);
     }
 
     /**
@@ -2920,13 +2938,13 @@ public final class Iterables {
 
     /**
      * Returns the average of the double values of the provided numbers in the specified range as an {@code OptionalDouble}.
-     * If the specified range is empty ({@code fromIndex == toIndex}, it returns an empty {@code OptionalDouble}.
+     * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
      *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
      * @param fromIndex the start index of the range, inclusive.
      * @param toIndex the end index of the range, exclusive.
-     * @return the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
+     * @return the average of the double values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length}).
      * @see N#averageDouble(Number[], int, int)
      */
@@ -2954,14 +2972,14 @@ public final class Iterables {
 
     /**
      * Returns the average of the double values extracted from the elements in the specified range by the input {@code func} function as an {@code OptionalDouble}.
-     * If the specified range is empty ({@code fromIndex == toIndex}, it returns an empty {@code OptionalDouble}.
+     * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
      *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
      * @param fromIndex the start index of the range, inclusive.
      * @param toIndex the end index of the range, exclusive.
      * @param func the function to extract a double value from each element.
-     * @return the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
+     * @return the average of the double values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length}).
      * @see N#averageDouble(Object[], int, int, ToDoubleFunction)
      */
@@ -2984,13 +3002,13 @@ public final class Iterables {
 
     /**
      * Returns the average of the double values of the provided numbers in the specified range as an {@code OptionalDouble}.
-     * If the specified range is empty ({@code fromIndex == toIndex}, it returns an empty {@code OptionalDouble}.
+     * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
      *
      * @param <T> the type of the elements.
      * @param c the collection of elements to evaluate.
      * @param fromIndex the start index of the range, inclusive.
      * @param toIndex the end index of the range, exclusive.
-     * @return the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
+     * @return the average of the double values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > c.size()}).
      * @see N#averageDouble(Collection, int, int)
      */
@@ -3001,14 +3019,14 @@ public final class Iterables {
 
     /**
      * Returns the average of the double values extracted from the elements in the specified range by the input {@code func} function as an {@code OptionalDouble}.
-     * If the specified range is empty ({@code fromIndex == toIndex}, it returns an empty {@code OptionalDouble}.
+     * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
      *
      * @param <T> the type of the elements.
      * @param c the collection of elements to evaluate.
      * @param fromIndex the start index of the range, inclusive.
      * @param toIndex the end index of the range, exclusive.
      * @param func the function to extract a double value from each element.
-     * @return the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
+     * @return the average of the double values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > c.size()}).
      * @see N#averageDouble(Collection, int, int, ToDoubleFunction)
      */
@@ -3136,7 +3154,20 @@ public final class Iterables {
             return Optional.empty();
         }
 
-        return Optional.of(N.averageBigInteger(c, func));
+        // Iterate the same iterator we already advanced; calling c.iterator() again breaks
+        // single-use iterables (e.g., stream::iterator).
+        BigInteger sum = BigInteger.ZERO;
+        long cnt = 0;
+
+        do {
+            final BigInteger next = func.apply(iter.next());
+            if (next != null) {
+                sum = sum.add(next);
+                cnt++;
+            }
+        } while (iter.hasNext());
+
+        return Optional.of(cnt == 0 ? BigDecimal.ZERO : new BigDecimal(sum).divide(BigDecimal.valueOf(cnt), java.math.MathContext.DECIMAL128));
     }
 
     /**
@@ -3168,7 +3199,19 @@ public final class Iterables {
             return Optional.empty();
         }
 
-        return Optional.of(N.averageBigDecimal(c, func));
+        // Iterate the same iterator we already advanced; calling c.iterator() again breaks
+        // single-use iterables (e.g., stream::iterator).
+        BigDecimal sum = BigDecimal.ZERO;
+        long cnt = 0;
+        do {
+            final BigDecimal next = func.apply(iter.next());
+            if (next != null) {
+                sum = sum.add(next);
+                cnt++;
+            }
+        } while (iter.hasNext());
+
+        return Optional.of(cnt == 0 ? BigDecimal.ZERO : sum.divide(BigDecimal.valueOf(cnt), java.math.MathContext.DECIMAL128));
     }
 
     /**
@@ -3616,7 +3659,7 @@ public final class Iterables {
     }
 
     /**
-     * Fills the specified list with the specified with values provided by the specified supplier from the specified start index to the specified end index.
+     * Fills the specified list with values provided by the specified supplier from the specified start index to the specified end index.
      * The list will be extended automatically if the size of the list is less than the specified toIndex.
      *
      * <p><b>Usage Examples:</b></p>
@@ -4565,7 +4608,7 @@ public final class Iterables {
      * <p>Elements appear in these subsets in the same iteration order as they
      * appeared in the input set. The order in which these subsets appear in the
      * outer set is undefined. Note that the power set of the empty set is not the
-     * empty set, but an one-element set containing the empty set.
+     * empty set, but a one-element set containing the empty set.
      *
      * <p>The returned set and its constituent sets use {@code equals} to decide
      * whether two elements are identical, even if the input set uses a different

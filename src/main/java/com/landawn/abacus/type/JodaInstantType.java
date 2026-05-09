@@ -41,6 +41,7 @@ import com.landawn.abacus.util.Numbers;
  */
 public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
 
+    /** The type name constant for Joda-Time {@link Instant} type identification. */
     public static final String INSTANT = "JodaInstant";
 
     /**

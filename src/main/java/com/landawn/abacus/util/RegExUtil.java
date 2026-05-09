@@ -435,8 +435,12 @@ public final class RegExUtil {
      *   <li>{@code "42"}</li>
      *   <li>{@code "-3.14"}</li>
      *   <li>{@code "+0.99"}</li>
-     *   <li>{@code "100."} (not matched)</li>
-     *   <li>{@code ".25"} (not matched)</li>
+     * </ul>
+     *
+     * <p>Example non-matches:</p>
+     * <ul>
+     *   <li>{@code "100."} (trailing dot with no fractional digits)</li>
+     *   <li>{@code ".25"} (no digit before the dot)</li>
      * </ul>
      *
      * <p><strong>Note:</strong> This pattern does not match numbers like {@code .25} or {@code 100.}
@@ -1975,8 +1979,10 @@ public final class RegExUtil {
         }
 
         final Matcher matcher = pattern.matcher(checkSourceString(source));
+        int start = -1;
+        int end = -1;
 
-        for (int start = -1, end = -1, i = source.length(); i >= 0; i--) {
+        for (int i = source.length(); i >= 0; i--) {
             if (matcher.find(i)) {
                 if (start < 0 || (matcher.start() < start && matcher.end() >= end)) {
                     start = matcher.start();
@@ -1987,6 +1993,12 @@ public final class RegExUtil {
             } else if (start >= 0) {
                 return Strings.replaceRange(source, start, end, replacement);
             }
+        }
+
+        // Loop completed without applying replacement; happens when the rightmost
+        // match's leftmost equivalent extends to position 0.
+        if (start >= 0) {
+            return Strings.replaceRange(source, start, end, replacement);
         }
 
         return source;
@@ -2018,8 +2030,10 @@ public final class RegExUtil {
         }
 
         final Matcher matcher = pattern.matcher(checkSourceString(source));
+        int start = -1;
+        int end = -1;
 
-        for (int start = -1, end = -1, i = source.length(); i >= 0; i--) {
+        for (int i = source.length(); i >= 0; i--) {
             if (matcher.find(i)) {
                 if (start < 0 || (matcher.start() < start && matcher.end() >= end)) {
                     start = matcher.start();
@@ -2030,6 +2044,10 @@ public final class RegExUtil {
             } else if (start >= 0) {
                 return Strings.replaceRange(source, start, end, replacer.apply(source.substring(start, end)));
             }
+        }
+
+        if (start >= 0) {
+            return Strings.replaceRange(source, start, end, replacer.apply(source.substring(start, end)));
         }
 
         return source;
@@ -2061,8 +2079,10 @@ public final class RegExUtil {
         }
 
         final Matcher matcher = pattern.matcher(checkSourceString(source));
+        int start = -1;
+        int end = -1;
 
-        for (int start = -1, end = -1, i = source.length(); i >= 0; i--) {
+        for (int i = source.length(); i >= 0; i--) {
             if (matcher.find(i)) {
                 if (start < 0 || (matcher.start() < start && matcher.end() >= end)) {
                     start = matcher.start();
@@ -2073,6 +2093,10 @@ public final class RegExUtil {
             } else if (start >= 0) {
                 return Strings.replaceRange(source, start, end, replacer.apply(start, end));
             }
+        }
+
+        if (start >= 0) {
+            return Strings.replaceRange(source, start, end, replacer.apply(start, end));
         }
 
         return source;

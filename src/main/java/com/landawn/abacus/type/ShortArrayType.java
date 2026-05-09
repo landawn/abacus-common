@@ -24,6 +24,8 @@ import com.landawn.abacus.util.Strings;
 
 /**
  * Type handler for {@code Short[]} arrays, providing serialization and deserialization support.
+ * Arrays are formatted as comma-separated values enclosed in square brackets, with {@code null}
+ * elements rendered as the literal {@code "null"}.
  */
 public final class ShortArrayType extends ObjectArrayType<Short> {
 

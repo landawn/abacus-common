@@ -3574,7 +3574,7 @@ public class IterablesTest extends AbstractTest {
     }
 
     @Test
-    public void testAverageInt_EmptyIterable() {
+    public void testAverageInt_EmptyIterable_2() {
         assertFalse(Iterables.averageInt(Collections.<Integer> emptyList()).isPresent());
     }
 
@@ -6444,6 +6444,145 @@ public class IterablesTest extends AbstractTest {
         assertTrue(slice.contains("d"));
         assertTrue(slice.contains("e"));
         assertFalse(slice.contains("c"));
+    }
+
+    // ===================== Bug-fix regression: single-use Iterable averages =====================
+
+    /**
+     * Single-use {@code Iterable} backed by an iterator. Calling {@code iterator()} more than once
+     * returns the already-consumed iterator, which would cause a double-iteration bug to drop data.
+     */
+    private static <T> Iterable<T> singleUseIterable(final List<T> source) {
+        final Iterator<T> it = source.iterator();
+        return () -> it;
+    }
+
+    @Test
+    public void testAverageInt_SingleUseIterable() {
+        Iterable<Integer> single = singleUseIterable(Arrays.asList(1, 2, 3, 4, 5));
+        OptionalDouble result = Iterables.averageInt(single);
+        assertTrue(result.isPresent());
+        assertEquals(3.0, result.getAsDouble(), 1e-9);
+    }
+
+    @Test
+    public void testAverageInt_SingleUseIterable_WithFunc() {
+        Iterable<String> single = singleUseIterable(Arrays.asList("a", "bb", "ccc"));
+        OptionalDouble result = Iterables.averageInt(single, String::length);
+        assertTrue(result.isPresent());
+        assertEquals(2.0, result.getAsDouble(), 1e-9);
+    }
+
+    @Test
+    public void testAverageLong_SingleUseIterable() {
+        Iterable<Long> single = singleUseIterable(Arrays.asList(10L, 20L, 30L));
+        OptionalDouble result = Iterables.averageLong(single);
+        assertTrue(result.isPresent());
+        assertEquals(20.0, result.getAsDouble(), 1e-9);
+    }
+
+    @Test
+    public void testAverageBigInteger_SingleUseIterable() {
+        Iterable<BigInteger> single = singleUseIterable(
+                Arrays.asList(BigInteger.valueOf(10), BigInteger.valueOf(20), BigInteger.valueOf(30)));
+        Optional<BigDecimal> result = Iterables.averageBigInteger(single);
+        assertTrue(result.isPresent());
+        assertEquals(0, new BigDecimal("20").compareTo(result.get()));
+    }
+
+    @Test
+    public void testAverageBigDecimal_SingleUseIterable() {
+        Iterable<BigDecimal> single = singleUseIterable(
+                Arrays.asList(new BigDecimal("1.5"), new BigDecimal("2.5"), new BigDecimal("3.5")));
+        Optional<BigDecimal> result = Iterables.averageBigDecimal(single);
+        assertTrue(result.isPresent());
+        assertEquals(0, new BigDecimal("2.5").compareTo(result.get()));
+    }
+
+    @Test
+    public void testAverageInt_EmptyIterable() {
+        assertFalse(Iterables.averageInt((Iterable<Integer>) null).isPresent());
+        assertFalse(Iterables.averageInt(Collections.<Integer> emptyList()).isPresent());
+    }
+
+    @Test
+    public void testAverageBigInteger_EmptyAndNull() {
+        assertFalse(Iterables.averageBigInteger(null).isPresent());
+        assertFalse(Iterables.averageBigInteger(Collections.<BigInteger> emptyList()).isPresent());
+    }
+
+    // ===================== powerSet / permutations / cartesianProduct edge cases =====================
+
+    @Test
+    public void testPowerSet_Empty() {
+        Set<Set<Integer>> ps = Iterables.powerSet(Collections.<Integer> emptySet());
+        assertEquals(1, ps.size());
+        assertTrue(ps.contains(Collections.<Integer> emptySet()));
+    }
+
+    @Test
+    public void testPowerSet_NullInputTreatedAsEmpty() {
+        Set<Set<Integer>> ps = Iterables.powerSet(null);
+        assertEquals(1, ps.size());
+    }
+
+    @Test
+    public void testPowerSet_Three() {
+        Set<Integer> in = new HashSet<>(Arrays.asList(1, 2, 3));
+        Set<Set<Integer>> ps = Iterables.powerSet(in);
+        assertEquals(8, ps.size());
+    }
+
+    @Test
+    public void testPermutations_Empty() {
+        Collection<List<Integer>> perms = Iterables.permutations(Collections.<Integer> emptyList());
+        assertEquals(1, perms.size());
+        assertTrue(perms.iterator().next().isEmpty());
+    }
+
+    @Test
+    public void testPermutations_Count() {
+        Collection<List<Integer>> perms = Iterables.permutations(Arrays.asList(1, 2, 3));
+        assertEquals(6, perms.size());
+    }
+
+    @Test
+    public void testCartesianProduct_EmptyInput() {
+        // Counter-intuitive but mathematically consistent: zero axes -> one empty tuple.
+        List<List<Object>> r = Iterables.cartesianProduct();
+        assertEquals(1, r.size());
+        assertTrue(r.get(0).isEmpty());
+    }
+
+    @Test
+    public void testCartesianProduct_OneEmptyAxis() {
+        List<List<Integer>> r = Iterables.cartesianProduct(Arrays.asList(1, 2), Collections.<Integer> emptyList());
+        assertEquals(0, r.size());
+    }
+
+    @Test
+    public void testCartesianProduct_Sizes() {
+        List<List<Integer>> r = Iterables.cartesianProduct(Arrays.asList(1, 2, 3), Arrays.asList(10, 20));
+        assertEquals(6, r.size());
+        assertEquals(Arrays.asList(1, 10), r.get(0));
+        assertEquals(Arrays.asList(3, 20), r.get(5));
+    }
+
+    @Test
+    public void testRollup_Empty() {
+        List<List<Object>> r = Iterables.rollup(Collections.emptyList());
+        assertEquals(1, r.size());
+        assertTrue(r.get(0).isEmpty());
+    }
+
+    // ===================== min/max NULL_MIN_COMPARATOR short-circuit =====================
+
+    @Test
+    public void testMin_NullsFirstShortCircuits() {
+        Iterator<String> it = Arrays.asList("b", null, "a").iterator();
+        Nullable<String> r = Iterables.min(it, Comparator.nullsFirst(Comparator.<String> naturalOrder()));
+        assertTrue(r.isPresent());
+        assertNull(r.get());
     }
 
 }

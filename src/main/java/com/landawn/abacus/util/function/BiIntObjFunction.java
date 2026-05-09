@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -64,6 +66,7 @@ public interface BiIntObjFunction<T, R> extends Throwables.BiIntObjFunction<T, R
      * @throws NullPointerException if {@code after} is null
      */
     default <V> BiIntObjFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+        Objects.requireNonNull(after);
         return (i, j, t) -> after.apply(apply(i, j, t));
     }
 }

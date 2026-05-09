@@ -47,4 +47,10 @@ public class IntBiObjFunctionTest extends TestBase {
 
         assertEquals("Result: 5:A:B", combined.apply(5, "A", "B"));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        IntBiObjFunction<String, String, String> instance = (a, b, c) -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

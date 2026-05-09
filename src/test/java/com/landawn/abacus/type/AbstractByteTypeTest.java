@@ -229,4 +229,19 @@ public class AbstractByteTypeTest extends TestBase {
     public void testWriteCharacter_NumberValue() throws IOException {
         type.writeCharacter(characterWriter, (byte) 100, config);
     }
+
+    // Bug: appendTo previously delegated to x.toString() instead of byteValue(),
+    // producing inconsistent output relative to stringOf when a non-Byte Number was passed.
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test
+    public void testAppendTo_TruncatesNonByteNumberToByteRange() throws IOException {
+        final Type rawType = type;
+        final Long large = Long.valueOf(300L); // 300 truncated to byte is 44
+
+        StringBuilder sb = new StringBuilder();
+        rawType.appendTo(sb, large);
+        // appendTo must be consistent with stringOf — both should truncate to byte.
+        assertEquals(rawType.stringOf(large), sb.toString());
+        assertEquals("44", sb.toString());
+    }
 }

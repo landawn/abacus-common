@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -104,6 +106,7 @@ public interface LongObjPredicate<T> extends Throwables.LongObjPredicate<T, Runt
      * @throws NullPointerException if {@code other} is null
      */
     default LongObjPredicate<T> and(final LongObjPredicate<T> other) {
+        Objects.requireNonNull(other);
         return (i, t) -> test(i, t) && other.test(i, t);
     }
 
@@ -133,6 +136,7 @@ public interface LongObjPredicate<T> extends Throwables.LongObjPredicate<T, Runt
      * @throws NullPointerException if {@code other} is null
      */
     default LongObjPredicate<T> or(final LongObjPredicate<T> other) {
+        Objects.requireNonNull(other);
         return (i, t) -> test(i, t) || other.test(i, t);
     }
 }

@@ -77,8 +77,11 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
 
     /**
      * Parses a string and returns a new {@link java.util.concurrent.atomic.AtomicBoolean} containing
-     * the parsed value. Parsing is case-insensitive: {@code "true"} (in any casing) yields {@code true};
-     * any other non-blank value yields {@code false}.
+     * the parsed value. Leading and trailing whitespace is trimmed before parsing. The trimmed string
+     * is interpreted using the type system's boolean parsing rules: single-character {@code "Y"},
+     * {@code "y"}, or {@code "1"} yields {@code true}; multi-character inputs are interpreted via
+     * {@link Boolean#valueOf(String)} (case-insensitive {@code "true"} yields {@code true}); any other
+     * value yields {@code false}.
      *
      * @param str the string to parse; may be {@code null} or blank
      * @return a new {@code AtomicBoolean} containing the parsed boolean value,

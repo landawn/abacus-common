@@ -244,4 +244,10 @@ public class BytePredicateTest extends TestBase {
     public void testFunctionalInterface() {
         assertNotNull(BytePredicate.class.getAnnotation(FunctionalInterface.class));
     }
+
+    @Test
+    public void testAndNullThrowsImmediately() {
+        BytePredicate instance = a -> false;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((BytePredicate) null));
+    }
 }

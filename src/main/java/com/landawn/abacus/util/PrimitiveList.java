@@ -273,7 +273,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      *
      * @param other the PrimitiveList containing elements to be added to this list.
      *          If {@code null} or empty, this list remains unchanged.
-     * @return {@code true} if this list changed as a result of the call (i.e., if c was not empty),
+     * @return {@code true} if this list changed as a result of the call (i.e., if {@code other} was not empty),
      *         {@code false} otherwise
      */
     public abstract boolean addAll(L other);
@@ -291,7 +291,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      *              Must be between 0 and size() (inclusive).
      * @param other the PrimitiveList containing elements to be inserted into this list.
      *          If {@code null} or empty, this list remains unchanged.
-     * @return {@code true} if this list changed as a result of the call (i.e., if c was not empty),
+     * @return {@code true} if this list changed as a result of the call (i.e., if {@code other} was not empty),
      *         {@code false} otherwise
      * @throws IndexOutOfBoundsException if the index is out of range
      *         ({@code index < 0 || index > size()})

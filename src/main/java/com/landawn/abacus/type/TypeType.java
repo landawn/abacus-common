@@ -59,6 +59,9 @@ import com.landawn.abacus.util.Strings;
 @SuppressWarnings("rawtypes")
 public class TypeType extends AbstractType<Type> {
 
+    /**
+     * The type name identifier for {@code Type} (the meta-type that handles {@link Type} instances).
+     */
     public static final String TYPE = "Type";
 
     /**

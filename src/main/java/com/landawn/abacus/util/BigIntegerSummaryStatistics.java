@@ -109,7 +109,7 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
         }
 
         this.count = count;
-        this.sum = sum;
+        this.sum = sum == null ? BigInteger.ZERO : sum;
         this.min = min;
         this.max = max;
     }

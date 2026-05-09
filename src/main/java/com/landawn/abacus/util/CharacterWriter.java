@@ -300,7 +300,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String unicode = getCharNum('\u2028');   // Returns "\u2028"
-     * String ctrl    = getCharNum('');   // Returns ""
+     * String ctrl    = getCharNum((char) 0x01);   // Returns "\u0001"
      * }</pre>
      *
      * @param ch the character to convert

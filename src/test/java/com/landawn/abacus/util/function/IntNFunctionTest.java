@@ -57,4 +57,10 @@ public class IntNFunctionTest extends TestBase {
 
         assertEquals("Sum: 15", combined.apply(5, 10));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        IntNFunction<String> instance = a -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

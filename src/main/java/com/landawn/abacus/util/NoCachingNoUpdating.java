@@ -158,11 +158,17 @@ public interface NoCachingNoUpdating {
         public <A> A[] toArray(A[] target) {
             N.checkArgNotNull(target, "target");
 
-            if (target.length < length()) {
-                target = (A[]) java.lang.reflect.Array.newInstance(target.getClass().getComponentType(), length());
+            final int len = length();
+
+            if (target.length < len) {
+                target = (A[]) java.lang.reflect.Array.newInstance(target.getClass().getComponentType(), len);
+            } else if (target.length > len) {
+                // Mirror Collection.toArray(T[]) contract: when the supplied array is larger
+                // than the data, set target[length()] to null as the end-of-data sentinel.
+                target[len] = null;
             }
 
-            N.copy(a, 0, target, 0, length());
+            N.copy(a, 0, target, 0, len);
 
             return target;
         }

@@ -493,24 +493,24 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
     }
 
     /**
-     * Returns an inverted view of this {@code ImmutableBiMap}, in which each value
+     * Returns an inverse view of this {@code ImmutableBiMap}, in which each value
      * of this map becomes a key, and each key becomes the corresponding value.
      *
      * <p>The returned map is also an {@code ImmutableBiMap} and is backed by the
-     * same underlying {@code BiMap} as this instance. Calling {@code inverted()}
+     * same underlying {@code BiMap} as this instance. Calling {@code inverse()}
      * multiple times returns the same cached instance.</p>
      *
      * <p><b>Usage example:</b></p>
      * <pre>{@code
      * ImmutableBiMap<String, Integer> map = ImmutableBiMap.of("one", 1, "two", 2);
-     * ImmutableBiMap<Integer, String> inverted = map.inverted();
-     * String key = inverted.get(1);   // returns "one"
+     * ImmutableBiMap<Integer, String> inverse = map.inverse();
+     * String key = inverse.get(1);   // returns "one"
      * }</pre>
      *
      * @return an {@code ImmutableBiMap} view where keys and values are swapped
      */
-    public ImmutableBiMap<V, K> inverted() {
-        return invertedView == null ? (invertedView = ImmutableBiMap.wrap(biMap.inverted())) : invertedView;
+    public ImmutableBiMap<V, K> inverse() {
+        return invertedView == null ? (invertedView = ImmutableBiMap.wrap(biMap.inverse())) : invertedView;
     }
 
     /**

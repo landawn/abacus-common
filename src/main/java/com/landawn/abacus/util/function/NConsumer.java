@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 /**
  * Represents an operation that accepts a variable number of arguments and returns no result.
  * This is a variable-arity (varargs) generalization of {@code Consumer}.
@@ -108,6 +110,7 @@ public interface NConsumer<T> {
      * @throws NullPointerException if {@code after} is null
      */
     default NConsumer<T> andThen(final NConsumer<? super T> after) {
+        Objects.requireNonNull(after);
         return args -> {
             accept(args);
             after.accept(args);

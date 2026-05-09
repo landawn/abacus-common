@@ -57,6 +57,9 @@ import com.landawn.abacus.util.Strings;
  */
 public class URLType extends AbstractType<URL> {
 
+    /**
+     * The type name identifier for {@link java.net.URL} type (the simple class name {@code "URL"}).
+     */
     public static final String URL = URL.class.getSimpleName();
 
     /**
@@ -125,7 +128,8 @@ public class URLType extends AbstractType<URL> {
      *
      * @param str the string to convert to a URL
      * @return a URL instance created from the string, or {@code null} if the string is empty
-     * @throws RuntimeException if the string is not a valid URL format (wraps MalformedURLException)
+     * @throws IllegalArgumentException if the string is not a valid URI (thrown by {@link URI#create(String)})
+     * @throws RuntimeException if the URI cannot be converted to a URL (wraps {@link MalformedURLException})
      */
     @Override
     public URL valueOf(final String str) {

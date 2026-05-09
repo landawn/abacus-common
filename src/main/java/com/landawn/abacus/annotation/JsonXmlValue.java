@@ -22,12 +22,12 @@ import java.lang.annotation.Target;
 
 /**
  * Indicates that the annotated method or field represents the value of an object
- * for JSON/XML serialization and deserialization purposes. This annotation is used
- * to designate a single property that contains the essential value of the object.
+ * for JSON/XML serialization and deserialization purposes.
  *
- * <p>When an object is annotated with this annotation on one of its properties,
- * that property's value will be used as the serialized representation of the entire object.
- * During deserialization, the value will be used to reconstruct the object.</p>
+ * <p>This annotation designates a single property that contains the essential value of the
+ * object. When an object has this annotation on one of its properties, that property's value
+ * will be used as the serialized representation of the entire object. During deserialization,
+ * the value will be used to reconstruct the object.</p>
  *
  * <p>This annotation is particularly useful for:</p>
  * <ul>

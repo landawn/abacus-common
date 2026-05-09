@@ -161,10 +161,15 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
 
     /**
      * Removes and returns the element associated with the specified key.
-     * The element's activity print is updated to reflect this access.
+     * The element's activity print is updated (last access time and access count)
+     * to reflect this access.
      *
      * <p>Unlike {@link #get(Object)}, this method removes the element from the pool,
      * so it will not be available for future requests unless re-added.
+     *
+     * <p>The pool does <em>not</em> invoke {@link Poolable#destroy(Poolable.Caller)} on the
+     * returned element — the caller takes ownership and is responsible for either returning
+     * the element to a pool or destroying it when no longer needed.
      *
      * @param key the key whose mapping is to be removed from the pool
      * @return the element previously associated with the key, or {@code null} if no mapping exists

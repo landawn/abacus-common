@@ -1310,11 +1310,11 @@ public final class Fn {
     }
 
     /**
-     * Returns a Function that converts its input to a String using String.valueOf().
+     * Returns a Function that converts its input to a String using {@link N#toString(Object)}.
      *
      * @param <T> the type of the input
      * @return a Function that converts its input to String
-     * @see String#valueOf(Object)
+     * @see N#toString(Object)
      */
     public static <T> Function<T, String> toStr() {
         return TO_STRING;
@@ -3965,7 +3965,7 @@ public final class Fn {
 
             @Override
             public boolean test(final T t) {
-                return counter.getAndDecrement() > 0;
+                return counter.getAndUpdate(i -> i > 0 ? i - 1 : 0) > 0;
             }
         };
     }
@@ -5472,11 +5472,13 @@ public final class Fn {
      * @see Fnn#mc(Throwables.BiConsumer)
      */
     @Beta
-    public static <T, U> java.util.function.BiConsumer<T, Consumer<U>> mc(
+    public static <T, U> java.util.function.BiConsumer<T, java.util.function.Consumer<U>> mc(
             final java.util.function.BiConsumer<? super T, ? extends java.util.function.Consumer<U>> mapper) {
         N.checkArgNotNull(mapper);
 
-        return (BiConsumer<T, Consumer<U>>) mapper;
+        final java.util.function.BiConsumer<T, java.util.function.Consumer<U>> jdkMapper = (java.util.function.BiConsumer<T, java.util.function.Consumer<U>>) mapper;
+
+        return jdkMapper;
     }
 
     /**

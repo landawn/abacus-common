@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -56,6 +58,7 @@ public interface BooleanUnaryOperator extends Throwables.BooleanUnaryOperator<Ru
      * @see #andThen(BooleanUnaryOperator)
      */
     default BooleanUnaryOperator compose(final BooleanUnaryOperator before) {
+        Objects.requireNonNull(before);
         return v -> applyAsBoolean(before.applyAsBoolean(v));
     }
 
@@ -75,6 +78,7 @@ public interface BooleanUnaryOperator extends Throwables.BooleanUnaryOperator<Ru
      * @see #compose(BooleanUnaryOperator)
      */
     default BooleanUnaryOperator andThen(final BooleanUnaryOperator after) {
+        Objects.requireNonNull(after);
         return t -> after.applyAsBoolean(applyAsBoolean(t));
     }
 

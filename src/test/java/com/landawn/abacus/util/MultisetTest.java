@@ -3045,7 +3045,7 @@ public class MultisetTest extends AbstractTest {
         Arrays.fill(b, "test");
         String[] resultB = multiset.toArray(b);
         assertSame(b, resultB);
-        assertEquals("test", b[0]);
+        assertNull(b[0]);
     }
 
     @Test

@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -102,6 +104,7 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
      * @throws NullPointerException if {@code other} is null
      */
     default TriPredicate<A, B, C> and(final TriPredicate<? super A, ? super B, ? super C> other) {
+        Objects.requireNonNull(other);
         return (a, b, c) -> test(a, b, c) && other.test(a, b, c);
     }
 
@@ -132,6 +135,7 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
      * @throws NullPointerException if {@code other} is null
      */
     default TriPredicate<A, B, C> or(final TriPredicate<? super A, ? super B, ? super C> other) {
+        Objects.requireNonNull(other);
         return (a, b, c) -> test(a, b, c) || other.test(a, b, c);
     }
 

@@ -75,7 +75,7 @@ import com.landawn.abacus.annotation.Internal;
  * String userName = userIdMap.getByValue(1002);   // "bob"
  *
  * // Inverse view with swapped keys and values
- * BiMap<Integer, String> idUserMap = userIdMap.inverted();
+ * BiMap<Integer, String> idUserMap = userIdMap.inverse();
  * String user = idUserMap.get(1003);   // "charlie"
  *
  * // Bijective constraint enforcement
@@ -129,14 +129,14 @@ import com.landawn.abacus.annotation.Internal;
  *   <li><b>Reverse Lookup:</b> {@code getByValue(value)} - Value-to-key lookup</li>
  *   <li><b>Safe Reverse Lookup:</b> {@code getByValueOrDefault(value, defaultKey)}</li>
  *   <li><b>Reverse Removal:</b> {@code removeByValue(value)} - Remove by value</li>
- *   <li><b>Inverse View:</b> {@code inverted()} - Swapped key-value BiMap</li>
+ *   <li><b>Inverse View:</b> {@code inverse()} - Swapped key-value BiMap</li>
  * </ul>
  *
  * <p><b>Advanced Operations:</b>
  * <ul>
  *   <li>{@link #forcePut(Object, Object)} - Override bijective constraint</li>
  *   <li>{@link #copy()} - Create independent copy with same data</li>
- *   <li>{@link #inverted()} - Get inverted view (cached for efficiency)</li>
+ *   <li>{@link #inverse()} - Get inverse view (cached for efficiency)</li>
  * </ul>
  *
  * <p><b>Collection Views:</b>
@@ -180,7 +180,7 @@ import com.landawn.abacus.annotation.Internal;
  * <p><b>Inverse View Behavior:</b>
  * <ul>
  *   <li>Inverse view is a live view - reflects changes in original BiMap</li>
- *   <li>Modifications to inverted view affect the original BiMap</li>
+ *   <li>Modifications to inverse view affect the original BiMap</li>
  *   <li>Inverse of inverse returns the original BiMap (not a new instance)</li>
  *   <li>Inverse view is cached for performance - created only once</li>
  * </ul>
@@ -1156,20 +1156,20 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Returns the inverted view of this BiMap, which maps each of this BiMap's values to its associated key.
+     * Returns the inverse view of this BiMap, which maps each of this BiMap's values to its associated key.
      * The two BiMaps are backed by the same underlying data; any changes to one will appear in the other.
      * This provides an efficient way to perform reverse lookups without creating a separate copy.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiMap<String, Integer> map = BiMap.of("one", 1, "two", 2);
-     * BiMap<Integer, String> inverted = map.inverted();
-     * String key = inverted.get(1);   // returns "one"
+     * BiMap<Integer, String> inverse = map.inverse();
+     * String key = inverse.get(1);   // returns "one"
      * }</pre>
      *
-     * @return The inverted view of this BiMap where keys and values are swapped.
+     * @return The inverse view of this BiMap where keys and values are swapped.
      */
-    public BiMap<V, K> inverted() {
+    public BiMap<V, K> inverse() {
         return (invertedView == null) ? invertedView = new BiMap<>(valueMap, keyMap, this) : invertedView;
     }
 

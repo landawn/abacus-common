@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -73,6 +75,7 @@ public interface ObjCharConsumer<T> extends Throwables.ObjCharConsumer<T, Runtim
      * @throws NullPointerException if {@code after} is null
      */
     default ObjCharConsumer<T> andThen(final ObjCharConsumer<? super T> after) {
+        Objects.requireNonNull(after);
         return (t, value) -> {
             accept(t, value);
             after.accept(t, value);

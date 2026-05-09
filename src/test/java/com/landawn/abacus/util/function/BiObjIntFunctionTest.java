@@ -108,4 +108,10 @@ public class BiObjIntFunctionTest extends TestBase {
 
         assertThrows(RuntimeException.class, () -> chainedFunction.apply("test", "value", 5));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        BiObjIntFunction<String, String, String> instance = (a, b, c) -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

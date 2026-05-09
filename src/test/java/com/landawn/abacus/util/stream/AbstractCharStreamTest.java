@@ -1344,4 +1344,29 @@ public class AbstractCharStreamTest extends TestBase {
         assertFalse(iterator.hasNext());
     }
 
+    @Test
+    public void testReversedRotatedReverseSorted_CountExhaustsIterator() {
+        // reversed(): count() must consume all remaining elements
+        CharIteratorEx revIter = (CharIteratorEx) createCharStream(new char[] { 'a', 'b', 'c', 'd', 'e' }).map(c -> c).reversed().iteratorEx();
+        assertEquals(5L, revIter.count());
+        assertFalse(revIter.hasNext());
+
+        // rotated(): count() must consume all remaining elements
+        CharIteratorEx rotIter = (CharIteratorEx) createCharStream(new char[] { 'a', 'b', 'c', 'd', 'e' }).map(c -> c).rotated(2).iteratorEx();
+        assertEquals(5L, rotIter.count());
+        assertFalse(rotIter.hasNext());
+
+        // reverseSorted(): count() must consume all remaining elements
+        CharIteratorEx rsIter = (CharIteratorEx) createCharStream(new char[] { 'c', 'a', 'd', 'a', 'e' }).map(c -> c).reverseSorted().iteratorEx();
+        assertEquals(5L, rsIter.count());
+        assertFalse(rsIter.hasNext());
+
+        // After consuming a few elements first, count() returns the remaining count and exhausts the iterator
+        CharIteratorEx revIter2 = (CharIteratorEx) createCharStream(new char[] { 'a', 'b', 'c', 'd', 'e' }).map(c -> c).reversed().iteratorEx();
+        revIter2.nextChar();
+        revIter2.nextChar();
+        assertEquals(3L, revIter2.count());
+        assertFalse(revIter2.hasNext());
+    }
+
 }

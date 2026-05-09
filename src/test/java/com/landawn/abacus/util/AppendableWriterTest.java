@@ -497,4 +497,57 @@ public class AppendableWriterTest extends TestBase {
             assertEquals("", writer.toString());
         }
     }
+
+    private static final class FailingFlushAppendable implements Appendable, java.io.Flushable, AutoCloseable {
+        boolean closed;
+        private final IOException flushFailure;
+
+        FailingFlushAppendable(IOException flushFailure) {
+            this.flushFailure = flushFailure;
+        }
+
+        @Override
+        public Appendable append(CharSequence csq) {
+            return this;
+        }
+
+        @Override
+        public Appendable append(CharSequence csq, int start, int end) {
+            return this;
+        }
+
+        @Override
+        public Appendable append(char c) {
+            return this;
+        }
+
+        @Override
+        public void flush() throws IOException {
+            throw flushFailure;
+        }
+
+        @Override
+        public void close() {
+            closed = true;
+        }
+    }
+
+    @Test
+    public void testCloseStillReleasesUnderlyingWhenFlushFails() {
+        IOException flushFailure = new IOException("flush failed");
+        FailingFlushAppendable underlying = new FailingFlushAppendable(flushFailure);
+        AppendableWriter writer = new AppendableWriter(underlying);
+
+        // The IOException from flush should propagate, but the underlying close
+        // must still have been invoked and the writer state must be marked closed.
+        IOException thrown = assertThrows(IOException.class, writer::close);
+        assertSame(flushFailure, thrown);
+        assertTrue(underlying.closed, "Underlying Appendable must be closed even when flush throws");
+
+        // Subsequent close() should be a no-op (idempotent), not retry flush.
+        Assertions.assertDoesNotThrow(writer::close);
+
+        // Further writes must fail because the writer is closed.
+        assertThrows(IOException.class, () -> writer.write("x"));
+    }
 }

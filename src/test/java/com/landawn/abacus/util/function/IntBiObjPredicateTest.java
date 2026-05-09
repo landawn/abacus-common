@@ -69,4 +69,10 @@ public class IntBiObjPredicateTest extends TestBase {
         assertTrue(combined.test(1, null, "B"));
         assertFalse(combined.test(1, "A", "B"));
     }
+
+    @Test
+    public void testAndNullThrowsImmediately() {
+        IntBiObjPredicate<String, String> instance = (a, b, c) -> false;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((IntBiObjPredicate) null));
+    }
 }

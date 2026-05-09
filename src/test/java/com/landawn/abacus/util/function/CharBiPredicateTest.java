@@ -166,4 +166,10 @@ public class CharBiPredicateTest extends TestBase {
     public void testFunctionalInterface() {
         assertNotNull(CharBiPredicate.class.getAnnotation(FunctionalInterface.class));
     }
+
+    @Test
+    public void testAndNullThrowsImmediately() {
+        CharBiPredicate instance = (a, b) -> false;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((CharBiPredicate) null));
+    }
 }

@@ -684,7 +684,7 @@ public abstract class Observer<T> implements Immutable {
      * Observer.interval(1000)
      *     .timeInterval()
      *     .observe(timed -> System.out.println("Value: " + timed.value() +
-     *                                          ", Interval: " + timed.time() + "ms"));
+     *                                          ", Interval: " + timed.timestamp() + "ms"));
      * }</pre>
      *
      * @return this Observer instance emitting Timed objects with interval information
@@ -718,7 +718,7 @@ public abstract class Observer<T> implements Immutable {
      * eventObserver
      *     .timestamp()
      *     .observe(timed -> System.out.println("Event: " + timed.value() +
-     *                                          " at " + new Date(timed.time())));
+     *                                          " at " + new Date(timed.timestamp())));
      * }</pre>
      *
      * @return this Observer instance emitting Timed objects with timestamp information

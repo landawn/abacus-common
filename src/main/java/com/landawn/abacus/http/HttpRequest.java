@@ -36,13 +36,18 @@ import com.landawn.abacus.util.URLEncodedUtil;
 import com.landawn.abacus.util.cs;
 
 /**
- * A fluent API for building and executing HTTP requests using HttpClient.
+ * A fluent, builder-style API for building and executing a single HTTP request using {@link HttpClient}.
  * This class provides a builder-style interface for configuring HTTP requests with various options
  * such as headers, authentication, timeouts, and request bodies.
  *
- * <p>HttpRequest is designed for single-use scenarios where you want to create an HttpClient,
- * execute a request, and then dispose of the client. For multiple requests to the same endpoint,
- * consider using HttpClient directly.</p>
+ * <p>{@code HttpRequest} is designed for single-use scenarios. The static {@code url(...)} factories
+ * create a new dedicated {@link HttpClient} that is automatically closed after the request completes;
+ * the {@link #create(HttpClient)} factory instead reuses a caller-supplied client. For multiple
+ * requests to the same endpoint, prefer reusing a long-lived {@link HttpClient} via
+ * {@link #create(HttpClient)}.</p>
+ *
+ * <p><b>Thread Safety:</b> Instances of this class are <i>not</i> thread-safe. Build and execute
+ * each request on a single thread.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -63,8 +68,11 @@ import com.landawn.abacus.util.cs;
  *     .asyncGet(String.class);
  * }</pre>
  *
- * @see URLEncodedUtil
+ * @see HttpClient
+ * @see HttpResponse
  * @see HttpHeaders
+ * @see HttpSettings
+ * @see URLEncodedUtil
  * @see com.landawn.abacus.http.v2.HttpRequest
  */
 public final class HttpRequest {
@@ -527,7 +535,8 @@ public final class HttpRequest {
     }
 
     /**
-     * Sets query parameters for GET or DELETE requests as a query string.
+     * Sets query parameters for GET or DELETE requests as a raw query string.
+     * Passing {@code null} or an empty string clears any previously configured query/body.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -536,7 +545,7 @@ public final class HttpRequest {
      *     .get();
      * }</pre>
      *
-     * @param query The query string
+     * @param query The query string (already URL-encoded). {@code null} or empty clears any previously set value.
      * @return This HttpRequest instance for method chaining
      */
     public HttpRequest query(final String query) {
@@ -553,6 +562,8 @@ public final class HttpRequest {
 
     /**
      * Sets query parameters for GET or DELETE requests from a map.
+     * The entries are URL-encoded and appended to the URL when the request is executed.
+     * A {@code null} or empty map clears any previously configured query/body.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -562,7 +573,7 @@ public final class HttpRequest {
      *     .get();
      * }</pre>
      *
-     * @param queryParams A map containing query parameter names and values
+     * @param queryParams A map containing query parameter names and values. {@code null} or empty clears any previously set value.
      * @return This HttpRequest instance for method chaining
      */
     public HttpRequest query(final Map<String, ?> queryParams) {
@@ -916,10 +927,11 @@ public final class HttpRequest {
 
     /**
      * Executes a HEAD request with the specified result class.
+     * HEAD responses have no body, so non-{@link HttpResponse} result classes will typically yield {@code null}.
      *
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
-     * @return The deserialized response object (typically {@code null} for HEAD requests)
+     * @return The response object — populated when {@code resultClass} is {@link HttpResponse}, otherwise typically {@code null}
      * @throws UncheckedIOException if an I/O error occurs
      */
     <T> T head(final Class<T> resultClass) throws UncheckedIOException {
@@ -952,7 +964,10 @@ public final class HttpRequest {
      * @param httpMethod The HTTP method to use
      * @param resultClass The class of the expected response object
      * @return The deserialized response object
-     * @throws IllegalArgumentException if httpMethod is null
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}
+     * @throws IllegalStateException if {@link #query(String)} was set but the method is not {@code GET}/{@code DELETE},
+     *         or {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not
+     *         {@code POST}/{@code PUT}/{@code PATCH}
      * @throws UncheckedIOException if an I/O error occurs
      */
     @Beta
@@ -1434,11 +1449,11 @@ public final class HttpRequest {
 
     /**
      * Executes an asynchronous HEAD request with a custom executor and the specified result class.
-     *
-     * @param resultClass The class of the expected response object. Must not be {@code null}.
-     * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
+     * HEAD responses have no body, so non-{@link HttpResponse} result classes will typically yield {@code null}.
      *
      * @param <T> The type of the response object
+     * @param resultClass The class of the expected response object. Must not be {@code null}.
+     * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the response
      */
     public <T> ContinuableFuture<T> asyncHead(final Class<T> resultClass, final Executor executor) {

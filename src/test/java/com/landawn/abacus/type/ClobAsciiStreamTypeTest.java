@@ -201,4 +201,31 @@ public class ClobAsciiStreamTypeTest extends TestBase {
         Assertions.assertNull(result);
     }
 
+    /**
+     * Bug fix verification: writeCharacter declares {@code throws IOException}, so an
+     * {@link IOException} raised by the underlying stream must propagate as an
+     * {@link IOException} to the caller — not be wrapped/swallowed as
+     * {@code UncheckedIOException}.
+     */
+    @Test
+    public void testWriteCharacter_IOExceptionPropagates() {
+        CharacterWriter mockWriter = createCharacterWriter();
+        final IOException expected = new IOException("boom");
+        InputStream failingStream = new InputStream() {
+            @Override
+            public int read() throws IOException {
+                throw expected;
+            }
+
+            @Override
+            public int read(byte[] b, int off, int len) throws IOException {
+                throw expected;
+            }
+        };
+
+        IOException thrown = Assertions.assertThrows(IOException.class,
+                () -> type.writeCharacter(mockWriter, failingStream, null));
+        assertEquals(expected, thrown);
+    }
+
 }

@@ -56,6 +56,9 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
 
     static final Type<String> strType = TypeFactory.getType(String.class);
 
+    /**
+     * The type name identifier for Range type, equal to the simple class name {@code "Range"}.
+     */
     public static final String RANGE = Range.class.getSimpleName();
 
     private final String declaringName;
@@ -139,13 +142,16 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
     /**
      * Converts a Range object to its string representation.
      * The format depends on the bound type:
-     * - Open-Open: "(lower, upper)"
-     * - Open-Closed: "(lower, upper]"
-     * - Closed-Open: "[lower, upper)"
-     * - Closed-Closed: "[lower, upper]"
+     * <ul>
+     *   <li>{@code OPEN_OPEN}: {@code "(lower, upper)"}</li>
+     *   <li>{@code OPEN_CLOSED}: {@code "(lower, upper]"}</li>
+     *   <li>{@code CLOSED_OPEN}: {@code "[lower, upper)"}</li>
+     *   <li>{@code CLOSED_CLOSED}: {@code "[lower, upper]"}</li>
+     * </ul>
+     * Endpoints are written using the element type's serialization, separated by a comma and space.
      *
      * @param x the Range to convert to string
-     * @return the string representation of the Range, or {@code null} if the input is null
+     * @return the string representation of the Range, or {@code null} if the input is {@code null}
      */
     @Override
     public String stringOf(final Range<T> x) {
@@ -184,14 +190,17 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
     /**
      * Parses a string representation of a Range and returns the corresponding Range object.
      * The string should be in one of the following formats:
-     * - "(lower, upper)" for open-open range
-     * - "(lower, upper]" for open-closed range
-     * - "[lower, upper)" for closed-open range
-     * - "[lower, upper]" for closed-closed range
+     * <ul>
+     *   <li>{@code "(lower, upper)"} for open-open range</li>
+     *   <li>{@code "(lower, upper]"} for open-closed range</li>
+     *   <li>{@code "[lower, upper)"} for closed-open range</li>
+     *   <li>{@code "[lower, upper]"} for closed-closed range</li>
+     * </ul>
+     * Endpoints are deserialized as a JSON array using the configured element type.
      *
      * @param str the string to parse
      * @return the parsed Range object, or {@code null} if the input string is {@code null} or empty
-     * @throws IllegalArgumentException if the string format is invalid
+     * @throws IllegalArgumentException if the string format is invalid or does not contain exactly two endpoints
      */
     @Override
     public Range<T> valueOf(String str) {

@@ -3525,7 +3525,7 @@ public class u { // NOSONAR
          *
          * @param supplier the supplying function that produces a value to be returned
          * @return the value if present, otherwise the result of the supplying function
-         * @throws IllegalArgumentException if other is null
+         * @throws IllegalArgumentException if {@code supplier} is null
          */
         public int orElseGet(final IntSupplier supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.other);
@@ -4183,7 +4183,7 @@ public class u { // NOSONAR
          *
          * @param supplier the supplying function that produces a value to be returned
          * @return the value if present, otherwise the result of the supplying function
-         * @throws IllegalArgumentException if other is null
+         * @throws IllegalArgumentException if {@code supplier} is null
          */
         public long orElseGet(final LongSupplier supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.other);

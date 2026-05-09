@@ -1478,7 +1478,13 @@ public final class EscapeUtil {
 
                     if (result != null) {
                         out.write(result);
-                        return i;
+                        // Caller advances by codepoint count, not char count. For BMP-only keys
+                        // these are equal, but a key containing a surrogate pair (1 codepoint,
+                        // 2 chars) would otherwise cause the driver loop to over-advance by an
+                        // extra codepoint, skipping characters. The bundled tables only use BMP
+                        // keys so this only matters for user-supplied tables — but the contract
+                        // applies regardless.
+                        return Character.codePointCount(input, index, index + i);
                     }
                 }
             }

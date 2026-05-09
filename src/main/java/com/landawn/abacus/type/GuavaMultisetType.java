@@ -34,10 +34,10 @@ import com.landawn.abacus.util.Strings;
  * Type handler for Google Guava Multiset implementations.
  * This class provides serialization and deserialization capabilities for various Guava Multiset types
  * including HashMultiset, LinkedHashMultiset, and TreeMultiset.
- * Multisets are serialized as Map&lt;E, Integer&gt; structures where the value represents the count of each element.
+ * Multisets are serialized as {@code Map<E, Integer>} structures where the value represents the count of each element.
  *
  * @param <E> the element type of the multiset
- * @param <T> the multiset type (must extend Multiset&lt;E&gt;)
+ * @param <T> the multiset type (must extend {@code Multiset<E>})
  */
 @SuppressWarnings("java:S2160")
 public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T> {

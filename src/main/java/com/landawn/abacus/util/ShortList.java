@@ -2107,7 +2107,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param distance the distance to rotate the list. Positive values rotate right,
      *                 negative values rotate left
-     * @see N#rotate(int[], int)
+     * @see N#rotate(short[], int)
      */
     @Override
     public void rotate(final int distance) {
@@ -2205,7 +2205,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return a new ShortList containing the selected elements
      * @throws IndexOutOfBoundsException if the range is invalid
      * @throws IllegalArgumentException if step is zero
-     * @see N#copyOfRange(int[], int, int, int)
+     * @see N#copyOfRange(short[], int, int, int)
      */
     @Override
     public ShortList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {

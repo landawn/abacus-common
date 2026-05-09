@@ -713,16 +713,20 @@ public interface Type<T> {
     }
 
     /**
-     * Returns the name of this type.
-     * For generic types, includes type parameters (e.g., "List&lt;String&gt;").
+     * Returns the canonical name of this type.
+     * For generic/parameterized types, includes the type parameters using fully qualified
+     * element type names (e.g., {@code "List<java.lang.String>"}).
+     * This is the primary identity used by {@link TypeFactory} for caching and lookup.
      *
      * @return the type name
      */
     String name();
 
     /**
-     * Returns the declaring name of this type.
-     * This may differ from name() for nested or inner types.
+     * Returns the declaring (source-form) name of this type, typically using
+     * simple class names rather than fully qualified names (e.g., {@code "List<String>"}
+     * vs the canonical {@code "List<java.lang.String>"}).
+     * This is the form most suitable for displaying the type in source code or messages.
      *
      * @return the declaring name
      */
@@ -730,7 +734,8 @@ public interface Type<T> {
 
     /**
      * Returns the XML-safe name of this type.
-     * Angle brackets are escaped for use in XML documents.
+     * Generic angle brackets are not used; instead, the XML form replaces them with
+     * a representation suitable for embedding inside XML element/attribute names.
      *
      * @return the XML-safe type name
      */
@@ -1180,8 +1185,8 @@ public interface Type<T> {
      * Converts a value of this type to its string representation.
      * This is the standard way to serialize values as strings.
      *
-     * @param x the value to convert
-     * @return the string representation
+     * @param x the value to convert; may be {@code null}
+     * @return the string representation, or {@code null} if {@code x} is {@code null}
      */
     String stringOf(T x);
 
@@ -1189,17 +1194,18 @@ public interface Type<T> {
      * Parses a string to create a value of this type.
      * This is the standard way to deserialize values from strings.
      *
-     * @param str the string to parse
-     * @return the parsed value
+     * @param str the string to parse; may be {@code null} or empty
+     * @return the parsed value, or {@code null} (or the type's default) when {@code str} is {@code null} or empty
      */
     T valueOf(String str);
 
     /**
      * Converts an object to a value of this type.
-     * Handles various input types with appropriate conversions.
+     * Handles various input types with appropriate conversions; the default
+     * behavior delegates to {@link #valueOf(String)} after stringifying the object.
      *
-     * @param obj the object to convert
-     * @return the converted value
+     * @param obj the object to convert; may be {@code null}
+     * @return the converted value, or {@code null} if {@code obj} is {@code null}
      */
     T valueOf(Object obj);
 
@@ -1210,7 +1216,7 @@ public interface Type<T> {
      * @param cbuf the character array
      * @param offset the starting position
      * @param len the number of characters to parse
-     * @return the parsed value
+     * @return the parsed value, or {@code null} if {@code cbuf} is {@code null} or {@code len} is {@code 0}
      */
     T valueOf(char[] cbuf, int offset, int len);
 

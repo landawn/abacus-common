@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
@@ -119,6 +121,7 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      * @throws NullPointerException if {@code other} is null
      */
     default FloatPredicate and(final FloatPredicate other) {
+        Objects.requireNonNull(other);
         return t -> test(t) && other.test(t);
     }
 
@@ -136,6 +139,7 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      * @throws NullPointerException if {@code other} is null
      */
     default FloatPredicate or(final FloatPredicate other) {
+        Objects.requireNonNull(other);
         return t -> test(t) || other.test(t);
     }
 

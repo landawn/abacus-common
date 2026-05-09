@@ -26,9 +26,16 @@ import java.sql.SQLException;
  * parameters. SQL Arrays are database-specific structures and cannot be meaningfully serialized to or
  * deserialized from a string; {@link #stringOf(Array)} and {@link #valueOf(String)} therefore throw
  * {@link UnsupportedOperationException}.
+ *
+ * <p>Note: {@link Array} instances are bound to the active database connection. Callers are
+ * responsible for invoking {@link Array#free()} when the array is no longer needed; this type
+ * handler does not manage the array lifecycle.
  */
 public class SQLArrayType extends AbstractType<Array> {
 
+    /**
+     * The type name identifier for SQL Array type, equal to the constant string {@code "SQLArray"}.
+     */
     static final String SQL_ARRAY = "SQLArray";
 
     /**

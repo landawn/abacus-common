@@ -18,9 +18,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Type handler for Short wrapper type.
- * This class provides functionality to handle Short objects in database operations and type conversions.
- * It extends AbstractShortType to inherit common short type handling behavior.
+ * Type handler for the {@link Short} wrapper type.
+ * This class provides functionality to handle Short objects in database operations and type conversions,
+ * and distinguishes SQL NULL from the value zero by checking {@link ResultSet#wasNull()} after reading.
+ * It extends {@link AbstractShortType} to inherit common short type handling behavior.
  */
 public final class ShortType extends AbstractShortType {
 

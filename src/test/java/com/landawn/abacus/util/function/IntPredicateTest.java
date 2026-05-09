@@ -252,4 +252,10 @@ public class IntPredicateTest extends TestBase {
         assertFalse(betweenTenAndTwenty.test(9));
         assertFalse(betweenTenAndTwenty.test(21));
     }
+
+    @Test
+    public void testAndNullThrowsImmediately() {
+        IntPredicate instance = a -> false;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((java.util.function.IntPredicate) null));
+    }
 }

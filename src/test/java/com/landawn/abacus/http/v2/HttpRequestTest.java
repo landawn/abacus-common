@@ -573,6 +573,24 @@ public class HttpRequestTest extends TestBase {
         assertNotNull(request);
     }
 
+    @Test
+    public void testBasicAuthCharArrayPasswordIsEncodedAsString() throws Exception {
+        // Regression: prior code did `username + ":" + password` which calls Object.toString()
+        // on a char[] (yielding "[C@xxxx") instead of treating it as a real password.
+        HttpRequest request = HttpRequest.url(testUrl).basicAuth("user", new char[] { 'p', 'a', 's', 's' });
+
+        // Pull the underlying java.net.http.HttpRequest.Builder out via reflection so we can inspect
+        // the Authorization header that was actually set.
+        java.lang.reflect.Field f = HttpRequest.class.getDeclaredField("requestBuilder");
+        f.setAccessible(true);
+        java.net.http.HttpRequest.Builder builder = (java.net.http.HttpRequest.Builder) f.get(request);
+        java.net.http.HttpRequest built = builder.uri(URI.create(testUrl)).GET().build();
+
+        String auth = built.headers().firstValue("Authorization").orElseThrow();
+        String expected = "Basic " + java.util.Base64.getEncoder().encodeToString("user:pass".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        assertEquals(expected, auth);
+    }
+
     // ==================== header(String, Object) ====================
 
     @Test

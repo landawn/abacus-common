@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Fn.UnaryOperators;
 import com.landawn.abacus.util.Throwables;
 
@@ -58,6 +60,7 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
      * @see #andThen(java.util.function.UnaryOperator)
      */
     default UnaryOperator<T> compose(final java.util.function.UnaryOperator<T> before) {
+        Objects.requireNonNull(before);
         return t -> apply(before.apply(t));
     }
 
@@ -87,6 +90,7 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
      * @see #compose(java.util.function.UnaryOperator)
      */
     default UnaryOperator<T> andThen(final java.util.function.UnaryOperator<T> after) {
+        Objects.requireNonNull(after);
         return t -> after.apply(apply(t));
     }
 

@@ -256,10 +256,10 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int count = 0;
+     * int[] count = {0};
      * LongIterator iter = LongIterator.generate(
-     *     () -> count < 5,
-     *     () -> count++
+     *     () -> count[0] < 5,
+     *     () -> count[0]++
      * );
      * // Will generate: 0, 1, 2, 3, 4
      * }</pre>

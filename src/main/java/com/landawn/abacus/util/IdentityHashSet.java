@@ -420,10 +420,15 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
     }
 
     /**
-     * Compares the specified object with this set for equality. Returns {@code true} if the
-     * specified object is also an IdentityHashSet and the two sets have identical mappings.
-     * Note that this compares the internal maps for equality, which means it checks if both
-     * sets contain the same object references.
+     * Compares the specified object with this set for equality using reference (identity) semantics.
+     * Returns {@code true} only if the specified object is also an {@code IdentityHashSet} and the
+     * two sets contain the exact same object references (compared with {@code ==}).
+     *
+     * <p><b>Note:</b> This intentionally deviates from the {@link java.util.Set#equals(Object)}
+     * contract. A non-{@code IdentityHashSet} (for example a {@link java.util.HashSet}) is never
+     * considered equal to this set, even if they appear to contain the same elements by
+     * {@code equals}. The reference semantics of this set are inherently incompatible with the
+     * standard {@code Set} contract, so cross-type equality cannot be guaranteed to be symmetric.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -436,7 +441,8 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * }</pre>
      *
      * @param o object to be compared for equality with this set
-     * @return {@code true} if the specified object is equal to this set
+     * @return {@code true} if {@code o} is an {@code IdentityHashSet} containing exactly the same
+     *         object references as this set; {@code false} otherwise
      */
     @SuppressWarnings("rawtypes")
     @Override
@@ -453,10 +459,15 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
     }
 
     /**
-     * Returns the hash code value for this set. The hash code of a set is defined to be
-     * the sum of the hash codes of the elements in the set. This ensures that
-     * s1.equals(s2) implies that s1.hashCode()==s2.hashCode() for any two sets s1 and s2,
-     * as required by the general contract of {@link Object#hashCode}.
+     * Returns the hash code value for this set, computed as the sum of the
+     * {@linkplain System#identityHashCode(Object) identity hash codes} of the elements in the
+     * set. Two {@code IdentityHashSet}s for which {@link #equals(Object)} returns {@code true}
+     * will have the same hash code, satisfying the contract relative to this class's
+     * (identity-based) {@code equals}.
+     *
+     * <p>Because this set uses reference equality, the returned value is generally different
+     * from {@link java.util.Set#hashCode()} (which sums {@code Object.hashCode()}) on a
+     * conventional set containing the same elements.</p>
      *
      * @return the hash code value for this set
      */

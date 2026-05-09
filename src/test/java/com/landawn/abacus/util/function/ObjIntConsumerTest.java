@@ -36,4 +36,10 @@ public class ObjIntConsumerTest extends TestBase {
     public void testFunctionalInterface() {
         assertNotNull(ObjIntConsumer.class.getAnnotation(FunctionalInterface.class));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        ObjIntConsumer<String> instance = (a, b) -> {};
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((ObjIntConsumer) null));
+    }
 }

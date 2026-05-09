@@ -1,8 +1,8 @@
 package com.landawn.abacus.util;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -8202,5 +8202,180 @@ public class IOUtilTest extends TestBase {
         } finally {
             IOUtil.close(zipHolder.value());
         }
+    }
+
+    // ---------------------------------------------------------------------
+    //  Regression tests for symbolic-link handling in recursive operations.
+    //  These guard against infinite loops on cyclic symlinks (listFiles,
+    //  copyDirectory) and verify that copy never escapes the source tree
+    //  by following a symlink target outside it.
+    // ---------------------------------------------------------------------
+
+    /** Try to create a symbolic link; return false if not supported (Windows w/o privilege). */
+    private static boolean trySymlink(Path link, Path target) {
+        try {
+            Files.createSymbolicLink(link, target);
+            return true;
+        } catch (UnsupportedOperationException | IOException e) {
+            // SecurityException, AccessDenied on Windows without "Create symbolic links" privilege.
+            return false;
+        }
+    }
+
+    @Test
+    public void testListFiles_recursive_doesNotFollowSymlinkCycle() throws Exception {
+        File root = Files.createTempDirectory(tempFolder, "symlink-cycle").toFile();
+        File sub = new File(root, "sub");
+        assertTrue(sub.mkdir());
+        Files.write(new File(sub, "leaf.txt").toPath(), "leaf".getBytes(UTF_8));
+
+        // sub/loop -> root  (cycle: root/sub/loop/sub/loop/sub/...)
+        Path loop = sub.toPath().resolve("loop");
+        if (!trySymlink(loop, root.toPath())) {
+            return; // Skip on platforms that can't create symlinks (e.g. Windows non-admin).
+        }
+
+        // Must complete (no StackOverflowError / no hang).
+        java.util.List<File> files = IOUtil.listFiles(root, true, false);
+        assertNotNull(files);
+        // The symlink itself is reported, but its contents are NOT recursed into.
+        // Therefore "leaf.txt" should appear at most twice (real file, possibly via the link).
+        long leafCount = files.stream().filter(f -> "leaf.txt".equals(f.getName())).count();
+        assertTrue(leafCount <= 2, "leaf.txt appeared " + leafCount + " times — symlink was followed recursively");
+    }
+
+    @Test
+    public void testCopyDirectory_doesNotFollowSymlinkCycle() throws Exception {
+        File src = Files.createTempDirectory(tempFolder, "copy-symlink-src").toFile();
+        File dest = Files.createTempDirectory(tempFolder, "copy-symlink-dest").toFile();
+        // Make dest non-existent so copyDirectory creates it inside.
+        assertTrue(IOUtil.deleteRecursivelyIfExists(dest));
+        Files.write(new File(src, "a.txt").toPath(), "A".getBytes(UTF_8));
+
+        // src/loop -> src
+        Path loop = src.toPath().resolve("loop");
+        if (!trySymlink(loop, src.toPath())) {
+            return;
+        }
+
+        // Must terminate; previously this could spin forever.
+        IOUtil.copyDirectory(src, dest);
+
+        // a.txt was copied; we don't recurse through the symlink, so we shouldn't see
+        // src/loop/loop/loop/... materialized as nested directories at the destination.
+        File copiedA = new File(dest, src.getName() + "/a.txt");
+        assertTrue(copiedA.exists() || new File(dest, "a.txt").exists());
+    }
+
+    @Test
+    public void testListFiles_nullParentReturnsEmptyNotNpe() {
+        java.util.List<File> files = IOUtil.listFiles(null, true, false);
+        assertNotNull(files);
+        assertTrue(files.isEmpty());
+    }
+
+    @Test
+    public void testWriteLines_doesNotCloseCallerWriter() throws Exception {
+        File out = Files.createTempFile(tempFolder, "wl", ".txt").toFile();
+        java.util.concurrent.atomic.AtomicBoolean closed = new java.util.concurrent.atomic.AtomicBoolean();
+        try (Writer w = new java.io.OutputStreamWriter(new FileOutputStream(out), UTF_8) {
+            @Override public void close() throws IOException { closed.set(true); super.close(); }
+        }) {
+            IOUtil.writeLines(java.util.Arrays.asList("a", "b"), w);
+            // Caller-supplied writer must still be usable after writeLines returns.
+            assertFalse(closed.get(), "writeLines must not close caller's Writer");
+            w.write("c\n");
+        }
+        // After try-with-resources, content should include all three lines.
+        String content = new String(Files.readAllBytes(out.toPath()), UTF_8);
+        assertTrue(content.contains("a"));
+        assertTrue(content.contains("b"));
+        assertTrue(content.contains("c"));
+    }
+
+    @Test
+    public void testReadLines_doesNotCloseCallerReader() throws Exception {
+        File f = Files.createTempFile(tempFolder, "rl", ".txt").toFile();
+        Files.write(f.toPath(), "x\ny\nz\n".getBytes(UTF_8));
+        java.util.concurrent.atomic.AtomicBoolean closed = new java.util.concurrent.atomic.AtomicBoolean();
+        // Use a BufferedReader so subsequent reads aren't lost — readLines() wraps a
+        // non-BufferedReader in a pooled buffer that read-aheads then gets recycled,
+        // which is incompatible with the "still advanceable" check below.
+        try (Reader r = new java.io.BufferedReader(new java.io.InputStreamReader(new FileInputStream(f), UTF_8) {
+            @Override public void close() throws IOException { closed.set(true); super.close(); }
+        })) {
+            java.util.List<String> first = IOUtil.readLines(r, 0, 1);
+            assertEquals(java.util.Collections.singletonList("x"), first);
+            assertFalse(closed.get(), "readLines must not close caller's Reader");
+            // Reader should still be advanceable.
+            java.util.List<String> rest = IOUtil.readLines(r, 0, 10);
+            assertEquals(java.util.Arrays.asList("y", "z"), rest);
+        }
+    }
+
+    @Test
+    public void testReadBytes_offsetSkippedShortReturnsEmpty() throws Exception {
+        File f = Files.createTempFile(tempFolder, "rb", ".bin").toFile();
+        Files.write(f.toPath(), new byte[] { 1, 2, 3 });
+        // offset > file size -> empty array, NOT exception.
+        byte[] result = IOUtil.readBytes(f, 100, 10);
+        assertNotNull(result);
+        assertEquals(0, result.length);
+    }
+
+    // BUG FIX: append(CharSequence, Charset=null, File) used to NPE on String.getBytes(null);
+    // toByteArray(...) now treats null charset as platform default (matches charsToBytes/write semantics).
+    @Test
+    public void testAppendCharSequence_nullCharsetUsesDefault() throws Exception {
+        File f = Files.createTempFile(tempFolder, "appendcs", ".txt").toFile();
+        // overwrite with a known prefix using default charset
+        IOUtil.write("PRE-", f);
+        // null charset must be tolerated and behave as DEFAULT_CHARSET (no NPE).
+        IOUtil.append("hello", (Charset) null, f);
+        String content = new String(Files.readAllBytes(f.toPath()), Charset.defaultCharset());
+        assertEquals("PRE-hello", content);
+    }
+
+    // BUG FIX: appendLine(Object, Charset=null, File) used to NPE on String.getBytes(null).
+    @Test
+    public void testAppendLine_nullCharsetUsesDefault() throws Exception {
+        File f = Files.createTempFile(tempFolder, "appendln", ".txt").toFile();
+        IOUtil.write("first\n", f);
+        // null charset must not NPE; should append "second\n" using default charset.
+        IOUtil.appendLine("second", (Charset) null, f);
+        String content = new String(Files.readAllBytes(f.toPath()), Charset.defaultCharset());
+        assertEquals("first\nsecond\n", content);
+    }
+
+    // BUG FIX: splitBySize previously declared `throws IOException` but unconditionally
+    // wrapped any IOException in UncheckedIOException, so the declared checked type could
+    // never actually be observed. Verify a normal successful split with valid inputs.
+    @Test
+    public void testSplitBySize_normalSplitMatchesDeclaredSignature() throws Exception {
+        File src = Files.createTempFile(tempFolder, "splitsrc", ".bin").toFile();
+        byte[] data = new byte[10];
+        for (int i = 0; i < data.length; i++) {
+            data[i] = (byte) i;
+        }
+        Files.write(src.toPath(), data);
+        File destDir = Files.createTempDirectory(tempFolder, "splitdest").toFile();
+
+        // Should not throw UncheckedIOException for a healthy file.
+        // Splitting a 10-byte file by 4 should produce 3 parts (4, 4, 2).
+        IOUtil.splitBySize(src, 4, destDir);
+
+        File p1 = new File(destDir, src.getName() + "_0001");
+        File p2 = new File(destDir, src.getName() + "_0002");
+        File p3 = new File(destDir, src.getName() + "_0003");
+        assertTrue(p1.exists() && p2.exists() && p3.exists());
+        assertEquals(4, p1.length());
+        assertEquals(4, p2.length());
+        assertEquals(2, p3.length());
+
+        byte[] merged = new byte[10];
+        System.arraycopy(Files.readAllBytes(p1.toPath()), 0, merged, 0, 4);
+        System.arraycopy(Files.readAllBytes(p2.toPath()), 0, merged, 4, 4);
+        System.arraycopy(Files.readAllBytes(p3.toPath()), 0, merged, 8, 2);
+        assertArrayEquals(data, merged);
     }
 }

@@ -2745,8 +2745,14 @@ public final class CsvUtil {
             throw new IllegalArgumentException("'beanClassForColumnTypeInference' cannot be null");
         }
 
-        try (final BufferedReader reader = IOUtil.newBufferedReader(csvReader); //
-             final BufferedJsonWriter bw = Objectory.createBufferedJsonWriter(jsonWriter)) {
+        // Note: We must NOT close the caller-provided csvReader / jsonWriter here. The previous
+        // implementation wrapped them in try-with-resources, which propagated close() down to the
+        // caller's Reader/Writer (closing them unexpectedly). The rest of CsvUtil consistently
+        // borrows pooled buffered readers/writers via Objectory and recycles them in finally.
+        final boolean isBufferedReader = IOUtil.isBufferedReader(csvReader);
+        final BufferedReader reader = isBufferedReader ? (BufferedReader) csvReader : Objectory.createBufferedReader(csvReader);
+        final BufferedJsonWriter bw = Objectory.createBufferedJsonWriter(jsonWriter);
+        try {
             final Function<String, String[]> headerParser = csvHeaderParser_TL.get();
             final BiConsumer<String, String[]> lineParser = csvLineParser_TL.get();
 
@@ -2857,6 +2863,11 @@ public final class CsvUtil {
             return cnt;
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
+        } finally {
+            Objectory.recycle(bw);
+            if (!isBufferedReader) {
+                Objectory.recycle(reader);
+            }
         }
     }
 
@@ -2974,10 +2985,13 @@ public final class CsvUtil {
 
     private static long jsonToCsv(final Reader jsonReader, final Collection<String> selectCsvHeaders, long offset, long count, final Writer csvWriter)
             throws UncheckedIOException {
+        // Note: Do NOT close the caller-provided csvWriter here. BufferedCsvWriter#close() (inherited
+        // from BufferedWriter) propagates close() to the underlying Writer. Use Objectory.recycle()
+        // to release the pooled buffer without closing the user's writer.
+        final BufferedCsvWriter bw = Objectory.createBufferedCsvWriter(csvWriter);
         try (final Stream<Map<String, Object>> stream = jsonParser.stream(jsonReader, false, Type.ofMap(String.class, Object.class))
                 .skip(offset < 0 ? 0 : offset)
-                .limit(count <= 0 ? 0 : count); //
-             final BufferedCsvWriter bw = Objectory.createBufferedCsvWriter(csvWriter)) {
+                .limit(count <= 0 ? 0 : count)) {
             final List<String> headers = N.newArrayList(selectCsvHeaders);
 
             final char separator = SK._COMMA;
@@ -3039,6 +3053,8 @@ public final class CsvUtil {
             return cnt;
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
+        } finally {
+            Objectory.recycle(bw);
         }
     }
 

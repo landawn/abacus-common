@@ -46,8 +46,12 @@ import com.landawn.abacus.util.URLEncodedUtil;
  * This class provides a convenient API for building and executing HTTP requests with various features
  * such as headers, query parameters, request bodies, authentication, and timeouts.
  *
- * <p>This implementation uses the modern Java HttpClient introduced in Java 11, providing better performance
- * and support for HTTP/2 compared to older HTTP clients.</p>
+ * <p>This implementation uses the modern Java {@link java.net.http.HttpClient} introduced in Java 11,
+ * providing better performance and support for HTTP/2 compared to older HTTP clients.</p>
+ *
+ * <p><b>Thread-safety:</b> Instances of this class are mutable builders and are not thread-safe.
+ * Each request should be configured and executed from a single thread; the underlying
+ * {@code java.net.http.HttpClient} is itself thread-safe and is reused across calls when possible.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -69,6 +73,7 @@ import com.landawn.abacus.util.URLEncodedUtil;
  *
  * @see URLEncodedUtil
  * @see HttpHeaders
+ * @see HttpMethod
  */
 public final class HttpRequest {
 
@@ -374,7 +379,8 @@ public final class HttpRequest {
      * @see HttpHeaders.Values
      */
     public HttpRequest basicAuth(final String username, final Object password) {
-        header(HttpHeaders.Names.AUTHORIZATION, "Basic " + Strings.base64Encode((username + ":" + password).getBytes(Charsets.UTF_8)));
+        final String pwd = password instanceof char[] cs ? new String(cs) : String.valueOf(password);
+        header(HttpHeaders.Names.AUTHORIZATION, "Basic " + Strings.base64Encode((username + ":" + pwd).getBytes(Charsets.UTF_8)));
 
         return this;
     }
@@ -1805,14 +1811,8 @@ public final class HttpRequest {
 
         final HttpClient httpClientToUse = checkUrlAndHttpClient();
 
-        //    try {
-        //        return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler);
-        //    } finally {
-        //        // This is asynchronous call
-        //        // doAfterExecution(httpClientToUse);
-        //    }
-
-        return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler);
+        return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler)
+                .whenComplete((r, t) -> doAfterExecution(httpClientToUse));
     }
 
     /**
@@ -1845,6 +1845,7 @@ public final class HttpRequest {
         final BodyHandler<?> responseBodyHandler = createResponseBodyHandler(resultClass);
 
         return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler)
+                .whenComplete((r, t) -> doAfterExecution(httpClientToUse))
                 .thenApply(it -> getBody(it, resultClass));
     }
 
@@ -1881,14 +1882,8 @@ public final class HttpRequest {
 
         final HttpClient httpClientToUse = checkUrlAndHttpClient();
 
-        //    try {
-        //        return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler, pushPromiseHandler);
-        //    } finally {
-        //        // This is asynchronous call
-        //        // doAfterExecution(httpClientToUse);
-        //    }
-
-        return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler, pushPromiseHandler);
+        return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler, pushPromiseHandler)
+                .whenComplete((r, t) -> doAfterExecution(httpClientToUse));
     }
 
     private BodyPublisher checkBodyPublisher() {

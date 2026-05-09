@@ -1383,4 +1383,31 @@ public class ExcelUtilTest extends TestBase {
         Assertions.assertTrue(str.contains("3"));
         Assertions.assertTrue(str.contains("4"));
     }
+
+    @Test
+    public void test_writeSheet_AutoFilterByFirstRow_EmptyHeaders() throws Exception {
+        File tempFile = createTempFile(".xlsx");
+        List<Object> headers = new ArrayList<>();
+        List<List<Object>> rows = new ArrayList<>();
+
+        SheetCreateOptions options = SheetCreateOptions.builder().autoFilterByFirstRow(true).build();
+
+        Assertions.assertDoesNotThrow(() -> ExcelUtil.writeSheet("Empty", headers, rows, options, tempFile));
+
+        Assertions.assertTrue(tempFile.exists());
+    }
+
+    @Test
+    public void test_loadSheet_HeaderWithBlankCell() throws Exception {
+        File tempFile = createTempFile(".xlsx");
+        List<Object> headers = Arrays.asList("A", null, "C");
+        List<List<Object>> rows = Arrays.asList(Arrays.asList("x", "y", "z"));
+        ExcelUtil.writeSheet("Sheet1", headers, rows, tempFile);
+
+        Dataset dataset = ExcelUtil.loadSheet(tempFile);
+        Assertions.assertNotNull(dataset);
+        Assertions.assertEquals(3, dataset.columnCount());
+        Assertions.assertEquals("A", dataset.getColumnName(0));
+        Assertions.assertEquals("C", dataset.getColumnName(2));
+    }
 }

@@ -1963,14 +1963,20 @@ public final class Futures {
         final ExecutorCompletionService<Result<T, Exception>> completionService = new ExecutorCompletionService<>(N.ASYNC_EXECUTOR.getExecutor());
         final int futureCount = cfs.size();
 
+        // Track every submitted wrapper task so we can cancel still-running ones when
+        // the iterator is abandoned, the global timeout fires, or the consumer is
+        // interrupted. Without this, blocked future.get() calls keep occupying threads in
+        // the shared async executor long after the caller has stopped consuming results.
+        final List<Future<Result<T, Exception>>> submitted = new ArrayList<>(futureCount);
+
         for (final Future<? extends T> future : cfs) {
-            completionService.submit(() -> {
+            submitted.add(completionService.submit(() -> {
                 try {
                     return Result.of(future.get(), null);
                 } catch (final Exception e) {
                     return Result.of(null, convertException(e));
                 }
-            });
+            }));
         }
 
         return new ObjIterator<>() {
@@ -2009,6 +2015,7 @@ public final class Futures {
                     }
                 } catch (final InterruptedException e) {
                     Thread.currentThread().interrupt();
+                    cancelPending();
                     noMore = true;
                     resultReady = true;
                     nextResult = Result.of(null, e);
@@ -2016,6 +2023,7 @@ public final class Futures {
                 }
 
                 if (doneFuture == null) {
+                    cancelPending();
                     noMore = true;
                     resultReady = true;
                     nextResult = Result.of(null, new TimeoutException());
@@ -2042,6 +2050,16 @@ public final class Futures {
 
                 resultReady = false;
                 return resultHandler.apply(nextResult);
+            }
+
+            private void cancelPending() {
+                for (final Future<?> f : submitted) {
+                    if (!f.isDone()) {
+                        // Best-effort interrupt-and-cancel of the wrapper task. The underlying
+                        // user-supplied future is not cancelled (we don't own it).
+                        f.cancel(true);
+                    }
+                }
             }
         };
     }

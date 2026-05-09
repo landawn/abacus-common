@@ -78,11 +78,17 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
     }
 
     /**
-     * Returns the lazily initialized value. On first call, the value is obtained from the supplier
-     * and cached. Subsequent calls return the cached value without invoking the supplier again.
+     * Returns the lazily initialized value. On first successful call, the value is obtained from
+     * the supplier and cached. Subsequent calls return the cached value without invoking the supplier again.
      *
-     * <p>This method is thread-safe and uses double-checked locking to ensure the supplier is called
-     * only once even in concurrent scenarios.</p>
+     * <p>This method is thread-safe and uses double-checked locking to ensure that, in the absence of
+     * exceptions, the supplier is invoked exactly once even under concurrent access.</p>
+     *
+     * <p><b>Exception handling:</b> If the supplier throws an exception, the initialization state
+     * is <em>not</em> marked as completed and the exception is propagated to the caller. Subsequent
+     * calls to {@code get()} will retry the initialization by invoking the supplier again. As a
+     * result, if the supplier consistently throws, every call will throw; if it eventually succeeds,
+     * the first successful result is cached.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

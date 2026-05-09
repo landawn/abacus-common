@@ -871,4 +871,29 @@ public class AbstractShortStreamTest extends TestBase {
         assertFalse(iter.hasNext());
     }
 
+    @Test
+    public void testReversedRotatedReverseSorted_CountExhaustsIterator() {
+        // reversed(): count() must consume all remaining elements
+        ShortIteratorEx revIter = (ShortIteratorEx) createShortStream(new short[] { 1, 2, 3, 4, 5 }).reversed().iteratorEx();
+        assertEquals(5L, revIter.count());
+        assertFalse(revIter.hasNext());
+
+        // rotated(): count() must consume all remaining elements
+        ShortIteratorEx rotIter = (ShortIteratorEx) createShortStream(new short[] { 1, 2, 3, 4, 5 }).rotated(2).iteratorEx();
+        assertEquals(5L, rotIter.count());
+        assertFalse(rotIter.hasNext());
+
+        // reverseSorted(): count() must consume all remaining elements
+        ShortIteratorEx rsIter = (ShortIteratorEx) createShortStream(new short[] { 3, 1, 4, 1, 5 }).reverseSorted().iteratorEx();
+        assertEquals(5L, rsIter.count());
+        assertFalse(rsIter.hasNext());
+
+        // After consuming a few elements first, count() returns the remaining count and exhausts the iterator
+        ShortIteratorEx revIter2 = (ShortIteratorEx) createShortStream(new short[] { 1, 2, 3, 4, 5 }).reversed().iteratorEx();
+        revIter2.nextShort();
+        revIter2.nextShort();
+        assertEquals(3L, revIter2.count());
+        assertFalse(revIter2.hasNext());
+    }
+
 }

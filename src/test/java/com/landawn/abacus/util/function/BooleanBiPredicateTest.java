@@ -206,4 +206,10 @@ public class BooleanBiPredicateTest extends TestBase {
 
         assertTrue(combined.test(true, true)); // Should not throw exception
     }
+
+    @Test
+    public void testAndNullThrowsImmediately() {
+        BooleanBiPredicate instance = (a, b) -> false;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((BooleanBiPredicate) null));
+    }
 }

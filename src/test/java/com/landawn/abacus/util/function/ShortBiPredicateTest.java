@@ -187,4 +187,10 @@ public class ShortBiPredicateTest extends TestBase {
         assertTrue(combined.test((short) 0, (short) 0));
         assertFalse(combined.test((short) 5, (short) 5));
     }
+
+    @Test
+    public void testAndNullThrowsImmediately() {
+        ShortBiPredicate instance = (a, b) -> false;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((ShortBiPredicate) null));
+    }
 }

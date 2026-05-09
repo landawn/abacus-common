@@ -164,4 +164,10 @@ public class LongBiConsumerTest extends TestBase {
         assertEquals(12L, results.get(1));
         assertEquals(4L, results.get(2));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        LongBiConsumer instance = (a, b) -> {};
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((LongBiConsumer) null));
+    }
 }

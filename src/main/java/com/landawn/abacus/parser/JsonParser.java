@@ -92,7 +92,9 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param source the JSON string to parse (must not be {@code null})
      * @param targetType the type of the target object to deserialize into (must not be {@code null})
      * @return an instance of {@code T} parsed from the JSON string
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}, or if the source contains invalid JSON
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws com.landawn.abacus.exception.ParsingException if the source contains invalid JSON
+     * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs during parsing
      */
     <T> T parse(String source, Type<? extends T> targetType);
 
@@ -114,7 +116,9 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param source the JSON string to parse (must not be {@code null})
      * @param targetType the class of the target object to deserialize into (must not be {@code null})
      * @return an instance of {@code T} parsed from the JSON string
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}, or if the source contains invalid JSON
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws com.landawn.abacus.exception.ParsingException if the source contains invalid JSON
+     * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs during parsing
      */
     <T> T parse(String source, Class<? extends T> targetType);
 
@@ -139,7 +143,9 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the type of the target object to deserialize into (must not be {@code null})
      * @return an instance of {@code T} parsed from the JSON string
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}, or if the source contains invalid JSON
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws com.landawn.abacus.exception.ParsingException if the source contains invalid JSON
+     * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs during parsing
      */
     <T> T parse(String source, JsonDeserConfig config, Type<? extends T> targetType);
 
@@ -164,7 +170,9 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the class of the target object to deserialize into (must not be {@code null})
      * @return an instance of {@code T} parsed from the JSON string
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}, or if the source contains invalid JSON
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws com.landawn.abacus.exception.ParsingException if the source contains invalid JSON
+     * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs during parsing
      */
     <T> T parse(String source, JsonDeserConfig config, Class<? extends T> targetType);
 
@@ -183,7 +191,9 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      *
      * @param source the JSON string to parse (must not be {@code null}); must contain a JSON array
      * @param output the pre-allocated array to populate with parsed values (must not be {@code null})
-     * @throws IllegalArgumentException if source or output is {@code null}, or if the source contains invalid JSON, or if array size doesn't match
+     * @throws IllegalArgumentException if {@code source} or {@code output} is {@code null}
+     * @throws com.landawn.abacus.exception.ParsingException if the source contains invalid JSON
+     * @throws IndexOutOfBoundsException if the JSON array contains more elements than the output array can hold
      */
     void parse(String source, Object[] output);
 
@@ -204,7 +214,9 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param source the JSON string to parse (must not be {@code null}); must contain a JSON array
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param output the pre-allocated array to populate with parsed values (must not be {@code null})
-     * @throws IllegalArgumentException if source or output is {@code null}, or if the source contains invalid JSON, or if array size doesn't match
+     * @throws IllegalArgumentException if {@code source} or {@code output} is {@code null}
+     * @throws com.landawn.abacus.exception.ParsingException if the source contains invalid JSON
+     * @throws IndexOutOfBoundsException if the JSON array contains more elements than the output array can hold
      */
     void parse(String source, JsonDeserConfig config, Object[] output);
 
@@ -222,7 +234,8 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      *
      * @param source the JSON string to parse, must contain a JSON array
      * @param output the Collection to populate with parsed values, must not be {@code null}; existing elements are preserved
-     * @throws IllegalArgumentException if the source is {@code null} or invalid JSON
+     * @throws IllegalArgumentException if {@code source} or {@code output} is {@code null}
+     * @throws com.landawn.abacus.exception.ParsingException if the source contains invalid JSON
      * @throws UnsupportedOperationException if the collection is unmodifiable
      */
     void parse(String source, Collection<?> output);
@@ -243,7 +256,8 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param source the JSON string to parse, must contain a JSON array
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param output the Collection to populate with parsed values, must not be {@code null}; existing elements are preserved
-     * @throws IllegalArgumentException if the source is {@code null} or invalid JSON
+     * @throws IllegalArgumentException if {@code source} or {@code output} is {@code null}
+     * @throws com.landawn.abacus.exception.ParsingException if the source contains invalid JSON
      * @throws UnsupportedOperationException if the collection is unmodifiable
      */
     void parse(String source, JsonDeserConfig config, Collection<?> output);
@@ -262,7 +276,8 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      *
      * @param source the JSON string to parse, must contain a JSON object
      * @param output the Map to populate with parsed key-value pairs, must not be {@code null}; existing entries are preserved
-     * @throws IllegalArgumentException if the source is {@code null} or invalid JSON
+     * @throws IllegalArgumentException if {@code source} or {@code output} is {@code null}
+     * @throws com.landawn.abacus.exception.ParsingException if the source contains invalid JSON
      * @throws UnsupportedOperationException if the map is unmodifiable
      */
     void parse(String source, Map<?, ?> output);
@@ -283,7 +298,8 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param source the JSON string to parse, must contain a JSON object
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param output the Map to populate with parsed key-value pairs, must not be {@code null}; existing entries are preserved
-     * @throws IllegalArgumentException if the source is {@code null} or invalid JSON
+     * @throws IllegalArgumentException if {@code source} or {@code output} is {@code null}
+     * @throws com.landawn.abacus.exception.ParsingException if the source contains invalid JSON
      * @throws UnsupportedOperationException if the map is unmodifiable
      */
     void parse(String source, JsonDeserConfig config, Map<?, ?> output);
@@ -307,6 +323,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param targetType the type of the target object
      * @return an instance of {@code T} deserialized from the JSON string
      * @throws IndexOutOfBoundsException if the indices are out of bounds or {@code fromIndex > toIndex}
+     * @throws com.landawn.abacus.exception.ParsingException if the substring contains invalid JSON
      */
     <T> T deserialize(String source, int fromIndex, int toIndex, Type<? extends T> targetType);
 
@@ -329,6 +346,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param targetType the class of the target object
      * @return an instance of {@code T} deserialized from the JSON string
      * @throws IndexOutOfBoundsException if the indices are out of bounds or {@code fromIndex > toIndex}
+     * @throws com.landawn.abacus.exception.ParsingException if the substring contains invalid JSON
      */
     <T> T deserialize(String source, int fromIndex, int toIndex, Class<? extends T> targetType);
 
@@ -353,6 +371,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param targetType the type of the target object
      * @return an instance of {@code T} deserialized from the JSON string
      * @throws IndexOutOfBoundsException if the indices are out of bounds or {@code fromIndex > toIndex}
+     * @throws com.landawn.abacus.exception.ParsingException if the substring contains invalid JSON
      */
     <T> T deserialize(String source, int fromIndex, int toIndex, JsonDeserConfig config, Type<? extends T> targetType);
 
@@ -377,6 +396,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param targetType the class of the target object
      * @return an instance of {@code T} deserialized from the JSON string
      * @throws IndexOutOfBoundsException if the indices are out of bounds or {@code fromIndex > toIndex}
+     * @throws com.landawn.abacus.exception.ParsingException if the substring contains invalid JSON
      */
     <T> T deserialize(String source, int fromIndex, int toIndex, JsonDeserConfig config, Class<? extends T> targetType);
 
@@ -400,7 +420,8 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param source the JSON string containing a JSON array
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
      * @return a {@code Stream} of parsed elements that must be closed after use
-     * @throws IllegalArgumentException if the source is {@code null}, invalid JSON, or not a JSON array
+     * @throws IllegalArgumentException if {@code source} or {@code elementType} is {@code null}
+     * @throws com.landawn.abacus.exception.ParsingException if the source is invalid JSON or not a JSON array
      */
     <T> Stream<T> stream(String source, Type<? extends T> elementType);
 
@@ -423,7 +444,8 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
      * @return a {@code Stream} of parsed elements that must be closed after use
-     * @throws IllegalArgumentException if the source is {@code null}, invalid JSON, or not a JSON array
+     * @throws IllegalArgumentException if {@code source} or {@code elementType} is {@code null}
+     * @throws com.landawn.abacus.exception.ParsingException if the source is invalid JSON or not a JSON array
      */
     <T> Stream<T> stream(String source, JsonDeserConfig config, Type<? extends T> elementType);
 
@@ -447,7 +469,9 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param source the JSON file containing a JSON array, must exist and be readable
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
      * @return a {@code Stream} of parsed elements that must be closed after use
-     * @throws IllegalArgumentException if the source is {@code null} or the file contains invalid JSON
+     * @throws IllegalArgumentException if {@code source} or {@code elementType} is {@code null}
+     * @throws com.landawn.abacus.exception.ParsingException if the file contains invalid JSON
+     * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs reading the file
      */
     <T> Stream<T> stream(File source, Type<? extends T> elementType);
 
@@ -470,7 +494,9 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
      * @return a {@code Stream} of parsed elements that must be closed after use
-     * @throws IllegalArgumentException if the source is {@code null} or the file contains invalid JSON
+     * @throws IllegalArgumentException if {@code source} or {@code elementType} is {@code null}
+     * @throws com.landawn.abacus.exception.ParsingException if the file contains invalid JSON
+     * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs reading the file
      */
     <T> Stream<T> stream(File source, JsonDeserConfig config, Type<? extends T> elementType);
 
@@ -494,7 +520,9 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param closeInputStreamWhenStreamIsClosed if {@code true}, the input stream will be closed when the returned stream is closed
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
      * @return a {@code Stream} of parsed elements that must be closed after use
-     * @throws IllegalArgumentException if the source is {@code null} or contains invalid JSON
+     * @throws IllegalArgumentException if {@code source} or {@code elementType} is {@code null}
+     * @throws com.landawn.abacus.exception.ParsingException if the source contains invalid JSON
+     * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs during reading
      */
     <T> Stream<T> stream(InputStream source, boolean closeInputStreamWhenStreamIsClosed, Type<? extends T> elementType);
 
@@ -519,7 +547,9 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
      * @return a {@code Stream} of parsed elements that must be closed after use
-     * @throws IllegalArgumentException if the source is {@code null} or contains invalid JSON
+     * @throws IllegalArgumentException if {@code source} or {@code elementType} is {@code null}
+     * @throws com.landawn.abacus.exception.ParsingException if the source contains invalid JSON
+     * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs during reading
      */
     <T> Stream<T> stream(InputStream source, boolean closeInputStreamWhenStreamIsClosed, JsonDeserConfig config, Type<? extends T> elementType);
 
@@ -543,7 +573,9 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param closeReaderWhenStreamIsClosed if {@code true}, the reader will be closed when the returned stream is closed
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
      * @return a {@code Stream} of parsed elements that must be closed after use
-     * @throws IllegalArgumentException if the source is {@code null} or contains invalid JSON
+     * @throws IllegalArgumentException if {@code source} or {@code elementType} is {@code null}
+     * @throws com.landawn.abacus.exception.ParsingException if the source contains invalid JSON
+     * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs during reading
      */
     <T> Stream<T> stream(Reader source, boolean closeReaderWhenStreamIsClosed, Type<? extends T> elementType);
 
@@ -568,7 +600,9 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
      * @return a {@code Stream} of parsed elements that must be closed after use
-     * @throws IllegalArgumentException if the source is {@code null} or contains invalid JSON
+     * @throws IllegalArgumentException if {@code source} or {@code elementType} is {@code null}
+     * @throws com.landawn.abacus.exception.ParsingException if the source contains invalid JSON
+     * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs during reading
      */
     <T> Stream<T> stream(Reader source, boolean closeReaderWhenStreamIsClosed, JsonDeserConfig config, Type<? extends T> elementType);
 }

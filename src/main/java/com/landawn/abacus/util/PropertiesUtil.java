@@ -1018,7 +1018,7 @@ public final class PropertiesUtil {
 
             final Object oldPropValue = properties.get(propName);
 
-            if (oldPropValue != null && oldPropValue.getClass().equals(propValue.getClass())
+            if (oldPropValue != null && propValue != null && oldPropValue.getClass().equals(propValue.getClass())
                     && (oldPropValue instanceof Collection || oldPropValue instanceof Map) && !(oldPropValue instanceof Properties)) {
                 if (oldPropValue instanceof Collection) {
                     ((Collection) oldPropValue).clear();
@@ -1033,7 +1033,7 @@ public final class PropertiesUtil {
                 } else {
                     final Class<?> parameterType = propSetMethod.getParameterTypes()[0];
 
-                    if (Strings.isEmpty(propValue.toString()) && Properties.class.isAssignableFrom(parameterType)) {
+                    if ((propValue == null || Strings.isEmpty(propValue.toString())) && Properties.class.isAssignableFrom(parameterType)) {
                         propValue = N.newInstance(parameterType);
                     }
 
@@ -1212,7 +1212,13 @@ public final class PropertiesUtil {
      */
     public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean writeTypeInfo, final OutputStream output)
             throws UncheckedIOException {
-        storeToXml(properties, rootElementName, writeTypeInfo, true, IOUtil.newOutputStreamWriter(output, Charsets.UTF_8));
+        final java.io.OutputStreamWriter writer = IOUtil.newOutputStreamWriter(output, Charsets.UTF_8);
+        try {
+            storeToXml(properties, rootElementName, writeTypeInfo, true, writer);
+            writer.flush();
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /**
@@ -1505,7 +1511,7 @@ public final class PropertiesUtil {
 
             IOUtil.createNewFileIfNotExists(classFile);
 
-            writer = IOUtil.newFileWriter(classFile, Charsets.DEFAULT);
+            writer = IOUtil.newFileWriter(classFile, Charsets.UTF_8);
             writer.write("package " + packageName + ";" + IOUtil.LINE_SEPARATOR_UNIX);
 
             writer.write(IOUtil.LINE_SEPARATOR_UNIX);

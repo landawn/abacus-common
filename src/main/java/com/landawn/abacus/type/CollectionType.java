@@ -131,7 +131,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      * The declaring name represents the type in a simplified format suitable for type declarations,
      * using simple class names rather than fully qualified names.
      *
-     * @return the declaring name of this type (e.g., "List&lt;String&gt;" instead of "java.util.List&lt;java.lang.String&gt;")
+     * @return the declaring name of this type (e.g., {@code "List<String>"} instead of {@code "java.util.List<java.lang.String>"})
      */
     @Override
     public String declaringName() {

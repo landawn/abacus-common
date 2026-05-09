@@ -35,6 +35,7 @@ import com.landawn.abacus.util.Strings;
  */
 public class JdkDurationType extends AbstractType<Duration> {
 
+    /** The type name constant for {@link Duration} (JDK) type identification. */
     public static final String DURATION = "JdkDuration";
 
     /**

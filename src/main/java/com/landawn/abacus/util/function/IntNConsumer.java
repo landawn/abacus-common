@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 /**
  * Represents an operation that accepts a variable number of {@code int}-valued arguments and returns no result.
  * This is the n-arity specialization of {@link IntConsumer}.
@@ -69,6 +71,7 @@ public interface IntNConsumer {
      * @throws NullPointerException if {@code after} is null
      */
     default IntNConsumer andThen(final IntNConsumer after) {
+        Objects.requireNonNull(after);
         return args -> {
             accept(args);
             after.accept(args);

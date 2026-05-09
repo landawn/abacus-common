@@ -374,4 +374,38 @@ public class IndexedIntTest extends TestBase {
         assertEquals("[0]=" + Integer.MIN_VALUE, minValue.toString());
     }
 
+    @Test
+    public void testEquals_crossType_IndexedLong() {
+        // IndexedInt and IndexedLong sharing identical numeric value/index must NOT be equal.
+        IndexedInt indexedInt = IndexedInt.of(42, 5);
+        IndexedLong indexedLong = IndexedLong.of(42L, 5);
+        assertFalse(indexedInt.equals(indexedLong));
+        assertFalse(indexedLong.equals(indexedInt));
+    }
+
+    @Test
+    public void testEquals_crossType_IndexedShort() {
+        IndexedInt indexedInt = IndexedInt.of(42, 5);
+        IndexedShort indexedShort = IndexedShort.of((short) 42, 5);
+        assertFalse(indexedInt.equals(indexedShort));
+        assertFalse(indexedShort.equals(indexedInt));
+    }
+
+    @Test
+    public void testEquals_crossType_IndexedByte() {
+        IndexedInt indexedInt = IndexedInt.of(42, 5);
+        IndexedByte indexedByte = IndexedByte.of((byte) 42, 5);
+        assertFalse(indexedInt.equals(indexedByte));
+        assertFalse(indexedByte.equals(indexedInt));
+    }
+
+    @Test
+    public void testEquals_crossType_GenericIndexed() {
+        // IndexedInt must not equal Indexed<Integer> with same numeric content.
+        IndexedInt indexedInt = IndexedInt.of(42, 5);
+        Indexed<Integer> indexedGeneric = Indexed.of(42, 5);
+        assertFalse(indexedInt.equals(indexedGeneric));
+        assertFalse(indexedGeneric.equals(indexedInt));
+    }
+
 }

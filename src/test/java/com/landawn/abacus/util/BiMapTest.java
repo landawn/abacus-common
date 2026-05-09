@@ -125,7 +125,7 @@ public class BiMapTest extends AbstractTest {
     @Test
     public void testInversed() {
         BiMap<String, Integer> biMap = BiMap.of("one", 1, "two", 2);
-        BiMap<Integer, String> inverse = biMap.inverted();
+        BiMap<Integer, String> inverse = biMap.inverse();
 
         assertNotNull(inverse);
         assertEquals(2, inverse.size());
@@ -138,7 +138,7 @@ public class BiMapTest extends AbstractTest {
     @Test
     public void testInversedBackedBySameData() {
         BiMap<String, Integer> biMap = BiMap.of("one", 1);
-        BiMap<Integer, String> inverse = biMap.inverted();
+        BiMap<Integer, String> inverse = biMap.inverse();
 
         biMap.put("two", 2);
         assertEquals(2, inverse.size());
@@ -152,8 +152,8 @@ public class BiMapTest extends AbstractTest {
     @Test
     public void testInversedReturnsSameInstance() {
         BiMap<String, Integer> biMap = BiMap.of("one", 1);
-        BiMap<Integer, String> inverse1 = biMap.inverted();
-        BiMap<Integer, String> inverse2 = biMap.inverted();
+        BiMap<Integer, String> inverse1 = biMap.inverse();
+        BiMap<Integer, String> inverse2 = biMap.inverse();
 
         assertSame(inverse1, inverse2);
     }
@@ -161,7 +161,7 @@ public class BiMapTest extends AbstractTest {
     @Test
     public void testInverseOperations() {
         BiMap<String, Integer> biMap = BiMap.of("one", 1, "two", 2);
-        BiMap<Integer, String> inverse = biMap.inverted();
+        BiMap<Integer, String> inverse = biMap.inverse();
 
         inverse.put(3, "three");
         assertEquals(3, biMap.size());
@@ -209,14 +209,14 @@ public class BiMapTest extends AbstractTest {
     @Test
     public void testInverse_PutWithNullKey() {
         BiMap<String, Integer> biMap = BiMap.of("a", 1);
-        BiMap<Integer, String> inverse = biMap.inverted();
+        BiMap<Integer, String> inverse = biMap.inverse();
         assertThrows(IllegalArgumentException.class, () -> inverse.put(null, "b"));
     }
 
     @Test
     public void testInverse_PutWithNullValue() {
         BiMap<String, Integer> biMap = BiMap.of("a", 1);
-        BiMap<Integer, String> inverse = biMap.inverted();
+        BiMap<Integer, String> inverse = biMap.inverse();
         assertThrows(IllegalArgumentException.class, () -> inverse.put(2, null));
     }
 
@@ -619,29 +619,29 @@ public class BiMapTest extends AbstractTest {
         assertEquals(3, count);
     }
 
-    // inverted()
+    // inverse()
     @Test
-    public void testInverted() {
+    public void testInverse() {
         BiMap<String, Integer> biMap = BiMap.of("one", 1, "two", 2);
-        BiMap<Integer, String> inverted = biMap.inverted();
-        assertNotNull(inverted);
-        assertEquals(2, inverted.size());
-        assertEquals("one", inverted.get(1));
-        assertEquals("two", inverted.get(2));
+        BiMap<Integer, String> inverse = biMap.inverse();
+        assertNotNull(inverse);
+        assertEquals(2, inverse.size());
+        assertEquals("one", inverse.get(1));
+        assertEquals("two", inverse.get(2));
     }
 
     @Test
-    public void testInverted_modifications() {
+    public void testInverse_modifications() {
         BiMap<String, Integer> biMap = BiMap.of("one", 1);
-        BiMap<Integer, String> inverted = biMap.inverted();
+        BiMap<Integer, String> inverse = biMap.inverse();
 
-        // Modifications through inverted view reflect in original
-        inverted.put(2, "two");
+        // Modifications through inverse view reflect in original
+        inverse.put(2, "two");
         assertEquals(2, biMap.size());
         assertEquals(2, biMap.get("two"));
 
         // Same instance returned on repeated calls
-        assertSame(inverted, biMap.inverted());
+        assertSame(inverse, biMap.inverse());
     }
 
     @Test
@@ -649,8 +649,8 @@ public class BiMapTest extends AbstractTest {
         BiMap<String, Integer> biMap = new BiMap<>();
         biMap.put("one", 1);
 
-        BiMap<Integer, String> inverse = biMap.inverted();
-        BiMap<String, Integer> inverseInverse = inverse.inverted();
+        BiMap<Integer, String> inverse = biMap.inverse();
+        BiMap<String, Integer> inverseInverse = inverse.inverse();
 
         assertSame(biMap, inverseInverse);
     }

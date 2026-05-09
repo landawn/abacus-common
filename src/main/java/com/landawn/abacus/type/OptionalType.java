@@ -18,13 +18,23 @@ import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.u.Optional;
 
 /**
- * Generic type handler for {@link Optional} wrapper objects from the {@code com.landawn.abacus.util.u} package,
- * providing serialization, deserialization, and database interaction capabilities for optional values of any type.
- * Note: this handles the abacus-specific {@code Optional<T>}, not {@code java.util.Optional<T>}.
- * This type handler supports generic type parameters and delegates serialization/deserialization operations to the
- * appropriate element type handler.
+ * Generic type handler for {@link Optional} wrapper objects from the {@code com.landawn.abacus.util.u}
+ * package, providing serialization, deserialization, and database interaction capabilities for
+ * optional values of any type.
+ * <p>
+ * Note: this handles the abacus-specific {@code Optional<T>}, not {@code java.util.Optional<T>}
+ * (which is handled by {@code JdkOptionalType}).
+ * <p>
+ * Unlike {@link com.landawn.abacus.util.u.Nullable Nullable} (handled by {@link NullableType}),
+ * an {@code Optional} cannot carry {@code null} as a present value: an absent value and a
+ * {@code null} value are conflated as {@link Optional#empty()}. SQL {@code NULL} columns are
+ * mapped to {@code Optional.empty()} on read, and {@code Optional.empty()} maps to SQL
+ * {@code NULL} on write.
+ * <p>
+ * This type handler supports generic type parameters of the form {@code OptionalType<T>}
+ * and delegates element serialization/deserialization to the appropriate element type handler.
  *
- * @param <T> the type of value wrapped by the Optional
+ * @param <T> the type of value wrapped by the {@code Optional}
  */
 @SuppressWarnings("java:S2160")
 public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {

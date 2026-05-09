@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 /**
  * Represents an operation that accepts a variable number of char-valued arguments and returns no result.
  * This is a functional interface designed to consume char arrays of any length.
@@ -79,6 +81,7 @@ public interface CharNConsumer {
      * @throws NullPointerException if {@code after} is null
      */
     default CharNConsumer andThen(final CharNConsumer after) {
+        Objects.requireNonNull(after);
         return args -> {
             accept(args);
             after.accept(args);

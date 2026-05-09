@@ -15,37 +15,34 @@
 package com.landawn.abacus.parser;
 
 /**
- * Enumeration of XML parser types supported by the framework.
- * Each parser type represents a different approach to XML processing with distinct characteristics.
+ * Package-private enumeration of XML parser strategies supported by the parser implementations
+ * in this package. Each constant represents a different underlying XML parsing technology with
+ * distinct memory and performance characteristics; the value is supplied to a parser
+ * implementation's constructor (see {@link AbacusXmlParserImpl} and {@link XmlParserImpl}) to
+ * select the strategy used by that instance.
  *
- * <p>Available parser types:
+ * <p>Available parser types:</p>
  * <ul>
- *   <li>{@link #SAX} - Simple API for XML (event-driven, memory efficient)</li>
- *   <li>{@link #DOM} - Document Object Model (tree-based, loads entire document)</li>
- *   <li>{@link #StAX} - Streaming API for XML (pull-based, balances performance and ease of use)</li>
+ *   <li>{@link #SAX} &mdash; Simple API for XML (event-driven, memory efficient)</li>
+ *   <li>{@link #DOM} &mdash; Document Object Model (tree-based, loads the entire document)</li>
+ *   <li>{@link #StAX} &mdash; Streaming API for XML (pull-based, balances performance and ease of use)</li>
  * </ul>
  *
- * <p>Parser characteristics:
+ * <p>Parser characteristics:</p>
  * <ul>
  *   <li><b>SAX</b>: Event-driven, forward-only, memory efficient for large documents,
- *       but requires more complex programming model</li>
- *   <li><b>DOM</b>: Loads entire document into memory as a tree structure,
- *       allows random access and modification, but memory intensive</li>
- *   <li><b>StAX</b>: Pull-based streaming, developer controls parsing flow,
- *       good balance between performance and ease of use</li>
+ *       but requires a more complex programming model.</li>
+ *   <li><b>DOM</b>: Loads the entire document into memory as a tree structure,
+ *       allowing random access and modification, but is memory intensive.</li>
+ *   <li><b>StAX</b>: Pull-based streaming, the application controls parsing flow,
+ *       providing a good balance between performance and ease of use.</li>
  * </ul>
  *
- * <p><b>Usage Examples:</b></p>
- * <pre>{@code
- * // Create parser with specific type
- * XmlParser staxParser = new XmlParserImpl(XmlParserType.StAX);
- * XmlParser domParser = new XmlParserImpl(XmlParserType.DOM);
+ * <p>Note: not every implementation supports every parser type. {@link XmlParserImpl}
+ * supports {@link #StAX} and {@link #DOM}; {@link AbacusXmlParserImpl} additionally supports
+ * {@link #SAX}.</p>
  *
- * // Choose parser based on requirements
- * XmlParserType parserType = largeFile ? XmlParserType.StAX : XmlParserType.DOM;
- * XmlParser parser = new XmlParserImpl(parserType);
- * }</pre>
- *
+ * @see AbacusXmlParserImpl
  * @see XmlParserImpl
  */
 enum XmlParserType {

@@ -3839,12 +3839,17 @@ public final class Index {
 
     /**
      * Returns the indices of all occurrences of the specified value in the given array within a specified tolerance, starting from the specified index.
+     * <p>
+     * Matching uses {@link Numbers#fuzzyEquals(double, double, double)}, which is consistent with
+     * {@link #of(double[], double, double, int)} and {@link #last(double[], double, double, int)}.
+     * In particular, two {@link Double#NaN} values are considered equal, and infinities of the same sign match.
      *
      * @param source the array to be searched.
      * @param valueToFind the value to find in the array.
-     * @param tolerance the tolerance within which matches will be found.
+     * @param tolerance the tolerance within which matches will be found; must be non-negative and not NaN.
      * @param fromIndex the index to start the search from.
      * @return a BitSet containing the indices of all occurrences of the value in the array within the specified tolerance, or an empty BitSet if the value is not found or the input array is {@code null}.
+     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
      */
     public static BitSet allOf(final double[] source, final double valueToFind, final double tolerance, final int fromIndex) {
         final BitSet bitSet = new BitSet();
@@ -3854,11 +3859,8 @@ public final class Index {
             return bitSet;
         }
 
-        final double min = valueToFind - tolerance;
-        final double max = valueToFind + tolerance;
-
         for (int i = N.max(fromIndex, 0); i < len; i++) {
-            if (source[i] >= min && source[i] <= max) {
+            if (Numbers.fuzzyEquals(source[i], valueToFind, tolerance)) {
                 bitSet.set(i);
             }
         }

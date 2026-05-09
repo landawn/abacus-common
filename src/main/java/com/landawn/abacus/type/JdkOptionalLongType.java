@@ -18,13 +18,16 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for java.util.OptionalLong.
- * This class provides serialization, deserialization, and database access capabilities for OptionalLong instances.
- * OptionalLong is a container that may or may not contain a long value.
- * Empty optionals are represented as {@code null} in serialized form.
+ * Type handler for {@link java.util.OptionalLong}, the JDK primitive-long optional wrapper.
+ * This class provides serialization, deserialization, and database access capabilities for
+ * {@link OptionalLong} instances. {@link OptionalLong} is a container that may or may not contain
+ * a {@code long} value; this handler unboxes the underlying primitive on read/write.
+ * Empty optionals (and {@code null} references) are represented as {@code null} in serialized form
+ * and as SQL {@code NULL} in database form.
  */
 public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
 
+    /** The type name constant for {@link OptionalLong} (JDK) type identification. */
     public static final String OPTIONAL_LONG = "JdkOptionalLong";
 
     /**

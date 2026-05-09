@@ -47,4 +47,10 @@ public class IntObjFunctionTest extends TestBase {
 
         assertEquals("Result: 5:test", combined.apply(5, "test"));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        IntObjFunction<String, String> instance = (a, b) -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

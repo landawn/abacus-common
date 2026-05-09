@@ -154,4 +154,10 @@ public class LongObjConsumerTest extends TestBase {
     public void testFunctionalInterface() {
         assertNotNull(LongObjConsumer.class.getAnnotation(FunctionalInterface.class));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        LongObjConsumer<String> instance = (a, b) -> {};
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((LongObjConsumer) null));
+    }
 }

@@ -143,4 +143,10 @@ public class IntBiPredicateTest extends TestBase {
         assertTrue(combined.test(0, 0));
         assertFalse(combined.test(5, 5));
     }
+
+    @Test
+    public void testAndNullThrowsImmediately() {
+        IntBiPredicate instance = (a, b) -> false;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((IntBiPredicate) null));
+    }
 }

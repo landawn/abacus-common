@@ -1470,8 +1470,8 @@ public sealed interface Dataset permits RowDataset {
      * @param newColumnNames a list containing the names of the new columns to be added. These should not be names that already exist in the Dataset.
      * @param newColumns a list of collections, where each collection represents a column. Each collection should have a size that matches the number of rows in the Dataset.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if any of the new column names already exist in the Dataset, if size of {@code newColumnNames} does not match the size of {@code columns},
-     *                                  or if any collection in {@code columns} is not empty and its size does not match the number of rows in the Dataset.
+     * @throws IllegalArgumentException if any of the new column names already exist in the Dataset, if size of {@code newColumnNames} does not match the size of {@code newColumns},
+     *                                  or if any collection in {@code newColumns} is not empty and its size does not match the number of rows in the Dataset.
      */
     void addColumns(List<String> newColumnNames, List<? extends Collection<?>> newColumns) throws IllegalStateException, IllegalArgumentException;
 
@@ -1494,10 +1494,9 @@ public sealed interface Dataset permits RowDataset {
      * @param newColumnNames a list containing the names of the new columns to be added. These should not be names that already exist in the Dataset.
      * @param newColumns a list of collections, where each collection represents a column. Each collection should have a size that matches the number of rows in the Dataset.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if the specified {@code newColumnPosition} is less than zero or bigger than column size or any of the new column names already exist in the Dataset,
-     *                                  or if size of {@code newColumnNames} does not match the size of {@code columns},
-     *                                  or if any collection in {@code columns} is not empty and its size does not match the number of rows in the Dataset,
-     *                                  or the newColumnPosition is out of bounds.
+     * @throws IllegalArgumentException if the specified {@code newColumnPosition} is less than zero or greater than the column count, or any of the new column names already exist in the Dataset,
+     *                                  or if size of {@code newColumnNames} does not match the size of {@code newColumns},
+     *                                  or if any collection in {@code newColumns} is not empty and its size does not match the number of rows in the Dataset.
      */
     void addColumns(int newColumnPosition, List<String> newColumnNames, List<? extends Collection<?>> newColumns)
             throws IllegalStateException, IllegalArgumentException;
@@ -1976,9 +1975,9 @@ public sealed interface Dataset permits RowDataset {
      * dataset.addRow(Arrays.asList(101, "John Doe", 30));
      * }</pre>
      *
-     * @param row the new row to be added to the Dataset. It can be an Object array, List, Map, or a Bean with getter/setter methods.
+     * @param row the new row to be added to the Dataset. It can be an Object array, List, Map, or a Bean with getter/setter methods. Must not be {@code null}.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if the structure of the row does not match the required type - Object array, List, Map, or Bean.
+     * @throws IllegalArgumentException if {@code row} is {@code null} or its structure does not match the required type - Object array, List, Map, or Bean.
      */
     void addRow(Object row) throws IllegalStateException, IllegalArgumentException;
 
@@ -1991,14 +1990,14 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
-     * dataset.addRow(new Object[] {2, "Bob"});
+     * dataset.addRow(0, new Object[] {2, "Bob"});
      * }</pre>
      *
      * @param newRowPosition the position at which the new row should be added. Must be in the range {@code [0, size()]}; passing {@code size()} appends.
-     * @param row the new row to be added to the Dataset. It can be an Object array, List, Map, or a Bean with getter/setter methods.
+     * @param row the new row to be added to the Dataset. It can be an Object array, List, Map, or a Bean with getter/setter methods. Must not be {@code null}.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IndexOutOfBoundsException if {@code newRowPosition < 0} or {@code newRowPosition > size()}.
-     * @throws IllegalArgumentException if the structure of the row does not match the required type - Object array, List, Map, or Bean.
+     * @throws IllegalArgumentException if {@code row} is {@code null} or its structure does not match the required type - Object array, List, Map, or Bean.
      */
     void addRow(int newRowPosition, Object row) throws IllegalStateException, IndexOutOfBoundsException, IllegalArgumentException;
 
@@ -2032,7 +2031,7 @@ public sealed interface Dataset permits RowDataset {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id"), new Object[][] {{1}});
-     * dataset.addRows(Arrays.asList(new Object[] {2}, new Object[] {3}));
+     * dataset.addRows(1, Arrays.asList(new Object[] {2}, new Object[] {3}));
      * }</pre>
      *
      * @param newRowPosition the position at which the new rows should be added. Must be in the range {@code [0, size()]}; passing {@code size()} appends.
@@ -2329,7 +2328,7 @@ public sealed interface Dataset permits RowDataset {
      * dataset.replaceIf((i, c, v) -> "id".equals(c) && v instanceof Integer && (Integer) v < 2, 99);
      * }</pre>
      *
-     * @param predicate the predicate to test each value in the sheet. It takes the row index, column name, and a value from the Dataset as input, and returns a boolean indicating whether the value should be replaced.
+     * @param predicate the predicate to test each value in the Dataset. It takes the row index, column name, and a value from the Dataset as input, and returns a boolean indicating whether the value should be replaced.
      * @param newValue the new value to replace the values that satisfy the condition.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      */
@@ -2598,21 +2597,22 @@ public sealed interface Dataset permits RowDataset {
     Dataset moveToRow(int rowIndex);
 
     /**
-     * Retrieves a row from the Dataset as an array of Objects.
+     * Retrieves a row from the Dataset as an immutable List of Objects.
      * <br />
      * This method is typically used when accessing the data in a specific row.
+     * The returned list lazily reads values from this Dataset by row index and column index.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name", "age"), data);
-     * Object[] firstRow = dataset.getRow(0);   // Gets first row as Object[]
+     * ImmutableList<Object> firstRow = dataset.getRow(0);   // Gets first row as an immutable list
      * }</pre>
      *
      * @param rowIndex the index of the row to retrieve. The first row is 0, the second is 1, and so on.
-     * @return an array of Objects representing the data in the specified row.
+     * @return an immutable List of Objects representing the data in the specified row.
      * @throws IndexOutOfBoundsException if the specified {@code rowIndex} is out of bounds.
      */
-    Object[] getRow(int rowIndex) throws IndexOutOfBoundsException;
+    ImmutableList<Object> getRow(int rowIndex) throws IndexOutOfBoundsException;
 
     /**
      * Retrieves a row from the Dataset and converts it to a specific type.
@@ -2681,7 +2681,7 @@ public sealed interface Dataset permits RowDataset {
      * @param rowSupplier the IntFunction that generates an instance of the target type. It takes an integer as input, which is the number of columns in the row, and returns an instance of the target type.
      * @return an instance of the specified type representing the data in the specified row.
      * @throws IndexOutOfBoundsException if the specified {@code rowIndex} is out of bounds.
-     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code columnNames} is empty or the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class, or if any of the specified {@code columnNames} does not exist in the Dataset.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code columnNames} is empty or the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
     <T> T getRow(int rowIndex, Collection<String> columnNames, IntFunction<? extends T> rowSupplier) throws IndexOutOfBoundsException, IllegalArgumentException;
 
@@ -2834,7 +2834,7 @@ public sealed interface Dataset permits RowDataset {
     <T> Optional<T> lastRow(Collection<String> columnNames, IntFunction<? extends T> rowSupplier) throws IllegalArgumentException;
 
     /**
-     * Performs the given action for each row of the Dataset until all rows.
+     * Performs the given action for each row of the Dataset.
      * <br />
      * This method is typically used when you need to perform an operation on each row in the Dataset.
      * The action is a Consumer function that takes a DisposableObjArray as input, which represents a row in the Dataset.
@@ -2847,7 +2847,7 @@ public sealed interface Dataset permits RowDataset {
     <E extends Exception> void forEach(Throwables.Consumer<? super DisposableObjArray, E> action) throws E;
 
     /**
-     * Performs the given action for each row of the Dataset until all rows.
+     * Performs the given action for each row of the Dataset.
      * <br />
      * This method is typically used when you need to perform an operation on each row in the Dataset.
      * The action is a Consumer function that takes a DisposableObjArray as input, which represents a row in the Dataset.
@@ -3240,7 +3240,7 @@ public sealed interface Dataset permits RowDataset {
      * @param rowType the Class object representing the target type of the row. It must be Object[], Collection, Map, or Bean class.
      * @return a List of instances of the specified type representing the data in the specified range of the Dataset. Each instance is a row in the Dataset.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
-     * @throws IllegalArgumentException if the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @throws IllegalArgumentException if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
     <T> List<T> toList(int fromRowIndex, int toRowIndex, Predicate<? super String> columnNameFilter, Function<? super String, String> columnNameConverter,
             Class<? extends T> rowType) throws IndexOutOfBoundsException, IllegalArgumentException;
@@ -3501,7 +3501,7 @@ public sealed interface Dataset permits RowDataset {
      * @param prefixAndFieldNameMap the map that defines the mapping between column names and field names. The key is the column name prefix, and the value is the corresponding field name.
      * @param beanClass the Class object representing the target type of the row. It must be a Bean class.
      * @return a List of instances of the specified type representing the data in the Dataset. Each instance is a merged entity in the Dataset.
-     * @throws IllegalArgumentException if any of the specified property names does not exist in the Dataset or {@code selectPropNames} is empty, or if the specified {@code beanClass} is not a supported type - Bean class or no id defined in {@code beanClass}.
+     * @throws IllegalArgumentException if the mapping defined by {@code prefixAndFieldNameMap} is invalid, or if the specified {@code beanClass} is not a supported type - Bean class or no id defined in {@code beanClass}.
      */
     <T> List<T> toMergedEntities(Map<String, String> prefixAndFieldNameMap, Class<? extends T> beanClass) throws IllegalArgumentException;
 
@@ -3562,7 +3562,7 @@ public sealed interface Dataset permits RowDataset {
      * @param selectPropNames the collection of property names to be included in the instance.
      * @param beanClass the Class object representing the target type of the row. It must be a Bean class.
      * @return a List of instances of the specified type representing the data in the Dataset. Each instance is a merged entity in the Dataset.
-     * @throws IllegalArgumentException if the specified {@code idPropName} does not exist in the Dataset or {@code idPropNames} is empty, or if any of the specified property names does not exist in the Dataset or {@code selectPropNames} is empty, or if the specified {@code beanClass} is not a supported type - Bean class.
+     * @throws IllegalArgumentException if the specified {@code idPropName} does not exist in the Dataset, or if any of the specified property names does not exist in the Dataset or {@code selectPropNames} is empty, or if the specified {@code beanClass} is not a supported type - Bean class.
      * @see #toMergedEntities(Class)
      * @see #toMergedEntities(Map, Class)
      */
@@ -3581,7 +3581,7 @@ public sealed interface Dataset permits RowDataset {
      * @param prefixAndFieldNameMap the map that defines the mapping between column names and field names. The key is the column name prefix, and the value is the corresponding field name.
      * @param beanClass the Class object representing the target type of the row. It must be a Bean class.
      * @return a List of instances of the specified type representing the data in the Dataset. Each instance is a merged entity in the Dataset.
-     * @throws IllegalArgumentException if any of the specified property names does not exist in the Dataset or {@code selectPropNames} is empty, or if the specified {@code beanClass} is not a supported type - Bean class or no id defined in {@code beanClass}.
+     * @throws IllegalArgumentException if the specified {@code idPropName} does not exist in the Dataset, or if the mapping defined by {@code prefixAndFieldNameMap} is invalid, or if the specified {@code beanClass} is not a supported type - Bean class or no id defined in {@code beanClass}.
      * @see #toMergedEntities(Class)
      * @see #toMergedEntities(Map, Class)
      */
@@ -5181,7 +5181,7 @@ public sealed interface Dataset permits RowDataset {
      * Converts the entire Dataset into a CSV string.
      * <br />
      * Column names are quoted with double quotes.
-     * values are quoted with double quotes if the value type is not boolean or number and properly escaped according to CSV format rules.
+     * Values are quoted with double quotes if the value type is not boolean or number and properly escaped according to CSV format rules.
      * Boolean and number values are not quoted.
      *
      * <p><b>Usage Examples:</b></p>
@@ -5211,7 +5211,7 @@ public sealed interface Dataset permits RowDataset {
      * Converts a range of rows in the Dataset into a CSV string, including only the specified columns.
      * <br />
      * Column names are quoted with double quotes.
-     * values are quoted with double quotes if the value type is not boolean or number and properly escaped according to CSV format rules.
+     * Values are quoted with double quotes if the value type is not boolean or number and properly escaped according to CSV format rules.
      * Boolean and number values are not quoted.
      *
      * <p><b>Usage Examples:</b></p>
@@ -5246,7 +5246,7 @@ public sealed interface Dataset permits RowDataset {
      * Converts the entire Dataset into a CSV string and writes it to a File.
      * <br />
      * Column names are quoted with double quotes.
-     * values are quoted with double quotes if the value type is not boolean or number and properly escaped according to CSV format rules.
+     * Values are quoted with double quotes if the value type is not boolean or number and properly escaped according to CSV format rules.
      * Boolean and number values are not quoted.
      *
      * <p><b>Usage Examples:</b></p>
@@ -5277,7 +5277,7 @@ public sealed interface Dataset permits RowDataset {
      * Converts a range of rows in the Dataset into a CSV string, including only the specified columns, and writes it to a File.
      * <br />
      * Column names are quoted with double quotes.
-     * values are quoted with double quotes if the value type is not boolean or number and properly escaped according to CSV format rules.
+     * Values are quoted with double quotes if the value type is not boolean or number and properly escaped according to CSV format rules.
      * Boolean and number values are not quoted.
      *
      * <p><b>Usage Examples:</b></p>
@@ -5314,7 +5314,7 @@ public sealed interface Dataset permits RowDataset {
      * Converts the entire Dataset into a CSV string and writes it to an OutputStream.
      * <br />
      * Column names are quoted with double quotes.
-     * values are quoted with double quotes if the value type is not boolean or number and properly escaped according to CSV format rules.
+     * Values are quoted with double quotes if the value type is not boolean or number and properly escaped according to CSV format rules.
      * Boolean and number values are not quoted.
      *
      * <p><b>Usage Examples:</b></p>
@@ -5345,7 +5345,7 @@ public sealed interface Dataset permits RowDataset {
      * Converts a range of rows in the Dataset into a CSV string, including only the specified columns, and writes it to an OutputStream.
      * <br />
      * Column names are quoted with double quotes.
-     * values are quoted with double quotes if the value type is not boolean or number and properly escaped according to CSV format rules.
+     * Values are quoted with double quotes if the value type is not boolean or number and properly escaped according to CSV format rules.
      * Boolean and number values are not quoted.
      *
      * <p><b>Usage Examples:</b></p>
@@ -5382,7 +5382,7 @@ public sealed interface Dataset permits RowDataset {
      * Converts the entire Dataset into a CSV string and writes it to a Writer.
      * <br />
      * Column names are quoted with double quotes.
-     * values are quoted with double quotes if the value type is not boolean or number and properly escaped according to CSV format rules.
+     * Values are quoted with double quotes if the value type is not boolean or number and properly escaped according to CSV format rules.
      * Boolean and number values are not quoted.
      *
      * <p><b>Usage Examples:</b></p>
@@ -5413,7 +5413,7 @@ public sealed interface Dataset permits RowDataset {
      * Converts a range of rows in the Dataset into a CSV string, including only the specified columns, and writes it to a Writer.
      * <br />
      * Column names are quoted with double quotes.
-     * values are quoted with double quotes if the value type is not boolean or number and properly escaped according to CSV format rules.
+     * Values are quoted with double quotes if the value type is not boolean or number and properly escaped according to CSV format rules.
      * Boolean and number values are not quoted.
      *
      * <p><b>Usage Examples:</b></p>
@@ -9239,7 +9239,7 @@ public sealed interface Dataset permits RowDataset {
      *     });
      *
      * Dataset result = dataset1.intersectAll(dataset2);
-     * // Result contains: {1, "Alice", 25}, {2, "Bob", 30}, {1, "Alice", 35} based on matching common columns id and name
+     * // Result contains: {1, "Alice", 25}, {2, "Bob", 30}, {1, "Alice", 25} based on matching common columns id and name
      * // Note: Duplicates are preserved
      * }</pre>
      *

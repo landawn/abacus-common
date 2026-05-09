@@ -189,4 +189,10 @@ public class DoubleNFunctionTest extends TestBase {
 
         assertEquals(8, result); // "sum=30.0".length() = 8
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        DoubleNFunction<String> instance = a -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

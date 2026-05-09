@@ -169,4 +169,10 @@ public class BiIntObjPredicateTest extends TestBase {
 
         assertTrue(combined.test(10, 5, "test")); // Should not throw exception
     }
+
+    @Test
+    public void testAndNullThrowsImmediately() {
+        BiIntObjPredicate<String> instance = (a, b, c) -> false;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((BiIntObjPredicate) null));
+    }
 }

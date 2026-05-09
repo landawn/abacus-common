@@ -68,16 +68,19 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
     /**
      * Converts the specified array to a new collection of the given collection class.
      * <p>
-     * Each element from the array is added to a newly created collection instance of
-     * the specified type. If the input array is {@code null}, {@code null} is returned.
+     * A new collection of {@code collClass} is created with an initial capacity equal to
+     * the array length, and each element is added in iteration order via
+     * {@link #arrayToCollection(Object, Collection)}. If the input array is {@code null},
+     * {@code null} is returned.
      * </p>
      *
      * @param <E> the element type of the resulting collection
-     * @param array the array to convert, may be {@code null}
-     * @param collClass the class of the collection to create (e.g., {@code ArrayList.class}, {@code HashSet.class})
+     * @param array the array to convert; may be {@code null}
+     * @param collClass the class of the collection to create
+     *                  (e.g., {@code ArrayList.class}, {@code HashSet.class})
      * @return a new collection containing all elements from the array,
-     *         or {@code null} if the input array is {@code null}
-     * @throws IllegalArgumentException if the collection class cannot be instantiated
+     *         or {@code null} if {@code array} is {@code null}
+     * @throws IllegalArgumentException if {@code collClass} cannot be instantiated
      */
     @Override
     public <E> Collection<E> arrayToCollection(final T array, final Class<?> collClass) {
@@ -97,13 +100,14 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
      * Splits the specified string into an array of substrings using predefined delimiters.
      * <p>
      * This method first attempts to split using the {@code ELEMENT_SEPARATOR}. If that
-     * results in a single element and the string contains a comma, it falls back to
-     * splitting by comma. Leading {@code [} and trailing {@code ]} brackets are stripped
-     * from the first and last elements respectively, if present.
+     * yields a single element and the string contains a comma, it falls back to splitting
+     * by comma. A leading {@code '['} on the first element and a trailing {@code ']'} on
+     * the last element are stripped if both are present.
      * </p>
      *
      * @param str the string to split; must not be {@code null}
-     * @return an array of trimmed substrings after splitting and bracket-stripping
+     * @return an array of substrings after splitting and bracket-stripping
+     * @throws NullPointerException if {@code str} is {@code null}
      */
     protected static String[] split(final String str) {
         String[] elements = str.split(ELEMENT_SEPARATOR); // NOSONAR

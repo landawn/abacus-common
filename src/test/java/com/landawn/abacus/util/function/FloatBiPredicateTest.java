@@ -67,4 +67,10 @@ public class FloatBiPredicateTest extends TestBase {
         assertFalse(FloatBiPredicate.ALWAYS_FALSE.test(1.0f, 2.0f));
         assertFalse(FloatBiPredicate.ALWAYS_FALSE.test(-1.0f, -2.0f));
     }
+
+    @Test
+    public void testAndNullThrowsImmediately() {
+        FloatBiPredicate instance = (a, b) -> false;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((FloatBiPredicate) null));
+    }
 }

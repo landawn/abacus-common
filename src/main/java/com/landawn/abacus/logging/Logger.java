@@ -46,6 +46,12 @@ import java.util.function.Supplier;
  *   <li>{@code ERROR} - Error messages for error events</li>
  * </ol>
  *
+ * <p><b>Message formatting contract:</b> Methods that accept a {@code template} and arguments
+ * substitute each {@code {}} (SLF4J style) or {@code %s} (printf style) placeholder in the template
+ * with the corresponding argument, in order. The two styles cannot be mixed within the same template.
+ * If there are more arguments than placeholders, the extra arguments are appended to the formatted
+ * message in square brackets. Concrete formatting is performed by {@link AbstractLogger}.</p>
+ *
  * <p><b>Typical usage pattern:</b></p>
  * <pre>{@code
  * public class Wombat {

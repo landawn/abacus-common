@@ -638,7 +638,7 @@ public enum JavaVersion {
 
         JavaVersion result = null;
 
-        if (versionStr.startsWith("1.") || versionStr.startsWith("0.")) {
+        if ((versionStr.startsWith("1.") || versionStr.startsWith("0.")) && versionStr.length() >= 3) {
             result = get(versionStr.substring(0, 3));
         } else {
             final int idx = versionStr.indexOf('.');

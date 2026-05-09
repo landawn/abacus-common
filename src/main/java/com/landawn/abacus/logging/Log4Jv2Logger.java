@@ -59,8 +59,10 @@ class Log4Jv2Logger extends AbstractLogger {
      * <p>This constructor obtains a Log4j 2 logger instance from the {@code LogManager}
      * and casts it to {@link ExtendedLogger} for access to advanced features.</p>
      *
-     * <p><b>Note:</b> This class is package-private and this constructor should not be called directly
-     * from outside the logging package. Use {@link LoggerFactory#getLogger(Class)} or {@link LoggerFactory#getLogger(String)} instead.</p>
+     * <p><b>Note:</b> The enclosing class is package-private, so this constructor cannot be invoked
+     * from outside the {@code com.landawn.abacus.logging} package. Use
+     * {@link LoggerFactory#getLogger(Class)} or {@link LoggerFactory#getLogger(String)} to obtain
+     * logger instances from application code.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

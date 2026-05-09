@@ -18,6 +18,10 @@ package com.landawn.abacus.type;
  * Type handler for the primitive {@code boolean} type, as opposed to the {@link Boolean} wrapper class.
  * It provides type information and default value handling for {@code boolean} primitives.
  *
+ * <p>The key distinction from {@code BooleanType} (which handles {@link Boolean}) is the default value:
+ * {@link #defaultValue()} returns {@link Boolean#FALSE} (matching the JLS default for {@code boolean}),
+ * whereas the wrapper type's default is {@code null}.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Type<Boolean> type = TypeFactory.getType(boolean.class);

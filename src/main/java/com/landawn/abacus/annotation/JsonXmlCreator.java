@@ -22,8 +22,9 @@ import java.lang.annotation.Target;
 
 /**
  * Marks a method or constructor as the preferred creator for JSON/XML deserialization.
- * This annotation indicates that the annotated method or constructor should be used
- * when deserializing objects from JSON or XML formats.
+ *
+ * <p>This annotation indicates that the annotated method or constructor should be used
+ * when deserializing objects from JSON or XML formats.</p>
  *
  * <p>When applied to a constructor, it designates that constructor as the primary
  * way to create instances during deserialization. When applied to a static factory method,

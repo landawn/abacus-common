@@ -543,9 +543,9 @@ public class ContinuableFuture<T> implements Future<T> {
      * boolean cancelled = future.cancel(true);   // Interrupt if running
      * }</pre>
      *
-     * @param mayInterruptIfRunning {@code true} if the thread executing this task should be interrupted;.
+     * @param mayInterruptIfRunning {@code true} if the thread executing this task should be interrupted;
      *                              otherwise, in-progress tasks are allowed to complete.
-     * @return {@code false} if the task could not be cancelled, typically because it has already.
+     * @return {@code false} if the task could not be cancelled, typically because it has already
      *         completed normally; {@code true} otherwise.
      * @see Future#cancel(boolean)
      */
@@ -2303,30 +2303,29 @@ public class ContinuableFuture<T> implements Future<T> {
 
             @Override
             public boolean isDone() {
-                final boolean isDone = future.isDone();
-
-                if (isDone) {
-                    delay();
-                }
-
-                return isDone;
+                return future.isDone();
             }
 
             @Override
             public T get() throws InterruptedException, ExecutionException {
-                delay();
+                delay(Long.MAX_VALUE);
 
                 return future.get();
             }
 
             @Override
             public T get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+                final long timeoutNanos = unit.toNanos(timeout);
                 final long startNanos = System.nanoTime();
 
-                delay();
+                // Cap the artificial delay at the user-supplied timeout. Without this cap, a
+                // delay longer than the timeout would still wait the full delay before timing out,
+                // surprising callers who expect get(t, unit) to return within ~t.
+                final long timeoutMillis = TimeUnit.NANOSECONDS.toMillis(timeoutNanos);
+                delay(timeoutMillis);
 
                 final long elapsedNanos = System.nanoTime() - startNanos;
-                final long remainingNanos = unit.toNanos(timeout) - elapsedNanos;
+                final long remainingNanos = timeoutNanos - elapsedNanos;
 
                 if (remainingNanos <= 0) {
                     throw new TimeoutException("Timeout after delay");
@@ -2335,15 +2334,18 @@ public class ContinuableFuture<T> implements Future<T> {
                 return future.get(remainingNanos, TimeUnit.NANOSECONDS);
             }
 
-            private void delay() {
+            private void delay(final long maxWaitMillis) throws InterruptedException {
                 if (!isDelayed) {
                     synchronized (this) {
                         if (!isDelayed) {
                             isDelayed = true;
-                            long elapsedTime = System.currentTimeMillis() - startTime;
-                            long remainingDelay = delayInMillis - elapsedTime;
+                            final long elapsedTime = System.currentTimeMillis() - startTime;
+                            final long remainingDelay = delayInMillis - elapsedTime;
                             if (remainingDelay > 0) {
-                                N.sleepUninterruptibly(remainingDelay);
+                                // Use interruptible Thread.sleep so blocked callers can be
+                                // interrupted promptly per Future#get's contract — the prior
+                                // sleepUninterruptibly silently swallowed InterruptedException.
+                                Thread.sleep(Math.min(remainingDelay, maxWaitMillis));
                             }
                         }
                     }

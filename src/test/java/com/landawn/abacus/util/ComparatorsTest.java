@@ -2114,4 +2114,112 @@ public class ComparatorsTest extends TestBase {
         assertTrue(Comparators.COLLECTION_COMPARATOR.compare(Arrays.asList("a"), Arrays.asList("a", "b")) < 0);
     }
 
+    // === Review-driven additions ===
+
+    @Test
+    public void test_naturalOrder_nonComparable_throwsClassCastException() {
+        // naturalOrder() is unchecked-cast: comparing two non-Comparable instances must throw ClassCastException.
+        Comparator cmp = Comparators.naturalOrder();
+        Object a = new Object();
+        Object b = new Object();
+        assertThrows(ClassCastException.class, () -> cmp.compare(a, b));
+    }
+
+    @Test
+    public void test_reverseOrder_doesNotNPEonNull() {
+        // Unlike Collections.reverseOrder(), Comparators.reverseOrder() must tolerate nulls (nulls last).
+        Comparator<Integer> cmp = Comparators.reverseOrder();
+        assertTrue(cmp.compare(null, 1) > 0);
+        assertTrue(cmp.compare(1, null) < 0);
+        assertEquals(0, cmp.compare(null, null));
+    }
+
+    @Test
+    public void test_nullsFirst_with_extractor_consistent() {
+        Comparator<String> byLen = Comparator.comparingInt(String::length);
+        Comparator<String> cmp = Comparators.nullsFirst(byLen);
+        List<String> list = new ArrayList<>(Arrays.asList("aa", null, "b", null, "ccc"));
+        list.sort(cmp);
+        assertEquals(Arrays.asList(null, null, "b", "aa", "ccc"), list);
+    }
+
+    @Test
+    public void test_nullsLast_with_extractor_consistent() {
+        Comparator<Integer> cmp = Comparators.nullsLast(Comparator.<Integer> naturalOrder());
+        List<Integer> list = new ArrayList<>(Arrays.asList(3, null, 1, null, 2));
+        list.sort(cmp);
+        assertEquals(Arrays.asList(1, 2, 3, null, null), list);
+    }
+
+    @Test
+    public void test_comparing_keyExtractor_nullKey_handled() {
+        // Comparators.comparingBy uses NATURAL_ORDER (nulls first) on extracted keys,
+        // so a null-returning extractor must NOT NPE.
+        Comparator<Person> byName = Comparators.comparingBy((Function<Person, Comparable>) p -> p.getName());
+        Person alice = new Person("Alice", 30);
+        Person nullName = new Person(null, 25);
+        Person bob = new Person("Bob", 40);
+
+        List<Person> list = new ArrayList<>(Arrays.asList(alice, nullName, bob));
+        list.sort(byName);
+        // null-named first, then "Alice", then "Bob"
+        assertEquals(nullName, list.get(0));
+        assertEquals(alice, list.get(1));
+        assertEquals(bob, list.get(2));
+    }
+
+    @Test
+    public void test_thenComparing_chained() {
+        Comparator<Person> byAge = Comparators.comparingInt(Person::getAge);
+        Comparator<Person> byName = Comparators.comparingBy(Person::getName);
+        Comparator<Person> chain = byAge.thenComparing(byName);
+
+        Person p1 = new Person("Charlie", 30);
+        Person p2 = new Person("Alice", 30);
+        Person p3 = new Person("Bob", 25);
+
+        List<Person> list = new ArrayList<>(Arrays.asList(p1, p2, p3));
+        list.sort(chain);
+        assertEquals(p3, list.get(0)); // age 25 first
+        assertEquals(p2, list.get(1)); // age 30, name "Alice"
+        assertEquals(p1, list.get(2)); // age 30, name "Charlie"
+    }
+
+    @Test
+    public void test_comparingFloat_NaN_uses_FloatCompare() {
+        // Comparator must use Float.compare so NaN sorts deterministically (largest), not be inconsistent.
+        Comparator<float[]> cmp = Comparators.comparingFloat(a -> a[0]);
+        float[] nan = { Float.NaN };
+        float[] one = { 1.0f };
+        // Float.compare(NaN, 1.0) > 0 by spec
+        assertTrue(cmp.compare(nan, one) > 0);
+        assertTrue(cmp.compare(one, nan) < 0);
+        assertEquals(0, cmp.compare(nan, new float[] { Float.NaN }));
+    }
+
+    @Test
+    public void test_comparingDouble_NaN_uses_DoubleCompare() {
+        Comparator<double[]> cmp = Comparators.comparingDouble(a -> a[0]);
+        double[] nan = { Double.NaN };
+        double[] one = { 1.0 };
+        assertTrue(cmp.compare(nan, one) > 0);
+        assertEquals(0, cmp.compare(nan, new double[] { Double.NaN }));
+    }
+
+    @Test
+    public void test_comparingBy_keyExtractor_called_each_compare() {
+        // Documents the (intentional) behavior: key extractor is invoked on every comparison,
+        // not memoized. Tests should rely on a cheap & pure key extractor.
+        int[] callCount = { 0 };
+        Function<String, Integer> extractor = s -> {
+            callCount[0]++;
+            return s.length();
+        };
+        Comparator<String> cmp = Comparators.comparingBy(extractor::apply, Comparator.<Integer> naturalOrder());
+        cmp.compare("a", "bb");
+        cmp.compare("a", "bb");
+        // Each compare invokes extractor twice (once per argument)
+        assertEquals(4, callCount[0]);
+    }
+
 }

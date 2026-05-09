@@ -130,10 +130,10 @@ class CurlInterceptor implements Interceptor {
             final MediaType requestBodyContentType = requestBody.contentType();
             bodyContentType = requestBodyContentType == null ? null : requestBodyContentType.toString();
 
-            if (Strings.isNotEmpty(bodyContentType) && bodyContentType.contains("charset")) {
-                charset = HttpUtil.getCharset(bodyContentType);
-            } else if (Strings.isNotEmpty(contentType) && contentType.contains("charset")) {
-                charset = HttpUtil.getCharset(contentType);
+            if (Strings.isNotEmpty(bodyContentType) && Strings.containsIgnoreCase(bodyContentType, "charset")) {
+                charset = HttpUtil.getCharset(bodyContentType, charset);
+            } else if (Strings.isNotEmpty(contentType) && Strings.containsIgnoreCase(contentType, "charset")) {
+                charset = HttpUtil.getCharset(contentType, charset);
             }
 
             final Buffer buffer = new Buffer();

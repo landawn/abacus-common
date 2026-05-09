@@ -275,4 +275,10 @@ public class ShortPredicateTest extends TestBase {
         assertFalse(betweenTenAndTwenty.test((short) 9));
         assertFalse(betweenTenAndTwenty.test((short) 21));
     }
+
+    @Test
+    public void testAndNullThrowsImmediately() {
+        ShortPredicate instance = a -> false;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((ShortPredicate) null));
+    }
 }

@@ -186,6 +186,15 @@ public class JavaVersionTest extends TestBase {
     }
 
     @Test
+    public void testOf_shortLeadingDotPrefix_throwsIAE_notIOOBE() {
+        // Regression: previously JavaVersion.of("1.") and JavaVersion.of("0.") threw
+        // StringIndexOutOfBoundsException because substring(0,3) was called on a length-2 input.
+        // After the fix these inputs should throw IllegalArgumentException (or its subclass).
+        assertThrows(IllegalArgumentException.class, () -> JavaVersion.of("1."));
+        assertThrows(IllegalArgumentException.class, () -> JavaVersion.of("0."));
+    }
+
+    @Test
     public void testJavaRecent_MaxVersionFallback() throws Exception {
         final Method maxVersionMethod = JavaVersion.class.getDeclaredMethod("maxVersion");
         maxVersionMethod.setAccessible(true);

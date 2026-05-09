@@ -133,4 +133,10 @@ public class ByteConsumerTest extends TestBase {
     public void testFunctionalInterface() {
         assertNotNull(ByteConsumer.class.getAnnotation(FunctionalInterface.class));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        ByteConsumer instance = a -> {};
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((ByteConsumer) null));
+    }
 }

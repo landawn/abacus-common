@@ -102,4 +102,10 @@ public class BooleanBiFunctionTest extends TestBase {
 
         assertThrows(RuntimeException.class, () -> chainedFunction.apply(true, false));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        BooleanBiFunction<String> instance = (a, b) -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

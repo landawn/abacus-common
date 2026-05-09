@@ -332,7 +332,8 @@ public final class ExcelUtil {
 
         for (int i = 0; i < columnCount; i++) {
             final Cell cell = headerRow.getCell(i);
-            headers[i] = cell == null ? "" : CELL_TO_STRING.apply(cell);
+            final String name = cell == null ? "" : CELL_TO_STRING.apply(cell);
+            headers[i] = name.isEmpty() ? "Column_" + i : name;
         }
 
         final List<List<Object>> columnList = new ArrayList<>(columnCount);
@@ -697,7 +698,7 @@ public final class ExcelUtil {
 
             if (sheetCreateOptions.getAutoFilter() != null) {
                 sheet.setAutoFilter(sheetCreateOptions.getAutoFilter());
-            } else if (sheetCreateOptions.isAutoFilterByFirstRow()) {
+            } else if (sheetCreateOptions.isAutoFilterByFirstRow() && columnCount > 0) {
                 sheet.setAutoFilter(new CellRangeAddress(0, 0, 0, columnCount - 1));
             }
         };
@@ -964,8 +965,9 @@ public final class ExcelUtil {
     /**
      * Converts the sheet with the specified name from an Excel file to a CSV file.
      * This method allows exporting a specific worksheet by name rather than index, which is
-     * more robust when working with workbooks where sheet positions might change. Uses the
-     * platform's default charset for text encoding and preserves all original data including headers.
+     * more robust when working with workbooks where sheet positions might change. The charset
+     * depends on the underlying {@code IOUtil.newFileWriter} implementation and all original
+     * data, including headers, is preserved.
      *
      * <p>The conversion process maintains data fidelity by converting each cell type appropriately:
      * strings remain as text, numbers are formatted, and formulas are exported as their text
@@ -1402,11 +1404,10 @@ public final class ExcelUtil {
      *     );
      * Dataset ds = ExcelUtil.loadSheet(file, 0, uppercaseExtractor);
      *
-     * // Create extractor with null handling
+     * // The extractor short-circuits null cells (writing null to the output) — the mapper
+     * // itself is only invoked for non-null cells.
      * TriConsumer<String[], Row, Object[]> safeExtractor =
-     *     RowExtractors.create(cell ->
-     *         cell == null ? "" : ExcelUtil.CELL_GETTER.apply(cell)
-     *     );
+     *     RowExtractors.create(ExcelUtil.CELL_GETTER);
      * Dataset ds = ExcelUtil.loadSheet(file, "Sheet1", safeExtractor);
      * }</pre>
      *
@@ -1454,17 +1455,16 @@ public final class ExcelUtil {
          * transformed values. This is used with loadSheet methods to control how Excel
          * cell data is extracted and converted for Dataset creation.
          *
-         * <p>The cell mapper function receives each Cell from the row and returns the
-         * value to store in the output array. This enables custom type conversions,
-         * default value handling, data validation, or any other per-cell transformation logic.</p>
+         * <p>The cell mapper function receives each non-null {@link Cell} from the row and returns
+         * the value to store in the output array. The extractor itself short-circuits for
+         * {@code null} cells (writing {@code null} to the output array) — the mapper is therefore
+         * only invoked for non-null cells and does not need to handle {@code null} input.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * // Extract all values as strings, with empty string for null cells
+         * // Extract every cell as its String form (null cells become null entries in the row)
          * TriConsumer<String[], Row, Object[]> stringExtractor =
-         *     RowExtractors.create(cell ->
-         *         cell == null ? "" : CELL_TO_STRING.apply(cell)
-         *     );
+         *     RowExtractors.create(CELL_TO_STRING);
          *
          * Dataset ds = ExcelUtil.loadSheet(file, "Sheet1", stringExtractor);
          * }</pre>

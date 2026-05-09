@@ -158,4 +158,16 @@ public class AbstractIntegerTypeTest extends TestBase {
         integerType.writeCharacter(writer, null, config);
         verify(writer).writeInt(0);
     }
+
+    // Bug: appendTo previously called x.toString() for any Number,
+    // diverging from stringOf which truncates to int via intValue().
+    @Test
+    public void testAppendTo_TruncatesNonIntNumberToIntRange() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        // (Integer.MAX_VALUE + 1L) as a Long is 2147483648; truncated to int it's Integer.MIN_VALUE.
+        final Long large = Long.valueOf(((long) Integer.MAX_VALUE) + 1L);
+        integerType.appendTo(sb, large);
+        assertEquals(integerType.stringOf(large), sb.toString());
+        assertEquals(String.valueOf(Integer.MIN_VALUE), sb.toString());
+    }
 }

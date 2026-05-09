@@ -173,4 +173,10 @@ public class LongFunctionTest extends TestBase {
         assertEquals(-100L, identity.apply(-100L));
         assertEquals(Long.MAX_VALUE, identity.apply(Long.MAX_VALUE));
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        LongFunction<String> instance = a -> null;
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+    }
 }

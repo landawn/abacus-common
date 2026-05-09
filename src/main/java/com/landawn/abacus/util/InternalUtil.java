@@ -61,7 +61,7 @@ public final class InternalUtil {
      * <p>The pool size is dynamically calculated based on the JVM's maximum memory,
      * ranging from 1000 to 8192 elements.</p>
      *
-     * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
+     * @deprecated DO NOT call the methods defined in this class. It's for internal use only.
      */
     @Deprecated
     public static final int POOL_SIZE;
@@ -107,7 +107,7 @@ public final class InternalUtil {
      *
      * @param c the collection to get the internal array from
      * @return the internal array if accessible, {@code null} otherwise
-     * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
+     * @deprecated DO NOT call the methods defined in this class. It's for internal use only.
      */
     @Deprecated
     @Beta
@@ -145,7 +145,7 @@ public final class InternalUtil {
      * @param <T> the element type
      * @param a the array to create the list from
      * @return a new ArrayList backed by the array
-     * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
+     * @deprecated DO NOT call the methods defined in this class. It's for internal use only.
      */
     @Deprecated
     @Beta
@@ -172,7 +172,7 @@ public final class InternalUtil {
      *
      * @param str the string to get characters from
      * @return a character array (may be shared, do not modify)
-     * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
+     * @deprecated DO NOT call the methods defined in this class. It's for internal use only.
      */
     @Deprecated
     @Beta

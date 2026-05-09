@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -86,6 +88,7 @@ public interface BooleanTriPredicate extends Throwables.BooleanTriPredicate<Runt
      * @throws NullPointerException if {@code other} is null
      */
     default BooleanTriPredicate and(final BooleanTriPredicate other) {
+        Objects.requireNonNull(other);
         return (a, b, c) -> test(a, b, c) && other.test(a, b, c);
     }
 
@@ -109,6 +112,7 @@ public interface BooleanTriPredicate extends Throwables.BooleanTriPredicate<Runt
      * @throws NullPointerException if {@code other} is null
      */
     default BooleanTriPredicate or(final BooleanTriPredicate other) {
+        Objects.requireNonNull(other);
         return (a, b, c) -> test(a, b, c) || other.test(a, b, c);
     }
 }

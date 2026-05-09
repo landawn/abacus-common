@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -87,6 +89,7 @@ public interface ObjDoubleFunction<T, R> extends Throwables.ObjDoubleFunction<T,
      * @throws NullPointerException if {@code after} is null
      */
     default <V> ObjDoubleFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+        Objects.requireNonNull(after);
         return (t, u) -> after.apply(apply(t, u));
     }
 }
