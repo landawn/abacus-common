@@ -52,7 +52,8 @@ import com.landawn.abacus.util.stream.Stream;
 public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
     /**
-     * Constructs a new BooleanIterator.
+     * Constructs a new {@code BooleanIterator}.
+     * Intended for use by subclasses only.
      */
     protected BooleanIterator() {
     }
@@ -132,8 +133,8 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * @param a the boolean array (may be {@code null})
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
-     * @return a new {@code BooleanIterator} over the specified range, or an empty iterator if the array is {@code null} or fromIndex equals toIndex
-     * @throws IndexOutOfBoundsException if the indices are out of range
+     * @return a new {@code BooleanIterator} over the specified range, or an empty iterator if the array is {@code null} or {@code fromIndex} equals {@code toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > a.length}, or {@code fromIndex > toIndex}
      */
     public static BooleanIterator of(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -185,9 +186,9 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * // Iterator is not created until first use
      * }</pre>
      *
-     * @param iteratorSupplier A Supplier that provides the BooleanIterator when needed
-     * @return A BooleanIterator that is initialized on the first call to hasNext() or nextBoolean()
-     * @throws IllegalArgumentException if iteratorSupplier is {@code null}
+     * @param iteratorSupplier a Supplier that provides the {@code BooleanIterator} when needed, must not be {@code null}
+     * @return a {@code BooleanIterator} that is initialized on the first call to {@code hasNext()} or {@code nextBoolean()}
+     * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}
      */
     public static BooleanIterator defer(final Supplier<? extends BooleanIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
@@ -335,9 +336,9 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * boolean value = skipped.nextBoolean();   // true (third element)
      * }</pre>
      *
-     * @param n the number of elements to skip
-     * @return a new BooleanIterator with elements skipped
-     * @throws IllegalArgumentException if n is negative
+     * @param n the number of elements to skip; must be non-negative
+     * @return a new {@code BooleanIterator} with the first {@code n} elements skipped, or this iterator if {@code n} is 0
+     * @throws IllegalArgumentException if {@code n} is negative
      */
     public BooleanIterator skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -391,9 +392,9 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * // Will only return the first two elements
      * }</pre>
      *
-     * @param count the maximum number of elements to return
-     * @return a new BooleanIterator limited to the specified count
-     * @throws IllegalArgumentException if count is negative
+     * @param count the maximum number of elements to return; must be non-negative
+     * @return a new {@code BooleanIterator} limited to the specified count, or an empty iterator if {@code count} is 0
+     * @throws IllegalArgumentException if {@code count} is negative
      */
     public BooleanIterator limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, cs.count);
@@ -551,7 +552,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false);
      * ObjIterator<IndexedBoolean> indexed = iter.indexed();
-     * // Returns IndexedBoolean{index=0, value=true}, IndexedBoolean{index=1, value=false}
+     * // Produces IndexedBoolean values printed as: [0]=true, [1]=false
      * }</pre>
      *
      * @return an ObjIterator of IndexedBoolean elements
@@ -568,12 +569,12 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false);
      * ObjIterator<IndexedBoolean> indexed = iter.indexed(10);
-     * // Returns IndexedBoolean{index=10, value=true}, IndexedBoolean{index=11, value=false}
+     * // Produces IndexedBoolean values printed as: [10]=true, [11]=false
      * }</pre>
      *
-     * @param startIndex the starting index value
-     * @return an ObjIterator of IndexedBoolean elements
-     * @throws IllegalArgumentException if startIndex is negative
+     * @param startIndex the starting index value; must be non-negative
+     * @return an {@code ObjIterator} of {@code IndexedBoolean} elements
+     * @throws IllegalArgumentException if {@code startIndex} is negative
      */
     @Beta
     public ObjIterator<IndexedBoolean> indexed(final long startIndex) {
@@ -619,7 +620,8 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * }</pre>
      *
      * @param <E> the type of exception that the action may throw
-     * @param action the action to be performed for each element
+     * @param action the action to be performed for each element, must not be {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachRemaining(final Throwables.BooleanConsumer<E> action) throws E {//NOSONAR
@@ -642,8 +644,9 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * }</pre>
      *
      * @param <E> the type of exception that the action may throw
-     * @param action the action to be performed for each element with its index
+     * @param action the action to be performed for each element with its index, must not be {@code null}
      * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalStateException if the iterator contains more than {@code Integer.MAX_VALUE} elements (index overflow)
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntBooleanConsumer<E> action) throws IllegalArgumentException, E {

@@ -382,6 +382,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * @param a the array of elements to be included in the new list. Can be {@code null}.
      * @return a new LongList containing the elements from the specified array, or an empty list if the array is {@code null}
+     * @see #copyOf(long[])
      */
     public static LongList of(final long... a) {
         return new LongList(N.nullToEmpty(a));
@@ -1085,6 +1086,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param index the index of the element to remove
      * @return the removed element
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
+     * @see #remove(long)
      */
     public long removeAt(final int index) {
         rangeCheck(index);
@@ -2378,16 +2380,18 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * {@code step = 2}, every second element in the range will be included in the result.
      * </p>
      * <p>
-     * If {@code fromIndex} is greater than {@code toIndex}, elements are copied in
-     * reverse order. The step value must be positive.
+     * A positive {@code step} selects elements forward from {@code fromIndex} (inclusive)
+     * up to {@code toIndex} (exclusive). A negative {@code step} (with {@code fromIndex}
+     * greater than {@code toIndex}) selects elements in reverse order; when {@code toIndex}
+     * is {@code -1} it is treated as {@code 0} for bounds validation. The step value must not be zero.
      * </p>
      *
      * @param fromIndex the starting index of the range to copy (inclusive)
      * @param toIndex the ending index of the range to copy (exclusive)
-     * @param step the step size for selecting elements (must be positive)
+     * @param step the step size for selecting elements (must not be zero)
      * @return a new {@code LongList} containing elements from the specified range at the specified intervals
      * @throws IndexOutOfBoundsException if the range is out of bounds
-     * @throws IllegalArgumentException if {@code step} is not positive
+     * @throws IllegalArgumentException if {@code step} is zero
      * @see N#copyOfRange(long[], int, int, int)
      */
     @Override

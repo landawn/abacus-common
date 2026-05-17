@@ -298,9 +298,6 @@ public final class Fnn {
      * subsequent calls will retry the computation. The memoization only occurs upon successful completion,
      * ensuring that transient failures don't permanently cache error states.</p>
      *
-     * <p><b>Serialization Note:</b> The supplier's serialized form does not contain the cached value.
-     * Deserialization will result in a fresh supplier that recomputes the value on first access.</p>
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Cache expensive API call results for 5 minutes
@@ -877,7 +874,7 @@ public final class Fnn {
      * stream.forEach(Fnn.<String>throwRuntimeException("Unexpected element encountered"));
      *
      * // Use as a fallback consumer
-     * Consumer<String> handler = condition ? normalHandler : Fnn.throwRuntimeException("Not supported");
+     * Throwables.Consumer<String, RuntimeException> handler = condition ? normalHandler : Fnn.throwRuntimeException("Not supported");
      * }</pre>
      *
      * @param <T> the type of the input to the consumer
@@ -940,12 +937,23 @@ public final class Fnn {
     }
 
     /**
-     * Returns a Throwables.Consumer that throws an exception provided by the supplier.
+     * Returns a {@code Throwables.Consumer} that throws the exception provided by the given supplier.
+     * The consumer ignores its input and, on each invocation, obtains a fresh exception instance from
+     * the supplier and throws it. This is useful as a terminal handler in functional pipelines where
+     * a custom exception type or message should be raised.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.Consumer<String, IllegalStateException> handler =
+     *     Fnn.throwException(() -> new IllegalStateException("Unexpected state"));
+     * }</pre>
      *
      * @param <T> the type of the input to the consumer
      * @param <E> the type of exception that may be thrown
-     * @param exceptionSupplier the supplier that provides the exception to throw
-     * @return a Consumer that throws the supplied exception
+     * @param exceptionSupplier the supplier that provides the exception instance to throw
+     * @return a Consumer that always throws the exception supplied by {@code exceptionSupplier}
+     * @see #throwException(String)
+     * @see #throwRuntimeException(String)
      */
     public static <T, E extends Exception> Throwables.Consumer<T, E> throwException(final java.util.function.Supplier<? extends E> exceptionSupplier) {
         return t -> {
@@ -954,26 +962,30 @@ public final class Fnn {
     }
 
     /**
-     * Returns a Throwables.Consumer that sleeps for the specified number of milliseconds.
-     * The consumer ignores its input and calls N.sleep(millis).
+     * Returns a {@code Throwables.Consumer} that sleeps for the specified number of milliseconds.
+     * The consumer ignores its input and calls {@link N#sleep(long)}.
      *
      * @param <T> the type of the input to the consumer
      * @param <E> the type of exception that may be thrown
      * @param millis the number of milliseconds to sleep
-     * @return a Consumer that sleeps for the specified duration
+     * @return a Consumer that sleeps for the specified duration on each invocation
+     * @see N#sleep(long)
+     * @see #sleepUninterruptibly(long)
      */
     public static <T, E extends Exception> Throwables.Consumer<T, E> sleep(final long millis) {
         return t -> N.sleep(millis);
     }
 
     /**
-     * Returns a Throwables.Consumer that sleeps uninterruptibly for the specified number of milliseconds.
-     * The consumer ignores its input and calls N.sleepUninterruptibly(millis).
+     * Returns a {@code Throwables.Consumer} that sleeps uninterruptibly for the specified number of milliseconds.
+     * The consumer ignores its input and calls {@link N#sleepUninterruptibly(long)}.
      *
      * @param <T> the type of the input to the consumer
      * @param <E> the type of exception that may be thrown
      * @param millis the number of milliseconds to sleep
-     * @return a Consumer that sleeps uninterruptibly for the specified duration
+     * @return a Consumer that sleeps uninterruptibly for the specified duration on each invocation
+     * @see N#sleepUninterruptibly(long)
+     * @see #sleep(long)
      */
     public static <T, E extends Exception> Throwables.Consumer<T, E> sleepUninterruptibly(final long millis) {
         return t -> N.sleepUninterruptibly(millis);
@@ -1019,23 +1031,29 @@ public final class Fnn {
     };
 
     /**
-     * Returns a Throwables.Consumer that closes an AutoCloseable resource.
-     * The consumer calls close() on the resource if it is not {@code null}.
+     * Returns a {@code Throwables.Consumer} that closes an {@link AutoCloseable} resource.
+     * The consumer calls {@link AutoCloseable#close()} on the resource if it is not {@code null};
+     * a {@code null} input is silently ignored. Any exception thrown by {@code close()} is propagated.
      *
-     * @param <T> the type of AutoCloseable
-     * @return a Consumer that closes the AutoCloseable resource
+     * @param <T> the type of {@code AutoCloseable} accepted by the consumer
+     * @return a Consumer that closes the {@code AutoCloseable} resource, propagating any exception from {@code close()}
+     * @see #closeQuietly()
+     * @see AutoCloseable#close()
      */
     public static <T extends AutoCloseable> Throwables.Consumer<T, Exception> close() {
         return (Throwables.Consumer<T, Exception>) CLOSE;
     }
 
     /**
-     * Returns a Throwables.Consumer that closes an AutoCloseable resource quietly.
-     * The consumer calls closeQuietly() on the resource, suppressing any exceptions.
+     * Returns a {@code Throwables.Consumer} that closes an {@link AutoCloseable} resource quietly.
+     * The consumer closes the resource (if not {@code null}) while suppressing any exception thrown
+     * by {@code close()}, so the returned consumer never throws.
      *
-     * @param <T> the type of AutoCloseable
-     * @param <E> the type of exception that may be thrown
-     * @return a Consumer that closes the AutoCloseable resource quietly
+     * @param <T> the type of {@code AutoCloseable} accepted by the consumer
+     * @param <E> the type of exception that may be thrown (though none will be)
+     * @return a Consumer that closes the {@code AutoCloseable} resource, suppressing any exception
+     * @see #close()
+     * @see IOUtil#closeQuietly(AutoCloseable)
      */
     public static <T extends AutoCloseable, E extends Exception> Throwables.Consumer<T, E> closeQuietly() {
         return (Throwables.Consumer<T, E>) Fn.CLOSE_QUIETLY;
@@ -2473,8 +2491,8 @@ public final class Fnn {
      * <pre>{@code
      * // Using mc() to help with type inference in a stream operation
      * Seq<List<String>, Exception> seq = ...;
-     * seq<String, Exception> flatStream = seq.mapMulti(
-     *     Fnn.mc((List<String> list, Consumer<String> consumer) -> {
+     * Seq<String, Exception> flatSeq = seq.mapMulti(
+     *     Fnn.mc((List<String> list, java.util.function.Consumer<String> consumer) -> {
      *         for (String item : list) {
      *             if (item != null && !item.isEmpty()) {
      *                 consumer.accept(item);

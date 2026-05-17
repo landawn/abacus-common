@@ -123,10 +123,10 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     /**
      * Parses a string representation and creates a byte array.
      * Expected format: [1, 2, 3] or similar numeric value representations.
-     * Returns {@code null} if input is {@code null}, empty array if input is empty or "[]".
+     * Returns {@code null} if input is {@code null}, empty, or blank, or an empty array if input is {@code "[]"}.
      *
      * @param str the string to parse
-     * @return the parsed byte array, or {@code null} if input is null
+     * @return the parsed byte array, or {@code null} if input is {@code null}, empty, or blank
      */
     @Override
     public byte[] valueOf(final String str) {

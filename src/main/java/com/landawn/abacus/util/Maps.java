@@ -56,20 +56,21 @@ import com.landawn.abacus.util.u.OptionalShort;
  * implementations with a focus on functional programming patterns and Optional-based return types.
  *
  * <p>The {@code Maps} class is designed as a final utility class that provides a complete toolkit
- * for map processing including creation, transformation, filtering, searching, merging, and statistical
- * operations. All methods are static, thread-safe, and designed to handle edge cases gracefully while
- * maintaining optimal performance for large-scale map operations.</p>
+ * for map processing including creation, transformation, filtering, comparison, and restructuring
+ * operations. All methods are static and designed to handle common edge cases (such as {@code null}
+ * or empty maps) gracefully while maintaining good performance for large-scale map operations.</p>
  *
  * <p><b>Key Features:</b>
  * <ul>
- *   <li><b>Comprehensive Map Operations:</b> Complete set of operations for all Map types and implementations</li>
- *   <li><b>Optional-Based Returns:</b> Most methods return Optional types for null-safe value handling</li>
- *   <li><b>Null-Safe Design:</b> All methods handle null inputs gracefully without throwing exceptions</li>
- *   <li><b>Functional Programming:</b> Support for map, filter, reduce, and other functional patterns</li>
+ *   <li><b>Comprehensive Map Operations:</b> Broad set of operations for all Map types and implementations</li>
+ *   <li><b>Optional/Nullable Returns:</b> Value-retrieval methods return {@link Optional}, {@link Nullable},
+ *       or primitive-Optional types for null-safe value handling</li>
+ *   <li><b>Null-Tolerant Design:</b> {@code null} or empty maps are handled gracefully; some methods still
+ *       validate non-{@code null} arguments such as default values and predicates</li>
+ *   <li><b>Functional Programming:</b> Support for filter, invert, and other functional patterns</li>
  *   <li><b>Type Safety:</b> Generic methods with compile-time type checking</li>
  *   <li><b>Performance Optimized:</b> Efficient algorithms with minimal object allocation</li>
- *   <li><b>Map Creation Utilities:</b> Factory methods for various Map types and initialization patterns</li>
- *   <li><b>Transformation Support:</b> Key/value transformation, inversion, and restructuring operations</li>
+ *   <li><b>Restructuring Support:</b> Key replacement, inversion, flattening, and unflattening operations</li>
  * </ul>
  *
  * <p><b>Core Design Principles:</b>
@@ -104,14 +105,14 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * <p><b>Core Functional Categories:</b>
  * <ul>
- *   <li><b>Map Creation:</b> Factory methods for HashMap, LinkedHashMap, TreeMap, and specialized maps</li>
+ *   <li><b>Map Creation:</b> {@code zip} for combining separate key/value collections</li>
  *   <li><b>Access Operations:</b> {@code getIfExists}, {@code getOrDefaultIfAbsent}, {@code getAs*} with Optional and Nullable returns</li>
- *   <li><b>Search Operations:</b> find, contains, indexOf with predicate support and Optional returns</li>
- *   <li><b>Transformation Operations:</b> map keys/values, filter, invert, merge, combine</li>
- *   <li><b>Aggregation Operations:</b> reduce, fold, sum, count, min, max for map values</li>
- *   <li><b>Validation Operations:</b> isEmpty, isNotEmpty, containsKey, containsValue, equals</li>
- *   <li><b>Conversion Operations:</b> toList, toSet, toArray, entrySet operations</li>
- *   <li><b>Utility Operations:</b> zip, unzip, partition, group, flatten for map manipulation</li>
+ *   <li><b>Containment Operations:</b> {@code containsEntry} for key-value pair membership tests</li>
+ *   <li><b>Transformation Operations:</b> {@code filter}, {@code invert}, {@code flatInvert}, {@code replaceKeys}</li>
+ *   <li><b>Comparison Operations:</b> {@code difference}, {@code symmetricDifference}, {@code intersection}</li>
+ *   <li><b>Mutation Operations:</b> {@code putIfAbsent}, {@code putAllIf}, {@code removeIf}, {@code replace}, {@code replaceAll}</li>
+ *   <li><b>Conversion Operations:</b> {@code keySet}, {@code values}, {@code entrySet}</li>
+ *   <li><b>Restructuring Operations:</b> {@code flatten}, {@code unflatten}, {@code flatToMap} for nested map manipulation</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
@@ -130,43 +131,29 @@ import com.landawn.abacus.util.u.OptionalShort;
  * Nullable<Integer> nullable = Maps.getIfExists(map, "key");   // Nullable-wrapped value
  *
  * // Null-as-absent access (treats null same as missing)
- * int defaultValue = Maps.getOrDefaultIfAbsent(map, "key", 0); // With default value
+ * Integer defaultValue = Maps.getOrDefaultIfAbsent(map, "key", 0); // With default value
  *
  * // Type-converting access
  * OptionalInt intVal = Maps.getAsInt(map, "key");               // Type-converted Optional
  *
  * // Null-safe operations
  * Nullable<Integer> fromNull = Maps.getIfExists(null, "key");   // Nullable.empty()
- * boolean isEmpty = Maps.isEmpty(null);                          // Returns true
  *
  * // Transformation operations
- * Map<String, String> transformed = Maps.map(map, (k, v) -> k.toUpperCase(), v -> v.toString());
  * Map<String, Integer> filtered = Maps.filter(map, (k, v) -> v > 0);
  * Map<Integer, String> inverted = Maps.invert(map);   // Swap keys and values
  *
- * // Functional operations
- * boolean allPositive = Maps.allMatch(map, (k, v) -> v > 0);
- * boolean anyEven = Maps.anyMatch(map, (k, v) -> v % 2 == 0);
- * Optional<Integer> max = Maps.maxValue(map);
- * Optional<String> longestKey = Maps.maxKey(map, Comparator.comparing(String::length));
- *
- * // Merging and combining operations
- * Map<String, Integer> map1 = Maps.of("a", 1, "b", 2);
- * Map<String, Integer> map2 = Maps.of("b", 3, "c", 4);
- * Map<String, Integer> merged = Maps.merge(map1, map2, Integer::sum);   // {a=1, b=5, c=4}
- *
  * // Conversion operations
- * List<Map.Entry<String, Integer>> entries = Maps.toList(map);
- * Set<String> keys = Maps.keySet(map);
+ * Set<String> keySet = Maps.keySet(map);
  * Collection<Integer> values = Maps.values(map);
  * }</pre>
  *
  * <p><b>Map Creation Utilities:</b>
  * <ul>
- *   <li><b>JDK Types:</b> {@code HashMap}, {@code LinkedHashMap}, {@code TreeMap}</li>
- *   <li><b>Builder Patterns:</b> {@code of()} for immutable-style map creation</li>
- *   <li><b>Zip Operations:</b> {@code zip()} for combining separate key/value collections</li>
- *   <li><b>Specialized Maps:</b> {@code newIdentityHashMap()}, {@code newConcurrentHashMap()}</li>
+ *   <li><b>Zip Operations:</b> {@code zip()} for combining separate key/value collections,
+ *       with optional merge functions, default values, and a custom map supplier</li>
+ *   <li><b>Get-or-create:</b> {@code getOrPutIfAbsent()}, {@code getOrPutListIfAbsent()},
+ *       {@code getOrPutSetIfAbsent()}, {@code getOrPutMapIfAbsent()} for multimap-style construction</li>
  * </ul>
  *
  * <p><b>Value Retrieval Access:</b>
@@ -180,27 +167,33 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * <p><b>Functional Transformations:</b>
  * <ul>
- *   <li><b>Key/Value Mapping:</b> {@code map()}, {@code mapKeys()}, {@code mapValues()}</li>
+ *   <li><b>Key Replacement:</b> {@code replaceKeys()}, {@code replaceAll()}</li>
  *   <li><b>Filtering:</b> {@code filter()}, {@code filterByKey()}, {@code filterByValue()}</li>
- *   <li><b>Reduction:</b> {@code reduce()}, {@code fold()}, {@code aggregate()}</li>
- *   <li><b>Inversion:</b> {@code invert()}, {@code invertMultimap()} for key-value swapping</li>
+ *   <li><b>Difference:</b> {@code difference()}, {@code symmetricDifference()}, {@code intersection()}</li>
+ *   <li><b>Inversion:</b> {@code invert()}, {@code flatInvert()} for key-value swapping</li>
+ *   <li><b>Flattening:</b> {@code flatten()}, {@code unflatten()}, {@code flatToMap()}</li>
  * </ul>
  *
  * <p><b>Performance Characteristics:</b>
  * <ul>
  *   <li><b>Memory Efficient:</b> Minimal object allocation and copying in operations</li>
- *   <li><b>Lazy Evaluation:</b> Operations performed only when results are consumed</li>
- *   <li><b>Algorithm Selection:</b> Optimal algorithms chosen based on map type and size</li>
- *   <li><b>Short-Circuit Operations:</b> Early termination for operations like anyMatch, allMatch</li>
- *   <li><b>Type-Specific Optimizations:</b> Specialized handling for different Map implementations</li>
+ *   <li><b>Eager Evaluation:</b> Operations are performed immediately and return concrete results</li>
+ *   <li><b>Result Sizing:</b> Result maps are pre-sized based on the input map size where possible</li>
+ *   <li><b>Type Preservation:</b> Transformation methods attempt to return a map of the same type
+ *       as the input (falling back to {@link java.util.HashMap}/{@link java.util.LinkedHashMap})</li>
  * </ul>
  *
  * <p><b>Thread Safety:</b>
  * <ul>
- *   <li><b>Stateless Design:</b> All static methods are stateless and thread-safe</li>
- *   <li><b>Immutable Operations:</b> Methods create new maps rather than modifying inputs</li>
+ *   <li><b>Stateless Design:</b> All methods are static and hold no shared mutable state of their own</li>
+ *   <li><b>Mutating vs. Non-mutating:</b> Many methods (e.g.&nbsp;{@code zip}, {@code filter},
+ *       {@code invert}, {@code difference}) return a new map and do not modify their inputs;
+ *       others (e.g.&nbsp;{@code putIfAbsent}, {@code putAllIf}, {@code removeIf}, {@code replace},
+ *       {@code replaceAll}, {@code replaceKeys}, {@code getOrPut*IfAbsent}) modify the supplied
+ *       map in place. Consult each method's documentation</li>
  *   <li><b>No Shared State:</b> No static mutable fields that could cause race conditions</li>
- *   <li><b>Concurrent Access:</b> Safe for concurrent access from multiple threads</li>
+ *   <li><b>Caller Responsibility:</b> Thread safety of an individual call depends on the thread
+ *       safety of the supplied map; concurrent access must be coordinated by the caller</li>
  * </ul>
  *
  * <p><b>Integration with Java Maps:</b>
@@ -249,9 +242,9 @@ import com.landawn.abacus.util.u.OptionalShort;
  * <p><b>Common Patterns:</b>
  * <ul>
  *   <li><b>Safe Access:</b> {@code Nullable<V> value = Maps.getIfExists(map, key);}</li>
- *   <li><b>Transformation:</b> {@code Map<K, R> result = Maps.mapValues(map, transformer);}</li>
  *   <li><b>Filtering:</b> {@code Map<K, V> filtered = Maps.filter(map, predicate);}</li>
- *   <li><b>Merging:</b> {@code Map<K, V> merged = Maps.merge(map1, map2, combiner);}</li>
+ *   <li><b>Inversion:</b> {@code Map<V, K> inverted = Maps.invert(map);}</li>
+ *   <li><b>Zipping:</b> {@code Map<K, V> zipped = Maps.zip(keys, values);}</li>
  * </ul>
  *
  * <p><b>Related Utility Classes:</b>
@@ -268,36 +261,24 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * <p><b>Usage Examples: Data Processing Pipeline</b>
  * <pre>{@code
- * // Complete map processing example
- * Map<String, Double> salesData = Maps.of(
- *     "Q1", 1200.50, "Q2", 1450.75, "Q3", 980.25, "Q4", 1350.00
- * );
+ * // Build a map by zipping parallel key/value collections
+ * List<String> quarters = Arrays.asList("Q1", "Q2", "Q3", "Q4");
+ * List<Double> sales = Arrays.asList(1200.50, 1450.75, 980.25, 1350.00);
+ * Map<String, Double> salesData = Maps.zip(quarters, sales);
  *
- * // Statistical analysis
- * Optional<Double> maxSales = Maps.maxValue(salesData);
- * Optional<String> bestQuarter = Maps.maxKey(salesData, Comparator.comparing(salesData::get));
- * double totalSales = Maps.sumValues(salesData);
- * double avgSales = Maps.averageValues(salesData).orElse(0.0);
- *
- * // Transformation and filtering
- * Map<String, String> formatted = Maps.mapValues(salesData,
- *     sales -> String.format("$%.2f", sales));
+ * // Filtering
  * Map<String, Double> highPerformance = Maps.filter(salesData,
- *     (quarter, sales) -> sales > 1200.0);
+ *     (quarter, amount) -> amount > 1200.0);   // {Q1=1200.5, Q2=1450.75, Q4=1350.0}
  *
- * // Grouping and analysis
- * Map<String, String> performance = Maps.map(salesData,
- *     Function.identity(),
- *     sales -> sales > avgSales ? "Above Average" : "Below Average"
- * );
+ * // Filtering by value only
+ * Map<String, Double> belowTarget = Maps.filterByValue(salesData,
+ *     amount -> amount < 1000.0);              // {Q3=980.25}
  *
- * // Merging with additional data
- * Map<String, Double> targets = Maps.of("Q1", 1100.0, "Q2", 1400.0, "Q3", 1000.0, "Q4", 1300.0);
- * Map<String, Double> variance = Maps.merge(salesData, targets, (actual, target) -> actual - target);
+ * // Inversion (swap keys and values)
+ * Map<Double, String> byAmount = Maps.invert(salesData);
  *
- * // Validation and reporting
- * boolean allQuartersPresent = Maps.containsAllKeys(salesData, Arrays.asList("Q1", "Q2", "Q3", "Q4"));
- * boolean anyTargetMissed = Maps.anyMatch(variance, (quarter, var) -> var < 0);
+ * // Batch retrieval of values for a set of keys
+ * List<Double> firstHalf = Maps.getValuesIfPresent(salesData, Arrays.asList("Q1", "Q2"));
  * }</pre>
  *
  * <p><b>Usage Examples: Configuration Management</b>
@@ -314,30 +295,21 @@ import com.landawn.abacus.util.u.OptionalShort;
  * Map<String, String> validConfig = Maps.filter(config,
  *     (key, value) -> value != null && !value.trim().isEmpty());
  *
- * // Type conversion and transformation
- * Map<String, Integer> intConfigs = Maps.mapValues(
- *     Maps.filterByKey(validConfig, key -> key.endsWith(".timeout")),
- *     Integer::parseInt
- * );
+ * // Key-based filtering for timeout-related entries
+ * Map<String, String> timeoutConfigs = Maps.filterByKey(validConfig,
+ *     key -> key.endsWith(".timeout"));
  *
  * // Environment-specific filtering
  * String envPrefix = environment + ".";
  * Map<String, String> envConfig = Maps.filterByKey(validConfig,
  *     key -> key.startsWith(envPrefix));
  *
- * // Flattening nested configuration
- * Map<String, String> flatConfig = Maps.map(envConfig,
- *     key -> key.substring(envPrefix.length()),
- *     Function.identity()
- * );
+ * // Renaming keys in place (strip the environment prefix)
+ * Maps.replaceKeys(envConfig, key -> key.substring(envPrefix.length()));
  *
- * // Merging with defaults
- * Map<String, String> defaults = Maps.of(
- *     "host", "localhost",
- *     "port", "8080",
- *     "ssl", "false"
- * );
- * Map<String, String> finalConfig = Maps.merge(defaults, flatConfig, (def, custom) -> custom);
+ * // Flattening nested configuration
+ * Map<String, Object> nested = loadNestedConfiguration();
+ * Map<String, Object> flatConfig = Maps.flatten(nested);
  * }</pre>
  *
  * <p><b>Attribution:</b>
@@ -704,7 +676,7 @@ public final class Maps {
      * Creates a Map by zipping together two Iterables with default values for missing elements.
      * The resulting Map will have the size of the longer Iterable.
      * If one Iterable is shorter, the default value is used for the missing elements.
-     * Returns an empty map if either Iterable is {@code null} or empty.
+     * Returns an empty map only if both Iterables are {@code null} or empty.
      *
      * <p><b>Important:</b> When using default keys, if multiple values map to the same default key,
      * the merge function {@code Fn.selectFirst()} is applied, which keeps the first value and
@@ -737,7 +709,7 @@ public final class Maps {
      * Creates a Map by zipping together two Iterables with default values and custom merge function.
      * The resulting Map will have entries for all elements from both Iterables.
      * If one Iterable is shorter, default values are used. Duplicate keys are handled by the merge function.
-     * Returns an empty map if either Iterable is {@code null} or empty.
+     * Returns an empty map only if both Iterables are {@code null} or empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3126,16 +3098,24 @@ public final class Maps {
      * // map = {key1=[a, b]}
      *
      * List<String> result2 = Maps.putIfAbsent(map, "key2", () -> new ArrayList<>());
-     * // result2 = null (key2 was absent, supplier called and value set)
+     * // result2 = null (key2 was absent, supplier called and value set) for a plain Map
      * // map = {key1=[a, b], key2=[]}
      * }</pre>
+     *
+     * <p><b>Note:</b> If {@code map} is a {@link java.util.concurrent.ConcurrentMap}, this method
+     * delegates to {@link java.util.concurrent.ConcurrentMap#computeIfAbsent(Object, Function)}.
+     * In that case the supplier is invoked at most once and, when the key was absent, the
+     * <em>newly created</em> value is returned (not {@code null}).</p>
      *
      * @param <K> the key type.
      * @param <V> the value type.
      * @param map the map to put the value in.
      * @param key the key to associate the value with.
      * @param supplier the supplier to get the value from if the key is absent.
-     * @return the existing non-null value associated with the specified key, or {@code null} if the key was absent or mapped to {@code null} (in which case the supplier's value is put).
+     * @return for a plain map: the existing non-null value associated with the specified key, or
+     *         {@code null} if the key was absent or mapped to {@code null} (in which case the
+     *         supplier's value is put); for a {@link java.util.concurrent.ConcurrentMap}: the
+     *         current (existing or newly computed) value associated with the key.
      * @see Map#putIfAbsent(Object, Object)
      */
     public static <K, V> V putIfAbsent(final Map<K, V> map, final K key, final Supplier<V> supplier) {
@@ -3261,8 +3241,9 @@ public final class Maps {
      * @param <K> the type of keys maintained by the map.
      * @param <V> the type of mapped values.
      * @param map the map from which the entry is to be removed.
-     * @param entry the entry to be removed from the map.
+     * @param entry the entry to be removed from the map; must not be {@code null}.
      * @return {@code true} if the entry was removed, {@code false} otherwise.
+     * @throws NullPointerException if {@code entry} is {@code null}.
      * @see Map#remove(Object, Object)
      */
     public static <K, V> boolean removeEntry(final Map<K, V> map, final Map.Entry<?, ?> entry) {

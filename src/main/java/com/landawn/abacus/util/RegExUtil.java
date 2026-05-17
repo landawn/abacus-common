@@ -474,8 +474,10 @@ public final class RegExUtil {
      *   <li>{@code "3.14"}</li>
      *   <li>{@code "0.99"}</li>
      *   <li>{@code ".25"}</li>
-     *   <li>{@code "100."}</li>
      * </ul>
+     *
+     * <p><strong>Note:</strong> The match must end with at least one digit, so a trailing dot
+     * is not included; for example, in {@code "100."} only {@code "100"} is matched.</p>
      *
      * @see java.util.regex.Pattern
      */

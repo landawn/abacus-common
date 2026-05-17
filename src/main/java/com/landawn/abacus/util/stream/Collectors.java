@@ -1176,6 +1176,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @see #toList(int)
      */
     public static <T, C extends Collection<T>> Collector<T, ?, C> toCollection(final int atMostSize, final Supplier<? extends C> collectionFactory) {
+        N.checkArgNotNegative(atMostSize, "atMostSize");
+
         final BiConsumer<C, T> accumulator = (c, t) -> {
             if (c.size() < atMostSize) {
                 c.add(t);
@@ -2667,7 +2669,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Result: "Hello"
      * }</pre>
      *
-     * @return a {@code Collector} which concatenates CharSequence elements into a {@code String}
+     * @return a {@code Collector} which concatenates input elements into a {@code String}
      */
     public static Collector<Object, ?, String> joining() {
         return joining("", "", "");
@@ -2693,7 +2695,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * }</pre>
      *
      * @param delimiter the delimiter to be used between each element
-     * @return a {@code Collector} which concatenates CharSequence elements, separated by the
+     * @return a {@code Collector} which concatenates input elements, separated by the
      *         specified delimiter, into a {@code String}
      */
     public static Collector<Object, ?, String> joining(final CharSequence delimiter) {
@@ -2723,7 +2725,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param delimiter the delimiter to be used between each element
      * @param prefix the sequence of characters to be used at the beginning
      * @param suffix the sequence of characters to be used at the end
-     * @return a {@code Collector} which concatenates CharSequence elements, separated by the
+     * @return a {@code Collector} which concatenates input elements, separated by the
      *         specified delimiter, into a {@code String} with the specified prefix and suffix
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
@@ -3179,6 +3181,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param defaultForEmpty the default value to return if no elements are collected
      * @return a collector which returns the collected result, or the default value if
      *         no elements were collected
+     * @throws IllegalArgumentException if collector is null
      */
     @Beta
     public static <T, A, R> Collector<T, A, R> collectingOrDefaultIfEmpty(final Collector<T, A, R> collector, final R defaultForEmpty) {
@@ -3423,7 +3426,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * @param <T> the type of the input elements
      * @param keyMapper a function which classifies input elements
-     * @return a collector which counts the number of distinct classes the mapper
+     * @return a collector which counts the number of distinct values the mapper
      *         function returns for the stream elements
      */
     public static <T> Collector<T, ?, Integer> distinctByToCounting(final Function<? super T, ?> keyMapper) {
@@ -4950,9 +4953,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that finds both the minimum and maximum elements from
      * a stream of {@code Comparable} elements.
      *
-     * <p>This collector processes the stream in a single pass to find both the minimum
-     * and maximum elements according to their natural ordering. If the stream is empty,
-     * an empty {@code Optional} is returned.</p>
+     * <p>This collector finds both the minimum and maximum elements according to their
+     * natural ordering. If the stream is empty, an empty {@code Optional} is returned.</p>
      *
      * <p>The collector produces a stable result for ordered streams: if several
      * minimal or maximal elements appear, the collector always selects the
@@ -4979,9 +4981,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that finds both the minimum and maximum elements from
      * a stream according to the specified comparator.
      *
-     * <p>This collector processes the stream in a single pass to find both the minimum
-     * and maximum elements according to the provided comparator. If the stream is empty,
-     * an empty {@code Optional} is returned.</p>
+     * <p>This collector finds both the minimum and maximum elements according to the
+     * provided comparator. If the stream is empty, an empty {@code Optional} is returned.</p>
      *
      * <p>The collector produces a stable result for ordered streams: if several
      * minimal or maximal elements appear, the collector always selects the
@@ -5014,7 +5015,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * the minimum and maximum elements found. The finisher function is only called
      * if the stream contains at least one element.</p>
      *
-     * <p>This collector produces a stable result for ordered stream: if several
+     * <p>This collector produces a stable result for ordered streams: if several
      * minimal or maximal elements appear, the collector always selects the
      * first encountered.</p>
      *
@@ -5132,7 +5133,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that finds both the minimum and maximum elements according
      * to the specified comparator, returning a default value if the stream is empty.
      *
-     * <p>This collector processes the stream to find both extremes in a single pass.
+     * <p>This collector finds both extremes according to the given comparator.
      * If the stream is empty, the supplier function is called to provide a default result.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -5190,7 +5191,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that finds both the minimum and maximum elements according
      * to the specified comparator, throwing an exception if the stream is empty.
      *
-     * <p>This collector processes the stream to find both extremes in a single pass.
+     * <p>This collector finds both extremes according to the given comparator.
      * If the stream is empty, a {@code NoSuchElementException} is thrown.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -5857,7 +5858,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a {@code Collector} that produces the arithmetic mean as a {@code BigDecimal}
      * @see #averagingBigIntegerOrEmpty(Function)
      * @see #averagingBigIntegerOrElseThrow(Function)
-     * @see java.util.stream.Collectors#averagingDouble(ToDoubleFunction)
      */
     public static <T> Collector<T, ?, BigDecimal> averagingBigInteger(final Function<? super T, BigInteger> mapper) {
         final BiConsumer<Pair<BigInteger, long[]>, T> accumulator = (a, t) -> {
@@ -6013,7 +6013,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a {@code Collector} that produces the arithmetic mean as a {@code BigDecimal}
      * @see #averagingBigDecimalOrEmpty(Function)
      * @see #averagingBigDecimalOrElseThrow(Function)
-     * @see java.util.stream.Collectors#averagingDouble(ToDoubleFunction)
      */
     public static <T> Collector<T, ?, BigDecimal> averagingBigDecimal(final Function<? super T, BigDecimal> mapper) {
         final BiConsumer<Pair<BigDecimal, long[]>, T> accumulator = (a, t) -> {
@@ -8300,6 +8299,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param keyMapper a mapping function to produce keys
      * @param valueMapper a mapping function to produce values
      * @return a {@code Collector} which collects elements into a {@code ConcurrentMap}
+     * @throws IllegalStateException if duplicate keys are encountered
      */
     public static <T, K, V> Collector<T, ?, ConcurrentMap<K, V>> toConcurrentMap(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper) {
@@ -8335,6 +8335,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapFactory a supplier providing a new empty {@code ConcurrentMap}
      *                   into which the results will be inserted
      * @return a {@code Collector} which collects elements into a {@code ConcurrentMap}
+     * @throws IllegalStateException if duplicate keys are encountered
      */
     public static <T, K, V, M extends ConcurrentMap<K, V>> Collector<T, ?, M> toConcurrentMap(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final Supplier<? extends M> mapFactory) {
@@ -10806,7 +10807,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 return merger.apply(a);
             };
 
-            final Collection<Characteristics> common = N.intersection(downstreams.stream().map(Collector::characteristics).filter(N::notEmpty).toList());
+            // Must intersect ALL downstreams' characteristics — including empty sets. Filtering
+            // out empty sets would silently advertise characteristics that one of the underlying
+            // collectors does not have (e.g., UNORDERED when one downstream is ordered).
+            final Collection<Characteristics> common = N.intersection(downstreams.stream().map(Collector::characteristics).toList());
 
             common.remove(Characteristics.IDENTITY_FINISH);
 

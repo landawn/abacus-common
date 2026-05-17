@@ -44,6 +44,10 @@ public class MillisTimeType extends TimeType {
      */
     public static final String MILLIS_TIME = "MillisTime";
 
+    /**
+     * Package-private constructor for {@code MillisTimeType}.
+     * Instances are created by the {@code TypeFactory}.
+     */
     MillisTimeType() {
         super(MILLIS_TIME);
     }

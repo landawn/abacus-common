@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>The interface extends both {@code Throwables.LongToDoubleFunction} with {@code RuntimeException}
  * and {@code java.util.function.LongToDoubleFunction}, providing compatibility with the Java standard library
- * while adding a predefined identity function.
+ * while adding a predefined default conversion function.
  *
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>

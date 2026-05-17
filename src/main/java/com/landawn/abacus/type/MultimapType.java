@@ -49,6 +49,18 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
 
     protected final JsonDeserConfig jdc;
 
+    /**
+     * Package-private constructor for {@code MultimapType}.
+     * This constructor is called by the {@code TypeFactory} (and by {@link ListMultimapType}/
+     * {@link SetMultimapType}) to create {@code Multimap} type instances.
+     *
+     * @param typeClass the concrete {@code Multimap} implementation class to handle
+     * @param keyTypeName the name of the key type parameter
+     * @param valueElementTypeName the name of the element type parameter; may be empty
+     *        when the value collection type is specified instead
+     * @param valueTypeName the name of the value collection type parameter; may be empty
+     *        when the element type is specified instead
+     */
     MultimapType(final Class<?> typeClass, final String keyTypeName, final String valueElementTypeName, final String valueTypeName) {
         super(getTypeName(typeClass, keyTypeName, valueElementTypeName, valueTypeName, false));
 

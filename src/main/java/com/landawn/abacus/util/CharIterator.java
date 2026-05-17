@@ -720,6 +720,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each element and its index, must not be {@code null}
      * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalStateException if the iterator yields more than {@code Integer.MAX_VALUE} elements (index overflow)
      * @throws E if the action throws an exception during processing
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntCharConsumer<E> action) throws IllegalArgumentException, E {

@@ -65,7 +65,7 @@ class SLF4JLogger extends AbstractLogger {
      * is thrown.</p>
      *
      * <p>If the obtained logger implements LocationAwareLogger, it will be used for
-     * WARN and ERROR level logging to provide accurate caller location information.</p>
+     * logging at all levels to provide accurate caller location information.</p>
      *
      * <p><b>Note:</b> The enclosing class is package-private, so this constructor cannot be invoked
      * from outside the {@code com.landawn.abacus.logging} package. Use

@@ -36,11 +36,25 @@ import com.landawn.abacus.util.stream.EntryStream;
  * <p>Conceptually it's a "Trie" except it searches by a list of key prefixes instead of string
  * prefixes.
  *
+ * <p>Instances are immutable and are created through a {@link Builder} obtained from
+ * {@link #builder()}.
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * PrefixSearchTable<String, String> table = PrefixSearchTable.<String, String>builder()
+ *         .add(Arrays.asList("a", "b"), "foo")
+ *         .build();
+ *
+ * table.get(Arrays.asList("a", "b", "c"));   // Optional["foo"]
+ * table.get(Arrays.asList("a"));             // Optional.empty()
+ * }</pre>
+ *
  * <br />
  * Note: copied from <a href="https://github.com/google/mug">google mug</a> under Apache License, Version 2.0 and modified.
  *
  * @param <K> the type of key elements in the compound prefix
  * @param <V> the type of values stored in the table
+ * @see Builder
  */
 public final class PrefixSearchTable<K, V> {
     private final Map<K, Node<K, V>> nodes;
@@ -53,9 +67,12 @@ public final class PrefixSearchTable<K, V> {
      * Searches the table for the longest prefix match of {@code compoundKey}.
      *
      * @param compoundKey the compound key to search for
-     * @return the value mapped to the longest (non-empty) prefix of {@code compoundKey} if present
+     * @return an {@code Optional} holding the value mapped to the longest (non-empty) prefix of
+     *         {@code compoundKey}; an empty {@code Optional} if no non-empty prefix is present
      * @throws IllegalArgumentException if {@code compoundKey} is empty
-     * @throws NullPointerException if {@code compoundKey} is null or any key element is null
+     * @throws NullPointerException if {@code compoundKey} is {@code null} or any traversed key
+     *         element is {@code null}
+     * @see #getAll(List)
      */
     public Optional<V> get(List<? extends K> compoundKey) {
         return getAll(compoundKey).values().reduce((shorter, longer) -> longer);
@@ -70,9 +87,13 @@ public final class PrefixSearchTable<K, V> {
      * <p>To get the longest matched prefix, use {@link #get} instead.
      *
      * @param compoundKey the compound key to search for
-     * @return EntryStream of the matched prefixes of {@code compoundKey} and the mapped values
+     * @return a lazy {@code EntryStream} pairing each matched prefix of {@code compoundKey}
+     *         (as an unmodifiable {@code List}) with its mapped value, in ascending order of
+     *         prefix length; empty if no non-empty prefix is present
      * @throws IllegalArgumentException if {@code compoundKey} is empty
-     * @throws NullPointerException if {@code compoundKey} is null or any key element is null
+     * @throws NullPointerException if {@code compoundKey} is {@code null} or any traversed key
+     *         element is {@code null}
+     * @see #get(List)
      */
     public EntryStream<List<K>, V> getAll(List<? extends K> compoundKey) {
         N.checkArgument(compoundKey.size() > 0, "cannot search by empty key");
@@ -130,6 +151,11 @@ public final class PrefixSearchTable<K, V> {
         return builder;
     }
 
+    /**
+     * Returns a string representation of this table derived from its internal node map.
+     *
+     * @return a string representation of this table
+     */
     @Override
     public String toString() {
         return nodes.toString();

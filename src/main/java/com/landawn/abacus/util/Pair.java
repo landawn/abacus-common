@@ -116,13 +116,14 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * map.put("age", 25);
      * Map.Entry<String, Integer> entry = map.entrySet().iterator().next();
      * Pair<String, Integer> pair = Pair.from(entry);
-     * // pair.left returns "age", pair.right returns 25
+     * // pair.left() returns "age", pair.right() returns 25
      * }</pre>
      *
-     * @param <K> the key type of the Map.Entry, which becomes the left element type.
-     * @param <V> the value type of the Map.Entry, which becomes the right element type.
-     * @param entry the Map.Entry to convert to a Pair, must not be {@code null}.
+     * @param <K> the key type of the {@code Map.Entry}, which becomes the left element type.
+     * @param <V> the value type of the {@code Map.Entry}, which becomes the right element type.
+     * @param entry the {@code Map.Entry} to convert to a Pair, must not be {@code null}.
      * @return a new Pair instance with the key as the left element and the value as the right element.
+     * @throws NullPointerException if {@code entry} is {@code null}.
      */
     public static <K, V> Pair<K, V> from(final Map.Entry<K, V> entry) {
         return new Pair<>(entry.getKey(), entry.getValue());
@@ -409,6 +410,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *                may be {@code null}
      * @return {@code true} if the left element was updated, {@code false} otherwise
      * @throws E if the predicate throws an exception
+     * @throws NullPointerException if {@code predicate} is {@code null}
      */
     public <E extends Exception> boolean setLeftIf(final Throwables.BiPredicate<? super L, ? super R, E> predicate, final L newLeft) throws E {
         if (predicate.test(left, right)) {
@@ -447,6 +449,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *                 may be {@code null}
      * @return {@code true} if the right element was updated, {@code false} otherwise
      * @throws E if the predicate throws an exception
+     * @throws NullPointerException if {@code predicate} is {@code null}
      */
     public <E extends Exception> boolean setRightIf(final Throwables.BiPredicate<? super L, ? super R, E> predicate, final R newRight) throws E {
         if (predicate.test(left, right)) {
@@ -493,6 +496,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *                 may be {@code null}
      * @return {@code true} if both elements were updated, {@code false} otherwise
      * @throws E if the predicate throws an exception
+     * @throws NullPointerException if {@code predicate} is {@code null}
      */
     public <E extends Exception> boolean setIf(final Throwables.BiPredicate<? super L, ? super R, E> predicate, final L newLeft, final R newRight) throws E {
         if (predicate.test(left, right)) {
@@ -598,6 +602,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @param a the array into which the elements are to be stored, if it is big enough;
      *          otherwise, a new array of the same runtime type is allocated for this purpose
      * @return an array containing the left element at index 0 and the right element at index 1.
+     * @throws NullPointerException if {@code a} is {@code null}
      * @throws ArrayStoreException if the runtime type of the specified array is not a
      *         supertype of the runtime type of the elements in this pair
      */

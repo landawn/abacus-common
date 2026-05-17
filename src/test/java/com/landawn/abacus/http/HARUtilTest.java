@@ -711,4 +711,76 @@ public class HARUtilTest extends TestBase {
         assertEquals("application/xml", result._2);
     }
 
+    @Test
+    public void testSendRequestWithNoEntries() {
+        String harWithoutEntries = "{\"log\": {}}";
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            HARUtil.sendRequest(harWithoutEntries, url -> true);
+        });
+    }
+
+    @Test
+    public void testSendRequestWithEmptyEntries() {
+        String harWithEmptyEntries = "{\"log\": {\"entries\": []}}";
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            HARUtil.sendRequest(harWithEmptyEntries, url -> true);
+        });
+    }
+
+    @Test
+    public void testSendRequestsWithNoEntries() {
+        String harWithoutEntries = "{\"log\": {}}";
+
+        List<String> result = HARUtil.sendRequests(harWithoutEntries, url -> true);
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testSendRequestsWithEmptyEntries() {
+        String harWithEmptyEntries = "{\"log\": {\"entries\": []}}";
+
+        List<String> result = HARUtil.sendRequests(harWithEmptyEntries, url -> true);
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testStreamRequestsWithNoEntries() {
+        String harWithoutEntries = "{\"log\": {}}";
+
+        var result = HARUtil.streamRequests(harWithoutEntries, url -> true);
+        assertNotNull(result);
+        assertTrue(result.toList().isEmpty());
+    }
+
+    @Test
+    public void testStreamRequestsWithEmptyEntries() {
+        String harWithEmptyEntries = "{\"log\": {\"entries\": []}}";
+
+        var result = HARUtil.streamRequests(harWithEmptyEntries, url -> true);
+        assertNotNull(result);
+        assertTrue(result.toList().isEmpty());
+    }
+
+    @Test
+    public void testFindRequestEntryWithNoEntries() {
+        String harWithoutEntries = "{\"log\": {}}";
+
+        Optional<Map<String, Object>> result = HARUtil.findRequestEntry(harWithoutEntries, url -> true);
+        assertNotNull(result);
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testFindRequestEntryWithEmptyEntries() {
+        String harWithEmptyEntries = "{\"log\": {\"entries\": []}}";
+
+        Optional<Map<String, Object>> result = HARUtil.findRequestEntry(harWithEmptyEntries, url -> true);
+        assertNotNull(result);
+        assertFalse(result.isPresent());
+    }
+
 }

@@ -58,6 +58,8 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
  * List<String> list = XmlMappers.fromXml(listXml, new TypeReference<List<String>>() {});
  * }</pre>
  *
+ * <p>This class is not instantiable.</p>
+ *
  * @see XmlMapper
  * @see TypeReference
  * @see SerializationConfig
@@ -180,6 +182,7 @@ public final class XmlMappers {
      * @param features additional serialization features to enable
      * @return the XML string representation of the object
      * @throws RuntimeException if serialization fails
+     * @see #toXml(Object, SerializationConfig)
      */
     public static String toXml(final Object obj, final SerializationFeature first, final SerializationFeature... features) {
         return toXml(obj, defaultSerializationConfig.with(first, features));
@@ -477,6 +480,7 @@ public final class XmlMappers {
      * @param features additional deserialization features to enable
      * @return the deserialized object
      * @throws RuntimeException if deserialization fails
+     * @see #fromXml(String, Class, DeserializationConfig)
      * @see com.fasterxml.jackson.core.type.TypeReference
      */
     public static <T> T fromXml(final String xml, final Class<? extends T> targetType, final DeserializationFeature first,
@@ -1177,7 +1181,7 @@ public final class XmlMappers {
      * @param mapper the XmlMapper to return to the pool, or {@code null} (which is ignored)
      */
     static void recycle(final XmlMapper mapper) {
-        if (mapper == null) {
+        if (mapper == null || mapper == defaultXmlMapper || mapper == defaultXmlMapperForPretty) {
             return;
         }
 
@@ -1205,7 +1209,8 @@ public final class XmlMappers {
      * }</pre>
      *
      * @param xmlMapper the XmlMapper instance to wrap
-     * @return a One instance wrapping the provided XmlMapper
+     * @return a {@link One} instance wrapping the provided XmlMapper
+     * @see One
      */
     public static One wrap(final XmlMapper xmlMapper) {
         return new One(xmlMapper);

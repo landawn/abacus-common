@@ -144,7 +144,7 @@ public final class ExcelUtil {
      * This function provides automatic type-preserving extraction, returning appropriate Java
      * objects based on the cell's actual type: {@code String} for STRING cells, {@code Double} for
      * NUMERIC cells, {@code Boolean} for BOOLEAN cells, {@code String} for FORMULA cells (returns
-     * formula text), and empty string for BLANK cells.
+     * formula text), and an empty {@code String} for BLANK and ERROR cells.
      *
      * <p>This extractor is commonly used as the default cell processor for reading Excel data
      * when you want to preserve the original cell types without conversion. It's ideal for
@@ -179,8 +179,8 @@ public final class ExcelUtil {
      *
      * <p>Numeric values are converted using {@code String.valueOf()}, boolean values are converted
      * to "true" or "false", formula cells return the formula text (not the evaluated result), and
-     * blank cells return an empty string. This converter is ideal for export operations and text-based
-     * data processing where type information is not critical.</p>
+     * blank and error cells return an empty string. This converter is ideal for export operations and
+     * text-based data processing where type information is not critical.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -256,8 +256,8 @@ public final class ExcelUtil {
      * @param rowExtractor custom function to extract row data. Receives three parameters:
      *                     column headers array, current row, and output array to populate with extracted values.
      * @return a Dataset containing the extracted sheet data with the first row as column names.
-     * @throws UncheckedException if an I/O error occurs while reading the file, if the file is not a valid Excel file,
-     *                            or if the sheet index is out of bounds.
+     * @throws UncheckedException if an I/O error occurs while reading the file, or if the file is not a valid Excel file.
+     * @throws IllegalArgumentException if the sheet index is out of bounds.
      */
     public static Dataset loadSheet(final File excelFile, final int sheetIndex,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
@@ -293,8 +293,8 @@ public final class ExcelUtil {
      * @param rowExtractor custom function to extract row data. Receives three parameters:
      *                     column headers array, current row, and output array to populate with extracted values.
      * @return a Dataset containing the extracted sheet data with the first row as column names.
-     * @throws UncheckedException if an I/O error occurs, if the file is not a valid Excel file,
-     *                            or if the sheet name is not found in the workbook.
+     * @throws UncheckedException if an I/O error occurs or if the file is not a valid Excel file.
+     * @throws IllegalArgumentException if the sheet name is not found in the workbook.
      */
     public static Dataset loadSheet(final File excelFile, final String sheetName,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
@@ -409,8 +409,8 @@ public final class ExcelUtil {
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows.
      * @param rowMapper function to convert each Row to an object of type T.
      * @return a list of mapped objects, one per row (excluding skipped rows).
-     * @throws UncheckedException if an I/O error occurs while reading the file, if the file is not a valid Excel file,
-     *                            or if the sheet index is out of bounds.
+     * @throws UncheckedException if an I/O error occurs while reading the file, or if the file is not a valid Excel file.
+     * @throws IllegalArgumentException if the sheet index is out of bounds.
      */
     public static <T> List<T> readSheet(final File excelFile, final int sheetIndex, final boolean skipFirstRow,
             final Function<? super Row, ? extends T> rowMapper) {
@@ -452,8 +452,8 @@ public final class ExcelUtil {
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows.
      * @param rowMapper function to convert each Row to an object of type T.
      * @return a list of mapped objects, one per row (excluding skipped rows).
-     * @throws UncheckedException if an I/O error occurs, if the file is not a valid Excel file,
-     *                            or if the sheet name is not found in the workbook.
+     * @throws UncheckedException if an I/O error occurs or if the file is not a valid Excel file.
+     * @throws IllegalArgumentException if the sheet name is not found in the workbook.
      */
     public static <T> List<T> readSheet(final File excelFile, final String sheetName, final boolean skipFirstRow,
             final Function<? super Row, ? extends T> rowMapper) {
@@ -570,8 +570,8 @@ public final class ExcelUtil {
      * @param sheetName the name of the sheet to stream, case-sensitive
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows
      * @return a Stream of Row objects from the specified sheet that must be closed after use
-     * @throws UncheckedException if an I/O error occurs, if the file is not a valid Excel file,
-     *                            or if the sheet name is not found in the workbook
+     * @throws UncheckedException if an I/O error occurs or if the file is not a valid Excel file
+     * @throws IllegalArgumentException if the sheet name is not found in the workbook
      */
     public static Stream<Row> streamSheet(final File excelFile, final String sheetName, final boolean skipFirstRow) {
         InputStream is = null;
@@ -951,8 +951,8 @@ public final class ExcelUtil {
      * @param excelFile the Excel file to read, must exist and be a valid Excel file
      * @param sheetIndex the zero-based index of the sheet to convert (0 for first sheet)
      * @param outputCsvFile the CSV file to write to (will be created or overwritten)
-     * @throws UncheckedException if an I/O error occurs during conversion, if the file is not a valid Excel file,
-     *                            or if the sheet index is out of bounds
+     * @throws UncheckedException if an I/O error occurs during conversion or if the file is not a valid Excel file
+     * @throws IllegalArgumentException if the sheet index is out of bounds
      */
     public static void saveSheetAsCsv(final File excelFile, final int sheetIndex, final File outputCsvFile) {
         try (Writer writer = IOUtil.newFileWriter(outputCsvFile)) {
@@ -985,8 +985,8 @@ public final class ExcelUtil {
      * @param excelFile the Excel file to read, must exist and be a valid Excel file
      * @param sheetName the name of the sheet to convert, case-sensitive
      * @param outputCsvFile the CSV file to write to (will be created or overwritten)
-     * @throws UncheckedException if an I/O error occurs, if the file is not a valid Excel file,
-     *                            or if the sheet name is not found in the workbook
+     * @throws UncheckedException if an I/O error occurs or if the file is not a valid Excel file
+     * @throws IllegalArgumentException if the sheet name is not found in the workbook
      */
     public static void saveSheetAsCsv(final File excelFile, final String sheetName, final File outputCsvFile) {
         try (Writer writer = IOUtil.newFileWriter(outputCsvFile)) {
@@ -1021,8 +1021,8 @@ public final class ExcelUtil {
      * @param sheetIndex the zero-based index of the sheet to convert (0 for first sheet)
      * @param csvHeaders custom headers for the CSV file (null to use original Excel headers from first row)
      * @param outputWriter the Writer to write the CSV content to
-     * @throws UncheckedException if an I/O error occurs during conversion, if the file is not a valid Excel file,
-     *                            or if the sheet index is out of bounds
+     * @throws UncheckedException if an I/O error occurs during conversion or if the file is not a valid Excel file
+     * @throws IllegalArgumentException if the sheet index is out of bounds
      */
     public static void saveSheetAsCsv(final File excelFile, final int sheetIndex, final List<String> csvHeaders, final Writer outputWriter) {
         try (InputStream is = new FileInputStream(excelFile); //
@@ -1061,8 +1061,8 @@ public final class ExcelUtil {
      * @param sheetName the name of the sheet to convert, case-sensitive
      * @param csvHeaders custom headers for the CSV file (null to use original Excel headers from first row)
      * @param outputWriter the Writer to write the CSV content to
-     * @throws UncheckedException if an I/O error occurs, if the file is not a valid Excel file,
-     *                            or if the sheet name is not found in the workbook
+     * @throws UncheckedException if an I/O error occurs or if the file is not a valid Excel file
+     * @throws IllegalArgumentException if the sheet name is not found in the workbook
      */
     public static void saveSheetAsCsv(final File excelFile, final String sheetName, List<String> csvHeaders, final Writer outputWriter) {
         try (InputStream is = new FileInputStream(excelFile); //

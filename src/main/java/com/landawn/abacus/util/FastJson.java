@@ -47,6 +47,9 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * MyClass obj = FastJson.fromJson(json, MyClass.class);
  * }</pre>
  *
+ * @see com.alibaba.fastjson2.JSON
+ * @see com.alibaba.fastjson2.JSONWriter.Feature
+ * @see com.alibaba.fastjson2.JSONReader.Feature
  */
 public final class FastJson {
 
@@ -68,7 +71,7 @@ public final class FastJson {
      * }</pre>
      *
      * @param obj the object to be converted to JSON string
-     * @return the JSON string representation of the object, or {@code "null"} if the object is {@code null}
+     * @return the JSON string representation of the object, or the literal string {@code "null"} if the object is {@code null}
      */
     public static String toJson(final Object obj) {
         return JSON.toJSONString(obj);
@@ -453,7 +456,7 @@ public final class FastJson {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "[{\"name\":\"John\"},{\"name\":\"Jane\"}]";
-     * Type listType = new TypeToken<List<Person>>(){}.getType();
+     * Type listType = new TypeReference<List<Person>>(){}.getType();
      * List<Person> people = FastJson.fromJson(json, listType);
      * }</pre>
      *
@@ -473,7 +476,7 @@ public final class FastJson {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Type listType = new TypeToken<List<Person>>(){}.getType();
+     * Type listType = new TypeReference<List<Person>>(){}.getType();
      * List<Person> people = FastJson.fromJson(json, listType, JSONReader.Feature.SupportSmartMatch);
      * }</pre>
      *
@@ -495,7 +498,7 @@ public final class FastJson {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONReader.Context context = new JSONReader.Context();
-     * Type listType = new TypeToken<List<Person>>(){}.getType();
+     * Type listType = new TypeReference<List<Person>>(){}.getType();
      * List<Person> people = FastJson.fromJson(json, listType, context);
      * }</pre>
      *
@@ -646,7 +649,7 @@ public final class FastJson {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Reader reader = new FileReader("people.json");
-     * Type listType = new TypeToken<List<Person>>(){}.getType();
+     * Type listType = new TypeReference<List<Person>>(){}.getType();
      * List<Person> people = FastJson.fromJson(reader, listType);
      * }</pre>
      *
@@ -668,7 +671,7 @@ public final class FastJson {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Reader reader = new FileReader("people.json");
-     * Type listType = new TypeToken<List<Person>>(){}.getType();
+     * Type listType = new TypeReference<List<Person>>(){}.getType();
      * List<Person> people = FastJson.fromJson(reader, listType, JSONReader.Feature.SupportSmartMatch);
      * }</pre>
      *
@@ -691,7 +694,7 @@ public final class FastJson {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONReader.Context context = new JSONReader.Context();
-     * Type listType = new TypeToken<List<Person>>(){}.getType();
+     * Type listType = new TypeReference<List<Person>>(){}.getType();
      * List<Person> people = FastJson.fromJson(reader, listType, context);
      * }</pre>
      *

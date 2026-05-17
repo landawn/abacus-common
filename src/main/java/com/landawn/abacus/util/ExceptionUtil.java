@@ -131,6 +131,10 @@ public final class ExceptionUtil {
      * @param <E> the type of exception to map
      * @param exceptionClass the class of the exception to map
      * @param runtimeExceptionMapper the function that converts the exception to RuntimeException
+     * @throws IllegalArgumentException if {@code exceptionClass} or {@code runtimeExceptionMapper} is {@code null},
+     *         if {@code exceptionClass} is a built-in class (package starting with "java.", "javax.", or "com.landawn.abacus"),
+     *         or if a mapper for the specified exception class has already been registered
+     * @see #registerRuntimeExceptionMapper(Class, Function, boolean)
      */
     public static <E extends Throwable> void registerRuntimeExceptionMapper(final Class<E> exceptionClass,
             final Function<E, RuntimeException> runtimeExceptionMapper) {
@@ -152,11 +156,12 @@ public final class ExceptionUtil {
      * }</pre>
      *
      * @param <E> the type of exception to map
-     * @param exceptionClass the class of the exception to map
-     * @param runtimeExceptionMapper the function that converts the exception to RuntimeException
-     * @param force if {@code true}, overwrites existing mapper; if {@code false}, throws exception if mapper exists
-     * @throws IllegalArgumentException if trying to register built-in classes (classes with package starting with "java.", "javax.", or "com.landawn.abacus"),
-     *         or if a mapper for the specified exception class already exists and force is {@code false}
+     * @param exceptionClass the class of the exception to map; must not be {@code null}
+     * @param runtimeExceptionMapper the function that converts the exception to RuntimeException; must not be {@code null}
+     * @param force if {@code true}, overwrites an existing mapper; if {@code false}, throws an exception if a mapper already exists
+     * @throws IllegalArgumentException if {@code exceptionClass} or {@code runtimeExceptionMapper} is {@code null},
+     *         if trying to register a built-in class (package starting with "java.", "javax.", or "com.landawn.abacus"),
+     *         or if a mapper for the specified exception class already exists and {@code force} is {@code false}
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Throwable> void registerRuntimeExceptionMapper(final Class<E> exceptionClass,
@@ -190,8 +195,10 @@ public final class ExceptionUtil {
      * }
      * }</pre>
      *
-     * @param e the exception to convert
-     * @return the converted runtime exception or the original if already runtime
+     * @param e the exception to convert; must not be {@code null}
+     * @return the converted runtime exception, or the original instance if it is already a {@code RuntimeException}
+     * @throws NullPointerException if {@code e} is {@code null}
+     * @see #toRuntimeException(Throwable, boolean, boolean)
      */
     public static RuntimeException toRuntimeException(final Exception e) {
         return toRuntimeException(e, false, false);
@@ -211,9 +218,11 @@ public final class ExceptionUtil {
      * }
      * }</pre>
      *
-     * @param e the exception to convert
+     * @param e the exception to convert; must not be {@code null}
      * @param callInterrupt whether to call {@code Thread.currentThread().interrupt()} if the exception is an InterruptedException
      * @return the converted runtime exception
+     * @throws NullPointerException if {@code e} is {@code null}
+     * @see #toRuntimeException(Throwable, boolean, boolean)
      */
     public static RuntimeException toRuntimeException(final Exception e, final boolean callInterrupt) {
         return toRuntimeException(e, callInterrupt, false);
@@ -232,8 +241,10 @@ public final class ExceptionUtil {
      * }
      * }</pre>
      *
-     * @param e the throwable to convert
-     * @return the converted runtime exception
+     * @param e the throwable to convert; must not be {@code null}
+     * @return the converted runtime exception, or the original instance if it is already a {@code RuntimeException}
+     * @throws NullPointerException if {@code e} is {@code null}
+     * @see #toRuntimeException(Throwable, boolean, boolean)
      */
     public static RuntimeException toRuntimeException(final Throwable e) {
         return toRuntimeException(e, false, false);
@@ -252,9 +263,11 @@ public final class ExceptionUtil {
      * }
      * }</pre>
      *
-     * @param e the throwable to convert
+     * @param e the throwable to convert; must not be {@code null}
      * @param callInterrupt whether to call {@code Thread.currentThread().interrupt()} if the exception is an InterruptedException
      * @return the converted runtime exception
+     * @throws NullPointerException if {@code e} is {@code null}
+     * @see #toRuntimeException(Throwable, boolean, boolean)
      */
     public static RuntimeException toRuntimeException(final Throwable e, final boolean callInterrupt) {
         return toRuntimeException(e, callInterrupt, false);
@@ -274,11 +287,12 @@ public final class ExceptionUtil {
      * }
      * }</pre>
      *
-     * @param e the throwable to convert
+     * @param e the throwable to convert; must not be {@code null}
      * @param callInterrupt whether to call {@code Thread.currentThread().interrupt()} if the exception is an InterruptedException
-     * @param throwIfItIsError whether to throw the throwable if it is an Error
-     * @return the converted runtime exception
-     * @throws Error if e is an Error and throwIfItIsError is true
+     * @param throwIfItIsError whether to throw the throwable if it is an {@code Error}
+     * @return the converted runtime exception, or the original instance if it is already a {@code RuntimeException}
+     * @throws Error if {@code e} is an {@code Error} and {@code throwIfItIsError} is {@code true}
+     * @throws NullPointerException if {@code e} is {@code null}
      */
     public static RuntimeException toRuntimeException(final Throwable e, final boolean callInterrupt, final boolean throwIfItIsError) {
         if (throwIfItIsError && e instanceof Error) {
@@ -334,8 +348,8 @@ public final class ExceptionUtil {
      * }
      * }</pre>
      *
-     * @param e the exception to unwrap
-     * @return the original checked exception if found, otherwise returns the input exception
+     * @param e the exception to unwrap, which may be {@code null}
+     * @return the original checked exception if found, otherwise the input exception itself ({@code null} if {@code e} is {@code null})
      */
     public static Exception tryToGetOriginalCheckedException(final Exception e) {
         return tryToGetOriginalCheckedException(e, MAX_DEPTH_FOR_LOOP_CAUSE);
@@ -386,9 +400,10 @@ public final class ExceptionUtil {
      * }
      * }</pre>
      *
-     * @param e the exception to check
+     * @param e the exception to check, which may be {@code null}
      * @param targetExceptionType the exception type to look for
-     * @return {@code true} if the exception or any cause is of the specified type
+     * @return {@code true} if the exception or any cause is assignable to the specified type; {@code false} if {@code e} is {@code null}
+     * @see #findCause(Throwable, Class)
      */
     public static boolean hasCause(final Throwable e, final Class<? extends Throwable> targetExceptionType) {
         if (e == null) {
@@ -424,9 +439,10 @@ public final class ExceptionUtil {
      * }
      * }</pre>
      *
-     * @param e the exception to check
+     * @param e the exception to check, which may be {@code null}
      * @param targetExceptionTester the predicate to test each exception in the cause chain
-     * @return {@code true} if any exception in the cause chain matches the predicate
+     * @return {@code true} if any exception in the cause chain matches the predicate; {@code false} if {@code e} is {@code null}
+     * @see #findCause(Throwable, Predicate)
      */
     public static boolean hasCause(final Throwable e, final Predicate<? super Throwable> targetExceptionTester) {
         if (e == null) {
@@ -632,9 +648,11 @@ public final class ExceptionUtil {
      * }</pre>
      *
      * @param <E> the type of exception to find
-     * @param e the exception to search through
+     * @param e the exception to search through, which may be {@code null}
      * @param targetExceptionType the class of the exception to find
-     * @return an Optional containing the found exception, or empty if not found
+     * @return an {@code Optional} containing the first exception in the cause chain assignable to the specified type,
+     *         or an empty {@code Optional} if none is found or {@code e} is {@code null}
+     * @see #hasCause(Throwable, Class)
      */
     public static <E extends Throwable> Optional<E> findCause(final Throwable e, final Class<? extends E> targetExceptionType) {
         if (e == null) {
@@ -674,9 +692,11 @@ public final class ExceptionUtil {
      * }</pre>
      *
      * @param <E> the type of exception expected
-     * @param e the exception to search through
+     * @param e the exception to search through, which may be {@code null}
      * @param targetExceptionTester the predicate to match exceptions
-     * @return an Optional containing the found exception, or empty if not found
+     * @return an {@code Optional} containing the first exception in the cause chain that matches the predicate,
+     *         or an empty {@code Optional} if none matches or {@code e} is {@code null}
+     * @see #hasCause(Throwable, Predicate)
      */
     public static <E extends Throwable> Optional<E> findCause(final Throwable e, final Predicate<? super Throwable> targetExceptionTester) {
         if (e == null) {
@@ -745,8 +765,9 @@ public final class ExceptionUtil {
      * }</pre>
      *
      * @param e the exception, which may be {@code null}
-     * @return the error message, or the exception class name if no message is available;
-     *         returns an empty string if {@code e} is {@code null}
+     * @return the error message; if no message is available anywhere in the cause chain, the canonical class name of {@code e};
+     *         an empty string if {@code e} is {@code null}. For a {@code SQLException}, the SQL error code is prefixed (e.g. {@code "1054|message"})
+     * @see #getErrorMessage(Throwable, boolean)
      */
     public static String getErrorMessage(final Throwable e) {
         return getErrorMessage(e, false);
@@ -767,8 +788,10 @@ public final class ExceptionUtil {
      * }</pre>
      *
      * @param e the exception, which may be {@code null}
-     * @param withExceptionClassName if {@code true}, prefixes the message with the exception class name
-     * @return the formatted error message; returns an empty string if {@code e} is {@code null}
+     * @param withExceptionClassName if {@code true}, prefixes the message with the exception's simple class name
+     * @return the formatted error message (for a {@code SQLException} the SQL error code is also included);
+     *         an empty string if {@code e} is {@code null}
+     * @see #getErrorMessage(Throwable)
      */
     public static String getErrorMessage(final Throwable e, final boolean withExceptionClassName) {
         if (e == null) {

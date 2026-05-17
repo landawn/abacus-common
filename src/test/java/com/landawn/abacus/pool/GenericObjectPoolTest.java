@@ -1308,4 +1308,43 @@ public class GenericObjectPoolTest extends TestBase {
             p.close();
         }
     }
+
+    /**
+     * Regression: a thread blocked in {@code take(timeout, unit)} that aborts because the
+     * pool is concurrently {@code close()}d (resulting in an IllegalStateException) must NOT
+     * be counted as a cache miss. Before the fix the hit/miss accounting lived in the
+     * {@code finally} block and ran even when the body unwound exceptionally, recording a
+     * spurious miss. {@code missCount} is read directly (package-private field) because
+     * {@code stats()} throws on a closed pool.
+     */
+    @Test
+    public void testTakeTimed_PoolClosedWhileWaiting_NoSpuriousMissCount() throws InterruptedException {
+        final CountDownLatch takingLatch = new CountDownLatch(1);
+        final CountDownLatch doneLatch = new CountDownLatch(1);
+        final AtomicBoolean gotIllegalState = new AtomicBoolean(false);
+
+        Thread taker = new Thread(() -> {
+            try {
+                takingLatch.countDown();
+                pool.take(10, TimeUnit.SECONDS);
+            } catch (IllegalStateException e) {
+                gotIllegalState.set(true);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } finally {
+                doneLatch.countDown();
+            }
+        });
+
+        taker.start();
+        assertTrue(takingLatch.await(2, TimeUnit.SECONDS));
+        Thread.sleep(100); // let the taker park in notEmpty.awaitNanos
+
+        pool.close(); // signals notEmpty.signalAll(); taker wakes, assertNotClosed() throws
+
+        assertTrue(doneLatch.await(3, TimeUnit.SECONDS));
+        assertTrue(gotIllegalState.get(), "Taker must receive IllegalStateException on close");
+        assertEquals(0, pool.missCount.get(), "Closed-pool abort must not be counted as a miss");
+        assertEquals(0, pool.hitCount.get(), "Closed-pool abort must not be counted as a hit");
+    }
 }

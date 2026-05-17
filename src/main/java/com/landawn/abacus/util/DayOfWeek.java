@@ -113,9 +113,12 @@ public enum DayOfWeek {
     }
 
     /**
-     * Returns the DayOfWeek enum constant associated with the specified integer value.
+     * Returns the {@code DayOfWeek} enum constant associated with the specified integer value.
      * This method provides a way to convert numeric day representations back to
-     * DayOfWeek enum constants.
+     * {@code DayOfWeek} enum constants. It is the inverse of {@link #intValue()}.
+     *
+     * <p>Note: this is distinct from the implicitly declared {@code valueOf(String)} method
+     * inherited by every enum, which looks up a constant by its name.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -128,9 +131,10 @@ public enum DayOfWeek {
      * DayOfWeek day = DayOfWeek.valueOf(storedDay);
      * }</pre>
      *
-     * @param intValue the integer value to convert (must be 0-6)
-     * @return the corresponding DayOfWeek enum constant
-     * @throws IllegalArgumentException if intValue is not in the range 0-6
+     * @param intValue the integer value to convert (must be in the range 0-6)
+     * @return the corresponding {@code DayOfWeek} enum constant (never {@code null})
+     * @throws IllegalArgumentException if {@code intValue} is not in the range 0-6
+     * @see #intValue()
      */
     public static DayOfWeek valueOf(final int intValue) {
         switch (intValue) {

@@ -46,7 +46,8 @@ final class GuavaHashFunction implements HashFunction {
     /**
      * Constructs a new GuavaHashFunction wrapping the specified Guava hash function.
      *
-     * @param gHashFunction the Guava hash function to wrap
+     * @param gHashFunction the Guava hash function to wrap, must not be {@code null}
+     * @throws NullPointerException if {@code gHashFunction} is {@code null}
      */
     GuavaHashFunction(final com.google.common.hash.HashFunction gHashFunction) {
         N.requireNonNull(gHashFunction, "gHashFunction");

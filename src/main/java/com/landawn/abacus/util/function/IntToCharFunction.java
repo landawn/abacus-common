@@ -62,7 +62,7 @@ public interface IntToCharFunction {
      *
      * @param value the function argument, an int value to be converted to char.
      *              This is typically a Unicode code point value
-     * @return the function result as a char value
+     * @return the function result as a char value.
      */
     char applyAsChar(int value);
 }

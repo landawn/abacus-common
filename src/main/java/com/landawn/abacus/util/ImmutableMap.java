@@ -21,9 +21,12 @@ import java.util.SortedMap;
 import com.landawn.abacus.annotation.Beta;
 
 /**
- * An immutable, thread-safe implementation of the Map interface.
- * Once created, the contents of an ImmutableMap cannot be modified.
- * All mutating operations (put, remove, clear, etc.) will throw UnsupportedOperationException.
+ * An immutable implementation of the {@link Map} interface.
+ * Once created, the contents of an {@code ImmutableMap} cannot be modified.
+ * All mutating operations ({@code put}, {@code remove}, {@code clear}, etc.) throw {@link UnsupportedOperationException}.
+ *
+ * <p>Note: instances created via {@link #wrap(Map)} delegate to the supplied backing map; the immutability
+ * (and thread-safety) guarantee then depends on that backing map not being modified externally.</p>
  *
  * <p>This class provides several static factory methods for creating instances:
  * <ul>
@@ -85,7 +88,7 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      *
      * @param <K> the type of keys.
      * @param <V> the type of values.
-     * @return an empty ImmutableMap instance.
+     * @return an empty {@code ImmutableMap} instance.
      */
     public static <K, V> ImmutableMap<K, V> empty() {
         return EMPTY;
@@ -116,9 +119,9 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
 
     /**
      * Returns an ImmutableMap containing exactly two key-value mappings.
-     * The returned map is immutable and will have a size of 2.
+     * The returned map is immutable and will have a size of 2 (or fewer if duplicate keys are supplied).
      * The iteration order is guaranteed to match the order of insertion.
-     * If the same key is provided twice, an IllegalArgumentException may be thrown.
+     * If the same key is provided more than once, the later value overwrites the earlier one.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -145,9 +148,9 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
 
     /**
      * Returns an ImmutableMap containing exactly three key-value mappings.
-     * The returned map is immutable and will have a size of 3.
+     * The returned map is immutable and will have a size of 3 (or fewer if duplicate keys are supplied).
      * The iteration order is guaranteed to match the order of insertion.
-     * If duplicate keys are provided, an IllegalArgumentException may be thrown.
+     * If duplicate keys are provided, the later value overwrites the earlier one.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -178,9 +181,9 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
 
     /**
      * Returns an ImmutableMap containing exactly four key-value mappings.
-     * The returned map is immutable and will have a size of 4.
+     * The returned map is immutable and will have a size of 4 (or fewer if duplicate keys are supplied).
      * The iteration order is guaranteed to match the order of insertion.
-     * If duplicate keys are provided, an IllegalArgumentException may be thrown.
+     * If duplicate keys are provided, the later value overwrites the earlier one.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -212,9 +215,9 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
 
     /**
      * Returns an ImmutableMap containing exactly five key-value mappings.
-     * The returned map is immutable and will have a size of 5.
+     * The returned map is immutable and will have a size of 5 (or fewer if duplicate keys are supplied).
      * The iteration order is guaranteed to match the order of insertion.
-     * If duplicate keys are provided, an IllegalArgumentException may be thrown.
+     * If duplicate keys are provided, the later value overwrites the earlier one.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -251,9 +254,9 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
 
     /**
      * Returns an ImmutableMap containing exactly six key-value mappings.
-     * The returned map is immutable and will have a size of 6.
+     * The returned map is immutable and will have a size of 6 (or fewer if duplicate keys are supplied).
      * The iteration order is guaranteed to match the order of insertion.
-     * If duplicate keys are provided, an IllegalArgumentException may be thrown.
+     * If duplicate keys are provided, the later value overwrites the earlier one.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -293,9 +296,9 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
 
     /**
      * Returns an ImmutableMap containing exactly seven key-value mappings.
-     * The returned map is immutable and will have a size of 7.
+     * The returned map is immutable and will have a size of 7 (or fewer if duplicate keys are supplied).
      * The iteration order is guaranteed to match the order of insertion.
-     * If duplicate keys are provided, an IllegalArgumentException may be thrown.
+     * If duplicate keys are provided, the later value overwrites the earlier one.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -339,9 +342,9 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
 
     /**
      * Returns an ImmutableMap containing exactly eight key-value mappings.
-     * The returned map is immutable and will have a size of 8.
+     * The returned map is immutable and will have a size of 8 (or fewer if duplicate keys are supplied).
      * The iteration order is guaranteed to match the order of insertion.
-     * If duplicate keys are provided, an IllegalArgumentException may be thrown.
+     * If duplicate keys are provided, the later value overwrites the earlier one.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -387,9 +390,9 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
 
     /**
      * Returns an ImmutableMap containing exactly nine key-value mappings.
-     * The returned map is immutable and will have a size of 9.
+     * The returned map is immutable and will have a size of 9 (or fewer if duplicate keys are supplied).
      * The iteration order is guaranteed to match the order of insertion.
-     * If duplicate keys are provided, an IllegalArgumentException may be thrown.
+     * If duplicate keys are provided, the later value overwrites the earlier one.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -455,8 +458,9 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      *
      * @param <K> the type of keys in the map.
      * @param <V> the type of values in the map.
-     * @param map the map whose mappings are to be placed in the ImmutableMap.
-     * @return an ImmutableMap containing all mappings from the source map, or the same instance if already an ImmutableMap.
+     * @param map the map whose mappings are to be placed in the {@code ImmutableMap}.
+     * @return an {@code ImmutableMap} containing all mappings from the source map, or the same instance if it is already an {@code ImmutableMap}, or an empty instance if {@code map} is {@code null} or empty.
+     * @see #wrap(Map)
      */
     public static <K, V> ImmutableMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
         if (map instanceof ImmutableMap) {
@@ -489,8 +493,9 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      *
      * @param <K> the type of keys in the map.
      * @param <V> the type of values in the map.
-     * @param map the map to be wrapped into an ImmutableMap.
-     * @return an ImmutableMap view of the provided map, or the same instance if already an ImmutableMap.
+     * @param map the map to be wrapped into an {@code ImmutableMap}.
+     * @return an {@code ImmutableMap} view backed by the provided map, or the same instance if it is already an {@code ImmutableMap}, or an empty instance if {@code map} is {@code null}.
+     * @see #copyOf(Map)
      */
     @Beta
     public static <K, V> ImmutableMap<K, V> wrap(final Map<? extends K, ? extends V> map) {
@@ -531,7 +536,7 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      * Creates a new Builder for constructing an ImmutableMap.
      * The builder allows adding key-value pairs one by one and then creating an immutable map.
      * This is useful when the number of entries is not known at compile time.
-     * The builder uses a HashMap internally for efficient entry addition.
+     * The builder uses a LinkedHashMap internally, so insertion order is preserved.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

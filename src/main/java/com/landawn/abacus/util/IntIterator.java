@@ -132,8 +132,8 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * @param a the int array (may be {@code null})
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
-     * @return a new {@code IntIterator} over the specified range, or an empty iterator if the array is {@code null} or fromIndex equals toIndex
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds
+     * @return a new {@code IntIterator} over the specified range, or an empty iterator if the array is {@code null} or {@code fromIndex == toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > a.length}, or {@code fromIndex > toIndex}
      */
     public static IntIterator of(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -188,9 +188,9 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * }
      * }</pre>
      *
-     * @param iteratorSupplier a Supplier that provides the IntIterator when needed
-     * @return a lazily initialized IntIterator
-     * @throws IllegalArgumentException if iteratorSupplier is null
+     * @param iteratorSupplier a {@code Supplier} that provides the {@code IntIterator} when needed
+     * @return a lazily initialized {@code IntIterator}
+     * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}
      */
     public static IntIterator defer(final Supplier<? extends IntIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
@@ -239,9 +239,9 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * // Generates infinite stream of 42
      * }</pre>
      *
-     * @param supplier the IntSupplier to generate values
-     * @return an infinite IntIterator
-     * @throws IllegalArgumentException if supplier is null
+     * @param supplier the {@code IntSupplier} used to generate each value
+     * @return an infinite {@code IntIterator} whose {@code hasNext()} always returns {@code true}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      */
     public static IntIterator generate(final IntSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier);
@@ -272,10 +272,10 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * // Generates: 0, 1, 2, 3, 4
      * }</pre>
      *
-     * @param hasNext the BooleanSupplier that determines if more elements exist
-     * @param supplier the IntSupplier to generate values
-     * @return an IntIterator that generates values conditionally
-     * @throws IllegalArgumentException if hasNext or supplier is null
+     * @param hasNext the {@code BooleanSupplier} that determines whether more elements exist
+     * @param supplier the {@code IntSupplier} used to generate each value
+     * @return an {@code IntIterator} that generates values while {@code hasNext} returns {@code true}
+     * @throws IllegalArgumentException if {@code hasNext} or {@code supplier} is {@code null}
      */
     public static IntIterator generate(final BooleanSupplier hasNext, final IntSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(hasNext);
@@ -620,9 +620,12 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * Performs the given action for each remaining element.
+     * Performs the given action for each remaining element, passing each value as a boxed {@code Integer}.
      *
-     * @param action the action to perform
+     * <p><b>Note:</b> This method is deprecated because it causes unnecessary boxing overhead.
+     * Use {@link #foreachRemaining(Throwables.IntConsumer)} instead for better performance.</p>
+     *
+     * @param action the action to perform on each remaining element
      * @deprecated use {@link #foreachRemaining(Throwables.IntConsumer)} instead to avoid boxing
      */
     @Deprecated

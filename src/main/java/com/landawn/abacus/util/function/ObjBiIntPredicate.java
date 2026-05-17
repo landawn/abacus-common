@@ -111,10 +111,10 @@ public interface ObjBiIntPredicate<T> extends Throwables.ObjBiIntPredicate<T, Ru
      *     end > start;
      *
      * ObjBiIntPredicate<String> combined = isValidRange.and(isNonEmpty);
-     * combined.test("Hello", 2, 2);   // returns {@code false} (not non-empty)
+     * combined.test("Hello", 2, 2);   // returns false (not non-empty)
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate
+     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
      * @throws NullPointerException if {@code other} is null
@@ -146,7 +146,7 @@ public interface ObjBiIntPredicate<T> extends Throwables.ObjBiIntPredicate<T, Ru
      * // Returns true if list is empty OR if range covers entire list
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate
+     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
      * @throws NullPointerException if {@code other} is null

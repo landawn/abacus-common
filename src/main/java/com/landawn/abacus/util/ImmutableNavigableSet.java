@@ -25,19 +25,19 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 
 /**
- * An immutable, thread-safe implementation of the NavigableSet interface.
- * This class extends ImmutableSortedSet and provides additional navigation methods
+ * An immutable implementation of the {@link NavigableSet} interface.
+ * This class extends {@link ImmutableSortedSet} and provides additional navigation methods
  * for accessing elements based on their ordering.
  *
- * <p>A NavigableSet extends SortedSet with navigation methods returning the closest
+ * <p>A {@code NavigableSet} extends {@code SortedSet} with navigation methods returning the closest
  * matches for given search targets. Methods like {@link #lower}, {@link #floor},
  * {@link #ceiling}, and {@link #higher} return elements respectively less than,
  * less than or equal, greater than or equal, and greater than a given element,
  * returning {@code null} if there is no such element.</p>
  *
- * <p>All mutating operations will throw UnsupportedOperationException. The set maintains
- * elements in sorted order according to their natural ordering or by a Comparator provided
- * at creation time.</p>
+ * <p>All mutating operations throw {@link UnsupportedOperationException}. The set maintains
+ * elements in sorted order according to their natural ordering or by a {@link java.util.Comparator}
+ * provided at creation time.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -306,8 +306,9 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      *
      * @param <E> the type of elements in the collection
      * @param c the collection whose elements are to be placed into this set
-     * @return an ImmutableNavigableSet containing the elements of the specified collection
-     * @throws ClassCastException if the elements don't implement Comparable
+     * @return an {@code ImmutableNavigableSet} containing the elements of the specified collection, or the same instance if it is already an {@code ImmutableNavigableSet}, or an empty instance if {@code c} is {@code null} or empty
+     * @throws ClassCastException if the elements are not mutually comparable (when the source collection is not a {@code SortedSet})
+     * @see #wrap(NavigableSet)
      */
     public static <E> ImmutableNavigableSet<E> copyOf(final Collection<? extends E> c) {
         if (c instanceof ImmutableNavigableSet) {
@@ -340,8 +341,9 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * }</pre>
      *
      * @param <E> the type of elements in the NavigableSet
-     * @param navigableSet the NavigableSet to be wrapped into an ImmutableNavigableSet
-     * @return an ImmutableNavigableSet backed by the provided NavigableSet
+     * @param navigableSet the NavigableSet to be wrapped into an {@code ImmutableNavigableSet}
+     * @return an {@code ImmutableNavigableSet} backed by the provided NavigableSet, or the same instance if it is already an {@code ImmutableNavigableSet}, or an empty instance if {@code navigableSet} is {@code null}
+     * @see #copyOf(Collection)
      */
     @Beta
     public static <E> ImmutableNavigableSet<E> wrap(final NavigableSet<? extends E> navigableSet) {

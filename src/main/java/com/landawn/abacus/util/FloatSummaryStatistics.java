@@ -39,6 +39,7 @@ import com.landawn.abacus.util.function.FloatConsumer;
  * System.out.println("Average: " + stats.getAverage());
  * }</pre>
  *
+ * @see KahanSummation
  * @see java.util.DoubleSummaryStatistics
  * @see java.util.IntSummaryStatistics
  * @see java.util.LongSummaryStatistics

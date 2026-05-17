@@ -678,7 +678,7 @@ public final class WebUtil {
      * @param quoteChar the character to use for quoting values in the cURL command,
      *                  typically single quote (') or double quote (")
      * @return a formatted cURL command string with line separators, ready for execution
-     * @throws IllegalArgumentException if {@code httpMethod} or {@code url} is {@code null}
+     * @throws IllegalArgumentException if {@code httpMethod} or {@code url} is {@code null} or empty
      * @see HttpUtil#readHttpHeaderValue(Object)
      * @see Strings#quoteEscaped(String, char)
      */

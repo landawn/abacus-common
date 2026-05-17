@@ -174,12 +174,12 @@ public abstract class RateLimiter {
      * }</pre>
      *
      * @param permitsPerSecond the rate of the returned {@code RateLimiter}, measured in how many
-     *     permits become available per second, must be positive
+     *     permits become available per second, must be positive and not NaN
      * @param warmupPeriod the duration of the period where the {@code RateLimiter} ramps up its rate,
      *     before reaching its stable (maximum) rate, must be non-negative
      * @param unit the time unit of the warmupPeriod argument, must not be null
      * @return a newly created {@code RateLimiter} with the specified rate and warmup period
-     * @throws IllegalArgumentException if {@code permitsPerSecond} is negative or zero, or
+     * @throws IllegalArgumentException if {@code permitsPerSecond} is negative, zero, or NaN, or
      *     {@code warmupPeriod} is negative
      */
     public static RateLimiter create(final double permitsPerSecond, final long warmupPeriod, final TimeUnit unit) throws IllegalArgumentException {
@@ -421,8 +421,7 @@ public abstract class RateLimiter {
      *
      * @param timeout the maximum time to wait for the permit. Negative values are treated as zero.
      * @param unit the time unit of the timeout argument, must not be null
-     * @return {@code true} if the permit was acquired, {@code false} otherwise
-     * @throws IllegalArgumentException if the requested number of permits is negative or zero
+     * @return {@code true} if the permit was acquired within the timeout, {@code false} otherwise
      * @see #tryAcquire()
      * @see #tryAcquire(int)
      * @see #tryAcquire(int, long, TimeUnit)
@@ -437,7 +436,8 @@ public abstract class RateLimiter {
      * Acquires the specified number of permits from this {@link RateLimiter} if they can be acquired
      * immediately without any delay. This is a non-blocking operation that returns immediately.
      *
-     * <p>This method is equivalent to {@code tryAcquire(permits, 0, anyUnit)}.
+     * <p>This method is equivalent to {@code tryAcquire(permits, 0, TimeUnit.MICROSECONDS)} (with a
+     * zero timeout, the time unit has no effect).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

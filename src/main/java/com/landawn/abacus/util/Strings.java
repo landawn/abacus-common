@@ -551,7 +551,7 @@ public final class Strings {
       * @see <a href="https://docs.oracle.com/javase/specs/jls/se17/html/jls-3.html#jls-3.8">Java Language Specification - Identifiers</a>
       */
     public static boolean isValidJavaIdentifier(final CharSequence cs) {
-        if (isEmpty(cs)) {
+        if (isEmpty(cs) || !Character.isJavaIdentifierStart(cs.charAt(0)) || javax.lang.model.SourceVersion.isKeyword(cs)) {
             return false;
         }
 
@@ -3513,7 +3513,7 @@ public final class Strings {
      *
      * <p>This method converts the input string to uppercase and inserts underscores before uppercase letters
      * that are preceded by lowercase letters or followed by lowercase letters. This is useful for converting
-     * camelCase or UpperCamelCase strings to SCREAMING_SNAKE_CASES format.</p>
+     * camelCase or UpperCamelCase strings to SCREAMING_SNAKE_CASE format.</p>
      *
      * <p>The method returns the original string if it is {@code null} or empty.</p>
      *
@@ -3657,7 +3657,7 @@ public final class Strings {
      * <p>The method returns {@code null} if the input string is {@code null}.</p>
      *
      * <p>Note: This method performs character-by-character case swapping, not word-based swapping.
-     * For word-based algorithms, see {@link org.apache.commons.lang3.text.WordUtils#swapCase(String)}.</p>
+     * For word-based algorithms, see {@code org.apache.commons.lang3.text.WordUtils#swapCase(String)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4309,7 +4309,7 @@ public final class Strings {
      * Strings.replaceFirst(null, *, *);             // returns null
      * Strings.replaceFirst("", *, *);               // returns ""
      * Strings.replaceFirst("any", null, *);         // returns "any"
-     * Strings.replaceFirst("any", *, null);         // returns "ny"
+     * Strings.replaceFirst("any", *, null);         // returns "any"
      * Strings.replaceFirst("any", "", *);           // returns "any"
      * Strings.replaceFirst("aba", "a", null);       // returns "ba"
      * Strings.replaceFirst("aba", "a", "");         // returns "ba"
@@ -4439,9 +4439,9 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.replaceLast("abacadae", 8, "a", "z");       // returns "abacadze"
-     * Strings.replaceLast("abacadae", 5, "a", "z");       // returns "abzcadae"
-     * Strings.replaceLast("abacadae", 2, "a", "z");       // returns "zbacadae"
+     * Strings.replaceLast("abacadae", 8, "a", "z");       // returns "abacadzae"
+     * Strings.replaceLast("abacadae", 5, "a", "z");       // returns "abaczadae"
+     * Strings.replaceLast("abacadae", 2, "a", "z");       // returns "abzcadae"
      * Strings.replaceLast("hello world", 11, "o", "0");   // returns "hello w0rld"
      * Strings.replaceLast("hello world", 5, "o", "0");    // returns "hell0 world"
      * }</pre>
@@ -5750,6 +5750,11 @@ public final class Strings {
                 } else if (preserveAllTokens) {
                     substrs.add(EMPTY);
                 }
+            } else if (preserveAllTokens && idx >= 0 && i == len) {
+                // The loop terminated because i advanced to the end of the string right after consuming
+                // a trailing delimiter (idx points at that final delimiter). The empty token following the
+                // final delimiter must still be preserved, mirroring the single-char splitWorker behavior.
+                substrs.add(EMPTY);
             }
         }
 
@@ -8242,10 +8247,10 @@ public final class Strings {
      * Strings.isAlphaSpace("你好 世界");          // returns true (Chinese with space)
      * Strings.isAlphaSpace("");               // returns true (empty string)
      * Strings.isAlphaSpace("  ");             // returns true (only spaces)
+     * Strings.isAlphaSpace("ab c");           // returns true
      *
      * // Invalid strings
      * Strings.isAlphaSpace(null);             // returns false
-     * Strings.isAlphaSpace("ab c");           // returns true
      * Strings.isAlphaSpace("ab2c");           // returns false (contains digit)
      * Strings.isAlphaSpace("ab-c");           // returns false (contains hyphen)
      * Strings.isAlphaSpace("ab\tc");          // returns false (contains tab)
@@ -8340,11 +8345,11 @@ public final class Strings {
      * Strings.isAlphanumericSpace("你好 123");              // returns true
      * Strings.isAlphanumericSpace("");                    // returns true (empty string)
      * Strings.isAlphanumericSpace("  ");                  // returns true (only spaces)
+     * Strings.isAlphanumericSpace("ab c");                // returns true
+     * Strings.isAlphanumericSpace("ab2c");                // returns true
      *
      * // Invalid strings
      * Strings.isAlphanumericSpace(null);                  // returns false
-     * Strings.isAlphanumericSpace("ab c");                // returns true
-     * Strings.isAlphanumericSpace("ab2c");                // returns true
      * Strings.isAlphanumericSpace("ab-c");                // returns false (contains hyphen)
      * Strings.isAlphanumericSpace("ab\tc");               // returns false (contains tab)
      * }</pre>
@@ -11384,8 +11389,8 @@ public final class Strings {
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
-     * @param valuesToFind the character to be checked
-     * @return {@code true} if the given string contains only the specified character or the given string is {@code null} or empty, {@code false} otherwise
+     * @param valuesToFind the array of allowed characters
+     * @return {@code true} if the given string contains only the specified characters or the given string is {@code null} or empty, {@code false} otherwise
      */
     public static boolean containsOnly(final String str, final char... valuesToFind) {
         if (isEmpty(str)) {
@@ -16992,7 +16997,7 @@ public final class Strings {
      * @param delimiter the delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
      * @param prefix the prefix to be added at the beginning. It can be empty.
      * @param suffix the suffix to be added at the end. It can be empty.
-     * @return the concatenated string with prefix and suffix applied.
+     * @return the concatenated string with prefix and suffix applied. Returns an empty string if the specified array is {@code null} or empty and both {@code prefix} and {@code suffix} are empty.
      * @see #join(Object[], String, String, String, boolean)
      */
     public static String join(final Object[] a, final String delimiter, final String prefix, final String suffix) {
@@ -17024,7 +17029,7 @@ public final class Strings {
      * @param prefix the prefix to be added at the beginning. It can be empty.
      * @param suffix the suffix to be added at the end. It can be empty.
      * @param trim if {@code true}, trims the string representations of each element.
-     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex} and <i>prefix, suffix</i> are empty.
+     * @return the concatenated string. Returns an empty string if the specified array is {@code null} or empty and <i>prefix, suffix</i> are empty.
      */
     public static String join(final Object[] a, final String delimiter, final String prefix, final String suffix, final boolean trim) {
         return join(a, 0, N.len(a), delimiter, prefix, suffix, trim);
@@ -18525,18 +18530,18 @@ public final class Strings {
      * Concatenates the string representations of two objects into a single string.
      *
      * <p>This method converts both objects to their string representations using {@code N.toString}
-     * and then concatenates them. {@code null} objects are converted to empty strings before concatenation.
-     * The actual concatenation is delegated to the string-based {@code concat} method.</p>
+     * and then concatenates them. {@code null} objects are converted to the string {@code "null"}
+     * before concatenation. The actual concatenation is delegated to the string-based {@code concat} method.</p>
      *
-     * <p>The method returns an empty string if both objects are {@code null}.</p>
+     * <p>The method returns {@code "nullnull"} if both objects are {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Strings.concat("Hello", 123);           // returns "Hello123"
      * Strings.concat(42, " is the answer");   // returns "42 is the answer"
-     * Strings.concat(null, "World");          // returns "World"
-     * Strings.concat("Hello", null);          // returns "Hello"
-     * Strings.concat(null, null);             // returns ""
+     * Strings.concat(null, "World");          // returns "nullWorld"
+     * Strings.concat("Hello", null);          // returns "Hellonull"
+     * Strings.concat(null, null);             // returns "nullnull"
      * }</pre>
      *
      * @param a the first object to concatenate, may be {@code null}
@@ -18551,17 +18556,17 @@ public final class Strings {
      * Concatenates the string representations of three objects into a single string.
      *
      * <p>This method converts all objects to their string representations using {@code N.toString}
-     * and then concatenates them. {@code null} objects are converted to empty strings before concatenation.
-     * The actual concatenation is delegated to the string-based {@code concat} method.</p>
+     * and then concatenates them. {@code null} objects are converted to the string {@code "null"}
+     * before concatenation. The actual concatenation is delegated to the string-based {@code concat} method.</p>
      *
-     * <p>The method returns an empty string if all objects are {@code null}.</p>
+     * <p>The method returns {@code "nullnullnull"} if all three objects are {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Strings.concat("Hello", " ", "World");   // returns "Hello World"
      * Strings.concat(1, 2, 3);                 // returns "123"
      * Strings.concat("Value: ", 42, "!");      // returns "Value: 42!"
-     * Strings.concat(null, null, null);        // returns ""
+     * Strings.concat(null, null, null);        // returns "nullnullnull"
      * }</pre>
      *
      * @param a the first object to concatenate, may be {@code null}
@@ -18578,10 +18583,10 @@ public final class Strings {
      * Concatenates the string representations of four objects into a single string.
      *
      * <p>This method converts all objects to their string representations using {@code N.toString}
-     * and then concatenates them. {@code null} objects are converted to empty strings before concatenation.
-     * The actual concatenation is delegated to the string-based {@code concat} method.</p>
+     * and then concatenates them. {@code null} objects are converted to the string {@code "null"}
+     * before concatenation. The actual concatenation is delegated to the string-based {@code concat} method.</p>
      *
-     * <p>The method returns an empty string if all objects are {@code null}.</p>
+     * <p>If all objects are {@code null}, the result is the string {@code "null"} repeated once per argument.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18606,10 +18611,10 @@ public final class Strings {
      * Concatenates the string representations of five objects into a single string.
      *
      * <p>This method converts all objects to their string representations using {@code N.toString}
-     * and then concatenates them. {@code null} objects are converted to empty strings before concatenation.
-     * The actual concatenation is delegated to the string-based {@code concat} method.</p>
+     * and then concatenates them. {@code null} objects are converted to the string {@code "null"}
+     * before concatenation. The actual concatenation is delegated to the string-based {@code concat} method.</p>
      *
-     * <p>The method returns an empty string if all objects are {@code null}.</p>
+     * <p>If all objects are {@code null}, the result is the string {@code "null"} repeated once per argument.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18635,10 +18640,10 @@ public final class Strings {
      * Concatenates the string representations of six objects into a single string.
      *
      * <p>This method converts all objects to their string representations using {@code N.toString}
-     * and then concatenates them. {@code null} objects are converted to empty strings before concatenation.
-     * The actual concatenation is delegated to the string-based {@code concat} method.</p>
+     * and then concatenates them. {@code null} objects are converted to the string {@code "null"}
+     * before concatenation. The actual concatenation is delegated to the string-based {@code concat} method.</p>
      *
-     * <p>The method returns an empty string if all objects are {@code null}.</p>
+     * <p>If all objects are {@code null}, the result is the string {@code "null"} repeated once per argument.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18664,10 +18669,10 @@ public final class Strings {
      * Concatenates the string representations of seven objects into a single string.
      *
      * <p>This method converts all objects to their string representations using {@code N.toString}
-     * and then concatenates them. {@code null} objects are converted to empty strings before concatenation.
-     * The actual concatenation is delegated to the string-based {@code concat} method.</p>
+     * and then concatenates them. {@code null} objects are converted to the string {@code "null"}
+     * before concatenation. The actual concatenation is delegated to the string-based {@code concat} method.</p>
      *
-     * <p>The method returns an empty string if all objects are {@code null}.</p>
+     * <p>If all objects are {@code null}, the result is the string {@code "null"} repeated once per argument.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18694,10 +18699,10 @@ public final class Strings {
      * Concatenates the string representations of eight objects into a single string.
      *
      * <p>This method converts all objects to their string representations using {@code N.toString}
-     * and then concatenates them. {@code null} objects are converted to empty strings before concatenation.
-     * The actual concatenation is delegated to the string-based {@code concat} method.</p>
+     * and then concatenates them. {@code null} objects are converted to the string {@code "null"}
+     * before concatenation. The actual concatenation is delegated to the string-based {@code concat} method.</p>
      *
-     * <p>The method returns an empty string if all objects are {@code null}.</p>
+     * <p>If all objects are {@code null}, the result is the string {@code "null"} repeated once per argument.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18726,10 +18731,10 @@ public final class Strings {
      * Concatenates the string representations of nine objects into a single string.
      *
      * <p>This method converts all objects to their string representations using {@code N.toString}
-     * and then concatenates them. {@code null} objects are converted to empty strings before concatenation.
-     * The actual concatenation is delegated to the string-based {@code concat} method.</p>
+     * and then concatenates them. {@code null} objects are converted to the string {@code "null"}
+     * before concatenation. The actual concatenation is delegated to the string-based {@code concat} method.</p>
      *
-     * <p>The method returns an empty string if all objects are {@code null}.</p>
+     * <p>If all objects are {@code null}, the result is the string {@code "null"} repeated once per argument.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18747,7 +18752,7 @@ public final class Strings {
      * @param g the seventh object to concatenate, may be {@code null}
      * @param h the eighth object to concatenate, may be {@code null}
      * @param i the ninth object to concatenate, may be {@code null}
-     * @return the concatenated string. Returns an empty string if all input objects are {@code null} or empty.
+     * @return the concatenated string representation of the objects. {@code null} objects are rendered as {@code "null"}.
      */
     public static String concat(final Object a, final Object b, final Object c, final Object d, final Object e, final Object f, final Object g, final Object h,
             final Object i) {
@@ -20535,6 +20540,180 @@ public final class Strings {
     }
 
     /**
+     * Estimates whether a Unicode code point is likely to occupy two columns in a
+     * monospace terminal or fixed-width text table.
+     *
+     * <p>This method uses a broad {@code wcwidth}-style heuristic inspired by
+     * Unicode East Asian Width values {@code W} and {@code F}. It covers common
+     * wide/fullwidth scripts and symbols, including CJK, Hangul, Kana, Bopomofo,
+     * Yi, Tangut, Nüshu, Khitan, fullwidth forms, vertical forms, CJK compatibility
+     * forms, emoji, pictographs, and supplementary CJK ideographic planes.</p>
+     *
+     * <p>This is not a complete Unicode display-width implementation. Actual
+     * rendering may depend on terminal, font, locale, emoji presentation,
+     * variation selectors, combining marks, and grapheme-cluster sequences such
+     * as ZWJ emoji.</p>
+     *
+     * @param codePoint the Unicode code point to evaluate
+     * @return {@code true} if the code point is likely rendered as two columns;
+     *         {@code false} otherwise
+     */
+    public static boolean isLikelyWideCodePoint(final int codePoint) {
+        // Fast fail for ASCII, most Latin scripts, and invalid code points.
+        if (codePoint < 0x1100 || !Character.isValidCodePoint(codePoint)) {
+            return false;
+        }
+
+        // BMP: U+0000 - U+FFFF
+        if (codePoint <= 0xFFFF) {
+
+            // Hangul Jamo leading consonants.
+            if (codePoint <= 0x115F) {
+                return true;
+            }
+
+            // Unicode wide angle brackets.
+            if (codePoint == 0x2329 || codePoint == 0x232A) {
+                return true;
+            }
+
+            // CJK symbols, Hiragana, Katakana, Bopomofo, and core ideographs.
+            if (codePoint >= 0x2E80 && codePoint <= 0x9FFF) {
+                return codePoint != 0x303F;
+            }
+
+            // Yi syllables and radicals.
+            if (codePoint >= 0xA000 && codePoint <= 0xA4CF) {
+                return true;
+            }
+
+            // Hangul Jamo Extended-A and Hangul syllables.
+            if (codePoint >= 0xA960 && codePoint <= 0xD7A3) {
+                return codePoint <= 0xA97F || codePoint >= 0xAC00;
+            }
+
+            // CJK compatibility ideographs.
+            if (codePoint >= 0xF900 && codePoint <= 0xFAFF) {
+                return true;
+            }
+
+            // Vertical forms and CJK compatibility forms.
+            if (codePoint >= 0xFE10 && codePoint <= 0xFE6F) {
+                return codePoint <= 0xFE19 || codePoint >= 0xFE30;
+            }
+
+            // Fullwidth ASCII variants and symbols.
+            return (codePoint >= 0xFF01 && codePoint <= 0xFF60) || (codePoint >= 0xFFE0 && codePoint <= 0xFFE6);
+        }
+
+        // Plane 1: Supplementary Multilingual Plane.
+        if (codePoint <= 0x1FFFF) {
+            return (codePoint >= 0x16FE0 && codePoint <= 0x18D08) // Tangut, Khitan, related CJK scripts
+                    || (codePoint >= 0x1B000 && codePoint <= 0x1B2FF) // Kana Supplement/Extended, Nüshu
+                    || (codePoint >= 0x1F200 && codePoint <= 0x1F2FF) // Enclosed ideographic supplement
+                    || (codePoint >= 0x1F300 && codePoint <= 0x1FAFF); // emoji and pictographs
+        }
+
+        // Plane 2 and 3: supplementary/tertiary CJK ideographic ranges.
+        return codePoint >= 0x20000 && codePoint <= 0x3FFFD;
+    }
+
+    /**
+     * Calculates the estimated visual display width of a string.
+     *
+     * <p>This iterates over the string's Unicode code points and sums the
+     * {@link #displayWidth(int) display width} of each, so wide CJK characters
+     * count as two columns while combining marks and ISO control characters
+     * count as zero. The result is an estimate suitable for monospace layout
+     * and is not a guarantee of how a particular terminal or font renders the
+     * string.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Strings.displayWidth("abc");    // returns 3
+     * Strings.displayWidth("中文");   // returns 4 (two wide characters)
+     * Strings.displayWidth("");       // returns 0
+     * Strings.displayWidth(null);     // returns 0
+     * }</pre>
+     *
+     * @param str the string to evaluate; may be {@code null}
+     * @return the total estimated visual width, or {@code 0} if the string is {@code null} or empty
+     * @see #displayWidth(int)
+     * @see #padEndByDisplayWidth(String, int)
+     */
+    public static int displayWidth(final String str) {
+        if (str == null || str.isEmpty()) {
+            return 0;
+        }
+
+        int width = 0;
+        for (int i = 0, len = str.length(); i < len;) {
+            final int codePoint = str.codePointAt(i);
+            width += displayWidth(codePoint);
+            i += Character.charCount(codePoint);
+        }
+
+        return width;
+    }
+
+    /**
+     * Returns the estimated visual width of a single Unicode code point.
+     *
+     * <p>ISO control characters and combining/enclosing marks are treated as
+     * zero width. Code points that are likely rendered as full-width (such as
+     * CJK ideographs, per {@link #isLikelyWideCodePoint(int)}) return {@code 2};
+     * all other printable code points return {@code 1}.</p>
+     *
+     * @param codePoint the Unicode code point to evaluate
+     * @return the estimated visual width: {@code 0} for control/combining marks,
+     *         {@code 2} for likely wide code points, otherwise {@code 1}
+     * @see #isLikelyWideCodePoint(int)
+     * @see #displayWidth(String)
+     */
+    public static int displayWidth(final int codePoint) {
+        if (Character.isISOControl(codePoint)) {
+            return 0;
+        }
+
+        final int type = Character.getType(codePoint);
+        if (type == Character.NON_SPACING_MARK || type == Character.ENCLOSING_MARK || type == Character.COMBINING_SPACING_MARK) {
+            return 0;
+        }
+
+        return isLikelyWideCodePoint(codePoint) ? 2 : 1;
+    }
+
+    /**
+     * Pads the end of a string with spaces until it reaches a minimum visual display width.
+     *
+     * <p>Unlike {@code String.format}, which pads based on character count, this method
+     * uses {@link #displayWidth(String)} to ensure the string occupies the correct
+     * amount of horizontal space in a visual layout, accounting for wide CJK characters.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Strings.padEndByDisplayWidth("ab", 5);    // returns "ab   " (3 spaces appended)
+     * Strings.padEndByDisplayWidth("中文", 5);   // returns "中文 " (display width 4 -> 1 space)
+     * Strings.padEndByDisplayWidth("abcde", 3); // returns "abcde" (already wide enough)
+     * Strings.padEndByDisplayWidth(null, 3);    // returns "   "
+     * }</pre>
+     *
+     * @param str the string to pad; if {@code null}, it is treated as an empty string
+     * @param minDisplayWidth the target minimum visual width
+     * @return the padded string, or the original string if it already meets or exceeds the target width
+     * @see #displayWidth(String)
+     */
+    public static String padEndByDisplayWidth(String str, final int minDisplayWidth) {
+        if (str == null) {
+            str = "";
+        }
+
+        final int displayWidth = displayWidth(str);
+
+        return displayWidth >= minDisplayWidth ? str : str + Strings.repeat(' ', minDisplayWidth - displayWidth);
+    }
+
+    /**
      * Enum defining different strategies for extracting substrings between delimiters.
      *
      * <p>This enum provides various approaches for handling nested delimiters when extracting
@@ -20867,7 +21046,7 @@ public final class Strings {
          * @param inclusiveBeginIndex the starting index (inclusive) of the substring.
          * @param defaultStr the default string to return if substring extraction fails, can be {@code null}.
          * @return the substring if it exists, otherwise {@code defaultStr}.
-         * @see Strings#substringAfter(String, char)
+         * @see Strings#substring(String, int)
          */
         @Beta
         public static String substringOrElse(final String str, final int inclusiveBeginIndex, final String defaultStr) {
@@ -20982,7 +21161,7 @@ public final class Strings {
          * @param str the string from which to extract the substring, can be {@code null}.
          * @param inclusiveBeginIndex the starting index (inclusive) of the substring.
          * @return the substring if it exists, otherwise {@code str} itself.
-         * @see Strings#substringAfter(String, char)
+         * @see Strings#substring(String, int)
          */
         @Beta
         public static String substringOrElseItself(final String str, final int inclusiveBeginIndex) {
@@ -21949,7 +22128,7 @@ public final class Strings {
          * @param exclusiveEndIndex the index marking the end boundary for searching (exclusive).
          * @param delimiterOfExclusiveEndIndex the delimiter marking the end of the substring (exclusive).
          * @return the substring before the last delimiter if found, otherwise {@code str} itself.
-         * @see Strings#substringBeforeLast(String, String)
+         * @see Strings#substringBeforeLast(String, int, String)
          */
         @Beta
         public static String substringBeforeLastOrElseItself(final String str, final int exclusiveEndIndex, final String delimiterOfExclusiveEndIndex) {

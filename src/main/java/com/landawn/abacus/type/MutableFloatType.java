@@ -29,6 +29,7 @@ import com.landawn.abacus.util.Strings;
  */
 public class MutableFloatType extends NumberType<MutableFloat> {
 
+    /** The type name constant for MutableFloat type identification, equal to {@code "MutableFloat"}. */
     public static final String MUTABLE_FLOAT = MutableFloat.class.getSimpleName();
 
     /**

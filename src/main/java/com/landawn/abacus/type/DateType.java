@@ -31,7 +31,7 @@ import com.landawn.abacus.util.N;
  * <p>Supported conversions include:
  * <ul>
  *   <li>{@link Number}: interpreted as milliseconds since the Unix epoch</li>
- *   <li>{@link java.util.Date}: the time portion is preserved in the resulting SQL Date</li>
+ *   <li>{@link java.util.Date}: the time instant is used to construct a new SQL Date</li>
  *   <li>{@link String}: parsed as a date string, or the special value {@code "sysTime"} for today's date</li>
  *   <li>{@code char[]}: parsed as a timestamp (milliseconds) or date string</li>
  * </ul>

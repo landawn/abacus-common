@@ -92,11 +92,11 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * );
      * }</pre>
      *
-     * @param count the count of values
-     * @param min the minimum value
-     * @param max the maximum value
-     * @param sum the sum of values
-     * @throws IllegalArgumentException if count is negative or minimum is greater than maximum
+     * @param count the count of values; must be non-negative
+     * @param min the minimum value, may be {@code null} if no values were recorded
+     * @param max the maximum value, may be {@code null} if no values were recorded
+     * @param sum the sum of values; if {@code null}, it is treated as {@link BigDecimal#ZERO}
+     * @throws IllegalArgumentException if {@code count} is negative, or if {@code min} is greater than {@code max}
      */
     public BigDecimalSummaryStatistics(final long count, final BigDecimal min, final BigDecimal max, final BigDecimal sum) {
         if (count < 0) {
@@ -126,7 +126,8 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * stats.accept(new BigDecimal("30.75"));
      * }</pre>
      *
-     * @param value the input value to be recorded
+     * @param value the input value to be recorded, must not be {@code null}
+     * @throws NullPointerException if {@code value} is {@code null}
      */
     @Override
     public void accept(final BigDecimal value) {

@@ -17,8 +17,8 @@ package com.landawn.abacus.util;
 /**
  * Represents a primitive boolean value paired with an index position.
  *
- * <p>This class is a specialized version of {@link Indexed} for primitive boolean values,
- * providing better performance by avoiding boxing/unboxing overhead.</p>
+ * <p>This class is a specialized version of {@code Indexed<Boolean>} for primitive boolean
+ * values, providing better performance by avoiding boxing/unboxing overhead.</p>
  *
  * <p>The class is immutable and extends {@link AbstractIndexed}.</p>
  *
@@ -26,7 +26,7 @@ package com.landawn.abacus.util;
  * <pre>{@code
  * IndexedBoolean indexedBool = IndexedBoolean.of(true, 5);
  * boolean value = indexedBool.value();   // true
- * long index = indexedBool.index();   // 5
+ * int index = indexedBool.index();   // 5
  * }</pre>
  *
  * @see Indexed
@@ -44,9 +44,11 @@ public final class IndexedBoolean extends AbstractIndexed {
 
     /**
      * Constructs an IndexedBoolean instance with the specified index and value.
+     * This is a package-private constructor; use {@link #of(boolean, int)} or
+     * {@link #of(boolean, long)} factory methods for creating instances.
      *
-     * @param index the index position
-     * @param value the boolean value to be indexed
+     * @param index the index position (non-negative long value)
+     * @param value the boolean value to be associated with the index
      */
     IndexedBoolean(final long index, final boolean value) {
         super(index);
@@ -61,10 +63,10 @@ public final class IndexedBoolean extends AbstractIndexed {
      * IndexedBoolean indexed = IndexedBoolean.of(true, 5);
      * }</pre>
      *
-     * @param value the boolean value to be indexed
-     * @param index the index position (must be non-negative)
-     * @return a new IndexedBoolean instance
-     * @throws IllegalArgumentException if index is negative
+     * @param value the boolean value to be associated with the index
+     * @param index the index position (must be non-negative, 0 to Integer.MAX_VALUE)
+     * @return a new immutable IndexedBoolean instance containing the specified value and index
+     * @throws IllegalArgumentException if index is negative (index &lt; 0)
      */
     public static IndexedBoolean of(final boolean value, final int index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
@@ -82,10 +84,10 @@ public final class IndexedBoolean extends AbstractIndexed {
      * IndexedBoolean indexed = IndexedBoolean.of(true, 5000000000L);
      * }</pre>
      *
-     * @param value the boolean value to be indexed
-     * @param index the index position (must be non-negative)
-     * @return a new IndexedBoolean instance
-     * @throws IllegalArgumentException if index is negative
+     * @param value the boolean value to be associated with the index
+     * @param index the index position (must be non-negative, 0 to Long.MAX_VALUE)
+     * @return a new immutable IndexedBoolean instance containing the specified value and index
+     * @throws IllegalArgumentException if index is negative (index &lt; 0)
      */
     public static IndexedBoolean of(final boolean value, final long index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
@@ -95,6 +97,9 @@ public final class IndexedBoolean extends AbstractIndexed {
 
     /**
      * Returns the boolean value stored in this IndexedBoolean instance.
+     *
+     * <p>The index associated with this value can be retrieved through the {@link #index()}
+     * method inherited from {@link AbstractIndexed}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -137,8 +142,9 @@ public final class IndexedBoolean extends AbstractIndexed {
      * indexed1.equals(indexed3);   // false
      * }</pre>
      *
-     * @param obj the object to compare with
-     * @return {@code true} if the objects are equal, {@code false} otherwise
+     * @param obj the object to compare with this IndexedBoolean instance for equality
+     * @return {@code true} if the specified object is an IndexedBoolean with the same
+     *         index and value, {@code false} otherwise
      */
     @Override
     public boolean equals(final Object obj) {

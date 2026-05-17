@@ -20,8 +20,10 @@ package com.landawn.abacus.util;
  * original position need to be preserved, such as when sorting or filtering numeric
  * collections while maintaining knowledge of the original indices.
  *
- * <p>This class extends {@link AbstractIndexed} and provides factory methods for creating
- * instances with validated non-negative indices.</p>
+ * <p>This class is a specialized version of {@code Indexed<Float>} for primitive float
+ * values, providing better performance by avoiding boxing/unboxing overhead. It extends
+ * {@link AbstractIndexed} and provides factory methods for creating instances with validated
+ * non-negative indices.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -45,9 +47,11 @@ public final class IndexedFloat extends AbstractIndexed {
 
     /**
      * Constructs an IndexedFloat instance with the specified index and value.
+     * This is a package-private constructor; use {@link #of(float, int)} or
+     * {@link #of(float, long)} factory methods for creating instances.
      *
-     * @param index the index position
-     * @param value the float value to be indexed
+     * @param index the index position (non-negative long value)
+     * @param value the float value to be associated with the index
      */
     IndexedFloat(final long index, final float value) {
         super(index);
@@ -62,10 +66,10 @@ public final class IndexedFloat extends AbstractIndexed {
      * IndexedFloat indexed = IndexedFloat.of(2.718f, 10);
      * }</pre>
      *
-     * @param value the float value to be stored
-     * @param index the index position, must be non-negative
-     * @return a new {@code IndexedFloat} instance
-     * @throws IllegalArgumentException if the index is negative
+     * @param value the float value to be associated with the index
+     * @param index the index position (must be non-negative, 0 to Integer.MAX_VALUE)
+     * @return a new immutable {@code IndexedFloat} instance containing the specified value and index
+     * @throws IllegalArgumentException if the index is negative (index &lt; 0)
      */
     public static IndexedFloat of(final float value, final int index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
@@ -83,10 +87,10 @@ public final class IndexedFloat extends AbstractIndexed {
      * IndexedFloat indexed = IndexedFloat.of(1.414f, 1000000000L);
      * }</pre>
      *
-     * @param value the float value to be stored
-     * @param index the index position as a long, must be non-negative
-     * @return a new {@code IndexedFloat} instance
-     * @throws IllegalArgumentException if the index is negative
+     * @param value the float value to be associated with the index
+     * @param index the index position as a long (must be non-negative, 0 to Long.MAX_VALUE)
+     * @return a new immutable {@code IndexedFloat} instance containing the specified value and index
+     * @throws IllegalArgumentException if the index is negative (index &lt; 0)
      */
     public static IndexedFloat of(final float value, final long index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
@@ -97,7 +101,10 @@ public final class IndexedFloat extends AbstractIndexed {
     /**
      * Returns the float value stored in this IndexedFloat instance.
      *
-     * @return the float value
+     * <p>The index associated with this value can be retrieved through the {@link #index()}
+     * method inherited from {@link AbstractIndexed}.</p>
+     *
+     * @return the float value associated with this index
      */
     public float value() {
         return value;

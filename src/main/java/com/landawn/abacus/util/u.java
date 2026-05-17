@@ -122,12 +122,12 @@ import com.landawn.abacus.util.stream.Stream;
  *         .map(divisor -> dividend / divisor));
  *
  * // Stream integration
- * Stream<Integer> values = OptionalInt.of(42).stream()
+ * IntStream values = OptionalInt.of(42).stream()
  *     .map(i -> i * 2);
  *
  * // Cross-type transformations
  * OptionalChar letter = OptionalInt.of(65)
- *     .mapToChar(i -> (char) i);   // 'A'
+ *     .mapToChar(i -> (char) i.intValue());   // 'A'
  *
  * // Exception-safe operations
  * OptionalInt parsed = OptionalInt.empty()
@@ -295,11 +295,11 @@ public class u { // NOSONAR
     @com.landawn.abacus.annotation.Immutable
     public static final class OptionalBoolean implements Comparable<OptionalBoolean>, Immutable {
 
-        /** Represents {@code true}. */
-        public static final OptionalBoolean TRUE = new OptionalBoolean(true);
-
-        /** Represents {@code false}. */
+        /** The singleton instance representing a present {@code false} value. */
         public static final OptionalBoolean FALSE = new OptionalBoolean(false);
+
+        /** The singleton instance representing a present {@code true} value. */
+        public static final OptionalBoolean TRUE = new OptionalBoolean(true);
 
         private static final OptionalBoolean EMPTY = new OptionalBoolean();
 
@@ -369,7 +369,7 @@ public class u { // NOSONAR
             if (value == null) {
                 return empty();
             } else {
-                return of(value);
+                return value ? TRUE : FALSE;
             }
         }
 
@@ -674,15 +674,15 @@ public class u { // NOSONAR
         }
 
         /**
-         * If a value is present, returns this {@code OptionalBoolean}, otherwise
-         * returns the {@code OptionalBoolean} produced by the supplying function.
+         * Returns this {@code OptionalBoolean} if a value is present; otherwise returns
+         * the {@code OptionalBoolean} produced by the supplying function.
          *
-         * @param supplier the supplying function that produces an {@code OptionalBoolean}
-         *        to be returned
-         * @return this {@code OptionalBoolean}, if a value is present, otherwise the
-         *         {@code OptionalBoolean} produced by the supplying function
-         * @throws NullPointerException if no value is present and the supplying function is {@code null}
-         *         or returns {@code null}
+         * @param supplier the supplying function that produces the alternative
+         *        {@code OptionalBoolean}
+         * @return this {@code OptionalBoolean} if a value is present; otherwise the
+         *         supplied {@code OptionalBoolean}
+         * @throws NullPointerException if no value is present and {@code supplier} is
+         *         {@code null}, or if {@code supplier} returns {@code null}
          */
         public OptionalBoolean or(final Supplier<OptionalBoolean> supplier) {
             if (isPresent) {
@@ -690,6 +690,38 @@ public class u { // NOSONAR
             } else {
                 return Objects.requireNonNull(supplier.get());
             }
+        }
+
+        /**
+         * Returns the contained value if present; otherwise returns {@code false}.
+         *
+         * <p>This is a convenience method equivalent to:
+         * <pre>{@code
+         * optional.orElse(false)
+         * }</pre>
+         *
+         * @return the contained value if present; otherwise {@code false}
+         * @see #orElse(boolean)
+         */
+        @Beta
+        public boolean orElseFalse() {
+            return isPresent ? value : false;
+        }
+
+        /**
+         * Returns the contained value if present; otherwise returns {@code true}.
+         *
+         * <p>This is a convenience method equivalent to:
+         * <pre>{@code
+         * optional.orElse(true)
+         * }</pre>
+         *
+         * @return the contained value if present; otherwise {@code true}
+         * @see #orElse(boolean)
+         */
+        @Beta
+        public boolean orElseTrue() {
+            return isPresent ? value : true;
         }
 
         /**
@@ -709,15 +741,14 @@ public class u { // NOSONAR
         }
 
         /**
-         * If a value is present, returns the value, otherwise returns the result
-         * produced by the supplying function.
+         * Returns the contained value if present; otherwise returns the result produced
+         * by the supplied {@code BooleanSupplier}.
          *
-         * @param supplier a {@code BooleanSupplier} whose result is returned if no value
-         *        is present
-         * @return the value, if present, otherwise the result produced by the
-         *         supplying function
-         * @throws IllegalArgumentException if no value is present and the supplying
-         *         function is null
+         * <p>The supplier is checked for null before the presence check.
+         *
+         * @param supplier the supplier whose result is returned if no value is present
+         * @return the contained value if present; otherwise the supplied value
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}
          */
         public boolean orElseGet(final BooleanSupplier supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.other);
@@ -943,15 +974,15 @@ public class u { // NOSONAR
         }
 
         /**
-         * Compares this {@code OptionalBoolean} to another {@code OptionalBoolean}.
-         * The comparison is first based on presence of values. An empty {@code OptionalBoolean}
-         * is considered less than a non-empty one. If both are non-empty, the contained
-         * values are compared using {@link Boolean#compare}.
+         * Compares this {@code OptionalBoolean} with another {@code OptionalBoolean}.
          *
-         * @param optional the {@code OptionalBoolean} to compare to
-         * @return a negative integer, zero, or a positive integer as this
-         *         {@code OptionalBoolean} is less than, equal to, or greater than the
-         *         specified {@code OptionalBoolean}
+         * <p>Empty instances are ordered before present instances. If both instances are
+         * present, their values are compared using {@link Boolean#compare(boolean, boolean)}.
+         * A {@code null} argument is treated as an empty {@code OptionalBoolean}.
+         *
+         * @param optional the {@code OptionalBoolean} to compare with, or {@code null}
+         * @return a negative integer, zero, or a positive integer as this instance is
+         *         less than, equal to, or greater than {@code optional}
          */
         @Override
         public int compareTo(final OptionalBoolean optional) {
@@ -967,17 +998,14 @@ public class u { // NOSONAR
         }
 
         /**
-         * Indicates whether some other object is "equal to" this {@code OptionalBoolean}.
-         * The other object is considered equal if:
-         * <ul>
-         *  <li>it is also an {@code OptionalBoolean} and;
-         *  <li>both instances have no value present or;
-         *  <li>the present values are equal via {@code ==}
-         * </ul>
+         * Indicates whether another object is equal to this {@code OptionalBoolean}.
          *
-         * @param obj an object to be tested for equality
-         * @return {@code true} if the other object is "equal to" this object
-         *         otherwise {@code false}
+         * <p>Two {@code OptionalBoolean} instances are equal if they are both empty, or
+         * if they are both present and contain the same boolean value.
+         *
+         * @param obj the object to compare with
+         * @return {@code true} if {@code obj} is equal to this instance; otherwise
+         *         {@code false}
          */
         @SuppressFBWarnings
         @Override
@@ -1006,12 +1034,9 @@ public class u { // NOSONAR
 
         /**
          * Returns a non-empty string representation of this {@code OptionalBoolean}
-         * suitable for debugging. The exact presentation format is unspecified and
-         * may vary between implementations and versions.
+         * suitable for debugging.
          *
-         * <p>If a value is present the result must include its string representation
-         * in the result. Empty and present {@code OptionalBoolean}s must be unambiguously
-         * differentiable.
+         * <p>The exact format is unspecified and may vary between versions.
          *
          * @return the string representation of this instance
          */
@@ -1411,6 +1436,7 @@ public class u { // NOSONAR
          *
          * @return the value, if present, otherwise zero
          */
+        @Beta
         public char orElseZero() {
             return isPresent() ? value : 0;
         }
@@ -1743,12 +1769,12 @@ public class u { // NOSONAR
 
         /**
          * Returns a non-empty string representation of this {@code OptionalChar}
-         * suitable for debugging. The exact presentation format is unspecified and
-         * may vary between implementations and versions.
+         * suitable for debugging.
          *
-         * <p>If a value is present the result must include its string representation
-         * in the result. Empty and present {@code OptionalChar}s must be unambiguously
-         * differentiable.
+         * <p>If a value is present, the result is {@code "OptionalChar["} followed by
+         * the value and {@code "]"}; if no value is present, the result is
+         * {@code "OptionalChar.empty"}. The exact presentation format is unspecified
+         * and may vary between versions.
          *
          * @return the string representation of this instance
          */
@@ -2101,6 +2127,7 @@ public class u { // NOSONAR
          *
          * @return the value if present, otherwise {@code 0}
          */
+        @Beta
         public byte orElseZero() {
             return isPresent ? value : 0;
         }
@@ -2769,6 +2796,7 @@ public class u { // NOSONAR
          *
          * @return the value if present, otherwise {@code 0}
          */
+        @Beta
         public short orElseZero() {
             return isPresent ? value : 0;
         }
@@ -3506,6 +3534,7 @@ public class u { // NOSONAR
          *
          * @return the value if present, otherwise 0
          */
+        @Beta
         public int orElseZero() {
             return isPresent ? value : 0;
         }
@@ -3809,9 +3838,9 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns the hash code of the value if present, otherwise returns a hash code for empty.
+         * Returns the hash code of the value if present, otherwise returns {@code 0} (zero) if no value is present.
          *
-         * @return hash code value of the present value or a hash code for empty
+         * @return hash code value of the present value or {@code 0} if no value is present
          */
         @Override
         public int hashCode() {
@@ -4164,6 +4193,7 @@ public class u { // NOSONAR
          *
          * @return the value if present, otherwise 0
          */
+        @Beta
         public long orElseZero() {
             return isPresent ? value : 0;
         }
@@ -4467,9 +4497,9 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns the hash code of the value if present, otherwise returns a hash code for empty.
+         * Returns the hash code of the value if present, otherwise returns {@code 0} (zero) if no value is present.
          *
-         * @return hash code value of the present value or a hash code for empty
+         * @return hash code value of the present value or {@code 0} if no value is present
          */
         @Override
         public int hashCode() {
@@ -4793,6 +4823,7 @@ public class u { // NOSONAR
          *
          * @return the value if present, otherwise 0
          */
+        @Beta
         public float orElseZero() {
             return isPresent ? value : 0;
         }
@@ -5441,6 +5472,7 @@ public class u { // NOSONAR
          *
          * @return the value if present, otherwise {@code 0}
          */
+        @Beta
         public double orElseZero() {
             return isPresent ? value : 0;
         }

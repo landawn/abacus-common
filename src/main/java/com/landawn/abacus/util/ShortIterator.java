@@ -24,9 +24,9 @@ import com.landawn.abacus.util.function.ShortSupplier;
 import com.landawn.abacus.util.stream.ShortStream;
 
 /**
- * A specialized iterator for primitive short values that extends ImmutableIterator.
+ * A specialized iterator for primitive {@code short} values that extends {@link ImmutableIterator}.
  * This class provides various factory methods and operations for creating and manipulating
- * iterators over short values without the overhead of boxing/unboxing.
+ * iterators over {@code short} values without the overhead of boxing/unboxing.
  *
  * <p>The iterator is immutable, meaning elements cannot be removed during iteration.
  * It provides specialized methods like {@code nextShort()} to avoid boxing overhead,
@@ -106,8 +106,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * ShortIterator iter = ShortIterator.of(values);
      * }</pre>
      *
-     * @param a the short array (may be {@code null})
+     * @param a the {@code short} array (may be {@code null})
      * @return a new {@code ShortIterator} over the array elements, or an empty iterator if the array is {@code null} or empty
+     * @see #of(short[], int, int)
      */
     public static ShortIterator of(final short... a) {
         return N.isEmpty(a) ? EMPTY : of(a, 0, a.length);
@@ -126,11 +127,11 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * ShortIterator iter = ShortIterator.of(values, 1, 4);   // iterates over 2, 3, 4
      * }</pre>
      *
-     * @param a the short array (may be {@code null})
+     * @param a the {@code short} array (may be {@code null})
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
-     * @return a new {@code ShortIterator} over the specified range, or an empty iterator if the array is {@code null} or fromIndex equals toIndex
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds
+     * @return a new {@code ShortIterator} over the specified range, or an empty iterator if the array is {@code null} or {@code fromIndex == toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > a.length}, or {@code fromIndex > toIndex}
      */
     public static ShortIterator of(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -183,9 +184,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * // The expensive computation is not performed until iter.hasNext() or iter.nextShort() is called
      * }</pre>
      *
-     * @param iteratorSupplier a Supplier that provides the ShortIterator when needed
-     * @return a lazily initialized ShortIterator
-     * @throws IllegalArgumentException if iteratorSupplier is null
+     * @param iteratorSupplier a {@link Supplier} that provides the {@code ShortIterator} when needed; must not be {@code null}
+     * @return a lazily initialized {@code ShortIterator}
+     * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}
      */
     public static ShortIterator defer(final Supplier<? extends ShortIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
@@ -232,9 +233,10 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * randomShorts.limit(10).toList();
      * }</pre>
      *
-     * @param supplier the supplier function that generates short values
-     * @return an infinite ShortIterator
-     * @throws IllegalArgumentException if supplier is null
+     * @param supplier the supplier function that generates {@code short} values; must not be {@code null}
+     * @return an infinite {@code ShortIterator}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @see #generate(BooleanSupplier, ShortSupplier)
      */
     public static ShortIterator generate(final ShortSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier);
@@ -266,10 +268,11 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * // Will generate: 0, 1, 2, 3, 4
      * }</pre>
      *
-     * @param hasNext a BooleanSupplier that determines if there are more elements
-     * @param supplier the supplier function that generates short values
-     * @return a conditional ShortIterator
-     * @throws IllegalArgumentException if hasNext or supplier is null
+     * @param hasNext a {@link BooleanSupplier} that determines if there are more elements; must not be {@code null}
+     * @param supplier the supplier function that generates {@code short} values; must not be {@code null}
+     * @return a conditional {@code ShortIterator}
+     * @throws IllegalArgumentException if {@code hasNext} or {@code supplier} is {@code null}
+     * @see #generate(ShortSupplier)
      */
     public static ShortIterator generate(final BooleanSupplier hasNext, final ShortSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(hasNext);
@@ -296,9 +299,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * Returns the next element in the iteration as a boxed Short.
      * This method is deprecated in favor of {@link #nextShort()} to avoid unnecessary boxing.
      *
-     * @return the next short element as a Short object
+     * @return the next {@code short} element as a boxed {@link Short} object
      * @throws NoSuchElementException if the iteration has no more elements
-     * @deprecated use {@code nextShort()} instead to avoid boxing overhead
+     * @deprecated use {@link #nextShort()} instead to avoid boxing overhead
      */
     @Deprecated
     @Override
@@ -316,7 +319,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * short second = iter.nextShort();   // 2
      * }</pre>
      *
-     * @return the next short value
+     * @return the next {@code short} value
      * @throws NoSuchElementException if the iteration has no more elements
      */
     public abstract short nextShort();
@@ -332,8 +335,10 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * }</pre>
      *
      * @param n the number of elements to skip
-     * @return a new ShortIterator that skips the first n elements
-     * @throws IllegalArgumentException if n is negative
+     * @return a new {@code ShortIterator} that skips the first {@code n} elements;
+     *         returns this iterator unchanged if {@code n <= 0}
+     * @throws IllegalArgumentException if {@code n} is negative
+     * @see #limit(long)
      */
     public ShortIterator skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -388,8 +393,10 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * }</pre>
      *
      * @param count the maximum number of elements to iterate
-     * @return a new ShortIterator limited to count elements
-     * @throws IllegalArgumentException if count is negative
+     * @return a new {@code ShortIterator} limited to {@code count} elements;
+     *         returns an empty iterator if {@code count == 0}
+     * @throws IllegalArgumentException if {@code count} is negative
+     * @see #skip(long)
      */
     public ShortIterator limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, cs.count);
@@ -430,9 +437,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * ShortIterator evens = iter.filter(x -> x % 2 == 0);   // Will iterate over 2, 4
      * }</pre>
      *
-     * @param predicate the predicate to test each element
-     * @return a new filtered ShortIterator
-     * @throws IllegalArgumentException if predicate is null
+     * @param predicate the predicate to test each element; must not be {@code null}
+     * @return a new filtered {@code ShortIterator}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     public ShortIterator filter(final ShortPredicate predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate);
@@ -488,7 +495,8 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * short[] empty = ShortIterator.empty().toArray();   // empty.length == 0
      * }</pre>
      *
-     * @return a short array containing all remaining elements
+     * @return a {@code short} array containing all remaining elements; an empty array if there are none
+     * @see #toList()
      */
     @SuppressWarnings("deprecation")
     public short[] toArray() {
@@ -511,7 +519,8 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * ShortList empty = ShortIterator.empty().toList();   // empty.size() == 0
      * }</pre>
      *
-     * @return a ShortList containing all remaining elements
+     * @return a {@link ShortList} containing all remaining elements; an empty list if there are none
+     * @see #toArray()
      */
     public ShortList toList() {
         final ShortList list = new ShortList();
@@ -535,7 +544,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      *     .orElse(0.0);
      * }</pre>
      *
-     * @return a ShortStream of the remaining elements
+     * @return a {@link ShortStream} of the remaining elements
      */
     public ShortStream stream() {
         return ShortStream.of(this);
@@ -552,7 +561,8 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * // Will produce: IndexedShort(10, 0), IndexedShort(20, 1), IndexedShort(30, 2)
      * }</pre>
      *
-     * @return an iterator of IndexedShort objects
+     * @return an {@link ObjIterator} of {@link IndexedShort} objects
+     * @see #indexed(long)
      */
     @Beta
     public ObjIterator<IndexedShort> indexed() {
@@ -571,8 +581,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * }</pre>
      *
      * @param startIndex the starting index value
-     * @return an iterator of IndexedShort objects
-     * @throws IllegalArgumentException if startIndex is negative
+     * @return an {@link ObjIterator} of {@link IndexedShort} objects
+     * @throws IllegalArgumentException if {@code startIndex} is negative
+     * @see #indexed()
      */
     @Beta
     public ObjIterator<IndexedShort> indexed(final long startIndex) {
@@ -600,7 +611,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * This method is deprecated because it causes boxing of primitive shorts.
      *
      * @param action the action to perform on each element
-     * @deprecated use {@link #foreachRemaining(Throwables.ShortConsumer)} instead to avoid boxing
+     * @deprecated use {@link #foreachRemaining(Throwables.ShortConsumer)} instead to avoid boxing overhead
      */
     @Deprecated
     @Override
@@ -647,8 +658,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
-     * @param action the action to perform on each element with its index
-     * @throws IllegalArgumentException if action is null
+     * @param action the action to perform on each element with its index; must not be {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalStateException if the iterator has more than {@link Integer#MAX_VALUE} elements (index overflow)
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntShortConsumer<E> action) throws IllegalArgumentException, E {

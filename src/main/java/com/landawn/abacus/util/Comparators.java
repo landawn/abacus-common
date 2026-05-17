@@ -1490,8 +1490,10 @@ public final class Comparators {
      * // Result: ["a", "short", "medium", "very long string"]
      * }</pre>
      *
-     * @param <T> the type of CharSequence being compared
-     * @return a comparator that compares CharSequences by length
+     * @param <T> the type of {@link CharSequence} being compared
+     * @return a comparator that compares {@code CharSequence} instances by their length, with {@code null} treated as length 0
+     * @see #comparingByArrayLength()
+     * @see #comparingBySize()
      */
     public static <T extends CharSequence> Comparator<T> comparingByLength() {
         return (Comparator<T>) COMPARING_BY_LENGTH;

@@ -367,6 +367,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * The size of the list will be equal to the length of the array.
      *
      * @param a the array to be used as the backing array for this list. Must not be {@code null}.
+     * @throws NullPointerException if the specified array is {@code null}
      */
     public DoubleList(final double[] a) {
         this(N.requireNonNull(a), a.length);
@@ -701,7 +702,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * If the list does not contain the element, it is unchanged. Elements are compared using
      * {@code Double.compare} for accurate floating-point comparison.
      *
-     * <p>This method runs in linear time, as it may need to search through the entire list
+     * <p>This method runs in linear time, as it may need to search through the entire list.</p>
+     *
      * <p><b>Note:</b> This method removes by value. To remove by index, use {@link #removeAt(int)}.</p>
      *
      * @param e the element to be removed from this list, if present
@@ -1950,7 +1952,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <p>This method returns {@code true} if any value appears more than once
      * in the list, {@code false} if all elements are unique.</p>
      *
-     * <p>The comparison uses {@code ==} for primitive doubles, which means that
+     * <p>The comparison uses {@code Double.compare}, which means that
      * {@code NaN} values are considered equal to themselves for this purpose.</p>
      *
      * @return {@code true} if this list contains at least one duplicate element,
@@ -2515,6 +2517,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @return the first double value in the list
      * @throws NoSuchElementException if this list is empty
+     * @see #first()
+     * @see #getLast()
      */
     public double getFirst() {
         throwNoSuchElementExceptionIfEmpty();
@@ -2530,6 +2534,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @return the last double value in the list
      * @throws NoSuchElementException if this list is empty
+     * @see #last()
+     * @see #getFirst()
      */
     public double getLast() {
         throwNoSuchElementExceptionIfEmpty();
@@ -2612,7 +2618,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <p>Returns {@code true} if and only if the specified object is also a
      * {@code DoubleList}, both lists have the same size, and all corresponding
      * pairs of elements in the two lists are equal. Two double values are
-     * considered equal if they have the same bit pattern (which means that
+     * compared using {@code Double.compare} (which means that
      * {@code NaN} equals {@code NaN} and {@code -0.0} does not equal {@code 0.0}
      * for this method).</p>
      *

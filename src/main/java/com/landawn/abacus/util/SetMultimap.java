@@ -111,7 +111,7 @@ import com.landawn.abacus.annotation.Internal;
  *   <li>{@link #fromMap(Map)} - From existing Map</li>
  *   <li>{@link #fromCollection(Collection, Function)} - Grouping by key extractor</li>
  *   <li>{@link #fromCollection(Collection, Function, Function)} - Key and value extractors</li>
- *   <li>{@link #merge(Map, Map)} - Concatenating multiple maps</li>
+ *   <li>{@link #merge(Map, Map)} - Merging multiple maps</li>
  *   <li>{@link #wrap(Map)} - Wrapping existing Map&lt;K, Set&lt;E&gt;&gt;</li>
  *   <li>{@link N#newSetMultimap()} - Empty instance with default backing</li>
  * </ul>
@@ -748,10 +748,11 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Wraps an existing map into a SetMultimap without copying its contents. Changes to the wrapped map
      * will be reflected in the SetMultimap and vice versa, as they share the same underlying storage.
      *
-     * <p><strong>Important:</strong> The provided map must not contain {@code null} values.
-     * All values must be {@code non-null} Set instances. This constraint is validated at wrap time.
+     * <p><strong>Important:</strong> The provided map must not contain {@code null} or empty values.
+     * Every value must be a {@code non-null}, non-empty {@link Set} instance. This constraint is
+     * validated at wrap time.
      *
-     * <p>This method is useful when you want to treat an existing Map&lt;K, Set&lt;E&gt;&gt; as a SetMultimap
+     * <p>This method is useful when you want to treat an existing {@code Map<K, Set<E>>} as a SetMultimap
      * without creating a copy.
      *
      * <p><b>Usage Examples:</b></p>
@@ -765,9 +766,10 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param <K> the type of the keys in the map
      * @param <E> the type of the elements in the set
      * @param <V> the type of the set extending Set&lt;E&gt;
-     * @param map The map to be wrapped into a SetMultimap; must not be {@code null} and must not contain {@code null} values
+     * @param map the map to be wrapped into a SetMultimap; must not be {@code null} and must not contain {@code null} or empty values
      * @return a SetMultimap instance backed by the provided map
-     * @throws IllegalArgumentException if the provided map is {@code null} or contains {@code null} values
+     * @throws IllegalArgumentException if the provided map is {@code null} or contains a {@code null} or empty value
+     * @see #wrap(Map, Supplier)
      */
     @SuppressWarnings("rawtypes")
     @Beta
@@ -797,11 +799,12 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *
      * @param <K> the type of the keys in the map
      * @param <E> the type of the elements in the set
-     * @param <V> the type of the set extending Set&lt;E&gt;
-     * @param map The map to be wrapped into a SetMultimap
-     * @param valueSupplier The supplier that provides the set to be used as the value collection
+     * @param <V> the type of the value set, which must extend {@code Set<E>}
+     * @param map the map to be wrapped into a SetMultimap; must not be {@code null}
+     * @param valueSupplier the supplier that provides the set to be used as the value collection; must not be {@code null}
      * @return a SetMultimap instance backed by the provided map
-     * @throws IllegalArgumentException if the provided map or valueSupplier is null
+     * @throws IllegalArgumentException if the provided map or {@code valueSupplier} is {@code null}
+     * @see #wrap(Map)
      */
     @Beta
     public static <K, E, V extends Set<E>> SetMultimap<K, E> wrap(final Map<K, V> map, final Supplier<? extends V> valueSupplier)
@@ -830,7 +833,9 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * // inverted: {1 -> ["a", "b"], 2 -> ["a"]}
      * }</pre>
      *
-     * @return a new SetMultimap where each original value is mapped to the set of keys that contained it
+     * @return a new SetMultimap where each original value is mapped to the set of keys that contained it;
+     *         an empty SetMultimap if this multimap is empty
+     * @see #copy()
      */
     public SetMultimap<E, K> invert() {
         final SetMultimap<K, E> multimap = this;
@@ -989,8 +994,10 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * // immutable.get("a") returns ImmutableSet[1, 2]
      * }</pre>
      *
-     * @return an ImmutableMap where each key from this multimap is associated with an ImmutableSet
-     *         containing all values that were associated with that key
+     * @return an {@link ImmutableMap} where each key from this multimap is associated with an
+     *         {@link ImmutableSet} containing all values that were associated with that key;
+     *         an empty map if this multimap is empty
+     * @see #toImmutableMap(IntFunction)
      */
     public ImmutableMap<K, ImmutableSet<E>> toImmutableMap() {
         final Map<K, ImmutableSet<E>> map = Maps.newTargetMap(backingMap);
@@ -1020,9 +1027,11 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * }</pre>
      *
      * @param mapSupplier a function that creates a new map instance given an initial capacity;
-     *                    the function receives the size of this multimap as its argument
-     * @return an ImmutableMap where each key from this multimap is associated with an ImmutableSet
-     *         containing all values that were associated with that key
+     *                    the function receives the size of this multimap as its argument; must not be {@code null}
+     * @return an {@link ImmutableMap} where each key from this multimap is associated with an
+     *         {@link ImmutableSet} containing all values that were associated with that key
+     * @throws NullPointerException if {@code mapSupplier} is {@code null}
+     * @see #toImmutableMap()
      */
     public ImmutableMap<K, ImmutableSet<E>> toImmutableMap(final IntFunction<? extends Map<K, ImmutableSet<E>>> mapSupplier) {
         final Map<K, ImmutableSet<E>> map = mapSupplier.apply(backingMap.size());

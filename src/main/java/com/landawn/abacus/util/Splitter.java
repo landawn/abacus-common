@@ -121,8 +121,8 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Configuration Options:</b>
  * <ul>
  *   <li>{@link #omitEmptyStrings()} - Skip empty results in output</li>
- *   <li>{@link #trimResults()} - Remove leading/trailing ASCII whitespace</li>
- *   <li>{@link #stripResults()} - Remove leading/trailing Unicode whitespace</li>
+ *   <li>{@link #trimResults()} - Remove leading/trailing space characters only</li>
+ *   <li>{@link #stripResults()} - Remove leading/trailing whitespace per {@link Character#isWhitespace(char)}</li>
  *   <li>{@link #limit(int)} - Limit maximum number of splits performed</li>
  * </ul>
  *
@@ -170,8 +170,8 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Whitespace Handling Details:</b>
  * <ul>
- *   <li><b>trimResults():</b> Removes ASCII whitespace (space, tab, newline, carriage return)</li>
- *   <li><b>stripResults():</b> Removes all Unicode whitespace characters</li>
+ *   <li><b>trimResults():</b> Removes only the space character (' ') from the start and end</li>
+ *   <li><b>stripResults():</b> Removes all whitespace as defined by {@link Character#isWhitespace(char)}</li>
  *   <li><b>Both methods:</b> Applied after splitting but before empty string filtering</li>
  *   <li><b>Unicode Support:</b> {@link #WHITE_SPACE_PATTERN} provides full Unicode whitespace matching</li>
  * </ul>
@@ -1572,10 +1572,10 @@ public final class Splitter {
         }
 
         /**
-         * Configures this MapSplitter to omit entries with empty values when the
-         * specified parameter is {@code true}. This applies to the entries splitting phase.
+         * Configures this MapSplitter to omit empty entry strings when the
+         * specified parameter is {@code true}. This applies to the entry splitting phase.
          *
-         * @param omitEmptyStrings {@code true} to omit entries with empty keys and values, {@code false} to include them.
+         * @param omitEmptyStrings {@code true} to omit empty entry strings, {@code false} to include them.
          * @return this MapSplitter instance for method chaining.
          * @deprecated replaced by {@link #omitEmptyStrings()}
          */
@@ -1587,9 +1587,9 @@ public final class Splitter {
         }
 
         /**
-         * Configures this MapSplitter to omit entries with empty values.
-         * This applies to the entries splitting phase, filtering out entries
-         * that would result in empty strings after splitting.
+         * Configures this MapSplitter to omit empty entry strings.
+         * This applies to the entry splitting phase, filtering out entry
+         * strings that are empty after splitting by the entry delimiter.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code

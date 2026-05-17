@@ -405,7 +405,11 @@ public final class HttpRequest {
      * @see HttpHeaders.Values
      */
     public HttpRequest header(final String name, final Object value) {
-        requestBuilder.header(name, HttpHeaders.valueOf(value));
+        // Use setHeader (replace) rather than header (append) so the documented
+        // "any headers with that name are all replaced" contract holds. Otherwise
+        // repeated header(...) / setContentType(...) calls produce duplicate headers
+        // (e.g. two Content-Type values after header("Content-Type", ...) + jsonBody(...)).
+        requestBuilder.setHeader(name, HttpHeaders.valueOf(value));
 
         return this;
     }
@@ -795,8 +799,8 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<User> users = HttpRequest.url("http://localhost:18080/users")
-     *     .get(new TypeToken<List<User>>(){}.getType());
+     * User user = HttpRequest.url("http://localhost:18080/users/123")
+     *     .get(User.class);
      * }</pre>
      *
      * @param <T> the type of the result
@@ -1274,12 +1278,10 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * CompletableFuture<List<User>> future = HttpRequest.url("http://localhost:18080/users")
-     *     .asyncGet(new TypeToken<List<User>>(){}.getType());
+     * CompletableFuture<User> future = HttpRequest.url("http://localhost:18080/users/123")
+     *     .asyncGet(User.class);
      *
-     * future.thenAccept(users -> {
-     *     users.forEach(System.out::println);
-     * });
+     * future.thenAccept(System.out::println);
      * }</pre>
      *
      * @param <T> the type of the result

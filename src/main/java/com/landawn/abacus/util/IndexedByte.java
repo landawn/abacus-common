@@ -20,8 +20,10 @@ package com.landawn.abacus.util;
  * need to be preserved, such as when sorting or filtering collections while maintaining
  * knowledge of the original indices.
  *
- * <p>This class extends {@link AbstractIndexed} and provides factory methods for creating
- * instances with validated non-negative indices.</p>
+ * <p>This class is a specialized version of {@code Indexed<Byte>} for primitive byte values,
+ * providing better performance by avoiding boxing/unboxing overhead. It extends
+ * {@link AbstractIndexed} and provides factory methods for creating instances with validated
+ * non-negative indices.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -45,9 +47,11 @@ public final class IndexedByte extends AbstractIndexed {
 
     /**
      * Constructs an IndexedByte instance with the specified index and value.
+     * This is a package-private constructor; use {@link #of(byte, int)} or
+     * {@link #of(byte, long)} factory methods for creating instances.
      *
-     * @param index the index position
-     * @param value the byte value to be indexed
+     * @param index the index position (non-negative long value)
+     * @param value the byte value to be associated with the index
      */
     IndexedByte(final long index, final byte value) {
         super(index);
@@ -62,10 +66,10 @@ public final class IndexedByte extends AbstractIndexed {
      * IndexedByte indexed = IndexedByte.of((byte) 10, 3);
      * }</pre>
      *
-     * @param value the byte value to be stored
-     * @param index the index position, must be non-negative
-     * @return a new {@code IndexedByte} instance
-     * @throws IllegalArgumentException if the index is negative
+     * @param value the byte value to be associated with the index
+     * @param index the index position (must be non-negative, 0 to Integer.MAX_VALUE)
+     * @return a new immutable {@code IndexedByte} instance containing the specified value and index
+     * @throws IllegalArgumentException if the index is negative (index &lt; 0)
      */
     public static IndexedByte of(final byte value, final int index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
@@ -83,10 +87,10 @@ public final class IndexedByte extends AbstractIndexed {
      * IndexedByte indexed = IndexedByte.of((byte) 25, 1000000000L);
      * }</pre>
      *
-     * @param value the byte value to be stored
-     * @param index the index position as a long, must be non-negative
-     * @return a new {@code IndexedByte} instance
-     * @throws IllegalArgumentException if the index is negative
+     * @param value the byte value to be associated with the index
+     * @param index the index position as a long (must be non-negative, 0 to Long.MAX_VALUE)
+     * @return a new immutable {@code IndexedByte} instance containing the specified value and index
+     * @throws IllegalArgumentException if the index is negative (index &lt; 0)
      */
     public static IndexedByte of(final byte value, final long index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
@@ -97,7 +101,10 @@ public final class IndexedByte extends AbstractIndexed {
     /**
      * Returns the byte value stored in this IndexedByte instance.
      *
-     * @return the byte value
+     * <p>The index associated with this value can be retrieved through the {@link #index()}
+     * method inherited from {@link AbstractIndexed}.</p>
+     *
+     * @return the byte value associated with this index
      */
     public byte value() {
         return value;

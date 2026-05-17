@@ -50,8 +50,8 @@ public interface IntToShortFunction {
      * short result = low16Bits.applyAsShort(32768);   // -32768
      * }</pre>
      *
-     * @param value the function argument, an int value to be converted to short
-     * @return the function result as a short value
+     * @param value the function argument, an int value to be converted to short.
+     * @return the function result as a short value.
      */
     short applyAsShort(int value);
 }

@@ -49,6 +49,8 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * int age = user.get("age", Integer.class);   // returns 30
  * }</pre>
  *
+ * @see NameUtil
+ * @see java.io.Serializable
  */
 @Internal
 public final class MapEntity implements Serializable {
@@ -152,7 +154,11 @@ public final class MapEntity implements Serializable {
 
     /**
      * Gets the value of the specified property and converts it to the target type.
-     * If the property value is {@code null}, returns the default value for the target type.
+     * If the property value is {@code null} (or the property is absent), the target type's
+     * default value is returned (for example, {@code 0} for primitive types such as
+     * {@code int.class}, {@code false} for {@code boolean.class}, and {@code null} for
+     * reference types including the primitive wrapper types such as {@code Integer.class}
+     * and {@code Boolean.class}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -160,13 +166,15 @@ public final class MapEntity implements Serializable {
      * user.set("age", "25");
      *
      * Integer age = user.get("age", Integer.class);         // returns 25
-     * Boolean active = user.get("active", Boolean.class);   // returns false (default)
+     * Boolean active = user.get("active", Boolean.class);   // returns null (default for Boolean)
      * }</pre>
      *
      * @param <T> the target type
      * @param propName the property name (can be simple or canonical)
      * @param targetType the class of the target type to convert to
-     * @return the property value converted to the target type, or the default value if null
+     * @return the property value converted to the target type, or the target type's default value
+     *         (which is {@code null} for reference types) if the property is absent or {@code null}
+     * @see #get(String)
      */
     public <T> T get(final String propName, final Class<? extends T> targetType) {
         Object propValue = get(propName);
@@ -219,6 +227,8 @@ public final class MapEntity implements Serializable {
      * }</pre>
      *
      * @param nameValues a map of property names to values
+     * @throws NullPointerException if {@code nameValues} is {@code null}
+     * @see #set(String, Object)
      */
     public void set(final Map<String, Object> nameValues) {
         for (final Map.Entry<String, Object> entry : nameValues.entrySet()) {
@@ -265,6 +275,8 @@ public final class MapEntity implements Serializable {
      * }</pre>
      *
      * @param propNames a collection of property names to remove
+     * @throws NullPointerException if {@code propNames} is {@code null}
+     * @see #remove(String)
      */
     public void removeAll(final Collection<String> propNames) { // NOSONAR
         for (final String propName : propNames) {
@@ -310,7 +322,7 @@ public final class MapEntity implements Serializable {
      * MapEntity user = new MapEntity("User");
      * user.set("name", "John").set("age", 30);
      *
-     * Set<String> keys = user.keySet();   // returns ["name", "age"]
+     * Set<String> keys = user.keySet();   // contains "name" and "age" (no guaranteed order)
      * }</pre>
      *
      * @return a set of property names
@@ -467,7 +479,7 @@ public final class MapEntity implements Serializable {
      * <pre>{@code
      * MapEntity user = new MapEntity("User");
      * user.set("name", "John").set("age", 30);
-     * String str = user.toString();   // returns "{name=John, age=30}"
+     * String str = user.toString();   // e.g. "{name=John, age=30}" (property order is not guaranteed)
      * }</pre>
      *
      * @return a string representation of this object
@@ -492,6 +504,7 @@ public final class MapEntity implements Serializable {
      *
      * @param entityName the name of the entity
      * @return a new MapEntityBuilder instance
+     * @see MapEntityBuilder
      */
     public static MapEntityBuilder builder(final String entityName) {
         return new MapEntityBuilder(entityName);

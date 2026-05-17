@@ -27,18 +27,18 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 
 /**
- * An immutable, thread-safe implementation of the SortedSet interface.
- * Once created, the contents of an ImmutableSortedSet cannot be modified.
- * All mutating operations inherited from the parent interfaces will throw UnsupportedOperationException.
+ * An immutable implementation of the {@link SortedSet} interface.
+ * Once created, the contents of an {@code ImmutableSortedSet} cannot be modified.
+ * All mutating operations inherited from the parent interfaces throw {@link UnsupportedOperationException}.
  *
  * <p>This class maintains elements in sorted order according to their natural ordering
- * (if they implement Comparable) or by a Comparator provided at set creation time.
- * The implementation preserves the sorted order of elements when created from another SortedSet.</p>
+ * (if they implement {@link Comparable}) or by a {@link Comparator} provided at set creation time.
+ * The implementation preserves the sorted order of elements when created from another {@code SortedSet}.</p>
  *
- * <p>This class provides several static factory methods for creating instances:
+ * <p>This class provides several static factory methods for creating instances:</p>
  * <ul>
  * <li>{@link #empty()} - returns an empty immutable sorted set</li>
- * <li>{@link #of(Comparable)} (and arity-overloads up to ten elements) - creates sets with specific elements</li>
+ * <li>{@link #of(Object)} (and arity-overloads up to ten elements) - creates sets with specific elements</li>
  * <li>{@link #copyOf(Collection)} - creates a defensive copy from another collection</li>
  * <li>{@link #wrap(SortedSet)} - wraps an existing sorted set (changes to the underlying set will be reflected)</li>
  * </ul>
@@ -308,8 +308,9 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      *
      * @param <E> the type of elements in the collection
      * @param c the collection whose elements are to be placed into this set
-     * @return an ImmutableSortedSet containing the elements of the specified collection
-     * @throws ClassCastException if the elements don't implement Comparable
+     * @return an {@code ImmutableSortedSet} containing the elements of the specified collection, or the same instance if it is already an {@code ImmutableSortedSet}, or an empty instance if {@code c} is {@code null} or empty
+     * @throws ClassCastException if the elements are not mutually comparable (when the source collection is not a {@code SortedSet})
+     * @see #wrap(SortedSet)
      */
     public static <E> ImmutableSortedSet<E> copyOf(final Collection<? extends E> c) {
         if (c instanceof ImmutableSortedSet) {
@@ -344,7 +345,9 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @param <E> the type of elements in the set
      * @param sortedSet the sorted set to wrap; may be {@code null}
      * @return an {@code ImmutableSortedSet} backed by the specified {@code sortedSet},
+     *         the same instance if it is already an {@code ImmutableSortedSet},
      *         or {@link #empty()} if {@code sortedSet} is {@code null}
+     * @see #copyOf(Collection)
      */
     @Beta
     public static <E> ImmutableSortedSet<E> wrap(final SortedSet<? extends E> sortedSet) {
@@ -385,7 +388,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * SortedSet<String> customSet = new TreeSet<>(reverseOrder);
      * customSet.add("a");
      * ImmutableSortedSet<String> customOrder = ImmutableSortedSet.wrap(customSet);
-     * System.out.println(customOrder.comparator());   // ReverseComparator
+     * System.out.println(customOrder.comparator() == reverseOrder);   // true
      * }</pre>
      *
      * @return the comparator used to order the elements in this set, or {@code null}
@@ -401,8 +404,8 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * inclusive, to {@code toElement}, exclusive. The returned set is backed by this set,
      * so it remains immutable.
      *
-     * <p>The returned set will throw an {@code IllegalArgumentException} on an attempt to insert
-     * an element outside its range.</p>
+     * <p>The returned set is itself an {@code ImmutableSortedSet}; any attempt to modify it
+     * throws an {@link UnsupportedOperationException}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

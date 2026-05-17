@@ -2856,7 +2856,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     * <p>The exception message, if thrown, is built by substituting {@code arg1} and {@code arg2} into
+     * {@code errorMessageTemplate}.
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2874,7 +2875,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     * <p>The exception message, if thrown, is built by substituting {@code arg1}, {@code arg2} and
+     * {@code arg3} into {@code errorMessageTemplate}.
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2893,7 +2895,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     * <p>The exception message, if thrown, is built by substituting {@code arg1}, {@code arg2},
+     * {@code arg3} and {@code arg4} into {@code errorMessageTemplate}.
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2913,7 +2916,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     * <p>The error message is obtained lazily from {@code errorMessageSupplier} only when the check fails,
+     * avoiding the cost of building the message when the expression is {@code true}.
      *
      * @param expression a boolean expression
      * @param errorMessageSupplier a supplier of the exception message to use if the check fails; will not be invoked if the check passes
@@ -3754,7 +3758,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
-     * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     * <p>The exception message, if thrown, is built by substituting {@code arg1} and {@code arg2} into
+     * {@code errorMessageTemplate}.
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -8707,17 +8712,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an immutable empty {@code List} if the specified list is {@code null}, otherwise itself is returned.
+     * Returns an immutable empty {@code List} if the specified collection is {@code null}, otherwise itself is returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * nullToEmpty((Collection) null);   // returns immutable empty list
-     * nullToEmpty(new ArrayList<>());   // returns the original list
+     * nullToEmpty(new ArrayList<>());   // returns the original collection
      * }</pre>
      *
-     * @param <T> the type of elements in the list
+     * @param <T> the type of elements in the collection
      * @param c the collection to check
-     * @return an empty {@code List} if the specified list is {@code null}, otherwise the original list
+     * @return an empty {@code List} if the specified collection is {@code null}, otherwise the original collection
      * @see #emptyList()
      */
     public static <T> Collection<T> nullToEmpty(final Collection<T> c) {

@@ -83,8 +83,8 @@ import com.landawn.abacus.util.u.OptionalShort;
  * // Basic median calculation for primitive arrays
  * int[] numbers = {5, 2, 8, 1, 9, 3};
  * Pair<Integer, OptionalInt> result = Median.of(numbers);
- * int median1 = result.left;  // First median (smaller for even length)
- * OptionalInt median2 = result.right;  // Second median (empty for odd length)
+ * int median1 = result.left();  // First median (smaller for even length)
+ * OptionalInt median2 = result.right();  // Second median (empty for odd length)
  *
  * // Handle odd vs even length results
  * if (median2.isPresent()) {
@@ -102,7 +102,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * // Collection with natural ordering
  * List<String> words = Arrays.asList("zebra", "apple", "banana", "cherry");
  * Pair<String, Optional<String>> wordMedian = Median.of(words);
- * String medianWord = wordMedian.left;  // "banana" (alphabetically)
+ * String medianWord = wordMedian.left();  // "banana" (alphabetically)
  *
  * // Collection with custom comparator
  * Comparator<String> lengthComparator = Comparator.comparing(String::length);
@@ -114,8 +114,8 @@ import com.landawn.abacus.util.u.OptionalShort;
  * // Working with floating-point data
  * double[] measurements = {23.1, 45.7, 12.3, 67.8, 34.5, 56.2};
  * Pair<Double, OptionalDouble> doubleResult = Median.of(measurements);
- * double primaryMedian = doubleResult.left;
- * doubleResult.right.ifPresent(secondMedian -> {
+ * double primaryMedian = doubleResult.left();
+ * doubleResult.right().ifPresent(secondMedian -> {
  *     double traditionalMedian = (primaryMedian + secondMedian) / 2.0;
  *     System.out.println("Traditional median: " + traditionalMedian);
  * });
@@ -238,9 +238,9 @@ import com.landawn.abacus.util.u.OptionalShort;
  *     public StatisticalSummary analyzeDataset(double[] dataset) {
  *         // Calculate median efficiently
  *         Pair<Double, OptionalDouble> medianResult = Median.of(dataset);
- *         double median = medianResult.right.isPresent()
- *             ? (medianResult.left + medianResult.right.get()) / 2.0
- *             : medianResult.left;
+ *         double median = medianResult.right().isPresent()
+ *             ? (medianResult.left() + medianResult.right().get()) / 2.0
+ *             : medianResult.left();
  *
  *         // Use median for further analysis
  *         double[] deviationsFromMedian = Arrays.stream(dataset)
@@ -248,9 +248,9 @@ import com.landawn.abacus.util.u.OptionalShort;
  *             .toArray();
  *
  *         Pair<Double, OptionalDouble> madResult = Median.of(deviationsFromMedian);
- *         double medianAbsoluteDeviation = madResult.right.isPresent()
- *             ? (madResult.left + madResult.right.get()) / 2.0
- *             : madResult.left;
+ *         double medianAbsoluteDeviation = madResult.right().isPresent()
+ *             ? (madResult.left() + madResult.right().get()) / 2.0
+ *             : madResult.left();
  *
  *         return new StatisticalSummary(median, medianAbsoluteDeviation, detectOutliers(dataset, median));
  *     }
@@ -297,7 +297,7 @@ public final class Median {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Character, OptionalChar> median = Median.of('z', 'a', 'm');
-     * char medianValue = median.left;  // 'm'
+     * char medianValue = median.left();  // 'm'
      * }</pre>
      *
      * @param source the array of characters to find the median from. Must not be {@code null} or empty.
@@ -408,7 +408,7 @@ public final class Median {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Byte, OptionalByte> median = Median.of((byte)10, (byte)5, (byte)15);
-     * byte medianValue = median.left;  // 10
+     * byte medianValue = median.left();  // 10
      * }</pre>
      *
      * @param source the array of bytes to find the median from. Must not be {@code null} or empty.
@@ -518,7 +518,7 @@ public final class Median {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Short, OptionalShort> median = Median.of((short)100, (short)50, (short)200);
-     * short medianValue = median.left;  // 100
+     * short medianValue = median.left();  // 100
      * }</pre>
      *
      * @param source the array of short integers to find the median from. Must not be {@code null} or empty.
@@ -628,8 +628,8 @@ public final class Median {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Integer, OptionalInt> median = Median.of(10, 5, 20, 15);
-     * int lowerMedian = median.left;  // 10
-     * int upperMedian = median.right.get();   // 15
+     * int lowerMedian = median.left();  // 10
+     * int upperMedian = median.right().get();   // 15
      * }</pre>
      *
      * @param source the array of integers to find the median from. Must not be {@code null} or empty.
@@ -653,7 +653,7 @@ public final class Median {
      * <p>The median represents the middle value(s) when the subarray elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method operates on a contiguous subarray defined
      * by the range [fromIndex, toIndex) and uses an efficient selection algorithm based on a priority queue
-     * that maintains only the smallest (length/2 + 1) elements during processing.</p>
+     * that maintains only the largest (length/2 + 1) elements during processing.</p>
      *
      * <p>For subarrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -739,8 +739,8 @@ public final class Median {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Long, OptionalLong> median = Median.of(1000L, 500L, 1500L, 750L);
-     * long lowerMedian = median.left;  // 750
-     * long upperMedian = median.right.get();   // 1000
+     * long lowerMedian = median.left();  // 750
+     * long upperMedian = median.right().get();   // 1000
      * }</pre>
      *
      * @param source the array of long integers to find the median from. Must not be {@code null} or empty.
@@ -764,7 +764,7 @@ public final class Median {
      * <p>The median represents the middle value(s) when the subarray elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method operates on a contiguous subarray defined
      * by the range [fromIndex, toIndex) and uses an efficient selection algorithm that maintains a min-heap
-     * of the k smallest elements where k = (length/2 + 1).</p>
+     * of the k largest elements where k = (length/2 + 1).</p>
      *
      * <p>For subarrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -852,7 +852,7 @@ public final class Median {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Float, OptionalFloat> median = Median.of(10.5f, 5.2f, 20.8f);
-     * float medianValue = median.left;  // 10.5f
+     * float medianValue = median.left();  // 10.5f
      * }</pre>
      *
      * @param source the array of float values to find the median from. Must not be {@code null} or empty.
@@ -965,8 +965,8 @@ public final class Median {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Double, OptionalDouble> median = Median.of(10.5, 5.2, 20.8, 15.1);
-     * double lowerMedian = median.left;  // 10.5
-     * double upperMedian = median.right.get();   // 15.1
+     * double lowerMedian = median.left();  // 10.5
+     * double upperMedian = median.right().get();   // 15.1
      * }</pre>
      *
      * @param source the array of double values to find the median from. Must not be {@code null} or empty.
@@ -1079,10 +1079,10 @@ public final class Median {
      * <pre>{@code
      * String[] words = {"apple", "banana", "cherry"};
      * Pair<String, Optional<String>> median = Median.of(words);
-     * String medianWord = median.left;  // "banana"
+     * String medianWord = median.left();  // "banana"
      * }</pre>
      *
-     * @param <T> the type of elements in the array., which must implement Comparable.
+     * @param <T> the type of elements in the array, which must implement {@code Comparable}.
      * @param source the array of Comparable objects to find the median from. Must not be {@code null} or empty.
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length arrays, the {@code left}
@@ -1118,7 +1118,7 @@ public final class Median {
      * // Considers words[1], words[2], words[3]: "apple", "banana", "cherry". Returns ["banana", Optional.empty()]
      * }</pre>
      *
-     * @param <T> the type of elements in the array., which must implement Comparable.
+     * @param <T> the type of elements in the array, which must implement {@code Comparable}.
      * @param source the array of Comparable objects to find the median from. Must not be {@code null}.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
      *                  Must be non-negative and less than or equal to toIndex.
@@ -1160,7 +1160,7 @@ public final class Median {
      * <pre>{@code
      * String[] words = {"apple", "pie", "banana"};
      * Pair<String, Optional<String>> median = Median.of(words, Comparator.comparing(String::length));
-     * String medianWord = median.left;  // "apple" (middle length)
+     * String medianWord = median.left();  // "apple" (middle length)
      * }</pre>
      *
      * @param <T> the type of elements in the array.
@@ -1189,7 +1189,7 @@ public final class Median {
      * selection algorithm based on a bounded priority queue that maintains only the necessary elements.</p>
      *
      * <p>The algorithm optimizes performance by using a min-heap of size k = (length/2 + 1) to track
-     * only the smaller half of the elements plus one, avoiding the need to sort the entire subarray.</p>
+     * only the larger half of the elements plus one, avoiding the need to sort the entire subarray.</p>
      *
      * <p><strong>Note:</strong> This method does not explicitly handle {@code null} elements. Behavior with null
      * elements depends on the comparator used. If using natural ordering (null comparator) or a comparator
@@ -1287,7 +1287,7 @@ public final class Median {
      * <pre>{@code
      * List<Integer> numbers = Arrays.asList(10, 5, 20, 15, 25);
      * Pair<Integer, Optional<Integer>> median = Median.of(numbers);
-     * int medianValue = median.left;  // 15
+     * int medianValue = median.left();  // 15
      * }</pre>
      *
      * @param <T> the type of elements in the collection, which must implement Comparable.
@@ -1313,7 +1313,7 @@ public final class Median {
      * than natural order is desired.</p>
      *
      * <p>The algorithm maintains optimal performance by using a min-heap of size k = (size/2 + 1) to track
-     * only the smaller half of the elements plus one, iterating through the collection exactly once.</p>
+     * only the larger half of the elements plus one, iterating through the collection exactly once.</p>
      *
      * <p><strong>Note:</strong> This method does not explicitly handle {@code null} elements. Behavior with null
      * elements depends on the comparator used. If using natural ordering (null comparator) or a comparator
@@ -1329,7 +1329,7 @@ public final class Median {
      * <pre>{@code
      * Set<String> words = new HashSet<>(Arrays.asList("apple", "pie", "banana"));
      * Pair<String, Optional<String>> median = Median.of(words, Comparator.comparing(String::length));
-     * String medianWord = median.left;  // Word with median length
+     * String medianWord = median.left();  // Word with median length
      * }</pre>
      *
      * @param <T> the type of elements in the collection.

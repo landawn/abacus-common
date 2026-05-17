@@ -198,7 +198,9 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param source the JSON string to parse; may be {@code null} or empty
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
-     * @return the deserialized object of type {@code T}, or {@code null} if the source is {@code null}
+     * @return the deserialized object of type {@code T}; if the source is {@code null} the target type's
+     *         default value is returned, and if the source is empty an empty value (or the default value)
+     *         is returned depending on the target type and the {@code readNullToEmpty} configuration
      * @throws UncheckedIOException if an I/O error occurs during parsing
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
      */
@@ -244,7 +246,9 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param source the JSON string to parse; may be {@code null} or empty
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetClass the class of the target object to deserialize into; must not be {@code null}
-     * @return the deserialized object of type {@code T}, or {@code null} if the source is {@code null}
+     * @return the deserialized object of type {@code T}; if the source is {@code null} the target type's
+     *         default value is returned, and if the source is empty an empty value (or the default value)
+     *         is returned depending on the target type and the {@code readNullToEmpty} configuration
      * @throws UncheckedIOException if an I/O error occurs during parsing
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
      */
@@ -391,12 +395,12 @@ final class JsonParserImpl extends AbstractJsonParser {
     }
 
     /**
-     * Reads and deserializes a JSON string using a JsonReader into the specified target class.
+     * Reads and deserializes a JSON string using a {@link JsonReader} into the specified target type.
      *
-     * <p>This is an internal method that performs the actual JSON parsing using a JsonReader.
+     * <p>This is an internal method that performs the actual JSON parsing using a {@code JsonReader}.
      * It handles various serialization types including arrays, collections, maps, beans, datasets,
      * sheets, and entity IDs. The method dispatches to type-specific read methods based on the
-     * serialization type of the target class.</p>
+     * serialization type of the target type.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -412,7 +416,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param output optional pre-existing output object (array, collection, or map) to populate; may be {@code null}
      * @return the deserialized object of type {@code T}
      * @throws IOException if an I/O error occurs during reading
-     * @throws ParsingException if the JSON structure doesn't match the target class or is invalid
+     * @throws ParsingException if the JSON structure doesn't match the target type or is invalid
      */
     @SuppressWarnings("unchecked")
     protected <T> T parse(final String source, final JsonReader jr, final JsonDeserConfig config, final Type<? extends T> targetType, final Object output)
@@ -503,6 +507,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the serialization configuration to use; may be {@code null} to use default configuration
      * @return the JSON string representation; returns empty string if {@code obj} is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during serialization
+     * @throws ParsingException if the object type is not supported for serialization
      */
     @Override
     public String serialize(final Object obj, final JsonSerConfig config) {
@@ -554,6 +559,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the serialization configuration to use; may be {@code null} to use default configuration
      * @param output the file to write the JSON to; must not be {@code null}
      * @throws UncheckedIOException if an I/O error occurs during serialization or file writing
+     * @throws ParsingException if the object type is not supported for serialization
      */
     @Override
     public void serialize(final Object obj, final JsonSerConfig config, final File output) {
@@ -620,6 +626,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the serialization configuration to use; may be {@code null} to use default configuration
      * @param output the output stream to write the JSON to; must not be {@code null}
      * @throws UncheckedIOException if an I/O error occurs during serialization or stream writing
+     * @throws ParsingException if the object type is not supported for serialization
      */
     @Override
     public void serialize(final Object obj, final JsonSerConfig config, final OutputStream output) {
@@ -682,6 +689,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the serialization configuration to use; may be {@code null} to use default configuration
      * @param output the writer to write the JSON to; must not be {@code null}
      * @throws UncheckedIOException if an I/O error occurs during serialization or writing
+     * @throws ParsingException if the object type is not supported for serialization
      */
     @Override
     public void serialize(final Object obj, final JsonSerConfig config, final Writer output) {
@@ -725,6 +733,19 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
     }
 
+    /**
+     * Writes an object to JSON, dispatching to the appropriate type-specific writer based on the
+     * object's serialization type (bean, map, array, collection, map entity, entity id, dataset, or sheet).
+     *
+     * @param obj the object to write (must not be {@code null})
+     * @param config the serialization configuration
+     * @param isFirstCall whether this is the top-level (root) write call
+     * @param indentation the current indentation string for pretty printing, or {@code null}
+     * @param serializedObjects set of objects on the current path for circular reference detection, or {@code null}
+     * @param bw the buffered JSON writer
+     * @throws IOException if an I/O error occurs
+     * @throws ParsingException if the object type is not supported and the configuration requires failing on it
+     */
     @SuppressWarnings("rawtypes")
     protected void write(final Object obj, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final BufferedJsonWriter bw) throws IOException {
@@ -800,6 +821,18 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
     }
 
+    /**
+     * Writes a root-level object to JSON, optionally omitting the enclosing brackets for serializable
+     * array/collection root values when {@code config.isBracketRootValue()} is {@code false}.
+     *
+     * @param obj the object to write
+     * @param config the serialization configuration
+     * @param serializedObjects set of objects on the current path for circular reference detection, or {@code null}
+     * @param type the type information for the object
+     * @param bw the buffered JSON writer
+     * @param flush whether to flush the writer after writing
+     * @throws IOException if an I/O error occurs
+     */
     protected void write(final Object obj, final JsonSerConfig config, final IdentityHashSet<Object> serializedObjects, final Type<Object> type,
             final BufferedJsonWriter bw, final boolean flush) throws IOException {
         if (config.isBracketRootValue() || !type.isSerializable()) {
@@ -817,6 +850,20 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
     }
 
+    /**
+     * Writes an object to JSON, returning immediately when {@code obj} is {@code null}, and
+     * optionally flushing the writer afterwards.
+     *
+     * @param obj the object to write; if {@code null} nothing is written
+     * @param config the serialization configuration
+     * @param isFirstCall whether this is the top-level (root) write call
+     * @param indentation the current indentation string for pretty printing, or {@code null}
+     * @param serializedObjects set of objects on the current path for circular reference detection, or {@code null}
+     * @param type the type information for the object (unused; retained for signature consistency)
+     * @param bw the buffered JSON writer
+     * @param flush whether to flush the writer after writing
+     * @throws IOException if an I/O error occurs
+     */
     @SuppressWarnings("unused")
     protected void write(final Object obj, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJsonWriter bw, final boolean flush) throws IOException {
@@ -831,6 +878,18 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
     }
 
+    /**
+     * Writes a bean object to JSON as an object with one entry per serializable property.
+     *
+     * @param obj the bean to write
+     * @param config the serialization configuration
+     * @param isFirstCall whether this is the top-level (root) write call
+     * @param indentation the current indentation string for pretty printing, or {@code null}
+     * @param serializedObjects set of objects on the current path for circular reference detection, or {@code null}
+     * @param type the type information for the bean
+     * @param bw the buffered JSON writer
+     * @throws IOException if an I/O error occurs
+     */
     protected void writeBean(final Object obj, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJsonWriter bw) throws IOException {
         //    if (hasCircularReference(obj, serializedObjects, config, bw)) {
@@ -990,6 +1049,18 @@ final class JsonParserImpl extends AbstractJsonParser {
     }
 
     @SuppressWarnings("unused")
+    /**
+     * Writes a map to JSON as an object with one entry per map entry.
+     *
+     * @param m the map to write
+     * @param config the serialization configuration
+     * @param isFirstCall whether this is the top-level (root) write call
+     * @param indentation the current indentation string for pretty printing, or {@code null}
+     * @param serializedObjects set of objects on the current path for circular reference detection, or {@code null}
+     * @param type the type information for the map
+     * @param bw the buffered JSON writer
+     * @throws IOException if an I/O error occurs
+     */
     protected void writeMap(final Map<?, ?> m, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJsonWriter bw) throws IOException {
         //    if (hasCircularReference(m, serializedObjects, config, bw)) {
@@ -1086,6 +1157,18 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
     }
 
+    /**
+     * Writes an array (object or primitive) to JSON as a JSON array.
+     *
+     * @param obj the array to write
+     * @param config the serialization configuration
+     * @param isFirstCall whether this is the top-level (root) write call
+     * @param indentation the current indentation string for pretty printing, or {@code null}
+     * @param serializedObjects set of objects on the current path for circular reference detection, or {@code null}
+     * @param type the type information for the array
+     * @param bw the buffered JSON writer
+     * @throws IOException if an I/O error occurs
+     */
     protected void writeArray(final Object obj, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJsonWriter bw) throws IOException {
         //    if (hasCircularReference(obj, serializedObjects, config, bw)) {
@@ -1143,6 +1226,18 @@ final class JsonParserImpl extends AbstractJsonParser {
     }
 
     @SuppressWarnings("unused")
+    /**
+     * Writes a collection to JSON as a JSON array.
+     *
+     * @param c the collection to write
+     * @param config the serialization configuration
+     * @param isFirstCall whether this is the top-level (root) write call
+     * @param indentation the current indentation string for pretty printing, or {@code null}
+     * @param serializedObjects set of objects on the current path for circular reference detection, or {@code null}
+     * @param type the type information for the collection
+     * @param bw the buffered JSON writer
+     * @throws IOException if an I/O error occurs
+     */
     protected void writeCollection(final Collection<?> c, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJsonWriter bw) throws IOException {
         //    if (hasCircularReference(c, serializedObjects, config, bw)) {
@@ -1193,6 +1288,19 @@ final class JsonParserImpl extends AbstractJsonParser {
     }
 
     @SuppressWarnings("unused")
+    /**
+     * Writes a {@link MapEntity} to JSON as an object whose single property is the entity name
+     * mapping to the entity's property map.
+     *
+     * @param mapEntity the map entity to write
+     * @param config the serialization configuration
+     * @param isFirstCall whether this is the top-level (root) write call
+     * @param indentation the current indentation string for pretty printing, or {@code null}
+     * @param serializedObjects set of objects on the current path for circular reference detection, or {@code null}
+     * @param type the type information for the map entity
+     * @param bw the buffered JSON writer
+     * @throws IOException if an I/O error occurs
+     */
     protected void writeMapEntity(final MapEntity mapEntity, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJsonWriter bw) throws IOException {
         //    if (hasCircularReference(mapEntity, serializedObjects, config, bw)) {
@@ -1293,6 +1401,18 @@ final class JsonParserImpl extends AbstractJsonParser {
     }
 
     @SuppressWarnings("unused")
+    /**
+     * Writes an {@link EntityId} to JSON as an object with one entry per id property.
+     *
+     * @param entityId the entity id to write
+     * @param config the serialization configuration
+     * @param isFirstCall whether this is the top-level (root) write call
+     * @param indentation the current indentation string for pretty printing, or {@code null}
+     * @param serializedObjects set of objects on the current path for circular reference detection, or {@code null}
+     * @param type the type information for the entity id
+     * @param bw the buffered JSON writer
+     * @throws IOException if an I/O error occurs
+     */
     protected void writeEntityId(final EntityId entityId, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJsonWriter bw) throws IOException {
         //    if (hasCircularReference(entityId, serializedObjects, config, bw)) {
@@ -1393,6 +1513,19 @@ final class JsonParserImpl extends AbstractJsonParser {
     }
 
     @SuppressWarnings({ "unused" })
+    /**
+     * Writes a {@link Dataset} to JSON, by columns or by rows depending on
+     * {@code config.isWriteDatasetByRow()}, optionally including column type information.
+     *
+     * @param ds the dataset to write
+     * @param config the serialization configuration
+     * @param isFirstCall whether this is the top-level (root) write call
+     * @param indentation the current indentation string for pretty printing, or {@code null}
+     * @param serializedObjects set of objects on the current path for circular reference detection, or {@code null}
+     * @param type the type information for the dataset
+     * @param bw the buffered JSON writer
+     * @throws IOException if an I/O error occurs
+     */
     protected void writeDataset(final Dataset ds, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJsonWriter bw) throws IOException {
         //    if (hasCircularReference(ds, serializedObjects, config, bw)) {
@@ -1470,17 +1603,20 @@ final class JsonParserImpl extends AbstractJsonParser {
             bw.write(COLON_SPACE_CHAR_ARRAY);
 
             final List<String> types = Objectory.createList();
-            Class<?> eleTypeClass;
 
-            for (int i = 0, len = columnNames.size(); i < len; i++) {
-                eleTypeClass = getElementType(ds.getColumn(i));
+            try {
+                Class<?> eleTypeClass = null;
 
-                types.add(eleTypeClass == null ? null : Type.of(eleTypeClass).name());
+                for (int i = 0, len = columnNames.size(); i < len; i++) {
+                    eleTypeClass = getElementType(ds.getColumn(i));
+
+                    types.add(eleTypeClass == null ? null : Type.of(eleTypeClass).name());
+                }
+
+                write(types, config, false, nextIndentation, serializedObjects, bw);
+            } finally {
+                Objectory.recycle(types);
             }
-
-            write(types, config, false, nextIndentation, serializedObjects, bw);
-
-            Objectory.recycle(types);
 
             if (isPrettyFormat) {
                 bw.write(_COMMA);
@@ -1641,6 +1777,19 @@ final class JsonParserImpl extends AbstractJsonParser {
     }
 
     @SuppressWarnings({ "unused", "rawtypes" })
+    /**
+     * Writes a {@link Sheet} to JSON, emitting its row keys, column keys, and cell values,
+     * optionally including row/column key type and column type information per the configuration.
+     *
+     * @param sheet the sheet to write
+     * @param config the serialization configuration
+     * @param isFirstCall whether this is the top-level (root) write call
+     * @param indentation the current indentation string for pretty printing, or {@code null}
+     * @param serializedObjects set of objects on the current path for circular reference detection, or {@code null}
+     * @param type the type information for the sheet
+     * @param bw the buffered JSON writer
+     * @throws IOException if an I/O error occurs
+     */
     protected void writeSheet(final Sheet sheet, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJsonWriter bw) throws IOException {
         //    if (hasCircularReference(sheet, serializedObjects, config, bw)) {
@@ -1822,17 +1971,19 @@ final class JsonParserImpl extends AbstractJsonParser {
             bw.write(COLON_SPACE_CHAR_ARRAY);
 
             final List<String> types = Objectory.createList();
-            Class<?> eleTypeClass = null;
+            try {
+                Class<?> eleTypeClass = null;
 
-            for (final Object columnKey : sheet.columnKeySet()) {
-                eleTypeClass = getElementType(sheet.columnValues(columnKey));
+                for (final Object columnKey : sheet.columnKeySet()) {
+                    eleTypeClass = getElementType(sheet.columnValues(columnKey));
 
-                types.add(eleTypeClass == null ? null : Type.of(eleTypeClass).name());
+                    types.add(eleTypeClass == null ? null : Type.of(eleTypeClass).name());
+                }
+
+                write(types, config, false, nextIndentation, serializedObjects, bw);
+            } finally {
+                Objectory.recycle(types);
             }
-
-            write(types, config, false, nextIndentation, serializedObjects, bw);
-
-            Objectory.recycle(types);
 
             if (isPrettyFormat) {
                 bw.write(_COMMA);
@@ -1975,7 +2126,9 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param source the JSON string to deserialize; may be {@code null} or empty
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
-     * @return the deserialized object of type {@code T}, or {@code null} if the source is {@code null}
+     * @return the deserialized object of type {@code T}; if the source is {@code null} the target type's
+     *         default value is returned, and if the source is empty an empty value (or the default value)
+     *         is returned depending on the target type and the {@code readNullToEmpty} configuration
      * @throws UncheckedIOException if an I/O error occurs during deserialization
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
      */
@@ -2019,7 +2172,9 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param source the JSON string to deserialize; may be {@code null} or empty
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetClass the class of the target object to deserialize into; must not be {@code null}
-     * @return the deserialized object of type {@code T}, or {@code null} if the source is {@code null}
+     * @return the deserialized object of type {@code T}; if the source is {@code null} the target type's
+     *         default value is returned, and if the source is empty an empty value (or the default value)
+     *         is returned depending on the target type and the {@code readNullToEmpty} configuration
      * @throws UncheckedIOException if an I/O error occurs during deserialization
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
      */
@@ -2290,6 +2445,17 @@ final class JsonParserImpl extends AbstractJsonParser {
         return deserialize(source, config, Type.of(targetClass));
     }
 
+    /**
+     * Reads and deserializes JSON from a reader into the specified target type using a streaming reader.
+     *
+     * @param <T> the type of the target object
+     * @param source the reader containing JSON data
+     * @param config the deserialization configuration (may be {@code null} for default behavior)
+     * @param targetType the type of the object to create
+     * @return the deserialized object of type {@code T}
+     * @throws UncheckedIOException if an I/O error occurs while reading
+     * @throws ParsingException if the JSON is invalid or doesn't match the target type
+     */
     protected <T> T read(final Reader source, final JsonDeserConfig config, final Type<? extends T> targetType) {
         final JsonDeserConfig configToUse = check(config);
         final char[] rbuf = Objectory.createCharArrayBuffer();
@@ -2307,11 +2473,41 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
     }
 
+    /**
+     * Reads and deserializes a JSON value from the given reader as a top-level (first) call.
+     *
+     * @param <T> the type of the target object
+     * @param source the original JSON source (string, reader, or other), used for scalar fallback conversion
+     * @param jr the JSON reader to read tokens from
+     * @param config the deserialization configuration
+     * @param targetClass the class of the object to create
+     * @param targetType the type of the object to create
+     * @return the deserialized object of type {@code T}
+     * @throws IOException if an I/O error occurs while reading
+     * @throws ParsingException if the JSON is invalid or doesn't match the target type
+     */
     protected <T> T read(final Object source, final JsonReader jr, final JsonDeserConfig config, final Class<? extends T> targetClass,
             final Type<? extends T> targetType) throws IOException {
         return read(source, jr, UNDEFINED, config, true, targetClass, targetType);
     }
 
+    /**
+     * Reads and deserializes a JSON value, dispatching to the appropriate type-specific reader
+     * based on the target type's serialization type (bean, map, array, collection, map entity,
+     * dataset, sheet, or entity id).
+     *
+     * @param <T> the type of the target object
+     * @param source the original JSON source, used for scalar fallback conversion
+     * @param jr the JSON reader to read tokens from
+     * @param lastToken the token already consumed by the caller, or {@link #UNDEFINED} if none
+     * @param config the deserialization configuration
+     * @param isFirstCall whether this is the top-level (root) read call
+     * @param targetClass the class of the object to create
+     * @param targetType the type of the object to create
+     * @return the deserialized object of type {@code T}
+     * @throws IOException if an I/O error occurs while reading
+     * @throws ParsingException if the JSON is invalid or the target type is unsupported
+     */
     @SuppressWarnings("unchecked")
     protected <T> T read(final Object source, final JsonReader jr, final int lastToken, final JsonDeserConfig config, final boolean isFirstCall,
             final Class<? extends T> targetClass, final Type<? extends T> targetType) throws IOException {
@@ -2366,6 +2562,20 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
     }
 
+    /**
+     * Reads a JSON object into a bean instance, mapping JSON property names to bean properties.
+     *
+     * @param <T> the type of the target object
+     * @param jr the JSON reader positioned at (or before) the opening brace
+     * @param config the deserialization configuration
+     * @param isFirstCall whether this is the top-level (root) read call
+     * @param targetClass the bean class to create
+     * @param targetType the bean type to create
+     * @return the deserialized bean of type {@code T}
+     * @throws IOException if an I/O error occurs while reading
+     * @throws ParsingException if the JSON is invalid or an unmatched property is encountered
+     *         while {@code ignoreUnmatchedProperty} is disabled
+     */
     @SuppressWarnings("unused")
     protected <T> T readBean(final JsonReader jr, final JsonDeserConfig config, final boolean isFirstCall, final Class<? extends T> targetClass,
             final Type<? extends T> targetType) throws IOException {
@@ -2657,6 +2867,21 @@ final class JsonParserImpl extends AbstractJsonParser {
 
     private static final BiConsumer<Collection<Object>, Object> DEFAULT_PROP_HANDLER = Collection::add;
 
+    /**
+     * Reads a JSON object into a map, converting keys and values to the configured key/value types.
+     *
+     * @param <T> the type of the target object
+     * @param jr the JSON reader positioned at (or before) the opening brace
+     * @param config the deserialization configuration
+     * @param propType the declared property type providing key/value type hints, or {@code null}
+     * @param isFirstCall whether this is the top-level (root) read call
+     * @param targetClass the map class to create
+     * @param targetType the map type to create
+     * @param output an existing map to populate, or {@code null} to create a new one
+     * @return the deserialized map of type {@code T}
+     * @throws IOException if an I/O error occurs while reading
+     * @throws ParsingException if the JSON is invalid
+     */
     @SuppressWarnings("unchecked")
     protected <T> T readMap(final JsonReader jr, final JsonDeserConfig config, Type<?> propType, final boolean isFirstCall,
             final Class<? extends T> targetClass, final Type<? extends T> targetType, final Map<Object, Object> output) throws IOException {
@@ -2851,6 +3076,21 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
     }
 
+    /**
+     * Reads a JSON array into an array (object or primitive), converting elements to the element type.
+     *
+     * @param <T> the type of the target object
+     * @param jr the JSON reader positioned at (or before) the opening bracket
+     * @param config the deserialization configuration
+     * @param propType the declared property type providing element type hints, or {@code null}
+     * @param isFirstCall whether this is the top-level (root) read call
+     * @param targetClass the array class to create
+     * @param targetType the array type to create
+     * @param output an existing array to populate, or {@code null} to create a new one
+     * @return the deserialized array of type {@code T}
+     * @throws IOException if an I/O error occurs while reading
+     * @throws ParsingException if the JSON is invalid
+     */
     @SuppressWarnings({ "unchecked" })
     protected <T> T readArray(final JsonReader jr, final JsonDeserConfig config, final Type<?> propType, final boolean isFirstCall,
             final Class<? extends T> targetClass, final Type<? extends T> targetType, Object[] output) throws IOException {
@@ -3045,6 +3285,23 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
     }
 
+    /**
+     * Reads a JSON array into a collection, converting elements to the element type and
+     * optionally applying a per-element property handler.
+     *
+     * @param <T> the type of the target object
+     * @param jr the JSON reader positioned at (or before) the opening bracket
+     * @param config the deserialization configuration
+     * @param propType the declared property type providing element type hints, or {@code null}
+     * @param propHandler an optional handler invoked for each element being added, or {@code null}
+     * @param isFirstCall whether this is the top-level (root) read call
+     * @param targetClass the collection class to create
+     * @param targetType the collection type to create
+     * @param output an existing collection to populate, or {@code null} to create a new one
+     * @return the deserialized collection of type {@code T}
+     * @throws IOException if an I/O error occurs while reading
+     * @throws ParsingException if the JSON is invalid
+     */
     @SuppressWarnings("unchecked")
     protected <T> T readCollection(final JsonReader jr, final JsonDeserConfig config, final Type<?> propType,
             final BiConsumer<? super Collection<Object>, ?> propHandler, final boolean isFirstCall, final Class<? extends T> targetClass,
@@ -3164,6 +3421,20 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
     }
 
+    /**
+     * Reads a JSON object into a {@link MapEntity}, using the single top-level property name
+     * as the entity name and its value as the entity's property map.
+     *
+     * @param <T> the type of the target object
+     * @param jr the JSON reader positioned at (or before) the opening brace
+     * @param config the deserialization configuration
+     * @param isFirstCall whether this is the top-level (root) read call
+     * @param targetClass the target class to create
+     * @param targetType the target type to create
+     * @return the deserialized map entity of type {@code T}
+     * @throws IOException if an I/O error occurs while reading
+     * @throws ParsingException if the JSON is invalid
+     */
     @SuppressWarnings("unused")
     protected <T> T readMapEntity(final JsonReader jr, final JsonDeserConfig config, final boolean isFirstCall, final Class<? extends T> targetClass,
             final Type<? extends T> targetType) throws IOException {
@@ -3223,6 +3494,19 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
     }
 
+    /**
+     * Reads a JSON object into an {@link EntityId}, mapping each JSON property to an id property.
+     *
+     * @param <T> the type of the target object
+     * @param jr the JSON reader positioned at (or before) the opening brace
+     * @param config the deserialization configuration
+     * @param isFirstCall whether this is the top-level (root) read call
+     * @param targetClass the target class to create
+     * @param targetType the target type to create
+     * @return the deserialized entity id of type {@code T}
+     * @throws IOException if an I/O error occurs while reading
+     * @throws ParsingException if the JSON is invalid
+     */
     @SuppressWarnings({ "unused" })
     protected <T> T readEntityId(final JsonReader jr, final JsonDeserConfig config, final boolean isFirstCall, final Class<? extends T> targetClass,
             final Type<? extends T> targetType) throws IOException {
@@ -3282,6 +3566,21 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
     }
 
+    /**
+     * Reads a JSON object into a {@link Dataset}, supporting both column-oriented and
+     * row-oriented serialized layouts with optional column type information.
+     *
+     * @param <T> the type of the target object
+     * @param jr the JSON reader positioned at (or before) the opening brace
+     * @param lastToken the token already consumed by the caller, or {@link #UNDEFINED} if none
+     * @param config the deserialization configuration
+     * @param isFirstCall whether this is the top-level (root) read call
+     * @param targetClass the target class to create
+     * @param targetType the target type to create
+     * @return the deserialized dataset of type {@code T}
+     * @throws IOException if an I/O error occurs while reading
+     * @throws ParsingException if the JSON is invalid or not a valid dataset structure
+     */
     @SuppressWarnings("unused")
     protected <T> T readDataset(final JsonReader jr, final int lastToken, final JsonDeserConfig config, final boolean isFirstCall,
             final Class<? extends T> targetClass, final Type<? extends T> targetType) throws IOException {
@@ -3712,6 +4011,20 @@ final class JsonParserImpl extends AbstractJsonParser {
         //}
     }
 
+    /**
+     * Reads a JSON object into a {@link Sheet}, restoring its row keys, column keys, and cell values.
+     *
+     * @param <T> the type of the target object
+     * @param jr the JSON reader positioned at (or before) the opening brace
+     * @param lastToken the token already consumed by the caller, or {@link #UNDEFINED} if none
+     * @param config the deserialization configuration
+     * @param isFirstCall whether this is the top-level (root) read call
+     * @param targetClass the target class to create
+     * @param targetType the target type to create
+     * @return the deserialized sheet of type {@code T}
+     * @throws IOException if an I/O error occurs while reading
+     * @throws ParsingException if the JSON is invalid or not a valid sheet structure
+     */
     @SuppressWarnings({ "unused", "rawtypes" })
     protected <T> T readSheet(final JsonReader jr, final int lastToken, final JsonDeserConfig config, final boolean isFirstCall,
             final Class<? extends T> targetClass, final Type<? extends T> targetType) throws IOException {
@@ -3981,6 +4294,18 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
     }
 
+    /**
+     * Reads a bracketed JSON value ({@code [...]}) into an array, collection, dataset, or
+     * pair/triple, tracking JSON nesting depth to guard against stack-overflow on hostile input.
+     *
+     * @param jr the JSON reader positioned after the opening bracket
+     * @param config the deserialization configuration
+     * @param propHandler an optional handler invoked for each element being added, or {@code null}
+     * @param type the target type for the bracketed value
+     * @return the deserialized value
+     * @throws IOException if an I/O error occurs while reading
+     * @throws ParsingException if the JSON nesting depth exceeds the allowed maximum or the JSON is invalid
+     */
     protected Object readBracketedValue(final JsonReader jr, JsonDeserConfig config, final BiConsumer<? super Collection<Object>, ?> propHandler,
             final Type<?> type) throws IOException {
         enterNesting();
@@ -4031,6 +4356,18 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
     }
 
+    /**
+     * Reads a braced JSON value ({@code {...}}) into a bean, map, map entity, entity id,
+     * dataset, or sheet, tracking JSON nesting depth to guard against stack-overflow on
+     * hostile input.
+     *
+     * @param jr the JSON reader positioned after the opening brace
+     * @param config the deserialization configuration
+     * @param type the target type for the braced value
+     * @return the deserialized value
+     * @throws IOException if an I/O error occurs while reading
+     * @throws ParsingException if the JSON nesting depth exceeds the allowed maximum or the JSON is invalid
+     */
     protected Object readBracedValue(final JsonReader jr, JsonDeserConfig config, final Type<?> type) throws IOException {
         enterNesting();
         try {
@@ -4077,10 +4414,29 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
     }
 
+    /**
+     * Reads a scalar JSON value and converts it to the given type, optionally substituting an
+     * empty value for {@code null} when {@code nullToEmpty} is {@code true}.
+     *
+     * @param jr the JSON reader positioned at the value token
+     * @param nullToEmpty whether a {@code null} value should be replaced with an empty value
+     * @param valueType the target type to convert the value to
+     * @return the converted value
+     */
     protected Object readValue(final JsonReader jr, final boolean nullToEmpty, final Type<?> valueType) {
         return readNullToEmpty(valueType, jr.readValue(valueType), nullToEmpty);
     }
 
+    /**
+     * Reads a scalar JSON value and converts it to the given type, applying the property's
+     * custom format (if any) and optionally substituting an empty value for {@code null}.
+     *
+     * @param jr the JSON reader positioned at the value token
+     * @param nullToEmpty whether a {@code null} value should be replaced with an empty value
+     * @param propInfo the property metadata supplying an optional custom format, or {@code null}
+     * @param valueType the target type to convert the value to
+     * @return the converted value
+     */
     protected Object readValue(final JsonReader jr, final boolean nullToEmpty, final PropInfo propInfo, final Type<?> valueType) {
         return readNullToEmpty(valueType, propInfo != null && propInfo.hasFormat ? propInfo.readPropValue(jr.readValue(strType)) : jr.readValue(valueType),
                 nullToEmpty);

@@ -44,6 +44,10 @@ public class MillisCalendarType extends CalendarType {
      */
     public static final String MILLIS_CALENDAR = "MillisCalendar";
 
+    /**
+     * Package-private constructor for {@code MillisCalendarType}.
+     * Instances are created by the {@code TypeFactory}.
+     */
     MillisCalendarType() {
         super(MILLIS_CALENDAR);
     }

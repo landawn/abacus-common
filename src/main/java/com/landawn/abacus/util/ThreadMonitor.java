@@ -104,6 +104,7 @@ final class ThreadMonitor implements Runnable {
      * or no timeout if the value is zero or less
      * @return The monitor thread or {@code null}
      * if the timeout amount is not greater than zero
+     * @throws IllegalArgumentException if {@code thread} is {@code null}
      */
     public static Thread start(final Thread thread, final long timeout) {
         N.checkArgNotNull(thread, "thread");

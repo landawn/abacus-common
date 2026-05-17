@@ -52,10 +52,20 @@ public class InputStreamType extends AbstractType<InputStream> {
 
     private final Constructor<?> streamConstructor;
 
+    /**
+     * Package-private constructor for {@code InputStreamType}.
+     * Instances are created by the {@code TypeFactory}.
+     */
     InputStreamType() {
         this(INPUT_STREAM);
     }
 
+    /**
+     * Package-private constructor for {@code InputStreamType} with a custom type name.
+     * Used by subclasses that extend this type with a specialized name.
+     *
+     * @param typeName the custom type name to register
+     */
     InputStreamType(final String typeName) {
         super(typeName);
 
@@ -65,6 +75,13 @@ public class InputStreamType extends AbstractType<InputStream> {
         streamConstructor = null;
     }
 
+    /**
+     * Package-private constructor for {@code InputStreamType} bound to a concrete {@link InputStream} subclass.
+     * For non-abstract classes, the {@code byte[]} and {@link InputStream} constructors are looked up
+     * for later use by {@link #valueOf(String)}.
+     *
+     * @param cls the {@link InputStream} class (or subclass) this type handler represents
+     */
     InputStreamType(final Class<InputStream> cls) {
         super(ClassUtil.getSimpleClassName(cls));
 

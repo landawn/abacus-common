@@ -208,4 +208,17 @@ public class JdkOptionalTypeTest extends TestBase {
         optionalStringType.writeCharacter(characterWriter, opt, config);
         verify(characterWriter, times(1)).writeCharacter(anyString());
     }
+
+    @Test
+    public void testStringOfUsesElementType() {
+        java.util.Optional<Integer> opt = java.util.Optional.of(42);
+        String result = optionalIntegerType.stringOf(opt);
+        assertNotNull(result);
+        assertEquals("42", result);
+
+        java.util.Optional<Integer> empty = java.util.Optional.empty();
+        assertNull(optionalIntegerType.stringOf(empty));
+
+        assertNull(optionalIntegerType.stringOf(null));
+    }
 }

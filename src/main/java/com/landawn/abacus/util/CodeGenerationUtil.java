@@ -109,10 +109,10 @@ public final class CodeGenerationUtil {
     //    1 out of every 10 English words starts with “s”
     //    1 out of every 2,000 starts with “x”
 
-    /** Default inner interface name for single-entity property constants. */
+    /** Default inner interface name ({@code "x"}) for single-entity property constants. */
     public static final String X = "x";
 
-    /** Conventional class name for standalone property-name tables. */
+    /** Conventional top-level interface name ({@code "s"}) for standalone property-name tables. */
     public static final String S = "s";
 
     /** Default nested interface name for snake_case property constants. */
@@ -181,6 +181,7 @@ public final class CodeGenerationUtil {
      *
      * @param entityClass the entity class that contributes bean property names
      * @return generated Java source that declares the inner interface and constants
+     * @throws IllegalArgumentException if {@code entityClass} is {@code null}
      * @see #generatePropNameTableClass(Class, String)
      */
     @Beta
@@ -200,6 +201,7 @@ public final class CodeGenerationUtil {
      * @param entityClass the entity class that contributes bean property names
      * @param propNameTableClassName interface name for generated constants
      * @return generated Java source that declares the inner interface and constants
+     * @throws IllegalArgumentException if {@code entityClass} is {@code null}
      * @see #generatePropNameTableClass(Class, String, String)
      */
     @Beta
@@ -224,6 +226,7 @@ public final class CodeGenerationUtil {
      * @param propNameTableClassName interface name for generated constants
      * @param srcDir source root directory; if {@code null} or empty, source is not written
      * @return generated Java source that declares the inner interface and constants
+     * @throws IllegalArgumentException if {@code entityClass} is {@code null}
      * @throws RuntimeException if writing the modified source file fails
      */
     @Beta
@@ -339,8 +342,9 @@ public final class CodeGenerationUtil {
      * System.out.println(source);
      * }</pre>
      *
-     * @param entityClasses entity classes that contribute bean property names
+     * @param entityClasses entity classes that contribute bean property names; must not be {@code null} or empty
      * @return generated Java source for the standalone property-name table
+     * @throws IllegalArgumentException if {@code entityClasses} is {@code null} or empty
      * @see #generatePropNameTableClasses(Collection, String)
      */
     public static String generatePropNameTableClasses(final Collection<Class<?>> entityClasses) {
@@ -356,9 +360,10 @@ public final class CodeGenerationUtil {
      * System.out.println(source);
      * }</pre>
      *
-     * @param entityClasses entity classes that contribute bean property names
-     * @param propNameTableClassName top-level interface name to generate
+     * @param entityClasses entity classes that contribute bean property names; must not be {@code null} or empty
+     * @param propNameTableClassName top-level interface name to generate; must not be {@code null} or empty
      * @return generated Java source for the standalone property-name table
+     * @throws IllegalArgumentException if {@code entityClasses} is {@code null} or empty, or {@code propNameTableClassName} is {@code null} or empty
      * @see #generatePropNameTableClasses(Collection, String, String, String)
      */
     public static String generatePropNameTableClasses(final Collection<Class<?>> entityClasses, final String propNameTableClassName) {
@@ -374,12 +379,13 @@ public final class CodeGenerationUtil {
      *         Arrays.asList(User.class, Order.class), "Props", "com.example.props", "src/main/java");
      * }</pre>
      *
-     * @param entityClasses entity classes that contribute bean property names
-     * @param propNameTableClassName top-level interface name to generate
+     * @param entityClasses entity classes that contribute bean property names; must not be {@code null} or empty
+     * @param propNameTableClassName top-level interface name to generate; must not be {@code null} or empty
      * @param propNameTableClassPackageName package for generated source; if empty, uses the first
      *        entity package
      * @param srcDir source root directory; if {@code null} or empty, source is not written
      * @return generated Java source for the standalone property-name table
+     * @throws IllegalArgumentException if {@code entityClasses} is {@code null} or empty, or {@code propNameTableClassName} is {@code null} or empty
      * @throws RuntimeException if writing the generated file fails
      */
     public static String generatePropNameTableClasses(final Collection<Class<?>> entityClasses, final String propNameTableClassName,
@@ -412,9 +418,14 @@ public final class CodeGenerationUtil {
      * String source = CodeGenerationUtil.generatePropNameTableClasses(config);
      * }</pre>
      *
-     * @param codeConfig full generation configuration
+     * @param codeConfig full generation configuration; must not be {@code null} and must supply a
+     *        non-empty {@code entityClasses} collection and a non-empty {@code className}
      * @return generated Java source for the property-name table class
-     * @throws IllegalArgumentException if {@code codeConfig} is invalid
+     * @throws IllegalArgumentException if {@code codeConfig} is {@code null}, its {@code entityClasses}
+     *         is {@code null} or empty, its {@code className} is {@code null} or empty, or
+     *         {@code generateClassPropNameList} is enabled while the entities have duplicate simple class names
+     * @throws java.util.NoSuchElementException if no usable entity class remains after filtering out
+     *         interfaces and Lombok builder classes
      * @throws RuntimeException if writing to file fails when {@code srcDir} is configured
      */
     public static String generatePropNameTableClasses(final PropNameTableCodeConfig codeConfig) {
@@ -921,7 +932,7 @@ public final class CodeGenerationUtil {
      *         .classNameForScreamingSnakeCase("sau")
      *         .generateFunctionPropName(true)
      *         .functionClassName("f")
-     *         .propFunctions(N.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))
+     *         .propFunctions(N.asMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))
      *         .build();
      * }</pre>
      */

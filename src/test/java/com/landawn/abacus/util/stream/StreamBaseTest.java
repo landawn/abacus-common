@@ -1070,17 +1070,17 @@ public class StreamBaseTest extends TestBase {
 
     @Test
     public void testSumIntArray() {
-        Assertions.assertEquals(0, StreamBase.sum((int[]) null));
-        Assertions.assertEquals(0, StreamBase.sum(new int[0]));
+        Assertions.assertEquals(0, StreamBase.sumToLong((int[]) null));
+        Assertions.assertEquals(0, StreamBase.sumToLong(new int[0]));
 
         int[] arr = { 1000, 2000, 3000, 4000, 5000 };
-        Assertions.assertEquals(15000, StreamBase.sum(arr));
+        Assertions.assertEquals(15000, StreamBase.sumToLong(arr));
 
-        Assertions.assertEquals(6000, StreamBase.sum(arr, 0, 3));
-        Assertions.assertEquals(9000, StreamBase.sum(arr, 3, 5));
+        Assertions.assertEquals(6000, StreamBase.sumToLong(arr, 0, 3));
+        Assertions.assertEquals(9000, StreamBase.sumToLong(arr, 3, 5));
 
         int[] largeArr = { Integer.MAX_VALUE, 1 };
-        Assertions.assertThrows(ArithmeticException.class, () -> StreamBase.sum(largeArr));
+        Assertions.assertEquals(Integer.MAX_VALUE + 1L, StreamBase.sumToLong(largeArr));
     }
 
     @Test

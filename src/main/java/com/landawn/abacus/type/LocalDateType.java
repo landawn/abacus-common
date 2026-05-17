@@ -37,6 +37,7 @@ import com.landawn.abacus.util.Numbers;
  */
 public class LocalDateType extends AbstractTemporalType<LocalDate> {
 
+    /** The type name constant for LocalDate type identification, equal to {@code "LocalDate"}. */
     public static final String LOCAL_DATE = LocalDate.class.getSimpleName();
 
     /**

@@ -445,12 +445,12 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *
      * @param <T1> the element type of the first array
      * @param <T2> the element type of the second array
-     * @param <L> the type of List containing elements of type T1
-     * @param <R> the type of List containing elements of type T2
+     * @param <L> the type of {@code List} containing elements of type {@code T1} (the concrete result lists are {@code ArrayList} instances)
+     * @param <R> the type of {@code List} containing elements of type {@code T2} (the concrete result lists are {@code ArrayList} instances)
      * @param a the first array to compare. Can be {@code null}, which is treated as an empty array.
      * @param b the second array to compare. Can be {@code null}, which is treated as an empty array.
-     * @return a {@code Difference} object containing lists of common elements (type L),
-     *         elements only in the first array (type L), and elements only in the second array (type R).
+     * @return a non-{@code null} {@code Difference} object containing lists of common elements (type {@code L}),
+     *         elements only in the first array (type {@code L}), and elements only in the second array (type {@code R})
      * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
      * @see N#symmetricDifference(Collection, Collection)
@@ -492,12 +492,12 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *
      * @param <T1> the element type of the first collection
      * @param <T2> the element type of the second collection
-     * @param <L> the type of List containing elements of type T1
-     * @param <R> the type of List containing elements of type T2
+     * @param <L> the type of {@code List} containing elements of type {@code T1} (the concrete result lists are {@code ArrayList} instances)
+     * @param <R> the type of {@code List} containing elements of type {@code T2} (the concrete result lists are {@code ArrayList} instances)
      * @param a the first collection to compare. Can be {@code null} or empty.
      * @param b the second collection to compare. Can be {@code null} or empty.
-     * @return a {@code Difference} object containing lists of common elements (type L),
-     *         elements only in the first collection (type L), and elements only in the second collection (type R).
+     * @return a non-{@code null} {@code Difference} object containing lists of common elements (type {@code L}),
+     *         elements only in the first collection (type {@code L}), and elements only in the second collection (type {@code R})
      * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
      * @see N#symmetricDifference(Collection, Collection)
@@ -1079,9 +1079,14 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * in either collection. For example, if an element appears 3 times in the first collection
      * and 2 times in the second, it will appear 2 times in the common elements.
      *
-     * <p>The returned collection maintains the order of elements as they appear in the first collection.
+     * <p>For collection/array comparisons the returned collection maintains the order of elements
+     * as they appear in the first collection. For {@link MapDifference} and {@link BeanDifference}
+     * the returned value is instead a map of the common entries/properties.
      *
-     * @return a collection containing the common elements. The type L is typically a List or similar collection.
+     * @return a non-{@code null} collection (or map, for key-value differences) containing the common
+     *         elements; never {@code null} but may be empty
+     * @see #onlyOnLeft()
+     * @see #onlyOnRight()
      */
     public L common() {
         return common;
@@ -1095,9 +1100,14 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * For example, if an element appears 5 times in the first collection and 2 times in the
      * second collection, it will appear 3 times in the left-only elements.
      *
-     * <p>The returned collection maintains the order of elements as they appear in the first collection.
+     * <p>For collection/array comparisons the returned collection maintains the order of elements
+     * as they appear in the first collection. For {@link MapDifference} and {@link BeanDifference}
+     * the returned value is instead a map of the entries/properties present only on the left.
      *
-     * @return a collection containing elements only in the left collection. The type L is typically a List or similar collection.
+     * @return a non-{@code null} collection (or map, for key-value differences) containing elements
+     *         present only in the left structure; never {@code null} but may be empty
+     * @see #common()
+     * @see #onlyOnRight()
      */
     public L onlyOnLeft() {
         return onlyOnLeft;
@@ -1111,9 +1121,14 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * For example, if an element appears 2 times in the first collection and 5 times in the
      * second collection, it will appear 3 times in the right-only elements.
      *
-     * <p>The returned collection maintains the order of elements as they appear in the second collection.
+     * <p>For collection/array comparisons the returned collection maintains the order of elements
+     * as they appear in the second collection. For {@link MapDifference} and {@link BeanDifference}
+     * the returned value is instead a map of the entries/properties present only on the right.
      *
-     * @return a collection containing elements only in the right collection. The type R is typically a List or similar collection.
+     * @return a non-{@code null} collection (or map, for key-value differences) containing elements
+     *         present only in the right structure; never {@code null} but may be empty
+     * @see #common()
+     * @see #onlyOnLeft()
      */
     public R onlyOnRight() {
         return onlyOnRight;
@@ -1133,6 +1148,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * would not be equal.
      *
      * @return {@code true} if the two compared collections have exactly the same elements with the same occurrences, {@code false} otherwise
+     * @see #common()
+     * @see #onlyOnLeft()
+     * @see #onlyOnRight()
      */
     @SuppressWarnings("rawtypes")
     public boolean areEqual() {
@@ -1154,8 +1172,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * <p>This method properly handles {@code null} values and ensures type safety by checking
      * that the compared object is also a {@code Difference} instance.
      *
-     * @param obj the object to compare with this {@code Difference}
-     * @return {@code true} if the specified object is equal to this {@code Difference}, {@code false} otherwise
+     * @param obj the object to compare with this {@code Difference}; may be {@code null}
+     * @return {@code true} if the specified object is also a {@code Difference} with equal common,
+     *         left-only, and right-only contents; {@code false} otherwise (including when {@code obj} is {@code null})
      */
     @Override
     public boolean equals(Object obj) {
@@ -1274,8 +1293,12 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // diff.differentValues() returns {"b": Pair.of(2, 3)}
          * }</pre>
          *
-         * @return a map containing entries/properties with different values. The type D is typically
-         *         a Map with Pair values representing the differing values from left and right.
+         * @return a non-{@code null} map containing entries/properties with different values; for the
+         *         single-map and single-bean comparisons the keys are the shared keys/property names and
+         *         the values are {@link Pair} instances holding the left and right values respectively
+         *         (collection-based comparisons instead map each matched identifier to a nested
+         *         {@code Difference} describing the per-entry/per-property changes). May be empty but never {@code null}.
+         * @see #areEqual()
          */
         public D differentValues() {
             return diffValues;
@@ -1294,6 +1317,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * as it also considers whether any entries/properties have different values.
          *
          * @return {@code true} if the two structures have exactly the same entries/properties with the same values, {@code false} otherwise
+         * @see #differentValues()
          */
         @SuppressWarnings("rawtypes")
         @Override
@@ -1312,8 +1336,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Entries/properties with different values</li>
          * </ul>
          *
-         * @param obj the object to compare with this {@code KeyValueDifference}
-         * @return {@code true} if the specified object is equal to this {@code KeyValueDifference}, {@code false} otherwise
+         * @param obj the object to compare with this {@code KeyValueDifference}; may be {@code null}
+         * @return {@code true} if the specified object is also a {@code KeyValueDifference} with equal
+         *         common, left-only, right-only, and different-value contents; {@code false} otherwise
+         *         (including when {@code obj} is {@code null})
          */
         @Override
         public boolean equals(Object obj) {
@@ -1503,7 +1529,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * MapDifference<...> diff = MapDifference.of(map1, map2, keys);
          * // Results in:
          * // common: {"a": 1}
-         * // onlyOnLeft: {} (empty, since "a" and "b" exist in both, "e" doesn't exist in map1)
+         * // onlyOnLeft: {} (empty, since the compared keys "a" and "b" both exist in map2)
          * // onlyOnRight: {"e": 6}
          * // differentValues: {"b": Pair.of(2, 5)}
          * // Note: "c" and "d" are not compared because they're not in keysToCompare
@@ -1550,9 +1576,6 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Only certain fields of complex objects should be compared</li>
          *   <li>Case-insensitive string comparison is needed</li>
          * </ul>
-         *
-         * <p>Example with custom equivalence:
-         *
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -1621,9 +1644,6 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Case-sensitive comparison for some keys, case-insensitive for others</li>
          *   <li>Ignoring certain fields based on the key</li>
          * </ul>
-         *
-         * <p>Example with key-dependent equivalence:
-         *
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -1711,7 +1731,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // Custom equivalence that handles type differences
          * TriPredicate<String, Object, Object> configEqual = (key, v1, v2) -> {
          *     if (key.equals("timeout")) {
-         *         return v1.toString().equals(v2.toString());
+         *         return ((Number) v1).doubleValue() == ((Number) v2).doubleValue();
          *     }
          *     return Objects.equals(v1, v2);
          * };
@@ -2038,16 +2058,13 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *       right-only, or having different values</li>
          * </ol>
          *
-         * <p>Example comparing different API versions with selective field comparison:
-         *
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Collection A: Version 1 API
          * List<Map<String, Object>> v1Data = Arrays.asList(
-         *     Map.of("userId", 1, "userName", "john_doe", "email", "john@old.com",
+         *     Map.of("userId", 1, "username", "john_doe", "email", "john@old.com",
          *            "createdAt", "2023-01-01"),
-         *     Map.of("userId", 2, "userName", "jane_smith", "email", "jane@old.com",
+         *     Map.of("userId", 2, "username", "jane_smith", "email", "jane@old.com",
          *            "createdAt", "2023-02-01")
          * );
          *
@@ -2059,8 +2076,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *            "created", "2023-03-01T00:00:00Z")
          * );
          *
-         * // Only compare username fields (note: different key names in each version)
-         * Collection<String> keysToCompare = Arrays.asList("userName", "username");
+         * // Only compare the shared "username" field
+         * Collection<String> keysToCompare = Arrays.asList("username");
          *
          * MapDifference<...> diff = MapDifference.of(
          *     v1Data, v2Data, keysToCompare,
@@ -2278,7 +2295,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Only properties in {@code propNamesToCompare} are examined</li>
          *   <li>Properties with {@code null} values in both beans ARE included in the common properties</li>
          *   <li>{@code @DiffIgnore} annotations are ignored when specific properties are requested</li>
-         *   <li>If a specified property doesn't exist in a bean, it's treated as a missing property</li>
+         *   <li>If a specified property doesn't exist in the first bean, it is skipped entirely; if it
+         *       exists in the first bean but not the second, it is reported as a left-only property</li>
          * </ul>
          *
          * <p><b>Usage Examples:</b></p>
@@ -2731,8 +2749,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param a the first collection of beans to compare. Can be {@code null} or empty.
          * @param b the second collection of beans to compare. Can be {@code null} or empty.
          * @param idExtractor the function to extract a unique identifier from each bean. Must not be {@code null}.
-         * @return a {@code BeanDifference} object containing the comparison results
+         * @return a non-{@code null} {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if {@code idExtractor} is {@code null} or if the collections contain non-bean objects
+         * @throws IllegalStateException if duplicate identifiers are found within a single collection
          */
         public static <T, C extends List<T>, K> BeanDifference<C, C, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
                 final Collection<? extends T> a, final Collection<? extends T> b, final Function<? super T, K> idExtractor) {
@@ -2789,8 +2808,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param b the second collection of beans to compare. Can be {@code null} or empty.
          * @param propNamesToCompare the property names to compare. If {@code null} or empty, all properties are compared.
          * @param idExtractor the function to extract a unique identifier from each bean. Must not be {@code null}.
-         * @return a {@code BeanDifference} object containing the comparison results
+         * @return a non-{@code null} {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if {@code idExtractor} is {@code null} or if the collections contain non-bean objects
+         * @throws IllegalStateException if duplicate identifiers are found within a single collection
          */
         public static <T, C extends List<T>, K> BeanDifference<C, C, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
                 final Collection<? extends T> a, final Collection<? extends T> b, final Collection<String> propNamesToCompare,
@@ -2857,9 +2877,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param b the second collection of beans to compare. Can be {@code null} or empty.
          * @param idExtractor1 the function to extract identifiers from beans in the first collection. Must not be {@code null}.
          * @param idExtractor2 the function to extract identifiers from beans in the second collection. Must not be {@code null}.
-         * @return a {@code BeanDifference} object containing the comparison results
+         * @return a non-{@code null} {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if either {@code idExtractor1} or {@code idExtractor2} is {@code null},
          *         or if the collections contain non-bean objects
+         * @throws IllegalStateException if duplicate identifiers are found within a single collection
          */
         public static <T1, T2, L extends List<T1>, R extends List<T2>, K> BeanDifference<L, R, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
                 final Collection<? extends T1> a, final Collection<? extends T2> b, final Function<? super T1, ? extends K> idExtractor1,
@@ -2939,9 +2960,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param propNamesToCompare the property names to compare. If {@code null} or empty, all matching properties are compared.
          * @param idExtractor1 the function to extract identifiers from beans in the first collection. Must not be {@code null}.
          * @param idExtractor2 the function to extract identifiers from beans in the second collection. Must not be {@code null}.
-         * @return a {@code BeanDifference} object containing the comparison results
+         * @return a non-{@code null} {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if either {@code idExtractor1} or {@code idExtractor2} is {@code null},
          *         or if the collections contain non-bean objects
+         * @throws IllegalStateException if duplicate identifiers are found within a single collection
          */
         public static <T1, T2, L extends List<T1>, R extends List<T2>, K> BeanDifference<L, R, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
                 final Collection<? extends T1> a, final Collection<? extends T2> b, final Collection<String> propNamesToCompare,

@@ -63,6 +63,11 @@ import com.landawn.abacus.logging.LoggerFactory;
  * }
  * }</pre>
  *
+ * <p><b>Note:</b> This is an internal utility class ({@link Internal @Internal},
+ * {@link Beta @Beta}) and is not intended for use outside this library. Several
+ * {@code create*}/{@code recycle} methods are marked {@code @deprecated} solely
+ * to discourage external use.</p>
+ *
  * @see java.io.BufferedWriter
  * @see java.io.BufferedReader
  */
@@ -143,8 +148,10 @@ public final class Objectory {
      * }</pre>
      *
      * @param <T> the type of elements in the list
-     * @return an empty ArrayList from the pool or a new instance if the pool is empty
+     * @return an empty {@link ArrayList} obtained from the pool, or a new
+     *         instance if the pool is empty
      * @deprecated for internal use only
+     * @see #recycle(List)
      */
     @Deprecated
     @SuppressWarnings("unchecked")
@@ -171,8 +178,10 @@ public final class Objectory {
      * }</pre>
      *
      * @param <T> the type of elements in the set
-     * @return an empty HashSet from the pool or a new instance if the pool is empty
+     * @return an empty {@link java.util.HashSet} obtained from the pool, or a
+     *         new instance if the pool is empty
      * @deprecated for internal use only
+     * @see #recycle(Set)
      */
     @Deprecated
     @SuppressWarnings("unchecked")
@@ -199,8 +208,10 @@ public final class Objectory {
      * }</pre>
      *
      * @param <T> the type of elements in the set
-     * @return an empty LinkedHashSet from the pool or a new instance if the pool is empty
+     * @return an empty {@link LinkedHashSet} obtained from the pool, or a new
+     *         instance if the pool is empty
      * @deprecated for internal use only
+     * @see #recycle(Set)
      */
     @Deprecated
     @SuppressWarnings("unchecked")
@@ -228,8 +239,10 @@ public final class Objectory {
      *
      * @param <K> the type of keys in the map
      * @param <V> the type of values in the map
-     * @return an empty HashMap from the pool or a new instance if the pool is empty
+     * @return an empty {@link java.util.HashMap} obtained from the pool, or a
+     *         new instance if the pool is empty
      * @deprecated for internal use only
+     * @see #recycle(Map)
      */
     @Deprecated
     public static <K, V> Map<K, V> createMap() {
@@ -256,8 +269,10 @@ public final class Objectory {
      *
      * @param <K> the type of keys in the map
      * @param <V> the type of values in the map
-     * @return an empty LinkedHashMap from the pool or a new instance if the pool is empty
+     * @return an empty {@link LinkedHashMap} obtained from the pool, or a new
+     *         instance if the pool is empty
      * @deprecated for internal use only
+     * @see #recycle(Map)
      */
     @Deprecated
     public static <K, V> Map<K, V> createLinkedHashMap() {
@@ -267,20 +282,23 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves an Object array with the default poolable size.
-     * The array length will be {@link #POOLABLE_ARRAY_LENGTH}.
+     * Creates or retrieves an {@code Object[]} of the default poolable length
+     * ({@code 128}).
      *
      * <p>After use, the array should be recycled using {@link #recycle(Object[])}.</p>
      *
-     * @return an Object array from the pool or a new instance if the pool is empty
+     * @return an {@code Object[]} of length {@code 128} obtained from the pool,
+     *         or a new instance if the pool is empty
+     * @see #createObjectArray(int)
      */
     public static Object[] createObjectArray() {
         return createObjectArray(POOLABLE_ARRAY_LENGTH);
     }
 
     /**
-     * Creates or retrieves an Object array of the specified size.
-     * Arrays larger than {@link #POOLABLE_ARRAY_LENGTH} are always newly allocated.
+     * Creates or retrieves an {@code Object[]} of the specified size.
+     * Arrays with size greater than {@code 128} are always newly allocated and
+     * are not pooled.
      *
      * <p>After use, the array should be recycled using {@link #recycle(Object[])}.</p>
      *
@@ -297,7 +315,8 @@ public final class Objectory {
      * }</pre>
      *
      * @param size the desired size of the array
-     * @return an Object array of the specified size
+     * @return an {@code Object[]} of the specified size
+     * @throws IllegalArgumentException if {@code size} is negative
      */
     public static Object[] createObjectArray(final int size) {
         if (size < 0) {
@@ -327,20 +346,25 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a char array buffer with the default buffer size.
-     * The buffer size will be {@link #BUFFER_SIZE}.
+     * Creates or retrieves a {@code char[]} buffer of the default buffer size.
+     * The returned buffer's length is the internal default buffer size.
      *
      * <p>After use, the buffer should be recycled using {@link #recycle(char[])}.</p>
      *
-     * @return a char array buffer from the pool or a new instance if the pool is empty
+     * @return a {@code char[]} buffer obtained from the pool, or a new instance
+     *         if the pool is empty
+     * @see #createCharArrayBuffer(int)
      */
     public static char[] createCharArrayBuffer() {
         return createCharArrayBuffer(BUFFER_SIZE);
     }
 
     /**
-     * Creates or retrieves a char array buffer of the specified capacity.
-     * Buffers larger than {@link #BUFFER_SIZE} are always newly allocated.
+     * Creates or retrieves a {@code char[]} buffer of at least the specified
+     * capacity. If {@code capacity} exceeds the internal default buffer size, a
+     * new array of exactly {@code capacity} is allocated (and is not pooled).
+     * Otherwise a pooled buffer is returned whose length is the default buffer
+     * size, which may be <i>larger</i> than the requested {@code capacity}.
      *
      * <p>This is useful for character-based I/O operations where a temporary buffer is needed.</p>
      *
@@ -356,8 +380,8 @@ public final class Objectory {
      * }
      * }</pre>
      *
-     * @param capacity the desired capacity of the buffer
-     * @return a char array buffer of the specified capacity
+     * @param capacity the minimum desired capacity of the buffer
+     * @return a {@code char[]} buffer at least {@code capacity} long
      */
     public static char[] createCharArrayBuffer(final int capacity) {
         if (capacity > BUFFER_SIZE) {
@@ -378,20 +402,25 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a byte array buffer with the default buffer size.
-     * The buffer size will be {@link #BUFFER_SIZE}.
+     * Creates or retrieves a {@code byte[]} buffer of the default buffer size.
+     * The returned buffer's length is the internal default buffer size.
      *
      * <p>After use, the buffer should be recycled using {@link #recycle(byte[])}.</p>
      *
-     * @return a byte array buffer from the pool or a new instance if the pool is empty
+     * @return a {@code byte[]} buffer obtained from the pool, or a new instance
+     *         if the pool is empty
+     * @see #createByteArrayBuffer(int)
      */
     public static byte[] createByteArrayBuffer() {
         return createByteArrayBuffer(BUFFER_SIZE);
     }
 
     /**
-     * Creates or retrieves a byte array buffer of the specified capacity.
-     * Buffers larger than {@link #BUFFER_SIZE} are always newly allocated.
+     * Creates or retrieves a {@code byte[]} buffer of at least the specified
+     * capacity. If {@code capacity} exceeds the internal default buffer size, a
+     * new array of exactly {@code capacity} is allocated (and is not pooled).
+     * Otherwise a pooled buffer is returned whose length is the default buffer
+     * size, which may be <i>larger</i> than the requested {@code capacity}.
      *
      * <p>This is useful for binary I/O operations where a temporary buffer is needed.</p>
      *
@@ -407,8 +436,8 @@ public final class Objectory {
      * }
      * }</pre>
      *
-     * @param capacity the desired capacity of the buffer
-     * @return a byte array buffer of the specified capacity
+     * @param capacity the minimum desired capacity of the buffer
+     * @return a {@code byte[]} buffer at least {@code capacity} long
      */
     public static byte[] createByteArrayBuffer(final int capacity) {
         if (capacity > BUFFER_SIZE) {
@@ -429,20 +458,26 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a StringBuilder with the default buffer size.
-     * The initial capacity will be {@link #BUFFER_SIZE}.
+     * Creates or retrieves a {@link StringBuilder} with the default initial
+     * capacity (the internal default buffer size).
      *
-     * <p>After use, the StringBuilder should be recycled using {@link #recycle(StringBuilder)}.</p>
+     * <p>After use, the {@code StringBuilder} should be recycled using
+     * {@link #recycle(StringBuilder)}.</p>
      *
-     * @return a StringBuilder from the pool or a new instance if the pool is empty
+     * @return a {@code StringBuilder} obtained from the pool, or a new instance
+     *         if the pool is empty
+     * @see #createStringBuilder(int)
      */
     public static StringBuilder createStringBuilder() {
         return createStringBuilder(BUFFER_SIZE);
     }
 
     /**
-     * Creates or retrieves a StringBuilder with the specified initial capacity.
-     * StringBuilders with capacity larger than {@link #BUFFER_SIZE} are always newly allocated.
+     * Creates or retrieves a {@link StringBuilder} with at least the specified
+     * initial capacity. If {@code initCapacity} exceeds the internal default
+     * buffer size, a new {@code StringBuilder} of that capacity is allocated
+     * (and is not pooled). Otherwise a pooled {@code StringBuilder} is returned
+     * whose capacity is the default buffer size.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -457,8 +492,8 @@ public final class Objectory {
      * }
      * }</pre>
      *
-     * @param initCapacity the desired initial capacity
-     * @return a StringBuilder with the specified initial capacity
+     * @param initCapacity the minimum desired initial capacity
+     * @return a {@code StringBuilder} with at least the specified initial capacity
      */
     public static StringBuilder createStringBuilder(final int initCapacity) {
         if (initCapacity > BUFFER_SIZE) {
@@ -477,20 +512,25 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a ByteArrayOutputStream with the default buffer size.
-     * The initial capacity will be {@link #BUFFER_SIZE}.
+     * Creates or retrieves a {@link ByteArrayOutputStream} with the default
+     * initial capacity (the internal default buffer size).
      *
      * <p>After use, the stream should be recycled using {@link #recycle(ByteArrayOutputStream)}.</p>
      *
-     * @return a ByteArrayOutputStream from the pool or a new instance if the pool is empty
+     * @return a {@code ByteArrayOutputStream} obtained from the pool, or a new
+     *         instance if the pool is empty
+     * @see #createByteArrayOutputStream(int)
      */
     public static ByteArrayOutputStream createByteArrayOutputStream() {
         return createByteArrayOutputStream(BUFFER_SIZE);
     }
 
     /**
-     * Creates or retrieves a ByteArrayOutputStream with the specified initial capacity.
-     * Streams with capacity larger than {@link #BUFFER_SIZE} are always newly allocated.
+     * Creates or retrieves a {@link ByteArrayOutputStream} with at least the
+     * specified initial capacity. If {@code initCapacity} exceeds the internal
+     * default buffer size, a new stream of that capacity is allocated (and is
+     * not pooled). Otherwise a pooled stream is returned whose initial capacity
+     * is the default buffer size.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -503,8 +543,8 @@ public final class Objectory {
      * }
      * }</pre>
      *
-     * @param initCapacity the desired initial capacity
-     * @return a ByteArrayOutputStream with the specified initial capacity
+     * @param initCapacity the minimum desired initial capacity
+     * @return a {@code ByteArrayOutputStream} with at least the specified initial capacity
      */
     public static ByteArrayOutputStream createByteArrayOutputStream(final int initCapacity) {
         if (initCapacity > BUFFER_SIZE) {
@@ -525,12 +565,14 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a BufferedWriter with no underlying writer.
-     * The writer must be initialized with {@link BufferedWriter#reinit(Writer)} before use.
+     * Creates or retrieves a {@link BufferedWriter} with no underlying target
+     * writer. The writer must be re-initialized with a target before it can be
+     * used for output.
      *
      * <p>After use, the writer should be recycled using {@link #recycle(java.io.BufferedWriter)}.</p>
      *
-     * @return a BufferedWriter from the pool or a new instance if the pool is empty
+     * @return a {@code BufferedWriter} obtained from the pool, or a new instance
+     *         if the pool is empty
      */
     public static java.io.BufferedWriter createBufferedWriter() {
         BufferedWriter bw = bufferedWriterPool.poll();
@@ -547,12 +589,13 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a BufferedWriter wrapping the specified OutputStream.
+     * Creates or retrieves a {@link BufferedWriter} that writes to the specified
+     * {@link OutputStream}.
      *
      * <p>After use, the writer should be recycled using {@link #recycle(java.io.BufferedWriter)}.</p>
      *
-     * @param os the OutputStream to wrap
-     * @return a BufferedWriter wrapping the specified stream
+     * @param os the {@code OutputStream} to write to
+     * @return a {@code BufferedWriter} writing to the specified stream
      */
     public static java.io.BufferedWriter createBufferedWriter(final OutputStream os) {
         BufferedWriter bw = bufferedWriterPool.poll();
@@ -569,8 +612,10 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a BufferedWriter wrapping the specified Writer.
-     * If the writer is already a BufferedWriter, it is returned as-is.
+     * Creates or retrieves a {@link BufferedWriter} that writes to the specified
+     * {@link Writer}. If {@code writer} is already a
+     * {@link java.io.BufferedWriter}, it is returned as-is (and will not be
+     * pooled by {@link #recycle(java.io.BufferedWriter)}).
      *
      * <p>After use, the writer should be recycled using {@link #recycle(java.io.BufferedWriter)}.</p>
      *
@@ -587,8 +632,8 @@ public final class Objectory {
      * }
      * }</pre>
      *
-     * @param writer the Writer to wrap
-     * @return a BufferedWriter wrapping the specified writer
+     * @param writer the {@code Writer} to write to
+     * @return a {@code BufferedWriter} writing to the specified writer
      */
     public static java.io.BufferedWriter createBufferedWriter(final Writer writer) {
         if (writer instanceof java.io.BufferedWriter) {
@@ -609,12 +654,14 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a BufferedXmlWriter with no underlying writer.
-     * The writer must be initialized before use.
+     * Creates or retrieves a {@link BufferedXmlWriter} with no underlying target
+     * writer. The writer must be re-initialized with a target before it can be
+     * used for output.
      *
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedXmlWriter)}.</p>
      *
-     * @return a BufferedXmlWriter from the pool or a new instance if the pool is empty
+     * @return a {@code BufferedXmlWriter} obtained from the pool, or a new
+     *         instance if the pool is empty
      */
     public static BufferedXmlWriter createBufferedXmlWriter() {
         BufferedXmlWriter bw = bufferedXmlWriterPool.poll();
@@ -631,7 +678,8 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a BufferedXmlWriter wrapping the specified OutputStream.
+     * Creates or retrieves a {@link BufferedXmlWriter} that writes to the
+     * specified {@link OutputStream}.
      *
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedXmlWriter)}.</p>
      *
@@ -645,8 +693,8 @@ public final class Objectory {
      * }
      * }</pre>
      *
-     * @param os the OutputStream to wrap
-     * @return a BufferedXmlWriter wrapping the specified stream
+     * @param os the {@code OutputStream} to write to
+     * @return a {@code BufferedXmlWriter} writing to the specified stream
      */
     public static BufferedXmlWriter createBufferedXmlWriter(final OutputStream os) {
         BufferedXmlWriter bw = bufferedXmlWriterPool.poll();
@@ -663,12 +711,13 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a BufferedXmlWriter wrapping the specified Writer.
+     * Creates or retrieves a {@link BufferedXmlWriter} that writes to the
+     * specified {@link Writer}.
      *
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedXmlWriter)}.</p>
      *
-     * @param writer the Writer to wrap
-     * @return a BufferedXmlWriter wrapping the specified writer
+     * @param writer the {@code Writer} to write to
+     * @return a {@code BufferedXmlWriter} writing to the specified writer
      */
     public static BufferedXmlWriter createBufferedXmlWriter(final Writer writer) {
         BufferedXmlWriter bw = bufferedXmlWriterPool.poll();
@@ -685,12 +734,14 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a BufferedJsonWriter with no underlying writer.
-     * The writer must be initialized before use.
+     * Creates or retrieves a {@link BufferedJsonWriter} with no underlying
+     * target writer. The writer must be re-initialized with a target before it
+     * can be used for output.
      *
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedJsonWriter)}.</p>
      *
-     * @return a BufferedJsonWriter from the pool or a new instance if the pool is empty
+     * @return a {@code BufferedJsonWriter} obtained from the pool, or a new
+     *         instance if the pool is empty
      */
     public static BufferedJsonWriter createBufferedJsonWriter() {
         BufferedJsonWriter bw = bufferedJsonWriterPool.poll();
@@ -707,7 +758,8 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a BufferedJsonWriter wrapping the specified OutputStream.
+     * Creates or retrieves a {@link BufferedJsonWriter} that writes to the
+     * specified {@link OutputStream}.
      *
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedJsonWriter)}.</p>
      *
@@ -721,8 +773,8 @@ public final class Objectory {
      * }
      * }</pre>
      *
-     * @param os the OutputStream to wrap
-     * @return a BufferedJsonWriter wrapping the specified stream
+     * @param os the {@code OutputStream} to write to
+     * @return a {@code BufferedJsonWriter} writing to the specified stream
      */
     public static BufferedJsonWriter createBufferedJsonWriter(final OutputStream os) {
         BufferedJsonWriter bw = bufferedJsonWriterPool.poll();
@@ -739,12 +791,13 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a BufferedJsonWriter wrapping the specified Writer.
+     * Creates or retrieves a {@link BufferedJsonWriter} that writes to the
+     * specified {@link Writer}.
      *
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedJsonWriter)}.</p>
      *
-     * @param writer the Writer to wrap
-     * @return a BufferedJsonWriter wrapping the specified writer
+     * @param writer the {@code Writer} to write to
+     * @return a {@code BufferedJsonWriter} writing to the specified writer
      */
     public static BufferedJsonWriter createBufferedJsonWriter(final Writer writer) {
         BufferedJsonWriter bw = bufferedJsonWriterPool.poll();
@@ -761,12 +814,16 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a BufferedCsvWriter with no underlying writer.
-     * The writer must be initialized before use.
+     * Creates or retrieves a {@link BufferedCsvWriter} with no underlying target
+     * writer. The writer must be re-initialized with a target before it can be
+     * used for output. The pooled instance is drawn from either the
+     * backslash-escape pool or the default pool depending on the current
+     * {@code CsvUtil} backslash-escape setting.
      *
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedCsvWriter)}.</p>
      *
-     * @return a BufferedCsvWriter from the pool or a new instance if the pool is empty
+     * @return a {@code BufferedCsvWriter} obtained from the pool, or a new
+     *         instance if the pool is empty
      */
     public static BufferedCsvWriter createBufferedCsvWriter() {
         BufferedCsvWriter bw = CsvUtil.isBackSlashEscapeCharForWrite() ? backSlashBufferedCsvWriterPool.poll() : bufferedCsvWriterPool.poll();
@@ -783,7 +840,8 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a BufferedCsvWriter wrapping the specified OutputStream.
+     * Creates or retrieves a {@link BufferedCsvWriter} that writes to the
+     * specified {@link OutputStream}.
      *
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedCsvWriter)}.</p>
      *
@@ -797,8 +855,8 @@ public final class Objectory {
      * }
      * }</pre>
      *
-     * @param os the OutputStream to wrap
-     * @return a BufferedCsvWriter wrapping the specified stream
+     * @param os the {@code OutputStream} to write to
+     * @return a {@code BufferedCsvWriter} writing to the specified stream
      */
     public static BufferedCsvWriter createBufferedCsvWriter(final OutputStream os) {
         BufferedCsvWriter bw = CsvUtil.isBackSlashEscapeCharForWrite() ? backSlashBufferedCsvWriterPool.poll() : bufferedCsvWriterPool.poll();
@@ -815,12 +873,13 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a BufferedCsvWriter wrapping the specified Writer.
+     * Creates or retrieves a {@link BufferedCsvWriter} that writes to the
+     * specified {@link Writer}.
      *
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedCsvWriter)}.</p>
      *
-     * @param writer the Writer to wrap
-     * @return a BufferedCsvWriter wrapping the specified writer
+     * @param writer the {@code Writer} to write to
+     * @return a {@code BufferedCsvWriter} writing to the specified writer
      */
     public static BufferedCsvWriter createBufferedCsvWriter(final Writer writer) {
         BufferedCsvWriter bw = CsvUtil.isBackSlashEscapeCharForWrite() ? backSlashBufferedCsvWriterPool.poll() : bufferedCsvWriterPool.poll();
@@ -837,7 +896,8 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a BufferedReader wrapping the specified String.
+     * Creates or retrieves a {@link BufferedReader} that reads from the
+     * specified {@code String} (via an internal {@link java.io.StringReader}).
      *
      * <p>After use, the reader should be recycled using {@link #recycle(java.io.BufferedReader)}.</p>
      *
@@ -855,20 +915,21 @@ public final class Objectory {
      * }
      * }</pre>
      *
-     * @param str the String to read from
-     * @return a BufferedReader reading from the specified string
+     * @param str the {@code String} to read from
+     * @return a {@code BufferedReader} reading from the specified string
      */
     public static java.io.BufferedReader createBufferedReader(final String str) {
         return createBufferedReader(new java.io.StringReader(str));
     }
 
     /**
-     * Creates or retrieves a BufferedReader wrapping the specified InputStream.
+     * Creates or retrieves a {@link BufferedReader} that reads from the
+     * specified {@link InputStream}.
      *
      * <p>After use, the reader should be recycled using {@link #recycle(java.io.BufferedReader)}.</p>
      *
-     * @param is the InputStream to wrap
-     * @return a BufferedReader wrapping the specified stream
+     * @param is the {@code InputStream} to read from
+     * @return a {@code BufferedReader} reading from the specified stream
      */
     public static java.io.BufferedReader createBufferedReader(final InputStream is) {
         final BufferedReader br = bufferedReaderPool.poll();
@@ -885,8 +946,10 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a BufferedReader wrapping the specified Reader.
-     * If the reader is already a BufferedReader, it is returned as-is.
+     * Creates or retrieves a {@link BufferedReader} that reads from the
+     * specified {@link Reader}. If {@code reader} is already a
+     * {@link java.io.BufferedReader}, it is returned as-is (and will not be
+     * pooled by {@link #recycle(java.io.BufferedReader)}).
      *
      * <p>After use, the reader should be recycled using {@link #recycle(java.io.BufferedReader)}.</p>
      *
@@ -903,8 +966,8 @@ public final class Objectory {
      * }
      * }</pre>
      *
-     * @param reader the Reader to wrap
-     * @return a BufferedReader wrapping the specified reader
+     * @param reader the {@code Reader} to read from
+     * @return a {@code BufferedReader} reading from the specified reader
      */
     public static java.io.BufferedReader createBufferedReader(final Reader reader) {
         if (reader instanceof java.io.BufferedReader) {
@@ -938,11 +1001,13 @@ public final class Objectory {
     }
 
     /**
-     * Returns a List to the object pool for reuse.
-     * The list is cleared before being added to the pool.
-     * Lists larger than {@link #POOLABLE_SIZE} are not pooled.
+     * Returns a {@code List} to the object pool for reuse.
+     * The list is cleared before being added to the pool. A {@code null} list,
+     * a list whose size exceeds the internal poolable-size limit, or a list
+     * offered when the pool is already full is silently ignored (not pooled).
      *
-     * <p>This method should be called in a finally block to ensure proper recycling:</p>
+     * <p>This method should be called in a {@code finally} block to ensure
+     * proper recycling:</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -954,8 +1019,9 @@ public final class Objectory {
      * }
      * }</pre>
      *
-     * @param list the list to recycle
+     * @param list the list to recycle; may be {@code null}
      * @deprecated for internal use only
+     * @see #createList()
      */
     @Deprecated
     public static void recycle(final List<?> list) {
@@ -970,13 +1036,17 @@ public final class Objectory {
     }
 
     /**
-     * Returns a Set to the object pool for reuse.
-     * The set is cleared before being added to the pool.
-     * Sets larger than {@link #POOLABLE_SIZE} are not pooled.
-     * LinkedHashSets are pooled separately from regular HashSets.
+     * Returns a {@code Set} to the object pool for reuse.
+     * The set is cleared before being added to the pool. A {@code null} set, a
+     * set whose size exceeds the internal poolable-size limit, or a set offered
+     * when the relevant pool is already full is silently ignored (not pooled).
+     * {@link LinkedHashSet} instances are pooled separately from other
+     * {@code Set} implementations.
      *
-     * @param set the set to recycle
+     * @param set the set to recycle; may be {@code null}
      * @deprecated for internal use only
+     * @see #createSet()
+     * @see #createLinkedHashSet()
      */
     @Deprecated
     public static void recycle(final Set<?> set) {
@@ -998,13 +1068,17 @@ public final class Objectory {
     }
 
     /**
-     * Returns a Map to the object pool for reuse.
-     * The map is cleared before being added to the pool.
-     * Maps larger than {@link #POOLABLE_SIZE} are not pooled.
-     * LinkedHashMaps are pooled separately from regular HashMaps.
+     * Returns a {@code Map} to the object pool for reuse.
+     * The map is cleared before being added to the pool. A {@code null} map, a
+     * map whose size exceeds the internal poolable-size limit, or a map offered
+     * when the relevant pool is already full is silently ignored (not pooled).
+     * {@link LinkedHashMap} instances are pooled separately from other
+     * {@code Map} implementations.
      *
-     * @param map the map to recycle
+     * @param map the map to recycle; may be {@code null}
      * @deprecated for internal use only
+     * @see #createMap()
+     * @see #createLinkedHashMap()
      */
     @Deprecated
     public static void recycle(final Map<?, ?> map) {
@@ -1026,9 +1100,12 @@ public final class Objectory {
     }
 
     /**
-     * Returns an Object array to the object pool for reuse.
-     * The array is cleared (all elements set to null) before being added to the pool.
-     * Arrays larger than {@link #POOLABLE_ARRAY_LENGTH} are not pooled.
+     * Returns an {@code Object[]} to the object pool for reuse.
+     * The array is cleared (all elements set to {@code null}) before being
+     * added to the pool. A {@code null} array, an empty array, an array longer
+     * than the maximum poolable length ({@code 128}), or an array offered when
+     * the per-length pool is already full is silently ignored (not pooled).
+     * Arrays are pooled in separate queues keyed by their exact length.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1040,7 +1117,8 @@ public final class Objectory {
      * }
      * }</pre>
      *
-     * @param objArray the array to recycle
+     * @param objArray the array to recycle; may be {@code null}
+     * @see #createObjectArray(int)
      */
     public static void recycle(final Object[] objArray) {
         if ((objArray == null) || (objArray.length == 0) || (objArray.length > POOLABLE_ARRAY_LENGTH)) {
@@ -1064,13 +1142,20 @@ public final class Objectory {
     }
 
     /**
-     * Returns a char array buffer to the object pool for reuse.
-     * Arrays larger than {@link #BUFFER_SIZE} are not pooled.
+     * Returns a {@code char[]} buffer to the object pool for reuse.
+     * Only arrays whose length is exactly the internal default buffer size are
+     * pooled; a {@code null} array or any other length is silently ignored.
      *
-     * @param cbuf the char array to recycle
+     * @param cbuf the char array to recycle; may be {@code null}
+     * @see #createCharArrayBuffer(int)
      */
     public static void recycle(final char[] cbuf) {
-        if ((cbuf == null) || (cbuf.length > BUFFER_SIZE)) {
+        // Only pool arrays of exactly BUFFER_SIZE — createCharArrayBuffer(int) promises a buffer
+        // at least as large as the requested capacity, so a smaller pooled array would silently
+        // violate that contract on a subsequent allocation. Larger-than-BUFFER_SIZE arrays from
+        // createCharArrayBuffer(capacity>BUFFER_SIZE) are always freshly allocated and were never
+        // pooled to begin with.
+        if (cbuf == null || cbuf.length != BUFFER_SIZE) {
             return;
         }
 
@@ -1078,13 +1163,16 @@ public final class Objectory {
     }
 
     /**
-     * Returns a byte array buffer to the object pool for reuse.
-     * Arrays larger than {@link #BUFFER_SIZE} are not pooled.
+     * Returns a {@code byte[]} buffer to the object pool for reuse.
+     * Only arrays whose length is exactly the internal default buffer size are
+     * pooled; a {@code null} array or any other length is silently ignored.
      *
-     * @param bbuf the byte array to recycle
+     * @param bbuf the byte array to recycle; may be {@code null}
+     * @see #createByteArrayBuffer(int)
      */
     public static void recycle(final byte[] bbuf) {
-        if ((bbuf == null) || (bbuf.length > BUFFER_SIZE)) {
+        // See recycle(char[]) for the rationale on the exact-length check.
+        if (bbuf == null || bbuf.length != BUFFER_SIZE) {
             return;
         }
 
@@ -1092,9 +1180,11 @@ public final class Objectory {
     }
 
     /**
-     * Returns a StringBuilder to the object pool for reuse.
-     * The StringBuilder is cleared before being added to the pool.
-     * StringBuilders with capacity larger than {@link #BUFFER_SIZE} are not pooled.
+     * Returns a {@link StringBuilder} to the object pool for reuse.
+     * The {@code StringBuilder} is reset to zero length before being added to
+     * the pool. A {@code null} builder, a builder whose capacity exceeds the
+     * internal default buffer size, or a builder offered when the pool is
+     * already full is silently ignored (not pooled).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1107,7 +1197,8 @@ public final class Objectory {
      * }
      * }</pre>
      *
-     * @param sb the StringBuilder to recycle
+     * @param sb the StringBuilder to recycle; may be {@code null}
+     * @see #createStringBuilder(int)
      */
     public static void recycle(final StringBuilder sb) {
         if ((sb == null) || (sb.capacity() > BUFFER_SIZE)) {
@@ -1121,11 +1212,14 @@ public final class Objectory {
     }
 
     /**
-     * Returns a ByteArrayOutputStream to the object pool for reuse.
-     * The stream is reset before being added to the pool.
-     * Streams with capacity larger than {@link #BUFFER_SIZE} are not pooled.
+     * Returns a {@link ByteArrayOutputStream} to the object pool for reuse.
+     * The stream is reset before being added to the pool. A {@code null}
+     * stream, a stream whose capacity exceeds the internal default buffer size,
+     * or a stream offered when the pool is already full is silently ignored
+     * (not pooled).
      *
-     * @param os the ByteArrayOutputStream to recycle
+     * @param os the ByteArrayOutputStream to recycle; may be {@code null}
+     * @see #createByteArrayOutputStream(int)
      */
     public static void recycle(final ByteArrayOutputStream os) {
         if ((os == null) || (os.capacity() > BUFFER_SIZE)) {
@@ -1139,11 +1233,14 @@ public final class Objectory {
     }
 
     /**
-     * Returns a BufferedXmlWriter to the object pool for reuse.
-     * The writer's buffer is flushed and the writer is reset before being added to the pool.
+     * Returns a {@link BufferedXmlWriter} to the object pool for reuse.
+     * The writer's buffer is flushed to its underlying target and the writer is
+     * reset before being added to the pool. A {@code null} writer is silently
+     * ignored.
      *
-     * @param bw the BufferedXmlWriter to recycle
-     * @throws UncheckedIOException if an I/O error occurs while flushing
+     * @param bw the BufferedXmlWriter to recycle; may be {@code null}
+     * @throws UncheckedIOException if an I/O error occurs while flushing the buffer
+     * @see #createBufferedXmlWriter()
      */
     public static void recycle(final BufferedXmlWriter bw) {
         if (bw == null) {
@@ -1161,11 +1258,14 @@ public final class Objectory {
     }
 
     /**
-     * Returns a BufferedJsonWriter to the object pool for reuse.
-     * The writer's buffer is flushed and the writer is reset before being added to the pool.
+     * Returns a {@link BufferedJsonWriter} to the object pool for reuse.
+     * The writer's buffer is flushed to its underlying target and the writer is
+     * reset before being added to the pool. A {@code null} writer is silently
+     * ignored.
      *
-     * @param bw the BufferedJsonWriter to recycle
-     * @throws UncheckedIOException if an I/O error occurs while flushing
+     * @param bw the BufferedJsonWriter to recycle; may be {@code null}
+     * @throws UncheckedIOException if an I/O error occurs while flushing the buffer
+     * @see #createBufferedJsonWriter()
      */
     public static void recycle(final BufferedJsonWriter bw) {
         if (bw == null) {
@@ -1183,12 +1283,15 @@ public final class Objectory {
     }
 
     /**
-     * Returns a BufferedCsvWriter to the object pool for reuse.
-     * The writer's buffer is flushed and the writer is reset before being added to the pool.
-     * Writers are pooled separately based on their escape character settings.
+     * Returns a {@link BufferedCsvWriter} to the object pool for reuse.
+     * The writer's buffer is flushed to its underlying target and the writer is
+     * reset before being added to the pool. Writers using a backslash escape
+     * character are pooled separately from those that do not. A {@code null}
+     * writer is silently ignored.
      *
-     * @param bw the BufferedCsvWriter to recycle
-     * @throws UncheckedIOException if an I/O error occurs while flushing
+     * @param bw the BufferedCsvWriter to recycle; may be {@code null}
+     * @throws UncheckedIOException if an I/O error occurs while flushing the buffer
+     * @see #createBufferedCsvWriter()
      */
     public static void recycle(final BufferedCsvWriter bw) {
         if (bw == null) {
@@ -1211,9 +1314,13 @@ public final class Objectory {
     }
 
     /**
-     * Returns a BufferedWriter to the object pool for reuse.
-     * The writer's buffer is flushed and the writer is reset before being added to the pool.
-     * This method handles all types of buffered writers (JSON, XML, CSV, and plain).
+     * Returns a {@link BufferedWriter} to the object pool for reuse.
+     * The writer's buffer is flushed to its underlying target and the writer is
+     * reset before being added to the pool. This method dispatches to the
+     * appropriate pool based on the concrete writer type (the library's JSON,
+     * XML, CSV, or plain buffered writer). A {@code null} writer, or any writer
+     * that is not one of these library types (for example a plain
+     * {@link java.io.BufferedWriter}), is silently ignored.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1226,8 +1333,9 @@ public final class Objectory {
      * }
      * }</pre>
      *
-     * @param writer the BufferedWriter to recycle
-     * @throws UncheckedIOException if an I/O error occurs while flushing
+     * @param writer the BufferedWriter to recycle; may be {@code null}
+     * @throws UncheckedIOException if an I/O error occurs while flushing the buffer
+     * @see #createBufferedWriter()
      */
     public static void recycle(final java.io.BufferedWriter writer) {
         if (writer instanceof BufferedJsonWriter) {
@@ -1249,9 +1357,10 @@ public final class Objectory {
     }
 
     /**
-     * Returns a BufferedReader to the object pool for reuse.
-     * The reader is reset before being added to the pool.
-     * Only instances of the custom BufferedReader class are pooled.
+     * Returns a {@link BufferedReader} to the object pool for reuse.
+     * The reader is reset before being added to the pool. Only instances of the
+     * library's internal {@code BufferedReader} are pooled; a {@code null}
+     * reader or any other {@link java.io.BufferedReader} is silently ignored.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1264,7 +1373,8 @@ public final class Objectory {
      * }
      * }</pre>
      *
-     * @param reader the BufferedReader to recycle
+     * @param reader the BufferedReader to recycle; may be {@code null}
+     * @see #createBufferedReader(Reader)
      */
     public static void recycle(final java.io.BufferedReader reader) {
         if (reader instanceof BufferedReader br) {

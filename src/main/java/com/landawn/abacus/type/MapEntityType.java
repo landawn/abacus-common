@@ -30,10 +30,15 @@ import com.landawn.abacus.util.Strings;
 @SuppressWarnings("java:S2160")
 public class MapEntityType extends AbstractType<MapEntity> {
 
+    /** The type name constant for MapEntity type identification, equal to {@code "MapEntity"}. */
     public static final String MAP_ENTITY = MapEntity.class.getSimpleName();
 
     private final Class<MapEntity> typeClass;
 
+    /**
+     * Package-private constructor for {@code MapEntityType}.
+     * Instances are created by the {@code TypeFactory}.
+     */
     MapEntityType() {
         super(MAP_ENTITY);
 

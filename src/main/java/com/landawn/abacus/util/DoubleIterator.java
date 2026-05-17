@@ -71,8 +71,9 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * A singleton empty DoubleIterator instance that contains no elements.
-     * This iterator's hasNext() always returns false, and nextDouble() always throws NoSuchElementException.
+     * A singleton empty {@code DoubleIterator} instance that contains no elements.
+     * This iterator's {@code hasNext()} always returns {@code false}, and {@code nextDouble()}
+     * always throws {@link NoSuchElementException}.
      *
      * @see #empty()
      */
@@ -324,8 +325,9 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * Returns the next element as a boxed Double.
      * This method is deprecated; use {@link #nextDouble()} instead for better performance.
      *
-     * @return the next double value as a Double object
-     * @deprecated use {@code nextDouble()} instead to avoid boxing overhead
+     * @return the next double value as a {@code Double} object
+     * @throws NoSuchElementException if the iteration has no more elements
+     * @deprecated use {@link #nextDouble()} instead to avoid boxing overhead
      */
     @Deprecated
     @Override
@@ -639,7 +641,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * Performs the given action for each remaining element.
      * This method is deprecated; use type-specific methods instead.
      *
-     * @param action the action to perform on each element
+     * @param action the action to perform on each element (must not be {@code null})
      * @deprecated use {@link #foreachRemaining(Throwables.DoubleConsumer)} instead to avoid boxing
      */
     @Deprecated

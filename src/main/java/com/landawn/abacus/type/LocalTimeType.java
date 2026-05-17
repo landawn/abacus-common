@@ -40,6 +40,7 @@ import com.landawn.abacus.util.Numbers;
  */
 public class LocalTimeType extends AbstractTemporalType<LocalTime> {
 
+    /** The type name constant for LocalTime type identification, equal to {@code "LocalTime"}. */
     public static final String LOCAL_TIME = LocalTime.class.getSimpleName();
 
     /**

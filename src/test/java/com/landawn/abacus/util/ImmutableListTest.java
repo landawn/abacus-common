@@ -901,4 +901,35 @@ public class ImmutableListTest extends TestBase {
         Assertions.assertEquals(5, list.size());
     }
 
+    @Test
+    public void testReversed_EqualsAndHashCode() {
+        ImmutableList<Integer> forward = ImmutableList.of(1, 2, 3);
+        ImmutableList<Integer> reversed = forward.reversed();
+
+        // Regression: the reversed view's own equals()/hashCode() must reflect its
+        // public [3, 2, 1] order (per the java.util.List contract), not the forward
+        // backing list's [1, 2, 3] order. (Before the fix, ReverseImmutableList did
+        // not override equals/hashCode and reported the forward list's values.)
+        Assertions.assertTrue(reversed.equals(Arrays.asList(3, 2, 1)));
+        Assertions.assertTrue(reversed.equals(ImmutableList.of(3, 2, 1)));
+        Assertions.assertEquals(Arrays.asList(3, 2, 1).hashCode(), reversed.hashCode());
+        Assertions.assertEquals(ImmutableList.of(3, 2, 1).hashCode(), reversed.hashCode());
+
+        // AbstractList.equals from the other side also works (iterator-based).
+        Assertions.assertEquals(Arrays.asList(3, 2, 1), reversed);
+
+        // reversed view must NOT equal the original forward order
+        Assertions.assertFalse(reversed.equals(forward));
+        Assertions.assertFalse(reversed.equals(ImmutableList.of(1, 2, 3)));
+        Assertions.assertFalse(reversed.equals(Arrays.asList(1, 2, 3)));
+
+        Assertions.assertTrue(reversed.equals(reversed));
+        Assertions.assertFalse(reversed.equals("not a list"));
+
+        // NOTE: ImmutableCollection.equals(other) on a *forward* list still compares
+        // raw backing stores as a fast path, so forwardList.equals(reversedView) is
+        // a pre-existing asymmetry that is intentionally NOT addressed here (changing
+        // the shared base class broke the general ImmutableCollection contract).
+    }
+
 }

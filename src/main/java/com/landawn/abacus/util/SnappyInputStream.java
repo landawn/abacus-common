@@ -93,6 +93,8 @@ public final class SnappyInputStream extends InputStream {
      * @return the total number of bytes read into the buffer, or -1 if there is no more data
      *         because the end of the stream has been reached
      * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code b} is {@code null}
+     * @see #read(byte[], int, int)
      */
     @Override
     public int read(final byte[] b) throws IOException {
@@ -115,6 +117,7 @@ public final class SnappyInputStream extends InputStream {
      * @return the total number of bytes read into the buffer, or -1 if there is no more data
      *         because the end of the stream has been reached
      * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code b} is {@code null}
      * @throws IndexOutOfBoundsException if {@code off} is negative, {@code len} is negative,
      *         or {@code len} is greater than {@code b.length - off}
      */
@@ -168,12 +171,10 @@ public final class SnappyInputStream extends InputStream {
     }
 
     /**
-     * Marks the current position in this input stream. A subsequent call to
-     * the {@code reset} method repositions this stream at the last marked position
-     * so that subsequent reads re-read the same bytes.
+     * Marks the current position in this input stream.
      *
-     * <p>The {@code readLimit} argument tells this input stream to allow that many
-     * bytes to be read before the mark position gets invalidated.</p>
+     * <p>The underlying Xerial Snappy input stream does not support mark/reset,
+     * so this method has no effect.</p>
      *
      * @param readLimit the maximum limit of bytes that can be read before the mark position becomes invalid
      * @see #reset()
@@ -188,10 +189,10 @@ public final class SnappyInputStream extends InputStream {
      * Repositions this stream to the position at the time the {@code mark} method
      * was last called on this input stream.
      *
-     * <p>Stream marks are intended to be used in situations where you need to read
-     * ahead a little to see what's in the stream.</p>
+     * <p>The underlying Xerial Snappy input stream does not support mark/reset,
+     * so this method always throws an {@link IOException}.</p>
      *
-     * @throws IOException if this stream has not been marked or if the mark has been invalidated
+     * @throws IOException always, because the underlying Snappy input stream does not support mark/reset
      * @see #mark(int)
      * @see #markSupported()
      */

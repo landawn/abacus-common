@@ -315,17 +315,16 @@ import com.landawn.abacus.util.stream.Stream;
  *     File outputFile = new File(outputDirectory, logFile.getName() + ".processed");
  *
  *     try {
- *         IOUtil.forLines(logFile, 0, Long.MAX_VALUE, 4,
+ *         IOUtil.forLines(logFile, 0, Long.MAX_VALUE, 4, 1024,
  *             line -> {
  *                 // Process each line
  *                 String processed = processLogLine(line);
  *                 if (processed != null) {
  *                     synchronized (outputFile) {
- *                         IOUtil.write(outputFile, processed + "\n", true);
+ *                         IOUtil.append(processed + "\n", outputFile);
  *                     }
  *                 }
- *             },
- *             ex -> logger.error("Error processing line", ex));
+ *             });
  *     } catch (Exception e) {
  *         logger.error("Error processing file: " + logFile, e);
  *     }
@@ -2132,7 +2131,7 @@ public final class IOUtil {
 
     /**
      * Reads up to a specified number of characters from an {@code InputStream} into a {@code String}, starting from a given character offset, using the platform's default charset.
-     * This method will skip the specified number of bytes from the stream before starting to read.
+     * This method will skip the specified number of characters from the stream before starting to read.
      * The input stream is not closed by this method.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2161,7 +2160,7 @@ public final class IOUtil {
 
     /**
      * Reads up to a specified number of characters from an {@code InputStream} into a {@code String}, starting from a given character offset, using the specified character set.
-     * This method will skip the specified number of bytes from the stream before starting to read.
+     * This method will skip the specified number of characters from the stream before starting to read.
      * The input stream is not closed by this method.
      *
      * <p><b>Usage Examples:</b></p>
@@ -5502,8 +5501,9 @@ public final class IOUtil {
      * Skips over and discards a specified number of bytes from the input stream.
      *
      * @param input       the {@code InputStream} from which bytes are to be skipped, must not be {@code null}.
-     * @param bytesToSkip the number of bytes to be skipped.
-     * @return the actual number of bytes skipped.
+     * @param bytesToSkip the number of bytes to be skipped, must be &gt;= 0.
+     * @return the actual number of bytes skipped, which may be less than {@code bytesToSkip} if the end of the stream is reached.
+     * @throws IllegalArgumentException if {@code bytesToSkip} is negative.
      * @throws IOException if an I/O error occurs.
      */
     public static long skip(final InputStream input, final long bytesToSkip) throws IOException {
@@ -5538,8 +5538,9 @@ public final class IOUtil {
      * Skips over and discards a specified number of characters from the input reader.
      *
      * @param input       the {@code Reader} from which characters are to be skipped, must not be {@code null}.
-     * @param charsToSkip the number of characters to be skipped.
-     * @return the actual number of characters skipped.
+     * @param charsToSkip the number of characters to be skipped, must be &gt;= 0.
+     * @return the actual number of characters skipped, which may be less than {@code charsToSkip} if the end of the reader is reached.
+     * @throws IllegalArgumentException if {@code charsToSkip} is negative.
      * @throws IOException if an I/O error occurs.
      */
     public static long skip(final Reader input, final long charsToSkip) throws IOException {
@@ -5757,8 +5758,8 @@ public final class IOUtil {
      * <ul>
      * <li>empty string becomes .
      * <li>. stays as .
-     * <li>fold output ./
-     * <li>fold output ./ when possible
+     * <li>fold out ./
+     * <li>fold out ../ when possible
      * <li>collapse multiple slashes
      * <li>delete trailing slashes (unless the path is just "/")
      * </ul>
@@ -9661,7 +9662,7 @@ public final class IOUtil {
     }
 
     /**
-     * Lists the names of all files and directories in the specified parent directory.
+     * Returns a {@link Stream} of all files and directories in the specified parent directory.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9681,9 +9682,9 @@ public final class IOUtil {
     }
 
     /**
-     * Lists the names of all files and directories in the specified parent directory.
-     * if the recursive parameter is set to {@code true}, it will list files in all subdirectories as well.
-     * if the excludeDirectory parameter is set to {@code true}, it will exclude directories from the list.
+     * Returns a {@link Stream} of files and directories in the specified parent directory.
+     * if the recursive parameter is set to {@code true}, it will include files in all subdirectories as well.
+     * if the excludeDirectory parameter is set to {@code true}, it will exclude directories from the stream.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -10015,7 +10016,7 @@ public final class IOUtil {
      * @param file1       the first file.
      * @param file2       the second file.
      * @param charsetName the name of the requested charset.
-     *                    May be {@code null}, in which case the platform default is used
+     *                    May be {@code null} or empty, in which case the platform's default charset is used.
      * @return {@code true} if the content of the files are equal or neither exists,
      *         {@code false} otherwise.
      * @throws IllegalArgumentException when an input is not a file.

@@ -65,8 +65,9 @@ public final class KahanSummation { // NOSONAR
      * System.out.println(sum.sum());   // 6.0
      * }</pre>
      *
-     * @param a the array of double values to sum
+     * @param a the array of double values to sum; may be empty
      * @return a new KahanSummation instance containing the sum of the provided values
+     * @see #addAll(double[])
      */
     public static KahanSummation of(final double... a) {
         final KahanSummation summation = new KahanSummation();
@@ -219,7 +220,9 @@ public final class KahanSummation { // NOSONAR
      * System.out.println(avg.orElse(0));   // 2.5
      * }</pre>
      *
-     * @return an OptionalDouble containing the average, or empty if no values have been added
+     * @return an {@code OptionalDouble} containing the average, or an empty {@code OptionalDouble} if no values have been added
+     * @see #sum()
+     * @see #count()
      */
     public OptionalDouble average() {
         return count == 0 ? OptionalDouble.empty() : OptionalDouble.of(sum() / count());

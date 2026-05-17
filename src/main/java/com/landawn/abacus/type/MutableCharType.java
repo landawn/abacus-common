@@ -31,8 +31,13 @@ import com.landawn.abacus.util.Strings;
  */
 public class MutableCharType extends AbstractType<MutableChar> {
 
+    /** The type name constant for MutableChar type identification, equal to {@code "MutableChar"}. */
     public static final String MUTABLE_CHAR = MutableChar.class.getSimpleName();
 
+    /**
+     * Constructor for {@code MutableCharType}.
+     * Instances are created by the {@code TypeFactory}.
+     */
     protected MutableCharType() {
         super(MUTABLE_CHAR);
     }

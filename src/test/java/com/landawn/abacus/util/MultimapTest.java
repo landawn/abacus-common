@@ -5023,4 +5023,40 @@ public class MultimapTest extends AbstractTest {
         });
     }
 
+    /**
+     * Regression test: merge(K, Collection, BiFunction) must defensively copy the
+     * remapping function's result before clearing the existing value collection.
+     * Previously merge did {@code oldValue.clear(); oldValue.addAll(newValue);} with no
+     * defensive copy. When the remapping function returns a view backed by oldValue
+     * (e.g. a subList), clear() empties that view too, so addAll adds nothing and
+     * the data is silently lost. The sibling methods compute/computeIfPresent/replaceAll
+     * already copy defensively.
+     */
+    @Test
+    public void testMergeCollectionReturningViewBackedByOldValue() {
+        ListMultimap<String, Integer> mm = N.newListMultimap();
+        mm.putValues("k", Arrays.asList(1, 2, 3, 4));
+
+        // remapping function returns a view (subList) backed by oldValue
+        List<Integer> result = mm.merge("k", Arrays.asList(99), (oldVals, newVals) -> oldVals.subList(0, 2));
+
+        assertEquals(Arrays.asList(1, 2), result);
+        assertEquals(Arrays.asList(1, 2), mm.get("k"));
+    }
+
+    /**
+     * Regression test for the single-element merge(K, E, BiFunction) overload with the
+     * same defensive-copy requirement as {@link #testMergeCollectionReturningViewBackedByOldValue()}.
+     */
+    @Test
+    public void testMergeElementReturningViewBackedByOldValue() {
+        ListMultimap<String, Integer> mm = N.newListMultimap();
+        mm.putValues("k", Arrays.asList(10, 20, 30));
+
+        List<Integer> result = mm.merge("k", 99, (oldVals, newVal) -> oldVals.subList(1, 3));
+
+        assertEquals(Arrays.asList(20, 30), result);
+        assertEquals(Arrays.asList(20, 30), mm.get("k"));
+    }
+
 }

@@ -79,6 +79,8 @@ public class DigestUtil {
      * @param messageDigest The MessageDigest algorithm to use (must not be {@code null})
      * @param data The byte array to digest (must not be {@code null})
      * @return The computed digest as a byte array, length depends on the algorithm used
+     * @throws NullPointerException if {@code messageDigest} or {@code data} is {@code null}
+     * @see MessageDigest#digest(byte[])
      */
     public static byte[] digest(final MessageDigest messageDigest, final byte[] data) {
         return messageDigest.digest(data);
@@ -245,8 +247,9 @@ public class DigestUtil {
      * @param defaultMessageDigest The MessageDigest to return if the algorithm is not available.
      *                            Can be {@code null}.
      * @return A MessageDigest instance for the algorithm if available, otherwise returns
-     *         defaultMessageDigest (which may be {@code null})
-     *
+     *         {@code defaultMessageDigest} (which may be {@code null})
+     * @see #getDigest(String)
+     * @see #isAvailable(String)
      */
     @MayReturnNull
     public static MessageDigest getDigest(final String algorithm, final MessageDigest defaultMessageDigest) {
@@ -1899,8 +1902,8 @@ public class DigestUtil {
      * String hash = DigestUtil.sha512Hex("critical data".getBytes());
      * }</pre>
      *
-     * @param data The data to digest.
-     * @return SHA-512 digest as a hex string.
+     * @param data The data to digest (must not be {@code null})
+     * @return SHA-512 digest as a 128-character lowercase hexadecimal string
      */
     public static String sha512Hex(final byte[] data) {
         return Hex.encodeToString(sha512(data));

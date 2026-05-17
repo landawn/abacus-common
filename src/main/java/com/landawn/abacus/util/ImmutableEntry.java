@@ -122,6 +122,7 @@ public final class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry
      * @param <V> the type of the value
      * @param entry the entry to copy, must not be null
      * @return a new ImmutableEntry with the same key and value as the provided entry
+     * @throws NullPointerException if {@code entry} is {@code null}
      */
     public static <K, V> ImmutableEntry<K, V> copyOf(final Map.Entry<? extends K, ? extends V> entry) {
         return new ImmutableEntry<>(entry.getKey(), entry.getValue());

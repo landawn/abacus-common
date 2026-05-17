@@ -781,7 +781,6 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *        the time in milliseconds. Not {@code null}.
      * @return {@code true} if the date creator was successfully registered, {@code false} if the class was already registered
      *         or is from a restricted package ({@code java.*}, {@code javax.*}, or {@code com.landawn.abacus.*}).
-     * @throws IllegalArgumentException if dateClass or dateCreator is {@code null}.
      * @see #registerCalendarCreator(Class, BiFunction)
      */
     public static <T extends java.util.Date> boolean registerDateCreator(final Class<? extends T> dateClass, final LongFunction<? extends T> dateCreator) {
@@ -832,7 +831,6 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *        the time in milliseconds and a {@code Calendar} template. Not {@code null}.
      * @return {@code true} if the calendar creator was successfully registered, {@code false} if the class was already registered
      *         or is from a restricted package ({@code java.*}, {@code javax.*}, or {@code com.landawn.abacus.*}).
-     * @throws IllegalArgumentException if calendarClass or calendarCreator is {@code null}.
      * @see #registerDateCreator(Class, LongFunction)
      */
     public static <T extends java.util.Calendar> boolean registerCalendarCreator(final Class<? extends T> calendarClass,
@@ -959,6 +957,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * }</pre>
      *
      * @return a new {@code XMLGregorianCalendar} instance representing the current date and time.
+     * @throws UnsupportedOperationException if the {@code DatatypeFactory} is not available.
      */
     public static XMLGregorianCalendar currentXMLGregorianCalendar() {
         if (dataTypeFactory == null) {
@@ -1592,6 +1591,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param calendar the calendar providing the time value, not {@code null}.
      * @return a new {@code XMLGregorianCalendar} instance representing the same point in time.
      * @throws IllegalArgumentException if calendar is {@code null}.
+     * @throws UnsupportedOperationException if the {@code DatatypeFactory} is not available.
      * @see #createXMLGregorianCalendar(java.util.Date)
      * @see #createXMLGregorianCalendar(long)
      * @see #createXMLGregorianCalendar(long, TimeZone)
@@ -1615,6 +1615,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date providing the time value, not {@code null}.
      * @return a new {@code XMLGregorianCalendar} instance representing the same point in time.
      * @throws IllegalArgumentException if date is {@code null}.
+     * @throws UnsupportedOperationException if the {@code DatatypeFactory} is not available.
      * @see #createXMLGregorianCalendar(Calendar)
      * @see #createXMLGregorianCalendar(long)
      * @see #createXMLGregorianCalendar(long, TimeZone)
@@ -1637,6 +1638,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param timeInMillis the time in milliseconds since the epoch (January 1, 1970, 00:00:00 GMT).
      * @return a new {@code XMLGregorianCalendar} instance representing the specified point in time.
+     * @throws UnsupportedOperationException if the {@code DatatypeFactory} is not available.
      * @see #createXMLGregorianCalendar(Calendar)
      * @see #createXMLGregorianCalendar(java.util.Date)
      * @see #createXMLGregorianCalendar(long, TimeZone)
@@ -1669,6 +1671,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param timeInMillis the time in milliseconds since the epoch (January 1, 1970, 00:00:00 GMT).
      * @param tz the time zone for the calendar; if {@code null}, the default time zone is used.
      * @return a new {@code XMLGregorianCalendar} instance with the specified time and time zone.
+     * @throws UnsupportedOperationException if the {@code DatatypeFactory} is not available.
      * @see #createXMLGregorianCalendar(long)
      * @see #createXMLGregorianCalendar(Calendar)
      * @see #createXMLGregorianCalendar(java.util.Date)
@@ -1903,11 +1906,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Time time1 = Dates.parseTime("14:30:45");
-     * Time time2 = Dates.parseTime("2025-10-22T14:30:45Z");   // Parsed as the underlying epoch millis
+     * Time time2 = Dates.parseTime("2025-10-22T14:30:45Z");   // Time portion only; date normalized to 1970-01-01
      * }</pre>
      *
-     * <p>Note: this method ultimately constructs a {@link java.sql.Time} from the parsed
-     * epoch-millisecond value; it does not zero out the date portion of the input.</p>
+     * <p>Note: for format-parsed input, the date portion is normalized to 1970-01-01 (per the
+     * {@link java.sql.Time} contract) while the time-of-day is preserved. Raw epoch-millisecond
+     * input (a purely numeric string parsed without a format) is used as-is without normalization.</p>
      *
      * @param date the string representation of the time to be parsed.
      * @return the parsed {@code java.sql.Time} instance, or {@code null} if the input is {@code null}, empty, or the string "null".
@@ -3319,9 +3323,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     /**
-     * Adds or subtracts the specified amount of time to the given time unit,
-     * based on the calendar's rules. For example, to subtract 5 days from the
-     * current time of the calendar, you can achieve it by calling:
+     * Adds or subtracts the specified amount of time, expressed in the given
+     * {@link TimeUnit}, to the supplied date and returns a new object of the same
+     * concrete type. The original date is unchanged. The amount is converted to
+     * milliseconds via {@link TimeUnit#toMillis(long)} and applied as plain
+     * millisecond arithmetic (it does not account for daylight-saving-time
+     * transitions).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3330,13 +3337,13 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Date past = Dates.roll(date, -2, TimeUnit.HOURS);   // Subtract 2 hours
      * }</pre>
      *
-     * @param <T> the type of Date to return.
+     * @param <T> the concrete {@code java.util.Date} subtype of {@code date} which is also the return type.
      * @param date the date to roll, must not be {@code null}.
      * @param amount the amount of time to add or subtract (negative values subtract).
-     * @param unit the time unit to use for rolling.
-     * @return a new instance of Date with the specified amount rolled.
-     * @throws IllegalArgumentException if the date is null.
-     * @see Calendar#set(int, int)
+     * @param unit the time unit of the {@code amount} parameter.
+     * @return a new date of the same type as {@code date} with the specified amount applied.
+     * @throws IllegalArgumentException if {@code date} is {@code null}.
+     * @see #roll(java.util.Date, int, CalendarField)
      */
     @Beta
     public static <T extends java.util.Date> T roll(final T date, final long amount, final TimeUnit unit) throws IllegalArgumentException {
@@ -3346,9 +3353,13 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     /**
-     * Adds or subtracts the specified amount of time to the given calendar
-     * unit, based on the calendar's rules. For example, to subtract 5 days from
-     * the current time of the calendar, you can achieve it by calling:
+     * Adds or subtracts the specified amount of the given {@link CalendarField}
+     * to the supplied date and returns a new object of the same concrete type.
+     * The original date is unchanged. For {@code MONTH}, {@code YEAR},
+     * {@code DAY_OF_MONTH} and {@code WEEK_OF_YEAR} the arithmetic is performed
+     * through {@link Calendar#add(int, int)} so that daylight-saving-time
+     * transitions are honoured; for finer fields plain millisecond arithmetic
+     * is used.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3357,13 +3368,14 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Date past = Dates.roll(date, -2, CalendarField.HOUR_OF_DAY);     // Subtract 2 hours
      * }</pre>
      *
-     * @param <T> the type of Date to return.
+     * @param <T> the concrete {@code java.util.Date} subtype of {@code date} which is also the return type.
      * @param date the date to roll, must not be {@code null}.
      * @param amount the amount to add or subtract (negative values subtract).
-     * @param unit the calendar field unit to use for rolling.
-     * @return a new instance of Date with the specified amount rolled.
-     * @throws IllegalArgumentException if the date or unit is null.
-     * @see Calendar#set(int, int)
+     * @param unit the calendar field unit to roll by, must not be {@code null}.
+     * @return a new date of the same type as {@code date} with the specified amount applied.
+     * @throws IllegalArgumentException if {@code date} or {@code unit} is {@code null}.
+     * @see #roll(java.util.Date, long, TimeUnit)
+     * @see Calendar#add(int, int)
      */
     @Beta
     public static <T extends java.util.Date> T roll(final T date, final int amount, final CalendarField unit) throws IllegalArgumentException {
@@ -3390,9 +3402,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     /**
-     * Adds or subtracts the specified amount of time to the given time unit,
-     * based on the calendar's rules. For example, to subtract 5 days from the
-     * current time of the calendar, you can achieve it by calling:
+     * Adds or subtracts the specified amount of time, expressed in the given
+     * {@link TimeUnit}, to the supplied calendar and returns a new calendar of
+     * the same concrete type. The original calendar is unchanged. The amount is
+     * converted to milliseconds via {@link TimeUnit#toMillis(long)} and applied
+     * as plain millisecond arithmetic (it does not account for daylight-saving-time
+     * transitions).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3401,13 +3416,13 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Calendar past = Dates.roll(calendar, -2, TimeUnit.HOURS);   // Subtract 2 hours
      * }</pre>
      *
-     * @param <T> the type of Calendar to return.
+     * @param <T> the concrete {@code Calendar} subtype of {@code calendar} which is also the return type.
      * @param calendar the calendar to roll, must not be {@code null}.
      * @param amount the amount of time to add or subtract (negative values subtract).
-     * @param unit the time unit to use for rolling.
-     * @return a new instance of Calendar with the specified amount rolled.
-     * @throws IllegalArgumentException if the calendar or unit is null.
-     * @see Calendar#set(int, int)
+     * @param unit the time unit of the {@code amount} parameter, must not be {@code null}.
+     * @return a new calendar of the same type as {@code calendar} with the specified amount applied.
+     * @throws IllegalArgumentException if {@code calendar} or {@code unit} is {@code null}.
+     * @see #roll(Calendar, int, CalendarField)
      */
     @Beta
     public static <T extends Calendar> T roll(final T calendar, final long amount, final TimeUnit unit) throws IllegalArgumentException {
@@ -3418,9 +3433,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     /**
-     * Adds or subtracts the specified amount of time to the given calendar
-     * unit, based on the calendar's rules. For example, to subtract 5 days from
-     * the current time of the calendar, you can achieve it by calling:
+     * Adds or subtracts the specified amount of the given {@link CalendarField}
+     * to the supplied calendar and returns a new calendar of the same concrete
+     * type. The original calendar is unchanged. The arithmetic is performed
+     * through {@link Calendar#add(int, int)}, honouring the calendar's rules
+     * (including daylight-saving-time transitions).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3429,13 +3446,14 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Calendar past = Dates.roll(calendar, -2, CalendarField.HOUR_OF_DAY);     // Subtract 2 hours
      * }</pre>
      *
-     * @param <T> the type of Calendar to return.
+     * @param <T> the concrete {@code Calendar} subtype of {@code calendar} which is also the return type.
      * @param calendar the calendar to roll, must not be {@code null}.
      * @param amount the amount to add or subtract (negative values subtract).
-     * @param unit the calendar field unit to use for rolling.
-     * @return a new instance of Calendar with the specified amount rolled.
-     * @throws IllegalArgumentException if the calendar or unit is null.
-     * @see Calendar#set(int, int)
+     * @param unit the calendar field unit to roll by, must not be {@code null}.
+     * @return a new calendar of the same type as {@code calendar} with the specified amount applied.
+     * @throws IllegalArgumentException if {@code calendar} or {@code unit} is {@code null}.
+     * @see #roll(Calendar, long, TimeUnit)
+     * @see Calendar#add(int, int)
      */
     @Beta
     public static <T extends Calendar> T roll(final T calendar, final int amount, final CalendarField unit) throws IllegalArgumentException {
@@ -3950,10 +3968,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * }</pre>
      *
      * @param <T> the type of the calendar object, which must extend java.util.Calendar.
-     * @param calendar the date to work with, not null.
+     * @param calendar the calendar to work with, not null.
      * @param field the field from {@code Calendar} or {@code SEMI_MONTH}.
      * @return a new calendar object of type T, rounded to the nearest whole unit as specified by the field.
-     * @throws IllegalArgumentException if the date is {@code null}.
+     * @throws IllegalArgumentException if the calendar is {@code null}.
      * @throws ArithmeticException if the year is over 280 million.
      */
     public static <T extends Calendar> T round(final T calendar, final int field) throws IllegalArgumentException {
@@ -4094,10 +4112,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * }</pre>
      *
      * @param <T> the type of the calendar object, which must extend java.util.Calendar.
-     * @param calendar the date to work with, not null.
+     * @param calendar the calendar to work with, not null.
      * @param field the field from {@code Calendar} or {@code SEMI_MONTH}.
      * @return a new calendar object of type T, truncated to the specified field.
-     * @throws IllegalArgumentException if the date is {@code null}.
+     * @throws IllegalArgumentException if the calendar is {@code null}.
      * @throws ArithmeticException if the year is over 280 million.
      */
     public static <T extends Calendar> T truncate(final T calendar, final int field) throws IllegalArgumentException {
@@ -4191,11 +4209,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * // Result: 2023-03-28 14:00:00
      * }</pre>
      *
-     * @param <T> the type of the date object, which must be a subclass of java.util.Date.
+     * @param <T> the type of the date object, which must be a subclass of {@code java.util.Date}.
      * @param date the date to be adjusted. Must not be {@code null}.
      * @param field the CalendarField to which the date is to be adjusted. Must not be {@code null}.
      * @return a new date object of type T, adjusted to the nearest future unit as specified by the field.
      * @throws IllegalArgumentException if the date or field is {@code null}.
+     * @throws ArithmeticException if the year is over 280 million.
      */
     public static <T extends java.util.Date> T ceiling(final T date, final CalendarField field) {
         N.checkArgNotNull(date, cs.date);
@@ -4224,10 +4243,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * }</pre>
      *
      * @param <T> the type of the calendar object, which must extend java.util.Calendar.
-     * @param calendar the date to work with, not null.
+     * @param calendar the calendar to work with, not null.
      * @param field the field from {@code Calendar} or {@code SEMI_MONTH}.
      * @return a new calendar object of type T, adjusted to the ceiling of the specified field.
-     * @throws IllegalArgumentException if the date is {@code null}.
+     * @throws IllegalArgumentException if the calendar is {@code null}.
      * @throws ArithmeticException if the year is over 280 million.
      */
     public static <T extends Calendar> T ceiling(final T calendar, final int field) throws IllegalArgumentException {
@@ -4256,11 +4275,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * // Result: calendar rounded up to the next hour
      * }</pre>
      *
-     * @param <T> the type of the calendar object, which must extend java.util.Calendar.
-     * @param calendar the original calendar object to be adjusted.
-     * @param field the field to be used for the ceiling operation, as a CalendarField.
+     * @param <T> the type of the calendar object, which must extend {@code java.util.Calendar}.
+     * @param calendar the original calendar object to be adjusted. Must not be {@code null}.
+     * @param field the field to be used for the ceiling operation, as a CalendarField. Must not be {@code null}.
      * @return a new calendar object representing the adjusted time.
-     * @throws IllegalArgumentException if the calendar is {@code null}.
+     * @throws IllegalArgumentException if the calendar or field is {@code null}.
+     * @throws ArithmeticException if the year is over 280 million.
      */
     public static <T extends Calendar> T ceiling(final T calendar, final CalendarField field) {
         N.checkArgNotNull(calendar, cs.calendar);
@@ -4562,7 +4582,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param cal1 the first calendar, not {@code null}.
      * @param cal2 the second calendar, not {@code null}.
      * @param field the field from {@code Calendar}.
-     * @return a negative integer, zero, or a positive integer as the first.
+     * @return a negative integer, zero, or a positive integer as the first
      * calendar is less than, equal to, or greater than the second.
      * @throws IllegalArgumentException if any argument is {@code null}.
      * @see #truncate(Calendar, int)
@@ -4613,7 +4633,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date1 the first date, not {@code null}.
      * @param date2 the second date, not {@code null}.
      * @param field the field from {@code Calendar}.
-     * @return a negative integer, zero, or a positive integer as the first.
+     * @return a negative integer, zero, or a positive integer as the first
      * date is less than, equal to, or greater than the second.
      * @throws IllegalArgumentException if any argument is {@code null}.
      * @see #truncate(java.util.Date, int)
@@ -4657,11 +4677,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * // Result: 538 (milliseconds within the current second)
      * }</pre>
      *
-     * @param date the date to work with, not null.
-     * @param fragment the {@code Calendar} field part of date to calculate.
-     * @return number of milliseconds within the fragment of date.
-     * @throws IllegalArgumentException if the date is {@code null} or.
-     * fragment is not supported
+     * @param date the date to work with, not {@code null}.
+     * @param fragment the {@code CalendarField} fragment of {@code date} to calculate.
+     * @return the number of milliseconds within the fragment of {@code date}.
+     * @throws IllegalArgumentException if {@code date} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInMilliseconds(final java.util.Date date, final CalendarField fragment) {
         return getFragment(date, fragment.value(), TimeUnit.MILLISECONDS);
@@ -4704,11 +4723,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * // Result: 10 (seconds within the current minute)
      * }</pre>
      *
-     * @param date the date to work with, not null.
-     * @param fragment the {@code Calendar} field part of date to calculate.
-     * @return number of seconds within the fragment of date.
-     * @throws IllegalArgumentException if the date is {@code null} or.
-     * fragment is not supported
+     * @param date the date to work with, not {@code null}.
+     * @param fragment the {@code CalendarField} fragment of {@code date} to calculate.
+     * @return the number of seconds within the fragment of {@code date}.
+     * @throws IllegalArgumentException if {@code date} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInSeconds(final java.util.Date date, final CalendarField fragment) {
         return getFragment(date, fragment.value(), TimeUnit.SECONDS);
@@ -4751,11 +4769,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * // Result: 15 (minutes within the current hour)
      * }</pre>
      *
-     * @param date the date to work with, not null.
-     * @param fragment the {@code Calendar} field part of date to calculate.
-     * @return number of minutes within the fragment of date.
-     * @throws IllegalArgumentException if the date is {@code null} or.
-     * fragment is not supported
+     * @param date the date to work with, not {@code null}.
+     * @param fragment the {@code CalendarField} fragment of {@code date} to calculate.
+     * @return the number of minutes within the fragment of {@code date}.
+     * @throws IllegalArgumentException if {@code date} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInMinutes(final java.util.Date date, final CalendarField fragment) {
         return getFragment(date, fragment.value(), TimeUnit.MINUTES);
@@ -4798,11 +4815,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * // Result: 7 (hours within the current day)
      * }</pre>
      *
-     * @param date the date to work with, not null.
-     * @param fragment the {@code Calendar} field part of date to calculate.
-     * @return number of hours within the fragment of date.
-     * @throws IllegalArgumentException if the date is {@code null} or.
-     * fragment is not supported
+     * @param date the date to work with, not {@code null}.
+     * @param fragment the {@code CalendarField} fragment of {@code date} to calculate.
+     * @return the number of hours within the fragment of {@code date}.
+     * @throws IllegalArgumentException if {@code date} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInHours(final java.util.Date date, final CalendarField fragment) {
         return getFragment(date, fragment.value(), TimeUnit.HOURS);
@@ -4845,11 +4861,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * // Result: 59 (days within the current year)
      * }</pre>
      *
-     * @param date the date to work with, not null.
-     * @param fragment the {@code Calendar} field part of date to calculate.
-     * @return number of days within the fragment of date.
-     * @throws IllegalArgumentException if the date is {@code null} or.
-     * fragment is not supported
+     * @param date the date to work with, not {@code null}.
+     * @param fragment the {@code CalendarField} fragment of {@code date} to calculate.
+     * @return the number of days within the fragment of {@code date}.
+     * @throws IllegalArgumentException if {@code date} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInDays(final java.util.Date date, final CalendarField fragment) {
         return getFragment(date, fragment.value(), TimeUnit.DAYS);
@@ -4861,11 +4876,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * Gets a Date fragment for any unit.
      *
-     * @param date the date to work with, not null.
-     * @param fragment the Calendar field part of date to calculate.
+     * @param date the date to work with, not {@code null}.
+     * @param fragment the {@code Calendar} field part of {@code date} to calculate.
      * @param unit the time unit.
-     * @return number of units within the fragment of the date.
-     * @throws IllegalArgumentException if the date is {@code null} or specified fragment is not supported.
+     * @return the number of units within the fragment of {@code date}.
+     * @throws IllegalArgumentException if {@code date} is {@code null} or the specified fragment is not supported.
      */
     private static long getFragment(final java.util.Date date, final int fragment, final TimeUnit unit) {
         N.checkArgNotNull(date, cs.date);
@@ -4912,11 +4927,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * // Result: 538 (milliseconds within the current second)
      * }</pre>
      *
-     * @param calendar the calendar to work with, not null.
-     * @param fragment the {@code Calendar} field part of calendar to calculate.
-     * @return number of milliseconds within the fragment of date.
-     * @throws IllegalArgumentException if the date is {@code null} or.
-     * fragment is not supported
+     * @param calendar the calendar to work with, not {@code null}.
+     * @param fragment the {@code CalendarField} fragment of {@code calendar} to calculate.
+     * @return the number of milliseconds within the fragment of {@code calendar}.
+     * @throws IllegalArgumentException if {@code calendar} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInMilliseconds(final Calendar calendar, final CalendarField fragment) {
         return getFragment(calendar, fragment.value(), TimeUnit.MILLISECONDS);
@@ -4959,11 +4973,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * // Result: 10 (seconds within the current minute)
      * }</pre>
      *
-     * @param calendar the calendar to work with, not null.
-     * @param fragment the {@code Calendar} field part of calendar to calculate.
-     * @return number of seconds within the fragment of date.
-     * @throws IllegalArgumentException if the date is {@code null} or.
-     * fragment is not supported
+     * @param calendar the calendar to work with, not {@code null}.
+     * @param fragment the {@code CalendarField} fragment of {@code calendar} to calculate.
+     * @return the number of seconds within the fragment of {@code calendar}.
+     * @throws IllegalArgumentException if {@code calendar} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInSeconds(final Calendar calendar, final CalendarField fragment) {
         return getFragment(calendar, fragment.value(), TimeUnit.SECONDS);
@@ -5006,11 +5019,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * // Result: 15 (minutes within the current hour)
      * }</pre>
      *
-     * @param calendar the calendar to work with, not null.
-     * @param fragment the {@code Calendar} field part of calendar to calculate.
-     * @return number of minutes within the fragment of date.
-     * @throws IllegalArgumentException if the date is {@code null} or.
-     * fragment is not supported
+     * @param calendar the calendar to work with, not {@code null}.
+     * @param fragment the {@code CalendarField} fragment of {@code calendar} to calculate.
+     * @return the number of minutes within the fragment of {@code calendar}.
+     * @throws IllegalArgumentException if {@code calendar} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInMinutes(final Calendar calendar, final CalendarField fragment) {
         return getFragment(calendar, fragment.value(), TimeUnit.MINUTES);
@@ -5053,11 +5065,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * // Result: 7 (hours within the current day)
      * }</pre>
      *
-     * @param calendar the calendar to work with, not null.
-     * @param fragment the {@code Calendar} field part of calendar to calculate.
-     * @return number of hours within the fragment of date.
-     * @throws IllegalArgumentException if the date is {@code null} or.
-     * fragment is not supported
+     * @param calendar the calendar to work with, not {@code null}.
+     * @param fragment the {@code CalendarField} fragment of {@code calendar} to calculate.
+     * @return the number of hours within the fragment of {@code calendar}.
+     * @throws IllegalArgumentException if {@code calendar} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInHours(final Calendar calendar, final CalendarField fragment) {
         return getFragment(calendar, fragment.value(), TimeUnit.HOURS);
@@ -5102,11 +5113,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * // Result: 59 (days within the current year)
      * }</pre>
      *
-     * @param calendar the calendar to work with, not null.
-     * @param fragment the {@code Calendar} field part of calendar to calculate.
-     * @return number of days within the fragment of date.
-     * @throws IllegalArgumentException if the date is {@code null} or.
-     * fragment is not supported
+     * @param calendar the calendar to work with, not {@code null}.
+     * @param fragment the {@code CalendarField} fragment of {@code calendar} to calculate.
+     * @return the number of days within the fragment of {@code calendar}.
+     * @throws IllegalArgumentException if {@code calendar} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInDays(final Calendar calendar, final CalendarField fragment) {
         return getFragment(calendar, fragment.value(), TimeUnit.DAYS);
@@ -5118,12 +5128,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * Gets a Calendar fragment for any unit.
      *
-     * @param calendar the calendar to work with, not null.
-     * @param fragment the Calendar field part of calendar to calculate.
+     * @param calendar the calendar to work with, not {@code null}.
+     * @param fragment the {@code Calendar} field part of {@code calendar} to calculate.
      * @param unit the time unit.
-     * @return number of units within the fragment of the calendar.
-     * @throws IllegalArgumentException if the date is {@code null} or.
-     * fragment is not supported
+     * @return the number of units within the fragment of {@code calendar}.
+     * @throws IllegalArgumentException if {@code calendar} is {@code null} or the specified fragment is not supported.
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     private static long getFragment(final Calendar calendar, final int fragment, final TimeUnit unit) {
@@ -5428,7 +5437,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param cal1 the first calendar, not altered, not null.
      * @param cal2 the second calendar, not altered, not null.
      * @return {@code true} if they represent the same millisecond instant.
-     * @throws IllegalArgumentException if either date is {@code null}.
+     * @throws IllegalArgumentException if either calendar is {@code null}.
+     * @see #isSameInstant(java.util.Date, java.util.Date)
      */
     public static boolean isSameInstant(final Calendar cal1, final Calendar cal2) throws IllegalArgumentException {
         N.checkArgNotNull(cal1, cs.calendar1);
@@ -5446,7 +5456,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p>Checks if two calendar objects represent the same local time.</p>
      *
      * <p>This method compares the values of the fields of the two objects.
-     * In addition, both calendars must be the same of the same type.</p>
+     * In addition, both calendars must be of the same type.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5464,7 +5474,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param cal1 the first calendar, not altered, not null.
      * @param cal2 the second calendar, not altered, not null.
      * @return {@code true} if they represent the same local time.
-     * @throws IllegalArgumentException if either date is {@code null}.
+     * @throws IllegalArgumentException if either calendar is {@code null}.
      */
     public static boolean isSameLocalTime(final Calendar cal1, final Calendar cal2) throws IllegalArgumentException {
         N.checkArgNotNull(cal1, cs.calendar1);
@@ -5999,9 +6009,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * LocalDate customDate = DTF.parseToLocalDate("25/12/2023", "dd/MM/yyyy");
      * }</pre>
      *
-     * <p><b>Relationship to Parent Class:</b>
-     * This class extends the capabilities of {@link Dates} by providing modern Java Time API support,
-     * while the parent class focuses on legacy date/time types. Use this class for:
+     * <p><b>Relationship to Enclosing Class:</b>
+     * This class complements {@link Dates} by providing modern Java Time API support,
+     * while the enclosing class focuses on legacy date/time types. Use this class for:
      * <ul>
      *   <li>New code requiring Java 8+ time types</li>
      *   <li>Applications needing strong type safety</li>
@@ -6262,12 +6272,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
         //    DTF(final DateTimeFormatter dtf) {
 
         /**
-         * Formats the provided java.util.Date instance into a string representation.
+         * Formats the provided {@code java.util.Date} instance into a string representation using this formatter's pattern.
          *
-         * @param date the java.util.Date instance to format.
-         * @return a string representation of the provided java.util.Date instance.
-         * @throws DateTimeException if an error occurs during formatting.
-         * @see DateTimeFormatter#format(TemporalAccessor)
+         * @param date the {@code java.util.Date} instance to format; may be {@code null}.
+         * @return a string representation of the provided date, or {@code null} if {@code date} is {@code null}.
+         * @throws IllegalArgumentException if an error occurs during formatting.
+         * @see Dates#format(java.util.Date, String)
          */
         @MayReturnNull
         public String format(final java.util.Date date) {
@@ -6287,10 +6297,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * String formatted = DTF.LOCAL_DATE_TIME.format(calendar);   // "2023-12-25 14:30:45"
          * }</pre>
          *
-         * @param calendar the java.util.Calendar instance to format.
-         * @return a string representation of the provided java.util.Calendar instance.
-         * @throws DateTimeException if an error occurs during formatting.
-         * @see DateTimeFormatter#format(TemporalAccessor)
+         * @param calendar the {@code java.util.Calendar} instance to format; may be {@code null}.
+         * @return a string representation of the provided calendar, or {@code null} if {@code calendar} is {@code null}.
+         * @throws IllegalArgumentException if an error occurs during formatting.
+         * @see Dates#format(java.util.Calendar, String)
          */
         @MayReturnNull
         public String format(final java.util.Calendar calendar) {
@@ -6313,8 +6323,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * String isoFormatted = DTF.ISO_8601_DATE_TIME.format(zdt);   // "2023-12-25T14:30:45Z"
          * }</pre>
          *
-         * @param temporal the TemporalAccessor instance to format.
-         * @return a string representation of the provided TemporalAccessor instance.
+         * @param temporal the {@code TemporalAccessor} instance to format; may be {@code null}.
+         * @return a string representation of the provided temporal, or {@code null} if {@code temporal} is {@code null}.
          * @throws DateTimeException if an error occurs during formatting.
          * @see DateTimeFormatter#format(TemporalAccessor)
          */
@@ -6338,10 +6348,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * // sb now contains: "2023-12-25 14:30:45"
          * }</pre>
          *
-         * @param date the java.util.Date instance to format.
-         * @param appendable the Appendable to which the formatted string will be appended.
-         * @throws DateTimeException if an error occurs during formatting.
-         * @see DateTimeFormatter#formatTo(TemporalAccessor, Appendable)
+         * @param date the {@code java.util.Date} instance to format; if {@code null}, the string {@code "null"} is appended.
+         * @param appendable the Appendable to which the formatted string will be appended; must not be {@code null}.
+         * @throws IllegalArgumentException if an error occurs during formatting.
+         * @throws UncheckedIOException if an I/O error occurs while appending.
+         * @see Dates#formatTo(java.util.Date, String, Appendable)
          */
         @MayReturnNull
         public void formatTo(final java.util.Date date, final Appendable appendable) {
@@ -6364,10 +6375,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * // sb now contains: "2023-12-25 14:30:45"
          * }</pre>
          *
-         * @param calendar the java.util.Calendar instance to format.
-         * @param appendable the Appendable to which the formatted string will be appended.
-         * @throws DateTimeException if an error occurs during formatting.
-         * @see DateTimeFormatter#formatTo(TemporalAccessor, Appendable)
+         * @param calendar the {@code java.util.Calendar} instance to format; if {@code null}, the string {@code "null"} is appended.
+         * @param appendable the Appendable to which the formatted string will be appended; must not be {@code null}.
+         * @throws IllegalArgumentException if an error occurs during formatting.
+         * @throws UncheckedIOException if an I/O error occurs while appending.
+         * @see Dates#formatTo(java.util.Calendar, String, Appendable)
          */
         @MayReturnNull
         public void formatTo(final java.util.Calendar calendar, final Appendable appendable) {
@@ -6390,9 +6402,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * // sb now contains: "2023-12-25 14:30:45"
          * }</pre>
          *
-         * @param temporal the TemporalAccessor instance to format.
-         * @param appendable the Appendable to which the formatted string will be appended.
+         * @param temporal the {@code TemporalAccessor} instance to format; if {@code null}, the string {@code "null"} is appended.
+         * @param appendable the Appendable to which the formatted string will be appended; must not be {@code null}.
          * @throws DateTimeException if an error occurs during formatting.
+         * @throws UncheckedIOException if an I/O error occurs while appending.
          * @see DateTimeFormatter#formatTo(TemporalAccessor, Appendable)
          */
         @MayReturnNull
@@ -6418,9 +6431,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * LocalDate fromMillis = DTF.LOCAL_DATE.parseToLocalDate(millis);
          * }</pre>
          *
-         * @param text the CharSequence to parse. Must not be {@code null}.
-         * @return a LocalDate instance representing the parsed date.
-         * @throws DateTimeParseException if the text cannot be parsed to a date.
+         * @param text the CharSequence to parse; may be {@code null} or empty. A purely numeric value is interpreted as epoch milliseconds.
+         * @return a LocalDate instance representing the parsed date, or {@code null} if {@code text} is {@code null} or empty.
+         * @throws DateTimeParseException if the text is non-empty and cannot be parsed to a date.
          * @see Instant#ofEpochMilli(long)
          * @see LocalDate#ofInstant(Instant, ZoneId)
          * @see LocalDate#from(TemporalAccessor)
@@ -6473,9 +6486,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * LocalTime fromMillis = DTF.LOCAL_TIME.parseToLocalTime(millis);
          * }</pre>
          *
-         * @param text the CharSequence to parse. Must not be {@code null}.
-         * @return a LocalTime instance representing the parsed time.
-         * @throws DateTimeParseException if the text cannot be parsed to a time.
+         * @param text the CharSequence to parse; may be {@code null} or empty. A purely numeric value is interpreted as epoch milliseconds.
+         * @return a LocalTime instance representing the parsed time, or {@code null} if {@code text} is {@code null} or empty.
+         * @throws DateTimeParseException if the text is non-empty and cannot be parsed to a time.
          * @see Instant#ofEpochMilli(long)
          * @see LocalTime#ofInstant(Instant, ZoneId)
          * @see LocalTime#from(TemporalAccessor)
@@ -6528,9 +6541,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * LocalDateTime fromMillis = DTF.LOCAL_DATE_TIME.parseToLocalDateTime(millis);
          * }</pre>
          *
-         * @param text the CharSequence to parse. Must not be {@code null}.
-         * @return a LocalDateTime instance representing the parsed date and time.
-         * @throws DateTimeParseException if the text cannot be parsed to a date and time.
+         * @param text the CharSequence to parse; may be {@code null} or empty. A purely numeric value is interpreted as epoch milliseconds.
+         * @return a LocalDateTime instance representing the parsed date and time, or {@code null} if {@code text} is {@code null} or empty.
+         * @throws DateTimeParseException if the text is non-empty and cannot be parsed to a date and time.
          * @see Instant#ofEpochMilli(long)
          * @see LocalDateTime#ofInstant(Instant, ZoneId)
          * @see LocalDateTime#from(TemporalAccessor)
@@ -6583,9 +6596,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * OffsetDateTime fromMillis = DTF.ISO_OFFSET_DATE_TIME.parseToOffsetDateTime(millis);
          * }</pre>
          *
-         * @param text the CharSequence to parse. Must not be {@code null}.
-         * @return an OffsetDateTime instance representing the parsed date and time.
-         * @throws DateTimeParseException if the text cannot be parsed to a date and time.
+         * @param text the CharSequence to parse; may be {@code null} or empty. A purely numeric value is interpreted as epoch milliseconds.
+         * @return an OffsetDateTime instance representing the parsed date and time, or {@code null} if {@code text} is {@code null} or empty.
+         * @throws DateTimeParseException if the text is non-empty and cannot be parsed to a date and time.
          * @see Instant#ofEpochMilli(long)
          * @see OffsetDateTime#ofInstant(Instant, ZoneId)
          * @see OffsetDateTime#from(TemporalAccessor)
@@ -6631,12 +6644,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * ZonedDateTime fromMillis = DTF.ISO_ZONED_DATE_TIME.parseToZonedDateTime(millis);
          * }</pre>
          *
-         * @param text the CharSequence to parse. Must not be {@code null}.
-         * @return a ZonedDateTime instance representing the parsed date and time.
-         * @throws DateTimeParseException if the text cannot be parsed to a date and time.
+         * @param text the CharSequence to parse; may be {@code null} or empty. A purely numeric value is interpreted as epoch milliseconds.
+         * @return a ZonedDateTime instance representing the parsed date and time, or {@code null} if {@code text} is {@code null} or empty.
+         * @throws DateTimeParseException if the text is non-empty and cannot be parsed to a date and time.
          * @see Instant#ofEpochMilli(long)
-         * @see OffsetDateTime#ofInstant(Instant, ZoneId)
-         * @see OffsetDateTime#from(TemporalAccessor)
+         * @see ZonedDateTime#ofInstant(Instant, ZoneId)
+         * @see ZonedDateTime#from(TemporalAccessor)
          */
         @MayReturnNull
         public ZonedDateTime parseToZonedDateTime(final CharSequence text) {
@@ -6679,9 +6692,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * Instant fromMillis = DTF.ISO_8601_DATE_TIME.parseToInstant(millis);
          * }</pre>
          *
-         * @param text the CharSequence to parse. Must not be {@code null}.
-         * @return an Instant instance representing the parsed date and time.
-         * @throws DateTimeParseException if the text cannot be parsed to a date and time.
+         * @param text the CharSequence to parse; may be {@code null} or empty. A purely numeric value is interpreted as epoch milliseconds.
+         * @return an Instant instance representing the parsed date and time, or {@code null} if {@code text} is {@code null} or empty.
+         * @throws DateTimeParseException if the text is non-empty and cannot be parsed to a date and time.
          * @see Instant#ofEpochMilli(long)
          * @see Instant#from(TemporalAccessor)
          */
@@ -6712,13 +6725,13 @@ public abstract sealed class Dates permits Dates.DateUtil {
         }
 
         /**
-         * Parses the provided CharSequence into a java.util.Date instance.
+         * Parses the provided CharSequence into a {@code java.util.Date} instance using this formatter's pattern.
          *
-         * @param text the CharSequence to parse. Must not be {@code null}.
-         * @return a java.util.Date instance representing the parsed date and time.
-         * @throws DateTimeParseException if the text cannot be parsed to a date and time.
-         * @see Instant#ofEpochMilli(long)
-         * @see java.util.Date#from(Instant)
+         * @param text the CharSequence to parse; may be {@code null} or empty.
+         * @return a {@code java.util.Date} instance representing the parsed date and time, or {@code null} if {@code text} is {@code null} or empty.
+         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's pattern.
+         * @see #parseToJUDate(CharSequence, TimeZone)
+         * @see Dates#parseJUDate(String, String)
          */
         @MayReturnNull
         public java.util.Date parseToJUDate(final CharSequence text) {
@@ -6732,12 +6745,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
         /**
          * Parses the provided CharSequence into a java.util.Date instance.
          *
-         * @param text the CharSequence to parse. Must not be {@code null}.
-         * @param tz the time zone to use for parsing the date and time.
-         * @return a java.util.Date instance representing the parsed date and time.
-         * @throws DateTimeParseException if the text cannot be parsed to a date and time.
-         * @see Instant#ofEpochMilli(long)
-         * @see java.util.Date#from(Instant)
+         * @param text the CharSequence to parse; may be {@code null} or empty.
+         * @param tz the time zone to use for parsing the date and time; if {@code null}, the default time zone is used.
+         * @return a {@code java.util.Date} instance representing the parsed date and time, or {@code null} if {@code text} is {@code null} or empty.
+         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's pattern.
+         * @see #parseToJUDate(CharSequence)
+         * @see Dates#parseJUDate(String, String, TimeZone)
          */
         @MayReturnNull
         public java.util.Date parseToJUDate(final CharSequence text, final TimeZone tz) {
@@ -6749,13 +6762,13 @@ public abstract sealed class Dates permits Dates.DateUtil {
         }
 
         /**
-         * Parses the provided CharSequence into a java.sql.Date instance.
+         * Parses the provided CharSequence into a {@code java.sql.Date} instance using this formatter's pattern.
          *
-         * @param text the CharSequence to parse. Must not be {@code null}.
-         * @return a java.sql.Date instance representing the parsed date and time.
-         * @throws DateTimeParseException if the text cannot be parsed to a date and time.
-         * @see Instant#ofEpochMilli(long)
-         * @see java.sql.Date#from(Instant)
+         * @param text the CharSequence to parse; may be {@code null} or empty.
+         * @return a {@code java.sql.Date} instance representing the parsed date, or {@code null} if {@code text} is {@code null} or empty.
+         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's pattern.
+         * @see #parseToDate(CharSequence, TimeZone)
+         * @see Dates#parseDate(String, String)
          */
         @MayReturnNull
         public java.sql.Date parseToDate(final CharSequence text) {
@@ -6769,12 +6782,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
         /**
          * Parses the provided CharSequence into a java.sql.Date instance.
          *
-         * @param text the CharSequence to parse. Must not be {@code null}.
-         * @param tz the time zone to use for parsing the date and time.
-         * @return a java.sql.Date instance representing the parsed date and time.
-         * @throws DateTimeParseException if the text cannot be parsed to a date and time.
-         * @see Instant#ofEpochMilli(long)
-         * @see java.sql.Date#from(Instant)
+         * @param text the CharSequence to parse; may be {@code null} or empty.
+         * @param tz the time zone to use for parsing the date; if {@code null}, the default time zone is used.
+         * @return a {@code java.sql.Date} instance representing the parsed date, or {@code null} if {@code text} is {@code null} or empty.
+         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's pattern.
+         * @see #parseToDate(CharSequence)
+         * @see Dates#parseDate(String, String, TimeZone)
          */
         @MayReturnNull
         public java.sql.Date parseToDate(final CharSequence text, final TimeZone tz) {
@@ -6794,11 +6807,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * Time time = DTF.LOCAL_TIME.parseToTime(timeStr);
          * }</pre>
          *
-         * @param text the CharSequence to parse. Must not be {@code null}.
-         * @return a java.sql.Time instance representing the parsed date and time.
-         * @throws DateTimeParseException if the text cannot be parsed to a date and time.
-         * @see Instant#ofEpochMilli(long)
-         * @see java.sql.Time#from(Instant)
+         * @param text the CharSequence to parse; may be {@code null} or empty.
+         * @return a {@code java.sql.Time} instance representing the parsed time, or {@code null} if {@code text} is {@code null} or empty.
+         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's pattern.
+         * @see #parseToTime(CharSequence, TimeZone)
+         * @see Dates#parseTime(String, String)
          */
         @MayReturnNull
         public Time parseToTime(final CharSequence text) {
@@ -6819,12 +6832,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * Time time = DTF.LOCAL_TIME.parseToTime(timeStr, utc);
          * }</pre>
          *
-         * @param text the CharSequence to parse. Must not be {@code null}.
-         * @param tz the time zone to use for parsing the date and time.
-         * @return a java.sql.Time instance representing the parsed date and time.
-         * @throws DateTimeParseException if the text cannot be parsed to a date and time.
-         * @see Instant#ofEpochMilli(long)
-         * @see java.sql.Time#from(Instant)
+         * @param text the CharSequence to parse; may be {@code null} or empty.
+         * @param tz the time zone to use for parsing the time; if {@code null}, the default time zone is used.
+         * @return a {@code java.sql.Time} instance representing the parsed time, or {@code null} if {@code text} is {@code null} or empty.
+         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's pattern.
+         * @see #parseToTime(CharSequence)
+         * @see Dates#parseTime(String, String, TimeZone)
          */
         @MayReturnNull
         public Time parseToTime(final CharSequence text, final TimeZone tz) {
@@ -6844,11 +6857,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * Timestamp timestamp = DTF.ISO_8601_TIMESTAMP.parseToTimestamp(timestampStr);
          * }</pre>
          *
-         * @param text the CharSequence to parse. Must not be {@code null}.
-         * @return a java.sql.Timestamp instance representing the parsed date and time.
-         * @throws DateTimeParseException if the text cannot be parsed to a date and time.
-         * @see Instant#ofEpochMilli(long)
-         * @see java.sql.Timestamp#from(Instant)
+         * @param text the CharSequence to parse; may be {@code null} or empty.
+         * @return a {@code java.sql.Timestamp} instance representing the parsed date and time, or {@code null} if {@code text} is {@code null} or empty.
+         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's pattern.
+         * @see #parseToTimestamp(CharSequence, TimeZone)
+         * @see Dates#parseTimestamp(String, String)
          */
         @MayReturnNull
         public Timestamp parseToTimestamp(final CharSequence text) {
@@ -6869,12 +6882,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * Timestamp timestamp = DTF.ISO_8601_TIMESTAMP.parseToTimestamp(timestampStr, utc);
          * }</pre>
          *
-         * @param text the CharSequence to parse. Must not be {@code null}.
-         * @param tz the time zone to use for parsing the date and time.
-         * @return a java.sql.Timestamp instance representing the parsed date and time.
-         * @throws DateTimeParseException if the text cannot be parsed to a date and time.
-         * @see Instant#ofEpochMilli(long)
-         * @see java.sql.Timestamp#from(Instant)
+         * @param text the CharSequence to parse; may be {@code null} or empty.
+         * @param tz the time zone to use for parsing the date and time; if {@code null}, the default time zone is used.
+         * @return a {@code java.sql.Timestamp} instance representing the parsed date and time, or {@code null} if {@code text} is {@code null} or empty.
+         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's pattern.
+         * @see #parseToTimestamp(CharSequence)
+         * @see Dates#parseTimestamp(String, String, TimeZone)
          */
         @MayReturnNull
         public Timestamp parseToTimestamp(final CharSequence text, final TimeZone tz) {
@@ -6894,9 +6907,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * Calendar calendar = DTF.LOCAL_DATE_TIME.parseToCalendar(dateTimeStr);
          * }</pre>
          *
-         * @param text the CharSequence to parse. Must not be {@code null}.
-         * @return a java.util.Calendar instance representing the parsed date and time.
-         * @throws DateTimeParseException if the text cannot be parsed to a date and time.
+         * @param text the CharSequence to parse; may be {@code null} or empty.
+         * @return a {@code java.util.Calendar} instance representing the parsed date and time, or {@code null} if {@code text} is {@code null} or empty.
+         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's pattern.
+         * @see #parseToCalendar(CharSequence, TimeZone)
+         * @see Dates#parseCalendar(String, String)
          */
         @MayReturnNull
         public Calendar parseToCalendar(final CharSequence text) {
@@ -6917,10 +6932,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * Calendar calendar = DTF.LOCAL_DATE_TIME.parseToCalendar(dateTimeStr, utc);
          * }</pre>
          *
-         * @param text the CharSequence to parse. Must not be {@code null}.
-         * @param tz the time zone to use for parsing the date and time.
-         * @return a java.util.Calendar instance representing the parsed date and time.
-         * @throws DateTimeParseException if the text cannot be parsed to a date and time.
+         * @param text the CharSequence to parse; may be {@code null} or empty.
+         * @param tz the time zone to use for parsing and for the returned calendar; if {@code null}, the default time zone is used.
+         * @return a {@code java.util.Calendar} instance representing the parsed date and time, or {@code null} if {@code text} is {@code null} or empty.
+         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's pattern.
+         * @see #parseToCalendar(CharSequence)
+         * @see Dates#parseCalendar(String, String, TimeZone)
          */
         @MayReturnNull
         public Calendar parseToCalendar(final CharSequence text, final TimeZone tz) {
@@ -6973,7 +6990,15 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     /**
-     * The Class DateUtil.
+     * A concrete, named subclass of {@link Dates} that exposes the full set of inherited
+     * static date/time utility methods under the alternative name {@code DateUtil}.
+     *
+     * <p>It is the sole permitted subtype of the sealed {@code Dates} class and adds no
+     * behavior of its own; it exists purely so callers may reference these utilities as
+     * {@code DateUtil} (for example, in code bases that already use that name) while sharing
+     * a single implementation. This class cannot be instantiated.</p>
+     *
+     * @see Dates
      */
     @Beta
     public static final class DateUtil extends Dates {

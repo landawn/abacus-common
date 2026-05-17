@@ -112,7 +112,7 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      */
     @Override
     public String stringOf(final Indexed<T> x) {
-        return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x.index(), x.value()), Utils.jsc);
+        return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x.longIndex(), x.value()), Utils.jsc);
     }
 
     /**

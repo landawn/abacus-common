@@ -48,6 +48,15 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
 
     private final JsonDeserConfig jdc;
 
+    /**
+     * Package-private constructor for {@code MapType}.
+     * This constructor is called by the {@code TypeFactory} to create
+     * {@code Map<K, V>} type instances for the given implementation class.
+     *
+     * @param typeClass the concrete {@code Map} implementation class to handle
+     * @param keyTypeName the name of the key type parameter
+     * @param valueTypeName the name of the value type parameter
+     */
     MapType(final Class<T> typeClass, final String keyTypeName, final String valueTypeName) {
         super(getTypeName(typeClass, keyTypeName, valueTypeName, false));
 

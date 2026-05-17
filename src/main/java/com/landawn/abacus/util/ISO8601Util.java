@@ -87,6 +87,7 @@ final class ISO8601Util {
      *
      * @param date the date to format
      * @return the formatted date string in ISO8601 format
+     * @throws NullPointerException if {@code date} is {@code null}
      */
     public static String format(final Date date) {
         return format(date, false, TIMEZONE_Z);
@@ -107,6 +108,7 @@ final class ISO8601Util {
      * @param date the date to format
      * @param millis {@code true} to include milliseconds, {@code false} otherwise
      * @return the formatted date string in ISO8601 format
+     * @throws NullPointerException if {@code date} is {@code null}
      */
     public static String format(final Date date, final boolean millis) {
         return format(date, millis, TIMEZONE_Z);
@@ -119,6 +121,7 @@ final class ISO8601Util {
      * @param millis {@code true} to include milliseconds, {@code false} otherwise
      * @param tz the timezone to use for formatting
      * @return the formatted date string in ISO8601 format
+     * @throws NullPointerException if {@code date} or {@code tz} is {@code null}
      * @deprecated Use {@link #format(Date, boolean, TimeZone, Locale)} instead
      */
     @Deprecated // since 2.9
@@ -141,9 +144,11 @@ final class ISO8601Util {
      *
      * @param date the date to format
      * @param millis {@code true} to include milliseconds, {@code false} otherwise
-     * @param tz timezone to use for formatting (UTC produces 'Z', others produce offset)
+     * @param tz timezone to use for formatting; a zero UTC offset produces a trailing {@code 'Z'},
+     *           any other offset produces a {@code [+-]HH:mm} suffix
      * @param loc locale to use for formatting
      * @return the formatted date string in ISO8601 format
+     * @throws NullPointerException if {@code date}, {@code tz} or {@code loc} is {@code null}
      */
     public static String format(final Date date, final boolean millis, final TimeZone tz, final Locale loc) {
         final Calendar calendar = new GregorianCalendar(tz, loc);
@@ -210,7 +215,7 @@ final class ISO8601Util {
      * <p>Supported formats include (24-hour clock):</p>
      * <ul>
      * <li>{@code [yyyy-MM-dd|yyyyMMdd]}</li>
-     * <li>{@code [yyyy-MM-dd|yyyyMMdd]T[HH:mm[:ss[.SSS]]|HHmm[ss[.SSS]]]}
+     * <li>{@code [yyyy-MM-dd|yyyyMMdd]T[HH:mm[:ss[.SSS]]|HHmm[ss[.SSS]]]}</li>
      * <li>{@code [yyyy-MM-dd|yyyyMMdd]T[HH:mm[:ss[.SSS]]|HHmm[ss[.SSS]]][Z|[+-]HH:mm]}</li>
      * </ul>
      *

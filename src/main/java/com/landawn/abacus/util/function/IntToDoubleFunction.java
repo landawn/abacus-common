@@ -65,8 +65,8 @@ public interface IntToDoubleFunction extends Throwables.IntToDoubleFunction<Runt
      * double result = half.applyAsDouble(9);   // 4.5
      * }</pre>
      *
-     * @param value the function argument, an int value to be converted to double
-     * @return the function result as a double value
+     * @param value the function argument, an int value to be converted to double.
+     * @return the function result as a double value.
      */
     @Override
     double applyAsDouble(int value);

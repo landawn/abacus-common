@@ -1105,6 +1105,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * duplicate indices and maintaining the correct element positions during removal.
      *
      * @param indices the indices of elements to be removed. If {@code null} or empty, this list remains unchanged.
+     * @throws IndexOutOfBoundsException if any of the specified indices is out of range
+     *         ({@code index < 0 || index >= size()})
      */
     @Override
     public void removeAt(final int... indices) {
@@ -1171,10 +1173,10 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
-     *      must be between 0 and size() - lengthOfRange, inclusive.
-     * @throws IndexOutOfBoundsException if any index is out of bounds or if
-     *         newPositionAfterMove would cause elements to be moved outside the list
+     * @param newPositionAfterMove the zero-based index where the first element of the range will be placed
+     *        after the move; must be between {@code 0} and {@code size() - (toIndex - fromIndex)}, inclusive
+     * @throws IndexOutOfBoundsException if any index is out of bounds, or if
+     *         {@code newPositionAfterMove} would cause elements to be moved outside the list
      */
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
@@ -1192,8 +1194,10 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * @param fromIndex the starting index (inclusive) of the range to replace
      * @param toIndex the ending index (exclusive) of the range to replace
-     * @param replacement the IntList whose elements will replace the specified range. If {@code null} or empty, this list remains unchanged.
+     * @param replacement the IntList whose elements will replace the specified range. If {@code null} or empty,
+     *        the range is simply removed (no elements are inserted)
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range ({@code fromIndex < 0 || toIndex > size() || fromIndex > toIndex})
+     * @throws OutOfMemoryError if the resulting size would exceed the maximum supported array size
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final IntList replacement) throws IndexOutOfBoundsException {
@@ -1241,8 +1245,10 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * @param fromIndex the starting index (inclusive) of the range to replace
      * @param toIndex the ending index (exclusive) of the range to replace
-     * @param replacement the array whose elements will replace the specified range. If {@code null} or empty, this list remains unchanged.
+     * @param replacement the array whose elements will replace the specified range. If {@code null} or empty,
+     *        the range is simply removed (no elements are inserted)
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range ({@code fromIndex < 0 || toIndex > size() || fromIndex > toIndex})
+     * @throws OutOfMemoryError if the resulting size would exceed the maximum supported array size
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final int[] replacement) throws IndexOutOfBoundsException {
@@ -1986,7 +1992,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive), or -1 for backward iteration to the start
      * @param action the action to be performed for each element
-     * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds, i.e. if
+     *         {@code min(fromIndex, toIndex == -1 ? 0 : toIndex) < 0} or
+     *         {@code max(fromIndex, toIndex) > size()} (except for the special {@code toIndex == -1} case)
      */
     public void forEach(final int fromIndex, final int toIndex, final IntConsumer action) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
@@ -2546,7 +2554,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Returns an iterator over all elements in this list.
      * The iterator returns elements in the order they appear in the list (from index 0 to size-1).
      *
-     * <p>The returned iterator does not support the remove operation.</p>
+     * <p>The returned iterator is <b>not</b> fail-fast: it iterates over the list's
+     * backing array directly, and concurrent structural modifications during iteration
+     * yield undefined results rather than a {@code ConcurrentModificationException}.</p>
      *
      * @return an IntIterator over the elements in this list
      */

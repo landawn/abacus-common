@@ -733,8 +733,8 @@ class JsonStringReader extends AbstractJsonReader {
      * "\n".
      *
      * @return the unescaped character
-     * @throws ParsingException if the escape sequence is incomplete or malformed
-     * @throws NumberFormatException if any unicode escape sequences contain invalid hex digits
+     * @throws ParsingException if the escape sequence is incomplete or malformed, including
+     *         when a unicode escape sequence contains invalid hex digits
      */
     protected char readEscapeCharacter() {
         if (strBeginIndex >= strEndIndex) {

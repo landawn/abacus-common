@@ -1562,7 +1562,7 @@ public final class Clazz {
      * Class<BiMap<String, Integer>> idMapClass = Clazz.ofBiMap(String.class, Integer.class);
      *
      * // BiMap enforces uniqueness on both keys and values
-     * BiMap<String, Integer> userIds = BiMap.create();
+     * BiMap<String, Integer> userIds = new BiMap<>();
      * userIds.put("alice", 101);
      * userIds.put("bob", 102);
      * String name = userIds.inverse().get(101);   // returns "alice"
@@ -1638,7 +1638,7 @@ public final class Clazz {
      * Class<Multiset<String>> wordCountClass = Clazz.ofMultiset(String.class);
      *
      * // Count word occurrences
-     * Multiset<String> words = Multiset.create();
+     * Multiset<String> words = new Multiset<>();
      * words.add("apple");
      * words.add("banana");
      * words.add("apple");

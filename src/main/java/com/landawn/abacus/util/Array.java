@@ -255,7 +255,7 @@ import com.landawn.abacus.annotation.NullSafe;
  *
  * <p><b>Nested Classes:</b>
  * <ul>
- *   <li><b>{@link ArrayUtil}:</b> Deprecated concrete implementation class</li>
+ *   <li><b>{@link ArrayUtil}:</b> {@link Beta} sealed-hierarchy implementation holder; invoke methods through {@link Array} directly</li>
  * </ul>
  *
  * <p><b>Attribution:</b>
@@ -3937,11 +3937,18 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a portion of an array of primitive booleans to an array of Boolean objects.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] primitives = {true, false, true, false, true};
+     * Boolean[] objects = Array.box(primitives, 1, 4);   // returns {Boolean.FALSE, Boolean.TRUE, Boolean.FALSE}
+     * Boolean[] empty = Array.box(primitives, 2, 2);     // returns empty Boolean array
+     * }</pre>
+     *
      * @param a the array of primitive booleans to be converted.
-     * @param fromIndex the start index of the portion to be converted.
-     * @param toIndex the end index of the portion to be converted.
+     * @param fromIndex the start index of the portion to be converted (inclusive).
+     * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Boolean objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      */
     @MayReturnNull
     public static Boolean[] box(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -4170,11 +4177,18 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a portion of an array of primitive integers to an array of Integer objects.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] primitives = {1, 2, 3, 4, 5};
+     * Integer[] objects = Array.box(primitives, 1, 4);   // returns {Integer.valueOf(2), Integer.valueOf(3), Integer.valueOf(4)}
+     * Integer[] empty = Array.box(primitives, 2, 2);     // returns empty Integer array
+     * }</pre>
+     *
      * @param a the array of primitive integers to be converted.
-     * @param fromIndex the start index of the portion to be converted.
-     * @param toIndex the end index of the portion to be converted.
+     * @param fromIndex the start index of the portion to be converted (inclusive).
+     * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Integer objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      */
     @MayReturnNull
     public static Integer[] box(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -5959,6 +5973,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the two-dimensional array to be transposed.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
+     * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
      */
     @MayReturnNull
     @Beta
@@ -6002,6 +6017,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the two-dimensional array to be transposed.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
+     * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
      */
     @MayReturnNull
     @Beta
@@ -6045,6 +6061,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the two-dimensional array to be transposed.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
+     * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
      */
     @MayReturnNull
     @Beta
@@ -6088,6 +6105,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the two-dimensional array to be transposed.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
+     * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
      */
     @MayReturnNull
     @Beta
@@ -6131,6 +6149,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the two-dimensional array to be transposed.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
+     * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
      */
     @MayReturnNull
     @Beta
@@ -6174,6 +6193,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the two-dimensional array to be transposed.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
+     * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
      */
     @MayReturnNull
     @Beta
@@ -6217,6 +6237,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the two-dimensional array to be transposed.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
+     * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
      */
     @MayReturnNull
     @Beta
@@ -6260,6 +6281,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the two-dimensional array to be transposed.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
+     * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
      */
     @MayReturnNull
     @Beta
@@ -6313,7 +6335,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param <T> the type of the elements in the two-dimensional array.
      * @param a the original two-dimensional array to be transposed.
      * @return a new two-dimensional array representing the transposed matrix, or {@code null} if the input array is {@code null}.
-     * @throws IllegalArgumentException if the input array is not a matrix.
+     * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
      */
     @MayReturnNull
     @Beta
@@ -6375,8 +6397,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Utility class that extends Array, providing access to all Array methods.
-     * This class is marked as Beta and may be subject to changes in future releases.
+     * The sole permitted subclass of the {@code sealed} {@link Array} class.
+     *
+     * <p>This is a non-instantiable utility holder that exists primarily to satisfy the
+     * {@code sealed} hierarchy declaration of {@link Array}. It inherits all of the static
+     * factory and manipulation methods declared in {@link Array}; those methods should be
+     * invoked through {@link Array} directly. This class is marked {@link Beta} and may be
+     * subject to changes in future releases.</p>
      *
      * @see Array
      */

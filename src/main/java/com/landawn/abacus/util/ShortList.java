@@ -245,7 +245,7 @@ import com.landawn.abacus.util.stream.ShortStream;
  * <ul>
  *   <li><b>Audio Samples:</b> {@code ShortList samples = new ShortList(sampleRate);}</li>
  *   <li><b>Port Numbers:</b> {@code ShortList ports = ShortList.range((short) 8000, (short) 9000);}</li>
- *   <li><b>Sensor Data:</b> {@code ShortList readings = ShortList.random((short) -1000, (short) 1000, count);}</li>
+ *   <li><b>Sensor Data:</b> {@code ShortList readings = ShortList.random(count);}</li>
  *   <li><b>Compact Storage:</b> {@code ShortList ids = data.stream().mapToShort(...).collect(...);}</li>
  * </ul>
  *
@@ -380,6 +380,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param a the array of elements to be included in the new list. Can be {@code null}.
      * @return a new ShortList containing the elements from the specified array, or an empty list if the array is {@code null}
+     * @see #copyOf(short[])
+     * @see #of(short[], int)
      */
     public static ShortList of(final short... a) {
         return new ShortList(N.nullToEmpty(a));
@@ -395,6 +397,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *             Must be between 0 and the array length (inclusive).
      * @return a new ShortList containing the first {@code size} elements of the specified array
      * @throws IndexOutOfBoundsException if {@code size} is negative or greater than the array length
+     * @see #of(short...)
+     * @see #copyOf(short[], int, int)
      */
     public static ShortList of(final short[] a, final int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, N.len(a));
@@ -736,7 +740,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * If the list does not contain the element, it is unchanged. More formally, removes the element
      * with the lowest index i such that elementData[i] == e.
      *
-     * <p>This method runs in linear time, as it may need to search through the entire list
+     * <p>This method runs in linear time, as it may need to search through the entire list.</p>
+     *
      * <p><b>Note:</b> This method removes by value. To remove by index, use {@link #removeAt(int)}.</p>
      *
      * @param e the element to be removed from this list, if present
@@ -1089,7 +1094,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ShortList list = ShortList.of((short) 0, (short) 1, (Short) 2, (Short) 3, (Short) 4, (Short) 5);
+     * ShortList list = ShortList.of((short) 0, (short) 1, (short) 2, (short) 3, (short) 4, (short) 5);
      * list.moveRange(1, 3, 3);   // Moves elements [1, 2] to position starting at index 3
      * // Result: [0, 3, 4, 1, 2, 5]
      * }</pre>
@@ -1206,8 +1211,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * Uses == for comparison.
      *
      * @param oldVal the value to be replaced
-     * @param newVal the value to replace oldVal
-     * @return the number of elements replaced
+     * @param newVal the value to replace {@code oldVal}
+     * @return the number of elements replaced; {@code 0} if no element matched
+     * @see #replaceAll(ShortUnaryOperator)
+     * @see #replaceIf(ShortPredicate, short)
      */
     public int replaceAll(final short oldVal, final short newVal) {
         if (size() == 0) {
@@ -1232,6 +1239,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * The operator is applied to each element in order from first to last.
      *
      * @param operator the operator to apply to each element
+     * @see #replaceAll(short, short)
+     * @see #replaceIf(ShortPredicate, short)
      */
     public void replaceAll(final ShortUnaryOperator operator) {
         for (int i = 0, len = size(); i < len; i++) {
@@ -1245,7 +1254,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param predicate the predicate to test each element
      * @param newValue the value to replace matching elements with
-     * @return {@code true} if any elements were replaced
+     * @return {@code true} if any elements were replaced; {@code false} otherwise
+     * @see #replaceAll(short, short)
+     * @see #replaceAll(ShortUnaryOperator)
      */
     public boolean replaceIf(final ShortPredicate predicate, final short newValue) {
         boolean result = false;
@@ -1537,6 +1548,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param b the list to compare against this list
      * @return a new ShortList containing the elements that are present in this list but not in the specified list,
      *         considering the number of occurrences.
+     *         Returns a copy of this list if {@code b} is {@code null} or empty.
      * @see #difference(short[])
      * @see #symmetricDifference(ShortList)
      * @see #intersection(ShortList)
@@ -1702,7 +1714,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * Returns the number of times the specified value appears in this list.
      *
      * @param valueToFind the value to count occurrences of
-     * @return the number of times the specified value appears in this list
+     * @return the number of times the specified value appears in this list; {@code 0} if it is not present or the list is empty
      */
     public int frequency(final short valueToFind) {
         if (size == 0) {
@@ -1728,6 +1740,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param valueToFind the element to search for
      * @return the index of the first occurrence of the specified element in this list,
      *         or -1 if this list does not contain the element
+     * @see #indexOf(short, int)
+     * @see #lastIndexOf(short)
      */
     public int indexOf(final short valueToFind) {
         return indexOf(valueToFind, 0);
@@ -1914,7 +1928,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive), or -1 for backward iteration to the start
      * @param action the action to be performed for each element
-     * @throws IndexOutOfBoundsException if the indices are out of range
+     * @throws IndexOutOfBoundsException if {@code fromIndex} or {@code toIndex} is out of range,
+     *         considering the supported forward and backward iteration semantics
      */
     public void forEach(final int fromIndex, final int toIndex, final ShortConsumer action) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
@@ -2226,7 +2241,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param chunkSize the desired size of each subsequence. Must be positive.
      * @return a List of ShortList instances containing the split subsequences
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
-     * @throws IllegalArgumentException if size &lt;= 0
+     * @throws IllegalArgumentException if {@code chunkSize <= 0}
      */
     @Override
     public List<ShortList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException {
@@ -2334,7 +2349,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Returns a new array containing all elements of this list in proper sequence.
      *
-     * @return a new short array containing all elements of this list
+     * @return a new {@code short} array containing all elements of this list; an empty array if this list is empty
      */
     @Override
     public short[] toArray() {
@@ -2344,10 +2359,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Converts this ShortList to an IntList.
      *
-     * <p>Each short value is widened to an int value. The resulting IntList
-     * contains the same number of elements as this list.</p>
+     * <p>Each {@code short} value is widened to an {@code int} value (no precision loss). The resulting
+     * {@link IntList} contains the same number of elements as this list.</p>
      *
-     * @return a new IntList containing all elements of this list widened to int values
+     * @return a new {@link IntList} containing all elements of this list widened to {@code int} values
+     * @see #boxed()
      */
     public IntList toIntList() {
         final int[] a = new int[size];
@@ -2460,8 +2476,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * <p>This method provides direct access to the first element without wrapping
      * in an Optional.</p>
      *
-     * @return the first short value in the list
+     * @return the first {@code short} value in the list
      * @throws NoSuchElementException if the list is empty
+     * @see #first()
+     * @see #getLast()
      */
     public short getFirst() {
         throwNoSuchElementExceptionIfEmpty();
@@ -2475,8 +2493,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * <p>This method provides direct access to the last element without wrapping
      * in an Optional.</p>
      *
-     * @return the last short value in the list
+     * @return the last {@code short} value in the list
      * @throws NoSuchElementException if the list is empty
+     * @see #last()
+     * @see #getFirst()
      */
     public short getLast() {
         throwNoSuchElementExceptionIfEmpty();
@@ -2499,9 +2519,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Appends the specified element to the end of this list.
      *
-     * <p>This method is equivalent to add(e).</p>
+     * <p>This method is equivalent to {@link #add(short)}.</p>
      *
      * @param e the element to add at the end of the list
+     * @see #addFirst(short)
      */
     public void addLast(final short e) {
         add(size, e);

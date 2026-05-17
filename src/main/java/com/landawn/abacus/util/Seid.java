@@ -64,7 +64,7 @@ import com.landawn.abacus.parser.ParserUtil.BeanInfo;
  *
  * // Retrieve values
  * int id = userId.getInt("id");
- * Long customerId = compositeId.get("customerId");
+ * Integer customerId = compositeId.get("customerId");
  * }</pre>
  *
  * @see EntityId
@@ -133,6 +133,7 @@ public class Seid implements EntityId {
      * }</pre>
      *
      * @param nameValues a map of property names to their values
+     * @throws IllegalArgumentException if nameValues is {@code null} or empty
      */
     public Seid(final Map<String, Object> nameValues) {
         this(extractEntityName(nameValues));

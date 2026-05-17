@@ -42,10 +42,10 @@ public interface FloatTernaryOperator extends Throwables.FloatTernaryOperator<Ru
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatTernaryOperator fusedMultiplyAdd = (a, b, c) -> a * b + c;
-     * float result = fusedMultiplyAdd.applyAsFloat(2.5f, 3.0f, 1.5f); // Returns 9.0
+     * float result = fusedMultiplyAdd.applyAsFloat(2.5f, 3.0f, 1.5f); // Returns 9.0f
      *
      * FloatTernaryOperator averageOfThree = (a, b, c) -> (a + b + c) / 3.0f;
-     * float avg = averageOfThree.applyAsFloat(1.0f, 2.0f, 3.0f); // Returns 2.0
+     * float avg = averageOfThree.applyAsFloat(1.0f, 2.0f, 3.0f); // Returns 2.0f
      * }</pre>
      *
      * @param a the first float operand

@@ -573,12 +573,15 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             }
         } finally {
             lock.unlock();
+        }
 
-            if (element != null) {
-                hitCount.incrementAndGet();
-            } else {
-                missCount.incrementAndGet();
-            }
+        // Only account hit/miss on a normal completion. If the body threw (e.g. a
+        // concurrent close() made assertNotClosed() raise IllegalStateException), the
+        // call neither hit nor missed the pool and must not skew the statistics.
+        if (element != null) {
+            hitCount.incrementAndGet();
+        } else {
+            missCount.incrementAndGet();
         }
 
         return element;
@@ -608,7 +611,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         lock.lock();
 
         try {
-            while (true) {
+            takeLoop: while (true) {
                 // Re-check on every iteration: a concurrent close()/removeAll() now signals
                 // notEmpty.signalAll(), so a waiter parked on awaitNanos wakes up and must
                 // notice the closed state instead of looping back to wait again.
@@ -648,7 +651,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                     notFull.signal();
 
                     if (element != null) {
-                        return element;
+                        break takeLoop;
                     }
 
                     // Just popped an expired element. Skip awaiting and re-check the
@@ -658,20 +661,26 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                 }
 
                 if (nanos <= 0) {
-                    return null;
+                    break takeLoop;
                 }
 
                 nanos = notEmpty.awaitNanos(nanos);
             }
         } finally {
             lock.unlock();
-
-            if (element != null) {
-                hitCount.incrementAndGet();
-            } else {
-                missCount.incrementAndGet();
-            }
         }
+
+        // Only account hit/miss on a normal completion. If the body threw (e.g. a
+        // concurrent close() made assertNotClosed() raise IllegalStateException, or the
+        // waiting thread was interrupted), the call neither hit nor missed the pool and
+        // must not skew the statistics.
+        if (element != null) {
+            hitCount.incrementAndGet();
+        } else {
+            missCount.incrementAndGet();
+        }
+
+        return element;
     }
 
     /**

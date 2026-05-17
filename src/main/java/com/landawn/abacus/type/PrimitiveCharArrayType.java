@@ -130,10 +130,10 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * Parses a string representation and creates a char array.
      * Expected format: ['a', 'b', 'c'] with quoted characters or [a, b, c] without quotes.
      * Automatically detects whether characters are quoted and handles both formats.
-     * Returns {@code null} if input is {@code null}, empty array if input is empty or "[]".
+     * Returns {@code null} if input is {@code null}, empty, or blank, or an empty array if input is {@code "[]"}.
      *
      * @param str the string to parse
-     * @return the parsed char array, or {@code null} if input is null
+     * @return the parsed char array, or {@code null} if input is {@code null}, empty, or blank
      */
     @Override
     public char[] valueOf(final String str) {
@@ -170,11 +170,11 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
 
     /**
      * Converts an object to a char array.
-     * Handles special case of Clob objects by extracting their character content.
-     * For other object types, converts to string first then parses as char array.
+     * Handles {@link Reader} (reads all characters) and {@link Clob} objects (extracts character content and frees the Clob)
+     * as special cases. For other object types, converts to string first then parses as char array.
      * Returns {@code null} if input is {@code null}.
      *
-     * @param obj the object to convert (can be a Clob or other type)
+     * @param obj the object to convert (can be a {@link Reader}, {@link Clob}, or any other type)
      * @return the char array representation of the object, or {@code null} if input is null
      * @throws UncheckedSQLException if a database access error occurs while reading or freeing a Clob
      * @throws UnsupportedOperationException if the Clob length exceeds {@link Integer#MAX_VALUE}

@@ -64,7 +64,7 @@ public interface DoubleObjPredicate<T> extends Throwables.DoubleObjPredicate<T, 
      * Returns a composed predicate that represents a short-circuiting logical AND of this predicate and another.
      * When evaluating the composed predicate, if this predicate is {@code false}, then the {@code other} predicate is not evaluated.
      *
-     * @param other a predicate that will be logically-ANDed with this predicate
+     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
      * @throws NullPointerException if {@code other} is null
      */
@@ -77,7 +77,7 @@ public interface DoubleObjPredicate<T> extends Throwables.DoubleObjPredicate<T, 
      * Returns a composed predicate that represents a short-circuiting logical OR of this predicate and another.
      * When evaluating the composed predicate, if this predicate is {@code true}, then the {@code other} predicate is not evaluated.
      *
-     * @param other a predicate that will be logically-ORed with this predicate
+     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
      * @throws NullPointerException if {@code other} is null
      */

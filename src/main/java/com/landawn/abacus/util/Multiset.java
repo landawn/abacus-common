@@ -74,7 +74,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>Element counts are limited to {@code Integer.MAX_VALUE}</li>
  *   <li>Negative counts are not allowed and will throw IllegalArgumentException</li>
  *   <li>Setting count to 0 effectively removes the element from the multiset</li>
- *   <li>The total size() may overflow for very large multisets</li>
+ *   <li>{@link #size()} throws {@link ArithmeticException} if the total occurrence count exceeds {@code Integer.MAX_VALUE}</li>
  * </ul>
  *
  * <p><b>Common Use Cases:</b>
@@ -222,7 +222,8 @@ public final class Multiset<E> implements Collection<E> {
      * System.out.println(multiset.getCount("a"));   // Prints: 3
      * }</pre>
      *
-     * @param iterable the collection whose elements are to be placed into this multiset.
+     * @param iterable the collection whose elements are to be placed into this multiset; a {@code null}
+     *                  iterable results in an empty multiset.
      */
     public Multiset(final Iterable<? extends E> iterable) {
         this(initCapacity(iterable));
@@ -1804,7 +1805,7 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @param <T> the runtime type of the array to contain the multiset.
-     * @param a the array into which the elements of this multiset are to be stored, if it is big enough;.
+     * @param a the array into which the elements of this multiset are to be stored, if it is big enough;
      *              otherwise, a new array of the same runtime type is allocated for this purpose
      * @return an array containing all the elements in this multiset
      * @throws IllegalArgumentException if the provided array is {@code null}

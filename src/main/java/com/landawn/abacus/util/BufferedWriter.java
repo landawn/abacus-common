@@ -72,16 +72,36 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     static final Writer DUMMY_WRITER = new DummyWriter();
 
+    /**
+     * The underlying writer to which buffered content is flushed, or {@code null}
+     * when this writer operates in internal buffer mode.
+     */
     protected Writer out;
 
+    /**
+     * The internal character buffer used in internal buffer mode, or {@code null}
+     * when writing to an underlying {@link #out} writer.
+     */
     protected char[] value;
 
+    /**
+     * The number of valid characters currently stored in {@link #value}.
+     */
     protected int count = 0;
 
+    /**
+     * The temporary flush buffer used when writing to an underlying {@link #out} writer.
+     */
     protected char[] _cbuf; //NOSONAR
 
+    /**
+     * The next position to write into {@link #_cbuf}.
+     */
     protected int nextChar = 0;
 
+    /**
+     * Indicates whether this writer has been closed.
+     */
     protected boolean isClosed = false;
 
     /**
@@ -184,9 +204,10 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
     }
 
     /**
-     * Writes a single character.
+     * Writes a single character. The integer is cast to a {@code char}, so only the
+     * low-order 16 bits are written and any higher-order bits are discarded.
      *
-     * @param ch the character to write as an int (0-65535)
+     * @param ch the character to write; the value is cast to {@code char} (0-65535)
      * @throws IOException if an I/O error occurs
      * @deprecated replaced by {@link #write(char)}
      */
@@ -682,9 +703,13 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
         }
 
         try {
-            flush();
-
-            IOUtil.close(out);
+            // Always attempt to close the underlying writer even if flush() throws,
+            // so we don't leak the underlying resource on a flush failure.
+            try {
+                flush();
+            } finally {
+                IOUtil.close(out);
+            }
         } finally {
             _reset();
             isClosed = true;

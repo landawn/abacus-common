@@ -46,6 +46,7 @@ import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.EntityId;
 import com.landawn.abacus.util.HBaseColumn;
+import com.landawn.abacus.util.Holder;
 import com.landawn.abacus.util.ImmutableList;
 import com.landawn.abacus.util.ImmutableMap;
 import com.landawn.abacus.util.ImmutableSet;
@@ -352,6 +353,7 @@ public final class TypeFactory {
             classes.add(com.landawn.abacus.type.OptionalDoubleType.class);
             classes.add(com.landawn.abacus.type.OptionalType.class);
             classes.add(com.landawn.abacus.type.NullableType.class);
+            classes.add(com.landawn.abacus.type.HolderType.class);
             classes.add(com.landawn.abacus.type.PasswordType.class);
             classes.add(com.landawn.abacus.type.PatternType.class);
             classes.add(com.landawn.abacus.type.PrimitiveBooleanArrayType.class);
@@ -492,7 +494,11 @@ public final class TypeFactory {
         }
 
         // special cases:
-        typePool.put(PrimitiveBooleanType.BOOL, typePool.get(PrimitiveBooleanType.BOOLEAN));
+        final Type<?> booleanType = typePool.get(PrimitiveBooleanType.BOOLEAN);
+
+        if (booleanType != null) {
+            typePool.put(PrimitiveBooleanType.BOOL, booleanType);
+        }
 
         final Type<?> typeType = typePool.get(TypeType.TYPE);
 
@@ -698,6 +704,15 @@ public final class TypeFactory {
                     }
 
                     type = new NullableType(typeParameters.length == 0 ? "Object" : typeParameters[0]);
+                } else if (Holder.class.isAssignableFrom(cls)) {
+                    if (typeParameters.length > 1) {
+                        throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". Holder has one and only has one type parameter.");
+                    }
+                    if (parameters.length > 0) {
+                        throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Holder Type can only have zero parameter.");
+                    }
+
+                    type = new HolderType(typeParameters.length == 0 ? "Object" : typeParameters[0]);
                 } else if (Multiset.class.isAssignableFrom(cls)) {
                     if (typeParameters.length > 1) {
                         throw new IllegalArgumentException(

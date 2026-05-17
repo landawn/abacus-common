@@ -198,9 +198,10 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     private transient Collection<E> values;
 
     /**
-     * Constructs a Multimap with the default initial capacity.
+     * Constructs a Multimap with default backing implementations.
      *
-     * <p>This constructor initializes a Multimap with a HashMap for the backing map and an ArrayList for the value collection.</p>
+     * <p>This constructor initializes a Multimap with a {@link HashMap} as the backing map and an
+     * {@link java.util.ArrayList} as the value collection type.</p>
      */
     Multimap() {
         this(HashMap.class, ArrayList.class);
@@ -236,8 +237,8 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * <p>This constructor initializes a Multimap with a map provided by the specified supplier for the backing map
      * and a collection provided by the specified supplier for the value collection.</p>
      *
-     * @param mapSupplier the supplier of the map to be used as the backing map
-     * @param valueSupplier the supplier of the collection to be used as the value collection
+     * @param mapSupplier the supplier of the map to be used as the backing map; invoked once during construction
+     * @param valueSupplier the supplier that creates a new value collection for each key
      */
     Multimap(final Supplier<? extends Map<K, V>> mapSupplier, final Supplier<? extends V> valueSupplier) {
         this.mapSupplier = mapSupplier;
@@ -251,8 +252,8 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * <p>This constructor initializes a Multimap with the provided map as the backing map
      * and a collection provided by the specified supplier for the value collection.</p>
      *
-     * @param valueMap the map to be used as the backing map
-     * @param valueSupplier the supplier of the collection to be used as the value collection
+     * @param valueMap the map to be used directly as the backing map (not copied)
+     * @param valueSupplier the supplier that creates a new value collection for each key
      */
     @Internal
     Multimap(final Map<K, V> valueMap, final Supplier<? extends V> valueSupplier) {
@@ -332,8 +333,9 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     /**
      * Returns the value collection associated with the specified key in the Multimap, or the provided default value if no value is found.
      *
-     * <p>The returned collection is backed by the Multimap, so changes to the returned collection are reflected in the Multimap.
-     * Usually, the returned collection should not be modified outside this Multimap directly, because it may cause unexpected behavior.</p>
+     * <p>When the key is present, the returned collection is backed by the Multimap, so changes to the returned collection are reflected in the Multimap.
+     * Usually, the returned collection should not be modified outside this Multimap directly, because it may cause unexpected behavior.
+     * When the key is absent, the provided default value is returned as-is (it is not stored in the Multimap).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -623,7 +625,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *
      * @param key the key with which the specified values are to be associated
      * @param c the collection of values to be associated with the specified key
-     * @return {@code true} if the key was not already present and the association was successfully added, {@code false} otherwise if the key is already present or the specified value collection is empty
+     * @return {@code true} if the key was not already present and the association was successfully added, {@code false} if the key is already present or the specified value collection is empty
      * @see #putIfKeyAbsent(Object, Object)
      * @see #putValues(Object, Collection)
      */
@@ -1095,9 +1097,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * // multimap now contains: {small=[1, 2, 1], large=[2, 3, 4, 5]}
      * }</pre>
      *
-     * @param entryPredicate the predicate to be applied to each key-value pair in the Multimap
+     * @param entryPredicate the predicate to be applied to each key and its value collection in the Multimap
      * @param value the value to be removed from the collections of values associated with the keys that satisfy the predicate
      * @return {@code true} if at least one value was successfully removed from the collections of values associated with the keys that satisfy the predicate, {@code false} otherwise
+     * @see #removeEntriesIf(Predicate, Object)
+     * @see #removeEntry(Object, Object)
      * @see Collection#remove(Object)
      */
     public boolean removeEntriesIf(final BiPredicate<? super K, ? super V> entryPredicate, final E value) {
@@ -1147,7 +1151,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * // "fruits" -> ["banana"], "vegetables" unchanged, "berries" unchanged
      * }</pre>
      *
-     * <p><b>Note:</b> Empty collections are not added to the result. If all values are removed
+     * <p><b>Note:</b> This method mutates this Multimap in place. If all values are removed
      * from a key's collection, the key is removed from the Multimap.</p>
      * @param keyPredicate the predicate that determines which keys to process
      * @param valuesToRemove the collection of values to remove from matching collections
@@ -1204,9 +1208,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * // multimap now contains: {small=[1, 2, 3], large=[3, 4, 5, 6]}
      * }</pre>
      *
-     * @param entryPredicate the predicate to be applied to each key-value pair in the Multimap
+     * @param entryPredicate the predicate to be applied to each key and its value collection in the Multimap
      * @param valuesToRemove the collection of elements to be removed from the collections of values associated with the keys that satisfy the predicate
      * @return {@code true} if at least one element was successfully removed from the collections of values associated with the keys that satisfy the predicate, {@code false} otherwise
+     * @see #removeValuesIf(Predicate, Collection)
+     * @see #removeValues(Object, Collection)
      * @see Collection#removeAll(Collection)
      */
     public boolean removeValuesIf(final BiPredicate<? super K, ? super V> entryPredicate, final Collection<?> valuesToRemove) {
@@ -1380,8 +1386,9 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param newValue the value to replace with (can be null)
      * @return {@code true} if the old value was found and replaced,
      *         {@code false} if the key doesn't exist or old value not found
-     * @throws IllegalStateException if the collection rejects the new value
-     *         (e.g., Set-based multimap where newValue already exists)
+     * @throws IllegalStateException if a non-List value collection rejects the new value after the
+     *         old value was removed (e.g. a Set-based multimap where {@code newValue} already exists);
+     *         not thrown for List-based value collections
      * @see #replaceValues(Object, Collection)
      * @see #replaceEntriesIf(Predicate, Object, Object)
      */
@@ -1481,7 +1488,8 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param newValue the replacement value
      * @return {@code true} if at least one replacement was made,
      *         {@code false} if no keys matched or old value was not found
-     * @throws IllegalStateException if the new value cannot be added to any collection
+     * @throws IllegalStateException if a Set-based value collection rejects the new value (e.g. the new value already exists in that collection)
+     * @see #replaceEntriesIf(BiPredicate, Object, Object)
      * @see #replaceEntry(Object, Object, Object)
      * @see #replaceValuesIf(Predicate, Collection)
      */
@@ -1516,11 +1524,13 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * // multimap now contains: {small=[1, 2, 3], large=[100, 2, 3, 4, 5]}
      * }</pre>
      *
-     * @param entryPredicate the predicate to be applied to each key-value pair in the Multimap
+     * @param entryPredicate the predicate to be applied to each key and its value collection in the Multimap
      * @param oldValue the old value to be replaced in the collections of values associated with the keys that satisfy the predicate
      * @param newValue the new value to replace the old value in the collections of values associated with the keys that satisfy the predicate
      * @return {@code true} if at least one old value was successfully replaced in the collections of values associated with the keys that satisfy the predicate, {@code false} otherwise
-     * @throws IllegalStateException if the new value cannot be added to the collection associated with the specified key that satisfy the predicate
+     * @throws IllegalStateException if a Set-based value collection rejects the new value (e.g. the new value already exists in that collection)
+     * @see #replaceEntriesIf(Predicate, Object, Object)
+     * @see #replaceEntry(Object, Object, Object)
      */
     public boolean replaceEntriesIf(final BiPredicate<? super K, ? super V> entryPredicate, final E oldValue, final E newValue) throws IllegalStateException {
         boolean wasModified = false;
@@ -1561,11 +1571,12 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * }</pre>
      *
      * @param key the key whose entire value collection should be replaced
-     * @param newValues the new values that will replace all existing values
-     * @return {@code true} if the key existed and replacement was performed,
+     * @param newValues the new values that will replace all existing values; if {@code null} or
+     *                  empty, the key is removed from this Multimap
+     * @return {@code true} if the key existed (values were replaced or the key was removed),
      *         {@code false} if the key was not present in the Multimap
-     * @throws IllegalStateException if the new value cannot be added to the collection
-     *         (this is rare but could happen with custom collection implementations)
+     * @throws IllegalStateException declared for API consistency with related replace methods;
+     *         not thrown by this implementation
      * @see #replaceEntry(Object, Object, Object)
      * @see #put(Object, Object)
      */
@@ -1661,9 +1672,10 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * }</pre>
      *
      * @param keyPredicate the predicate to be applied to each key in the Multimap
-     * @param newValues the replacement values; if empty, matching keys are removed
+     * @param newValues the replacement values; if {@code null} or empty, matching keys are removed
      * @return {@code true} if at least one key was updated or removed, {@code false} otherwise
-     * @throws IllegalStateException if the new values cannot be added to the collection for a matching key
+     * @throws IllegalStateException declared for API consistency with related replace methods;
+     *         not thrown by this implementation
      */
     public boolean replaceValuesIf(final Predicate<? super K> keyPredicate, final Collection<? extends E> newValues) throws IllegalStateException {
         boolean wasModified = false;
@@ -1710,10 +1722,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * // multimap now contains: {small=[1, 2, 3], large=[100]}
      * }</pre>
      *
-     * @param entryPredicate the predicate to be applied to each key-value collection in the Multimap
-     * @param newValues the replacement values; if empty, matching keys are removed
+     * @param entryPredicate the predicate to be applied to each key and its value collection in the Multimap
+     * @param newValues the replacement values; if {@code null} or empty, matching keys are removed
      * @return {@code true} if at least one key was updated or removed, {@code false} otherwise
-     * @throws IllegalStateException if the new values cannot be added to the collection for a matching key
+     * @throws IllegalStateException declared for API consistency with related replace methods;
+     *         not thrown by this implementation
      */
     public boolean replaceValuesIf(final BiPredicate<? super K, ? super V> entryPredicate, final Collection<? extends E> newValues)
             throws IllegalStateException {
@@ -1862,8 +1875,16 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * // multimap now contains: {numbers=[2, 4, 6], values=[8, 10]}
      * }</pre>
      *
-     * @param function the function to be applied to each key-value pair in the Multimap; it should return a new collection of values
-     * @throws IllegalStateException if the new collection of values cannot be added to the Multimap
+     * <p>If the function returns the same collection instance that was passed in, that entry is
+     * left unchanged.</p>
+     *
+     * @param function the function applied to each key and its current value collection; it should
+     *                 return the new collection of values for that key (or {@code null}/empty to
+     *                 remove the key)
+     * @throws IllegalStateException if the returned non-empty collection of values cannot be added
+     *         back into the existing value collection for a key
+     * @see #compute(Object, BiFunction)
+     * @see #replaceValuesIf(BiPredicate, Collection)
      */
     public void replaceAll(final BiFunction<? super K, ? super V, ? extends V> function) throws IllegalStateException {
         List<K> keyToRemove = null;
@@ -2127,16 +2148,16 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * });
      * // "numbers" -> [1, 2, 3, 4, 5]
      *
-     * // Custom logic: only keep values > 10
-     * multimap.merge("scores", Arrays.asList(15, 8, 22), (oldVals, newVals) -> {
+     * // Custom logic: only keep values > 10 (key already present, so the function runs)
+     * multimap.merge("numbers", Arrays.asList(15, 8, 22), (oldVals, newVals) -> {
      *     List<Integer> combined = new ArrayList<>(oldVals);
      *     combined.addAll(newVals);
      *     return combined.stream().filter(v -> v > 10).collect(java.util.stream.Collectors.toList());
      * });
      *
-     * // Remove key if function returns empty
-     * multimap.merge("temp", Arrays.asList(1, 2), (old, neu) -> Collections.emptyList());
-     * // "temp" key is removed
+     * // Remove key if the function returns an empty collection
+     * multimap.merge("numbers", Arrays.asList(1, 2), (old, neu) -> Collections.emptyList());
+     * // "numbers" key is removed
      * }</pre>
      *
      * @param <C> the type of the collection containing elements to merge
@@ -2166,8 +2187,10 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         if (newValue == oldValue) {
             ret = oldValue;
         } else if (N.notEmpty(newValue)) {
+            final List<E> copiedValues = new ArrayList<>(newValue);
+
             oldValue.clear();
-            oldValue.addAll(newValue);
+            oldValue.addAll(copiedValues);
 
             ret = oldValue;
         } else {
@@ -2208,8 +2231,8 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *     return oldVals;  // Don't add if below average
      * });
      *
-     * // Replace all if new value meets condition
-     * multimap.merge("threshold", 100, (oldVals, newVal) -> {
+     * // Replace all existing values if the new value meets a condition
+     * multimap.merge("scores", 100, (oldVals, newVal) -> {
      *     if (newVal > 50) {
      *         return Arrays.asList(newVal);   // Replace all
      *     }
@@ -2242,8 +2265,10 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         if (newValue == oldValue) {
             ret = oldValue;
         } else if (N.notEmpty(newValue)) {
+            final List<E> copiedValues = new ArrayList<>(newValue);
+
             oldValue.clear();
-            oldValue.addAll(newValue);
+            oldValue.addAll(copiedValues);
 
             ret = oldValue;
         } else {
@@ -2336,6 +2361,9 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * original.keyCount();                // Still 1 key
      * copy.keyCount();                    // Still 1 key, but different collections
      * }</pre>
+     *
+     * <p><b>Note:</b> the returned instance is a base {@code Multimap} created from this Multimap's
+     * map and value suppliers; subclasses override this method to preserve their concrete type.</p>
      *
      * @return a new Multimap containing the same key-value mappings as this one
      * @see #invert(IntFunction)
@@ -2684,6 +2712,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param action the action to be performed for each key-element pair
      * @throws IllegalArgumentException if action is null
      * @see #allValues()
+     * @see #entryStream()
      */
     @Beta
     public void forEach(final BiConsumer<? super K, ? super E> action) throws IllegalArgumentException {
@@ -2793,9 +2822,10 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * Returns a Set view of the keys contained in this Multimap.
      * The returned set is backed by the Multimap, so changes to the Multimap are reflected in the set.
      *
-     * <p><b>Live View:</b> The returned set is a live view - structural changes to the Multimap
-     * (like adding/removing keys) will be visible in this set, but modifying the set directly
-     * is not supported.</p>
+     * <p><b>Live View:</b> The returned set is the backing map's key set. Structural changes to the
+     * Multimap (adding/removing keys) are visible in this set. Removing a key through this set also
+     * removes the corresponding mapping from the Multimap; however, the set does not support adding
+     * keys (just as a {@link Map#keySet()} does not).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

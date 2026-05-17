@@ -31,8 +31,13 @@ import com.landawn.abacus.util.Strings;
  */
 public class MutableIntType extends NumberType<MutableInt> {
 
+    /** The type name constant for MutableInt type identification, equal to {@code "MutableInt"}. */
     public static final String MUTABLE_INT = MutableInt.class.getSimpleName();
 
+    /**
+     * Constructor for {@code MutableIntType}.
+     * Instances are created by the {@code TypeFactory}.
+     */
     protected MutableIntType() {
         super(MUTABLE_INT);
     }

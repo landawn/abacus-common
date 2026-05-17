@@ -348,9 +348,9 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      *
      * <p>The skip operation is performed lazily - elements are not skipped until
      * the first call to {@link #hasNext()} or {@link #nextByte()} on the returned
-     * iterator. If n is 0 or negative (after validation), this iterator is returned
-     * unchanged. If n is greater than the number of remaining elements, all elements
-     * are consumed and the returned iterator will be empty.</p>
+     * iterator. If n is 0, this iterator is returned unchanged. If n is greater
+     * than the number of remaining elements, all elements are consumed and the
+     * returned iterator will be empty.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -524,7 +524,9 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * }</pre>
      *
      * @return an OptionalByte containing the first element if present, otherwise empty
-     * @deprecated inconsistent data is returned
+     * @deprecated the result is cached on the first call, so subsequent calls return the same
+     *             (potentially stale) value even though the iterator has been advanced; this
+     *             inconsistent behavior makes the method unreliable
      */
     @Deprecated
     public OptionalByte first() {
@@ -783,6 +785,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each element and its index (must not be {@code null})
      * @throws IllegalArgumentException if action is {@code null}
+     * @throws IllegalStateException if the iterator has more than {@code Integer.MAX_VALUE} elements (index overflow)
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntByteConsumer<E> action) throws IllegalArgumentException, E {

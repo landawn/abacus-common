@@ -75,12 +75,12 @@ import com.landawn.abacus.annotation.Beta;
  * <pre>{@code
  * // Creating and populating primitive lists
  * IntList numbers = IntList.of(1, 2, 3, 4, 5);
- * DoubleList prices = DoubleList.create();
+ * DoubleList prices = new DoubleList();
  * prices.addAll(new double[]{19.99, 29.99, 39.99});
  *
  * // High-performance operations without boxing
- * int sum = numbers.sum();
- * double average = prices.average().orElse(0.0);
+ * int sum = numbers.stream().sum();
+ * double average = prices.stream().average().orElse(0.0);
  * int max = numbers.max().orElse(Integer.MIN_VALUE);
  *
  * // Set operations for data analysis
@@ -258,7 +258,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * are valid list elements.</p>
      *
      * @return the internal array backing this list
-     * @deprecated should call {@code toArray()}
+     * @deprecated should call {@link #toArray()} instead
      */
     @Deprecated
     @Beta
@@ -426,7 +426,8 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * }</pre>
      *
      * @param indices the indices of elements to be removed. Null or empty array results in no change.
-     *                Invalid indices (negative or &gt;= size()) are ignored.
+     * @throws IndexOutOfBoundsException if any of the specified indices is out of range
+     *         ({@code index < 0 || index >= size()})
      */
     public abstract void removeAt(int... indices);
 
@@ -1464,10 +1465,11 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * TreeSet<Integer> treeSet = list.toCollection(size -> new TreeSet<>());
      * }</pre>
      *
-     * @param <C> the type of Collection to return
+     * @param <C> the type of {@code Collection} to return, must extend {@code Collection<B>}
      * @param supplier a function that creates a new Collection instance with the given initial capacity.
      *                 The supplier receives the number of elements that will be added.
      * @return a Collection containing all elements from this list as boxed objects
+     * @see #toCollection(int, int, IntFunction)
      */
     public <C extends Collection<B>> C toCollection(final IntFunction<? extends C> supplier) {
         return toCollection(0, size(), supplier);
@@ -1547,7 +1549,8 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * The iterator returns elements in the order they appear in the list, from index 0 to size()-1.
      * The returned iterator does not support the remove() operation by default.
      *
-     * @return an Iterator over the boxed elements of type B in this list
+     * @return an {@code Iterator} over the boxed elements of type {@code B} in this list,
+     *         in list order
      */
     public abstract Iterator<B> iterator();
 

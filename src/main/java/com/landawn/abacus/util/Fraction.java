@@ -121,7 +121,7 @@ import java.math.BigInteger;
  *
  * // Financial calculations (avoiding floating-point errors)
  * Fraction interestRate = Fraction.of(3, 100);   // 3% as exact fraction
- * Fraction principal = Fraction.of(1000);   // $1000
+ * Fraction principal = Fraction.of(1000, 1);   // $1000
  * Fraction interest = principal.multipliedBy(interestRate);   // Exact $30
  *
  * // Mathematical operations
@@ -265,7 +265,7 @@ import java.math.BigInteger;
  *     }
  *
  *     public static void main(String[] args) {
- *         Fraction principal = Fraction.of(1000);   // $1000
+ *         Fraction principal = Fraction.of(1000, 1);   // $1000
  *         Fraction rate = Fraction.of(5, 100);   // 5% as exact fraction
  *         int years = 3;
  *
@@ -1401,9 +1401,9 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * }</pre>
      *
      * @param other the fraction to compare to
-     * @return -1 if this fraction is less than the other, 0 if equal in value,
-     *         +1 if this fraction is greater than the other
-     * @throws ClassCastException if the object is not a {@code Fraction}
+     * @return a negative integer if this fraction is less than the other, zero if equal
+     *         in value, or a positive integer if this fraction is greater than the other
+     * @throws NullPointerException if {@code other} is {@code null}
      */
     @Override
     public int compareTo(final Fraction other) {

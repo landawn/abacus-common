@@ -189,7 +189,8 @@ public final class Enumerations {
      *
      * @param <T> the type of elements
      * @param c the collection to create an Enumeration from
-     * @return an Enumeration over the collection's elements, or empty if collection is null/empty
+     * @return an Enumeration over the collection's elements, or an empty Enumeration if {@code c} is {@code null} or empty
+     * @see #create(Iterator)
      */
     public static <T> Enumeration<T> create(final Collection<? extends T> c) {
         if (N.isEmpty(c)) {
@@ -215,6 +216,7 @@ public final class Enumerations {
      * @param <T> the type of elements
      * @param iter the iterator to wrap as an Enumeration
      * @return an Enumeration that delegates to the specified Iterator
+     * @see #create(Collection)
      */
     public static <T> Enumeration<T> create(final Iterator<? extends T> iter) {
         return new Enumeration<>() {
@@ -245,7 +247,8 @@ public final class Enumerations {
      *
      * @param <T> the type of elements
      * @param a the Enumerations to concatenate
-     * @return a single Enumeration containing all elements from all input Enumerations
+     * @return a single Enumeration containing all elements from all input Enumerations, or an empty Enumeration if {@code a} is {@code null} or empty
+     * @see #concat(Collection)
      */
     @SafeVarargs
     public static <T> Enumeration<T> concat(final Enumeration<? extends T>... a) {
@@ -273,7 +276,8 @@ public final class Enumerations {
      *
      * @param <T> the type of elements
      * @param c a collection of Enumerations to concatenate
-     * @return a single Enumeration containing all elements from all input Enumerations
+     * @return a single Enumeration containing all elements from all input Enumerations, or an empty Enumeration if {@code c} is {@code null} or empty
+     * @see #concat(Enumeration...)
      */
     public static <T> Enumeration<T> concat(final Collection<? extends Enumeration<? extends T>> c) {
         if (N.isEmpty(c)) {
@@ -419,9 +423,11 @@ public final class Enumerations {
      *
      * @param <T> the type of elements
      * @param <C> the type of the Collection to create
-     * @param e the Enumeration to convert, may be null
-     * @param supplier the supplier to create the target collection
-     * @return a collection containing all elements from the Enumeration
+     * @param e the Enumeration to convert, may be {@code null}
+     * @param supplier the supplier to create the target collection; must not be {@code null}
+     * @return the collection created by {@code supplier} containing all elements from the Enumeration; an empty collection if {@code e} is {@code null}
+     * @see #toList(Enumeration)
+     * @see #toSet(Enumeration)
      */
     public static <T, C extends Collection<T>> C toCollection(final Enumeration<? extends T> e, final Supplier<? extends C> supplier) {
         final C c = supplier.get();

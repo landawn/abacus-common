@@ -160,8 +160,14 @@ public final class TypeAttrParser {
      * }</pre>
      *
      * @param attr the type attribute string to parse
-     * @return a TypeAttrParser instance containing the parsed components
-     * @throws StringIndexOutOfBoundsException if the string format is invalid
+     * @return a {@code TypeAttrParser} instance containing the parsed components; the returned
+     *         instance never has {@code null} type-parameter or constructor-parameter arrays
+     * @throws NullPointerException if {@code attr} is {@code null}
+     * @throws StringIndexOutOfBoundsException if the string is malformed (e.g. unbalanced
+     *         angle brackets or parentheses)
+     * @see #getClassName()
+     * @see #getTypeParameters()
+     * @see #getParameters()
      */
     public static TypeAttrParser parse(final String attr) {
         String className = null;
@@ -236,12 +242,18 @@ public final class TypeAttrParser {
      * HashMap<String, Integer> map = TypeAttrParser.newInstance(null, "HashMap<String, Integer>(16, 0.75f)");
      * }</pre>
      *
+     * <p>All parsed type parameters and constructor parameters are passed to the constructor
+     * as {@code String} values. If the class has no such parameters, the no-argument
+     * constructor is used.
+     *
      * @param <T> the type of object to create
-     * @param cls the class to instantiate, or {@code null} to derive from the attribute string
-     * @param attr the type attribute string containing class name and constructor parameters
+     * @param cls the class to instantiate, or {@code null} to derive it from the class name
+     *            in the attribute string
+     * @param attr the type attribute string containing the class name and constructor parameters
      * @return a new instance of the specified class
      * @throws IllegalArgumentException if no suitable constructor is found
-     * @throws RuntimeException if instantiation fails
+     * @throws RuntimeException if the class cannot be resolved or instantiation fails
+     * @see #parse(String)
      */
     @SuppressWarnings("unchecked")
     @Internal
@@ -316,20 +328,22 @@ public final class TypeAttrParser {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Create HashMap with type parameters and constructor args
-     * TypeAttrParser.newInstance(null, "HashMap<String, Integer>(16, 0.75f)");
-     *
-     * // Create custom class with additional explicit arguments
+     * // Create a custom class, prepending one explicit (Class, value) argument pair
+     * // ahead of the type parameters and constructor parameters parsed from attr.
      * TypeAttrParser.newInstance(MyClass.class, "MyClass<A, B>(x, y)", String.class, "extra");
      * }</pre>
      *
      * @param <T> the type of object to create
-     * @param cls the target class to instantiate, or {@code null} to derive from attr
+     * @param cls the target class to instantiate, or {@code null} to derive it from the
+     *            class name in {@code attr}
      * @param attr the type attribute string with optional generics and constructor params
-     * @param args alternating pairs of Class and value (must be even length)
+     * @param args alternating {@code (Class, value)} pairs prepended to the parsed parameters;
+     *             must have an even length, with every even-indexed element being a {@code Class}
      * @return a new instance of the specified class
-     * @throws IllegalArgumentException if no matching constructor is found
-     * @throws RuntimeException if instantiation fails
+     * @throws IllegalArgumentException if {@code args} has an odd length, if an even-indexed
+     *         element of {@code args} is not a {@code Class}, or if no matching constructor is found
+     * @throws RuntimeException if the class cannot be resolved or instantiation fails
+     * @see #parse(String)
      */
     public static <T> T newInstance(Class<?> cls, final String attr, final Object... args) {
         final TypeAttrParser attrResult = TypeAttrParser.parse(attr);

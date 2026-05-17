@@ -192,7 +192,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      *
      * @param <E> the type of exception that the predicate may throw
      * @param predicate the predicate that tests the current value
-     * @param newValue the new value to set if the condition is met
+     * @param newValue the new value to set if the predicate evaluates to {@code true}
      * @return {@code true} if the value was set, {@code false} otherwise
      * @throws E if the predicate throws an exception
      */

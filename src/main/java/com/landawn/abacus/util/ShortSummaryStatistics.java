@@ -74,11 +74,11 @@ public class ShortSummaryStatistics implements ShortConsumer {
      * ShortSummaryStatistics stats = new ShortSummaryStatistics(5, (short)10, (short)50, 150);
      * }</pre>
      *
-     * @param count the count of values
+     * @param count the count of values; must be non-negative
      * @param min the minimum value
      * @param max the maximum value
      * @param sum the sum of all values
-     * @throws IllegalArgumentException if count is negative or minimum is greater than maximum
+     * @throws IllegalArgumentException if {@code count} is negative or {@code min} is greater than {@code max}
      */
     public ShortSummaryStatistics(final long count, final short min, final short max, final long sum) {
         if (count < 0) {
@@ -108,6 +108,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
      * }</pre>
      *
      * @param value the input value to be recorded
+     * @see #combine(ShortSummaryStatistics)
      */
     @Override
     public void accept(final short value) {
@@ -137,6 +138,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
      * }</pre>
      *
      * @param other another {@code ShortSummaryStatistics} to be combined with this one
+     * @see #accept(short)
      */
     public void combine(final ShortSummaryStatistics other) {
         count += other.count;

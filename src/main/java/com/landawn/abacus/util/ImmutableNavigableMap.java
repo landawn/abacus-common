@@ -21,17 +21,17 @@ import java.util.TreeMap;
 import com.landawn.abacus.annotation.Beta;
 
 /**
- * An immutable, thread-safe implementation of the NavigableMap interface.
- * This class extends ImmutableSortedMap and provides additional navigation methods
+ * An immutable implementation of the {@link NavigableMap} interface.
+ * This class extends {@link ImmutableSortedMap} and provides additional navigation methods
  * for accessing entries based on their ordering.
  *
- * <p>A NavigableMap extends SortedMap with navigation methods returning the closest
+ * <p>A {@code NavigableMap} extends {@code SortedMap} with navigation methods returning the closest
  * matches for given search targets. Methods like {@link #lowerEntry}, {@link #floorEntry},
  * {@link #ceilingEntry}, and {@link #higherEntry} return Map.Entry objects associated
  * with keys respectively less than, less than or equal, greater than or equal, and
  * greater than a given key, returning {@code null} if there is no such key.</p>
  *
- * <p>All mutating operations will throw UnsupportedOperationException. The map maintains
+ * <p>All mutating operations throw {@link UnsupportedOperationException}. The map maintains
  * elements in sorted order according to their natural ordering or by a Comparator provided
  * at creation time.</p>
  *
@@ -445,8 +445,10 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
-     * @param map the Map whose mappings are to be placed in the ImmutableNavigableMap
-     * @return an ImmutableNavigableMap containing the same mappings as the provided Map, or the same instance if already an ImmutableNavigableMap
+     * @param map the Map whose mappings are to be placed in the {@code ImmutableNavigableMap}
+     * @return an {@code ImmutableNavigableMap} containing the same mappings as the provided Map, or the same instance if it is already an {@code ImmutableNavigableMap}, or an empty instance if {@code map} is {@code null} or empty
+     * @throws ClassCastException if the keys are not mutually comparable (when the source map is not a {@code SortedMap})
+     * @see #wrap(NavigableMap)
      */
     public static <K, V> ImmutableNavigableMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
         if (map instanceof ImmutableNavigableMap) {
@@ -480,8 +482,9 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *
      * @param <K> the type of keys in the NavigableMap
      * @param <V> the type of values in the NavigableMap
-     * @param navigableMap the NavigableMap to be used as the base for the ImmutableNavigableMap
-     * @return an ImmutableNavigableMap that is backed by the provided NavigableMap
+     * @param navigableMap the NavigableMap to be used as the base for the {@code ImmutableNavigableMap}
+     * @return an {@code ImmutableNavigableMap} backed by the provided NavigableMap, or the same instance if it is already an {@code ImmutableNavigableMap}, or an empty instance if {@code navigableMap} is {@code null}
+     * @see #copyOf(Map)
      */
     @Beta
     public static <K, V> ImmutableNavigableMap<K, V> wrap(final NavigableMap<? extends K, ? extends V> navigableMap) {

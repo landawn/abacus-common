@@ -11125,7 +11125,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the array
      * @param a the array from which to remove the value
      * @param valueToRemove the value to remove
-     * @return a new array with the first occurrence removed, or the input array itself if input is {@code null} or empty
+     * @return a new array with the first occurrence removed; a clone of the array if the value is not found; or the input array itself if it is {@code null} or empty
      * @throws IllegalArgumentException if an illegal argument is provided
      * @see #removeAll(Object[], Object...)
      * @see #removeAt(Object[], int)
@@ -15422,13 +15422,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return 0;
         }
 
-        long sum = 0;
+        int sum = 0;
 
         for (int i = fromIndex; i < toIndex; i++) {
             sum += a[i];
         }
 
-        return Numbers.toIntExact(sum);
+        return sum;
     }
 
     /**
@@ -15481,13 +15481,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return 0;
         }
 
-        long sum = 0;
+        int sum = 0;
 
         for (int i = fromIndex; i < toIndex; i++) {
             sum += a[i];
         }
 
-        return Numbers.toIntExact(sum);
+        return sum;
     }
 
     /**
@@ -15540,13 +15540,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return 0;
         }
 
-        long sum = 0;
+        int sum = 0;
 
         for (int i = fromIndex; i < toIndex; i++) {
             sum += a[i];
         }
 
-        return Numbers.toIntExact(sum);
+        return sum;
     }
 
     /**
@@ -18571,6 +18571,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the ending index (exclusive) of the range
      * @param cmp the Comparator to compare elements; if {@code null}, natural ordering with nulls last is used
      * @return the smallest value within the specified range according to the comparator
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @throws IllegalArgumentException if the collection is {@code null} or the range is empty
      * @see #min(Collection, int, int)
      * @see #max(Collection, int, int, Comparator)
@@ -34960,13 +34961,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * String[] names = {"Alice", "Bob", "Charlie", "Diana"};
      * N.forEach(names, 1, 3, name -> System.out.println(name));
      * // Prints: Bob, Charlie
+     *
+     * // Reverse iteration
+     * N.forEach(names, 3, 1, name -> System.out.println(name));
+     * // Prints: Diana, Charlie
      * }</pre>
      *
      * @param <T> the type of elements in the array
      * @param <E> the type of exception that the action may throw
      * @param a the array to iterate
      * @param fromIndex the start index (inclusive)
-     * @param toIndex the end index (exclusive)
+     * @param toIndex the end index (exclusive); if {@code fromIndex > toIndex}, the elements are iterated in reverse order
      * @param action the action to execute for each element
      * @throws IndexOutOfBoundsException if the range is out of bounds
      * @throws E if the action throws an exception
@@ -35053,13 +35058,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * List<String> names = Arrays.asList("Alice", "Bob", "Charlie", "Diana");
      * N.forEach(names, 1, 3, name -> System.out.println(name));
      * // Prints: Bob, Charlie
+     *
+     * // Reverse iteration
+     * N.forEach(names, 3, 1, name -> System.out.println(name));
+     * // Prints: Diana, Charlie
      * }</pre>
+     *
+     * <p>Note: For {@link java.util.List} with {@link java.util.RandomAccess}, uses optimized indexed access; otherwise uses iterator-based access.
      *
      * @param <T> the type of elements in the collection
      * @param <E> the type of exception that the action may throw
      * @param c the collection to iterate
      * @param fromIndex the start index (inclusive)
-     * @param toIndex the end index (exclusive)
+     * @param toIndex the end index (exclusive); if {@code fromIndex > toIndex}, the elements are iterated in reverse order
      * @param action the action to execute for each element
      * @throws IndexOutOfBoundsException if the range is out of bounds
      * @throws E if the action throws an exception

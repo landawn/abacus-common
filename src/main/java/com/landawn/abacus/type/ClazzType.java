@@ -58,8 +58,8 @@ public class ClazzType extends AbstractType<Class> {
 
     /**
      * Returns the Class object representing the Java type handled by this Type, which is
-     * always {@link Class}. Use {@link #getElementType()}-style accessors on parameterized
-     * Type subclasses to inspect the parameter class.
+     * always {@link Class}. Use {@link #getParameterClass()} to inspect the resolved
+     * type-parameter class of this {@code Clazz<T>}.
      *
      * @return {@link Class}{@code .class}
      */

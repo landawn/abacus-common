@@ -93,11 +93,11 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
      * );
      * }</pre>
      *
-     * @param count the count of values
-     * @param min the minimum value
-     * @param max the maximum value
-     * @param sum the sum of values
-     * @throws IllegalArgumentException if count is negative or minimum is greater than maximum
+     * @param count the count of values; must be non-negative
+     * @param min the minimum value, may be {@code null} if no values were recorded
+     * @param max the maximum value, may be {@code null} if no values were recorded
+     * @param sum the sum of values; if {@code null}, it is treated as {@link BigInteger#ZERO}
+     * @throws IllegalArgumentException if {@code count} is negative, or if {@code min} is greater than {@code max}
      */
     public BigIntegerSummaryStatistics(final long count, final BigInteger min, final BigInteger max, final BigInteger sum) {
         if (count < 0) {
@@ -128,7 +128,8 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
      * stats.accept(new BigInteger("300"));
      * }</pre>
      *
-     * @param value the input value to be recorded
+     * @param value the input value to be recorded, must not be {@code null}
+     * @throws NullPointerException if {@code value} is {@code null}
      */
     @Override
     public void accept(final BigInteger value) {
@@ -265,7 +266,7 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {min=10, max=30, count=3, sum=60, average=20.000000}
+     * {min=10, max=30, count=3, sum=60, average=20}
      * }</pre>
      *
      * @return a string representation of this summary statistics

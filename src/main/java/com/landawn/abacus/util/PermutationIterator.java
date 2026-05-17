@@ -77,8 +77,10 @@ public final class PermutationIterator {
      *
      * @param <T> the type of elements in the collection
      * @param elements the original collection whose elements have to be permuted
-     * @return an iterator containing all the different permutations of the original collection
-     * @throws IllegalArgumentException if elements is null
+     * @return an iterator that lazily yields every permutation of the original collection,
+     *         each as a new {@code List}; for an empty collection it yields a single empty list
+     * @throws IllegalArgumentException if {@code elements} is {@code null}
+     * @see #ordered(Collection)
      */
     public static <T> ObjIterator<List<T>> of(final Collection<T> elements) {
         N.checkArgNotNull(elements, cs.elements);
@@ -193,10 +195,13 @@ public final class PermutationIterator {
      * // Generates: [1,2,3], [1,3,2], [2,1,3], [2,3,1], [3,1,2], [3,2,1]
      * }</pre>
      *
-     * @param <T> the type of elements in the collection
-     * @param elements the original iterable whose elements have to be permuted
-     * @return an iterator containing all the different permutations of the original iterable
-     * @throws IllegalArgumentException if elements is null
+     * @param <T> the type of elements in the collection; must be mutually {@link Comparable}
+     * @param elements the original collection whose elements have to be permuted
+     * @return an iterator that lazily yields every distinct permutation in lexicographical
+     *         order; for an empty collection it yields a single empty list
+     * @throws IllegalArgumentException if {@code elements} is {@code null}
+     * @see #ordered(Collection, Comparator)
+     * @see #of(Collection)
      */
     public static <T extends Comparable<? super T>> ObjIterator<List<T>> ordered(final Collection<T> elements) {
         return ordered(elements, Comparators.naturalOrder());
@@ -229,10 +234,14 @@ public final class PermutationIterator {
      * <p>An empty collection has only one permutation: an empty list.</p>
      *
      * @param <T> the type of elements in the collection
-     * @param elements the original iterable whose elements have to be permuted
-     * @param comparator a comparator for the iterable's elements
-     * @return an iterator containing all the different permutations of the original iterable
-     * @throws IllegalArgumentException if elements or comparator is null
+     * @param elements the original collection whose elements have to be permuted
+     * @param comparator a comparator establishing the lexicographical ordering of the elements
+     * @return an iterator that lazily yields every distinct permutation in the lexicographical
+     *         order defined by {@code comparator}; for an empty collection it yields a single
+     *         empty list
+     * @throws IllegalArgumentException if {@code elements} or {@code comparator} is {@code null}
+     * @see #ordered(Collection)
+     * @see #of(Collection)
      */
     public static <T> ObjIterator<List<T>> ordered(final Collection<T> elements, final Comparator<? super T> comparator) {
         N.checkArgNotNull(elements, cs.elements);

@@ -593,9 +593,10 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * a float that has the identical bit pattern to the bit pattern of the float represented
      * by this object.
      *
-     * <p>For this purpose, two float values are considered to be the same if and only if the
-     * method {@link Float#floatToIntBits(float)} returns the same int value when applied to each.
-     * This definition allows hash tables to operate properly.</p>
+     * <p>The comparison is performed via {@link Float#compare(float, float)}, so two float values
+     * are considered the same if and only if {@code Float.compare} returns {@code 0} for them.
+     * This is equivalent to comparing the values returned by {@link Float#floatToIntBits(float)}
+     * and allows hash tables to operate properly.</p>
      *
      * <p>Note that in most cases, for two instances of class {@code MutableFloat}, {@code f1}
      * and {@code f2}, the value of {@code f1.equals(f2)} is {@code true} if and only if
@@ -606,7 +607,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * {@code equals} method returns {@code true}, even though {@code Float.NaN==Float.NaN}
      * has the value {@code false}.</li>
      * <li>If {@code f1} represents {@code +0.0f} while {@code f2} represents {@code -0.0f},
-     * or vice versa, the {@code equal} test has the value {@code false}, even though
+     * or vice versa, the {@code equals} test has the value {@code false}, even though
      * {@code 0.0f==-0.0f} has the value {@code true}. This allows hashtables to operate properly.</li>
      * </ul>
      *

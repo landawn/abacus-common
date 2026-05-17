@@ -28,10 +28,11 @@ package com.landawn.abacus.util;
  * System.out.println(indexed.val());   // User("John")
  * }</pre>
  *
- * @param <K> key type
- * @param <T> value type
+ * @param <K> the type of the key component
+ * @param <T> the type of the value component
  * @see Keyed
  * @see Wrapper
+ * @see Indexed
  */
 @com.landawn.abacus.annotation.Immutable
 public final class IndexedKeyed<K, T> extends Keyed<K, T> {
@@ -54,12 +55,12 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
     /**
      * Creates an {@code IndexedKeyed} with the specified key, value, and index.
      *
-     * @param key key component (nullable)
-     * @param val value component (nullable)
-     * @param index index component
-     * @param <K> key type
-     * @param <T> value type
-     * @return a new immutable {@code IndexedKeyed}
+     * @param <K> the type of the key component
+     * @param <T> the type of the value component
+     * @param key the key component (can be {@code null})
+     * @param val the value component (can be {@code null})
+     * @param index the index component
+     * @return a new immutable {@code IndexedKeyed} containing the specified key, value, and index
      */
     public static <K, T> IndexedKeyed<K, T> of(final K key, final T val, final int index) {
         return new IndexedKeyed<>(key, val, index);

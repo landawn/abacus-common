@@ -21,18 +21,19 @@ import java.util.function.Predicate;
 import com.landawn.abacus.annotation.Beta;
 
 /**
- * ImmutableCollection is an abstract base class for immutable collection implementations.
- * This class extends AbstractCollection and implements the Immutable interface,
+ * {@code ImmutableCollection} is a base class for immutable collection implementations.
+ * This class extends {@link AbstractCollection} and implements the {@link Immutable} interface,
  * representing a collection that cannot be modified once created.
  *
- * <p>All mutating operations (add, remove, clear, etc.) will throw UnsupportedOperationException.
- * The collection provides read-only access to its elements through standard collection methods
- * like contains(), size(), and iterator().</p>
+ * <p>All mutating operations ({@code add}, {@code remove}, {@code clear}, etc.) throw
+ * {@link UnsupportedOperationException}. The collection provides read-only access to its
+ * elements through standard collection methods like {@link #contains(Object)}, {@link #size()},
+ * and {@link #iterator()}.</p>
  *
  * <p>This class serves as the base for other immutable collection types in the framework,
- * such as ImmutableList and ImmutableSet. It should not be instantiated directly;
- * use the static factory method {@link #wrap(Collection)} or the specific immutable
- * collection types instead.</p>
+ * such as {@link ImmutableList} and {@link ImmutableSet}. It should generally not be
+ * instantiated directly; use the static factory method {@link #wrap(Collection)} or the
+ * specific immutable collection types instead.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code

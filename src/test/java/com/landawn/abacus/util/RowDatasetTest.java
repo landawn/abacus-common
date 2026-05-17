@@ -7388,4 +7388,16 @@ public class RowDatasetTest extends TestBase {
         assertEquals(1, ds.columnCount());
     }
 
+    @Test
+    public void testConstructor_NullFirstColumnThrowsIllegalArgumentException() {
+        // The first column in columnList is null. Per the constructor contract this must be
+        // reported as IllegalArgumentException (not NullPointerException from columnList.get(0).size()).
+        final List<String> cols = new ArrayList<>(Arrays.asList("a", "b"));
+        final List<List<Object>> data = new ArrayList<>();
+        data.add(null);
+        data.add(new ArrayList<>(Arrays.asList(1, 2, 3)));
+
+        assertThrows(IllegalArgumentException.class, () -> new RowDataset(cols, data));
+    }
+
 }

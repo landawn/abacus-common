@@ -102,10 +102,10 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
     /**
      * Parses a string representation and creates a double array.
      * Expected format: [1.5, 2.7, 3.14] or similar numeric value representations.
-     * Returns {@code null} if input is {@code null}, empty array if input is empty or "[]".
+     * Returns {@code null} if input is {@code null}, empty, or blank, or an empty array if input is {@code "[]"}.
      *
      * @param str the string to parse
-     * @return the parsed double array, or {@code null} if input is null
+     * @return the parsed double array, or {@code null} if input is {@code null}, empty, or blank
      */
     @Override
     public double[] valueOf(final String str) {

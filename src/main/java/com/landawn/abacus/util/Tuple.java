@@ -195,7 +195,7 @@ import com.landawn.abacus.util.u.Optional;
  *   <li>Use {@link Pair} or {@link Triple} when semantic meaning is more important than arity flexibility</li>
  *   <li>Document the meaning of each tuple position when not obvious from context</li>
  *   <li>Consider using records for Java 14+ projects when you need named fields</li>
- *   <li>Use tuple conversion methods ({@code toList()}) when you need to process elements uniformly</li>
+ *   <li>Use tuple conversion methods ({@code Tuple.toList(...)}) when you need to process elements uniformly</li>
  *   <li>Leverage the type system to prevent mixing up tuple element order</li>
  * </ul>
  *
@@ -395,6 +395,8 @@ public abstract class Tuple<TP> implements Immutable {
      * @return an array containing all elements of this tuple.
      * @throws ArrayStoreException if the runtime type of the specified array is not a supertype
      *         of the runtime type of every element in this tuple
+     * @throws NullPointerException if the specified array is {@code null}
+     * @see #toArray()
      */
     public abstract <A> A[] toArray(A[] a);
 
@@ -683,8 +685,6 @@ public abstract class Tuple<TP> implements Immutable {
      * for better code readability and maintainability.</p>
      *
      * <p>Example of preferred approach:</p>
-     *
-     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Instead of Tuple8, consider:
      * public record PersonDetails(
@@ -711,7 +711,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @param _7 the seventh element to be contained in the tuple.
      * @param _8 the eighth element to be contained in the tuple.
      * @return a new Tuple8 containing the specified elements.
-     * @deprecated you should consider using {@code class SomeBean/Record class: MyRecord { final T1 propName1, final T2 propName2...}}.
+     * @deprecated you should consider using a dedicated bean or record class, e.g. {@code record MyRecord(T1 propName1, T2 propName2, ...) {}}.
      */
     @Deprecated
     public static <T1, T2, T3, T4, T5, T6, T7, T8> Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> of(final T1 _1, final T2 _2, final T3 _3, final T4 _4, final T5 _5,
@@ -728,7 +728,7 @@ public abstract class Tuple<TP> implements Immutable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Instead of Tuple9, consider creating a dedicated class:
+     * // Creating a Tuple9 (discouraged for production code):
      * Tuple9<String, String, Integer, String, String, String, String, String, String> contact =
      *     Tuple.of("John", "Doe", 35, "john@example.com", "555-1234",
      *              "123 Main St", "Apt 4B", "Boston", "MA");
@@ -760,7 +760,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @param _8 the eighth element to be contained in the tuple.
      * @param _9 the ninth element to be contained in the tuple.
      * @return a new Tuple9 containing the specified elements.
-     * @deprecated you should consider using {@code class SomeBean/Record class: MyRecord { final T1 propName1, final T2 propName2...}}.
+     * @deprecated you should consider using a dedicated bean or record class, e.g. {@code record MyRecord(T1 propName1, T2 propName2, ...) {}}.
      */
     @Deprecated
     public static <T1, T2, T3, T4, T5, T6, T7, T8, T9> Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> of(final T1 _1, final T2 _2, final T3 _3, final T4 _4,
@@ -786,8 +786,9 @@ public abstract class Tuple<TP> implements Immutable {
      *
      * @param <K> the key type of the map entry.
      * @param <V> the value type of the map entry.
-     * @param entry the map entry to convert to a tuple, must not be null.
-     * @return a new Tuple2 containing the key and value from the entry.
+     * @param entry the map entry to convert to a tuple, must not be {@code null}.
+     * @return a new {@code Tuple2} containing the entry's key as {@code _1} and its value as {@code _2}.
+     * @throws NullPointerException if {@code entry} is {@code null}.
      */
     @Beta
     public static <K, V> Tuple2<K, V> from(final Map.Entry<K, V> entry) {
@@ -1164,8 +1165,9 @@ public abstract class Tuple<TP> implements Immutable {
      * @param <T1> the type of the first element in the nested tuple.
      * @param <T2> the type of the second element in the nested tuple.
      * @param <T3> the type of the third element (second element of outer tuple).
-     * @param tp the nested tuple structure to flatten, must not be null.
-     * @return a new Tuple3 containing all three elements in order.
+     * @param tp the nested tuple structure to flatten, must not be {@code null}.
+     * @return a new {@code Tuple3} containing {@code tp._1._1}, {@code tp._1._2} and {@code tp._2} in order.
+     * @throws NullPointerException if {@code tp} or its first element is {@code null}.
      */
     @Beta
     public static <T1, T2, T3> Tuple3<T1, T2, T3> flatten(final Tuple2<Tuple2<T1, T2>, T3> tp) {
@@ -1193,8 +1195,9 @@ public abstract class Tuple<TP> implements Immutable {
      * @param <T3> the type of the third element in the nested tuple.
      * @param <T4> the type of the fourth element (second element of outer tuple).
      * @param <T5> the type of the fifth element (third element of outer tuple).
-     * @param tp the nested tuple structure to flatten, must not be null.
-     * @return a new Tuple5 containing all five elements in order.
+     * @param tp the nested tuple structure to flatten, must not be {@code null}.
+     * @return a new {@code Tuple5} containing {@code tp._1._1}, {@code tp._1._2}, {@code tp._1._3}, {@code tp._2} and {@code tp._3} in order.
+     * @throws NullPointerException if {@code tp} or its first element is {@code null}.
      */
     @Beta
     public static <T1, T2, T3, T4, T5> Tuple5<T1, T2, T3, T4, T5> flatten(final Tuple3<Tuple3<T1, T2, T3>, T4, T5> tp) {
@@ -1289,7 +1292,8 @@ public abstract class Tuple<TP> implements Immutable {
          *
          * @param <A> the component type of the array.
          * @param a the array to use or a template for creating a new array.
-         * @return the same array, potentially with a[0] set to {@code null} if a.length > 0.
+         * @return the same array, potentially with {@code a[0]} set to {@code null} if {@code a.length > 0}.
+         * @throws NullPointerException if the specified array is {@code null}
          */
         @Override
         public <A> A[] toArray(final A[] a) {
@@ -1648,7 +1652,9 @@ public abstract class Tuple<TP> implements Immutable {
          * // pair.left = "key", pair.right = 100
          * }</pre>
          *
-         * @return a new Pair containing the same elements as this tuple.
+         * @return a new {@code Pair} containing the same elements as this tuple.
+         * @see #toImmutableEntry()
+         * @see Pair
          */
         public Pair<T1, T2> toPair() {
             return Pair.of(_1, _2);
@@ -1669,7 +1675,9 @@ public abstract class Tuple<TP> implements Immutable {
          * map.put(entry.getKey(), entry.getValue());
          * }</pre>
          *
-         * @return a new ImmutableEntry containing the same elements as this tuple.
+         * @return a new {@code ImmutableEntry} containing the first element as the key and the second element as the value.
+         * @see #toPair()
+         * @see ImmutableEntry
          */
         public ImmutableEntry<T1, T2> toImmutableEntry() {
             return ImmutableEntry.of(_1, _2);
@@ -1972,7 +1980,8 @@ public abstract class Tuple<TP> implements Immutable {
          * Triple<String, Integer, Boolean> triple = tuple.toTriple();
          * }</pre>
          *
-         * @return a new Triple containing the same elements as this tuple.
+         * @return a new {@code Triple} containing the same elements as this tuple.
+         * @see Triple
          */
         public Triple<T1, T2, T3> toTriple() {
             return Triple.of(_1, _2, _3);

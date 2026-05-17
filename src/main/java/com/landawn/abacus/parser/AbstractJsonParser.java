@@ -281,6 +281,9 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Deserializes a JSON object string and populates the provided map using custom deserialization configuration.
      * This method allows fine-grained control over how map entries are deserialized.
      *
+     * <p>This base-class implementation always throws {@link UnsupportedOperationException}. Concrete
+     * subclasses must override this method to provide actual parsing behavior.</p>
+     *
      * <p>Usage Examples:</p>
      * <pre>{@code
      * Map<String, Object> output = new HashMap<>();
@@ -291,7 +294,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @param source the JSON object string to deserialize; must not be {@code null}
      * @param config the deserialization configuration to use, or {@code null} to use default configuration
      * @param output the map to populate with deserialized key-value pairs; must not be {@code null}
-     * @throws UnsupportedOperationException if this operation is not supported by the implementation
+     * @throws UnsupportedOperationException always thrown by this base-class implementation
      */
     @Override
     public void parse(final String source, final JsonDeserConfig config, final Map<?, ?> output) throws UnsupportedOperationException {

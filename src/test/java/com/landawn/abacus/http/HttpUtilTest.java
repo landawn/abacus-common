@@ -851,6 +851,20 @@ public class HttpUtilTest extends TestBase {
     }
 
     @Test
+    public void testGetCharsetIgnoresCharsetSubstringInOtherParameter() {
+        // A non-charset parameter whose name merely contains "charset" must not be
+        // mistaken for the real charset parameter that follows it.
+        Charset result = HttpUtil.getCharset("text/html; x-charset-hint=foo; charset=ISO-8859-1", Charsets.UTF_8);
+        assertEquals(Charset.forName("ISO-8859-1"), result);
+
+        // "charset" only appearing inside another token (no real charset param) -> default.
+        assertEquals(Charsets.UTF_8, HttpUtil.getCharset("application/x-charset-test", Charsets.UTF_8));
+
+        // Real charset parameter still resolved when preceded by an unrelated token.
+        assertEquals(StandardCharsets.UTF_8, HttpUtil.getCharset("multipart/form-data; mycharsetparam=1; charset=UTF-8"));
+    }
+
+    @Test
     public void testTurnOffCertificateValidation() {
         // This test can only verify that the method doesn't throw an exception
         // Actually testing the certificate validation would require HTTPS connections

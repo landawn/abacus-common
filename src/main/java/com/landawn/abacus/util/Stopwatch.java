@@ -115,6 +115,7 @@ public final class Stopwatch {
      *
      * @param ticker the time source to use for measuring elapsed time
      * @return a new stopwatch instance that is not running
+     * @throws IllegalArgumentException if {@code ticker} is {@code null}
      */
     public static Stopwatch createUnstarted(final Ticker ticker) {
         return new Stopwatch(ticker);
@@ -153,6 +154,7 @@ public final class Stopwatch {
      *
      * @param ticker the time source to use for measuring elapsed time
      * @return a new stopwatch instance that is already running
+     * @throws IllegalArgumentException if {@code ticker} is {@code null}
      */
     public static Stopwatch createStarted(final Ticker ticker) {
         return new Stopwatch(ticker).start();

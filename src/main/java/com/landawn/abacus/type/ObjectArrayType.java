@@ -209,10 +209,11 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
     /**
      * Converts a JSON string representation to an object array.
-     * Handles {@code null}, empty strings, and the special "[]" representation for empty arrays.
+     * Returns {@code null} if the input is {@code null}, empty, or blank, and an empty array
+     * for the special "[]" representation; otherwise parses the string as JSON.
      *
      * @param str the JSON string to parse
-     * @return the parsed array, {@code null} if input is {@code null}, or empty array for empty representations
+     * @return the parsed array, {@code null} if input is {@code null}, empty, or blank, or an empty array for the "[]" representation
      */
     @Override
     public T[] valueOf(final String str) {

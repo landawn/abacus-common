@@ -159,7 +159,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Object Merging Strategies:</b>
  * <ul>
- *   <li><b>Default Merge:</b> Source values overwrite target values unconditionally</li>
+ *   <li><b>Default Merge:</b> Source values overwrite target values unless the source value is {@code null}</li>
  *   <li><b>Custom Functions:</b> User-defined merge logic with BiFunction parameters</li>
  *   <li><b>Partial Merge:</b> Merge only selected properties</li>
  * </ul>
@@ -2261,8 +2261,8 @@ public final class Beans {
      * String formal3 = Beans.normalizePropName("class");        // Returns "clazz"
      * }</pre>
      *
-     * @param str the property name to be formalized.
-     * @return the formalized property name.
+     * @param str the property name to be normalized.
+     * @return the normalized property name.
      */
     public static String normalizePropName(final String str) {
         if (Strings.isEmpty(str)) {
@@ -2388,7 +2388,7 @@ public final class Beans {
      *   <li>{@code "first_name"} → {@code "firstName"}</li>
      *   <li>{@code "USER_NAME"} → {@code "userName"}</li>
      *   <li>{@code "user-name"} → {@code "userName"}</li>
-     *   <li>{@code "userName"} → {@code "username"} (already camelCase but re-processed)</li>
+     *   <li>{@code "userName"} → {@code "userName"} (already camelCase, unchanged)</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2411,8 +2411,8 @@ public final class Beans {
      * <p><b>Notes:</b></p>
      * <ul>
      *   <li>If the map is {@code null} or empty, this method returns immediately without any action.</li>
-     *   <li>Keys that are already in camelCase may still be modified (e.g., {@code "userName"} becomes
-     *       {@code "username"} if no delimiter is found but the string is re-lowercased).</li>
+     *   <li>Keys that are already in camelCase (containing no {@code _}, {@code -}, or whitespace delimiter)
+     *       are left unchanged.</li>
      *   <li>If multiple keys convert to the same camelCase key, an {@link IllegalStateException} is thrown
      *       before any modifications are made (e.g., {@code "user_name"} and {@code "USER_NAME"} both
      *       convert to {@code "userName"}).</li>
@@ -2892,7 +2892,7 @@ public final class Beans {
      * user.setAge(25);
      *
      * // Using TreeMap to get sorted properties
-     * TreeMap<String, Object> sortedMap = Beans.beanToMap(user, TreeMap::new);
+     * TreeMap<String, Object> sortedMap = Beans.beanToMap(user, size -> new TreeMap<>());
      * // sortedMap: {age=25, name=John} (sorted by key)
      *
      * // Using HashMap for better performance
@@ -2959,7 +2959,7 @@ public final class Beans {
      *
      * // Only include name and age, using TreeMap
      * Collection<String> selectedProps = Arrays.asList("name", "age");
-     * TreeMap<String, Object> sortedMap = Beans.beanToMap(user, selectedProps, TreeMap::new);
+     * TreeMap<String, Object> sortedMap = Beans.beanToMap(user, selectedProps, size -> new TreeMap<>());
      * // sortedMap: {age=25, name=John} (sorted by key)
      * }</pre>
      *
@@ -3225,7 +3225,7 @@ public final class Beans {
      * Set<String> ignoredProps = new HashSet<>(Arrays.asList("password"));
      *
      * // Create TreeMap ignoring null properties
-     * TreeMap<String, Object> sortedMap = Beans.beanToMap(user, true, ignoredProps, TreeMap::new);
+     * TreeMap<String, Object> sortedMap = Beans.beanToMap(user, true, ignoredProps, size -> new TreeMap<>());
      * // sortedMap: {email=john@example.com, name=John} (sorted by key)
      * }</pre>
      *
@@ -3294,7 +3294,7 @@ public final class Beans {
      *
      * // Create custom map with snake_case keys, ignoring nulls and password
      * TreeMap<String, Object> customMap = Beans.beanToMap(user, true, ignoredProps,
-     *     NamingPolicy.SNAKE_CASE, TreeMap::new);
+     *     NamingPolicy.SNAKE_CASE, size -> new TreeMap<>());
      * // customMap: {first_name=John, last_name=Doe}
      * }</pre>
      *
@@ -3313,7 +3313,7 @@ public final class Beans {
         }
 
         final int beanPropNameSize = getPropNameList(bean.getClass()).size();
-        final int initCapacity = beanPropNameSize - N.size(ignoredPropNames);
+        final int initCapacity = N.max(0, beanPropNameSize - N.size(ignoredPropNames));
 
         final M output = mapSupplier.apply(initCapacity);
 
@@ -3503,7 +3503,7 @@ public final class Beans {
      * user.setAddress(address);
      *
      * // Using TreeMap for sorted keys
-     * TreeMap<String, Object> sortedDeepMap = Beans.deepBeanToMap(user, TreeMap::new);
+     * TreeMap<String, Object> sortedDeepMap = Beans.deepBeanToMap(user, size -> new TreeMap<>());
      * // sortedDeepMap: {
      * //   address={city=New York},
      * //   name=John
@@ -3931,7 +3931,7 @@ public final class Beans {
         }
 
         final int beanPropNameSize = getPropNameList(bean.getClass()).size();
-        final int initCapacity = beanPropNameSize - N.size(ignoredPropNames);
+        final int initCapacity = N.max(0, beanPropNameSize - N.size(ignoredPropNames));
 
         final M output = mapSupplier.apply(initCapacity);
 
@@ -4512,7 +4512,7 @@ public final class Beans {
         }
 
         final int beanPropNameSize = getPropNameList(bean.getClass()).size();
-        final int initCapacity = beanPropNameSize - N.size(ignoredPropNames);
+        final int initCapacity = N.max(0, beanPropNameSize - N.size(ignoredPropNames));
 
         final M output = mapSupplier.apply(initCapacity);
 
@@ -5203,8 +5203,9 @@ public final class Beans {
      * Merges properties from the source bean into the target bean.
      *
      * <p>This method copies all properties from the source bean to the target bean.
-     * Properties in the target bean are overwritten with values from the source bean.
-     * Unlike {@code copy} methods which create new instances, this modifies the existing target bean.</p>
+     * The default merge strategy keeps the source value unless it is {@code null}, in which case
+     * the existing target value is retained. Unlike {@code copy} methods which create new
+     * instances, this modifies the existing target bean.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6248,7 +6249,7 @@ public final class Beans {
      * @param bean1 the first bean to compare; must not be null
      * @param bean2 the second bean to compare; must not be null
      * @return {@code true} if all the common properties of the beans are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if no common property is found
+     * @throws IllegalArgumentException if either bean is {@code null}, if either bean is not a valid bean class, or if no common property is found
      */
     public static boolean equalsByCommonProps(@NotNull final Object bean1, @NotNull final Object bean2) throws IllegalArgumentException {
         N.checkArgNotNull(bean1);
@@ -6285,7 +6286,7 @@ public final class Beans {
      * @param bean2 the second bean to compare; must not be null
      * @param propNamesToCompare the collection of property names to compare; must not be {@code null} or empty
      * @return {@code true} if all the specified properties of the beans are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if the {@code propNamesToCompare} is empty
+     * @throws IllegalArgumentException if {@code propNamesToCompare} is {@code null} or empty
      */
     public static boolean equalsByProps(final Object bean1, final Object bean2, final Collection<String> propNamesToCompare) throws IllegalArgumentException {
         N.checkArgNotEmpty(propNamesToCompare, cs.propNamesToCompare);
@@ -6313,9 +6314,9 @@ public final class Beans {
      *
      * @param bean1 the first bean to compare; must not be null
      * @param bean2 the second bean to compare; must not be null
-     * @param propNamesToCompare the collection of property names to compare, which may be null
+     * @param propNamesToCompare the collection of property names to compare; must not be {@code null}
      * @return a negative integer, zero, or a positive integer as the first bean is less than, equal to, or greater than the second bean
-     * @throws IllegalArgumentException if any of the arguments are null
+     * @throws IllegalArgumentException if any of the arguments are {@code null}, or if either bean is not a valid bean class, or if a specified property is not found in either bean class
      * @deprecated calling {@code getPropValue} by reflection APIs during comparison or sorting may have a huge impact on performance. Use {@link ComparisonBuilder} instead.
      * @see Builder#compare(Object, Object, Comparator)
      * @see ComparisonBuilder

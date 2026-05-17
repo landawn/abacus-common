@@ -53,7 +53,7 @@ public interface LongConsumer extends Throwables.LongConsumer<RuntimeException>,
      * LongStream.range(1, 5).forEach(printer);
      * }</pre>
      *
-     * @param value the input argument
+     * @param value the {@code long} input argument
      */
     @Override
     void accept(long value);

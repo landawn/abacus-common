@@ -51,8 +51,8 @@ public interface IntToFloatFunction {
      * float result = percent.applyAsFloat(25);   // 0.25f
      * }</pre>
      *
-     * @param value the function argument, an int value to be converted to float
-     * @return the function result as a float value
+     * @param value the function argument, an int value to be converted to float.
+     * @return the function result as a float value.
      */
     float applyAsFloat(int value);
 }

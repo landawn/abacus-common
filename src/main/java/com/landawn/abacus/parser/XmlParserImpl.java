@@ -127,7 +127,7 @@ final class XmlParserImpl extends AbstractXmlParser {
     /**
      * {@inheritDoc}
      *
-     * <p>This implementation uses StAX (Streaming API for XML) for serialization, providing efficient
+     * <p>This implementation streams the XML output through a buffered writer, providing efficient
      * memory usage and good performance for objects of any size. The serialization process converts
      * Java objects to XML string format following the configured serialization settings.</p>
      *
@@ -175,7 +175,7 @@ final class XmlParserImpl extends AbstractXmlParser {
     /**
      * {@inheritDoc}
      *
-     * <p>This implementation writes the XML output to a file using StAX serialization. The file is created
+     * <p>This implementation writes the XML output to a file. The file is created
      * if it doesn't exist, and the contents are flushed and properly closed after serialization.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -217,7 +217,7 @@ final class XmlParserImpl extends AbstractXmlParser {
     /**
      * {@inheritDoc}
      *
-     * <p>This implementation writes the XML output to an output stream using StAX serialization. The stream
+     * <p>This implementation writes the XML output to an output stream. The stream
      * is flushed after serialization but is not closed, allowing the caller to manage the stream lifecycle.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -255,7 +255,7 @@ final class XmlParserImpl extends AbstractXmlParser {
     /**
      * {@inheritDoc}
      *
-     * <p>This implementation writes the XML output to a writer using StAX serialization. The writer
+     * <p>This implementation writes the XML output to a writer. The writer
      * is flushed after serialization but is not closed, allowing the caller to manage the writer lifecycle.
      * If the provided writer is already a {@link BufferedXmlWriter}, it is used directly for optimal performance.</p>
      *
@@ -374,6 +374,19 @@ final class XmlParserImpl extends AbstractXmlParser {
         }
     }
 
+    /**
+     * Writes a bean object to XML, emitting the enclosing element and serializing each
+     * serializable property.
+     *
+     * @param obj the bean to write
+     * @param config the serialization configuration
+     * @param indentation the current indentation string for pretty printing, or {@code null}
+     * @param serializedObjects set of already serialized objects for circular reference detection, or {@code null}
+     * @param type the type information for the bean
+     * @param bw the buffered XML writer
+     * @throws IOException if an I/O error occurs
+     * @throws ParsingException if no serializable property is found in the bean class
+     */
     protected void writeBean(final Object obj, final XmlSerConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXmlWriter bw) throws IOException {
         //    if (hasCircularReference(obj, serializedObjects, config, bw)) {
@@ -431,6 +444,17 @@ final class XmlParserImpl extends AbstractXmlParser {
         }
     }
 
+    /**
+     * Writes the serializable properties of a bean object to XML.
+     *
+     * @param obj the bean whose properties are to be written
+     * @param config the serialization configuration
+     * @param propIndentation the indentation string applied to each property, or {@code null}
+     * @param serializedObjects set of already serialized objects for circular reference detection, or {@code null}
+     * @param type the type information for the bean
+     * @param bw the buffered XML writer
+     * @throws IOException if an I/O error occurs
+     */
     protected void writeProperties(final Object obj, final XmlSerConfig config, final String propIndentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXmlWriter bw) throws IOException {
         //    if (hasCircularReference(obj, serializedObjects, config, bw)) {
@@ -527,6 +551,18 @@ final class XmlParserImpl extends AbstractXmlParser {
         }
     }
 
+    /**
+     * Writes a map to XML, emitting an enclosing map element and a child element for each entry
+     * keyed by the entry's string key.
+     *
+     * @param m the map to write
+     * @param config the serialization configuration
+     * @param indentation the current indentation string for pretty printing, or {@code null}
+     * @param serializedObjects set of already serialized objects for circular reference detection, or {@code null}
+     * @param type the type information for the map
+     * @param bw the buffered XML writer
+     * @throws IOException if an I/O error occurs
+     */
     protected void writeMap(final Map<?, ?> m, final XmlSerConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXmlWriter bw) throws IOException {
         //    if (hasCircularReference(m, serializedObjects, config, bw)) {
@@ -619,6 +655,18 @@ final class XmlParserImpl extends AbstractXmlParser {
         bw.write(XmlConstants.MAP_ELE_END);
     }
 
+    /**
+     * Writes a {@link MapEntity} to XML, emitting an element named after the entity and a child
+     * element for each of its properties.
+     *
+     * @param mapEntity the map entity to write
+     * @param config the serialization configuration
+     * @param indentation the current indentation string for pretty printing, or {@code null}
+     * @param serializedObjects set of already serialized objects for circular reference detection, or {@code null}
+     * @param type the type information for the map entity
+     * @param bw the buffered XML writer
+     * @throws IOException if an I/O error occurs
+     */
     protected void writeMapEntity(final MapEntity mapEntity, final XmlSerConfig config, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedXmlWriter bw) throws IOException {
         //    if (hasCircularReference(mapEntity, serializedObjects, config, bw)) {
@@ -714,6 +762,19 @@ final class XmlParserImpl extends AbstractXmlParser {
         bw.write(SK._GREATER_THAN);
     }
 
+    /**
+     * Writes an object array to XML, emitting an enclosing array element. If all elements are
+     * serializable, the array is written as a JSON payload; otherwise each element is written
+     * recursively.
+     *
+     * @param obj the array to write
+     * @param config the serialization configuration
+     * @param indentation the current indentation string for pretty printing, or {@code null}
+     * @param serializedObjects set of already serialized objects for circular reference detection, or {@code null}
+     * @param type the type information for the array
+     * @param bw the buffered XML writer
+     * @throws IOException if an I/O error occurs
+     */
     protected void writeArray(final Object obj, final XmlSerConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXmlWriter bw) throws IOException {
         //    if (hasCircularReference(obj, serializedObjects, config, bw)) {
@@ -766,6 +827,19 @@ final class XmlParserImpl extends AbstractXmlParser {
         bw.write(XmlConstants.ARRAY_ELE_END);
     }
 
+    /**
+     * Writes a collection to XML, emitting an enclosing element appropriate to the collection
+     * kind (list, set, or generic collection). If all elements are serializable, the collection
+     * is written as a JSON payload; otherwise each element is written recursively.
+     *
+     * @param c the collection to write
+     * @param config the serialization configuration
+     * @param indentation the current indentation string for pretty printing, or {@code null}
+     * @param serializedObjects set of already serialized objects for circular reference detection, or {@code null}
+     * @param type the type information for the collection
+     * @param bw the buffered XML writer
+     * @throws IOException if an I/O error occurs
+     */
     protected void writeCollection(final Collection<?> c, final XmlSerConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXmlWriter bw) throws IOException {
         //    if (hasCircularReference(c, serializedObjects, config, bw)) {
@@ -1470,6 +1544,22 @@ final class XmlParserImpl extends AbstractXmlParser {
         return readByDOMParser(source, config, targetType);
     }
 
+    /**
+     * Reads and deserializes XML from an input stream using either StAX or DOM parsing,
+     * resolving the target type from {@code targetType} or, when that is {@code null}, by
+     * looking up the root element name in {@code nodeTypes}.
+     *
+     * @param <T> the type of the target object
+     * @param source the input stream containing XML data
+     * @param config the deserialization configuration (may be {@code null} for default behavior)
+     * @param nodeTypes mapping of XML element names to their corresponding types, used to
+     *        resolve the target type when {@code targetType} is {@code null}
+     * @param targetType the explicit target type, or {@code null} to resolve it via {@code nodeTypes}
+     * @return the deserialized object of type {@code T}
+     * @throws UncheckedIOException if an I/O error occurs while reading the stream
+     * @throws ParsingException if no target type can be resolved, the parser type is unsupported,
+     *         or the XML is malformed
+     */
     @SuppressWarnings("unchecked")
     protected <T> T read(final InputStream source, final XmlDeserConfig config, final Map<String, Type<?>> nodeTypes, Type<? extends T> targetType) {
         final XmlDeserConfig configToUse = check(config);
@@ -1555,6 +1645,22 @@ final class XmlParserImpl extends AbstractXmlParser {
         }
     }
 
+    /**
+     * Reads and deserializes XML from a reader using either StAX or DOM parsing,
+     * resolving the target type from {@code targetType} or, when that is {@code null}, by
+     * looking up the root element name in {@code nodeTypes}.
+     *
+     * @param <T> the type of the target object
+     * @param source the reader containing XML data
+     * @param config the deserialization configuration (may be {@code null} for default behavior)
+     * @param nodeTypes mapping of XML element names to their corresponding types, used to
+     *        resolve the target type when {@code targetType} is {@code null}
+     * @param targetType the explicit target type, or {@code null} to resolve it via {@code nodeTypes}
+     * @return the deserialized object of type {@code T}
+     * @throws UncheckedIOException if an I/O error occurs while reading the source
+     * @throws ParsingException if no target type can be resolved, the parser type is unsupported,
+     *         or the XML is malformed
+     */
     @SuppressWarnings("unchecked")
     protected <T> T read(final Reader source, final XmlDeserConfig config, final Map<String, Type<?>> nodeTypes, Type<? extends T> targetType) {
         final XmlDeserConfig configToUse = check(config);
@@ -1640,6 +1746,16 @@ final class XmlParserImpl extends AbstractXmlParser {
         }
     }
 
+    /**
+     * Deserializes an object from the current position of an XML stream reader into the given target type.
+     *
+     * @param <T> the type of the target object
+     * @param xmlReader the XML stream reader positioned at the element to deserialize
+     * @param config the deserialization configuration
+     * @param targetType the type of the object to create
+     * @return the deserialized object of type {@code T}
+     * @throws XMLStreamException if an error occurs while reading the XML stream
+     */
     protected <T> T readByStreamParser(final XMLStreamReader xmlReader, final XmlDeserConfig config, final Type<? extends T> targetType)
             throws XMLStreamException {
         return readByStreamParser(xmlReader, config, null, null, targetType);
@@ -1667,6 +1783,20 @@ final class XmlParserImpl extends AbstractXmlParser {
         }
     }
 
+    /**
+     * Deserializes an object from the current position of an XML stream reader, tracking XML
+     * nesting depth to guard against stack-overflow on hostile input.
+     *
+     * @param <T> the type of the target object
+     * @param xmlReader the XML stream reader positioned at the element to deserialize
+     * @param config the deserialization configuration
+     * @param propInfo the property metadata for the value being read, or {@code null} at the root
+     * @param propType the declared property type, or {@code null} if not applicable
+     * @param targetType the type of the object to create
+     * @return the deserialized object of type {@code T}
+     * @throws XMLStreamException if an error occurs while reading the XML stream
+     * @throws ParsingException if the XML nesting depth exceeds the allowed maximum
+     */
     @SuppressWarnings({})
     protected <T> T readByStreamParser(final XMLStreamReader xmlReader, final XmlDeserConfig config, PropInfo propInfo, Type<?> propType, Type<?> targetType)
             throws XMLStreamException {
@@ -2428,12 +2558,39 @@ final class XmlParserImpl extends AbstractXmlParser {
         }
     }
 
+    /**
+     * Deserializes an object from the given DOM node into the specified target type using DOM-based parsing.
+     *
+     * @param <T> the type of the target object
+     * @param node the DOM node to deserialize
+     * @param config the deserialization configuration (may be {@code null} for default behavior)
+     * @param targetType the type of the object to create
+     * @return the deserialized object of type {@code T}
+     * @throws ParsingException if the XML structure doesn't match the target type
+     */
     protected <T> T readByDOMParser(final Node node, final XmlDeserConfig config, final Type<? extends T> targetType) {
         final XmlDeserConfig configToUse = check(config);
 
         return readByDOMParser(node, configToUse, configToUse.getElementType(), false, false, false, true, targetType);
     }
 
+    /**
+     * Deserializes an object from the given DOM node, tracking XML nesting depth to guard
+     * against stack-overflow on hostile input.
+     *
+     * @param <T> the type of the target object
+     * @param node the DOM node to deserialize
+     * @param config the deserialization configuration
+     * @param propType the declared property type for the value being read, or {@code null}
+     * @param checkedAttr whether the node's type attribute has already been resolved by the caller
+     * @param isTagByPropertyName whether elements are named after bean property names
+     * @param ignoreTypeInfo whether to ignore any type attribute present on the node
+     * @param isFirstCall whether this is the top-level (root) deserialization call
+     * @param inputType the type of the object to create
+     * @return the deserialized object of type {@code T}
+     * @throws ParsingException if the XML nesting depth exceeds the allowed maximum or the
+     *         XML structure doesn't match the target type
+     */
     @SuppressWarnings({ "unchecked" })
     protected <T> T readByDOMParser(final Node node, final XmlDeserConfig config, Type<?> propType, boolean checkedAttr, boolean isTagByPropertyName,
             boolean ignoreTypeInfo, final boolean isFirstCall, Type<? extends T> inputType) {
@@ -2886,6 +3043,16 @@ final class XmlParserImpl extends AbstractXmlParser {
         return propValue;
     }
 
+    /**
+     * Determines the {@link SerializationType} to use when deserializing the given type.
+     *
+     * <p>For serializable object-array types this returns {@link SerializationType#ARRAY}, and
+     * for serializable collection types it returns {@link SerializationType#COLLECTION};
+     * otherwise the type's own serialization type is returned.</p>
+     *
+     * @param type the target type being deserialized
+     * @return the serialization type to use for deserialization
+     */
     protected SerializationType getDeserializationType(final Type<?> type) {
         SerializationType serializationType = type.serializationType();
 

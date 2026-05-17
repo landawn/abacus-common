@@ -72,6 +72,8 @@ public final class StringWriter extends AppendableWriter {
      * }</pre>
      *
      * @param initialSize the initial capacity of the internal StringBuilder
+     * @see #StringWriter()
+     * @see #StringWriter(StringBuilder)
      */
     public StringWriter(final int initialSize) {
         this(new StringBuilder(initialSize));
@@ -91,6 +93,7 @@ public final class StringWriter extends AppendableWriter {
      * }</pre>
      *
      * @param sb the StringBuilder to use as the internal buffer
+     * @see #stringBuilder()
      */
     public StringWriter(final StringBuilder sb) {
         super(sb);

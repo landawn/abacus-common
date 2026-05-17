@@ -31,9 +31,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * double value = p.doubleValue();   // Returns 0.95
  * String str = p.toString();   // Returns "95%"
  *
- * // Get a range of percentages
+ * // Get a range of percentages (end exclusive): contains _90 through _98
  * ImmutableSet<Percentage> highPercentages = Percentage.range(Percentage._90, Percentage._99);
  * }</pre>
+ *
+ * @see #range(Percentage, Percentage)
+ * @see #rangeClosed(Percentage, Percentage)
  */
 public enum Percentage {
 

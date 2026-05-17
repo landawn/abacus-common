@@ -198,7 +198,7 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  *   <li><b>UncheckedIOException:</b> Wraps IOException from Appendable operations</li>
  *   <li><b>IllegalArgumentException:</b> Thrown for invalid parameters or malformed input</li>
  *   <li><b>NullPointerException:</b> Appropriate null checks with descriptive messages</li>
- *   <li><b>UnsupportedEncodingException:</b> Handled gracefully with fallback to platform default</li>
+ *   <li><b>Charset Fallback:</b> A {@code null} charset is handled gracefully with a fallback to the platform default charset</li>
  * </ul>
  *
  * <p><b>RFC Compliance and Standards:</b>
@@ -468,6 +468,7 @@ public final class URLEncodedUtil {
      *
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
      * @return a URL-encoded query string (e.g., "name=John+Doe&amp;age=30"); returns empty string if {@code parameters} is {@code null}.
+     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
      * @see #encode(Object, Charset)
      * @see #encode(Object, Charset, NamingPolicy)
      * @see URLEncoder#encode(String, String)
@@ -498,6 +499,7 @@ public final class URLEncodedUtil {
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
      * @param charset the charset to use for percent-encoding; if {@code null}, defaults to the platform default charset.
      * @return a URL-encoded query string; returns empty string if {@code parameters} is {@code null}.
+     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
      * @see #encode(Object)
      * @see #encode(Object, Charset, NamingPolicy)
      * @see URLEncoder#encode(String, Charset)
@@ -531,6 +533,7 @@ public final class URLEncodedUtil {
      * @param namingPolicy the naming policy to transform property/key names (e.g., CAMEL_CASE, SCREAMING_SNAKE_CASE);
      *                     if {@code null} or NO_CHANGE, names are not transformed.
      * @return a URL-encoded query string; returns empty string if {@code parameters} is {@code null}.
+     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
      * @see #encode(Object, Charset)
      */
     public static String encode(final Object parameters, final Charset charset, final NamingPolicy namingPolicy) {
@@ -550,7 +553,7 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Encodes parameters and appends them to a URL as a query string using the default charset (UTF-8).
+     * Encodes parameters and appends them to a URL as a query string using the platform default charset ({@link Charset#defaultCharset()}).
      * <p>
      * This method takes a base URL and parameters, encodes the parameters according to
      * application/x-www-form-urlencoded rules, and appends them to the URL with a '?' separator.
@@ -567,7 +570,8 @@ public final class URLEncodedUtil {
      * @param url the base URL to which the query string will be appended (e.g., "http://example.com/path").
      * @param parameters the parameters to encode and append (Map, bean, Object array pairs, or String); may be {@code null}.
      * @return the URL with the encoded query string appended (e.g., "http://example.com/path?name=value");
-     *         returns the original URL if {@code parameters} is {@code null} or empty.
+     *         returns the original URL if {@code parameters} is {@code null} or an empty {@code Map}.
+     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
      * @see #encode(String, Object, Charset)
      * @see #encode(Object)
      */
@@ -594,7 +598,8 @@ public final class URLEncodedUtil {
      * @param parameters the parameters to encode and append (Map, bean, Object array pairs, or String); may be {@code null}.
      * @param charset the charset to use for percent-encoding; if {@code null}, defaults to the platform default charset.
      * @return the URL with the encoded query string appended;
-     *         returns the original URL if {@code parameters} is {@code null} or empty.
+     *         returns the original URL if {@code parameters} is {@code null} or an empty {@code Map}.
+     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
      * @see #encode(String, Object)
      * @see #encode(String, Object, Charset, NamingPolicy)
      */
@@ -625,7 +630,8 @@ public final class URLEncodedUtil {
      * @param namingPolicy the naming policy to transform property/key names (e.g., CAMEL_CASE, SCREAMING_SNAKE_CASE);
      *                     if {@code null} or NO_CHANGE, names are not transformed.
      * @return the URL with the encoded query string appended;
-     *         returns the original URL if {@code parameters} is {@code null} or empty.
+     *         returns the original URL if {@code parameters} is {@code null} or an empty {@code Map}.
+     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
      * @see #encode(String, Object, Charset)
      */
     @SuppressWarnings("rawtypes")
@@ -677,6 +683,7 @@ public final class URLEncodedUtil {
      *
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
      * @param output the {@code Appendable} (e.g., {@code StringBuilder}, {@code Writer}) to which the encoded query string will be appended.
+     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
      * @throws UncheckedIOException if an I/O error occurs while appending to the output.
      * @see #encode(Object, Charset, Appendable)
      */
@@ -702,6 +709,7 @@ public final class URLEncodedUtil {
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
      * @param charset the charset to use for percent-encoding; if {@code null}, defaults to the platform default charset.
      * @param output the {@code Appendable} to which the encoded query string will be appended.
+     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
      * @throws UncheckedIOException if an I/O error occurs while appending to the output.
      * @see #encode(Object, Charset, NamingPolicy, Appendable)
      */
@@ -1129,9 +1137,10 @@ public final class URLEncodedUtil {
      *
      * @param <T> the type of the object to decode into (JavaBean or Map).
      * @param urlQuery the URL query string to decode, may be {@code null} or empty.
-     * @param targetType the class of the bean or Map to create and populate.
+     * @param targetType the class of the bean or Map to create and populate; must not be {@code null}.
      * @return an instance of type T populated with the decoded parameter values;
      *         returns an empty instance if {@code urlQuery} is {@code null} or empty.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null} or not a supported bean/Map type.
      * @see #decode(String, Charset, Class)
      */
     public static <T> T decode(final String urlQuery, final Class<? extends T> targetType) {
@@ -1164,9 +1173,10 @@ public final class URLEncodedUtil {
      * @param <T> the type of the object to decode into (JavaBean or Map).
      * @param urlQuery the URL query string to decode, may be {@code null} or empty.
      * @param charset the charset to use for decoding percent-encoded characters; if {@code null}, defaults to the platform default charset.
-     * @param targetType the class of the bean or Map to create and populate.
+     * @param targetType the class of the bean or Map to create and populate; must not be {@code null}.
      * @return an instance of type T populated with the decoded parameter values;
      *         returns an empty instance if {@code urlQuery} is {@code null} or empty.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null} or not a supported bean/Map type.
      * @see #decode(String, Class)
      */
     @SuppressWarnings("rawtypes")
@@ -1245,9 +1255,10 @@ public final class URLEncodedUtil {
      * @param <T> the type of the bean to create.
      * @param parameters the map of parameters to convert, where keys are property names and values are String arrays;
      *                   may be {@code null} or empty.
-     * @param targetType the class of the bean to create and populate.
+     * @param targetType the class of the bean to create and populate; must not be {@code null}.
      * @return an instance of type T with properties populated from the parameter map;
      *         returns an empty instance if {@code parameters} is {@code null} or empty.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null} or not a supported bean type.
      */
     public static <T> T convertToBean(final Map<String, String[]> parameters, final Class<? extends T> targetType) {
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType);

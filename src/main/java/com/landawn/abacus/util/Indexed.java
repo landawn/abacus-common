@@ -158,7 +158,7 @@ package com.landawn.abacus.util;
  *     Indexed.of("a", 0L),
  *     Indexed.of("b", 1L),
  *     Indexed.of("c", 2L)
- * ).collect(Collectors.toMap(Indexed::index, Indexed::value));
+ * ).collect(Collectors.toMap(Indexed::longIndex, Indexed::value));
  *
  * // Finding first occurrence matching a predicate
  * Optional<Indexed<String>> firstMatch = indexedList.stream()
@@ -170,7 +170,7 @@ package com.landawn.abacus.util;
  * Map<String, List<Long>> valueToIndices = indexedList.stream()
  *     .collect(Collectors.groupingBy(
  *         Indexed::value,
- *         Collectors.mapping(Indexed::index, Collectors.toList())
+ *         Collectors.mapping(Indexed::longIndex, Collectors.toList())
  *     ));
  * }</pre>
  *

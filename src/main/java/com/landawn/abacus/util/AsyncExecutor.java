@@ -34,9 +34,10 @@ import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 
 /**
- * The AsyncExecutor class provides a convenient way to execute tasks asynchronously
- * using a configurable thread pool. It supports both Runnable and Callable tasks,
- * with additional features like retry mechanisms and batch execution.
+ * Provides a convenient way to execute tasks asynchronously using a configurable
+ * thread pool. It supports both {@link java.lang.Runnable} and {@link java.util.concurrent.Callable}
+ * tasks, with additional features such as retry mechanisms and batch execution. Each
+ * submitted task yields a {@link ContinuableFuture} for composing follow-up actions.
  *
  * <p>By default, the core pool size is the maximum of 8 and the number of available processors,
  * and the maximum pool size is the maximum of 16 and twice the number of available processors.
@@ -60,7 +61,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  * });
  *
  * // Execute with retry
- * ContinuableFuture<String> retryFuture = executor.execute(
+ * ContinuableFuture<String> retryFuture = executor.executeWithRetry(
  *     () -> performNetworkCall(),
  *     3, // retry 3 times
  *     1000, // wait 1 second between retries
@@ -499,7 +500,9 @@ public class AsyncExecutor {
      * executor.execute(() -> System.out.println("Direct execution"));
      * }</pre>
      *
-     * @return the Executor instance used by this AsyncExecutor for executing tasks.
+     * @return the {@link Executor} instance used by this {@code AsyncExecutor} for executing tasks
+     * @throws IllegalStateException if this {@code AsyncExecutor} has already been shut down and the
+     *         executor has not yet been (re)initialized
      */
     @Internal
     public Executor getExecutor() {

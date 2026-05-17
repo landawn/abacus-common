@@ -114,7 +114,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param <A> the first type of elements returned by this iterator
      * @param <B> the second type of elements returned by this iterator
      * @param <C> the third type of elements returned by this iterator
-     * @return an empty TriIterator
+     * @return an empty {@code TriIterator}; {@link #hasNext()} always returns {@code false}
      */
     public static <A, B, C> TriIterator<A, B, C> empty() {
         return EMPTY;
@@ -145,7 +145,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param <C> the third type of elements returned by this iterator
      * @param output A Consumer that accepts a Triple&lt;A, B, C&gt; and produces the next Triple&lt;A, B, C&gt; on each iteration.
      * @return A TriIterator&lt;A, B, C&gt; that uses the provided output Consumer to generate its elements.
-     * @see  #generate(BooleanSupplier, Consumer)
+     * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @see #generate(BooleanSupplier, Consumer)
      */
     public static <A, B, C> TriIterator<A, B, C> generate(final Consumer<Triple<A, B, C>> output) {
         return generate(com.landawn.abacus.util.function.BooleanSupplier.TRUE, output);
@@ -306,8 +307,9 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param toIndex The ending index of the iterator (exclusive).
      * @param output An IntObjConsumer that accepts an integer index and a Triple&lt;A, B, C&gt; to populate on each iteration.
      * @return A TriIterator&lt;A, B, C&gt; that uses the provided fromIndex, toIndex, and output IntObjConsumer to generate its elements.
-     * @throws IllegalArgumentException If fromIndex is greater than toIndex.
-     * @throws IndexOutOfBoundsException If fromIndex or toIndex is out of range.
+     * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
+     *         {@code Integer.MAX_VALUE}, or {@code fromIndex} is greater than {@code toIndex}
      */
     public static <A, B, C> TriIterator<A, B, C> generate(final int fromIndex, final int toIndex, final IntObjConsumer<Triple<A, B, C>> output)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -830,9 +832,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * the next triple of elements without the overhead of object creation. The three elements
      * are passed directly to the action consumer.</p>
      *
-     * <p>Example implementation:
-     *
-     * <p><b>Usage Examples:</b></p>
+     * <p><b>Example implementation:</b></p>
      * <pre>{@code
      * protected <E extends Exception> void next(Throwables.TriConsumer<A, B, C, E> action) {
      *     if (!hasNext()) {
@@ -1262,8 +1262,9 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * }</pre>
      *
      * @param <R> the type of elements in the resulting Stream
-     * @param mapper the function to apply to each triple of elements, must not be {@code null}
+     * @param mapper the function to apply to each triple of elements
      * @return a {@code Stream} containing the elements produced by the mapper function
+     * @see #map(TriFunction)
      */
     public <R> Stream<R> stream(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper) {
         return Stream.of(map(mapper));
@@ -1293,10 +1294,10 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     /**
      * Converts the elements in this TriIterator to an array of the specified type.
      *
-     * @param <T> the type of the array elements. It should be a super type of Triple.
+     * @param <T> the type of the array elements; it should be a super type of {@code Triple}
      * @param a the array into which the elements of this TriIterator are to be stored, if it is big enough;
-     *          otherwise, a new array of the same runtime type is allocated for this purpose.
-     * @return an array containing the elements of this TriIterator
+     *          otherwise, a new array of the same runtime type is allocated for this purpose
+     * @return an array containing the remaining triples of elements in this TriIterator
      * @deprecated This method is deprecated. Use {@link #toArray()} or {@link #toList()} instead.
      */
     @Deprecated
@@ -1339,8 +1340,10 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * List<Boolean> activeList = result.right();   // [true, false, true]
      * }</pre>
      *
-     * @param supplier a Supplier that provides new instances of List for storing the elements
-     * @return a Triple containing three lists of elements of type A, B, and C
+     * @param supplier a Supplier that is invoked three times to provide a new {@code List} instance for
+     *                 each of the three components
+     * @return a {@code Triple} of three lists holding, respectively, all the first, second, and third
+     *         elements of the remaining triples
      */
     public Triple<List<A>, List<B>, List<C>> toMultiList(@SuppressWarnings("rawtypes") final Supplier<? extends List> supplier) {
         final List<A> listA = supplier.get();
@@ -1372,8 +1375,10 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * Set<Boolean> activeSet = result.right();   // [true, false]
      * }</pre>
      *
-     * @param supplier a Supplier that provides new instances of Set for storing the elements
-     * @return a Triple containing three sets of elements of type A, B, and C
+     * @param supplier a Supplier that is invoked three times to provide a new {@code Set} instance for
+     *                 each of the three components
+     * @return a {@code Triple} of three sets holding, respectively, the distinct first, second, and third
+     *         elements of the remaining triples
      */
     public Triple<Set<A>, Set<B>, Set<C>> toMultiSet(@SuppressWarnings("rawtypes") final Supplier<? extends Set> supplier) {
         final Set<A> listA = supplier.get();

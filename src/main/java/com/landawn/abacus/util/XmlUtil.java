@@ -110,6 +110,11 @@ import jakarta.xml.bind.Unmarshaller;
  * String attr = XmlUtil.getAttribute(elem, "id");
  * }</pre>
  *
+ * <p>This class is not instantiable.</p>
+ *
+ * @see XmlMappers
+ * @see javax.xml.parsers.DocumentBuilder
+ * @see jakarta.xml.bind.JAXBContext
  */
 public final class XmlUtil {
 
@@ -352,7 +357,8 @@ public final class XmlUtil {
      *
      * @param jaxbBean The JAXB-annotated bean to be marshaled
      * @return The XML string representation of the JAXB bean
-     * @throws RuntimeException if marshalling fails
+     * @throws RuntimeException if marshalling fails (e.g. a {@code JAXBException} is raised)
+     * @throws UncheckedIOException if an I/O error occurs while writing the XML
      * @see JAXBContext#newInstance(Class...)
      * @see Marshaller#marshal(Object, java.io.OutputStream)
      */
@@ -981,7 +987,8 @@ public final class XmlUtil {
      *
      * @param source The XML Document to be transformed
      * @param output The output file where the transformed XML will be written
-     * @throws UncheckedIOException if an IOException occurs during file operations
+     * @throws UncheckedIOException if an I/O error occurs while creating or writing the file
+     * @throws RuntimeException if a {@code TransformerException} occurs during transformation
      * @see Transformer#transform(Source, Result)
      */
     public static void transform(final Document source, File output) {
@@ -1176,9 +1183,15 @@ public final class XmlUtil {
      * }
      * }</pre>
      *
+     * <p>Matching is performed on the qualified tag name (the same semantics as
+     * {@link Element#getElementsByTagName(String)}); namespace URIs are not considered.</p>
+     *
      * @param node The parent element to search within
      * @param tagName The tag name of the elements to find
-     * @return A list of elements with the specified tag name that are direct children of the given node
+     * @return A list of elements with the specified tag name that are direct children of the given
+     *         node; an empty list if there is no match (never {@code null})
+     * @see Element#getElementsByTagName(String)
+     * @see #getNodesByName(Node, String)
      */
     public static List<Element> getElementsByTagName(final Element node, final String tagName) {
         final List<Element> result = new ArrayList<>();
@@ -1203,9 +1216,15 @@ public final class XmlUtil {
      * List<Node> allPriceNodes = XmlUtil.getNodesByName(doc, "price");
      * }</pre>
      *
+     * <p>The search includes {@code node} itself: if its node name equals {@code nodeName} it is
+     * included in the result.</p>
+     *
      * @param node The parent node to search within
      * @param nodeName The name of the nodes to find
-     * @return A list of all nodes with the specified name
+     * @return A list of all nodes with the specified name; an empty list if there is no match
+     *         (never {@code null})
+     * @see #getNextNodeByName(Node, String)
+     * @see #getElementsByTagName(Element, String)
      */
     public static List<Node> getNodesByName(final Node node, final String nodeName) {
         final List<Node> nodes = new ArrayList<>();
@@ -1575,7 +1594,7 @@ public final class XmlUtil {
      * char[] chars = "Data: <value> & 'text'".toCharArray();
      * StringBuilder sb = new StringBuilder();
      * XmlUtil.writeCharacters(chars, 6, 14, sb);
-     * // Result: "&lt;value&gt; &amp; &apos;text"
+     * // Result: "&lt;value&gt; &amp; &apos;tex"
      * }</pre>
      *
      * @param cbuf The character array containing the characters to be written
@@ -1661,7 +1680,7 @@ public final class XmlUtil {
      * char[] chars = "Data: <value> & 'text'".toCharArray();
      * FileOutputStream fos = new FileOutputStream("output.xml");
      * XmlUtil.writeCharacters(chars, 7, 14, fos);
-     * // Writes: "value&gt; &amp; &apos;tex"
+     * // Writes: "value&gt; &amp; &apos;text"
      * fos.close();
      * }</pre>
      *
@@ -1715,7 +1734,7 @@ public final class XmlUtil {
      * String text = "Prefix <tag>content</tag> suffix";
      * FileOutputStream fos = new FileOutputStream("output.xml");
      * XmlUtil.writeCharacters(text, 7, 17, fos);
-     * // Writes: "&lt;tag&gt;content&lt;/ta"
+     * // Writes: "&lt;tag&gt;content&lt;/tag"
      * fos.close();
      * }</pre>
      *

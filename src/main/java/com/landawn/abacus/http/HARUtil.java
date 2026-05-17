@@ -281,6 +281,7 @@ public final class HARUtil {
      * @param har the HAR content as a JSON string.
      * @param targetUrl the exact URL to match in the HAR content.
      * @return the response body as a string.
+     * @throws IllegalArgumentException if the HAR content contains no entries under {@code log.entries}.
      * @throws java.util.NoSuchElementException if no entry in the HAR content matches {@code targetUrl}.
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
@@ -312,6 +313,7 @@ public final class HARUtil {
      * @param har the HAR content as a JSON string.
      * @param filterForTargetUrl predicate to test URLs; the first matching URL's request will be sent.
      * @return the response body as a string.
+     * @throws IllegalArgumentException if the HAR content contains no entries under {@code log.entries}.
      * @throws java.util.NoSuchElementException if no entry in the HAR content matches {@code filterForTargetUrl}.
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
@@ -320,6 +322,10 @@ public final class HARUtil {
     public static String sendRequest(final String har, final Predicate<? super String> filterForTargetUrl) {
         final Map<String, ?> map = N.fromJson(har, Map.class);
         final List<Map> entries = Maps.getByPath(map, "log.entries"); //NOSONAR
+
+        if (entries == null || entries.isEmpty()) {
+            throw new IllegalArgumentException("HAR content must contain at least one entry under log.entries");
+        }
 
         return Stream.of(entries) //
                 .map(m -> (Map<String, Object>) m.get("request")) //NOSONAR
@@ -378,6 +384,10 @@ public final class HARUtil {
     public static List<String> sendRequests(final String har, final Predicate<? super String> filterForTargetUrl) {
         final Map<String, ?> map = N.fromJson(har, Map.class);
         final List<Map> entries = Maps.getByPath(map, "log.entries");
+
+        if (entries == null || entries.isEmpty()) {
+            return N.emptyList();
+        }
 
         return Stream.of(entries) //
                 .map(m -> (Map<String, Object>) m.get("request"))
@@ -440,6 +450,10 @@ public final class HARUtil {
     public static Stream<Tuple2<Map<String, Object>, HttpResponse>> streamRequests(final String har, final Predicate<? super String> filterForTargetUrl) {
         final Map<String, ?> map = N.fromJson(har, Map.class);
         final List<Map> entries = Maps.getByPath(map, "log.entries");
+
+        if (entries == null || entries.isEmpty()) {
+            return Stream.empty();
+        }
 
         return Stream.of(entries) //
                 .map(m -> (Map<String, Object>) m.get("request"))
@@ -552,6 +566,10 @@ public final class HARUtil {
     public static Optional<Map<String, Object>> findRequestEntry(final String har, final Predicate<? super String> filterForTargetUrl) {
         final Map<String, ?> map = N.fromJson(har, Map.class);
         final List<Map> entries = Maps.getByPath(map, "log.entries");
+
+        if (entries == null || entries.isEmpty()) {
+            return Optional.empty();
+        }
 
         return Stream.of(entries) //
                 .map(m -> (Map<String, Object>) m.get("request"))

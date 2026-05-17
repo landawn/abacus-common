@@ -591,6 +591,44 @@ public class HttpRequestTest extends TestBase {
         assertEquals(expected, auth);
     }
 
+    @Test
+    public void testHeaderReplacesPreviousValueInsteadOfAppending() throws Exception {
+        // Regression: header(...) used java.net.http.HttpRequest.Builder.header (append)
+        // instead of setHeader (replace). The Javadoc states existing headers with the
+        // same name are "all replaced", so a second header(...) call (or setContentType
+        // after a manual Content-Type header) must overwrite, not duplicate.
+        HttpRequest request = HttpRequest.url(testUrl)
+                .header("Content-Type", "text/plain")
+                .header("Content-Type", "application/json");
+
+        java.lang.reflect.Field f = HttpRequest.class.getDeclaredField("requestBuilder");
+        f.setAccessible(true);
+        java.net.http.HttpRequest.Builder builder = (java.net.http.HttpRequest.Builder) f.get(request);
+        java.net.http.HttpRequest built = builder.uri(URI.create(testUrl)).GET().build();
+
+        java.util.List<String> values = built.headers().allValues("Content-Type");
+        assertEquals(1, values.size());
+        assertEquals("application/json", values.get(0));
+    }
+
+    @Test
+    public void testJsonBodyDoesNotDuplicateContentTypeHeader() throws Exception {
+        // Regression: setContentType(...) -> header(...) appended a second Content-Type
+        // when one was already present, yielding "text/plain, application/json".
+        HttpRequest request = HttpRequest.url(POST_URL)
+                .header("Content-Type", "text/plain")
+                .jsonBody("{\"k\":\"v\"}");
+
+        java.lang.reflect.Field f = HttpRequest.class.getDeclaredField("requestBuilder");
+        f.setAccessible(true);
+        java.net.http.HttpRequest.Builder builder = (java.net.http.HttpRequest.Builder) f.get(request);
+        java.net.http.HttpRequest built = builder.uri(URI.create(POST_URL)).POST(BodyPublishers.ofString("{\"k\":\"v\"}")).build();
+
+        java.util.List<String> values = built.headers().allValues("Content-Type");
+        assertEquals(1, values.size());
+        assertEquals("application/json", values.get(0));
+    }
+
     // ==================== header(String, Object) ====================
 
     @Test

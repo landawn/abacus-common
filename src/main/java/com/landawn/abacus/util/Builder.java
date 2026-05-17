@@ -622,9 +622,9 @@ public class Builder<T> {
      * type (List, Set, Map, etc.), a specialized builder is returned. Otherwise, a generic Builder
      * is returned.
      *
-     * @param <T> the type of the value
-     * @param val the value to wrap in a builder
-     * @return an appropriate Builder instance for the given value
+     * @param <T> the type of the value to wrap
+     * @param val the value to wrap in a builder; must not be {@code null}
+     * @return an appropriate {@code Builder} instance for the given value; never {@code null}
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
     @SuppressWarnings("rawtypes")
@@ -665,7 +665,10 @@ public class Builder<T> {
     /**
      * Returns the wrapped value held by this builder.
      *
-     * @return the wrapped value
+     * <p>The same object reference passed to (or detected by) the factory method is returned;
+     * any mutations performed through this builder are reflected in the returned object.</p>
+     *
+     * @return the wrapped value; never {@code null}
      */
     public T val() {
         return val;
@@ -702,8 +705,16 @@ public class Builder<T> {
     /**
      * Performs the given action on the wrapped value and returns this builder for method chaining.
      *
-     * @param consumer the action to perform on the wrapped value
-     * @return this builder instance
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> result = Builder.of(new ArrayList<String>())
+     *     .accept(list -> list.add("a"))
+     *     .accept(list -> list.add("b"))
+     *     .val();
+     * }</pre>
+     *
+     * @param consumer the action to perform on the wrapped value, must not be {@code null}
+     * @return this builder instance for method chaining
      */
     public Builder<T> accept(final Consumer<? super T> consumer) {
         consumer.accept(val);
@@ -745,8 +756,12 @@ public class Builder<T> {
     }
 
     /**
-     * Specialized builder for BooleanList that provides fluent methods for adding, removing,
-     * and modifying boolean elements.
+     * Specialized builder for {@link BooleanList} that provides fluent methods for adding, removing,
+     * and modifying boolean elements. Each mutating method returns this builder so calls can be chained;
+     * call {@link #val()} to obtain the wrapped {@code BooleanList}.
+     *
+     * @see BooleanList
+     * @see Builder#of(BooleanList)
      */
     public static final class BooleanListBuilder extends Builder<BooleanList> {
 
@@ -847,8 +862,12 @@ public class Builder<T> {
     }
 
     /**
-     * Specialized builder for CharList that provides fluent methods for adding, removing,
-     * and modifying char elements.
+     * Specialized builder for {@link CharList} that provides fluent methods for adding, removing,
+     * and modifying char elements. Each mutating method returns this builder so calls can be chained;
+     * call {@link #val()} to obtain the wrapped {@code CharList}.
+     *
+     * @see CharList
+     * @see Builder#of(CharList)
      */
     public static final class CharListBuilder extends Builder<CharList> {
 
@@ -949,8 +968,12 @@ public class Builder<T> {
     }
 
     /**
-     * Specialized builder for ByteList that provides fluent methods for adding, removing,
-     * and modifying byte elements.
+     * Specialized builder for {@link ByteList} that provides fluent methods for adding, removing,
+     * and modifying byte elements. Each mutating method returns this builder so calls can be chained;
+     * call {@link #val()} to obtain the wrapped {@code ByteList}.
+     *
+     * @see ByteList
+     * @see Builder#of(ByteList)
      */
     public static final class ByteListBuilder extends Builder<ByteList> {
 
@@ -1051,8 +1074,12 @@ public class Builder<T> {
     }
 
     /**
-     * Specialized builder for ShortList that provides fluent methods for adding, removing,
-     * and modifying short elements.
+     * Specialized builder for {@link ShortList} that provides fluent methods for adding, removing,
+     * and modifying short elements. Each mutating method returns this builder so calls can be chained;
+     * call {@link #val()} to obtain the wrapped {@code ShortList}.
+     *
+     * @see ShortList
+     * @see Builder#of(ShortList)
      */
     public static final class ShortListBuilder extends Builder<ShortList> {
 
@@ -1153,8 +1180,12 @@ public class Builder<T> {
     }
 
     /**
-     * Specialized builder for IntList that provides fluent methods for adding, removing,
-     * and modifying int elements.
+     * Specialized builder for {@link IntList} that provides fluent methods for adding, removing,
+     * and modifying int elements. Each mutating method returns this builder so calls can be chained;
+     * call {@link #val()} to obtain the wrapped {@code IntList}.
+     *
+     * @see IntList
+     * @see Builder#of(IntList)
      */
     public static final class IntListBuilder extends Builder<IntList> {
 
@@ -1255,8 +1286,12 @@ public class Builder<T> {
     }
 
     /**
-     * Specialized builder for LongList that provides fluent methods for adding, removing,
-     * and modifying long elements.
+     * Specialized builder for {@link LongList} that provides fluent methods for adding, removing,
+     * and modifying long elements. Each mutating method returns this builder so calls can be chained;
+     * call {@link #val()} to obtain the wrapped {@code LongList}.
+     *
+     * @see LongList
+     * @see Builder#of(LongList)
      */
     public static final class LongListBuilder extends Builder<LongList> {
 
@@ -1357,8 +1392,12 @@ public class Builder<T> {
     }
 
     /**
-     * Specialized builder for FloatList that provides fluent methods for adding, removing,
-     * and modifying float elements.
+     * Specialized builder for {@link FloatList} that provides fluent methods for adding, removing,
+     * and modifying float elements. Each mutating method returns this builder so calls can be chained;
+     * call {@link #val()} to obtain the wrapped {@code FloatList}.
+     *
+     * @see FloatList
+     * @see Builder#of(FloatList)
      */
     public static final class FloatListBuilder extends Builder<FloatList> {
 
@@ -1459,8 +1498,12 @@ public class Builder<T> {
     }
 
     /**
-     * Specialized builder for DoubleList that provides fluent methods for adding, removing,
-     * and modifying double elements.
+     * Specialized builder for {@link DoubleList} that provides fluent methods for adding, removing,
+     * and modifying double elements. Each mutating method returns this builder so calls can be chained;
+     * call {@link #val()} to obtain the wrapped {@code DoubleList}.
+     *
+     * @see DoubleList
+     * @see Builder#of(DoubleList)
      */
     public static final class DoubleListBuilder extends Builder<DoubleList> {
 
@@ -1561,12 +1604,16 @@ public class Builder<T> {
     }
 
     /**
-     * Specialized builder for List that provides fluent methods for adding, removing,
-     * and modifying elements. This builder extends CollectionBuilder with List-specific
-     * operations such as indexed access.
+     * Specialized builder for {@link List} that provides fluent methods for adding, removing,
+     * and modifying elements. This builder extends {@link CollectionBuilder} with List-specific
+     * operations such as indexed insertion and removal. Each mutating method returns this builder
+     * so calls can be chained; call {@link #val()} to obtain the wrapped list.
      *
      * @param <T> the element type
-     * @param <L> the list type
+     * @param <L> the concrete list type being built
+     * @see List
+     * @see CollectionBuilder
+     * @see Builder#of(List)
      */
     public static final class ListBuilder<T, L extends List<T>> extends CollectionBuilder<T, L> {
 
@@ -1574,6 +1621,12 @@ public class Builder<T> {
             super(c);
         }
 
+        /**
+         * Appends the specified element to the end of the list.
+         *
+         * @param e the element to append; may be {@code null} if the underlying list permits {@code null} elements
+         * @return this builder instance for method chaining
+         */
         @Override
         public ListBuilder<T, L> add(final T e) {
             val.add(e);
@@ -1713,11 +1766,16 @@ public class Builder<T> {
     }
 
     /**
-     * Builder for Collection that provides fluent methods for adding and removing elements.
-     * This is the base builder for collection types and is extended by ListBuilder.
+     * Builder for {@link Collection} that provides fluent methods for adding and removing elements.
+     * This is the base builder for collection types and is extended by {@link ListBuilder}.
+     * Each mutating method returns this builder so calls can be chained; call {@link #val()}
+     * to obtain the wrapped collection.
      *
      * @param <T> the element type
-     * @param <C> the collection type
+     * @param <C> the concrete collection type being built
+     * @see Collection
+     * @see ListBuilder
+     * @see Builder#of(Collection)
      */
     public static sealed class CollectionBuilder<T, C extends Collection<T>> extends Builder<C> permits ListBuilder {
 
@@ -1739,8 +1797,7 @@ public class Builder<T> {
 
         /**
          * Adds all of the elements in the specified collection to this collection.
-         * The behavior of this operation is undefined if the specified collection
-         * is modified while the operation is in progress.
+         * Does nothing if the collection is {@code null} or empty.
          *
          * @param c the collection containing elements to be added to this collection
          * @return this builder instance
@@ -1755,6 +1812,7 @@ public class Builder<T> {
 
         /**
          * Adds all of the elements in the specified array to this collection.
+         * Does nothing if the array is {@code null} or empty.
          *
          * @param a the array containing elements to be added to this collection
          * @return this builder instance
@@ -1785,6 +1843,7 @@ public class Builder<T> {
          * Removes all of this collection's elements that are also contained in the
          * specified collection. After this call returns, this collection will contain
          * no elements in common with the specified collection.
+         * Does nothing if the collection is {@code null} or empty.
          *
          * @param c the collection containing elements to be removed from this collection
          * @return this builder instance
@@ -1800,7 +1859,7 @@ public class Builder<T> {
 
         /**
          * Removes all of this collection's elements that are also contained in the
-         * specified array.
+         * specified array. Does nothing if the array is {@code null} or empty.
          *
          * @param a the array containing elements to be removed from this collection
          * @return this builder instance
@@ -1820,6 +1879,7 @@ public class Builder<T> {
      *
      * @param <T> the element type
      * @see Multiset
+     * @see Builder#of(Multiset)
      */
     public static final class MultisetBuilder<T> extends Builder<Multiset<T>> {
 
@@ -1835,6 +1895,8 @@ public class Builder<T> {
          * @param e the element whose count is to be set
          * @param occurrences the desired count of the element; must be non-negative
          * @return this builder instance
+         * @throws IllegalArgumentException if {@code occurrences} is negative
+         * @see Multiset#setCount(Object, int)
          */
         public MultisetBuilder<T> setCount(final T e, final int occurrences) {
             val.setCount(e, occurrences);
@@ -1856,10 +1918,14 @@ public class Builder<T> {
 
         /**
          * Adds the specified number of occurrences of the specified element to this multiset.
+         * Adding zero occurrences leaves the multiset unchanged.
          *
          * @param e the element to add
-         * @param occurrencesToAdd the number of occurrences to add; may be negative to remove occurrences
+         * @param occurrencesToAdd the number of occurrences to add; must be non-negative
          * @return this builder instance
+         * @throws IllegalArgumentException if {@code occurrencesToAdd} is negative, or if the
+         *         resulting total count would overflow an {@code int}
+         * @see Multiset#add(Object, int)
          */
         public MultisetBuilder<T> add(final T e, final int occurrencesToAdd) {
             val.add(e, occurrencesToAdd);
@@ -1886,8 +1952,10 @@ public class Builder<T> {
          * will be removed.
          *
          * @param e the element to remove occurrences of
-         * @param occurrencesToRemove the number of occurrences to remove
+         * @param occurrencesToRemove the number of occurrences to remove; must be non-negative
          * @return this builder instance
+         * @throws IllegalArgumentException if {@code occurrencesToRemove} is negative
+         * @see Multiset#remove(Object, int)
          */
         public MultisetBuilder<T> remove(final Object e, final int occurrencesToRemove) {
             val.remove(e, occurrencesToRemove);
@@ -1934,11 +2002,15 @@ public class Builder<T> {
     }
 
     /**
-     * Specialized builder for Map that provides fluent methods for adding and removing key-value pairs.
+     * Specialized builder for {@link Map} that provides fluent methods for adding and removing
+     * key-value pairs. Each mutating method returns this builder so calls can be chained;
+     * call {@link #val()} to obtain the wrapped map.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> the map type
+     * @param <M> the concrete map type being built
+     * @see Map
+     * @see Builder#of(Map)
      */
     public static final class MapBuilder<K, V, M extends Map<K, V>> extends Builder<M> {
 
@@ -1962,8 +2034,9 @@ public class Builder<T> {
 
         /**
          * Copies all of the mappings from the specified map to this map.
-         * The effect of this call is equivalent to that of calling put(k, v)
-         * on this map once for each mapping from key k to value v in the specified map.
+         * The effect of this call is equivalent to that of calling {@code put(k, v)}
+         * on this map once for each mapping from key {@code k} to value {@code v} in the
+         * specified map. Does nothing if the specified map is {@code null} or empty.
          *
          * @param m the mappings to be stored in this map
          * @return this builder instance
@@ -2068,6 +2141,7 @@ public class Builder<T> {
      * @see Multimap
      * @see ListMultimap
      * @see SetMultimap
+     * @see Builder#of(Multimap)
      */
     public static final class MultimapBuilder<K, E, V extends Collection<E>, M extends Multimap<K, E, V>> extends Builder<M> {
 
@@ -2294,8 +2368,11 @@ public class Builder<T> {
     /**
      * Specialized builder for {@link Dataset} that provides fluent methods for data manipulation operations
      * such as renaming columns, adding/removing columns, transforming data, and combining datasets.
+     * Each mutating method returns this builder so calls can be chained; call {@link #val()}
+     * to obtain the wrapped {@code Dataset}.
      *
      * @see Dataset
+     * @see Builder#of(Dataset)
      */
     public static final class DatasetBuilder extends Builder<Dataset> {
 
@@ -3788,11 +3865,12 @@ public class Builder<T> {
          * }</pre>
          *
          * @param <T> the type of objects being compared
-         * @param left the first object to compare
-         * @param right the second object to compare
+         * @param left the first object to compare, may be {@code null}
+         * @param right the second object to compare, may be {@code null}
          * @param comparator the comparator to use, or {@code null} for natural ordering
          * @return this ComparisonBuilder instance for method chaining
-         * @throws IllegalArgumentException if comparator is {@code null} and objects don't implement Comparable
+         * @throws ClassCastException if {@code comparator} is {@code null} and the compared
+         *         objects are not mutually {@link Comparable}
          */
         public <T> ComparisonBuilder compare(final T left, final T right, final Comparator<T> comparator) throws IllegalArgumentException {
             if (result == 0) {

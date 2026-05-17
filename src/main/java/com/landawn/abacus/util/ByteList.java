@@ -1120,7 +1120,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
+     * @param newPositionAfterMove the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and size() - lengthOfRange, inclusive.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the list
@@ -2062,7 +2062,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <pre>{@code
      * ByteList.of(-5, 0, 3, 10).isSorted();   // returns true
      * ByteList.of(3, 1, 4, 2).isSorted();     // returns false
-     * ByteList.of(1, 1, 2, 2).isSorted();     // returns {@code true} (duplicates allowed)
+     * ByteList.of(1, 1, 2, 2).isSorted();     // returns true (duplicates allowed)
      * }</pre>
      *
      * @return {@code true} if the list is sorted in ascending order, {@code false} otherwise
@@ -2662,7 +2662,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *   <li>Iterates elements in index order (0 to size-1)</li>
      *   <li>Returns an empty iterator if the list is empty</li>
      *   <li>Does not support element removal</li>
-     *   <li>Fails fast if the list is structurally modified during iteration</li>
+     *   <li>Is not fail-fast; structural modification during iteration yields undefined results</li>
      * </ul>
      *
      * @return a ByteIterator over all elements in this list

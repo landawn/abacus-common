@@ -22,7 +22,6 @@ import java.util.Objects;
  *
  * <p>This is a functional interface whose functional method is {@link #accept(short...)}.
  *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see ShortConsumer

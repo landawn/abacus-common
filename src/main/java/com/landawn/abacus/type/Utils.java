@@ -22,15 +22,8 @@ import com.landawn.abacus.parser.XmlParser;
 
 /**
  * Internal utility class providing shared parser instances and configurations for the type system.
- * This class uses lazy initialization to avoid class loading issues and provides centralized
- * access to commonly used parsers throughout the type package.
- *
- * <p>The parsers and configurations are initialized lazily to:</p>
- * <ul>
- *   <li>Avoid NoClassDefFoundError during class loading</li>
- *   <li>Reduce memory footprint when parsers are not needed</li>
- *   <li>Ensure parsers are only created when actually used</li>
- * </ul>
+ * This class provides centralized access to commonly used parsers and serialization
+ * configurations throughout the type package.
  *
  * <p>This class is package-private and intended for internal use only within the type system.
  * It provides singleton instances of:</p>
@@ -46,7 +39,6 @@ final class Utils {
     // lazy initialization to avoid: NoClassDefFoundError: Could not initialize class com.landawn.abacus.parser.JsonParserImpl
     /**
      * Shared JSON parser instance for use throughout the type system.
-     * Lazily initialized to avoid class loading issues.
      */
     static final JsonParser jsonParser = ParserFactory.createJsonParser();
 

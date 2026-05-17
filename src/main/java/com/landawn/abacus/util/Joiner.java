@@ -450,7 +450,7 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.with(", ").trimBeforeAppend().appendAll("  a  ", " b ", "c  ").toString();
+     * Joiner.with(", ").trimBeforeAppend().appendAll(new Object[]{"  a  ", " b ", "c  "}).toString();
      * // Returns: "a, b, c"
      * }</pre>
      *
@@ -790,8 +790,11 @@ public final class Joiner implements Closeable {
      * }</pre>
      *
      * @param b the condition to check
-     * @param supplier the supplier that provides the value to append when condition is true
+     * @param supplier the supplier that provides the value to append when {@code b} is {@code true};
+     *        must not be {@code null} if {@code b} is {@code true}. The supplied value is appended via
+     *        {@link #append(Object)}, so it is subject to the {@code skipNulls} and {@code useForNull} settings.
      * @return this Joiner instance for method chaining
+     * @throws NullPointerException if {@code b} is {@code true} and {@code supplier} is {@code null}
      */
     public Joiner appendIf(final boolean b, final Supplier<?> supplier) {
         if (b) {
@@ -1762,7 +1765,7 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").appendAll(list).toString();   // Returns: "apple, banana, cherry"
      * }</pre>
      *
-     * @param c the Collection to append
+     * @param c the Collection to append; may be {@code null} or empty
      * @return this Joiner instance for method chaining
      */
     public Joiner appendAll(final Collection<?> c) {
@@ -1836,7 +1839,7 @@ public final class Joiner implements Closeable {
      * Joiner.with(" | ").appendAll(iterable).toString();   // Returns: "one | two | three"
      * }</pre>
      *
-     * @param c the Iterable to append
+     * @param c the Iterable to append; may be {@code null}
      * @return this Joiner instance for method chaining
      */
     public Joiner appendAll(final Iterable<?> c) {
@@ -1915,7 +1918,7 @@ public final class Joiner implements Closeable {
      * Joiner.with("->").appendAll(iter).toString();   // Returns: "x->y->z"
      * }</pre>
      *
-     * @param iter the Iterator to append from
+     * @param iter the Iterator to append from; may be {@code null}
      * @return this Joiner instance for method chaining
      */
     public Joiner appendAll(final Iterator<?> iter) {
@@ -2259,9 +2262,10 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * Appends a Map.Entry to the joiner.
-     * The entry's key and value are separated by the configured keyValueSeparator.
-     * Null entries are replaced with nullText.
+     * Appends a {@code Map.Entry} to the joiner.
+     * The entry's key and value are separated by the configured key-value separator.
+     * A {@code null} entry is appended as the configured null text. A {@code null} key or
+     * value is rendered using the configured null text.
      * If multiple entries are appended, they are separated by the configured separator.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2270,7 +2274,7 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").appendEntry(entry).toString();   // Returns: "score=100"
      * }</pre>
      *
-     * @param entry the Map.Entry to append
+     * @param entry the {@code Map.Entry} to append; may be {@code null}
      * @return this Joiner instance for method chaining
      */
     public Joiner appendEntry(final Map.Entry<?, ?> entry) {
@@ -2298,7 +2302,7 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").appendEntries(map).toString();   // Returns: "a=1, b=2"
      * }</pre>
      *
-     * @param m the map containing the entries to be appended
+     * @param m the map containing the entries to be appended; may be {@code null} or empty
      * @return this Joiner instance for method chaining
      */
     public Joiner appendEntries(final Map<?, ?> m) {
@@ -2530,8 +2534,11 @@ public final class Joiner implements Closeable {
 
     /**
      * Appends all properties of a bean object to the joiner.
-     * Each property is appended as a key-value pair using the property name and value.
-     * The bean must have getter/setter methods defined.
+     * Each property is appended as a key-value pair using the property name as the key
+     * and the property value as the value, separated by the configured key-value separator.
+     * Properties with {@code null} values are included (rendered using the configured null text).
+     * If {@code bean} is {@code null}, this Joiner is returned unchanged.
+     * The bean's class must be a valid JavaBean with getter/setter methods defined.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2544,8 +2551,12 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").appendBean(p).toString();   // Returns: "name=John, age=30"
      * }</pre>
      *
-     * @param bean the bean object whose properties to append
+     * @param bean the bean object whose properties to append; may be {@code null}
      * @return this Joiner instance for method chaining
+     * @throws IllegalArgumentException if {@code bean} is not {@code null} and its class is not a valid JavaBean
+     *         (i.e., does not have proper getter/setter methods)
+     * @see #appendBean(Object, Collection)
+     * @see #appendBean(Object, boolean, Set)
      */
     public Joiner appendBean(final Object bean) {
         return appendBean(bean, true, null);
@@ -2643,11 +2654,16 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").appendBean(u, true, ignored).toString();   // Returns: "id=123, name=Alice"
      * }</pre>
      *
-     * @param bean the bean object whose properties to append
+     * <p>If {@code bean} is {@code null}, this Joiner is returned unchanged.</p>
+     *
+     * @param bean the bean object whose properties to append; may be {@code null}
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values are skipped
-     * @param ignoredPropNames set of property names to exclude from appending
+     * @param ignoredPropNames set of property names to exclude from appending; may be {@code null} or empty
      * @return this Joiner instance for method chaining
-     * @throws IllegalArgumentException if bean is not a valid bean class with getter/setter methods
+     * @throws IllegalArgumentException if {@code bean} is not {@code null} and its class is not a valid JavaBean
+     *         with getter/setter methods
+     * @see #appendBean(Object)
+     * @see #appendBean(Object, Collection)
      */
     public Joiner appendBean(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) throws IllegalArgumentException {
         if (bean == null) {
@@ -2710,10 +2726,15 @@ public final class Joiner implements Closeable {
      *     !prop.equals("stock") || (Integer)val > 0).toString();   // Returns: "name=Laptop, price=999.99"
      * }</pre>
      *
-     * @param bean the bean object whose properties to append
-     * @param filter the bi-predicate to test property names and values; only properties that pass are appended
+     * <p>If {@code bean} is {@code null}, this Joiner is returned unchanged (after the {@code filter}
+     * non-null check).</p>
+     *
+     * @param bean the bean object whose properties to append; may be {@code null}
+     * @param filter the bi-predicate to test property names and values; only properties that pass are appended; must not be {@code null}
      * @return this Joiner instance for method chaining
-     * @throws IllegalArgumentException if filter is {@code null}, or if bean is not {@code null} and is not a valid bean class with getter/setter methods
+     * @throws IllegalArgumentException if {@code filter} is {@code null}, or if {@code bean} is not {@code null}
+     *         and its class is not a valid JavaBean with getter/setter methods
+     * @see #appendBean(Object)
      */
     public Joiner appendBean(final Object bean, final BiPredicate<? super String, ?> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, cs.filter);
@@ -2911,9 +2932,14 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * Appends the joined string to the specified Appendable.
-     * The joined string includes prefix, all elements with separators, and suffix.
-     * If no elements have been appended, nothing is appended to the Appendable.
+     * Appends the joined string to the specified {@code Appendable}.
+     * The joined string includes the prefix, all elements with separators, and the suffix.
+     * If no elements have been appended, the configured empty value (by default
+     * {@code prefix + suffix}, or the value set via {@link #setEmptyValue(CharSequence)})
+     * is appended when it is not empty; otherwise nothing is appended.
+     *
+     * <p>The underlying {@code StringBuilder} will be recycled after this method is called
+     * if {@code reuseBuffer} is set to {@code true} (via the internal {@link #toString()} call).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2922,10 +2948,11 @@ public final class Joiner implements Closeable {
      * sb.toString();   // Returns: "Result: a, b"
      * }</pre>
      *
-     * @param <A> the type of Appendable
-     * @param appendable the Appendable to append the joined string to
-     * @return the same Appendable instance for method chaining
+     * @param <A> the type of the {@code Appendable}
+     * @param appendable the {@code Appendable} to append the joined string to
+     * @return the same {@code Appendable} instance for method chaining
      * @throws IOException if an I/O error occurs during appending
+     * @see #toString()
      */
     public <A extends Appendable> A appendTo(final A appendable) throws IOException {
         if (buffer == null) {
@@ -2952,8 +2979,11 @@ public final class Joiner implements Closeable {
      * }</pre>
      *
      * @param <T> the type of the result
-     * @param mapper the function to apply to the joined string
-     * @return the result of applying the mapper function
+     * @param mapper the function to apply to the joined string; must not be {@code null}
+     * @return the result of applying the mapper function to the value returned by {@link #toString()}
+     * @throws NullPointerException if {@code mapper} is {@code null}
+     * @see #toString()
+     * @see #mapIfNotEmpty(Function)
      */
     @Beta
     public <T> T map(final Function<? super String, T> mapper) {

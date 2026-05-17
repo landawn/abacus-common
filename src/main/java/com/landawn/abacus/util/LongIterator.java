@@ -546,7 +546,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<IndexedLong> iter = LongIterator.of(10L, 20L, 30L).indexed();
-     * // Will produce: IndexedLong(10, 0), IndexedLong(20, 1), IndexedLong(30, 2)
+     * // Produces IndexedLong values (value=10 at index 0, value=20 at index 1, value=30 at index 2)
      * }</pre>
      *
      * @return an ObjIterator of IndexedLong objects
@@ -564,7 +564,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<IndexedLong> iter = LongIterator.of(10L, 20L, 30L).indexed(5);
-     * // Will produce: IndexedLong(10, 5), IndexedLong(20, 6), IndexedLong(30, 7)
+     * // Produces IndexedLong values (value=10 at index 5, value=20 at index 6, value=30 at index 7)
      * }</pre>
      *
      * @param startIndex the starting index value

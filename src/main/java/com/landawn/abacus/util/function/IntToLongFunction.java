@@ -73,8 +73,8 @@ public interface IntToLongFunction extends Throwables.IntToLongFunction<RuntimeE
      * IntStream.of(1, 2, 3).mapToLong(IntToLongFunction.DEFAULT).forEach(System.out::println);
      * }</pre>
      *
-     * @param value the function argument, an int value to be converted to long
-     * @return the function result as a long value
+     * @param value the function argument, an int value to be converted to long.
+     * @return the function result as a long value.
      */
     @Override
     long applyAsLong(int value);

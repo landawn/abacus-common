@@ -429,6 +429,20 @@ public class CollectorsTest extends TestBase {
     }
 
     @Test
+    public void testBugFix_toCollection_negativeAtMostSizeThrows() {
+        // Javadoc contract: toCollection(int atMostSize, Supplier) throws IllegalArgumentException
+        // if atMostSize is negative (matching the behavior of first(int)/last(int)).
+        assertThrows(IllegalArgumentException.class, () -> Collectors.toCollection(-1, ArrayList::new));
+        // toList(int) / toSet(int) delegate to toCollection(int, Supplier) and share the contract.
+        assertThrows(IllegalArgumentException.class, () -> Collectors.toList(-1));
+        assertThrows(IllegalArgumentException.class, () -> Collectors.toSet(-5));
+
+        // Sanity: zero is still allowed and yields an empty collection.
+        List<Integer> empty = Stream.of(1, 2, 3).collect(Collectors.toCollection(0, ArrayList::new));
+        assertTrue(empty.isEmpty());
+    }
+
+    @Test
     public void testToList() {
         List<String> result = stringList.stream().collect(Collectors.toList());
         assertEquals(stringList, result);

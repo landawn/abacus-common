@@ -130,7 +130,7 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
     /**
      * Parses a string representation and creates a float array.
      * Expected format: [1.5, 2.7, 3.14] or similar numeric value representations.
-     * Returns {@code null} if input is {@code null}, empty array if input is empty or "[]".
+     * Returns {@code null} if input is {@code null}, empty, or blank, or an empty array if input is {@code "[]"}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -146,7 +146,7 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * }</pre>
      *
      * @param str the string to parse
-     * @return the parsed float array, or {@code null} if input is null
+     * @return the parsed float array, or {@code null} if input is {@code null}, empty, or blank
      */
     @Override
     public float[] valueOf(final String str) {

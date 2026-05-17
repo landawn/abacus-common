@@ -407,7 +407,7 @@ public final class EscapeUtil {
      * to their HTML entity representations (e.g., {@code <} to {@code &lt;}, {@code &} to {@code &amp;}).
      *
      * <p>This method supports all known HTML 4.0 entities including basic entities ({@code <}, {@code >},
-     * {@code &}, {@code "}, ISO-8859-1 characters, and extended HTML 4.0 entities for symbols,
+     * {@code &}, {@code "}), ISO-8859-1 characters, and extended HTML 4.0 entities for symbols,
      * mathematical characters, Greek letters, etc.</p>
      *
      * <p>Note: The apostrophe entity ({@code &apos;}) is not a legal HTML 4.0 entity and is not used.
@@ -1304,18 +1304,20 @@ public final class EscapeUtil {
         private final EnumSet<OPTION> options;
 
         /**
-         * Create a UnicodeUnescaper.
+         * Create a NumericBeanUnescaper.
          *
          * The constructor takes a list of options, only one type of which is currently
          * available (whether to allow, error or ignore the semicolon on the end of a
-         * numeric bean to being missing).
+         * numeric bean being missing).
          *
          * For example, to support numeric entities without a ';':
          *    new NumericBeanUnescaper(NumericBeanUnescaper.OPTION.semiColonOptional)
          * and to throw an IllegalArgumentException when they're missing:
          *    new NumericBeanUnescaper(NumericBeanUnescaper.OPTION.errorIfNoSemiColon)
          *
-         * Note that the default behaviour is to ignore them.
+         * Note that when no option is supplied the default behaviour is
+         * {@code semiColonRequired}: a numeric entity without a trailing ';' is
+         * left untranslated.
          *
          * @param options to apply to this unescaper
          */

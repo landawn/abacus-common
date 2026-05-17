@@ -669,6 +669,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      *
      * @param <E2> the type of exception that the action might throw.
      * @param actionOnFailure the action to execute if this Result contains an exception, must not be {@code null}.
+     * @throws IllegalArgumentException if {@code actionOnFailure} is {@code null}.
      * @throws E2 if the actionOnFailure throws an exception of type E2.
      */
     public <E2 extends Throwable> void ifFailure(final Throwables.Consumer<? super E, E2> actionOnFailure) throws E2 {
@@ -721,6 +722,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      *
      * @param <E2> the type of exception that the action might throw.
      * @param actionOnSuccess the action to execute if this Result is successful, must not be {@code null}.
+     * @throws IllegalArgumentException if {@code actionOnSuccess} is {@code null}.
      * @throws E2 if the actionOnSuccess throws an exception of type E2.
      */
     public <E2 extends Throwable> void ifSuccess(final Throwables.Consumer<? super T, E2> actionOnSuccess) throws E2 {

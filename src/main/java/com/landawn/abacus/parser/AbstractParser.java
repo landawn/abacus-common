@@ -455,7 +455,8 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @return the effective exclusion strategy to use
      */
     protected static Exclusion getExclusion(final SerializationConfig<?> config, final BeanInfo beanInfo) {
-        return config.getExclusion() == null ? (beanInfo.jsonXmlSeriExclusion == null ? Exclusion.NULL : beanInfo.jsonXmlSeriExclusion) : config.getExclusion();
+        return config != null && config.getExclusion() != null ? config.getExclusion()
+                : (beanInfo.jsonXmlSeriExclusion == null ? Exclusion.NULL : beanInfo.jsonXmlSeriExclusion);
     }
 
     /**

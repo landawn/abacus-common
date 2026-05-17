@@ -40,7 +40,7 @@ import java.util.StringTokenizer;
  *
  * <p>The class works by executing platform-specific commands:</p>
  * <ul>
- * <li>Windows: uses 'dir /-c' command</li>
+ * <li>Windows: uses 'dir /a /-c' command</li>
  * <li>Unix/Linux: uses 'df -k' command</li>
  * <li>AIX/HP-UX: uses 'df -kP' command</li>
  * </ul>
@@ -130,7 +130,7 @@ final class FileSystemUtil {
      *
      * <p>Platform-specific behavior:</p>
      * <ul>
-     * <li>Windows: uses 'dir /-c' on the specified path</li>
+     * <li>Windows: uses 'dir /a /-c' on the specified path</li>
      * <li>Unix/Linux: uses 'df -k' on the specified path</li>
      * <li>AIX/HP-UX: uses 'df -kP' on the specified path</li>
      * </ul>
@@ -246,7 +246,7 @@ final class FileSystemUtil {
      * FileSystemUtil.freeSpaceKb("/volume");   // *nix
      * }</pre>
      * The free space is calculated via the command line.
-     * It uses 'dir /-c' on Windows and <i>df</i> on *nix.
+     * It uses 'dir /a /-c' on Windows and <i>df</i> on *nix.
      *
      * @param path the path to get free space for, not {@code null}, not empty on Unix
      * @param os the operating system code
@@ -380,7 +380,8 @@ final class FileSystemUtil {
      * @param posix whether to use the POSIX standard format flag
      * @param timeout the timeout amount in milliseconds or no timeout if the value
      *  is zero or less
-     * @return the amount of free disk space in kilobytes
+     * @return the amount of free disk space in bytes or kilobytes depending on the kb parameter
+     * @throws IllegalArgumentException if the path is empty
      * @throws IOException if an error occurs
      */
     long freeSpaceUnix(final String path, final boolean kb, final boolean posix, final long timeout) throws IOException {

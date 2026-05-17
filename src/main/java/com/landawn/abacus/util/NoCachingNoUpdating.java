@@ -35,10 +35,26 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 /**
  * Interface marking objects that should not be cached or updated.
  * This is a marker interface for one-off objects that are designed to be used once and discarded.
- * To persist or modify the object, call the {@code copy()} method to create a mutable copy.
+ * To persist or modify the object, call the {@code copy()} method (or one of the {@code toXxx()}
+ * conversion methods) to create an independent, mutable copy.
  *
  * <p>This pattern is useful for objects that wrap temporary resources or provide read-only views
  * of data that should not be retained in memory.</p>
+ *
+ * <p><b>IMPORTANT - Reused-instance contract:</b> Implementations of this interface (and the
+ * array/collection they wrap) are typically <i>reused</i> by the producer across successive
+ * elements (for example, the same wrapper instance and its backing array are handed out on every
+ * iteration of a stream or loop). Therefore:</p>
+ * <ul>
+ *   <li>Do <b>NOT</b> store or cache a {@code NoCachingNoUpdating} instance, nor the array,
+ *       {@code Deque}, {@code Map.Entry}, or other backing object exposed by it (including the
+ *       value returned by {@code values()} or passed to {@code apply(...)} / {@code accept(...)}).
+ *       Its contents may change as soon as control returns to the producer.</li>
+ *   <li>Do <b>NOT</b> modify the wrapped data; these views are intended to be read-only.</li>
+ *   <li>If the data must outlive the current step, take a defensive copy via {@code copy()},
+ *       {@code toArray(...)}, {@code toList()}, {@code toSet()}, or {@code toCollection(...)} —
+ *       those return fresh instances that are safe to retain and modify.</li>
+ * </ul>
  *
  */
 @Beta
@@ -92,8 +108,9 @@ public interface NoCachingNoUpdating {
          *
          * @param <T> the type of elements in the array
          * @param componentType the class of the array elements
-         * @param len the length of the array
-         * @return a new DisposableArray instance
+         * @param len the length of the array; must be non-negative
+         * @return a new DisposableArray instance backed by a freshly allocated array
+         * @throws IllegalArgumentException if {@code len} is negative
          */
         public static <T> DisposableArray<T> create(final Class<T> componentType, final int len) {
             if (len < 0) {
@@ -113,8 +130,9 @@ public interface NoCachingNoUpdating {
          * }</pre>
          *
          * @param <T> the type of elements in the array
-         * @param a the array to wrap
+         * @param a the array to wrap; must not be {@code null}
          * @return a new DisposableArray wrapping the given array
+         * @throws IllegalArgumentException if {@code a} is {@code null}
          */
         public static <T> DisposableArray<T> wrap(final T[] a) {
             return new DisposableArray<>(a);
@@ -150,9 +168,14 @@ public interface NoCachingNoUpdating {
          * String[] copy = disposable.toArray(new String[0]);
          * }</pre>
          *
-         * @param <A> the type of the target array
-         * @param target the array into which the elements are to be stored
-         * @return an array containing the elements
+         * <p>The returned array is safe to cache and modify.</p>
+         *
+         * @param <A> the runtime type of the target array
+         * @param target the array into which the elements are to be stored if it is large enough;
+         *               otherwise a new array of the same runtime type is allocated
+         * @return an array containing the elements; the supplied {@code target} if it was large
+         *         enough, otherwise a newly allocated array
+         * @throws IllegalArgumentException if {@code target} is {@code null}
          */
         @SuppressWarnings("unchecked")
         public <A> A[] toArray(A[] target) {
@@ -174,8 +197,10 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * Creates a copy of the wrapped array.
-         * This method should be used when you need to cache or modify the array data.
+         * Creates a new array containing the same elements as the wrapped array.
+         * Use this method when the array data must be cached, retained, or modified, since
+         * the wrapped array itself may be reused by the producer and must not be stored.
+         * The returned array is a fresh instance independent of this DisposableArray.
          *
          * @return a new array containing copies of the elements
          */
@@ -246,6 +271,10 @@ public interface NoCachingNoUpdating {
          * Applies the given function to the wrapped array and returns the result.
          * This is useful for performing operations that need access to the entire array.
          *
+         * <p>The live backing array is passed to {@code func}; the function must not retain a
+         * reference to it or modify it. Derive an independent copy if the data must outlive the
+         * call.</p>
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableArray<Integer> disposable = DisposableArray.wrap(new Integer[] {1, 2, 3});
@@ -265,6 +294,9 @@ public interface NoCachingNoUpdating {
         /**
          * Performs the given action with the wrapped array.
          * This is useful for operations that need to process the entire array without returning a value.
+         *
+         * <p>The live backing array is passed to {@code action}; the action must not retain a
+         * reference to it or modify it.</p>
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to perform with the array
@@ -309,21 +341,36 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, delimiter, prefix, suffix);
         }
 
+        /**
+         * Returns an iterator over the elements of the wrapped array.
+         * The iterator reads directly from the (potentially reused) backing array; do not
+         * cache the returned iterator beyond the current use.
+         *
+         * @return an iterator over the array elements
+         */
         @Override
         public Iterator<T> iterator() {
             return ObjIterator.of(a);
         }
 
+        /**
+         * Returns a string representation of the wrapped array, formatted as by
+         * {@link N#toString(Object[])}.
+         *
+         * @return a string representation of the array
+         */
         @Override
         public String toString() {
             return N.toString(a);
         }
 
         /**
-         * Returns the wrapped array.
-         * This method is protected to prevent external access to the mutable array.
+         * Returns the wrapped array directly, without copying.
+         * This method is protected to prevent external access to the mutable, potentially
+         * reused backing array. The returned array must not be cached or modified; use
+         * {@link #copy()} when an independent array is required.
          *
-         * @return the wrapped array
+         * @return the wrapped array (the live backing array, not a copy)
          */
         protected T[] values() {
             return a;
@@ -367,7 +414,7 @@ public interface NoCachingNoUpdating {
 
         /**
          * This method is not supported for DisposableObjArray.
-         * Use the parameterless create(int) method instead.
+         * Use the {@link #create(int)} method instead.
          *
          * @param <T> the component type (not used)
          * @param componentType the component type (not used)
@@ -463,7 +510,10 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * Creates a copy of the wrapped boolean array.
+         * Creates a new boolean array containing the same elements as the wrapped array.
+         * Use this method when the data must be retained or modified, since the wrapped
+         * array may be reused by the producer and must not be stored. The returned array
+         * is independent of this instance.
          *
          * @return a new boolean array containing copies of the elements
          */
@@ -656,7 +706,10 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * Creates a copy of the wrapped char array.
+         * Creates a new char array containing the same elements as the wrapped array.
+         * Use this method when the data must be retained or modified, since the wrapped
+         * array may be reused by the producer and must not be stored. The returned array
+         * is independent of this instance.
          *
          * @return a new char array containing copies of the elements
          */
@@ -881,7 +934,10 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * Creates a copy of the wrapped byte array.
+         * Creates a new byte array containing the same elements as the wrapped array.
+         * Use this method when the data must be retained or modified, since the wrapped
+         * array may be reused by the producer and must not be stored. The returned array
+         * is independent of this instance.
          *
          * @return a new byte array containing copies of the elements
          */
@@ -1104,7 +1160,10 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * Creates a copy of the wrapped short array.
+         * Creates a new short array containing the same elements as the wrapped array.
+         * Use this method when the data must be retained or modified, since the wrapped
+         * array may be reused by the producer and must not be stored. The returned array
+         * is independent of this instance.
          *
          * @return a new short array containing copies of the elements
          */
@@ -1328,7 +1387,10 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * Creates a copy of the wrapped int array.
+         * Creates a new int array containing the same elements as the wrapped array.
+         * Use this method when the data must be retained or modified, since the wrapped
+         * array may be reused by the producer and must not be stored. The returned array
+         * is independent of this instance.
          *
          * @return a new int array containing copies of the elements
          */
@@ -1551,7 +1613,10 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * Creates a copy of the wrapped long array.
+         * Creates a new long array containing the same elements as the wrapped array.
+         * Use this method when the data must be retained or modified, since the wrapped
+         * array may be reused by the producer and must not be stored. The returned array
+         * is independent of this instance.
          *
          * @return a new long array containing copies of the elements
          */
@@ -1774,7 +1839,10 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * Creates a copy of the wrapped float array.
+         * Creates a new float array containing the same elements as the wrapped array.
+         * Use this method when the data must be retained or modified, since the wrapped
+         * array may be reused by the producer and must not be stored. The returned array
+         * is independent of this instance.
          *
          * @return a new float array containing copies of the elements
          */
@@ -1998,7 +2066,10 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * Creates a copy of the wrapped double array.
+         * Creates a new double array containing the same elements as the wrapped array.
+         * Use this method when the data must be retained or modified, since the wrapped
+         * array may be reused by the producer and must not be stored. The returned array
+         * is independent of this instance.
          *
          * @return a new double array containing copies of the elements
          */

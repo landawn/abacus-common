@@ -44,6 +44,10 @@ public class MillisDateType extends DateType {
      */
     public static final String MILLIS_DATE = "MillisDate";
 
+    /**
+     * Package-private constructor for {@code MillisDateType}.
+     * Instances are created by the {@code TypeFactory}.
+     */
     MillisDateType() {
         super(MILLIS_DATE);
     }

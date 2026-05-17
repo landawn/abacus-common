@@ -439,7 +439,7 @@ public final class ParserUtil {
      * JsonNameTag[] tags = ParserUtil.getJsonNameTags("firstName");
      * // tags[0].name = "firstName" (CAMEL_CASE)
      * // tags[1].name = "FirstName" (UPPER_CAMEL_CASE)
-     * // tags[2].name = "first_name" (SNAKE_CASES)
+     * // tags[2].name = "first_name" (SNAKE_CASE)
      * }</pre>
      *
      * @param name the original name to convert
@@ -615,7 +615,7 @@ public final class ParserUtil {
      *
      * <p>This method checks for aliases from the following annotations:</p>
      * <ul>
-     *   <li>{@code @JsonXmlField(alias={...})}</li>
+     *   <li>{@code @JsonXmlField(aliases={...})}</li>
      *   <li>{@code @JSONField(alternateNames={...})}</li>
      *   <li>{@code @JsonAlias(value={...})}</li>
      * </ul>
@@ -1337,18 +1337,20 @@ public final class ParserUtil {
         /**
          * Gets property information by property name.
          *
-         * <p>This method supports various property name formats including:</p>
+         * <p>This method resolves a single property and supports various property name formats including:</p>
          * <ul>
          *   <li>Direct property names</li>
-         *   <li>Nested property paths using dot notation (e.g., "address.street")</li>
          *   <li>Aliases defined via annotations</li>
          *   <li>Column names from database mappings</li>
+         *   <li>Case-insensitive and normalized name matching</li>
          * </ul>
+         *
+         * <p>This method does not resolve nested property paths (dot notation). Use
+         * {@link #getPropInfoChain(String)} for nested paths such as {@code "address.city"}.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * PropInfo nameInfo = beanInfo.getPropInfo("name");
-         * PropInfo nestedInfo = beanInfo.getPropInfo("address.city");
          * }</pre>
          *
          * @param propName the property name to look up
@@ -3016,6 +3018,14 @@ public final class ParserUtil {
 
                     return func.read(this, strValue);
                 } else {
+                    // Date-format readers in propFuncMap each null-check strValue. NumberFormat.parse(null)
+                    // does not — it NPEs. JSON literal null deserializes to a Java null string here, so
+                    // for @JsonXmlField(numberFormat=...) fields with a null source value, return null
+                    // instead of NPE'ing.
+                    if (strValue == null) {
+                        return null;
+                    }
+
                     try {
                         synchronized (numberFormat) {
                             return numberFormat.parse(strValue);

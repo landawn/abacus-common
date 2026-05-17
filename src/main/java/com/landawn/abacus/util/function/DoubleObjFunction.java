@@ -67,7 +67,7 @@ public interface DoubleObjFunction<T, R> extends Throwables.DoubleObjFunction<T,
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function
-     * @param after the function to apply after this function is applied
+     * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed function that first applies this function and then applies the {@code after} function
      * @throws NullPointerException if {@code after} is null
      */

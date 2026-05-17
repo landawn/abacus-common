@@ -32,7 +32,7 @@ import com.landawn.abacus.annotation.Beta;
  * the base class for iterators returned by immutable collection implementations.</p>
  *
  * <p>Subclasses must implement the hasNext() and next() methods to provide iteration
- * functionality. The remove() method is final and always throws an exception.</p>
+ * functionality. The remove() method always throws an exception.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -110,6 +110,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * @param <C> the type of the collection to create
      * @param supplier a supplier that creates a new empty collection instance
      * @return a collection containing all remaining elements from this iterator
+     * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
      */
     public <C extends Collection<T>> C toCollection(final Supplier<? extends C> supplier) {
         final C c = supplier.get();

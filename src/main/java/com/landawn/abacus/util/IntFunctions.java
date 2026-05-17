@@ -75,7 +75,7 @@ import com.landawn.abacus.util.function.IntFunction;
  * <ul>
  *   <li>Functions for all major collection types (ArrayList, LinkedList, HashSet, TreeSet, etc.)</li>
  *   <li>Functions for various map implementations (HashMap, TreeMap, ConcurrentHashMap, etc.)</li>
- *   <li>Functions for primitive arrays (boolean[], int[], String[], etc.)</li>
+ *   <li>Functions for arrays (boolean[], int[], String[], Object[], etc.)</li>
  *   <li>Functions for specialized primitive list types (IntList, BooleanList, etc.)</li>
  *   <li>Functions for concurrent and blocking collections</li>
  *   <li>Dynamic type support through reflection for custom implementations</li>
@@ -254,7 +254,7 @@ public final class IntFunctions {
 
     /** Shared factory function that creates a new {@link ListMultimap} with the given initial capacity. */
     @SuppressWarnings("rawtypes")
-    private static final IntFunction<? super ListMultimap> LIST_MULTIMAP_FACTORY = N::newLinkedListMultimap;
+    private static final IntFunction<? super ListMultimap> LIST_MULTIMAP_FACTORY = N::newListMultimap;
 
     /** Shared factory function that creates a new {@link SetMultimap} with the given initial capacity. */
     @SuppressWarnings("rawtypes")
@@ -280,7 +280,7 @@ public final class IntFunctions {
      * }</pre>
      *
      * @param <T> the type of the result produced by the function
-     * @param func the {@code IntFunction} to return unchanged; must not be {@code null}
+     * @param func the {@code IntFunction} to return unchanged
      * @return the same {@code IntFunction} instance passed as the argument
      */
     public static <T> IntFunction<T> of(IntFunction<T> func) {
@@ -288,219 +288,238 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction that creates boolean arrays of the specified size.
+     * Returns an {@code IntFunction} that creates {@code boolean[]} arrays of the specified length.
      *
-     * <p>The returned function creates new boolean arrays with all elements initialized to {@code false}.</p>
+     * <p>The returned function creates new {@code boolean[]} arrays with all elements initialized to {@code false}.
+     * The same shared function instance is returned on every call.</p>
      *
-     * @return an IntFunction that creates boolean arrays
+     * @return an {@code IntFunction} that, given a length, creates a new {@code boolean[]} of that length
      */
     public static IntFunction<boolean[]> ofBooleanArray() {
         return BOOLEAN_ARRAY;
     }
 
     /**
-     * Returns an IntFunction that creates char arrays of the specified size.
+     * Returns an {@code IntFunction} that creates {@code char[]} arrays of the specified length.
      *
      * <p>The returned function creates new char arrays with all elements initialized to '\u0000'.</p>
      *
-     * @return an IntFunction that creates char arrays
+     * @return an {@code IntFunction} that, given a length, creates a new {@code char[]} of that length
      */
     public static IntFunction<char[]> ofCharArray() {
         return CHAR_ARRAY;
     }
 
     /**
-     * Returns an IntFunction that creates byte arrays of the specified size.
+     * Returns an {@code IntFunction} that creates {@code byte[]} arrays of the specified length.
      *
-     * <p>The returned function creates new byte arrays with all elements initialized to 0.</p>
+     * <p>The returned function creates new {@code byte[]} arrays with all elements initialized to {@code 0}.
+     * The same shared function instance is returned on every call.</p>
      *
-     * @return an IntFunction that creates byte arrays
+     * @return an {@code IntFunction} that, given a length, creates a new {@code byte[]} of that length
      */
     public static IntFunction<byte[]> ofByteArray() {
         return BYTE_ARRAY;
     }
 
     /**
-     * Returns an IntFunction that creates short arrays of the specified size.
+     * Returns an {@code IntFunction} that creates {@code short[]} arrays of the specified length.
      *
-     * <p>The returned function creates new short arrays with all elements initialized to 0.</p>
+     * <p>The returned function creates new {@code short[]} arrays with all elements initialized to {@code 0}.
+     * The same shared function instance is returned on every call.</p>
      *
-     * @return an IntFunction that creates short arrays
+     * @return an {@code IntFunction} that, given a length, creates a new {@code short[]} of that length
      */
     public static IntFunction<short[]> ofShortArray() {
         return SHORT_ARRAY;
     }
 
     /**
-     * Returns an IntFunction that creates int arrays of the specified size.
+     * Returns an {@code IntFunction} that creates {@code int[]} arrays of the specified length.
      *
-     * <p>The returned function creates new int arrays with all elements initialized to 0.</p>
+     * <p>The returned function creates new {@code int[]} arrays with all elements initialized to {@code 0}.
+     * The same shared function instance is returned on every call.</p>
      *
-     * @return an IntFunction that creates int arrays
+     * @return an {@code IntFunction} that, given a length, creates a new {@code int[]} of that length
      */
     public static IntFunction<int[]> ofIntArray() {
         return INT_ARRAY;
     }
 
     /**
-     * Returns an IntFunction that creates long arrays of the specified size.
+     * Returns an {@code IntFunction} that creates {@code long[]} arrays of the specified length.
      *
-     * <p>The returned function creates new long arrays with all elements initialized to 0L.</p>
+     * <p>The returned function creates new {@code long[]} arrays with all elements initialized to {@code 0L}.
+     * The same shared function instance is returned on every call.</p>
      *
-     * @return an IntFunction that creates long arrays
+     * @return an {@code IntFunction} that, given a length, creates a new {@code long[]} of that length
      */
     public static IntFunction<long[]> ofLongArray() {
         return LONG_ARRAY;
     }
 
     /**
-     * Returns an IntFunction that creates float arrays of the specified size.
+     * Returns an {@code IntFunction} that creates {@code float[]} arrays of the specified length.
      *
-     * <p>The returned function creates new float arrays with all elements initialized to 0.0f.</p>
+     * <p>The returned function creates new {@code float[]} arrays with all elements initialized to {@code 0.0f}.
+     * The same shared function instance is returned on every call.</p>
      *
-     * @return an IntFunction that creates float arrays
+     * @return an {@code IntFunction} that, given a length, creates a new {@code float[]} of that length
      */
     public static IntFunction<float[]> ofFloatArray() {
         return FLOAT_ARRAY;
     }
 
     /**
-     * Returns an IntFunction that creates double arrays of the specified size.
+     * Returns an {@code IntFunction} that creates {@code double[]} arrays of the specified length.
      *
-     * <p>The returned function creates new double arrays with all elements initialized to 0.0.</p>
+     * <p>The returned function creates new {@code double[]} arrays with all elements initialized to {@code 0.0}.
+     * The same shared function instance is returned on every call.</p>
      *
-     * @return an IntFunction that creates double arrays
+     * @return an {@code IntFunction} that, given a length, creates a new {@code double[]} of that length
      */
     public static IntFunction<double[]> ofDoubleArray() {
         return DOUBLE_ARRAY;
     }
 
     /**
-     * Returns an IntFunction that creates String arrays of the specified size.
+     * Returns an {@code IntFunction} that creates {@code String[]} arrays of the specified length.
      *
-     * <p>The returned function creates new String arrays with all elements initialized to {@code null}.</p>
+     * <p>The returned function creates new {@code String[]} arrays with all elements initialized to {@code null}.
+     * The same shared function instance is returned on every call.</p>
      *
-     * @return an IntFunction that creates String arrays
+     * @return an {@code IntFunction} that, given a length, creates a new {@code String[]} of that length
      */
     public static IntFunction<String[]> ofStringArray() {
         return STRING_ARRAY;
     }
 
     /**
-     * Returns an IntFunction that creates Object arrays of the specified size.
+     * Returns an {@code IntFunction} that creates {@code Object[]} arrays of the specified length.
      *
-     * <p>The returned function creates new Object arrays with all elements initialized to {@code null}.</p>
+     * <p>The returned function creates new {@code Object[]} arrays with all elements initialized to {@code null}.
+     * The same shared function instance is returned on every call.</p>
      *
-     * @return an IntFunction that creates Object arrays
+     * @return an {@code IntFunction} that, given a length, creates a new {@code Object[]} of that length
      */
     public static IntFunction<Object[]> ofObjectArray() {
         return OBJECT_ARRAY;
     }
 
     /**
-     * Returns an IntFunction that creates BooleanList instances with the specified initial capacity.
+     * Returns an {@code IntFunction} that creates {@link BooleanList} instances with the specified initial capacity.
      *
-     * <p>BooleanList is a specialized list implementation for primitive boolean values,
-     * avoiding boxing/unboxing overhead.</p>
+     * <p>{@code BooleanList} is a specialized list implementation for primitive {@code boolean} values,
+     * avoiding boxing/unboxing overhead. The same shared function instance is returned on every call.</p>
      *
-     * @return an IntFunction that creates BooleanList instances
+     * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code BooleanList}
+     * @see BooleanList
      */
     public static IntFunction<BooleanList> ofBooleanList() {
         return BOOLEAN_LIST;
     }
 
     /**
-     * Returns an IntFunction that creates CharList instances with the specified initial capacity.
+     * Returns an {@code IntFunction} that creates {@link CharList} instances with the specified initial capacity.
      *
-     * <p>CharList is a specialized list implementation for primitive char values,
-     * avoiding boxing/unboxing overhead.</p>
+     * <p>{@code CharList} is a specialized list implementation for primitive {@code char} values,
+     * avoiding boxing/unboxing overhead. The same shared function instance is returned on every call.</p>
      *
-     * @return an IntFunction that creates CharList instances
+     * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code CharList}
+     * @see CharList
      */
     public static IntFunction<CharList> ofCharList() {
         return CHAR_LIST;
     }
 
     /**
-     * Returns an IntFunction that creates ByteList instances with the specified initial capacity.
+     * Returns an {@code IntFunction} that creates {@link ByteList} instances with the specified initial capacity.
      *
-     * <p>ByteList is a specialized list implementation for primitive byte values,
-     * avoiding boxing/unboxing overhead.</p>
+     * <p>{@code ByteList} is a specialized list implementation for primitive {@code byte} values,
+     * avoiding boxing/unboxing overhead. The same shared function instance is returned on every call.</p>
      *
-     * @return an IntFunction that creates ByteList instances
+     * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code ByteList}
+     * @see ByteList
      */
     public static IntFunction<ByteList> ofByteList() {
         return BYTE_LIST;
     }
 
     /**
-     * Returns an IntFunction that creates ShortList instances with the specified initial capacity.
+     * Returns an {@code IntFunction} that creates {@link ShortList} instances with the specified initial capacity.
      *
-     * <p>ShortList is a specialized list implementation for primitive short values,
-     * avoiding boxing/unboxing overhead.</p>
+     * <p>{@code ShortList} is a specialized list implementation for primitive {@code short} values,
+     * avoiding boxing/unboxing overhead. The same shared function instance is returned on every call.</p>
      *
-     * @return an IntFunction that creates ShortList instances
+     * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code ShortList}
+     * @see ShortList
      */
     public static IntFunction<ShortList> ofShortList() {
         return SHORT_LIST;
     }
 
     /**
-     * Returns an IntFunction that creates IntList instances with the specified initial capacity.
+     * Returns an {@code IntFunction} that creates {@link IntList} instances with the specified initial capacity.
      *
-     * <p>IntList is a specialized list implementation for primitive int values,
-     * avoiding boxing/unboxing overhead.</p>
+     * <p>{@code IntList} is a specialized list implementation for primitive {@code int} values,
+     * avoiding boxing/unboxing overhead. The same shared function instance is returned on every call.</p>
      *
-     * @return an IntFunction that creates IntList instances
+     * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code IntList}
+     * @see IntList
      */
     public static IntFunction<IntList> ofIntList() {
         return INT_LIST;
     }
 
     /**
-     * Returns an IntFunction that creates LongList instances with the specified initial capacity.
+     * Returns an {@code IntFunction} that creates {@link LongList} instances with the specified initial capacity.
      *
-     * <p>LongList is a specialized list implementation for primitive long values,
-     * avoiding boxing/unboxing overhead.</p>
+     * <p>{@code LongList} is a specialized list implementation for primitive {@code long} values,
+     * avoiding boxing/unboxing overhead. The same shared function instance is returned on every call.</p>
      *
-     * @return an IntFunction that creates LongList instances
+     * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code LongList}
+     * @see LongList
      */
     public static IntFunction<LongList> ofLongList() {
         return LONG_LIST;
     }
 
     /**
-     * Returns an IntFunction that creates FloatList instances with the specified initial capacity.
+     * Returns an {@code IntFunction} that creates {@link FloatList} instances with the specified initial capacity.
      *
-     * <p>FloatList is a specialized list implementation for primitive float values,
-     * avoiding boxing/unboxing overhead.</p>
+     * <p>{@code FloatList} is a specialized list implementation for primitive {@code float} values,
+     * avoiding boxing/unboxing overhead. The same shared function instance is returned on every call.</p>
      *
-     * @return an IntFunction that creates FloatList instances
+     * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code FloatList}
+     * @see FloatList
      */
     public static IntFunction<FloatList> ofFloatList() {
         return FLOAT_LIST;
     }
 
     /**
-     * Returns an IntFunction that creates DoubleList instances with the specified initial capacity.
+     * Returns an {@code IntFunction} that creates {@link DoubleList} instances with the specified initial capacity.
      *
-     * <p>DoubleList is a specialized list implementation for primitive double values,
-     * avoiding boxing/unboxing overhead.</p>
+     * <p>{@code DoubleList} is a specialized list implementation for primitive {@code double} values,
+     * avoiding boxing/unboxing overhead. The same shared function instance is returned on every call.</p>
      *
-     * @return an IntFunction that creates DoubleList instances
+     * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code DoubleList}
+     * @see DoubleList
      */
     public static IntFunction<DoubleList> ofDoubleList() {
         return DOUBLE_LIST;
     }
 
     /**
-     * Returns an IntFunction that creates ArrayList instances with the specified initial capacity.
+     * Returns an {@code IntFunction} that creates {@link ArrayList} instances with the specified initial capacity.
      *
-     * <p>The returned function creates new ArrayList instances optimized with the given initial capacity
-     * to avoid resizing during element addition.</p>
+     * <p>The returned function creates new {@code ArrayList} instances pre-sized with the given initial
+     * capacity to avoid resizing during element addition. The same shared function instance is returned
+     * on every call.</p>
      *
      * @param <T> the type of elements in the list
-     * @return an IntFunction that creates ArrayList instances
+     * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code ArrayList}
+     * @see ArrayList#ArrayList(int)
      */
     @SuppressWarnings("rawtypes")
     public static <T> IntFunction<List<T>> ofList() {
@@ -508,13 +527,14 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction that creates LinkedList instances.
+     * Returns an {@code IntFunction} that creates {@link LinkedList} instances.
      *
-     * <p>The returned function creates new LinkedList instances. Note that the capacity parameter
-     * is ignored as LinkedList does not support initial capacity.</p>
+     * <p>The returned function creates new {@code LinkedList} instances. Note that the capacity argument
+     * is ignored, as {@code LinkedList} does not support an initial capacity. The same shared function
+     * instance is returned on every call.</p>
      *
      * @param <T> the type of elements in the list
-     * @return an IntFunction that creates LinkedList instances
+     * @return an {@code IntFunction} that creates a new {@code LinkedList} (the capacity argument is ignored)
      */
     @SuppressWarnings("rawtypes")
     public static <T> IntFunction<LinkedList<T>> ofLinkedList() {
@@ -522,13 +542,15 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction that creates HashSet instances with the specified initial capacity.
+     * Returns an {@code IntFunction} that creates {@link java.util.HashSet} instances sized for the
+     * specified expected number of elements.
      *
-     * <p>The returned function creates new HashSet instances optimized with the given initial capacity
-     * to avoid rehashing during element addition.</p>
+     * <p>The returned function creates new {@code HashSet} instances pre-sized for the given expected
+     * element count to avoid rehashing during element addition. The same shared function instance is
+     * returned on every call.</p>
      *
      * @param <T> the type of elements in the set
-     * @return an IntFunction that creates HashSet instances
+     * @return an {@code IntFunction} that, given an expected element count, creates a new {@code HashSet}
      */
     @SuppressWarnings("rawtypes")
     public static <T> IntFunction<Set<T>> ofSet() {
@@ -536,13 +558,15 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction that creates LinkedHashSet instances with the specified initial capacity.
+     * Returns an {@code IntFunction} that creates {@link LinkedHashSet} instances sized for the
+     * specified expected number of elements.
      *
-     * <p>The returned function creates new LinkedHashSet instances that maintain insertion order
-     * and are optimized with the given initial capacity.</p>
+     * <p>The returned function creates new {@code LinkedHashSet} instances that maintain insertion
+     * order and are pre-sized for the given expected element count. The same shared function instance
+     * is returned on every call.</p>
      *
      * @param <T> the type of elements in the set
-     * @return an IntFunction that creates LinkedHashSet instances
+     * @return an {@code IntFunction} that, given an expected element count, creates a new {@code LinkedHashSet}
      */
     @SuppressWarnings("rawtypes")
     public static <T> IntFunction<Set<T>> ofLinkedHashSet() {
@@ -550,13 +574,14 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction that creates TreeSet instances.
+     * Returns an {@code IntFunction} that creates {@link TreeSet} instances typed as {@link SortedSet}.
      *
-     * <p>The returned function creates new TreeSet instances that maintain elements in sorted order.
-     * Note that the capacity parameter is ignored as TreeSet does not support initial capacity.</p>
+     * <p>The returned function creates new {@code TreeSet} instances that maintain elements in sorted
+     * order. Note that the capacity argument is ignored, as {@code TreeSet} does not support an initial
+     * capacity. The same shared function instance is returned on every call.</p>
      *
      * @param <T> the type of elements in the set
-     * @return an IntFunction that creates TreeSet instances
+     * @return an {@code IntFunction} that creates a new {@code TreeSet} as a {@code SortedSet} (the capacity argument is ignored)
      */
     @SuppressWarnings("rawtypes")
     public static <T> IntFunction<SortedSet<T>> ofSortedSet() {
@@ -564,14 +589,15 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction that creates TreeSet instances as NavigableSet.
+     * Returns an {@code IntFunction} that creates {@link TreeSet} instances typed as {@link NavigableSet}.
      *
-     * <p>The returned function creates new TreeSet instances that provide navigation methods
-     * for accessing elements relative to other elements. Note that the capacity parameter
-     * is ignored as TreeSet does not support initial capacity.</p>
+     * <p>The returned function creates new {@code TreeSet} instances that provide navigation methods
+     * for accessing elements relative to other elements. Note that the capacity argument is ignored,
+     * as {@code TreeSet} does not support an initial capacity. The same shared function instance is
+     * returned on every call.</p>
      *
      * @param <T> the type of elements in the set
-     * @return an IntFunction that creates TreeSet instances as NavigableSet
+     * @return an {@code IntFunction} that creates a new {@code TreeSet} as a {@code NavigableSet} (the capacity argument is ignored)
      */
     @SuppressWarnings("rawtypes")
     public static <T> IntFunction<NavigableSet<T>> ofNavigableSet() {
@@ -579,13 +605,14 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction that creates TreeSet instances.
+     * Returns an {@code IntFunction} that creates {@link TreeSet} instances.
      *
-     * <p>The returned function creates new TreeSet instances that maintain elements in sorted order.
-     * Note that the capacity parameter is ignored as TreeSet does not support initial capacity.</p>
+     * <p>The returned function creates new {@code TreeSet} instances that maintain elements in sorted
+     * order. Note that the capacity argument is ignored, as {@code TreeSet} does not support an initial
+     * capacity. The same shared function instance is returned on every call.</p>
      *
      * @param <T> the type of elements in the set
-     * @return an IntFunction that creates TreeSet instances
+     * @return an {@code IntFunction} that creates a new {@code TreeSet} (the capacity argument is ignored)
      */
     @SuppressWarnings("rawtypes")
     public static <T> IntFunction<TreeSet<T>> ofTreeSet() {
@@ -593,13 +620,14 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction that creates LinkedList instances as Queue.
+     * Returns an {@code IntFunction} that creates {@link LinkedList} instances typed as {@link Queue}.
      *
-     * <p>The returned function creates new LinkedList instances that implement the Queue interface.
-     * Note that the capacity parameter is ignored as LinkedList does not support initial capacity.</p>
+     * <p>The returned function creates new {@code LinkedList} instances that implement the {@code Queue}
+     * interface. Note that the capacity argument is ignored, as {@code LinkedList} does not support an
+     * initial capacity. The same shared function instance is returned on every call.</p>
      *
      * @param <T> the type of elements in the queue
-     * @return an IntFunction that creates Queue instances (backed by LinkedList)
+     * @return an {@code IntFunction} that creates a new {@code Queue} backed by {@code LinkedList} (the capacity argument is ignored)
      */
     @SuppressWarnings("rawtypes")
     public static <T> IntFunction<Queue<T>> ofQueue() {
@@ -607,14 +635,15 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction that creates LinkedList instances as Deque.
+     * Returns an {@code IntFunction} that creates {@link LinkedList} instances typed as {@link Deque}.
      *
-     * <p>The returned function creates new LinkedList instances that implement the Deque interface,
-     * supporting element insertion and removal at both ends. Note that the capacity parameter
-     * is ignored as LinkedList does not support initial capacity.</p>
+     * <p>The returned function creates new {@code LinkedList} instances that implement the {@code Deque}
+     * interface, supporting element insertion and removal at both ends. Note that the capacity argument
+     * is ignored, as {@code LinkedList} does not support an initial capacity. The same shared function
+     * instance is returned on every call.</p>
      *
      * @param <T> the type of elements in the deque
-     * @return an IntFunction that creates Deque instances (backed by LinkedList)
+     * @return an {@code IntFunction} that creates a new {@code Deque} backed by {@code LinkedList} (the capacity argument is ignored)
      */
     @SuppressWarnings("rawtypes")
     public static <T> IntFunction<Deque<T>> ofDeque() {

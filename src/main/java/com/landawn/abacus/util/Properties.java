@@ -28,8 +28,6 @@ import java.util.Set;
  * <p>Unlike {@link java.util.Properties}, this class is generic and can store any type of objects,
  * not just strings. It also provides methods to retrieve values converted to specific types.</p>
  *
- * <p>All arguments to all task methods must be {@code non-null}.</p>
- *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Properties<String, Object> props = new Properties<>();
@@ -43,6 +41,9 @@ import java.util.Set;
  * // With default values
  * boolean debug = props.getOrDefault("debug", false, Boolean.class);
  * }</pre>
+ *
+ * <p>This class is backed by a {@code volatile} map reference and the underlying
+ * map is a {@link LinkedHashMap} by default, so iteration order reflects insertion order.</p>
  *
  * @param <K> the type of keys maintained by this map. It must not be {@code null}.
  * @param <V> the type of mapped values
@@ -69,7 +70,9 @@ public class Properties<K, V> implements Map<K, V> {
 
     /**
      * Creates a new Properties instance from the specified map.
-     * The returned Properties object contains a copy of the entries from the input map.
+     * The returned Properties object contains a shallow copy of the entries from the input map,
+     * stored in a {@link LinkedHashMap} that preserves the iteration order of the source map.
+     * Subsequent changes to the source map do not affect the returned instance.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -82,7 +85,8 @@ public class Properties<K, V> implements Map<K, V> {
      * @param <K> the key type
      * @param <V> the value type
      * @param map the map from which to create the Properties instance
-     * @return a new Properties instance containing the entries from the specified map
+     * @return a new Properties instance containing a copy of the entries from the specified map
+     * @throws NullPointerException if the specified map is {@code null}
      */
     public static <K, V> Properties<K, V> create(final Map<? extends K, ? extends V> map) {
         return new Properties<>(new LinkedHashMap<>(map));
@@ -122,12 +126,15 @@ public class Properties<K, V> implements Map<K, V> {
      * int age = props.get("age", Integer.class);             // Returns 25
      * boolean active = props.get("active", Boolean.class);   // Returns true
      * Double salary = props.get("salary", Double.class);     // Returns null (default of Double wrapper)
+     * int count = props.get("count", int.class);             // Returns 0 (default of primitive int)
      * }</pre>
      *
      * @param <T> the type to which the value should be converted
      * @param propName the name of the property whose associated value is to be returned
      * @param targetType the class of the type to which the value should be converted
-     * @return the value associated with the specified property name, converted to the specified target type, or default value of {@code targetType} if the property is not found or its value is {@code null}
+     * @return the value associated with the specified property name, converted to the specified target type;
+     *         if the property is not found or its value is {@code null}, returns the default value of {@code targetType}
+     *         (e.g. {@code 0} for primitive numeric types, {@code false} for {@code boolean}, {@code null} for reference types)
      * @see #get(Object)
      * @see #getOrDefault(Object, Object)
      * @see #getOrDefault(Object, Object, Class)
@@ -183,9 +190,10 @@ public class Properties<K, V> implements Map<K, V> {
      *
      * @param <T> the type to which the value should be converted
      * @param propName the name of the property whose associated value is to be returned
-     * @param defaultValue the value to be returned if the specified property name is not found or its value is {@code null}
-     * @param targetType the class of the type to which the value should be converted
-     * @return the value associated with the specified property name, converted to the specified target type, or {@code defaultValue} if the property is not found or its value is {@code null}
+     * @param defaultValue the value to be returned (unconverted) if the specified property name is not found or its value is {@code null}
+     * @param targetType the class of the type to which a found, non-{@code null} value should be converted
+     * @return the value associated with the specified property name, converted to the specified target type;
+     *         or {@code defaultValue} (returned as-is, without conversion) if the property is not found or its value is {@code null}
      * @see #get(Object)
      * @see #get(Object, Class)
      * @see #getOrDefault(Object, Object)
@@ -559,7 +567,9 @@ public class Properties<K, V> implements Map<K, V> {
 
     /**
      * Creates a shallow copy of this Properties instance.
-     * The keys and values themselves are not cloned.
+     * The keys and values themselves are not cloned. The returned instance is always
+     * backed by a new {@link LinkedHashMap} regardless of the backing map of this instance,
+     * so modifications to either instance do not affect the other.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -570,7 +580,7 @@ public class Properties<K, V> implements Map<K, V> {
      * copy.put("key2", "value2");   // Doesn't affect original
      * }</pre>
      *
-     * @return a shallow copy of this Properties instance
+     * @return a new Properties instance containing a shallow copy of this instance's mappings
      */
     public Properties<K, V> copy() {
         final Properties<K, V> copy = new Properties<>();

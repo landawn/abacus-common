@@ -19,7 +19,7 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents a predicate (boolean-valued function) of two {@code byte}-valued arguments.
- * This is the primitive type specialization of {@link BiPredicate} for {@code byte}.
+ * This is the primitive type specialization of {@link java.util.function.BiPredicate} for {@code byte}.
  *
  * <p>This is a functional interface whose functional method is {@link #test(byte, byte)}.
  *

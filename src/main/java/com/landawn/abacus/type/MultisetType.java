@@ -44,6 +44,13 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
 
     private final JsonDeserConfig jdc;
 
+    /**
+     * Package-private constructor for {@code MultisetType}.
+     * This constructor is called by the {@code TypeFactory} to create
+     * {@code Multiset<E>} type instances.
+     *
+     * @param parameterTypeName the name of the element type parameter
+     */
     @SuppressWarnings("unchecked")
     MultisetType(final String parameterTypeName) {
         super(getTypeName(typeClass, parameterTypeName, false));

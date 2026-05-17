@@ -44,8 +44,9 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>Additional utility methods inherited from ObjIterator</li>
  * </ul>
  *
- * <p>Note: The set() and add() operations are not supported and will throw
- * UnsupportedOperationException, maintaining immutability.</p>
+ * <p>Note: The {@code set()}, {@code add()}, and {@code remove()} operations
+ * are not supported and throw {@link UnsupportedOperationException}, preserving
+ * immutability.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -65,6 +66,7 @@ import com.landawn.abacus.util.stream.Stream;
  * }</pre>
  *
  * @param <T> the type of elements returned by this iterator
+ * @see ImmutableIterator
  * @see ObjIterator
  * @see BiIterator
  * @see TriIterator
@@ -140,19 +142,23 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
     };
 
     /**
-     * Returns an empty ObjListIterator that has no elements.
-     * The returned iterator's hasNext() and hasPrevious() methods always return {@code false}.
+     * Returns an empty {@code ObjListIterator} that has no elements.
+     * The returned iterator's {@code hasNext()} and {@code hasPrevious()}
+     * always return {@code false}, and {@code next()}/{@code previous()} always
+     * throw {@link NoSuchElementException}. A shared singleton instance is
+     * returned.
      *
      * @param <T> the type of elements (not) returned by the iterator
-     * @return an empty ObjListIterator
+     * @return an empty {@code ObjListIterator}
      */
     public static <T> ObjListIterator<T> empty() {
         return EMPTY;
     }
 
     /**
-     * Returns an ObjListIterator containing a single element.
-     * The iterator starts before the element, so next() must be called to access it.
+     * Returns an {@code ObjListIterator} containing exactly one element.
+     * The cursor starts before the element, so {@code next()} must be called to
+     * retrieve it. The value may be {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -166,15 +172,17 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      *
      * @param <T> the type of the element
      * @param val the single element to be returned by the iterator
-     * @return an ObjListIterator containing exactly one element
+     * @return an {@code ObjListIterator} containing exactly one element
      */
     public static <T> ObjListIterator<T> just(final T val) {
         return of(Collections.singletonList(val));
     }
 
     /**
-     * Returns an ObjListIterator over the specified array.
-     * The iterator will traverse all elements in the array in order.
+     * Returns an {@code ObjListIterator} over the specified array.
+     * The iterator traverses all elements of the array in order, and supports
+     * bidirectional iteration. If the array is {@code null} or empty, an empty
+     * iterator is returned. {@code null} elements are permitted.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -184,7 +192,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      *
      * @param <T> the type of elements in the array
      * @param a the array whose elements are to be iterated
-     * @return an ObjListIterator over the array elements
+     * @return an {@code ObjListIterator} over the array elements
      */
     @SafeVarargs
     public static <T> ObjListIterator<T> of(final T... a) {
@@ -199,8 +207,11 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
     }
 
     /**
-     * Returns an ObjListIterator over a portion of the specified array.
-     * The iterator will traverse elements from fromIndex (inclusive) to toIndex (exclusive).
+     * Returns an {@code ObjListIterator} over a portion of the specified array.
+     * The iterator traverses elements from {@code fromIndex} (inclusive) to
+     * {@code toIndex} (exclusive) and supports bidirectional iteration. If the
+     * array is {@code null}/empty or the range is empty, an empty iterator is
+     * returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -213,8 +224,9 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * @param a the array whose elements are to be iterated
      * @param fromIndex the index of the first element to iterate (inclusive)
      * @param toIndex the index after the last element to iterate (exclusive)
-     * @return an ObjListIterator over the specified range of array elements
-     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; array length, or fromIndex &gt; toIndex
+     * @return an {@code ObjListIterator} over the specified range of array elements
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > a.length},
+     *         or {@code fromIndex > toIndex}
      */
     public static <T> ObjListIterator<T> of(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -229,9 +241,11 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
     }
 
     /**
-     * Returns an ObjListIterator over the elements in the specified List.
-     * If the List is {@code null}, returns an empty ObjListIterator.
-     * The iterator supports all ListIterator operations.
+     * Returns an {@code ObjListIterator} over the elements in the specified
+     * {@code List}. If the list is {@code null}, an empty
+     * {@code ObjListIterator} is returned. The returned iterator supports
+     * bidirectional traversal but not the mutating {@code set()}/{@code add()}/
+     * {@code remove()} operations.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -240,24 +254,26 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * }</pre>
      *
      * @param <T> the type of elements in the list
-     * @param list the List whose elements are to be iterated
-     * @return an ObjListIterator over the list elements
+     * @param list the {@code List} whose elements are to be iterated
+     * @return an {@code ObjListIterator} over the list elements
      */
     public static <T> ObjListIterator<T> of(final List<? extends T> list) {
         return list == null ? ObjListIterator.empty() : of(list.listIterator());
     }
 
     /**
-     * Returns an ObjListIterator that wraps the specified ListIterator.
-     * If the ListIterator is {@code null}, returns an empty ObjListIterator.
-     * If the ListIterator is already an ObjListIterator, returns it as-is.
+     * Returns an {@code ObjListIterator} that wraps the specified
+     * {@code ListIterator}. If the list iterator is {@code null}, an empty
+     * {@code ObjListIterator} is returned. If it is already an
+     * {@code ObjListIterator}, it is returned as-is (no wrapping is performed).
      *
-     * <p>Note: The returned ObjListIterator does not support set() and add()
-     * operations, even if the underlying ListIterator does.</p>
+     * <p>Note: The returned {@code ObjListIterator} does not support the
+     * {@code set()} and {@code add()} operations even if the underlying
+     * {@code ListIterator} does; they throw {@link UnsupportedOperationException}.</p>
      *
      * @param <T> the type of elements in the iterator
-     * @param iter the ListIterator to wrap
-     * @return an ObjListIterator wrapping the given ListIterator
+     * @param iter the {@code ListIterator} to wrap
+     * @return an {@code ObjListIterator} wrapping the given list iterator
      */
     public static <T> ObjListIterator<T> of(final ListIterator<? extends T> iter) {
         if (iter == null) {
@@ -326,10 +342,13 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
     }
 
     /**
-     * Returns a new ObjListIterator that skips the first n elements.
-     * If n is greater than or equal to the number of remaining elements,
-     * the returned iterator will be empty for forward iteration.
-     * Backward iteration is still supported from the current position.
+     * Returns a new {@code ObjListIterator} that skips the first {@code n}
+     * elements of this iterator. If {@code n} is greater than or equal to the
+     * number of remaining elements, the returned iterator will be empty for
+     * forward iteration. The skip is performed lazily on the first call to
+     * {@code hasNext()} or {@code next()}. If {@code n} is {@code 0}, this
+     * iterator is returned unchanged. Backward iteration delegates to the
+     * underlying iterator and reflects whatever elements it has consumed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -341,8 +360,9 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * }</pre>
      *
      * @param n the number of elements to skip
-     * @return a new ObjListIterator that skips the first n elements
-     * @throws IllegalArgumentException if n is negative
+     * @return a new {@code ObjListIterator} that skips the first {@code n} elements
+     * @throws IllegalArgumentException if {@code n} is negative
+     * @see #limit(long)
      */
     public ObjListIterator<T> skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -433,11 +453,12 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
     }
 
     /**
-     * Returns a new ObjListIterator that yields at most the first count elements.
-     * If count is 0, returns an empty iterator.
-     * If count is greater than the number of remaining elements,
-     * returns all remaining elements.
-     * Backward iteration is still fully supported.
+     * Returns a new {@code ObjListIterator} that yields at most the first
+     * {@code count} elements of this iterator in forward iteration. If
+     * {@code count} is {@code 0}, an empty iterator is returned. If
+     * {@code count} is greater than the number of remaining elements, all
+     * remaining elements are returned. Backward iteration delegates to the
+     * underlying iterator and is not bounded by {@code count}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -448,8 +469,9 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * }</pre>
      *
      * @param count the maximum number of elements to return in forward iteration
-     * @return a new ObjListIterator limited to count elements
-     * @throws IllegalArgumentException if count is negative
+     * @return a new {@code ObjListIterator} limited to {@code count} elements
+     * @throws IllegalArgumentException if {@code count} is negative
+     * @see #skip(long)
      */
     public ObjListIterator<T> limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, cs.count);
@@ -527,9 +549,12 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
     }
 
     /**
-     * Returns the first {@code non-null} element of this iterator wrapped in an Optional.
-     * If no {@code non-null} element is found, returns an empty Optional.
-     * This operation may consume multiple elements until a {@code non-null} element is found.
+     * Returns the first {@code non-null} element of this iterator wrapped in an
+     * {@link u.Optional}. If no {@code non-null} element is found, an empty
+     * {@code Optional} is returned. This is a terminal operation that consumes
+     * elements in forward direction until a {@code non-null} element is found
+     * (or the iterator is exhausted); the {@code null} elements skipped before
+     * it are discarded.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -537,7 +562,8 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * Optional<String> first = iter.firstNonNull();   // Optional.of("found")
      * }</pre>
      *
-     * @return an Optional containing the first {@code non-null} element, or empty if none found
+     * @return an {@code Optional} containing the first {@code non-null} element,
+     *         or an empty {@code Optional} if none is found
      * @deprecated inconsistent data is returned
      */
     @Deprecated
@@ -556,20 +582,25 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
     }
 
     /**
-     * Converts the remaining elements in this iterator to an Object array.
-     * This operation consumes all remaining elements in forward direction.
+     * Converts the remaining elements of this iterator to an {@code Object[]}.
+     * This is a terminal operation that consumes all remaining elements in the
+     * forward direction. An empty array is returned if no elements remain.
      *
-     * @return an array containing all remaining elements
+     * @return an {@code Object[]} containing all remaining elements
+     * @see #toArray(Object[])
+     * @see #toList()
      */
     public Object[] toArray() {
         return toArray(N.EMPTY_OBJECT_ARRAY);
     }
 
     /**
-     * Converts the remaining elements in this iterator to an array of the specified type.
-     * If the provided array is large enough, it is used directly. Otherwise, a new
-     * array of the same type is allocated.
-     * This operation consumes all remaining elements in forward direction.
+     * Converts the remaining elements of this iterator to an array of the
+     * specified type. If the provided array is large enough, it is used
+     * directly (following the {@link java.util.Collection#toArray(Object[])}
+     * contract); otherwise a new array of the same runtime type is allocated.
+     * This is a terminal operation that consumes all remaining elements in the
+     * forward direction.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -578,7 +609,8 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * }</pre>
      *
      * @param <A> the component type of the array
-     * @param a the array into which elements are stored, if big enough
+     * @param a the array into which the elements are stored, if it is big enough;
+     *          otherwise a new array of the same runtime type is allocated
      * @return an array containing all remaining elements
      */
     public <A> A[] toArray(final A[] a) {
@@ -586,9 +618,10 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
     }
 
     /**
-     * Converts the remaining elements in this iterator to a List.
-     * This operation consumes all remaining elements in forward direction.
-     * The returned list is mutable and can be modified.
+     * Converts the remaining elements of this iterator to a {@code List}.
+     * This is a terminal operation that consumes all remaining elements in the
+     * forward direction. The returned list is a new mutable {@link ArrayList};
+     * an empty list is returned if no elements remain.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -596,7 +629,8 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * List<Integer> list = iter.toList();   // [1, 2, 3]
      * }</pre>
      *
-     * @return a List containing all remaining elements
+     * @return a mutable {@code List} containing all remaining elements
+     * @see #toArray()
      */
     public List<T> toList() {
         final List<T> list = new ArrayList<>();
@@ -609,9 +643,10 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
     }
 
     /**
-     * Returns a Stream containing the remaining elements of this iterator.
-     * This operation creates a new Stream that will consume elements from this iterator
-     * in forward direction. The iterator should not be used after calling this method.
+     * Returns a {@link Stream} backed by the remaining elements of this
+     * iterator. The stream consumes elements lazily from this iterator in the
+     * forward direction as it is traversed; this iterator should not be used
+     * directly after this method is called.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -621,7 +656,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      *     .count();   // 3
      * }</pre>
      *
-     * @return a Stream of the remaining elements
+     * @return a {@code Stream} of the remaining elements
      */
     public Stream<T> stream() {
         return Stream.of(this);
@@ -638,10 +673,11 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * // Prints: a, b, c
      * }</pre>
      *
-     * @param <E> the type of exception that may be thrown
-     * @param action the action to perform for each element
-     * @throws IllegalArgumentException if action is null
+     * @param <E> the type of exception that the action may throw
+     * @param action the action to perform for each remaining element
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @throws E if the action throws an exception
+     * @see #foreachIndexed(Throwables.IntObjConsumer)
      */
     public <E extends Exception> void foreachRemaining(final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action);
@@ -670,10 +706,13 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * // 2: c
      * }</pre>
      *
-     * @param <E> the type of exception that may be thrown
+     * @param <E> the type of exception that the action may throw
      * @param action the action to perform for each element and its index
-     * @throws IllegalArgumentException if action is null
+     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalStateException if {@link #nextIndex()} overflows (more than
+     *         {@link Integer#MAX_VALUE} elements)
      * @throws E if the action throws an exception
+     * @see #foreachRemaining(Throwables.Consumer)
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntObjConsumer<? super T, E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action);

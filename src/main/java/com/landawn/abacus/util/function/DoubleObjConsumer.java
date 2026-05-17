@@ -68,7 +68,7 @@ public interface DoubleObjConsumer<T> extends Throwables.DoubleObjConsumer<T, Ru
      * combined.accept(5.5, "value");   // Logs then validates
      * }</pre>
      *
-     * @param after the operation to perform after this operation
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code DoubleObjConsumer} that performs in sequence this operation followed by the {@code after} operation
      * @throws NullPointerException if {@code after} is null
      */

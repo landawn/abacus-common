@@ -371,7 +371,8 @@ public final class ClassUtil {
     }
 
     /**
-     * The Constant SENTINEL_CLASS.
+     * A sentinel {@code Class} placeholder used internally to represent the absence of a class
+     * in cache pools (since {@code null} cannot be stored as a pool value).
      *
      * @deprecated for internal only.
      */
@@ -380,7 +381,8 @@ public final class ClassUtil {
     public static final Class<?> SENTINEL_CLASS = SentinelClass.class;
 
     /**
-     * The Constant SENTINEL_METHOD.
+     * A sentinel {@code Method} placeholder used internally to represent the absence of a method
+     * in cache pools (since {@code null} cannot be stored as a pool value).
      *
      * @deprecated for internal only.
      */
@@ -389,7 +391,8 @@ public final class ClassUtil {
     public static final Method SENTINEL_METHOD = ClassUtil.lookupDeclaredMethod(SentinelClass.class, "sentinelMethod");
 
     /**
-     * The Constant SENTINEL_FIELD.
+     * A sentinel {@code Field} placeholder used internally to represent the absence of a field
+     * in cache pools (since {@code null} cannot be stored as a pool value).
      *
      * @deprecated for internal only.
      */
@@ -731,6 +734,7 @@ public final class ClassUtil {
      * @param clazz the class whose source code location is to be retrieved
      * @return the path to the code-source location of the specified class, with URL encoding removed,
      *         or {@code null} if unavailable
+     * @throws NullPointerException if {@code clazz} is {@code null}
      */
     public static String getClassLocation(final Class<?> clazz) {
         final CodeSource codeSource = clazz.getProtectionDomain().getCodeSource();
@@ -760,10 +764,10 @@ public final class ClassUtil {
      * Class<?> arrClass = ClassUtil.forName("String[]");
      * }</pre>
      *
-     * @param <T> the type of the class
+     * @param <T> the type the returned {@code Class} object is parameterized to (the caller-expected type)
      * @param clsName the fully qualified name of the desired class
      * @return the Class object for the class with the specified name
-     * @throws IllegalArgumentException if the class cannot be located
+     * @throws IllegalArgumentException if the class cannot be located by the specified name
      */
     public static <T> Class<T> forName(final String clsName) throws IllegalArgumentException {
         return forName(clsName, true);
@@ -897,6 +901,8 @@ public final class ClassUtil {
      *
      * @param type the type whose name is to be retrieved
      * @return the formatted name of the specified type
+     * @throws NullPointerException if {@code type} is {@code null}
+     * @see #formatParameterizedTypeName(String)
      */
     public static String getTypeName(final java.lang.reflect.Type type) {
         return formatParameterizedTypeName(type.getTypeName());
@@ -1423,7 +1429,8 @@ public final class ClassUtil {
      * }</pre>
      *
      * @param cls the class to look up
-     * @return a set of all interfaces implemented by the class and its superclasses
+     * @return a set of all interfaces implemented by the class and its superclasses;
+     *         an empty set if {@code cls} is {@code null} or implements no interfaces
      * @see #getAllSuperclasses(Class)
      * @see #getAllSuperTypes(Class)
      */
@@ -1447,6 +1454,7 @@ public final class ClassUtil {
      *
      * @param cls the class to look up
      * @return a list of all superclasses, excluding {@code Object.class}
+     * @throws NullPointerException if {@code cls} is {@code null}
      * @see #getAllInterfaces(Class)
      * @see #getAllSuperTypes(Class)
      */
@@ -1473,7 +1481,10 @@ public final class ClassUtil {
      * }</pre>
      *
      * @param cls the class to look up
-     * @return a set of all interfaces and superclasses, excluding {@code Object.class}
+     * @return a set of all interfaces and superclasses, excluding {@code Object.class};
+     *         an empty set if {@code cls} is {@code null}
+     * @see #getAllInterfaces(Class)
+     * @see #getAllSuperclasses(Class)
      */
     public static Set<Class<?>> getAllSuperTypes(final Class<?> cls) {
         final Set<Class<?>> superTypesFound = N.newLinkedHashSet();
@@ -1531,6 +1542,7 @@ public final class ClassUtil {
      *
      * @param cls the class whose enclosing class is to be retrieved
      * @return the enclosing class of the specified class, or {@code null} if the class is not an inner class
+     * @throws NullPointerException if {@code cls} is {@code null}
      */
     @MayReturnNull
     public static Class<?> getEnclosingClass(final Class<?> cls) {
@@ -1559,10 +1571,12 @@ public final class ClassUtil {
      * String str = ctor.newInstance(new char[] {'a', 'b', 'c'});
      * }</pre>
      *
-     * @param <T> the type of the class
+     * @param <T> the type whose constructor is to be retrieved
      * @param cls the class object
-     * @param parameterTypes the parameter types of the constructor
+     * @param parameterTypes the parameter types of the constructor; may be empty for the no-arg constructor
      * @return the constructor declared in the specified class with the specified parameter types, or {@code null} if no constructor is found
+     * @throws NullPointerException if {@code cls} is {@code null}
+     * @see #getDeclaredMethod(Class, String, Class...)
      */
     @MayReturnNull
     public static <T> Constructor<T> getDeclaredConstructor(final Class<T> cls, final Class<?>... parameterTypes) {
@@ -1628,8 +1642,10 @@ public final class ClassUtil {
      *
      * @param cls the class object
      * @param methodName the name of the method to retrieve
-     * @param parameterTypes the parameter types of the method
+     * @param parameterTypes the parameter types of the method; may be empty for a no-arg method
      * @return the method declared in the specified class with the specified name and parameter types, or {@code null} if no method is found
+     * @throws NullPointerException if {@code cls} is {@code null}
+     * @see #getDeclaredConstructor(Class, Class...)
      */
     @MayReturnNull
     public static Method getDeclaredMethod(final Class<?> cls, final String methodName, final Class<?>... parameterTypes) {
@@ -1698,6 +1714,8 @@ public final class ClassUtil {
      *
      * @param field the field whose parameterized type name is to be retrieved
      * @return the parameterized type name of the field, including generic type information if available
+     * @throws NullPointerException if {@code field} is {@code null}
+     * @see #getParameterizedTypeNameByMethod(Method)
      */
     public static String getParameterizedTypeNameByField(final Field field) {
         final String typeName = formatParameterizedTypeName(field.getGenericType().getTypeName());
@@ -1734,6 +1752,8 @@ public final class ClassUtil {
      *
      * @param method the method whose parameterized type name is to be retrieved
      * @return the parameterized type name of the method's parameter or return type, including generic type information if available
+     * @throws NullPointerException if {@code method} is {@code null}
+     * @see #getParameterizedTypeNameByField(Field)
      */
     public static String getParameterizedTypeNameByMethod(final Method method) {
         String typeName = null;
@@ -2568,6 +2588,7 @@ public final class ClassUtil {
      *
      * @param method the method for which the MethodHandle is to be created
      * @return the MethodHandle for the specified method
+     * @throws NullPointerException if {@code method} is {@code null}
      * @throws UnsupportedOperationException if the MethodHandle cannot be created
      */
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")

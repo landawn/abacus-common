@@ -126,7 +126,7 @@ public final class Charsets {
     public static final Charset UTF_16LE = StandardCharsets.UTF_16LE;
 
     /**
-     * Returns the default charset of this Java virtual machine.
+     * The default charset of this Java virtual machine.
      *
      * <p>The default charset is determined during virtual-machine startup
      * and typically depends upon the locale and charset of the underlying
@@ -170,7 +170,10 @@ public final class Charsets {
      *
      * <p>This caching mechanism significantly improves performance compared to repeatedly calling
      * {@code Charset.forName()} directly, especially in scenarios where the same charset is accessed
-     * frequently. The method is thread-safe, ensuring correct behavior in concurrent environments.</p>
+     * frequently. The underlying cache is backed by a concurrent map, so concurrent access is safe;
+     * however, the cache population is not performed as a single atomic operation, so
+     * {@link Charset#forName(String)} may be invoked more than once for the same name when the same
+     * uncached charset is requested concurrently.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

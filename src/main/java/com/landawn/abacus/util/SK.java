@@ -23,8 +23,14 @@ import com.landawn.abacus.annotation.Internal;
  * This class serves as a centralized repository for string constants to avoid hardcoding
  * and improve code maintainability.
  *
- * <p>All fields in this class are public static final constants representing either
- * single characters (prefixed with underscore) or their string equivalents.</p>
+ * <p>All fields in this class are {@code public static final} constants. Single-character
+ * constants are typically named with a leading underscore (for example, {@code _COMMA}),
+ * while their {@code String} equivalents use the same name without the underscore (for
+ * example, {@code COMMA}). A few character constants use the {@code CHAR_} prefix instead
+ * (for example, {@link #CHAR_LF}).</p>
+ *
+ * <p><b>Note:</b> This class is annotated {@code @Beta} and {@code @Internal}; it is
+ * intended for internal use and its API may change without notice.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code

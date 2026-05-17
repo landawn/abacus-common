@@ -304,6 +304,9 @@ public final class Suppliers {
      * <p>This method creates a supplier that captures the provided value and function,
      * and when the supplier is called, it applies the function to the value and returns the result.</p>
      *
+     * <p>Note: the function is applied on every call to the returned supplier's
+     * {@code get()} method, not memoized.</p>
+     *
      * @param <A> the type of the input value
      * @param <T> the type of results supplied by the supplier
      * @param a the value to be processed by the function
@@ -929,8 +932,9 @@ public final class Suppliers {
      * backed by the specified type of Map.</p>
      *
      * @param <T> the type of elements in the multiset
-     * @param valueMapType the class of Map to use for storing element counts
-     * @return a supplier that creates new Multiset instances
+     * @param valueMapType the class of {@code Map} to use for storing element counts
+     * @return a supplier that creates new Multiset instances backed by the specified map type
+     * @throws IllegalArgumentException if {@code valueMapType} is {@code null}
      */
     @SuppressWarnings("rawtypes")
     public static <T> Supplier<Multiset<T>> ofMultiset(final Class<? extends Map> valueMapType) {
@@ -944,8 +948,9 @@ public final class Suppliers {
      * backed by a Map created by the provided supplier.</p>
      *
      * @param <T> the type of elements in the multiset
-     * @param mapSupplier supplier to create the backing Map
-     * @return a supplier that creates new Multiset instances
+     * @param mapSupplier supplier to create the backing {@code Map} used for storing element counts
+     * @return a supplier that creates new Multiset instances backed by maps from the given supplier
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}
      */
     public static <T> Supplier<Multiset<T>> ofMultiset(final java.util.function.Supplier<? extends Map<T, ?>> mapSupplier) {
         return () -> N.newMultiset(mapSupplier);
@@ -1145,6 +1150,7 @@ public final class Suppliers {
      * @return a Supplier that creates instances of the specified Collection type
      * @throws IllegalArgumentException if targetType is not a Collection class, is abstract and cannot be instantiated,
      *         or if no suitable implementation can be found
+     * @see #registerForCollection(Class, java.util.function.Supplier)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Supplier<? extends Collection<T>> ofCollection(final Class<? extends Collection> targetType) throws IllegalArgumentException {
@@ -1235,6 +1241,7 @@ public final class Suppliers {
      * @return a Supplier that creates instances of the specified Map type
      * @throws IllegalArgumentException if targetType is not a Map class, is abstract and cannot be instantiated,
      *         or if no suitable implementation can be found
+     * @see #registerForMap(Class, java.util.function.Supplier)
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Supplier<? extends Map<K, V>> ofMap(final Class<? extends Map> targetType) throws IllegalArgumentException {
@@ -1305,6 +1312,7 @@ public final class Suppliers {
      * @param supplier the Supplier that creates instances of the target class
      * @return {@code true} if the registration was successful, {@code false} if a supplier was already registered for this class
      * @throws IllegalArgumentException if targetClass or supplier is {@code null}, or if targetClass is a built-in class
+     * @see #ofCollection(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Collection> boolean registerForCollection(final Class<T> targetClass, final java.util.function.Supplier<T> supplier)
@@ -1337,6 +1345,7 @@ public final class Suppliers {
      * @param supplier the Supplier that creates instances of the target class
      * @return {@code true} if the registration was successful, {@code false} if a supplier was already registered for this class
      * @throws IllegalArgumentException if targetClass or supplier is {@code null}, or if targetClass is a built-in class
+     * @see #ofMap(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Map> boolean registerForMap(final Class<T> targetClass, final java.util.function.Supplier<T> supplier)

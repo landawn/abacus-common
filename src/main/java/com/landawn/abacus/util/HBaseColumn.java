@@ -28,7 +28,8 @@ import java.util.TreeSet;
  * Represents a column value in HBase with its associated version (timestamp).
  * This class provides a type-safe wrapper for HBase column values along with their version information.
  *
- * <p>The class is immutable and implements {@link Comparable} based on version timestamps.
+ * <p>The class is immutable and implements {@link Comparable}, ordering instances primarily by
+ * version timestamp in ascending order with a value-based tie-break (see {@link #compareTo(HBaseColumn)}).
  * It provides various factory methods for creating instances and converting them to different collection types.</p>
  *
  * <p><b>Usage Examples:</b></p>
@@ -48,31 +49,31 @@ import java.util.TreeSet;
  */
 public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
 
-    /** Empty boolean column instance with value false and version 0 */
+    /** Empty boolean column instance with value {@code false} and version {@code 0}. */
     public static final HBaseColumn<Boolean> EMPTY_BOOLEAN_COLUMN = HBaseColumn.valueOf(false, 0);
 
-    /** Empty character column instance with value '\0' and version 0 */
+    /** Empty character column instance with value {@code '\0'} and version {@code 0}. */
     public static final HBaseColumn<Character> EMPTY_CHAR_COLUMN = HBaseColumn.valueOf((char) 0, 0);
 
-    /** Empty byte column instance with value 0 and version 0 */
+    /** Empty byte column instance with value {@code 0} and version {@code 0}. */
     public static final HBaseColumn<Byte> EMPTY_BYTE_COLUMN = HBaseColumn.valueOf((byte) 0, 0);
 
-    /** Empty short column instance with value 0 and version 0 */
+    /** Empty short column instance with value {@code 0} and version {@code 0}. */
     public static final HBaseColumn<Short> EMPTY_SHORT_COLUMN = HBaseColumn.valueOf((short) 0, 0);
 
-    /** Empty integer column instance with value 0 and version 0 */
+    /** Empty integer column instance with value {@code 0} and version {@code 0}. */
     public static final HBaseColumn<Integer> EMPTY_INT_COLUMN = HBaseColumn.valueOf(0, 0);
 
-    /** Empty long column instance with value 0L and version 0 */
+    /** Empty long column instance with value {@code 0L} and version {@code 0}. */
     public static final HBaseColumn<Long> EMPTY_LONG_COLUMN = HBaseColumn.valueOf(0L, 0);
 
-    /** Empty float column instance with value 0f and version 0 */
+    /** Empty float column instance with value {@code 0f} and version {@code 0}. */
     public static final HBaseColumn<Float> EMPTY_FLOAT_COLUMN = HBaseColumn.valueOf(0f, 0);
 
-    /** Empty double column instance with value 0d and version 0 */
+    /** Empty double column instance with value {@code 0d} and version {@code 0}. */
     public static final HBaseColumn<Double> EMPTY_DOUBLE_COLUMN = HBaseColumn.valueOf(0d, 0);
 
-    /** Empty object column instance with null value and version 0 */
+    /** Empty object column instance with {@code null} value and version {@code 0}. */
     public static final HBaseColumn<Object> EMPTY_OBJECT_COLUMN = HBaseColumn.valueOf(null, 0);
 
     private static final long LATEST_TIMESTAMP = Long.MAX_VALUE;
@@ -91,10 +92,10 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
         emptyColumnPool.put(String.class, EMPTY_OBJECT_COLUMN);
     }
 
-    /** Comparator that sorts HBaseColumn instances by version in descending order */
+    /** Comparator that sorts {@code HBaseColumn} instances by version in descending order. */
     public static final Comparator<HBaseColumn<?>> DESC_HBASE_COLUMN_COMPARATOR = (o1, o2) -> Long.compare(o2.version, o1.version);
 
-    /** Comparator that sorts version numbers (Long) in descending order */
+    /** Comparator that sorts version numbers ({@code Long}) in descending order. */
     public static final Comparator<Long> DESC_HBASE_VERSION_COMPARATOR = Comparator.comparing(Long::longValue).reversed();
 
     private final T value;
@@ -103,9 +104,10 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
 
     /**
      * Constructs an HBaseColumn with the specified value and the latest timestamp.
-     * The version will be set to {@code Long.MAX_VALUE}.
+     * The version is set to {@code Long.MAX_VALUE}, which represents the latest version in HBase.
      *
-     * @param value the column value
+     * @param value the column value (may be {@code null})
+     * @see #HBaseColumn(Object, long)
      */
     public HBaseColumn(final T value) {
         this(value, LATEST_TIMESTAMP);
@@ -114,8 +116,9 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * Constructs an HBaseColumn with the specified value and version.
      *
-     * @param value the column value
-     * @param version the version timestamp
+     * @param value the column value (may be {@code null})
+     * @param version the version timestamp associated with the value
+     * @see #HBaseColumn(Object)
      */
     public HBaseColumn(final T value, final long version) {
         this.value = value;
@@ -135,7 +138,9 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      *
      * @param <T> the type of the column value
      * @param targetClass the class type for which to get an empty column
-     * @return an empty HBaseColumn instance
+     * @return an empty HBaseColumn instance; the matching primitive constant if {@code targetClass}
+     *         is a registered primitive type, otherwise {@link #EMPTY_OBJECT_COLUMN}
+     * @see #isNull()
      */
     public static <T> HBaseColumn<T> emptyOf(final Class<?> targetClass) {
         final HBaseColumn<?> column = emptyColumnPool.get(targetClass);

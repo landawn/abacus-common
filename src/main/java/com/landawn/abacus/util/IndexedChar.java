@@ -20,8 +20,10 @@ package com.landawn.abacus.util;
  * need to be preserved, such as when processing strings while maintaining knowledge of
  * character positions.
  *
- * <p>This class extends {@link AbstractIndexed} and provides factory methods for creating
- * instances with validated non-negative indices.</p>
+ * <p>This class is a specialized version of {@code Indexed<Character>} for primitive char
+ * values, providing better performance by avoiding boxing/unboxing overhead. It extends
+ * {@link AbstractIndexed} and provides factory methods for creating instances with validated
+ * non-negative indices.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -45,9 +47,11 @@ public final class IndexedChar extends AbstractIndexed {
 
     /**
      * Constructs an IndexedChar instance with the specified index and value.
+     * This is a package-private constructor; use {@link #of(char, int)} or
+     * {@link #of(char, long)} factory methods for creating instances.
      *
-     * @param index the index position
-     * @param value the char value to be indexed
+     * @param index the index position (non-negative long value)
+     * @param value the char value to be associated with the index
      */
     IndexedChar(final long index, final char value) {
         super(index);
@@ -62,10 +66,10 @@ public final class IndexedChar extends AbstractIndexed {
      * IndexedChar indexed = IndexedChar.of('X', 5);
      * }</pre>
      *
-     * @param value the char value to be stored
-     * @param index the index position, must be non-negative
-     * @return a new {@code IndexedChar} instance
-     * @throws IllegalArgumentException if the index is negative
+     * @param value the char value to be associated with the index
+     * @param index the index position (must be non-negative, 0 to Integer.MAX_VALUE)
+     * @return a new immutable {@code IndexedChar} instance containing the specified value and index
+     * @throws IllegalArgumentException if the index is negative (index &lt; 0)
      */
     public static IndexedChar of(final char value, final int index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
@@ -83,10 +87,10 @@ public final class IndexedChar extends AbstractIndexed {
      * IndexedChar indexed = IndexedChar.of('Z', 1000000000L);
      * }</pre>
      *
-     * @param value the char value to be stored
-     * @param index the index position as a long, must be non-negative
-     * @return a new {@code IndexedChar} instance
-     * @throws IllegalArgumentException if the index is negative
+     * @param value the char value to be associated with the index
+     * @param index the index position as a long (must be non-negative, 0 to Long.MAX_VALUE)
+     * @return a new immutable {@code IndexedChar} instance containing the specified value and index
+     * @throws IllegalArgumentException if the index is negative (index &lt; 0)
      */
     public static IndexedChar of(final char value, final long index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
@@ -97,7 +101,10 @@ public final class IndexedChar extends AbstractIndexed {
     /**
      * Returns the char value stored in this IndexedChar instance.
      *
-     * @return the char value
+     * <p>The index associated with this value can be retrieved through the {@link #index()}
+     * method inherited from {@link AbstractIndexed}.</p>
+     *
+     * @return the char value associated with this index
      */
     public char value() {
         return value;

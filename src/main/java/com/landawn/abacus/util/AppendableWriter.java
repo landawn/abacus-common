@@ -245,8 +245,8 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
     /**
      * Flushes the stream.
      *
-     * <p>If the underlying Appendable implements Flushable, its flush method will be called.
-     * Otherwise, this method does nothing.</p>
+     * <p>If the underlying {@code Appendable} implements {@link java.io.Flushable},
+     * its {@code flush()} method is called. Otherwise, this method does nothing.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -319,9 +319,9 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
     }
 
     /**
-     * Returns the current content of the underlying Appendable as a string.
+     * Returns the current content of the underlying {@code Appendable} as a string.
      *
-     * <p>This method calls toString() on the wrapped Appendable object.</p>
+     * <p>This method delegates to {@code toString()} on the wrapped {@code Appendable} object.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -331,7 +331,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * System.out.println(writer.toString());   // "Hello"
      * }</pre>
      *
-     * @return the string representation of the underlying Appendable
+     * @return the string representation of the underlying {@code Appendable}
      */
     @Override
     public String toString() {

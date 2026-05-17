@@ -234,9 +234,9 @@ public final class RowDataset implements Dataset, Cloneable {
      * RowDataset dataset = new RowDataset(columnNames, columns, properties);
      *
      * // Accessing dataset and properties
-     * System.out.println(dataset.size());                  // prints: 3
-     * System.out.println(dataset.getProperty("source"));   // prints: "test_data"
-     * System.out.println(dataset.get(0, "name"));          // prints: "Alice"
+     * System.out.println(dataset.size());                          // prints: 3
+     * System.out.println(dataset.getProperties().get("source"));   // prints: "test_data"
+     * System.out.println(dataset.get(0, 1));                        // prints: "Alice"
      * }</pre>
      *
      * @param columnNameList the list of column names for the dataset. Must not be {@code null},
@@ -271,6 +271,10 @@ public final class RowDataset implements Dataset, Cloneable {
         N.checkArgument(!N.containsDuplicates(columnNameList), "Duplicated column names found in: {}", columnNameList);
         N.checkArgument(columnNameList.size() == columnList.size(), "The size of column name list: {} is different from the size of column list: {}",
                 columnNameList.size(), columnList.size());
+
+        if (columnList.size() > 0) {
+            N.checkArgNotNull(columnList.get(0), "Column in columnList cannot be null");
+        }
 
         final int size = columnList.size() == 0 ? 0 : columnList.get(0).size();
 
@@ -9386,12 +9390,12 @@ public final class RowDataset implements Dataset, Cloneable {
                 for (int i = 0; i < columnLen; i++) {
                     final List<Object> column = _columnList.get(columnIndexes[i]);
                     final List<String> strColumn = new ArrayList<>(rowLen);
-                    int maxLen = N.len(columnNameList.get(i));
+                    int maxLen = Strings.displayWidth(columnNameList.get(i));
                     String str = null;
 
                     for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
                         str = N.toString(column.get(rowIndex));
-                        maxLen = N.max(maxLen, N.len(str));
+                        maxLen = N.max(maxLen, Strings.displayWidth(str));
                         strColumn.add(str);
                     }
 
@@ -9418,7 +9422,7 @@ public final class RowDataset implements Dataset, Cloneable {
                         appendable.append(" | ");
                     }
 
-                    appendable.append(Strings.padEnd(columnNameList.get(i), maxColumnLens[i]));
+                    appendable.append(Strings.padEndByDisplayWidth(columnNameList.get(i), maxColumnLens[i]));
                 }
 
                 appendable.append(" |");
@@ -9442,7 +9446,7 @@ public final class RowDataset implements Dataset, Cloneable {
                             appendable.append(" | ");
                         }
 
-                        appendable.append(Strings.padEnd(strColumnList.get(i).get(j), maxColumnLens[i]));
+                        appendable.append(Strings.padEndByDisplayWidth(strColumnList.get(i).get(j), maxColumnLens[i]));
                     }
 
                     appendable.append(" |");

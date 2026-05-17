@@ -78,6 +78,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
  * @see TypeReference
  * @see SerializationFeature
  * @see DeserializationFeature
+ * @see JsonUtil
  */
 public final class JsonMappers {
     private static final int POOL_SIZE = 128;
@@ -1789,9 +1790,9 @@ public final class JsonMappers {
     }
 
     /**
-     * Wraps a Jackson ObjectMapper instance to provide convenient JSON operations through the One wrapper class.
+     * Wraps a Jackson ObjectMapper instance to provide convenient JSON operations through the {@link One} wrapper class.
      * This method allows using a custom ObjectMapper with specific configurations while benefiting from
-     * the simplified API provided by the One wrapper.
+     * the simplified API provided by the {@link One} wrapper.
      *
      * <p>The wrapped mapper will be used for all JSON operations performed through the returned One instance.
      * A separate mapper instance with pretty printing enabled is automatically created for formatted output.</p>

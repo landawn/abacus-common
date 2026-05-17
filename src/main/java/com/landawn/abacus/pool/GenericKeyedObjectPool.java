@@ -269,14 +269,21 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 }
             }
 
-            final long keyValueMemorySize = memoryMeasure == null ? 0 : memoryMeasure.sizeOf(key, value);
-
-            if (memoryMeasure != null && keyValueMemorySize < 0) {
-                logger.warn("Memory measure returned negative size for key/value: {}", keyValueMemorySize);
-                return false;
-            }
-
             if (memoryMeasure != null) {
+                long keyValueMemorySize;
+
+                try {
+                    keyValueMemorySize = memoryMeasure.sizeOf(key, value);
+                } catch (final Exception ex) {
+                    logger.warn("Error measuring memory size of entry", ex);
+                    return false;
+                }
+
+                if (keyValueMemorySize < 0) {
+                    logger.warn("Memory measure returned negative size for key/value: {}", keyValueMemorySize);
+                    return false;
+                }
+
                 if (maxMemorySize > 0 && keyValueMemorySize > maxMemorySize - totalDataSize.get()) {
                     if (autoBalance) {
                         evict();
@@ -406,16 +413,20 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 }
             }
 
-            return element;
         } finally {
             lock.unlock();
-
-            if (element != null) {
-                hitCount.incrementAndGet();
-            } else {
-                missCount.incrementAndGet();
-            }
         }
+
+        // Only account hit/miss on a normal completion. If the body threw (e.g. a
+        // concurrent close() made assertNotClosed() raise IllegalStateException), the
+        // call neither hit nor missed the pool and must not skew the statistics.
+        if (element != null) {
+            hitCount.incrementAndGet();
+        } else {
+            missCount.incrementAndGet();
+        }
+
+        return element;
     }
 
     /**

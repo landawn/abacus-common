@@ -120,8 +120,9 @@ public final class ByteArrayOutputStream extends OutputStream {
      * @param b the byte array containing data to write
      * @param off the start offset in the data
      * @param len the number of bytes to write
-     * @throws IndexOutOfBoundsException if off is negative, len is negative,
-     *         or off+len is greater than the length of the array b
+     * @throws NullPointerException if {@code b} is {@code null}
+     * @throws IndexOutOfBoundsException if {@code off} is negative, {@code len} is negative,
+     *         or {@code off + len} is greater than the length of the array {@code b}
      */
     @Override
     public void write(final byte[] b, final int off, final int len) {
@@ -170,6 +171,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      * }</pre>
      *
      * @param out the output stream to write to
+     * @throws NullPointerException if {@code out} is {@code null}
      * @throws IOException if an I/O error occurs
      */
     public void writeTo(final OutputStream out) throws IOException {

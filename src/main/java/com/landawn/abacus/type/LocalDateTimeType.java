@@ -39,6 +39,7 @@ import com.landawn.abacus.util.Numbers;
  */
 public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
 
+    /** The type name constant for LocalDateTime type identification, equal to {@code "LocalDateTime"}. */
     public static final String LOCAL_DATE_TIME = LocalDateTime.class.getSimpleName();
 
     /**

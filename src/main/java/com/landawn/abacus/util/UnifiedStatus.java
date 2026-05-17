@@ -397,8 +397,14 @@ public enum UnifiedStatus {
      * UnifiedStatus invalid = UnifiedStatus.fromCode(999);   // Returns null
      * }</pre>
      *
+     * <p>Not every value in the {@code [0, 128)} range is assigned (there are intentional
+     * gaps, e.g. code {@code 10} and codes {@code 16}&ndash;{@code 20}); such codes, as well
+     * as negative codes or codes {@code >= 128}, return {@code null}.</p>
+     *
      * @param code the numeric code to look up
-     * @return the UnifiedStatus associated with the code, or {@code null} if no UnifiedStatus exists for that code
+     * @return the {@code UnifiedStatus} associated with the code, or {@code null} if no
+     *         {@code UnifiedStatus} is mapped to that code
+     * @see #code()
      */
     public static UnifiedStatus fromCode(final int code) {
         return code < 0 || code >= MAX_CODE ? null : cache[code];

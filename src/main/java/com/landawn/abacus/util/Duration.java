@@ -1246,8 +1246,8 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * Two durations are considered equal if they represent the exact same amount of time.
      * </p>
      *
-     * @param obj the object to check, {@code null} returns false.
-     * @return {@code true} if this is equal to the other duration.
+     * @param obj the object to check, {@code null} returns {@code false}.
+     * @return {@code true} if {@code obj} is a {@code Duration} representing the same length of time, {@code false} otherwise.
      */
     @Override
     public boolean equals(final Object obj) {
@@ -1289,8 +1289,8 @@ public final class Duration implements Comparable<Duration>, Immutable {
      *   <li>"PT1H" - 1 hour</li>
      *   <li>"PT1H30M" - 1 hour and 30 minutes</li>
      *   <li>"PT1H30M25S" - 1 hour, 30 minutes and 25 seconds</li>
-     *   <li>"PT25.5S" - 25.5 seconds (25 seconds and 500 milliseconds)</li>
-     *   <li>"PT-0.5S" - negative 500 milliseconds</li>
+     *   <li>"PT25.500S" - 25.5 seconds (25 seconds and 500 milliseconds); milliseconds are always padded to 3 digits</li>
+     *   <li>"PT-0.500S" - negative 500 milliseconds; a single leading '-' after "PT" indicates a negative duration</li>
      * </ul>
      *
      * @return an ISO-8601 representation of this duration, not {@code null}.

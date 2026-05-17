@@ -103,7 +103,8 @@ public final class Reflection<T> {
      * @param <T> the type of the class
      * @param clsName the fully qualified name of the class
      * @return a Reflection instance for the specified class
-     * @throws IllegalArgumentException if the class cannot be located
+     * @throws RuntimeException if the class with the given name cannot be located
+     * @see ClassUtil#forName(String)
      */
     public static <T> Reflection<T> on(final String clsName) {
         return on(ClassUtil.forName(clsName));
@@ -138,8 +139,9 @@ public final class Reflection<T> {
      * }</pre>
      *
      * @param <T> the type of the target object
-     * @param instance the object to reflect upon
+     * @param instance the object to reflect upon, must not be {@code null}
      * @return a Reflection instance for the specified object
+     * @throws NullPointerException if {@code instance} is {@code null}
      */
     public static <T> Reflection<T> on(final T instance) {
         return new Reflection<>((Class<T>) instance.getClass(), instance);

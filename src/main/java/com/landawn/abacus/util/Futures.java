@@ -1078,9 +1078,11 @@ public final class Futures {
      *
      * @param <T1> the result type of the first future.
      * @param <T2> the result type of the second future.
-     * @param cf1 the first future.
-     * @param cf2 the second future.
-     * @return a ContinuableFuture containing a Tuple2 with both results.
+     * @param cf1 the first future, must not be {@code null}.
+     * @param cf2 the second future, must not be {@code null}.
+     * @return a {@code ContinuableFuture} whose result is a {@code Tuple2} holding both results,
+     *         in input order. Calling {@code get()} on it waits for both input futures and may
+     *         throw {@link InterruptedException} or {@link ExecutionException}.
      * @see #combine(Future, Future, Future)
      * @see #combine(Future, Future, Future, Future)
      * @see #combine(Future, Future, Future, Future, Future)
@@ -1113,10 +1115,12 @@ public final class Futures {
      * @param <T1> the result type of the first future.
      * @param <T2> the result type of the second future.
      * @param <T3> the result type of the third future.
-     * @param cf1 the first future.
-     * @param cf2 the second future.
-     * @param cf3 the third future.
-     * @return a ContinuableFuture containing a Tuple3 with all three results.
+     * @param cf1 the first future, must not be {@code null}.
+     * @param cf2 the second future, must not be {@code null}.
+     * @param cf3 the third future, must not be {@code null}.
+     * @return a {@code ContinuableFuture} whose result is a {@code Tuple3} holding all three
+     *         results, in input order. Calling {@code get()} on it waits for all input futures
+     *         and may throw {@link InterruptedException} or {@link ExecutionException}.
      * @see #combine(Future, Future)
      * @see #combine(Future, Future, Future, Future)
      * @see #combine(Future, Future, Future, Future, Future)
@@ -1152,11 +1156,13 @@ public final class Futures {
      * @param <T2> the result type of the second future.
      * @param <T3> the result type of the third future.
      * @param <T4> the result type of the fourth future.
-     * @param cf1 the first future.
-     * @param cf2 the second future.
-     * @param cf3 the third future.
-     * @param cf4 the fourth future.
-     * @return a ContinuableFuture containing a Tuple4 with all four results.
+     * @param cf1 the first future, must not be {@code null}.
+     * @param cf2 the second future, must not be {@code null}.
+     * @param cf3 the third future, must not be {@code null}.
+     * @param cf4 the fourth future, must not be {@code null}.
+     * @return a {@code ContinuableFuture} whose result is a {@code Tuple4} holding all four
+     *         results, in input order. Calling {@code get()} on it waits for all input futures
+     *         and may throw {@link InterruptedException} or {@link ExecutionException}.
      * @see #combine(Future, Future)
      * @see #combine(Future, Future, Future)
      * @see #combine(Future, Future, Future, Future, Future)
@@ -1195,12 +1201,14 @@ public final class Futures {
      * @param <T3> the result type of the third future.
      * @param <T4> the result type of the fourth future.
      * @param <T5> the result type of the fifth future.
-     * @param cf1 the first future.
-     * @param cf2 the second future.
-     * @param cf3 the third future.
-     * @param cf4 the fourth future.
-     * @param cf5 the fifth future.
-     * @return a ContinuableFuture containing a Tuple5 with all five results.
+     * @param cf1 the first future, must not be {@code null}.
+     * @param cf2 the second future, must not be {@code null}.
+     * @param cf3 the third future, must not be {@code null}.
+     * @param cf4 the fourth future, must not be {@code null}.
+     * @param cf5 the fifth future, must not be {@code null}.
+     * @return a {@code ContinuableFuture} whose result is a {@code Tuple5} holding all five
+     *         results, in input order. Calling {@code get()} on it waits for all input futures
+     *         and may throw {@link InterruptedException} or {@link ExecutionException}.
      * @see #combine(Future, Future)
      * @see #combine(Future, Future, Future)
      * @see #combine(Future, Future, Future, Future)
@@ -1240,13 +1248,15 @@ public final class Futures {
      * @param <T4> the result type of the fourth future.
      * @param <T5> the result type of the fifth future.
      * @param <T6> the result type of the sixth future.
-     * @param cf1 the first future.
-     * @param cf2 the second future.
-     * @param cf3 the third future.
-     * @param cf4 the fourth future.
-     * @param cf5 the fifth future.
-     * @param cf6 the sixth future.
-     * @return a ContinuableFuture containing a Tuple6 with all six results.
+     * @param cf1 the first future, must not be {@code null}.
+     * @param cf2 the second future, must not be {@code null}.
+     * @param cf3 the third future, must not be {@code null}.
+     * @param cf4 the fourth future, must not be {@code null}.
+     * @param cf5 the fifth future, must not be {@code null}.
+     * @param cf6 the sixth future, must not be {@code null}.
+     * @return a {@code ContinuableFuture} whose result is a {@code Tuple6} holding all six
+     *         results, in input order. Calling {@code get()} on it waits for all input futures
+     *         and may throw {@link InterruptedException} or {@link ExecutionException}.
      * @see #combine(Future, Future)
      * @see #combine(Future, Future, Future)
      * @see #combine(Future, Future, Future, Future)
@@ -1294,14 +1304,16 @@ public final class Futures {
      * @param <T5> the result type of the fifth future.
      * @param <T6> the result type of the sixth future.
      * @param <T7> the result type of the seventh future.
-     * @param cf1 the first future.
-     * @param cf2 the second future.
-     * @param cf3 the third future.
-     * @param cf4 the fourth future.
-     * @param cf5 the fifth future.
-     * @param cf6 the sixth future.
-     * @param cf7 the seventh future.
-     * @return a ContinuableFuture containing a Tuple7 with all seven results.
+     * @param cf1 the first future, must not be {@code null}.
+     * @param cf2 the second future, must not be {@code null}.
+     * @param cf3 the third future, must not be {@code null}.
+     * @param cf4 the fourth future, must not be {@code null}.
+     * @param cf5 the fifth future, must not be {@code null}.
+     * @param cf6 the sixth future, must not be {@code null}.
+     * @param cf7 the seventh future, must not be {@code null}.
+     * @return a {@code ContinuableFuture} whose result is a {@code Tuple7} holding all seven
+     *         results, in input order. Calling {@code get()} on it waits for all input futures
+     *         and may throw {@link InterruptedException} or {@link ExecutionException}.
      * @see #combine(Future, Future)
      * @see #combine(Future, Future, Future)
      * @see #combine(Future, Future, Future, Future)
@@ -1338,10 +1350,15 @@ public final class Futures {
      * @param <T1> the result type of the first future.
      * @param <T2> the result type of the second future.
      * @param <R> the result type after applying the action.
-     * @param cf1 the first future.
-     * @param cf2 the second future.
-     * @param action the function to apply to both results. Receives the actual values (not futures).
-     * @return a ContinuableFuture containing the result of applying the action to both values.
+     * @param cf1 the first future, must not be {@code null}.
+     * @param cf2 the second future, must not be {@code null}.
+     * @param action the function to apply to both results. Receives the actual values (not the
+     *               futures). Must not be {@code null}.
+     * @return a {@code ContinuableFuture} whose result is the value produced by {@code action}
+     *         applied to both completed results. Calling {@code get()} on it waits for both
+     *         input futures and may throw {@link InterruptedException} or
+     *         {@link ExecutionException}; if {@code action} throws, the exception is propagated
+     *         (wrapped in a {@link RuntimeException} if it is a checked exception).
      */
     public static <T1, T2, R> ContinuableFuture<R> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2,
             final Throwables.BiFunction<? super T1, ? super T2, ? extends R, ? extends Exception> action) {
@@ -1371,11 +1388,16 @@ public final class Futures {
      * @param <T2> the result type of the second future.
      * @param <T3> the result type of the third future.
      * @param <R> the result type after applying the action.
-     * @param cf1 the first future.
-     * @param cf2 the second future.
-     * @param cf3 the third future.
-     * @param action the function to apply to all three results.
-     * @return a ContinuableFuture containing the result of applying the action.
+     * @param cf1 the first future, must not be {@code null}.
+     * @param cf2 the second future, must not be {@code null}.
+     * @param cf3 the third future, must not be {@code null}.
+     * @param action the function to apply to all three results. Receives the actual values (not
+     *               the futures). Must not be {@code null}.
+     * @return a {@code ContinuableFuture} whose result is the value produced by {@code action}
+     *         applied to all three completed results. Calling {@code get()} on it waits for all
+     *         input futures and may throw {@link InterruptedException} or
+     *         {@link ExecutionException}; if {@code action} throws, the exception is propagated
+     *         (wrapped in a {@link RuntimeException} if it is a checked exception).
      */
     public static <T1, T2, T3, R> ContinuableFuture<R> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2, final Future<? extends T3> cf3,
             final Throwables.TriFunction<? super T1, ? super T2, ? super T3, ? extends R, ? extends Exception> action) {
@@ -1404,9 +1426,15 @@ public final class Futures {
      *
      * @param <T> the result type of the input futures.
      * @param <R> the result type after applying the action.
-     * @param cfs the collection of futures to combine.
-     * @param action the function to apply to the list of results.
-     * @return a ContinuableFuture containing the result of the action.
+     * @param cfs the collection of futures to combine, must not be {@code null} or empty.
+     * @param action the function to apply to the list of results, in iteration order of
+     *               {@code cfs}. Must not be {@code null}.
+     * @return a {@code ContinuableFuture} whose result is the value produced by {@code action}
+     *         applied to the list of all completed results. Calling {@code get()} on it waits
+     *         for all input futures and may throw {@link InterruptedException} or
+     *         {@link ExecutionException}; if {@code action} throws, the exception is propagated
+     *         (wrapped in a {@link RuntimeException} if it is a checked exception).
+     * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty.
      */
     public static <T, R> ContinuableFuture<R> combine(final Collection<? extends Future<? extends T>> cfs,
             final Throwables.Function<List<T>, ? extends R, ? extends Exception> action) {
@@ -1444,10 +1472,13 @@ public final class Futures {
      * }</pre>
      *
      * @param <T> the result type of the futures.
-     * @param cfs the array of futures to wait for.
-     * @return a ContinuableFuture that completes with a list of all results when all input
-     *         futures complete successfully.
-     * @throws IllegalArgumentException if the array is {@code null} or empty.
+     * @param cfs the array of futures to wait for, must not be {@code null} or empty.
+     * @return a {@code ContinuableFuture} whose result is a list of all results, in the same
+     *         order as {@code cfs}. Calling {@code get()} on it waits for every input future
+     *         and may throw {@link InterruptedException} or {@link ExecutionException} (the
+     *         latter propagated from the first failing future); {@code get(timeout, unit)} may
+     *         additionally throw {@link TimeoutException}.
+     * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty.
      */
     @SafeVarargs
     public static <T> ContinuableFuture<List<T>> allOf(final Future<? extends T>... cfs) {
@@ -1483,9 +1514,13 @@ public final class Futures {
      * }</pre>
      *
      * @param <T> the result type of the futures.
-     * @param cfs the collection of futures to wait for.
-     * @return a ContinuableFuture that completes with a list of all results.
-     * @throws IllegalArgumentException if the collection is {@code null} or empty.
+     * @param cfs the collection of futures to wait for, must not be {@code null} or empty.
+     * @return a {@code ContinuableFuture} whose result is a list of all results, in iteration
+     *         order of {@code cfs}. Calling {@code get()} on it waits for every input future
+     *         and may throw {@link InterruptedException} or {@link ExecutionException} (the
+     *         latter propagated from the first failing future); {@code get(timeout, unit)} may
+     *         additionally throw {@link TimeoutException}.
+     * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty.
      */
     public static <T> ContinuableFuture<List<T>> allOf(final Collection<? extends Future<? extends T>> cfs) {
         return allOf2(cfs);
@@ -1572,7 +1607,8 @@ public final class Futures {
     /**
      * Creates a ContinuableFuture that implements the "any of" semantics by returning the result of the first
      * future to complete successfully. If all futures complete exceptionally, the returned future completes
-     * exceptionally with a composite exception containing all failures.
+     * exceptionally with a {@link RuntimeException} representing the first failure, with the remaining
+     * failures attached as suppressed exceptions.
      *
      * <p>This method is useful for scenarios where you have multiple ways to get a result
      * and want to use whichever completes first, such as querying multiple replicas or
@@ -1592,9 +1628,12 @@ public final class Futures {
      * }</pre>
      *
      * @param <T> the result type of the futures.
-     * @param cfs the array of futures to race.
-     * @return a ContinuableFuture that completes with the first successful result.
-     * @throws IllegalArgumentException if the array is {@code null} or empty.
+     * @param cfs the array of futures to race, must not be {@code null} or empty.
+     * @return a {@code ContinuableFuture} whose {@code get()} returns the result of the first
+     *         input future to complete successfully. If every input future fails, {@code get()}
+     *         throws a {@link RuntimeException} representing the first failure, with the
+     *         remaining failures attached as suppressed exceptions.
+     * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty.
      */
     @SafeVarargs
     public static <T> ContinuableFuture<T> anyOf(final Future<? extends T>... cfs) {
@@ -1604,7 +1643,8 @@ public final class Futures {
     /**
      * Creates a ContinuableFuture that implements the "any of" semantics by returning the result of the first
      * future to complete successfully. If all futures complete exceptionally, the returned future completes
-     * exceptionally with a composite exception containing all failures.
+     * exceptionally with a {@link RuntimeException} representing the first failure, with the remaining
+     * failures attached as suppressed exceptions.
      *
      * <p>This is particularly useful for implementing timeout patterns, redundancy, or
      * getting the fastest response from multiple sources.
@@ -1624,9 +1664,12 @@ public final class Futures {
      * }</pre>
      *
      * @param <T> the result type of the futures.
-     * @param cfs the collection of futures to race.
-     * @return a ContinuableFuture that completes with the first successful result.
-     * @throws IllegalArgumentException if the collection is {@code null} or empty.
+     * @param cfs the collection of futures to race, must not be {@code null} or empty.
+     * @return a {@code ContinuableFuture} whose {@code get()} returns the result of the first
+     *         input future to complete successfully. If every input future fails, {@code get()}
+     *         throws a {@link RuntimeException} representing the first failure, with the
+     *         remaining failures attached as suppressed exceptions.
+     * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty.
      */
     public static <T> ContinuableFuture<T> anyOf(final Collection<? extends Future<? extends T>> cfs) {
         return anyOf2(cfs);
@@ -1757,8 +1800,10 @@ public final class Futures {
      * }</pre>
      *
      * @param <T> the result type of the futures.
-     * @param cfs the array of futures to iterate over.
-     * @return an iterator that yields results in completion order (first-finished, first-out).
+     * @param cfs the array of futures to iterate over, must not be {@code null} or empty.
+     * @return an {@code ObjIterator} that yields results in completion order (first-finished,
+     *         first-out). Calling {@code next()} on a failed future throws the future's failure
+     *         wrapped in a {@link RuntimeException}.
      */
     @SafeVarargs
     public static <T> ObjIterator<T> iterate(final Future<? extends T>... cfs) {
@@ -1791,8 +1836,10 @@ public final class Futures {
      * }</pre>
      *
      * @param <T> the result type of the futures.
-     * @param cfs the collection of futures to iterate over.
-     * @return an iterator that yields results in completion order (first-finished, first-out).
+     * @param cfs the collection of futures to iterate over, must not be {@code null} or empty.
+     * @return an {@code ObjIterator} that yields results in completion order (first-finished,
+     *         first-out). Calling {@code next()} on a failed future throws the future's failure
+     *         wrapped in a {@link RuntimeException}.
      */
     public static <T> ObjIterator<T> iterate(final Collection<? extends Future<? extends T>> cfs) {
         return iterate02(cfs);
@@ -1830,10 +1877,16 @@ public final class Futures {
      * }</pre>
      *
      * @param <T> the result type of the futures.
-     * @param cfs the collection of futures to iterate over.
-     * @param totalTimeoutForAll the maximum time to wait for all results.
-     * @param unit the time unit of the timeout.
-     * @return an iterator that yields results in completion order (first-finished, first-out) with timeout enforcement.
+     * @param cfs the collection of futures to iterate over, must not be {@code null} or empty.
+     * @param totalTimeoutForAll the maximum time to wait for all results; must be positive.
+     * @param unit the time unit of {@code totalTimeoutForAll}, must not be {@code null}.
+     * @return an {@code ObjIterator} that yields results in completion order (first-finished,
+     *         first-out) with timeout enforcement. Calling {@code next()} on a failed future
+     *         throws the future's failure wrapped in a {@link RuntimeException}; once the total
+     *         timeout elapses, {@code next()} throws a {@link RuntimeException} wrapping a
+     *         {@link TimeoutException}.
+     * @throws IllegalArgumentException if {@code totalTimeoutForAll} is not positive or
+     *         {@code unit} is {@code null}.
      */
     public static <T> ObjIterator<T> iterate(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll, final TimeUnit unit) {
         return iterate02(cfs, totalTimeoutForAll, unit);
@@ -1891,9 +1944,13 @@ public final class Futures {
      *
      * @param <T> the result type of the input futures.
      * @param <R> the result type after transformation.
-     * @param cfs the collection of futures to iterate over.
-     * @param resultHandler the function to transform Result objects into desired output type.
-     * @return an iterator that yields transformed results in completion order (first-finished, first-out).
+     * @param cfs the collection of futures to iterate over, must not be {@code null} or empty.
+     * @param resultHandler the function to transform each {@code Result} (success value or
+     *                      failure exception) into the desired output type. Must not be
+     *                      {@code null}.
+     * @return an {@code ObjIterator} that yields transformed results in completion order
+     *         (first-finished, first-out).
+     * @throws IllegalArgumentException if {@code resultHandler} is {@code null}.
      */
     public static <T, R> ObjIterator<R> iterate(final Collection<? extends Future<? extends T>> cfs,
             final Function<? super Result<T, Exception>, ? extends R> resultHandler) {
@@ -1936,11 +1993,17 @@ public final class Futures {
      *
      * @param <T> the result type of the input futures.
      * @param <R> the result type after transformation.
-     * @param cfs the collection of futures to iterate over.
-     * @param totalTimeoutForAll the maximum time to wait for all results.
-     * @param unit the time unit of the timeout.
-     * @param resultHandler the function to transform Result objects, including timeout handling.
-     * @return an iterator that yields transformed results in completion order (first-finished, first-out) with timeout enforcement.
+     * @param cfs the collection of futures to iterate over, must not be {@code null} or empty.
+     * @param totalTimeoutForAll the maximum time to wait for all results; must be positive.
+     * @param unit the time unit of {@code totalTimeoutForAll}, must not be {@code null}.
+     * @param resultHandler the function to transform each {@code Result}, including
+     *                      timeout-failure handling. Must not be {@code null}.
+     * @return an {@code ObjIterator} that yields transformed results in completion order
+     *         (first-finished, first-out) with timeout enforcement. Once the total timeout
+     *         elapses, a final {@code Result} carrying a {@link TimeoutException} is passed to
+     *         {@code resultHandler}.
+     * @throws IllegalArgumentException if {@code totalTimeoutForAll} is not positive, or
+     *         {@code unit} or {@code resultHandler} is {@code null}.
      */
     public static <T, R> ObjIterator<R> iterate(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll, final TimeUnit unit,
             final Function<? super Result<T, Exception>, ? extends R> resultHandler) {

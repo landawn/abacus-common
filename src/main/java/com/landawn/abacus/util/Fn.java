@@ -1167,11 +1167,12 @@ public final class Fn {
     }
 
     /**
-     * Returns a Function that converts Throwable to RuntimeException.
-     * If the input is already a RuntimeException, it is returned as-is.
-     * Otherwise, the Throwable is wrapped in a RuntimeException.
+     * Returns a {@code Function} that converts a {@code Throwable} to a {@code RuntimeException}.
+     * If the input is already a {@code RuntimeException}, it is returned as-is;
+     * otherwise, the {@code Throwable} is wrapped in a {@code RuntimeException}.
      *
-     * @return a Function that converts Throwable to RuntimeException
+     * @return a {@code Function} that converts a {@code Throwable} to a {@code RuntimeException}
+     * @see ExceptionUtil#toRuntimeException(Throwable, boolean)
      */
     public static Function<Throwable, RuntimeException> toRuntimeException() {
         return TO_RUNTIME_EXCEPTION;
@@ -1321,20 +1322,20 @@ public final class Fn {
     }
 
     /**
-     * Returns a UnaryOperator that converts strings to lower case.
+     * Returns a {@code UnaryOperator} that converts strings to lower case.
      *
-     * @return a UnaryOperator that converts strings to lower case
-     * @see String#toLowerCase()
+     * @return a {@code UnaryOperator} that converts strings to lower case
+     * @see Strings#toLowerCase(String)
      */
     public static UnaryOperator<String> toLowerCase() {
         return TO_LOWER_CASE;
     }
 
     /**
-     * Returns a UnaryOperator that converts strings to upper case.
+     * Returns a {@code UnaryOperator} that converts strings to upper case.
      *
-     * @return a UnaryOperator that converts strings to upper case
-     * @see String#toUpperCase()
+     * @return a {@code UnaryOperator} that converts strings to upper case
+     * @see Strings#toUpperCase(String)
      */
     public static UnaryOperator<String> toUpperCase() {
         return TO_UPPER_CASE;
@@ -1855,9 +1856,10 @@ public final class Fn {
 
     /**
      * Returns a Function that calculates the length of a CharSequence.
+     * Returns {@code 0} for {@code null} input.
      *
      * @param <T> the CharSequence type
-     * @return a Function that returns CharSequence length
+     * @return a Function that returns CharSequence length, or {@code 0} if the input is {@code null}
      * @see CharSequence#length()
      */
     public static <T extends CharSequence> Function<T, Integer> length() {
@@ -1866,9 +1868,10 @@ public final class Fn {
 
     /**
      * Returns a Function that calculates the size of a Collection.
+     * Returns {@code 0} for {@code null} input.
      *
      * @param <T> the Collection type
-     * @return a Function that returns Collection size
+     * @return a Function that returns Collection size, or {@code 0} if the input is {@code null}
      * @see Collection#size()
      */
     @SuppressWarnings("rawtypes")
@@ -1878,9 +1881,10 @@ public final class Fn {
 
     /**
      * Returns a Function that calculates the size of a Map.
+     * Returns {@code 0} for {@code null} input.
      *
      * @param <T> the Map type
-     * @return a Function that returns Map size
+     * @return a Function that returns Map size, or {@code 0} if the input is {@code null}
      * @see Map#size()
      */
     @Beta
@@ -3697,10 +3701,9 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> byteStrings = Arrays.asList("1", "2", "127");
-     * List<Byte> bytes = byteStrings.stream()
+     * int sum = byteStrings.stream()
      *     .mapToInt(Fn.parseByte())
-     *     .boxed()
-     *     .collect(Collectors.toList());
+     *     .sum();   // Result: 130
      * }</pre>
      *
      * @return a ToByteFunction that parses strings to byte values
@@ -8794,9 +8797,9 @@ public final class Fn {
         }
 
         /**
-         * Returns a CharPredicate that tests if a character is zero.
+         * Returns a CharPredicate that tests if a character is the null character.
          *
-         * @return a CharPredicate that returns {@code true} if the character is <i>\0</i>
+         * @return a CharPredicate that returns {@code true} if the character is {@code '\0'} (code point 0)
          */
         public static CharPredicate isZero() {
             return IS_ZERO;
@@ -9626,8 +9629,9 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the sum of all elements in an int array.
+         * The sum is returned as an Integer.
          *
-         * @return a Function that returns the sum of int array elements
+         * @return a Function that returns the sum of int array elements, or 0 if the array is {@code null} or empty
          */
         public static Function<int[], Integer> sum() {
             return SUM;
@@ -9864,8 +9868,9 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the sum of all elements in a long array.
+         * The sum is returned as a Long.
          *
-         * @return a Function that returns the sum of long array elements
+         * @return a Function that returns the sum of long array elements, or 0 if the array is {@code null} or empty
          */
         public static Function<long[], Long> sum() {
             return SUM;
@@ -10108,8 +10113,9 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the sum of all elements in a float array.
+         * The sum is returned as a Float.
          *
-         * @return a Function that returns the sum of float array elements
+         * @return a Function that returns the sum of float array elements, or 0 if the array is {@code null} or empty
          */
         public static Function<float[], Float> sum() {
             return SUM;
@@ -10352,8 +10358,9 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the sum of all elements in a double array.
+         * The sum is returned as a Double.
          *
-         * @return a Function that returns the sum of double array elements
+         * @return a Function that returns the sum of double array elements, or 0 if the array is {@code null} or empty
          */
         public static Function<double[], Double> sum() {
             return SUM;

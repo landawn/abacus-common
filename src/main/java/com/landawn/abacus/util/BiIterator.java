@@ -425,8 +425,9 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @param toIndex the ending index (exclusive), must be non-negative
      * @param output an IntObjConsumer that accepts an index and a Pair to populate with values, must not be {@code null}
      * @return a BiIterator that generates elements for each index in the range [fromIndex, toIndex)
-     * @throws IllegalArgumentException if fromIndex is greater than toIndex, or if output is {@code null}
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is negative or exceeds {@code Integer.MAX_VALUE}
+     * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
+     *         {@code Integer.MAX_VALUE}, or {@code fromIndex} is greater than {@code toIndex}
      */
     public static <A, B> BiIterator<A, B> generate(final int fromIndex, final int toIndex, final IntObjConsumer<Pair<A, B>> output)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -890,10 +891,11 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Processes the next pair of elements in the iterator using the provided action.
+     * Advances to the next pair of elements and passes the two components directly to the
+     * provided action, avoiding the creation of an intermediate {@code Pair} object.
      *
      * @param <E> the type of exception that the action may throw
-     * @param action a BiConsumer that processes the next pair of elements
+     * @param action a {@code BiConsumer} that receives the first and second values of the next pair, must not be {@code null}
      * @throws NoSuchElementException if there are no more elements in the iterator
      * @throws E if the action throws an exception
      */
@@ -1270,7 +1272,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * Map<String, Integer> result = stream.toMap();
      * }</pre>
      *
-     * @return an EntryStream containing the remaining pairs in this BiIterator
+     * @return an {@code EntryStream} containing the remaining pairs in this {@code BiIterator}
+     * @see #stream(BiFunction)
      */
     public EntryStream<A, B> stream() {
         return EntryStream.of(this);
@@ -1313,12 +1316,13 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Converts the elements in this BiIterator to an array of the specified type.
+     * Converts all remaining pairs in this {@code BiIterator} to an array of the specified type.
+     * This method consumes the entire iterator.
      *
-     * @param <T> the type of the array elements. It should be a super type of Pair.
-     * @param a the array into which the elements of this BiIterator are to be stored, if it is big enough;
-     *          otherwise, a new array of the same runtime type is allocated for this purpose.
-     * @return an array containing the elements of this BiIterator
+     * @param <T> the type of the array elements; it should be a super type of {@code Pair}
+     * @param a the array into which the elements of this {@code BiIterator} are to be stored, if it is big enough;
+     *          otherwise, a new array of the same runtime type is allocated for this purpose
+     * @return an array containing all remaining pairs from this {@code BiIterator}
      * @deprecated This method is deprecated. Use {@link #toArray()} or {@link #toList()} instead.
      */
     @Deprecated

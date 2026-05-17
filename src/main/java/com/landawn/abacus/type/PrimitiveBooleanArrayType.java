@@ -103,10 +103,10 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
     /**
      * Parses a string representation and creates a boolean array.
      * Expected format: [true, false, true] or similar boolean value representations.
-     * Returns {@code null} if input is {@code null}, empty array if input is empty or "[]".
+     * Returns {@code null} if input is {@code null}, empty, or blank, or an empty array if input is {@code "[]"}.
      *
      * @param str the string to parse
-     * @return the parsed boolean array, or {@code null} if input is null
+     * @return the parsed boolean array, or {@code null} if input is {@code null}, empty, or blank
      */
     @Override
     public boolean[] valueOf(final String str) {

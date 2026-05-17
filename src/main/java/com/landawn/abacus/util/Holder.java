@@ -230,6 +230,8 @@ public final class Holder<T> implements Mutable {
      * the current value. Unlike {@link #getAndUpdate(Throwables.UnaryOperator)}, this method
      * returns the new value after the update rather than the old value.
      *
+     * <p><b>Note:</b> This operation is <b>not</b> atomic or thread-safe.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<Integer> holder = Holder.of(5);
@@ -254,6 +256,10 @@ public final class Holder<T> implements Mutable {
      * against the current value, and only if it returns {@code true} will the new value be set.
      * This is useful for implementing compare-and-set semantics or conditional updates based
      * on the current state.
+     *
+     * <p><b>Note:</b> This operation is <b>not</b> atomic and does not provide true
+     * compare-and-set semantics; the predicate test and the subsequent assignment are
+     * performed in two separate steps without synchronization.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -861,7 +867,7 @@ public final class Holder<T> implements Mutable {
      * <p>Two Holders are considered equal if and only if:
      * <ul>
      * <li>They are the same instance (identity equality), OR</li>
-     * <li>The other object is also a Holder AND both Holders contain equal values (as determined by {@code Objects.equals()})</li>
+     * <li>The other object is also a Holder AND both Holders contain equal values (as determined by {@code N.equals()})</li>
      * </ul>
      *
      * <p>Note that two Holders containing {@code null} are considered equal.

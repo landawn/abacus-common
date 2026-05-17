@@ -51,7 +51,12 @@ import java.util.function.Predicate;
  *     .observe(System.out::println);
  * }</pre>
  *
+ * <p>This class is immutable in the sense of the {@link Immutable} marker; however, the
+ * intermediate operator methods mutate and return {@code this} for fluent chaining rather
+ * than producing new instances.</p>
+ *
  * @param <T> the type of elements emitted by this Observer
+ * @see Timed
  */
 @com.landawn.abacus.annotation.Immutable
 public abstract class Observer<T> implements Immutable {
@@ -116,8 +121,11 @@ public abstract class Observer<T> implements Immutable {
     }
 
     /**
-     * Signals completion to a BlockingQueue by adding a special completion flag.
-     * This method is used to indicate that no more elements will be added to the queue.
+     * Signals completion to a {@code BlockingQueue} by adding a special internal completion
+     * flag. This method is used to indicate that no more elements will be added to the queue,
+     * causing an Observer created via {@link #of(BlockingQueue)} to stop polling and invoke
+     * its completion handler. The flag is first offered to the queue and, if the queue is
+     * full, is inserted with a blocking {@code put}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -126,7 +134,9 @@ public abstract class Observer<T> implements Immutable {
      * Observer.complete(queue);   // Signal completion
      * }</pre>
      *
-     * @param queue the BlockingQueue to complete
+     * @param queue the {@code BlockingQueue} to complete
+     * @throws RuntimeException if the current thread is interrupted while waiting to insert
+     *         the completion flag into a full queue
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public static void complete(final BlockingQueue<?> queue) {
@@ -155,9 +165,10 @@ public abstract class Observer<T> implements Immutable {
      * }</pre>
      *
      * @param <T> the type of elements in the queue
-     * @param queue the BlockingQueue to create an Observer from
+     * @param queue the {@code BlockingQueue} to create an Observer from
      * @return a new Observer that emits elements from the queue
-     * @throws IllegalArgumentException if queue is null
+     * @throws IllegalArgumentException if {@code queue} is {@code null}
+     * @see #complete(BlockingQueue)
      */
     public static <T> Observer<T> of(final BlockingQueue<T> queue) throws IllegalArgumentException {
         N.checkArgNotNull(queue, cs.queue);
@@ -177,7 +188,8 @@ public abstract class Observer<T> implements Immutable {
      * }</pre>
      *
      * @param <T> the type of elements in the collection
-     * @param c the Collection to create an Observer from
+     * @param c the Collection to create an Observer from; may be {@code null} or empty, in
+     *        which case the resulting Observer emits no elements
      * @return a new Observer that emits elements from the collection
      */
     public static <T> Observer<T> of(final Collection<? extends T> c) {
@@ -199,7 +211,7 @@ public abstract class Observer<T> implements Immutable {
      * @param <T> the type of elements in the iterator
      * @param iter the Iterator to create an Observer from
      * @return a new Observer that emits elements from the iterator
-     * @throws IllegalArgumentException if iter is null
+     * @throws IllegalArgumentException if {@code iter} is {@code null}
      */
     public static <T> Observer<T> of(final Iterator<? extends T> iter) throws IllegalArgumentException {
         N.checkArgNotNull(iter, cs.iterator);
@@ -218,7 +230,9 @@ public abstract class Observer<T> implements Immutable {
      * }</pre>
      *
      * @param delayInMillis the delay in milliseconds before emitting
-     * @return a new Observer that emits after the delay
+     * @return a new Observer that emits a single {@code 0L} after the delay and then completes
+     * @throws IllegalArgumentException if {@code delayInMillis} is negative
+     * @see #timer(long, TimeUnit)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#timer(long,%20java.util.concurrent.TimeUnit)">RxJava#timer</a>
      */
     public static Observer<Long> timer(final long delayInMillis) {
@@ -237,8 +251,8 @@ public abstract class Observer<T> implements Immutable {
      *
      * @param delay the delay before emitting
      * @param unit the time unit of the delay
-     * @return a new Observer that emits after the delay
-     * @throws IllegalArgumentException if delay is negative or unit is null
+     * @return a new Observer that emits a single {@code 0L} after the delay and then completes
+     * @throws IllegalArgumentException if {@code delay} is negative or {@code unit} is {@code null}
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#timer(long,%20java.util.concurrent.TimeUnit)">RxJava#timer</a>
      */
     public static Observer<Long> timer(final long delay, final TimeUnit unit) throws IllegalArgumentException {
@@ -259,8 +273,10 @@ public abstract class Observer<T> implements Immutable {
      *     .observe(System.out::println);   // Prints 0, 1, 2, 3, 4
      * }</pre>
      *
-     * @param periodInMillis the period between emissions in milliseconds
-     * @return a new Observer that emits periodically
+     * @param periodInMillis the period between emissions in milliseconds; the first value
+     *        ({@code 0L}) is emitted immediately with no initial delay
+     * @return a new Observer that emits sequential {@code Long} values periodically
+     * @throws IllegalArgumentException if {@code periodInMillis} is zero or negative
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#interval(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#interval</a>
      */
     public static Observer<Long> interval(final long periodInMillis) {
@@ -280,7 +296,9 @@ public abstract class Observer<T> implements Immutable {
      *
      * @param initialDelayInMillis the initial delay before the first emission in milliseconds
      * @param periodInMillis the period between subsequent emissions in milliseconds
-     * @return a new Observer that emits periodically
+     * @return a new Observer that emits sequential {@code Long} values periodically
+     * @throws IllegalArgumentException if {@code initialDelayInMillis} is negative or
+     *         {@code periodInMillis} is zero or negative
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#interval(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#interval</a>
      */
     public static Observer<Long> interval(final long initialDelayInMillis, final long periodInMillis) {
@@ -297,9 +315,12 @@ public abstract class Observer<T> implements Immutable {
      *     .observe(n -> System.out.println("Tick: " + n));
      * }</pre>
      *
-     * @param period the period between emissions
+     * @param period the period between emissions; the first value ({@code 0L}) is emitted
+     *        immediately with no initial delay
      * @param unit the time unit of the period
-     * @return a new Observer that emits periodically
+     * @return a new Observer that emits sequential {@code Long} values periodically
+     * @throws IllegalArgumentException if {@code period} is zero or negative or {@code unit}
+     *         is {@code null}
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#interval(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#interval</a>
      */
     public static Observer<Long> interval(final long period, final TimeUnit unit) {
@@ -343,8 +364,11 @@ public abstract class Observer<T> implements Immutable {
      *     .observe(text -> performSearch(text));
      * }</pre>
      *
-     * @param intervalDurationInMillis the debounce interval in milliseconds
+     * @param intervalDurationInMillis the debounce interval in milliseconds; if zero, this
+     *        Observer is returned unchanged with no debounce applied
      * @return this Observer instance for method chaining
+     * @throws IllegalArgumentException if {@code intervalDurationInMillis} is negative
+     * @see #debounce(long, TimeUnit)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#debounce(long,%20java.util.concurrent.TimeUnit,%20io.reactivex.Scheduler)">RxJava#debounce</a>
      */
     public Observer<T> debounce(final long intervalDurationInMillis) {
@@ -362,10 +386,12 @@ public abstract class Observer<T> implements Immutable {
      *     .observe(data -> processSensorData(data));
      * }</pre>
      *
-     * @param intervalDuration the debounce interval
+     * @param intervalDuration the debounce interval; if zero, this Observer is returned
+     *        unchanged with no debounce applied
      * @param unit the time unit of the interval
      * @return this Observer instance for method chaining
-     * @throws IllegalArgumentException if intervalDuration is negative or unit is null
+     * @throws IllegalArgumentException if {@code intervalDuration} is negative or {@code unit}
+     *         is {@code null}
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#debounce(long,%20java.util.concurrent.TimeUnit,%20io.reactivex.Scheduler)">RxJava#debounce</a>
      */
     public Observer<T> debounce(final long intervalDuration, final TimeUnit unit) throws IllegalArgumentException {
@@ -445,8 +471,11 @@ public abstract class Observer<T> implements Immutable {
      *     .observe(click -> handleButtonClick());
      * }</pre>
      *
-     * @param intervalDurationInMillis the throttle window duration in milliseconds
+     * @param intervalDurationInMillis the throttle window duration in milliseconds; if zero,
+     *        this Observer is returned unchanged with no throttling applied
      * @return this Observer instance for method chaining
+     * @throws IllegalArgumentException if {@code intervalDurationInMillis} is negative
+     * @see #throttleFirst(long, TimeUnit)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#throttleFirst(long,%20java.util.concurrent.TimeUnit)">RxJava#throttleFirst</a>
      */
     public Observer<T> throttleFirst(final long intervalDurationInMillis) {
@@ -464,10 +493,12 @@ public abstract class Observer<T> implements Immutable {
      *     .observe(request -> makeApiCall(request));
      * }</pre>
      *
-     * @param intervalDuration the throttle window duration
+     * @param intervalDuration the throttle window duration; if zero, this Observer is returned
+     *        unchanged with no throttling applied
      * @param unit the time unit of the interval
      * @return this Observer instance for method chaining
-     * @throws IllegalArgumentException if intervalDuration is negative or unit is null
+     * @throws IllegalArgumentException if {@code intervalDuration} is negative or {@code unit}
+     *         is {@code null}
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#throttleFirst(long,%20java.util.concurrent.TimeUnit)">RxJava#throttleFirst</a>
      */
     public Observer<T> throttleFirst(final long intervalDuration, final TimeUnit unit) throws IllegalArgumentException {
@@ -532,8 +563,11 @@ public abstract class Observer<T> implements Immutable {
      *     .observe(pos -> updateCursorPosition(pos));
      * }</pre>
      *
-     * @param intervalDurationInMillis the sampling window duration in milliseconds
+     * @param intervalDurationInMillis the sampling window duration in milliseconds; if zero,
+     *        this Observer is returned unchanged with no throttling applied
      * @return this Observer instance for method chaining
+     * @throws IllegalArgumentException if {@code intervalDurationInMillis} is negative
+     * @see #throttleLast(long, TimeUnit)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#throttleLast(long,%20java.util.concurrent.TimeUnit)">RxJava#throttleLast</a>
      */
     public Observer<T> throttleLast(final long intervalDurationInMillis) {
@@ -551,10 +585,12 @@ public abstract class Observer<T> implements Immutable {
      *     .observe(temp -> logTemperature(temp));
      * }</pre>
      *
-     * @param intervalDuration the sampling window duration
+     * @param intervalDuration the sampling window duration; if zero, this Observer is returned
+     *        unchanged with no throttling applied
      * @param unit the time unit of the interval
      * @return this Observer instance for method chaining
-     * @throws IllegalArgumentException if intervalDuration is negative or unit is null
+     * @throws IllegalArgumentException if {@code intervalDuration} is negative or {@code unit}
+     *         is {@code null}
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#throttleLast(long,%20java.util.concurrent.TimeUnit)">RxJava#throttleLast</a>
      */
     public Observer<T> throttleLast(final long intervalDuration, final TimeUnit unit) throws IllegalArgumentException {
@@ -611,18 +647,22 @@ public abstract class Observer<T> implements Immutable {
     }
 
     /**
-     * Delays the emission of items by the specified duration in milliseconds.
-     * Each item will be emitted after the delay has passed.
+     * Delays the start of emissions by the specified duration in milliseconds. The delay is
+     * measured from the time this operator is applied; once the initial delay has elapsed,
+     * the first and all subsequent items are emitted without further per-item delay.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Observer.of(Arrays.asList("A", "B", "C"))
-     *     .delay(1000) // Delay each emission by 1 second
+     *     .delay(1000) // Delay the first emission by 1 second
      *     .observe(System.out::println);
      * }</pre>
      *
-     * @param delayInMillis the delay duration in milliseconds
+     * @param delayInMillis the delay duration in milliseconds; if zero, this Observer is
+     *        returned unchanged with no delay applied
      * @return this Observer instance for method chaining
+     * @throws IllegalArgumentException if {@code delayInMillis} is negative
+     * @see #delay(long, TimeUnit)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#delay(long,%20java.util.concurrent.TimeUnit)">RxJava#delay</a>
      */
     public Observer<T> delay(final long delayInMillis) {
@@ -631,7 +671,7 @@ public abstract class Observer<T> implements Immutable {
 
     /**
      * Delays the emission of items by the specified duration with custom time units.
-     * The delay is measured from the time the first item is dispatched; subsequent items
+     * The delay is measured from the time this operator is applied; subsequent items
      * are emitted immediately after the initial delay has elapsed.
      *
      * <p><b>Usage Examples:</b></p>
@@ -641,10 +681,11 @@ public abstract class Observer<T> implements Immutable {
      *     .observe(n -> System.out.println("Delayed action"));
      * }</pre>
      *
-     * @param delay the delay duration
+     * @param delay the delay duration; if zero, this Observer is returned unchanged with no
+     *        delay applied
      * @param unit the time unit of the delay
      * @return this Observer instance for method chaining
-     * @throws IllegalArgumentException if delay is negative or unit is {@code null}
+     * @throws IllegalArgumentException if {@code delay} is negative or {@code unit} is {@code null}
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#delay(long,%20java.util.concurrent.TimeUnit)">RxJava#delay</a>
      */
     public Observer<T> delay(final long delay, final TimeUnit unit) throws IllegalArgumentException {
@@ -687,7 +728,11 @@ public abstract class Observer<T> implements Immutable {
      *                                          ", Interval: " + timed.timestamp() + "ms"));
      * }</pre>
      *
-     * @return this Observer instance emitting Timed objects with interval information
+     * @return this Observer instance (re-typed) emitting {@code Timed<T>} objects whose
+     *         timestamp field holds the elapsed interval in milliseconds since the previous
+     *         emission
+     * @see Timed
+     * @see #timestamp()
      * @see <a href="http://reactivex.io/RxJava/javadoc/io/reactivex/Observable.html#timeInterval()">RxJava#timeInterval</a>
      */
     public Observer<Timed<T>> timeInterval() {
@@ -721,7 +766,10 @@ public abstract class Observer<T> implements Immutable {
      *                                          " at " + new Date(timed.timestamp())));
      * }</pre>
      *
-     * @return this Observer instance emitting Timed objects with timestamp information
+     * @return this Observer instance (re-typed) emitting {@code Timed<T>} objects whose
+     *         timestamp field holds the emission time in milliseconds since the epoch
+     * @see Timed
+     * @see #timeInterval()
      * @see <a href="http://reactivex.io/RxJava/javadoc/io/reactivex/Observable.html#timestamp()">RxJava#timestamp</a>
      */
     public Observer<Timed<T>> timestamp() {
@@ -747,9 +795,10 @@ public abstract class Observer<T> implements Immutable {
      *     .observe(System.out::println);   // Prints: 3, 4, 5
      * }</pre>
      *
-     * @param n the number of items to skip
+     * @param n the number of items to skip; if zero, no items are skipped (a negative
+     *        value is rejected as described below)
      * @return this Observer instance for method chaining
-     * @throws IllegalArgumentException if n is negative
+     * @throws IllegalArgumentException if {@code n} is negative
      */
     public Observer<T> skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -781,9 +830,10 @@ public abstract class Observer<T> implements Immutable {
      *     .observe(System.out::println);   // Prints: 0, 1, 2, 3, 4
      * }</pre>
      *
-     * @param maxSize the maximum number of items to emit
+     * @param maxSize the maximum number of items to emit; once this count is reached the
+     *        upstream source is signaled to stop producing further items
      * @return this Observer instance for method chaining
-     * @throws IllegalArgumentException if maxSize is negative
+     * @throws IllegalArgumentException if {@code maxSize} is negative
      */
     public Observer<T> limit(final long maxSize) throws IllegalArgumentException {
         N.checkArgNotNegative(maxSize, cs.maxSize);
@@ -806,7 +856,8 @@ public abstract class Observer<T> implements Immutable {
 
     /**
      * Filters out duplicate items, ensuring each unique item is emitted only once.
-     * Uses the item's equals() method for comparison.
+     * Uniqueness is determined by the item's {@code hashCode()} and {@code equals()}
+     * methods (a {@code HashSet} of seen items is maintained).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -816,6 +867,7 @@ public abstract class Observer<T> implements Immutable {
      * }</pre>
      *
      * @return this Observer instance for method chaining
+     * @see #distinctBy(Function)
      */
     public Observer<T> distinct() {
         dispatcher.append(new Dispatcher<>() {
@@ -843,8 +895,10 @@ public abstract class Observer<T> implements Immutable {
      *     .observe(System.out::println);   // Prints: apple, banana
      * }</pre>
      *
-     * @param keyExtractor function to extract the key for comparison
+     * @param keyExtractor function to extract the key used to determine uniqueness; key
+     *        equality is based on {@code hashCode()} and {@code equals()}
      * @return this Observer instance for method chaining
+     * @see #distinct()
      */
     public Observer<T> distinctBy(final Function<? super T, ?> keyExtractor) {
         dispatcher.append(new Dispatcher<>() {
@@ -898,8 +952,10 @@ public abstract class Observer<T> implements Immutable {
      * }</pre>
      *
      * @param <R> the type of items emitted after transformation
-     * @param mapper the function to transform items
-     * @return a new Observer emitting transformed items
+     * @param mapper the function to transform each item
+     * @return this Observer instance, re-typed as {@code Observer<R>}, emitting the
+     *         transformed items
+     * @see #flatMap(Function)
      */
     public <R> Observer<R> map(final Function<? super T, R> mapper) {
         dispatcher.append(new Dispatcher<>() {
@@ -926,8 +982,11 @@ public abstract class Observer<T> implements Immutable {
      * }</pre>
      *
      * @param <R> the type of items in the flattened sequence
-     * @param mapper function that transforms each item into a collection
-     * @return a new Observer emitting the flattened items
+     * @param mapper function that transforms each item into a collection; if it returns
+     *        {@code null} or an empty collection, no items are emitted for that input
+     * @return this Observer instance, re-typed as {@code Observer<R>}, emitting the
+     *         flattened items
+     * @see #map(Function)
      */
     public <R> Observer<R> flatMap(final Function<? super T, ? extends Collection<? extends R>> mapper) {
         dispatcher.append(new Dispatcher<>() {
@@ -961,8 +1020,11 @@ public abstract class Observer<T> implements Immutable {
      *
      * @param timespan the time window duration
      * @param unit the time unit of the timespan
-     * @return this Observer instance emitting lists of buffered items
-     * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#buffer(long,%20java.util.concurrent.TimeUnit)">RxJava#window(long, java.util.concurrent.TimeUnit)</a>
+     * @return this Observer instance (re-typed) emitting {@code List<T>} buffers of items
+     * @throws IllegalArgumentException if {@code timespan} is zero or negative or {@code unit}
+     *         is {@code null}
+     * @see #buffer(long, TimeUnit, int)
+     * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#buffer(long,%20java.util.concurrent.TimeUnit)">RxJava#buffer(long, java.util.concurrent.TimeUnit)</a>
      */
     public Observer<List<T>> buffer(final long timespan, final TimeUnit unit) {
         return buffer(timespan, unit, Integer.MAX_VALUE);
@@ -982,9 +1044,10 @@ public abstract class Observer<T> implements Immutable {
      * @param timespan the time window duration
      * @param unit the time unit of the timespan
      * @param count the maximum number of items per buffer
-     * @return this Observer instance emitting lists of buffered items
-     * @throws IllegalArgumentException if timespan or count is non-positive, or unit is null
-     * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#buffer(long,%20java.util.concurrent.TimeUnit,%20int)">RxJava#window(long, java.util.concurrent.TimeUnit, int)</a>
+     * @return this Observer instance (re-typed) emitting {@code List<T>} buffers of items
+     * @throws IllegalArgumentException if {@code timespan} or {@code count} is zero or
+     *         negative, or {@code unit} is {@code null}
+     * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#buffer(long,%20java.util.concurrent.TimeUnit,%20int)">RxJava#buffer(long, java.util.concurrent.TimeUnit, int)</a>
      */
     public Observer<List<T>> buffer(final long timespan, final TimeUnit unit, final int count) throws IllegalArgumentException {
         N.checkArgument(timespan > 0, "timespan cannot be 0 or negative");
@@ -1044,8 +1107,11 @@ public abstract class Observer<T> implements Immutable {
      * @param timespan the duration of each buffer window
      * @param timeskip the interval between starting new buffers
      * @param unit the time unit for both timespan and timeskip
-     * @return this Observer instance emitting lists of buffered items
-     * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#buffer(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#window(long, long, java.util.concurrent.TimeUnit)</a>
+     * @return this Observer instance (re-typed) emitting {@code List<T>} buffers of items
+     * @throws IllegalArgumentException if {@code timespan} or {@code timeskip} is zero or
+     *         negative, or {@code unit} is {@code null}
+     * @see #buffer(long, long, TimeUnit, int)
+     * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#buffer(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#buffer(long, long, java.util.concurrent.TimeUnit)</a>
      */
     public Observer<List<T>> buffer(final long timespan, final long timeskip, final TimeUnit unit) {
         return buffer(timespan, timeskip, unit, Integer.MAX_VALUE);
@@ -1067,9 +1133,10 @@ public abstract class Observer<T> implements Immutable {
      * @param timeskip the interval between starting new buffers
      * @param unit the time unit for both timespan and timeskip
      * @param count the maximum number of items per buffer
-     * @return this Observer instance emitting lists of buffered items
-     * @throws IllegalArgumentException if timespan, timeskip, or count is non-positive, or unit is null
-     * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#buffer(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#window(long, long, java.util.concurrent.TimeUnit)</a>
+     * @return this Observer instance (re-typed) emitting {@code List<T>} buffers of items
+     * @throws IllegalArgumentException if {@code timespan}, {@code timeskip}, or {@code count}
+     *         is zero or negative, or {@code unit} is {@code null}
+     * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#buffer(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#buffer(long, long, java.util.concurrent.TimeUnit)</a>
      */
     public Observer<List<T>> buffer(final long timespan, final long timeskip, final TimeUnit unit, final int count) throws IllegalArgumentException {
         N.checkArgument(timespan > 0, "timespan cannot be 0 or negative");
@@ -1123,7 +1190,9 @@ public abstract class Observer<T> implements Immutable {
 
     /**
      * Subscribes to this Observer with an action to be performed on each emitted item.
-     * If an error occurs, it will be thrown as a RuntimeException.
+     * If an error occurs, it is rethrown as a {@code RuntimeException} (the default missing
+     * error handler). Subscription is asynchronous; this method returns immediately and
+     * items are delivered on a background thread.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1132,6 +1201,9 @@ public abstract class Observer<T> implements Immutable {
      * }</pre>
      *
      * @param action the action to perform on each item
+     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @see #observe(Consumer, Consumer)
+     * @see #observe(Consumer, Consumer, Runnable)
      */
     public void observe(final Consumer<? super T> action) {
         observe(action, ON_ERROR_MISSING);
@@ -1139,7 +1211,8 @@ public abstract class Observer<T> implements Immutable {
 
     /**
      * Subscribes to this Observer with actions for items and errors.
-     * The onComplete action will be an empty action.
+     * The completion action is an empty no-op action. Subscription is asynchronous; this
+     * method returns immediately and items are delivered on a background thread.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1151,6 +1224,8 @@ public abstract class Observer<T> implements Immutable {
      *
      * @param action the action to perform on each item
      * @param onError the action to perform on error
+     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @see #observe(Consumer, Consumer, Runnable)
      */
     public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError) {
         observe(action, onError, EMPTY_ACTION);
@@ -1158,7 +1233,9 @@ public abstract class Observer<T> implements Immutable {
 
     /**
      * Subscribes to this Observer with actions for items, errors, and completion.
-     * This is the most complete form of subscription.
+     * This is the most complete form of subscription. Subscription is asynchronous; this
+     * method returns immediately and items are delivered on a background thread. Concrete
+     * implementations validate their arguments.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1172,6 +1249,7 @@ public abstract class Observer<T> implements Immutable {
      * @param action the action to perform on each item
      * @param onError the action to perform on error
      * @param onComplete the action to perform on completion
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      */
     public abstract void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete);
 

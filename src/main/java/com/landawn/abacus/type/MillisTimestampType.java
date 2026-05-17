@@ -46,6 +46,10 @@ public class MillisTimestampType extends TimestampType {
      */
     public static final String MILLIS_TIMESTAMP = "MillisTimestamp";
 
+    /**
+     * Package-private constructor for {@code MillisTimestampType}.
+     * Instances are created by the {@code TypeFactory}.
+     */
     MillisTimestampType() {
         super(MILLIS_TIMESTAMP);
     }

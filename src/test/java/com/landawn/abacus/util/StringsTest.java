@@ -244,7 +244,7 @@ public class StringsTest extends AbstractTest {
         assertTrue(Strings.isValidJavaIdentifier("$var"));
         assertTrue(Strings.isValidJavaIdentifier("var123"));
         assertTrue(Strings.isValidJavaIdentifier("MAX_VALUE"));
-        assertTrue(Strings.isValidJavaIdentifier("class"));
+        assertFalse(Strings.isValidJavaIdentifier("class"));
     }
 
     @Test
@@ -255,9 +255,35 @@ public class StringsTest extends AbstractTest {
         assertTrue(Strings.isValidJavaIdentifier("myVar123"));
         assertFalse(Strings.isValidJavaIdentifier("123myVar"));
         assertFalse(Strings.isValidJavaIdentifier("my-Var"));
-        assertTrue(Strings.isValidJavaIdentifier("class"));
+        assertFalse(Strings.isValidJavaIdentifier("class"));
         assertFalse(Strings.isValidJavaIdentifier(null));
         assertFalse(Strings.isValidJavaIdentifier(""));
+    }
+
+    @Test
+    public void testIsValidJavaIdentifier_2() {
+        // Valid identifiers
+        assertTrue(Strings.isValidJavaIdentifier("foo"));
+        assertTrue(Strings.isValidJavaIdentifier("orderId"));
+        assertTrue(Strings.isValidJavaIdentifier("_x"));
+        assertTrue(Strings.isValidJavaIdentifier("$bar"));
+        assertTrue(Strings.isValidJavaIdentifier("name2"));
+
+        // Reserved words — these silently produced uncompilable generated code prior to the fourth-pass warning.
+        assertFalse(Strings.isValidJavaIdentifier("class"));
+        assertFalse(Strings.isValidJavaIdentifier("int"));
+        assertFalse(Strings.isValidJavaIdentifier("final"));
+        assertFalse(Strings.isValidJavaIdentifier("for"));
+        assertFalse(Strings.isValidJavaIdentifier("default"));
+        assertFalse(Strings.isValidJavaIdentifier("true"));
+        assertFalse(Strings.isValidJavaIdentifier("null"));
+
+        // Invalid identifier shapes
+        assertFalse(Strings.isValidJavaIdentifier("2ndName"));
+        assertFalse(Strings.isValidJavaIdentifier(""));
+        assertFalse(Strings.isValidJavaIdentifier(null));
+        assertFalse(Strings.isValidJavaIdentifier("a-b"));
+        assertFalse(Strings.isValidJavaIdentifier("a b"));
     }
 
     @Test
@@ -9202,8 +9228,7 @@ public class StringsTest extends AbstractTest {
 
         {
             assertEquals("[[2, 6], [10, 11]]", N.stringOf(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.DEFAULT)));
-            assertEquals("[[5, 6], [2, 7], [10, 11]]",
-                    N.stringOf(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED)));
+            assertEquals("[[5, 6], [2, 7], [10, 11]]", N.stringOf(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED)));
             assertEquals("[[2, 7], [10, 11]]", N.stringOf(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
         }
 
@@ -9221,8 +9246,7 @@ public class StringsTest extends AbstractTest {
 
         {
             assertEquals("[[1, 5], [7, 8]]", N.stringOf(Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.DEFAULT)));
-            assertEquals("[[4, 5], [7, 8], [2, 10]]",
-                    N.stringOf(Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.STACK_BASED)));
+            assertEquals("[[4, 5], [7, 8], [2, 10]]", N.stringOf(Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.STACK_BASED)));
             assertEquals("[[2, 10]]", N.stringOf(Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
         }
 
@@ -11959,6 +11983,29 @@ public class StringsTest extends AbstractTest {
         assertEquals("abcdefg", Strings.abbreviate("abcdefg", 7));
         assertEquals("abcdefg", Strings.abbreviate("abcdefg", 8));
         assertNull(Strings.abbreviate(null, 4));
+    }
+
+    @Test
+    public void testSplitPreserveAllTokens_MultiCharDelimiter_TrailingEmptyToken() {
+        // Regression: with a multi-character delimiter, splitPreserveAllTokens used to drop the
+        // empty token that follows a trailing delimiter, while the single-char overload kept it.
+        // The two overloads must behave consistently.
+
+        // Single-char baseline (always correct).
+        assertArrayEquals(new String[] { "a", "b", "" }, Strings.splitPreserveAllTokens("a:b:", ':'));
+        assertArrayEquals(new String[] { "a", "" }, Strings.splitPreserveAllTokens("a:", ':'));
+
+        // Multi-char delimiter must keep the trailing empty token too.
+        assertArrayEquals(new String[] { "a", "b", "" }, Strings.splitPreserveAllTokens("a::b::", "::"));
+        assertArrayEquals(new String[] { "a", "" }, Strings.splitPreserveAllTokens("a::", "::"));
+        assertArrayEquals(new String[] { "a", "b", "", "" }, Strings.splitPreserveAllTokens("a::b::::", "::"));
+
+        // Cases that were already correct must remain unchanged.
+        assertArrayEquals(new String[] { "a", "b", "c" }, Strings.splitPreserveAllTokens("a::b::c", "::"));
+        assertArrayEquals(new String[] { "", "a", "b" }, Strings.splitPreserveAllTokens("::a::b", "::"));
+
+        // omitEmptyStrings variant (split) must still drop the trailing empties.
+        assertArrayEquals(new String[] { "a", "b" }, Strings.split("a::b::", "::"));
     }
 
 }

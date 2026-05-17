@@ -166,7 +166,7 @@ public class AsciiStreamType extends InputStreamType {
             if (appendable instanceof Writer) {
                 IOUtil.write(IOUtil.newInputStreamReader(x, Charsets.US_ASCII), (Writer) appendable); // NOSONAR
             } else {
-                appendable.append(IOUtil.readAllToString(x));
+                appendable.append(IOUtil.readAllToString(x, Charsets.US_ASCII));
             }
         }
     }

@@ -831,6 +831,36 @@ public class IntFunctionsTest extends TestBase {
     }
 
     @Test
+    public void testOfListMultimapBackedByPlainHashMap() {
+        // Regression: ofListMultimap() must create a standard (HashMap-backed) ListMultimap,
+        // consistent with ofSetMultimap() and Suppliers.ofListMultimap(). It previously used
+        // N::newLinkedListMultimap (LinkedHashMap-backed) by mistake.
+        IntFunction<ListMultimap<Integer, Integer>> func = IntFunctions.ofListMultimap();
+
+        ListMultimap<Integer, Integer> multimap = func.apply(16);
+
+        // Insert Integer keys in descending order. For a HashMap with small Integer keys the
+        // iteration order is ascending (bucket index == hash == value); for a LinkedHashMap it
+        // would preserve the descending insertion order.
+        for (int k = 8; k >= 0; k--) {
+            multimap.put(k, k);
+        }
+
+        List<Integer> keyOrder = new ArrayList<>(multimap.keySet());
+
+        // A standard HashMap-backed multimap yields sorted keys here; a LinkedHashMap-backed one
+        // (the buggy behavior) would yield [8, 7, 6, 5, 4, 3, 2, 1, 0].
+        Assertions.assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, 7, 8), keyOrder);
+
+        // It must also behave identically to N.newListMultimap() (the documented standard factory).
+        ListMultimap<Integer, Integer> reference = N.newListMultimap();
+        for (int k = 8; k >= 0; k--) {
+            reference.put(k, k);
+        }
+        Assertions.assertEquals(new ArrayList<>(reference.keySet()), keyOrder);
+    }
+
+    @Test
     public void testOfDisposableArray() {
         IntFunction<DisposableObjArray> func = IntFunctions.ofDisposableArray();
         Assertions.assertNotNull(func);

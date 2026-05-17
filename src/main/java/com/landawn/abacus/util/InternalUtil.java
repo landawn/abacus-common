@@ -132,19 +132,19 @@ public final class InternalUtil {
     /**
      * Creates an ArrayList by initializing its elements with the specified array.
      *
-     * <p>The returned list may share the same elements array with the input array.
-     * Any modification to the list/array will affect the array/list.</p>
+     * <p>The returned list is a new, modifiable ArrayList containing the elements
+     * of the input array; it is not backed by the input array.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "b", "c"};
      * List<String> list = InternalUtil.createList(array);
-     * // Modifications to list may affect array and vice versa
+     * // list is independent of array
      * }</pre>
      *
      * @param <T> the element type
      * @param a the array to create the list from
-     * @return a new ArrayList backed by the array
+     * @return a new ArrayList containing the elements of the array
      * @deprecated DO NOT call the methods defined in this class. It's for internal use only.
      */
     @Deprecated
@@ -161,8 +161,8 @@ public final class InternalUtil {
     /**
      * Gets the character array from a string for read-only purposes.
      *
-     * <p>This method attempts to optimize string to char array conversion.
-     * The returned array should not be modified as it may be shared with the original string.</p>
+     * <p>This method is intended for read-only access to a string's characters.
+     * The returned array should be treated as read-only and not modified.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -171,7 +171,8 @@ public final class InternalUtil {
      * }</pre>
      *
      * @param str the string to get characters from
-     * @return a character array (may be shared, do not modify)
+     * @return a character array containing the characters of {@code str} (treat as read-only, do not modify);
+     *         an empty array if {@code str} is {@code null} or empty
      * @deprecated DO NOT call the methods defined in this class. It's for internal use only.
      */
     @Deprecated

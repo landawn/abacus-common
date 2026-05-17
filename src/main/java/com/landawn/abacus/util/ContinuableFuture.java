@@ -173,7 +173,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *   <li><b>Memory Usage:</b> Efficient internal structure with optional upstream future tracking</li>
  *   <li><b>Cancellation Cost:</b> O(n) where n is the length of the execution chain</li>
  *   <li><b>Combination Efficiency:</b> Optimized algorithms for multi-future coordination</li>
- *   <li><b>Delay Implementation:</b> Uses ScheduledExecutorService for precise timing control</li>
+ *   <li><b>Delay Implementation:</b> Lazily applied when {@code get()} is called on the delayed future, using an interruptible wait</li>
  * </ul>
  *
  * <p><b>Thread Safety and Concurrency:</b>
@@ -829,8 +829,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * or providing immediate fallback values.
      *
      * <p>Note that this method still throws exceptions if the future is done but completed
-     * exceptionally. Use {@link #getAsResult()} with {@link Result#orElseThrow()} for exception-safe
-     * immediate value retrieval.
+     * exceptionally. Use {@link #getAsResult()} for exception-safe result retrieval that
+     * wraps any failure in a {@link Result} instead of throwing.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -852,8 +852,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param defaultValue the value to return if the computation is not yet complete.
-     * @return the computed result if complete, otherwise the defaultValue.
-     * @throws CancellationException if the computation was canceled.
+     * @return the computed result if the computation is already complete, otherwise {@code defaultValue}.
+     * @throws CancellationException if the computation was cancelled.
      * @throws ExecutionException if the computation threw an exception.
      * @throws InterruptedException if the current thread was interrupted while checking.
      */
@@ -1766,7 +1766,7 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Executes the provided Consumer action asynchronously after either this ContinuableFuture or the other ContinuableFuture completes
+     * Executes the provided BiConsumer action asynchronously after either this ContinuableFuture or the other ContinuableFuture completes
      * (successfully or exceptionally). The BiConsumer receives both the result (if successful)
      * and the exception (if failed) from whichever future completes first.
      *
@@ -2338,7 +2338,6 @@ public class ContinuableFuture<T> implements Future<T> {
                 if (!isDelayed) {
                     synchronized (this) {
                         if (!isDelayed) {
-                            isDelayed = true;
                             final long elapsedTime = System.currentTimeMillis() - startTime;
                             final long remainingDelay = delayInMillis - elapsedTime;
                             if (remainingDelay > 0) {
@@ -2346,6 +2345,15 @@ public class ContinuableFuture<T> implements Future<T> {
                                 // interrupted promptly per Future#get's contract — the prior
                                 // sleepUninterruptibly silently swallowed InterruptedException.
                                 Thread.sleep(Math.min(remainingDelay, maxWaitMillis));
+                            }
+
+                            // Only mark the configured delay as fully consumed once it has
+                            // actually elapsed. If the wait was capped by maxWaitMillis (e.g.
+                            // a get(timeout, unit) call with a timeout shorter than the
+                            // remaining delay), the delay is NOT yet satisfied and a later
+                            // get() must still honor the remaining delay.
+                            if (remainingDelay <= 0 || remainingDelay <= maxWaitMillis) {
+                                isDelayed = true;
                             }
                         }
                     }
@@ -2434,8 +2442,8 @@ public class ContinuableFuture<T> implements Future<T> {
      *   <li>For already-completed futures, consider using {@link CompletableFuture#completedFuture(Object)}</li>
      * </ul>
      *
-     * @return a new CompletableFuture that completes with the same result as this ContinuableFuture,.
-     *         executed asynchronously using this future's asyncExecutor.
+     * @return a new {@code CompletableFuture} that completes with the same result as this {@code ContinuableFuture},
+     *         executed asynchronously using this future's {@code asyncExecutor}.
      * @see CompletableFuture#supplyAsync(java.util.function.Supplier, Executor)
      * @see #toCompletableFuture(Executor)
      * @see CompletionException
@@ -2533,7 +2541,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * </ul>
      *
      * @param executor the executor to use for asynchronous result retrieval; must not be null.
-     * @return a new CompletableFuture that completes with the same result as this ContinuableFuture,.
+     * @return a new {@code CompletableFuture} that completes with the same result as this {@code ContinuableFuture},
      *         executed asynchronously using the provided executor.
      * @throws IllegalArgumentException if {@code executor} is null.
      * @see CompletableFuture#supplyAsync(java.util.function.Supplier, Executor)

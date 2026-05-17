@@ -68,7 +68,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      *
      * @param <T> the type of the element
      * @param e1 the element to be stored in the array
-     * @return an ImmutableArray containing the specified element
+     * @return an {@code ImmutableArray} containing the specified element
      */
     public static <T> ImmutableArray<T> of(final T e1) {
         return new ImmutableArray<>(N.asArray(e1));
@@ -243,8 +243,8 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      *
      * @param <T> the type of the elements
      * @param elements the array whose elements are to be copied
-     * @return an ImmutableArray containing a copy of the specified array's elements,
-     *         or an empty ImmutableArray if the input is null
+     * @return an {@code ImmutableArray} containing a copy of the specified array's elements,
+     *         or an empty {@code ImmutableArray} if the input is {@code null}
      */
     public static <T> ImmutableArray<T> copyOf(final T[] elements) {
         return new ImmutableArray<>(elements == null ? null : elements.clone());
@@ -320,7 +320,8 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * @param index the index of the element to return (zero-based)
      * @return the element at the specified position
      * @throws ArrayIndexOutOfBoundsException if the index is out of range
-     *         (index &lt; 0 || index &gt;= length())
+     *         ({@code index < 0 || index >= length()})
+     * @see #length()
      */
     public T get(final int index) {
         return elements[index];

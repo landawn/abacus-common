@@ -61,7 +61,7 @@ class CurlInterceptor implements Interceptor {
      * This constructor uses {@link #DEFAULT_QUOTE_CHAR} as the quote character.
      *
      * @param logHandler A consumer function that handles the generated cURL command string.
-     *                   This is typically used to log or store the command.
+     *                   This is typically used to log or store the command. Must not be {@code null}.
      * @see #CurlInterceptor(char, Consumer)
      */
     public CurlInterceptor(final Consumer<? super String> logHandler) {

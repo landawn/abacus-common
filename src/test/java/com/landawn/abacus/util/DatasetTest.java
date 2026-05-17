@@ -390,6 +390,27 @@ public class DatasetTest extends AbstractTest {
     }
 
     @Test
+    public void testPrintlnWithWideCharacters() {
+        Dataset ds = Dataset.rows(Arrays.asList("id", "name", "age", "salary"), new Object[][] { { 1, "John", 25, 50000.0 },
+                { 2, "Jane", 30, 60000.0 }, { 3, "Bob李海洋", 35, 70000.0 }, { 4, "Alice", 28, 55000.0 }, { 5, "Charlie", 40, 80000.0 } });
+        StringWriter writer = new StringWriter();
+
+        ds.println();
+
+        ds.println(writer);
+
+        assertEquals("+----+-----------+-----+---------+\n" //
+                + "| id | name      | age | salary  |\n" //
+                + "+----+-----------+-----+---------+\n" //
+                + "| 1  | John      | 25  | 50000.0 |\n" //
+                + "| 2  | Jane      | 30  | 60000.0 |\n" //
+                + "| 3  | Bob李海洋 | 35  | 70000.0 |\n" //
+                + "| 4  | Alice     | 28  | 55000.0 |\n" //
+                + "| 5  | Charlie   | 40  | 80000.0 |\n" //
+                + "+----+-----------+-----+---------+\n", writer.toString());
+    }
+
+    @Test
     public void testEquals() {
         Dataset ds1 = Dataset.rows(columnNames, sampleRows);
         Dataset ds2 = Dataset.rows(columnNames, sampleRows);
@@ -5739,7 +5760,7 @@ public class DatasetTest extends AbstractTest {
     public void test_pivot_2() throws Exception {
         final Object[][] rowList = { { "Banana", 1000, "USA" }, { "Carrots", 1500, "USA" }, { "Beans", 1600, "USA" }, { "Orange", 2000, "USA" },
                 { "Orange", 2000, "USA" }, { "Banana", 400, "China" }, { "Carrots", 1200, "China" }, { "Beans", 1500, "China" }, { "Orange", 4000, "China" },
-                { "Banana", 2000, "Canada" }, { "Carrots", 2000, "Canada" }, { "Beans", 2000, "Mexico" } };
+                { "Banana", 2000, "Canada" }, { "Carrots", 2000, "Canada" }, { "Beans", 2000, "Mex海😀洋" } };
 
         final Dataset dataset = N.newDataset(N.toList("Product", "Amount", "Country"), rowList);
 

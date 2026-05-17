@@ -27,8 +27,8 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
     public static final String OPTIONAL_BOOLEAN = OptionalBoolean.class.getSimpleName();
 
     /**
-     * Package-private constructor for OptionalBooleanType.
-     * This constructor is called by the TypeFactory to create OptionalBoolean type instances.
+     * Constructs a new OptionalBooleanType instance.
+     * Instances are normally obtained via the TypeFactory rather than constructed directly.
      */
     protected OptionalBooleanType() {
         super(OPTIONAL_BOOLEAN);

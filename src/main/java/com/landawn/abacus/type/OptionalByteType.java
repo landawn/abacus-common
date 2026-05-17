@@ -28,8 +28,8 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
     public static final String OPTIONAL_BYTE = OptionalByte.class.getSimpleName();
 
     /**
-     * Package-private constructor for OptionalByteType.
-     * This constructor is called by the TypeFactory to create OptionalByte type instances.
+     * Constructs a new OptionalByteType instance.
+     * Instances are normally obtained via the TypeFactory rather than constructed directly.
      */
     protected OptionalByteType() {
         super(OPTIONAL_BYTE);

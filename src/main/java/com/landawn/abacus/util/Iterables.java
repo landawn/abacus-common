@@ -61,173 +61,159 @@ import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
 
 /**
- * A comprehensive utility class providing an extensive collection of static methods for iterable operations,
- * transformations, aggregations, and manipulations. This class serves as the primary iterable utility facade
- * in the Abacus library, offering null-safe, performance-optimized operations for all types of Iterable
- * collections with a focus on Optional-based return types and functional programming patterns.
+ * A comprehensive utility class providing an extensive collection of static methods for iterable
+ * aggregations, searches, and set/collection manipulations. This class complements {@link com.landawn.abacus.util.N}
+ * in the Abacus library, offering null-safe operations with a focus on {@code Optional}/{@code Nullable}-based
+ * return types for statistical and searching operations.
  *
- * <p>The {@code Iterables} class is designed as a final utility class that provides a complete toolkit
- * for iterable processing including filtering, mapping, reducing, searching, sorting, and statistical
- * operations. All methods are static, thread-safe, and designed to handle edge cases gracefully while
- * maintaining optimal performance for large-scale data processing.</p>
+ * <p>The {@code Iterables} class is a final utility class that provides aggregation (min, max, sum,
+ * average, median, k-th largest), searching (indexOf, findFirstOrLast, findFirstAndLast), set views
+ * (union, intersection, difference, symmetric difference), and combinatorial helpers (power set,
+ * permutations, cartesian product). All methods are static, stateless, and thread-safe, and are
+ * designed to handle {@code null} and empty inputs gracefully.</p>
  *
  * <p><b>Key Features:</b>
  * <ul>
- *   <li><b>Optional-Based Returns:</b> Most methods return Optional types for null-safe value handling</li>
- *   <li><b>Comprehensive Operations:</b> Complete set of functional operations for iterables</li>
- *   <li><b>Null-Safe Design:</b> All methods handle null inputs gracefully without throwing exceptions</li>
- *   <li><b>Performance Optimized:</b> Efficient algorithms with minimal object allocation</li>
- *   <li><b>Statistical Functions:</b> Mathematical operations like sum, average, min, max, median</li>
- *   <li><b>Functional Programming:</b> Support for map, filter, reduce, and other functional patterns</li>
+ *   <li><b>Optional-Based Returns:</b> Aggregation/search methods return {@code Optional}, {@code Nullable},
+ *       or primitive optionals for null-safe value handling</li>
+ *   <li><b>Null-Safe Design:</b> Methods handle {@code null} and empty inputs gracefully, typically
+ *       returning an empty {@code Optional}/{@code Nullable} rather than throwing</li>
+ *   <li><b>Statistical Functions:</b> Mathematical operations like sum, average, min, max, median, kthLargest</li>
+ *   <li><b>Set Views:</b> Lazy, unmodifiable views for union, intersection, and difference of sets</li>
  *   <li><b>Type Safety:</b> Generic methods with compile-time type checking</li>
- *   <li><b>Stream Integration:</b> Seamless integration with Java Stream API patterns</li>
  * </ul>
  *
- * <p><b>Core Functional Categories:</b>
+ * <p><b>Core Categories:</b>
  * <ul>
- *   <li><b>Aggregation Operations:</b> sum, average, min, max, count, median for various number types</li>
- *   <li><b>Search Operations:</b> find, findFirst, findLast, contains, indexOf with Optional returns</li>
- *   <li><b>Transformation Operations:</b> map, flatMap, filter, distinct, reverse, shuffle</li>
- *   <li><b>Reduction Operations:</b> reduce operations with initial values and accumulators</li>
- *   <li><b>Comparison Operations:</b> equals, compare, isSubset, intersection, union, difference</li>
- *   <li><b>Validation Operations:</b> isEmpty, isNotEmpty, allMatch, anyMatch, noneMatch</li>
- *   <li><b>Conversion Operations:</b> toArray, toList, toSet, toMap with various collection types</li>
- *   <li><b>Partitioning Operations:</b> partition, groupBy, split with predicate-based logic</li>
+ *   <li><b>Aggregation:</b> {@code min}, {@code max}, {@code minBy}, {@code maxBy}, {@code minInt}/{@code minLong}/{@code minDouble}
+ *       (and {@code max*}), {@code minMax}, {@code median}, {@code kthLargest} for arrays, iterables, and iterators</li>
+ *   <li><b>Numeric Sums/Averages:</b> {@code sumInt}, {@code sumIntToLong}, {@code sumLong}, {@code sumDouble},
+ *       {@code sumBigInteger}, {@code sumBigDecimal}, and corresponding {@code averageInt}/{@code averageLong}/{@code averageDouble}/
+ *       {@code averageBigInteger}/{@code averageBigDecimal}</li>
+ *   <li><b>Search:</b> {@code indexOf}, {@code lastIndexOf}, {@code findFirstOrLast}, {@code findFirstAndLast},
+ *       {@code findFirstOrLastIndex}, {@code findFirstAndLastIndex}</li>
+ *   <li><b>Set Operations:</b> {@code union}, {@code intersection}, {@code difference},
+ *       {@code symmetricDifference}, {@code subSet}, {@code powerSet}</li>
+ *   <li><b>Combinatorial:</b> {@code rollup}, {@code permutations}, {@code orderedPermutations},
+ *       {@code cartesianProduct}</li>
+ *   <li><b>Mutation Helpers:</b> {@code fill}, {@code copyInto}, {@code copyRange}, {@code asReversed}</li>
+ *   <li><b>Null Selection:</b> {@code firstNonNull}, {@code lastNonNull}</li>
  * </ul>
  *
  * <p><b>Design Philosophy:</b>
  * <ul>
- *   <li><b>Optional First:</b> Methods prefer returning Optional types over element types to handle
- *       empty results gracefully and avoid null pointer exceptions</li>
+ *   <li><b>Optional First:</b> Aggregation/search methods prefer returning {@code Optional}/{@code Nullable}
+ *       over element types to handle empty results gracefully and avoid null pointer exceptions</li>
  *   <li><b>Null Safety:</b> Methods handle {@code null} inputs gracefully, typically returning
- *       empty Optional or sensible defaults rather than throwing exceptions</li>
- *   <li><b>Read-Only Operations:</b> Methods only read input parameters without modifying them</li>
- *   <li><b>Exception Minimization:</b> Exceptions are thrown only when method contracts are violated,
- *       not for edge cases like empty collections</li>
- *   <li><b>Performance First:</b> Optimized algorithms with lazy evaluation where appropriate</li>
+ *       an empty {@code Optional}/{@code Nullable} or {@code null} rather than throwing exceptions</li>
+ *   <li><b>Read-Only by Default:</b> Most methods only read input parameters; the {@code fill},
+ *       {@code copyInto}, and {@code copyRange} methods mutate the supplied destination/array as documented</li>
+ *   <li><b>Exception Minimization:</b> Exceptions are thrown only when method contracts are violated
+ *       (e.g., invalid index ranges), not for edge cases like empty collections</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // Statistical operations with Optional returns
+ * // Statistical operations with Optional/Nullable returns
  * List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
- * OptionalDouble average = Iterables.average(numbers);   // OptionalDouble[3.0]
- * OptionalInt max = Iterables.max(numbers);              // OptionalInt[5]
- * OptionalLong sum = Iterables.sumToLong(numbers);       // OptionalLong[15]
+ * OptionalDouble average = Iterables.averageInt(numbers);     // OptionalDouble[3.0]
+ * Nullable<Integer> max = Iterables.max(numbers);             // Nullable[5]
+ * OptionalLong sum = Iterables.sumIntToLong(numbers);         // OptionalLong[15]
  *
  * // Search operations with null safety
  * List<String> names = Arrays.asList("Alice", "Bob", "Charlie");
- * Optional<String> found = Iterables.findFirst(names, s -> s.startsWith("B"));      // Optional[Bob]
- * Optional<String> notFound = Iterables.findFirst(names, s -> s.startsWith("X"));   // Optional.empty()
+ * Nullable<String> found = Iterables.findFirstOrLast(names,
+ *         s -> s.startsWith("B"), s -> s.startsWith("X"));    // Nullable[Bob]
  *
  * // Null-safe operations
- * OptionalInt maxFromNull = Iterables.max((List<Integer>) null);   // OptionalInt.empty()
- * boolean isEmpty = Iterables.isEmpty(null);                       // Returns true
+ * Nullable<Integer> maxFromNull = Iterables.max((List<Integer>) null);   // Nullable.empty()
  *
- * // Functional transformations
- * List<String> words = Arrays.asList("hello", "world", "java");
- * List<Integer> lengths = Iterables.map(words, String::length);           // [5, 5, 4]
- * List<String> filtered = Iterables.filter(words, s -> s.length() > 4);   // [hello, world]
+ * // Index search
+ * OptionalInt index = Iterables.indexOf(names, "Bob");        // OptionalInt[1]
  *
- * // Collection operations
- * List<Integer> list1 = Arrays.asList(1, 2, 3);
- * List<Integer> list2 = Arrays.asList(2, 3, 4);
- * List<Integer> intersection = Iterables.intersection(list1, list2);   // [2, 3]
- * List<Integer> union = Iterables.union(list1, list2);                 // [1, 2, 3, 4]
- *
- * // Validation and matching
- * boolean allPositive = Iterables.allMatch(numbers, n -> n > 0);     // true
- * boolean anyEven = Iterables.anyMatch(numbers, n -> n % 2 == 0);    // true
- * boolean noneNegative = Iterables.noneMatch(numbers, n -> n < 0);   // true
- *
- * // Conversion operations
- * Integer[] array = Iterables.toArray(numbers, Integer.class);
- * Set<Integer> set = Iterables.toSet(numbers);
- * Map<Integer, String> map = Iterables.toMap(numbers, Object::toString);
+ * // Set view operations
+ * Set<Integer> set1 = new HashSet<>(Arrays.asList(1, 2, 3));
+ * Set<Integer> set2 = new HashSet<>(Arrays.asList(2, 3, 4));
+ * SetView<Integer> intersection = Iterables.intersection(set1, set2);   // {2, 3}
+ * SetView<Integer> union = Iterables.union(set1, set2);                 // {1, 2, 3, 4}
  * }</pre>
  *
  * <p><b>Optional-Based Return Types:</b>
  * <ul>
  *   <li><b>Primitive Optionals:</b> {@code OptionalInt}, {@code OptionalLong}, {@code OptionalDouble}</li>
- *   <li><b>Object Optional:</b> {@code Optional<T>} for object types</li>
- *   <li><b>Specialized Optionals:</b> {@code OptionalByte}, {@code OptionalChar}, {@code OptionalFloat}, etc.</li>
- *   <li><b>Empty Handling:</b> All methods return empty Optional for null or empty inputs</li>
+ *   <li><b>Object Optional:</b> {@code Optional<T>} for object types (e.g., {@code minMax}, {@code sumBigInteger})</li>
+ *   <li><b>Specialized Optionals:</b> {@code OptionalByte}, {@code OptionalChar}, {@code OptionalFloat},
+ *       {@code OptionalShort} for primitive array aggregations</li>
+ *   <li><b>Nullable:</b> {@code Nullable<T>} for element results that may legitimately be {@code null}
+ *       (e.g., {@code min}, {@code max}, {@code median}, {@code kthLargest})</li>
+ *   <li><b>Empty Handling:</b> Aggregation methods return an empty {@code Optional}/{@code Nullable}
+ *       for {@code null} or empty inputs</li>
  * </ul>
  *
  * <p><b>Statistical Operations:</b>
  * <ul>
- *   <li><b>Aggregation:</b> {@code sum()}, {@code average()}, {@code count()}, {@code median()}</li>
- *   <li><b>Extremes:</b> {@code min()}, {@code max()}, {@code minBy()}, {@code maxBy()}</li>
+ *   <li><b>Aggregation:</b> {@code sumInt()}, {@code sumLong()}, {@code sumDouble()}, {@code averageInt()},
+ *       {@code averageLong()}, {@code averageDouble()}, {@code median()}, {@code kthLargest()}</li>
+ *   <li><b>Extremes:</b> {@code min()}, {@code max()}, {@code minBy()}, {@code maxBy()}, {@code minMax()}</li>
  *   <li><b>Type-Specific:</b> Specialized methods for int, long, double, BigInteger, BigDecimal</li>
- *   <li><b>Custom Extractors:</b> Support for ToIntFunction, ToLongFunction, ToDoubleFunction</li>
+ *   <li><b>Custom Extractors:</b> Support for {@code ToIntFunction}, {@code ToLongFunction}, {@code ToDoubleFunction}</li>
  * </ul>
  *
- * <p><b>Functional Operations:</b>
+ * <p><b>Set View Operations:</b>
  * <ul>
- *   <li><b>Mapping:</b> {@code map()}, {@code flatMap()}, {@code mapToInt()}, {@code mapToLong()}</li>
- *   <li><b>Filtering:</b> {@code filter()}, {@code filterNot()}, {@code distinct()}</li>
- *   <li><b>Reduction:</b> {@code reduce()}, {@code reduceLeft()}, {@code reduceRight()}</li>
- *   <li><b>Transformation:</b> {@code reverse()}, {@code shuffle()}, {@code sort()}</li>
- * </ul>
- *
- * <p><b>Performance Characteristics:</b>
- * <ul>
- *   <li><b>Lazy Evaluation:</b> Operations are performed only when necessary</li>
- *   <li><b>Memory Efficient:</b> Minimal object allocation and copying</li>
- *   <li><b>Iterator-Based:</b> Efficient iteration patterns optimized for different collection types</li>
- *   <li><b>Short-Circuit Operations:</b> Early termination for operations like findFirst, anyMatch</li>
- *   <li><b>Algorithm Selection:</b> Optimal algorithms chosen based on collection type and size</li>
+ *   <li><b>Union:</b> {@code union()} returns a {@code SetView} of all elements from both sets</li>
+ *   <li><b>Intersection:</b> {@code intersection()} returns a {@code SetView} of common elements</li>
+ *   <li><b>Difference:</b> {@code difference()}, {@code symmetricDifference()}</li>
+ *   <li><b>Power Set:</b> {@code powerSet()} returns all subsets (limited to 30 input elements)</li>
+ *   <li><b>View Semantics:</b> Returned views are unmodifiable and backed by the input sets</li>
  * </ul>
  *
  * <p><b>Thread Safety:</b>
  * <ul>
  *   <li><b>Stateless Design:</b> All static methods are stateless and thread-safe</li>
- *   <li><b>Immutable Operations:</b> Methods create new collections rather than modifying inputs</li>
  *   <li><b>No Shared State:</b> No static mutable fields that could cause race conditions</li>
- *   <li><b>Concurrent Access:</b> Safe for concurrent access from multiple threads</li>
+ *   <li><b>Caller Responsibility:</b> Set views and {@code fill}/{@code copy} mutators are only as
+ *       thread-safe as the underlying collections supplied by the caller</li>
  * </ul>
  *
  * <p><b>Integration with Java Collections:</b>
  * <ul>
- *   <li><b>Iterable Compatibility:</b> Works with all Java Collection types</li>
- *   <li><b>Stream API Alignment:</b> Similar patterns to Java 8+ Stream operations</li>
+ *   <li><b>Iterable Compatibility:</b> Works with arrays, all Java {@code Collection} types, and {@code Iterator}s</li>
  *   <li><b>Collection Factory Methods:</b> Integration with collection creation utilities</li>
  *   <li><b>Functional Interface Support:</b> Full support for standard functional interfaces</li>
  * </ul>
  *
  * <p><b>Error Handling Strategy:</b>
  * <ul>
- *   <li><b>Graceful Degradation:</b> Methods handle edge cases gracefully without exceptions</li>
- *   <li><b>Null Tolerance:</b> Comprehensive null input handling throughout the API</li>
- *   <li><b>Empty Collection Support:</b> Proper handling of empty collections in all operations</li>
- *   <li><b>Optional Returns:</b> Use of Optional types to avoid null return values</li>
+ *   <li><b>Graceful Degradation:</b> Aggregation/search methods handle edge cases without exceptions</li>
+ *   <li><b>Null Tolerance:</b> Comprehensive null input handling throughout the aggregation API</li>
+ *   <li><b>Empty Collection Support:</b> Proper handling of empty collections in aggregation operations</li>
+ *   <li><b>Optional Returns:</b> Use of {@code Optional}/{@code Nullable} types to avoid null return values</li>
  * </ul>
  *
  * <p><b>Best Practices:</b>
  * <ul>
- *   <li>Use Optional-returning methods to avoid null pointer exceptions</li>
- *   <li>Prefer Iterables utilities over manual iteration for complex operations</li>
+ *   <li>Use {@code Optional}/{@code Nullable}-returning methods to avoid null pointer exceptions</li>
+ *   <li>Prefer {@code Iterables} utilities over manual iteration for aggregation and set operations</li>
  *   <li>Leverage the null-safe design for robust code</li>
- *   <li>Use appropriate functional interfaces for transformation operations</li>
  *   <li>Take advantage of the statistical functions for data analysis</li>
- *   <li>Use validation methods before processing collections</li>
+ *   <li>For functional transformations (map/filter/reduce), use {@link com.landawn.abacus.util.stream.Stream}
+ *       or {@link com.landawn.abacus.util.Seq}</li>
  * </ul>
  *
  * <p><b>Performance Tips:</b>
  * <ul>
  *   <li>Use appropriate collection types for input data structure</li>
- *   <li>Consider the cost of conversion operations for large collections</li>
- *   <li>Leverage short-circuit operations for better performance</li>
  *   <li>Use primitive-specific methods when working with numeric data</li>
- *   <li>Prefer lazy evaluation patterns for chained operations</li>
+ *   <li>For {@code intersection}, pass the smaller set first for better performance</li>
  * </ul>
  *
  * <p><b>Common Patterns:</b>
  * <ul>
- *   <li><b>Safe Aggregation:</b> {@code OptionalDouble avg = Iterables.average(numbers);}</li>
- *   <li><b>Null-Safe Search:</b> {@code Optional<T> result = Iterables.findFirst(collection, predicate);}</li>
- *   <li><b>Validation:</b> {@code if (Iterables.isNotEmpty(collection)) { ... }}</li>
- *   <li><b>Transformation:</b> {@code List<R> result = Iterables.map(input, mapper);}</li>
+ *   <li><b>Safe Aggregation:</b> {@code OptionalDouble avg = Iterables.averageInt(numbers);}</li>
+ *   <li><b>Null-Safe Extremes:</b> {@code Nullable<T> result = Iterables.max(collection);}</li>
+ *   <li><b>Conditional Search:</b> {@code Nullable<T> r = Iterables.findFirstOrLast(c, p1, p2);}</li>
+ *   <li><b>Set View:</b> {@code SetView<T> common = Iterables.intersection(set1, set2);}</li>
  * </ul>
  *
  * <p><b>Related Utility Classes:</b>
@@ -244,60 +230,49 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * <p><b>Usage Examples: Data Analysis Pipeline</b>
  * <pre>{@code
- * // Complete data analysis example
- * List<Double> salesData = Arrays.asList(1200.50, 1450.75, 980.25, 1350.00, null, 1600.25);
- *
  * // Statistical analysis with null safety
- * OptionalDouble average = Iterables.average(salesData);   // Handles null values
- * OptionalDouble max = Iterables.max(salesData);
- * OptionalDouble min = Iterables.min(salesData);
- * OptionalLong count = Iterables.count(salesData);
+ * List<Double> salesData = Arrays.asList(1200.50, 1450.75, 980.25, 1350.00, 1600.25);
  *
- * // Filtering and transformation
- * List<Double> validSales = Iterables.filter(salesData, Objects::nonNull);
- * List<Double> highSales = Iterables.filter(validSales, sale -> sale > 1300.0);
- * List<String> formattedSales = Iterables.map(highSales, sale -> String.format("$%.2f", sale));
+ * OptionalDouble average = Iterables.averageDouble(salesData);   // OptionalDouble[1316.35]
+ * Nullable<Double> max = Iterables.max(salesData);               // Nullable[1600.25]
+ * Nullable<Double> min = Iterables.min(salesData);               // Nullable[980.25]
+ * OptionalDouble total = Iterables.sumDouble(salesData);         // OptionalDouble[6581.75]
  *
- * // Validation and aggregation
- * boolean hasHighSales = Iterables.anyMatch(validSales, sale -> sale > 1500.0);
- * boolean allPositive = Iterables.allMatch(validSales, sale -> sale > 0.0);
+ * // Min/Max in a single pass
+ * Optional<Pair<Double, Double>> range = Iterables.minMax(salesData);
+ * // range => Optional[Pair[980.25, 1600.25]]
  *
- * // Partitioning for analysis
- * Map<Boolean, List<Double>> partitioned = Iterables.partition(validSales, sale -> sale > 1300.0);
- * List<Double> premium = partitioned.get(true);
- * List<Double> standard = partitioned.get(false);
+ * // Conditional search: first sale above 1500, else last sale below 1000
+ * Nullable<Double> notable = Iterables.findFirstOrLast(salesData,
+ *         sale -> sale > 1500.0, sale -> sale < 1000.0);
+ * // notable => Nullable[1600.25]
  *
- * // Summary statistics
- * OptionalDouble premiumAvg = Iterables.average(premium);
- * OptionalDouble standardAvg = Iterables.average(standard);
+ * // Median
+ * Nullable<Double> median = Iterables.median(salesData);         // Nullable[1350.0]
  * }</pre>
  *
- * <p><b>Usage Examples: Collection Operations</b>
+ * <p><b>Usage Examples: Set and Collection Operations</b>
  * <pre>{@code
- * // Collection manipulation and analysis
- * List<String> categories = Arrays.asList("Electronics", "Books", "Clothing", "Electronics", "Books");
- * List<Integer> prices = Arrays.asList(299, 25, 79, 399, 35);
+ * Set<String> catalogA = new HashSet<>(Arrays.asList("Electronics", "Books", "Clothing"));
+ * Set<String> catalogB = new HashSet<>(Arrays.asList("Books", "Toys"));
  *
- * // Unique operations
- * List<String> uniqueCategories = Iterables.distinct(categories);
- * Set<String> categorySet = Iterables.toSet(categories);
+ * // Set views (unmodifiable, backed by the inputs)
+ * SetView<String> all = Iterables.union(catalogA, catalogB);                 // {Electronics, Books, Clothing, Toys}
+ * SetView<String> common = Iterables.intersection(catalogA, catalogB);       // {Books}
+ * SetView<String> onlyA = Iterables.difference(catalogA, catalogB);          // {Electronics, Clothing}
+ * SetView<String> symDiff = Iterables.symmetricDifference(catalogA, catalogB); // {Electronics, Clothing, Toys}
  *
- * // Finding operations with Optional safety
- * Optional<String> expensiveCategory = Iterables.findFirst(categories, cat ->
- *     Iterables.max(prices).orElse(0) > 300);
+ * // Materialize a view into a concrete set when needed
+ * Set<String> commonCopy = common.copyInto(new HashSet<>());
  *
- * // Indexing and position
- * OptionalInt electronicsIndex = Iterables.indexOf(categories, "Electronics");
+ * // Index search
+ * List<String> categories = Arrays.asList("Electronics", "Books", "Clothing", "Books");
+ * OptionalInt firstBooks = Iterables.indexOf(categories, "Books");      // OptionalInt[1]
+ * OptionalInt lastBooks = Iterables.lastIndexOf(categories, "Books");   // OptionalInt[3]
  *
- * // Comparison operations
- * List<String> otherCategories = Arrays.asList("Electronics", "Books");
- * boolean isSubset = Iterables.isSubset(otherCategories, categories);
- * List<String> commonCategories = Iterables.intersection(categories, otherCategories);
- *
- * // Transformation and grouping
- * Map<String, Long> categoryFrequency = Iterables.groupBy(categories, Function.identity())
- *     .entrySet().stream()
- *     .collect(Collectors.toMap(Map.Entry::getKey, e -> (long) e.getValue().size()));
+ * // Combinatorial helpers
+ * List<List<String>> rollup = Iterables.rollup(Arrays.asList("a", "b"));   // [[], [a], [a, b]]
+ * Set<Set<String>> powerSet = Iterables.powerSet(catalogB);               // {{}, {Books}, {Toys}, {Books, Toys}}
  * }</pre>
  *
  * <p><b>Attribution:</b>
@@ -3755,9 +3730,12 @@ public final class Iterables {
      * // target => [1, 2, 3]
      * }</pre>
      *
+     * <p>If {@code src} is {@code null} or empty, this method does nothing and {@code dest} is left unchanged.</p>
+     *
      * @param <T> the type of the elements.
      * @param src the source list from which elements are to be copied.
      * @param dest the destination list to which elements are to be copied.
+     * @throws IndexOutOfBoundsException if {@code dest} is shorter than {@code src} (the source does not fit in the destination).
      * @see #copyRange(List, int, List, int, int)
      * @see java.util.Collections#copy(List, List)
      * @see N#copy(Object[], int, Object[], int, int)
@@ -4577,11 +4555,13 @@ public final class Iterables {
      * The returned NavigableSet is a view of the original set, meaning changes in the returned set are reflected in the original set and vice versa.
      * The iteration order of the returned set matches that of the original set.
      *
+     * <p>If the specified set is {@code null} or empty, an empty {@code NavigableSet} is returned.</p>
+     *
      * @param <K> the type of the elements.
      * @param set the original NavigableSet from which to derive the subset.
      * @param range the Range object that defines the lower and upper bounds of the subset.
-     * @return a NavigableSet view of elements within the specified range.
-     * @throws IllegalArgumentException if the set uses a custom comparator inconsistent with the natural ordering implied by {@code range}.
+     * @return a {@code NavigableSet} view of the elements within the specified range; an empty {@code NavigableSet} if {@code set} is {@code null} or empty.
+     * @throws IllegalArgumentException if the set uses a custom comparator (other than the natural ordering) under which {@code range.lowerEndpoint()} compares greater than {@code range.upperEndpoint()}.
      */
     public static <K extends Comparable<? super K>> NavigableSet<K> subSet(final NavigableSet<K> set, final Range<K> range) throws IllegalArgumentException {
         if (N.isEmpty(set)) {
@@ -4620,10 +4600,12 @@ public final class Iterables {
      * power set is iterated are the individual subsets created, and these subsets
      * themselves occupy only a small constant amount of memory.
      *
+     * <p>A {@code null} set is treated as an empty set, whose power set is a one-element set containing the empty set.</p>
+     *
      * @param <E> the type of the elements.
      * @param set the set of elements to construct a power set from.
-     * @return a Set containing all possible subsets of the input set.
-     * @throws IllegalArgumentException if set has more than 30 elements (causing the power set size to exceed the {@code int} range)
+     * @return a {@code Set} containing all {@code 2^n} possible subsets of the input set.
+     * @throws IllegalArgumentException if {@code set} has more than 30 elements (the implementation limits the input size so the subset bitmask fits in an {@code int})
      * @see <a href="http://en.wikipedia.org/wiki/Power_set">Power set article at Wikipedia</a>
      */
     public static <E> Set<Set<E>> powerSet(final Set<E> set) {
@@ -4636,9 +4618,18 @@ public final class Iterables {
      * The rollup starts with an empty list, and each subsequent list in the rollup includes one more element from the collection.
      * For example, given a collection [a, b, c], the rollup would be [[], [a], [a, b], [a, b, c]].
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<List<String>> r = Iterables.rollup(Arrays.asList("a", "b", "c"));
+     * // r => [[], [a], [a, b], [a, b, c]]
+     *
+     * List<List<Object>> empty = Iterables.rollup(null);
+     * // empty => [[]]
+     * }</pre>
+     *
      * @param <T> the type of the elements.
-     * @param c the original collection from which to generate the rollup.
-     * @return a {@code List} of {@code List}s representing the rollup of the collection, starting with an empty list and progressively including more elements.
+     * @param c the original collection from which to generate the rollup. A {@code null} or empty collection yields a single empty list.
+     * @return a {@code List} of {@code List}s representing the rollup of the collection, starting with an empty list and progressively including more elements; for {@code n} elements the result contains {@code n + 1} lists. Never {@code null}.
      */
     public static <T> List<List<T>> rollup(final Collection<? extends T> c) {
         final List<List<T>> res = new ArrayList<>();
@@ -4825,7 +4816,7 @@ public final class Iterables {
      * @param <E> any common base class shared by all axes (often just {@link Object})
      * @param cs the lists to choose elements from, in the order that
      *     the elements chosen from those lists should appear in the resulting lists
-     * @return a list containing every possible list that can be formed by choosing one element from each of the given lists
+     * @return a list containing every possible list that can be formed by choosing one element from each of the given lists; an empty list if any input list is empty; a single-element list containing the empty list if no input lists are provided
      * @throws IllegalArgumentException if the size of the cartesian product is greater than {@link Integer#MAX_VALUE}
      */
     @SafeVarargs
@@ -4885,7 +4876,7 @@ public final class Iterables {
      * @param <E> any common base class shared by all axes (often just {@link Object})
      * @param cs the lists to choose elements from, in the order that
      *     the elements chosen from those lists should appear in the resulting lists
-     * @return a list containing every possible list that can be formed by choosing one element from each of the given lists
+     * @return a list containing every possible list that can be formed by choosing one element from each of the given lists; an empty list if any input list is empty; a single-element list containing the empty list if {@code cs} is {@code null} or empty
      * @throws IllegalArgumentException if the size of the cartesian product is greater than {@link Integer#MAX_VALUE}
      */
     public static <E> List<List<E>> cartesianProduct(final Collection<? extends Collection<? extends E>> cs) {
@@ -5170,7 +5161,7 @@ public final class Iterables {
          * permutations is increased by a factor of (n choose r).</li>
          * </ul>
          *
-        * @param <E> the type of the elements.
+         * @param <E> the type of the elements.
          * @param sortedInputList the sorted input list.
          * @param comparator the comparator to determine the order of the elements.
          * @return the number of permutations, or {@code Integer.MAX_VALUE} if the number is too large.

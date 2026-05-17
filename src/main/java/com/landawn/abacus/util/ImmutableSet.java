@@ -27,9 +27,12 @@ import java.util.SortedSet;
 import com.landawn.abacus.annotation.Beta;
 
 /**
- * An immutable, thread-safe implementation of the {@link Set} interface.
- * Once created, the contents of an ImmutableSet cannot be modified.
- * All mutating operations (add, remove, clear, etc.) will throw {@link UnsupportedOperationException}.
+ * An immutable implementation of the {@link Set} interface.
+ * Once created, the contents of an {@code ImmutableSet} cannot be modified.
+ * All mutating operations ({@code add}, {@code remove}, {@code clear}, etc.) throw {@link UnsupportedOperationException}.
+ *
+ * <p>Note: instances created via {@link #wrap(Set)} delegate to the supplied backing set; the immutability
+ * guarantee then depends on that backing set not being modified externally.</p>
  *
  * <p>This class provides several static factory methods for creating instances:
  * <ul>
@@ -432,8 +435,9 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * }</pre>
      *
      * @param <E> the type of elements in the collection.
-     * @param c the collection whose distinct elements are to be placed into the ImmutableSet.
-     * @return an ImmutableSet containing all distinct elements from the collection, or the same instance if already an ImmutableSet.
+     * @param c the collection whose distinct elements are to be placed into the {@code ImmutableSet}.
+     * @return an {@code ImmutableSet} containing all distinct elements from the collection, or the same instance if it is already an {@code ImmutableSet}, or an empty instance if {@code c} is {@code null} or empty.
+     * @see #wrap(Set)
      */
     public static <E> ImmutableSet<E> copyOf(final Collection<? extends E> c) {
         if (c instanceof ImmutableSet) {
@@ -467,8 +471,9 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * }</pre>
      *
      * @param <E> the type of elements in the set.
-     * @param set the set to be wrapped into an ImmutableSet.
-     * @return an ImmutableSet view of the provided set, or the same instance if already an ImmutableSet.
+     * @param set the set to be wrapped into an {@code ImmutableSet}.
+     * @return an {@code ImmutableSet} view backed by the provided set, or the same instance if it is already an {@code ImmutableSet}, or an empty instance if {@code set} is {@code null}.
+     * @see #copyOf(Collection)
      */
     @Beta
     public static <E> ImmutableSet<E> wrap(final Set<? extends E> set) {

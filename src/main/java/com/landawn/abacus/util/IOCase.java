@@ -36,6 +36,8 @@ package com.landawn.abacus.util;
  * }</pre>
  *
  * @version $Id: IOCase.java 1483915 2013-05-17 17:02:35Z sebb $
+ * @see IOUtil
+ * @see java.io.File#separatorChar
  */
 public enum IOCase {
 
@@ -77,16 +79,20 @@ public enum IOCase {
     //-----------------------------------------------------------------------
 
     /**
-     * Factory method to create an IOCase instance from its name.
+     * Returns the {@code IOCase} constant whose {@link #getName() name} exactly matches the
+     * specified name. The match is case-sensitive.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IOCase ioCase = IOCase.forName("Sensitive");   // returns IOCase.SENSITIVE
      * }</pre>
      *
-     * @param name the name of the IOCase constant ("Sensitive", "Insensitive", or "System")
-     * @return the corresponding IOCase enum constant
-     * @throws IllegalArgumentException if the name is not valid
+     * @param name the name of the {@code IOCase} constant; one of "Sensitive", "Insensitive",
+     *             or "System" (case-sensitive)
+     * @return the {@code IOCase} constant matching the given name
+     * @throws IllegalArgumentException if {@code name} does not match any constant (including
+     *         when {@code name} is {@code null})
+     * @see #getName()
      */
     public static IOCase forName(final String name) {
         for (final IOCase ioCase : IOCase.values()) {

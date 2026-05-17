@@ -79,7 +79,7 @@ public interface DoubleTriConsumer extends Throwables.DoubleTriConsumer<RuntimeE
      * combined.accept(1.0, 2.0, 3.0);
      * }</pre>
      *
-     * @param after the operation to perform after this operation
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code DoubleTriConsumer} that performs in sequence this operation followed by the {@code after} operation
      * @throws NullPointerException if {@code after} is null
      */

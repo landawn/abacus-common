@@ -37,8 +37,7 @@ public interface ByteSupplier extends Throwables.ByteSupplier<RuntimeException> 
     ByteSupplier ZERO = () -> 0;
     /**
      * A supplier that returns random byte values.
-     * Each invocation returns a new random byte value between -128 and 127 (inclusive).
-     * The randomness is provided by {@code Util.RAND_BYTE.nextInt()}.
+     * Each invocation returns a new random byte value in the range [-128, 127] (inclusive).
      */
     ByteSupplier RANDOM = () -> (byte) Util.RAND_BYTE.nextInt();
 

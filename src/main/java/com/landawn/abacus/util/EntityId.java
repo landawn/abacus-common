@@ -192,7 +192,7 @@ public interface EntityId {
      *
      * @param nameValues a map of property names to their values
      * @return a new EntityId instance
-     * @throws IllegalArgumentException if the map is empty or null
+     * @throws IllegalArgumentException if {@code nameValues} is {@code null} or empty
      */
     static EntityId create(final Map<String, Object> nameValues) {
         return Seid.create(nameValues);
@@ -235,6 +235,7 @@ public interface EntityId {
      *
      * @param entity the entity object to extract ID from
      * @return a new EntityId instance
+     * @throws IllegalArgumentException if no ID property is defined in the entity class
      */
     static EntityId create(final Object entity) {
         return Seid.create(entity);
@@ -257,6 +258,7 @@ public interface EntityId {
      * @param entity the entity object to extract properties from
      * @param idPropNames the collection of property names to use as ID
      * @return a new EntityId instance
+     * @throws IllegalArgumentException if {@code idPropNames} is {@code null} or empty
      */
     static EntityId create(final Object entity, final Collection<String> idPropNames) {
         return Seid.create(entity, idPropNames);
@@ -301,7 +303,7 @@ public interface EntityId {
      * }</pre>
      *
      * @param propName the property name
-     * @return the property value as int, or 0 if not found or not a number
+     * @return the property value as an int; the value is converted if it is not a {@code Number}, returning {@code 0} if the property is absent or its value is {@code null}
      */
     int getInt(String propName);
 
@@ -315,7 +317,7 @@ public interface EntityId {
      * }</pre>
      *
      * @param propName the property name
-     * @return the property value as long, or 0 if not found or not a number
+     * @return the property value as a long; the value is converted if it is not a {@code Number}, returning {@code 0} if the property is absent or its value is {@code null}
      */
     long getLong(String propName);
 

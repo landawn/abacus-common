@@ -37,7 +37,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Assuming a Paginated implementation for database results
- * Paginated<List<User>> userPages = userRepository.findAllPaginated(pageSize: 20);
+ * Paginated<List<User>> userPages = userRepository.findAllPaginated(20);
  *
  * // Get specific page
  * List<User> firstPage = userPages.getPage(0);
@@ -59,7 +59,8 @@ import com.landawn.abacus.util.stream.Stream;
  * }
  * }</pre>
  *
- * @param <T> the type of data contained in each page (e.g., List&lt;Entity&gt;, Page&lt;Data&gt;)
+ * @param <T> the type of data contained in each page (e.g., {@code List<Entity>},
+ *        {@code Page<Data>})
  * @see Optional
  * @see Stream
  * @see Iterable

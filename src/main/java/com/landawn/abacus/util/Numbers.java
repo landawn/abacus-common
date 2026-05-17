@@ -1067,9 +1067,9 @@ public final class Numbers {
      * Type<Long> longType = Type.of(Long.class);
      * Long longValue      = Numbers.convert(new BigInteger("9223372036854775807"), longType);
      *
-     * // Null values return the default value for the target type
+     * // Null values return the default value of the target Type
      * Type<Byte> byteType = Type.of(Byte.class);
-     * Byte byteValue = Numbers.convert(null, byteType);   // Returns null
+     * Byte byteValue = Numbers.convert(null, byteType);   // Returns Byte's default value (null)
      * }</pre>
      *
      * @param <T> the target type of the conversion (must extend Number)
@@ -1382,8 +1382,8 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.format(12.105, "0.00");     // returns "12.11"
-     * Numbers.format(12.105, "#.##");     // returns "12.11"
+     * Numbers.format(12.105, "0.00");     // returns "12.10"
+     * Numbers.format(12.105, "#.##");     // returns "12.1"
      * Numbers.format(0.121, "0.00%");     // returns "12.10%"
      * Numbers.format(0.121, "#.##%");     // returns "12.1%"
      * Numbers.format(0.12156, "0.00%");   // returns "12.16%"
@@ -1423,8 +1423,8 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.format(12.105, "0.00");     // returns "12.11"
-     * Numbers.format(12.105, "#.##");     // returns "12.11"
+     * Numbers.format(12.105, "0.00");     // returns "12.10"
+     * Numbers.format(12.105, "#.##");     // returns "12.1"
      * Numbers.format(null, "0.00");       // returns "0.00"
      * Numbers.format(0.121, "#.##%");     // returns "12.1%"
      * Numbers.format(0.12156, "#.##%");   // returns "12.16%"
@@ -4190,7 +4190,7 @@ public final class Numbers {
      * Numbers.log2(10, RoundingMode.UP)            = 4    // ceiling(log2(10))
      * Numbers.log2(10, RoundingMode.CEILING)       = 4
      * Numbers.log2(10, RoundingMode.FLOOR)         = 3
-     * Numbers.log2(10, RoundingMode.HALF_UP)       = 3    // 10 closer to 8 than 16
+     * Numbers.log2(10, RoundingMode.HALF_UP)       = 3    // 10 < 2^3.5 (~11.3), so rounds down
      * Numbers.log2(16, RoundingMode.UNNECESSARY)   = 4    // exact power of 2
      * }</pre>
      * @param x the integer value to compute the logarithm of, must be positive
@@ -4245,7 +4245,7 @@ public final class Numbers {
      * Numbers.log2(1024L, RoundingMode.DOWN)   = 10   // 2^10 = 1024
      * Numbers.log2(1000L, RoundingMode.DOWN)              = 9    // floor(log2(1000))
      * Numbers.log2(1000L, RoundingMode.UP)                = 10   // ceiling(log2(1000))
-     * Numbers.log2(1000L, RoundingMode.HALF_UP)           = 10   // 1000 closer to 1024 than 512
+     * Numbers.log2(1000L, RoundingMode.HALF_UP)           = 10   // 1000 > 2^9.5 (~724), so rounds up
      * Numbers.log2(1048576L, RoundingMode.UNNECESSARY)    = 20   // exact power of 2 (2^20)
      * }</pre>
      * @param x the value to compute the logarithm of, must be positive
@@ -4471,7 +4471,7 @@ public final class Numbers {
      * Numbers.log10(1000, RoundingMode.DOWN)   = 3    // 10^3 = 1000
      * Numbers.log10(999, RoundingMode.DOWN)          = 2    // floor(log10(999))
      * Numbers.log10(999, RoundingMode.UP)            = 3    // ceiling(log10(999))
-     * Numbers.log10(500, RoundingMode.HALF_UP)        = 3    // 500 closer to 1000 than 100
+     * Numbers.log10(500, RoundingMode.HALF_UP)        = 3    // 500 > 10^2.5 (~316), so rounds up
      * Numbers.log10(1000, RoundingMode.UNNECESSARY)   = 3    // exact power of 10
      * }</pre>
      * @param x the integer value to compute the logarithm of, must be positive
@@ -5536,8 +5536,9 @@ public final class Numbers {
      * @param a the first integer
      * @param b the second integer
      * @return the greatest common divisor of {@code a} and {@code b}; returns {@code 0} if both are zero
-     * @throws ArithmeticException if {@code (a == 0 && b == Integer.MIN_VALUE) || (b == 0 && a == Integer.MIN_VALUE)}
-     *         because the GCD would be 2^31 which cannot be represented as a positive int
+     * @throws ArithmeticException if {@code (a == 0 && b == Integer.MIN_VALUE)}, {@code (b == 0 && a == Integer.MIN_VALUE)},
+     *         or {@code (a == Integer.MIN_VALUE && b == Integer.MIN_VALUE)}, because the GCD would be 2^31 which
+     *         cannot be represented as a positive int
      * @see #gcd(long, long)
      * @see #lcm(int, int)
      */
@@ -5616,8 +5617,9 @@ public final class Numbers {
      * @param a the first long integer
      * @param b the second long integer
      * @return the greatest common divisor of {@code a} and {@code b}; returns {@code 0} if both are zero
-     * @throws ArithmeticException if {@code (a == 0 && b == Long.MIN_VALUE) || (b == 0 && a == Long.MIN_VALUE)}
-     *         because the GCD would be 2^63 which cannot be represented as a positive long
+     * @throws ArithmeticException if {@code (a == 0 && b == Long.MIN_VALUE)}, {@code (b == 0 && a == Long.MIN_VALUE)},
+     *         or {@code (a == Long.MIN_VALUE && b == Long.MIN_VALUE)}, because the GCD would be 2^63 which
+     *         cannot be represented as a positive long
      * @see #gcd(int, int)
      * @see #lcm(long, long)
      */
@@ -6835,7 +6837,7 @@ public final class Numbers {
             k = n - k;
         }
         if (k < biggestBinomials.length && n <= biggestBinomials[k]) {
-            return BigInteger.valueOf(binomial(n, k));
+            return BigInteger.valueOf(binomialToLong(n, k));
         }
 
         BigInteger accum = BigInteger.ONE;
@@ -8125,7 +8127,7 @@ public final class Numbers {
 
         /**
          * A (self-inverse) bijection which converts the ordering on unsigned longs to the ordering on
-         * longs, that is, {@code a <= b} as unsigned longs if and only if {@code Numbers.flip(a) <= Numbers.flip(b)} as
+         * longs, that is, {@code a <= b} as unsigned longs if and only if {@code flip(a) <= flip(b)} as
          * signed longs.
          *
          * @param a the value to flip

@@ -22,12 +22,12 @@ import java.util.TreeMap;
 import com.landawn.abacus.annotation.Beta;
 
 /**
- * An immutable, thread-safe implementation of the SortedMap interface.
- * This class extends ImmutableMap and maintains its entries in sorted order
- * according to the natural ordering of its keys or by a Comparator provided at map creation time.
+ * An immutable implementation of the {@link SortedMap} interface.
+ * This class extends {@link ImmutableMap} and maintains its entries in sorted order
+ * according to the natural ordering of its keys or by a {@link Comparator} provided at map creation time.
  *
- * <p>Once created, the contents of an ImmutableSortedMap cannot be modified.
- * All mutating operations (put, remove, clear, etc.) will throw UnsupportedOperationException.</p>
+ * <p>Once created, the contents of an {@code ImmutableSortedMap} cannot be modified.
+ * All mutating operations ({@code put}, {@code remove}, {@code clear}, etc.) throw {@link UnsupportedOperationException}.</p>
  *
  * <p>This class provides several static factory methods for creating instances:
  * <ul>
@@ -453,8 +453,10 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      *
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
-     * @param map the Map whose mappings are to be placed in the ImmutableSortedMap
-     * @return an ImmutableSortedMap containing the same mappings as the provided Map, or the same instance if already an ImmutableSortedMap
+     * @param map the Map whose mappings are to be placed in the {@code ImmutableSortedMap}
+     * @return an {@code ImmutableSortedMap} containing the same mappings as the provided Map, or the same instance if it is already an {@code ImmutableSortedMap}, or an empty instance if {@code map} is {@code null} or empty
+     * @throws ClassCastException if the keys are not mutually comparable (when the source map is not a {@code SortedMap})
+     * @see #wrap(SortedMap)
      */
     public static <K, V> ImmutableSortedMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
         if (map instanceof ImmutableSortedMap) {
@@ -488,8 +490,9 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      *
      * @param <K> the type of keys in the SortedMap
      * @param <V> the type of values in the SortedMap
-     * @param sortedMap the SortedMap to be wrapped into an ImmutableSortedMap
-     * @return an ImmutableSortedMap backed by the provided SortedMap
+     * @param sortedMap the SortedMap to be wrapped into an {@code ImmutableSortedMap}
+     * @return an {@code ImmutableSortedMap} backed by the provided SortedMap, or the same instance if it is already an {@code ImmutableSortedMap}, or an empty instance if {@code sortedMap} is {@code null}
+     * @see #copyOf(Map)
      */
     @Beta
     public static <K, V> ImmutableSortedMap<K, V> wrap(final SortedMap<? extends K, ? extends V> sortedMap) {
@@ -531,7 +534,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * SortedMap<String, Integer> customMap = new TreeMap<>(reverseOrder);
      * customMap.put("a", 1);
      * ImmutableSortedMap<String, Integer> customOrder = ImmutableSortedMap.wrap(customMap);
-     * System.out.println(customOrder.comparator());   // ReverseComparator
+     * System.out.println(customOrder.comparator() == reverseOrder);   // true
      * }</pre>
      *
      * @return the comparator used to order the keys in this map, or {@code null}

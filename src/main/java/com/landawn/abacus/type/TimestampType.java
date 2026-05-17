@@ -102,7 +102,7 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * Special handling:
      * <ul>
      *   <li>If str is {@code null} or empty, returns null</li>
-     *   <li>If str equals "SYS_TIME", returns the current timestamp</li>
+     *   <li>If str represents the system-time marker (e.g. {@code "SYS_TIME"}), returns the current timestamp</li>
      *   <li>Otherwise, parses the string using the configured date format</li>
      * </ul>
      *

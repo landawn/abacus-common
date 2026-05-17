@@ -29,6 +29,7 @@ import com.landawn.abacus.util.Strings;
  */
 public class MutableLongType extends NumberType<MutableLong> {
 
+    /** The type name constant for MutableLong type identification, equal to {@code "MutableLong"}. */
     public static final String MUTABLE_LONG = MutableLong.class.getSimpleName();
 
     /**

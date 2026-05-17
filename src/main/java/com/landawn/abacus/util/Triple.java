@@ -626,8 +626,9 @@ public final class Triple<L, M, R> implements Mutable {
      * // original still contains ("left", 42, true)
      * }</pre>
      *
-     * @return a new Triple instance with type Triple&lt;R, M, L&gt; where the left and right
-     *         elements are swapped
+     * @return a new {@code Triple<R, M, L>} where the left and right elements are swapped and the
+     *         middle element is preserved
+     * @see #copy()
      */
     @Beta
     public Triple<R, M, L> swap() {

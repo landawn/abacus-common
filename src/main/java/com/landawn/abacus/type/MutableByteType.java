@@ -31,8 +31,13 @@ import com.landawn.abacus.util.Strings;
  */
 public class MutableByteType extends NumberType<MutableByte> {
 
+    /** The type name constant for MutableByte type identification, equal to {@code "MutableByte"}. */
     public static final String MUTABLE_BYTE = MutableByte.class.getSimpleName();
 
+    /**
+     * Constructor for {@code MutableByteType}.
+     * Instances are created by the {@code TypeFactory}.
+     */
     protected MutableByteType() {
         super(MUTABLE_BYTE);
     }

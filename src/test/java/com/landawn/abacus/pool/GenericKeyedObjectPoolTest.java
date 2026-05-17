@@ -1294,4 +1294,75 @@ public class GenericKeyedObjectPoolTest extends TestBase {
         p1.close();
         p2.close();
     }
+
+    /**
+     * Regression test for put() propagating exception when memoryMeasure.sizeOf() throws
+     * during value replacement.
+     *
+     * <p>By design, put() removes and destroys the old value before measuring the new one.
+     * Before the fix, an unchecked exception thrown by a user-supplied MemoryMeasure during
+     * put() for an already-existing key propagated out of the method while the old value had
+     * already been removed and destroyed — losing the entry. The fix wraps sizeOf() in a
+     * try/catch so the put returns {@code false} cleanly instead of throwing.
+     */
+    @Test
+    public void testPutDoesNotLeakOldValueWhenMemoryMeasureThrows() {
+        final java.util.concurrent.atomic.AtomicBoolean throwOnNext = new java.util.concurrent.atomic.AtomicBoolean(false);
+        final KeyedObjectPool.MemoryMeasure<String, TestPoolable> conditionalMeasure = (k, v) -> {
+            if (throwOnNext.get()) {
+                throw new RuntimeException("simulated sizeOf failure on put");
+            }
+            return 100L;
+        };
+
+        GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f, 1024L * 1024L,
+                conditionalMeasure);
+        try {
+            TestPoolable original = new TestPoolable("memMeasurePut");
+            assertTrue(p.put("k1", original));
+            assertEquals(1, p.size());
+
+            throwOnNext.set(true);
+
+            // Pre-fix: put() removes the old value (lines 254-258), then sizeOf() throws,
+            // the exception propagates to the caller — old value already destroyed.
+            // Post-fix: put() catches the exception, logs it, and returns false.
+            boolean putResult = p.put("k1", new TestPoolable("shouldNotBePut"));
+            assertFalse(putResult, "put() must return false when memoryMeasure throws");
+
+            // The old value was already destroyed per design, and the new value was not added.
+            // Pool should be empty; more importantly, no exception propagated.
+            assertEquals(0, p.size(), "pool should be empty after failed put");
+        } finally {
+            p.close();
+        }
+    }
+
+    /**
+     * Regression for the get() hit/miss accounting refactor: moving the counter update out
+     * of the {@code finally} block must preserve correct accounting on the normal path
+     * (present-key hit, absent-key miss, expired-key miss) and must not record a miss when
+     * get() aborts on a closed pool.
+     */
+    @Test
+    public void testGet_HitMissAccountingAfterRefactor() throws InterruptedException {
+        GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
+
+        p.put("k1", new TestPoolable("v1"));
+        assertNotNull(p.get("k1"));            // hit
+        assertNull(p.get("absent"));           // miss
+
+        p.put("short", new TestPoolable("s", 1, 1));
+        Thread.sleep(20);
+        assertNull(p.get("short"));            // expired -> miss
+
+        assertEquals(1, p.hitCount.get(), "exactly one hit");
+        assertEquals(2, p.missCount.get(), "exactly two misses");
+
+        p.close();
+        // Already-closed get() throws before acquiring the lock; counters must be untouched.
+        assertThrows(IllegalStateException.class, () -> p.get("k1"));
+        assertEquals(1, p.hitCount.get(), "closed get() must not change hitCount");
+        assertEquals(2, p.missCount.get(), "closed get() must not change missCount");
+    }
 }

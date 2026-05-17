@@ -2685,4 +2685,29 @@ public class ContinuableFutureTest extends AbstractTest {
         });
     }
 
+    @Test
+    @Timeout(10)
+    public void testThenDelay_remainingDelayHonoredAfterShortTimedGet() throws Exception {
+        final long delayMillis = 400;
+        final ContinuableFuture<String> delayed = ContinuableFuture.completed("done").thenDelay(delayMillis, TimeUnit.MILLISECONDS);
+
+        // A timed get() with a timeout much shorter than the configured delay must
+        // time out (the artificial delay is capped at the timeout).
+        assertThrows(TimeoutException.class, () -> delayed.get(20, TimeUnit.MILLISECONDS));
+
+        // The configured delay was only partially consumed by the capped wait above.
+        // A subsequent get() MUST still honor the remaining delay before returning.
+        final long startNanos = System.nanoTime();
+        final String result = delayed.get();
+        final long elapsedMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
+
+        assertEquals("done", result);
+        // Allow generous slack for scheduling jitter but require that a substantial
+        // portion of the remaining delay was actually applied. With the pre-fix logic
+        // (isDelayed flag set before the capped sleep), this get() returned almost
+        // immediately and elapsedMillis would be ~0.
+        assertTrue(elapsedMillis >= delayMillis / 2,
+                "Remaining delay was not honored after a short timed get(); elapsedMillis=" + elapsedMillis);
+    }
+
 }

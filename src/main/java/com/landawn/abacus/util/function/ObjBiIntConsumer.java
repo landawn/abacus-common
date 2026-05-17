@@ -102,7 +102,7 @@ public interface ObjBiIntConsumer<T> extends Throwables.ObjBiIntConsumer<T, Runt
      * // Result: "Data: Range: [10, 20] Sum: 30"
      * }</pre>
      *
-     * @param after the operation to perform after this operation
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code ObjBiIntConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
      * @throws NullPointerException if {@code after} is null

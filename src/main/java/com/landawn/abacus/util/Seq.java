@@ -2050,7 +2050,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     /**
      * Lists all files in the specified parent directory with optional recursive traversal.
      * If recursively is {@code false}, only immediate children files are listed.
-     * If recursively is {@code true}, all descendant files are listed in depth-first order.
+     * If recursively is {@code true}, all descendant files are listed.
      * Directories are included in the results when recursively is {@code true}.
      * The method uses a breadth-first traversal when recursive listing is enabled.
      *
@@ -4560,7 +4560,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *               the consumer for each element to be included in the resulting sequence.
      * @return a new sequence containing all elements added via the consumer
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the mapper is null
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     public <R> Seq<R, E> mapMulti(final Throwables.BiConsumer<? super T, ? super Consumer<R>, ? extends E> mapper) throws IllegalStateException {
         assertNotClosed();
@@ -4619,7 +4619,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param mapper a non-interfering, stateless function to apply to each adjacent pair of this sequence's elements
      * @return a new sequence consisting of the results of applying the mapper function to each adjacent pair of elements
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the mapper is null
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #slidingMap(int, Throwables.BiFunction)
      */
     @IntermediateOp
@@ -4759,7 +4759,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param mapper a non-interfering, stateless function to apply to each adjacent triple of this sequence's elements
      * @return a new sequence consisting of the results of applying the mapper function to each adjacent triple of elements
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the mapper is null
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #slidingMap(int, Throwables.TriFunction)
      */
     @IntermediateOp
@@ -6132,7 +6132,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Throws NoSuchElementException if seq was empty
      * }</pre>
      *
-     * @return this {@code Seq} instance
+     * @return a new {@code Seq} that throws a {@code NoSuchElementException} when a terminal operation finds it empty
      * @throws IllegalStateException if the sequence is already closed
      * @throws NoSuchElementException if the sequence is empty (thrown when terminal operation is executed)
      */
@@ -6156,7 +6156,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param exceptionSupplier the supplier that provides the exception to throw if this {@code Seq} is empty
-     * @return this {@code Seq} instance
+     * @return a new {@code Seq} that throws the supplied exception when a terminal operation finds it empty
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if exceptionSupplier is null
      */
@@ -6510,7 +6510,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * @param predicate the predicate to test each element
      * @param action the action to be performed on the elements pulled by downstream/terminal operation which matches the given predicate
-     * @return this {@code Seq} instance
+     * @return a new {@code Seq} that performs the action on each element matching the predicate
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if predicate or action is null
      */
@@ -6545,7 +6545,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * @param predicate the predicate to test each element. The first parameter is the element, and the second parameter is the count of iterated elements, starting with 1.
      * @param action the action to be performed on the elements pulled by downstream/terminal operation which matches the given predicate
-     * @return this {@code Seq} instance
+     * @return a new {@code Seq} that performs the action on each element matching the predicate
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if predicate or action is null
      */
@@ -6605,7 +6605,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param chunkSize the desired size of each subsequence (the last subsequence may be smaller)
      * @param collectionSupplier a function that provides a new collection to hold each sub-sequence
      * @return a new sequence where each element is a collection containing a subsequence of the original elements
-     * @throws IllegalStateException if the sequence is in an invalid state
+     * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if chunkSize is less than or equal to 0, or collectionSupplier is null
      */
     @IntermediateOp
@@ -9507,6 +9507,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param action a non-interfering action to perform on each element
+     * @throws IllegalStateException if the sequence is already closed
+     * @throws IllegalArgumentException if the action is null
      * @throws E if an exception occurs during iteration
      * @see #forEach(Throwables.Consumer)
      */
@@ -12523,7 +12525,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Converts the elements of the sequence into a Dataset.
-     * The element type {@code T} in this stream must be an array/collection, Map or Bean.
+     * The element type {@code T} in this sequence must be an array/collection, Map or Bean.
      *
      * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.</p>
      *

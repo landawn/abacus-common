@@ -30,7 +30,6 @@ import com.landawn.abacus.util.Throwables;
  *
  * @see java.util.function.UnaryOperator
  * @see java.util.function.DoubleUnaryOperator
- * @see java.util.function.IntUnaryOperator
  */
 @FunctionalInterface
 public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<RuntimeException> { //NOSONAR
@@ -44,10 +43,10 @@ public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<Runtim
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatUnaryOperator negate = x -> -x;
-     * float result = negate.applyAsFloat(5.0f); // Returns -5.0
+     * float result = negate.applyAsFloat(5.0f); // Returns -5.0f
      *
      * FloatUnaryOperator square = x -> x * x;
-     * float squared = square.applyAsFloat(3.0f); // Returns 9.0
+     * float squared = square.applyAsFloat(3.0f); // Returns 9.0f
      * }</pre>
      *
      * @param operand the float operand

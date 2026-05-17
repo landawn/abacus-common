@@ -150,6 +150,7 @@ public enum MediaType {
      * }</pre>
      *
      * @return the numeric value of this media type (0-5)
+     * @see #valueOf(int)
      */
     public int intValue() {
         return intValue;
@@ -180,6 +181,7 @@ public enum MediaType {
      * @return the MediaType enum constant corresponding to the specified value
      * @throws IllegalArgumentException if the intValue does not correspond to any MediaType
      *         (i.e., if intValue is not in the range 0-5)
+     * @see #intValue()
      */
     public static MediaType valueOf(final int intValue) {
         switch (intValue) {

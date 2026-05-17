@@ -30,8 +30,13 @@ import com.landawn.abacus.util.Strings;
  */
 public class MutableBooleanType extends AbstractType<MutableBoolean> {
 
+    /** The type name constant for MutableBoolean type identification, equal to {@code "MutableBoolean"}. */
     public static final String MUTABLE_BOOLEAN = MutableBoolean.class.getSimpleName();
 
+    /**
+     * Constructor for {@code MutableBooleanType}.
+     * Instances are created by the {@code TypeFactory}.
+     */
     protected MutableBooleanType() {
         super(MUTABLE_BOOLEAN);
     }

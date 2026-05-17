@@ -79,6 +79,8 @@ public final class Synchronized<T> {
      * @param mutex the object on which synchronized operations will be performed. Must not be {@code null}.
      * @return a new Synchronized instance for the provided mutex.
      * @throws IllegalArgumentException if the provided mutex is null.
+     * @see #run(Object, Throwables.Runnable)
+     * @see #call(Object, Throwables.Callable)
      */
     public static <T> Synchronized<T> on(final T mutex) throws IllegalArgumentException {
         N.checkArgNotNull(mutex);

@@ -5924,6 +5924,21 @@ public class NumbersTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Numbers.binomialToBigInteger(5, 6));
     }
 
+    // Regression: binomialToBigInteger must delegate to the long-precision binomial for the
+    // small-table fast path. The threshold table (biggestBinomials) is the long-precision one,
+    // so results that fit in a long but exceed Integer.MAX_VALUE must still be exact.
+    // Previously it called the int-saturating binomial(n, k) and returned Integer.MAX_VALUE.
+    @Test
+    public void test_binomialToBigInteger_longRange_regression() {
+        // C(3000, 3) = 4_495_501_000 -> fits in long, exceeds Integer.MAX_VALUE (2_147_483_647)
+        assertEquals(new BigInteger("4495501000"), Numbers.binomialToBigInteger(3000, 3));
+        // Must match the long-precision computation exactly.
+        assertEquals(BigInteger.valueOf(Numbers.binomialToLong(3000, 3)), Numbers.binomialToBigInteger(3000, 3));
+
+        // C(70000, 2) = 2_449_965_000 -> also exceeds Integer.MAX_VALUE
+        assertEquals(new BigInteger("2449965000"), Numbers.binomialToBigInteger(70000, 2));
+    }
+
     @Test
     public void test_mean_double_double() {
         assertEquals(5.0, Numbers.mean(4.0, 6.0), 0.001);

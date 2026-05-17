@@ -1513,6 +1513,10 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return the calculated buffer size, capped at Integer.MAX_VALUE
      */
     protected static int calculateBufferSize(final int len, final int elementPlusDelimiterLen) {
+        if (elementPlusDelimiterLen == 0) {
+            return 0;
+        }
+
         return len > Integer.MAX_VALUE / elementPlusDelimiterLen ? Integer.MAX_VALUE : len * elementPlusDelimiterLen;
     }
 }

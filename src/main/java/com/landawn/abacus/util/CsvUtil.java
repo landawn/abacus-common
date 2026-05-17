@@ -506,7 +506,8 @@ public final class CsvUtil {
      * @param count the maximum number of rows to process.
      * @param rowFilter a Predicate to filter rows, only matching rows are included.
      * @return a Dataset containing the filtered CSV data.
-     * @throws IllegalArgumentException if offset or count are negative.
+     * @throws IllegalArgumentException if offset or count are negative, or if any name in
+     *         {@code selectColumnNames} is not present in the CSV header.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #load(File)
      * @see #load(File, Collection)
@@ -629,7 +630,8 @@ public final class CsvUtil {
      * @param count the maximum number of rows to process
      * @param rowFilter a Predicate to filter rows, only matching rows are included
      * @return a Dataset containing the filtered CSV data
-     * @throws IllegalArgumentException if offset or count are negative
+     * @throws IllegalArgumentException if offset or count are negative, or if any name in
+     *         {@code selectColumnNames} is not present in the CSV header
      * @throws UncheckedIOException if an I/O error occurs
      * @see #load(Reader)
      * @see #load(Reader, Collection)
@@ -1096,7 +1098,7 @@ public final class CsvUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String,  ? extends Type<?>> typeMap = new HashMap<>();
+     * Map<String, Type<?>> typeMap = new HashMap<>();
      * typeMap.put("id", Type.of(Long.class));
      * // typeMap.put("name", Type.of(String.class)); // String is default
      * typeMap.put("price", Type.of(Double.class));
@@ -1123,7 +1125,7 @@ public final class CsvUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String,  ? extends Type<?>> typeMap = new HashMap<>();
+     * Map<String, Type<?>> typeMap = new HashMap<>();
      * typeMap.put("id", Type.of(Long.class));
      * // typeMap.put("name", Type.of(String.class)); // String is default
      * typeMap.put("price", Type.of(Double.class));
@@ -1154,7 +1156,7 @@ public final class CsvUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String,  ? extends Type<?>> typeMap = new HashMap<>();
+     * Map<String, Type<?>> typeMap = new HashMap<>();
      * typeMap.put("id", Type.of(Long.class));
      * // typeMap.put("name", Type.of(String.class)); // String is default
      * typeMap.put("price", Type.of(Double.class));
@@ -1195,14 +1197,14 @@ public final class CsvUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String,  ? extends Type<?>> typeMap = new HashMap<>();
+     * Map<String, Type<?>> typeMap = new HashMap<>();
      * typeMap.put("id", Type.of(Long.class));
      * // typeMap.put("name", Type.of(String.class)); // String is default
      * typeMap.put("price", Type.of(Double.class));
      * typeMap.put("active", Type.of(Boolean.class));
      *
      * try (Reader reader = new FileReader("products.csv")) {
-     *     // Load first 1000 products
+     *     // Load all products with explicitly typed columns
      *     Dataset ds = CsvUtil.load(reader, typeMap);
      * }
      * }</pre>
@@ -1225,14 +1227,14 @@ public final class CsvUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String,  ? extends Type<?>> typeMap = new HashMap<>();
+     * Map<String, Type<?>> typeMap = new HashMap<>();
      * typeMap.put("id", Type.of(Long.class));
      * // typeMap.put("name", Type.of(String.class)); // String is default
      * typeMap.put("price", Type.of(Double.class));
      * typeMap.put("active", Type.of(Boolean.class));
      *
      * try (Reader reader = new FileReader("products.csv")) {
-     *     // Load first 1000 products
+     *     // Skip the first 1000 rows, then load up to the next 1000 products
      *     Dataset ds = CsvUtil.load(reader, Arrays.asList("id", "name", "price", "active"), 1000, 1000, typeMap);
      *  }
      * }</pre>
@@ -1259,7 +1261,7 @@ public final class CsvUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String,  ? extends Type<?>> typeMap = new HashMap<>();
+     * Map<String, Type<?>> typeMap = new HashMap<>();
      * typeMap.put("id", Type.of(Long.class));
      * // typeMap.put("name", Type.of(String.class)); // String is default
      * typeMap.put("price", Type.of(Double.class));
@@ -1477,7 +1479,8 @@ public final class CsvUtil {
      * @param rowExtractor a TriConsumer to extract the row data to the output array.
      *      The first parameter is the column names, the second parameter is the row data, and the third parameter is the output array.
      * @return a Dataset containing the loaded CSV data
-     * @throws IllegalArgumentException if offset or count are negative, or if the size of {@code columnTypeList} is not equal to the size of columns in CSV.
+     * @throws IllegalArgumentException if offset or count are negative, or if any name in
+     *         {@code selectColumnNames} is not present in the CSV header
      * @throws UncheckedIOException if an I/O error occurs
      */
     public static Dataset load(final File source, final Collection<String> selectColumnNames, final long offset, final long count,
@@ -1601,7 +1604,8 @@ public final class CsvUtil {
      * @param rowExtractor a TriConsumer to extract the row data to the output array.
      *      The first parameter is the column names, the second parameter is the row data, and the third parameter is the output array.
      * @return a Dataset containing the loaded CSV data
-     * @throws IllegalArgumentException if offset or count are negative, or if the size of {@code columnTypeList} is not equal to the size of columns in CSV.
+     * @throws IllegalArgumentException if offset or count are negative, or if any name in
+     *         {@code selectColumnNames} is not present in the CSV header
      * @throws UncheckedIOException if an I/O error occurs
      */
     @SuppressFBWarnings("RV_DONT_JUST_NULL_CHECK_READLINE")
@@ -1718,7 +1722,7 @@ public final class CsvUtil {
      *   <li>Map - rows are converted to Map&lt;String, Object&gt;</li>
      *   <li>Collection - rows are converted to collections of column values</li>
      *   <li>Object[] - rows are converted to object arrays</li>
-     *   <li>A single-column primitive type - when only one column is selected</li>
+     *   <li>A single value type (e.g. String, Integer, LocalDate) - when only one column is selected</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2680,7 +2684,8 @@ public final class CsvUtil {
      * @param beanClassForColumnTypeInference the bean class defining property types for conversion,
      *                               {@code null} to treat all values as strings
      * @return the number of rows written to the JSON file
-     * @throws IllegalArgumentException if csvFile or jsonFile is {@code null}
+     * @throws IllegalArgumentException if csvFile or jsonFile is {@code null}, or if any name in
+     *         {@code selectColumnNames} is not present in the CSV header
      * @throws UncheckedIOException if an I/O error occurs during file operations
      * @see #csvToJson(File, File)
      * @see #csvToJson(File, Collection, File)
@@ -2729,6 +2734,7 @@ public final class CsvUtil {
      * @param beanClassForColumnTypeInference the bean class defining property types for conversion,
      *                               {@code null} to treat all values as strings
      * @return the number of rows written to the JSON output
+     * @throws IllegalArgumentException if any name in {@code selectColumnNames} is not present in the CSV header
      * @throws UncheckedIOException if an I/O error occurs during reading or writing
      * @see #csvToJson(File, File)
      * @see #csvToJson(File, Collection, File)
@@ -2881,7 +2887,7 @@ public final class CsvUtil {
      *
      * @param jsonFile the source JSON file to convert
      * @param csvFile the destination CSV file to create
-     * @return the number of rows written to the CSV file (including header row)
+     * @return the number of data rows written to the CSV file (excluding the header row)
      * @throws IllegalArgumentException if jsonFile or csvFile is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during file operations or if the JSON format is invalid
      * @see #jsonToCsv(File, Collection, File)
@@ -2929,7 +2935,7 @@ public final class CsvUtil {
      * @param selectCsvHeaders the collection of property names to include as CSV headers,
      *                        {@code null} or empty to include all properties from the first object
      * @param csvFile the destination CSV file to create
-     * @return the number of rows written to the CSV file (including header row)
+     * @return the number of data rows written to the CSV file (excluding the header row)
      * @throws IllegalArgumentException if jsonFile or csvFile is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during file operations or if the JSON format is invalid
      * @see #jsonToCsv(File, File)

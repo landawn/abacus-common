@@ -109,6 +109,7 @@ public enum ServiceStatus {
      * }</pre>
      *
      * @return the integer value of this status
+     * @see #fromCode(int)
      */
     public int code() {
         return code;
@@ -132,9 +133,10 @@ public enum ServiceStatus {
      * }
      * }</pre>
      *
-     * @param code the integer value to convert to ServiceStatus
-     * @return the ServiceStatus corresponding to the given integer value
-     * @throws IllegalArgumentException if no ServiceStatus exists for the given integer value
+     * @param code the integer value to convert to a {@code ServiceStatus}
+     * @return the {@code ServiceStatus} corresponding to the given integer value; never {@code null}
+     * @throws IllegalArgumentException if no {@code ServiceStatus} exists for the given integer value
+     * @see #code()
      */
     public static ServiceStatus fromCode(final int code) {
         switch (code) {

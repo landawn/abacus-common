@@ -69,14 +69,13 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Core Functional Categories:</b>
  * <ul>
- *   <li><b>Access Operations:</b> getFirst, getLast, elementAt with safe index handling</li>
- *   <li><b>Search Operations:</b> find, findFirst, findLast, indexOf, contains with predicate support</li>
- *   <li><b>Transformation Operations:</b> map, flatMap, filter, distinct, reverse, shuffle</li>
- *   <li><b>Aggregation Operations:</b> reduce, fold, sum, average, min, max for various types</li>
- *   <li><b>Parallel Operations:</b> forEach, map, filter with ExecutorService support</li>
- *   <li><b>Validation Operations:</b> isEmpty, allMatch, anyMatch, noneMatch with short-circuit evaluation</li>
- *   <li><b>Conversion Operations:</b> toArray, toList, toSet, toMap with type preservation</li>
- *   <li><b>Combination Operations:</b> concat, merge, zip, cartesianProduct for iterator composition</li>
+ *   <li><b>Access Operations:</b> {@code elementAt} with safe index handling</li>
+ *   <li><b>Search Operations:</b> {@code indexOf}, {@code frequency}, {@code count} with predicate support</li>
+ *   <li><b>Transformation Operations:</b> {@code map}, {@code flatMap}, {@code flatmap}, {@code filter}, {@code distinct}, {@code distinctBy}</li>
+ *   <li><b>Slicing Operations:</b> {@code skip}, {@code limit}, {@code skipAndLimit}, {@code takeWhile}, {@code dropWhile}, {@code skipUntil}</li>
+ *   <li><b>Repetition Operations:</b> {@code repeat}, {@code repeatElements}, {@code cycle}, {@code cycleToSize}</li>
+ *   <li><b>Parallel Operations:</b> {@code forEach} with multi-threaded reading/processing support</li>
+ *   <li><b>Combination Operations:</b> {@code concat}, {@code merge}, {@code mergeSorted}, {@code zip}, {@code unzip} for iterator composition</li>
  * </ul>
  *
  * <p><b>Design Philosophy:</b>
@@ -96,68 +95,52 @@ import com.landawn.abacus.util.stream.Stream;
  * // Basic iterator access operations
  * Iterator<String> iter = Arrays.asList("A", "B", "C", "D").iterator();
  * Nullable<String> element = Iterators.elementAt(iter, 2);     // Nullable["C"]
- * Nullable<String> first = Iterators.getFirst(iter);            // Nullable["A"]
- * Nullable<String> notFound = Iterators.elementAt(iter, 10);    // Nullable.empty()
  *
- * // Search operations with predicates
+ * // Search operations
+ * Iterator<String> letters = Arrays.asList("A", "B", "C", "B", "D").iterator();
+ * long index = Iterators.indexOf(letters, "B");                // Returns 1
+ *
+ * // Counting operations
  * Iterator<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5).iterator();
- * Nullable<Integer> found = Iterators.findFirst(numbers, n -> n > 3);   // Nullable[4]
- * int index = Iterators.indexOf(numbers.iterator(), 3);                 // Returns 2
+ * long evenCount = Iterators.count(numbers, n -> n % 2 == 0);  // Returns 2
  *
  * // Transformation operations
  * Iterator<String> words = Arrays.asList("hello", "world", "java").iterator();
- * Iterator<Integer> lengths = Iterators.map(words, String::length);           // [5, 5, 4]
- * Iterator<String> filtered = Iterators.filter(words, s -> s.length() > 4);   // [hello, world]
+ * ObjIterator<Integer> lengths = Iterators.map(words, String::length);              // [5, 5, 4]
+ * ObjIterator<String> filtered = Iterators.filter(
+ *     Arrays.asList("hello", "world", "java").iterator(), s -> s.length() > 4);     // [hello, world]
  *
- * // Aggregation operations
- * Iterator<Double> values = Arrays.asList(1.0, 2.0, 3.0, 4.0).iterator();
- * double sum = Iterators.sum(values);             // 10.0
- * double average = Iterators.average(values);     // 2.5
- * Nullable<Double> max = Iterators.max(values);   // Nullable[4.0]
+ * // Combination operations
+ * Iterator<Integer> a = Arrays.asList(1, 3, 5).iterator();
+ * Iterator<Integer> b = Arrays.asList(2, 4, 6).iterator();
+ * ObjIterator<Integer> merged = Iterators.mergeSorted(a, b);   // 1, 2, 3, 4, 5, 6
  *
- * // Parallel processing operations
- * ExecutorService executor = Executors.newFixedThreadPool(4);
- * Iterator<String> data = largeDataset.iterator();
- *
- * // Parallel forEach processing
- * Iterators.forEach(data, executor, item -> processItem(item));
- *
- * // Parallel map transformation
- * Iterator<String> processed = Iterators.map(data, executor, this::expensiveTransform);
- *
- * // Validation operations with short-circuit
- * Iterator<Integer> nums = Arrays.asList(2, 4, 6, 8).iterator();
- * boolean allEven = Iterators.allMatch(nums, n -> n % 2 == 0);   // true
- * boolean anyOdd = Iterators.anyMatch(nums, n -> n % 2 == 1);    // false
- *
- * // Conversion operations
- * Iterator<String> stringIter = Arrays.asList("a", "b", "c").iterator();
- * String[] array = Iterators.toArray(stringIter, String.class);
- * List<String> list = Iterators.toList(stringIter);
- * Set<String> set = Iterators.toSet(stringIter);
+ * // Parallel forEach processing of a collection of iterators
+ * List<Iterator<String>> data = getDataIterators();
+ * Iterators.forEach(data, 0, Long.MAX_VALUE, 2, 4, 100, item -> processItem(item));
  * }</pre>
  *
  * <p><b>Iterator Access Patterns:</b>
  * <ul>
- *   <li><b>Safe Access:</b> {@code get()}, {@code getFirst()}, {@code getLast()} with Nullable returns</li>
- *   <li><b>Index-Based:</b> {@code elementAt()} with bounds checking and default values</li>
- *   <li><b>Position Finding:</b> {@code indexOf()}, {@code lastIndexOf()} with predicate support</li>
- *   <li><b>Existence Checking:</b> {@code contains()}, {@code containsAny()}, {@code containsAll()}</li>
+ *   <li><b>Index-Based:</b> {@code elementAt()} with bounds checking and {@code Nullable} returns</li>
+ *   <li><b>Position Finding:</b> {@code indexOf()} with optional start index</li>
+ *   <li><b>Counting:</b> {@code count()}, {@code frequency()} with optional predicate support</li>
+ *   <li><b>Comparison:</b> {@code equalsInOrder()} for ordered element equality</li>
  * </ul>
  *
  * <p><b>Functional Transformations:</b>
  * <ul>
- *   <li><b>Mapping:</b> {@code map()}, {@code flatMap()}, {@code mapToInt()}, {@code mapToLong()}</li>
- *   <li><b>Filtering:</b> {@code filter()}, {@code filterNot()}, {@code distinct()}, {@code limit()}</li>
- *   <li><b>Reduction:</b> {@code reduce()}, {@code fold()}, {@code scan()} with accumulator functions</li>
- *   <li><b>Partitioning:</b> {@code partition()}, {@code groupBy()}, {@code split()} with predicate logic</li>
+ *   <li><b>Mapping:</b> {@code map()}, {@code flatMap()}, {@code flatmap()}</li>
+ *   <li><b>Filtering:</b> {@code filter()}, {@code distinct()}, {@code distinctBy()}, {@code limit()}</li>
+ *   <li><b>Slicing:</b> {@code skip()}, {@code skipAndLimit()}, {@code takeWhile()}, {@code dropWhile()}, {@code skipUntil()}</li>
+ *   <li><b>Composition:</b> {@code concat()}, {@code merge()}, {@code mergeSorted()}, {@code zip()}</li>
  * </ul>
  *
  * <p><b>Parallel Processing Support:</b>
  * <ul>
- *   <li><b>Concurrent Operations:</b> ExecutorService-based parallel processing</li>
- *   <li><b>Thread-Safe Design:</b> Safe concurrent access to iterator operations</li>
- *   <li><b>Load Balancing:</b> Automatic work distribution across available threads</li>
+ *   <li><b>Concurrent Operations:</b> Multi-threaded {@code forEach} with configurable read and process thread counts</li>
+ *   <li><b>Thread-Safe Design:</b> Safe concurrent consumption of iterator elements</li>
+ *   <li><b>Bounded Queue:</b> Configurable queue size for buffering elements before processing</li>
  *   <li><b>Exception Handling:</b> Proper exception propagation in parallel contexts</li>
  * </ul>
  *
@@ -165,7 +148,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <ul>
  *   <li><b>Memory Efficient:</b> Streaming operations with minimal memory footprint</li>
  *   <li><b>Lazy Evaluation:</b> Operations performed only when results are consumed</li>
- *   <li><b>Short-Circuit Operations:</b> Early termination for operations like findFirst, anyMatch</li>
+ *   <li><b>Short-Circuit Operations:</b> Early termination for operations like takeWhile and limit</li>
  *   <li><b>Cache-Friendly:</b> Sequential access patterns optimized for CPU cache performance</li>
  *   <li><b>Scalable Parallel Processing:</b> Efficient utilization of multi-core systems</li>
  * </ul>
@@ -224,9 +207,8 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Common Patterns:</b>
  * <ul>
  *   <li><b>Safe Access:</b> {@code Nullable<T> result = Iterators.elementAt(iterator, index);}</li>
- *   <li><b>Parallel Processing:</b> {@code Iterators.forEach(iterator, executor, processor);}</li>
- *   <li><b>Stream Conversion:</b> {@code Stream<T> stream = Iterators.stream(iterator);}</li>
- *   <li><b>Functional Pipeline:</b> {@code Iterator<R> result = Iterators.map(Iterators.filter(iter, pred), mapper);}</li>
+ *   <li><b>Parallel Processing:</b> {@code Iterators.forEach(iterators, offset, count, readThreadNum, processThreadNum, queueSize, processor);}</li>
+ *   <li><b>Functional Pipeline:</b> {@code ObjIterator<R> result = Iterators.map(Iterators.filter(iter, pred), mapper);}</li>
  * </ul>
  *
  * <p><b>Related Utility Classes:</b>
@@ -245,30 +227,15 @@ import com.landawn.abacus.util.stream.Stream;
  * <pre>{@code
  * // Processing large datasets with memory efficiency
  * Iterator<String> largeDataset = getMillionRecordIterator();
- * ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
  *
- * try {
- *     // Parallel processing with memory-efficient streaming
- *     Iterator<ProcessedRecord> processed = Iterators.map(largeDataset, executor, this::expensiveTransform);
+ * // Memory-efficient streaming transformation (lazy)
+ * ObjIterator<ProcessedRecord> processed = Iterators.map(largeDataset, this::transform);
  *
- *     // Filter and aggregate without loading all data into memory
- *     Iterator<ProcessedRecord> filtered = Iterators.filter(processed, record -> record.isValid());
+ * // Filter without loading all data into memory (lazy)
+ * ObjIterator<ProcessedRecord> filtered = Iterators.filter(processed, ProcessedRecord::isValid);
  *
- *     // Collect results efficiently
- *     List<ProcessedRecord> results = Iterators.toList(filtered);
- *
- *     // Statistical analysis
- *     double averageScore = Iterators.average(
- *         Iterators.map(results.iterator(), ProcessedRecord::getScore)
- *     );
- *
- *     // Find best performing records
- *     Nullable<ProcessedRecord> best = Iterators.max(results.iterator(),
- *         Comparator.comparing(ProcessedRecord::getScore));
- *
- * } finally {
- *     executor.shutdown();
- * }
+ * // Count matching records by consuming the iterator
+ * long validCount = Iterators.count(filtered, r -> r.getScore() > 0);
  * }</pre>
  *
  * <p><b>Usage Examples: Data Pipeline with Functional Operations</b>
@@ -276,29 +243,17 @@ import com.landawn.abacus.util.stream.Stream;
  * // Building a data processing pipeline
  * Iterator<RawData> source = dataSource.iterator();
  *
- * // Multi-stage transformation pipeline
- * Iterator<String> stage1 = Iterators.map(source, this::extractText);
- * Iterator<String> stage2 = Iterators.filter(stage1, text -> !text.isEmpty());
- * Iterator<String> stage3 = Iterators.map(stage2, String::trim);
- * Iterator<String> stage4 = Iterators.distinct(stage3);
+ * // Multi-stage transformation pipeline (all stages are lazy)
+ * ObjIterator<String> stage1 = Iterators.map(source, this::extractText);
+ * ObjIterator<String> stage2 = Iterators.filter(stage1, text -> !text.isEmpty());
+ * ObjIterator<String> stage3 = Iterators.map(stage2, String::trim);
+ * ObjIterator<String> stage4 = Iterators.distinct(stage3);
  *
- * // Validation and aggregation
- * boolean hasValidData = Iterators.anyMatch(stage4, this::isValidFormat);
+ * // Aggregation by consuming the pipeline
  * long totalCount = Iterators.count(stage4);
  *
- * // Parallel processing for CPU-intensive operations
- * ExecutorService executor = Executors.newCachedThreadPool();
- * Iterator<AnalyzedData> analyzed = Iterators.map(stage4, executor, this::performAnalysis);
- *
- * // Grouping and final processing
- * Map<String, List<AnalyzedData>> grouped = Iterators.groupBy(analyzed, AnalyzedData::getCategory);
- *
- * // Convert to final result format
- * Map<String, Summary> summaries = grouped.entrySet().stream()
- *     .collect(Collectors.toMap(
- *         Map.Entry::getKey,
- *         entry -> createSummary(entry.getValue())
- *     ));
+ * // Iterate the final stage and perform a terminal action
+ * Iterators.forEach(stage4, this::process);
  * }</pre>
  *
  * <p><b>Attribution:</b>
@@ -332,7 +287,7 @@ public final class Iterators {
     /**
      * Retrieves the element at the specified position in the given iterator.
      * The method will advance the iterator to the specified index and return the element at that position wrapped in a {@code Nullable}.
-     * If the index is out of bounds (greater than the number of elements in the iterator), a {@code Nullable}.empty() is returned.
+     * If the index is out of bounds (greater than or equal to the number of elements in the iterator), a {@code Nullable.empty()} is returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -590,9 +545,9 @@ public final class Iterators {
      * // notEqual => false
      * }</pre>
      *
-     * @param iterator1 the first iterator to compare.
-     * @param iterator2 the second iterator to compare.
-     * @return {@code true} if the iterators contain equal elements in the same order, {@code false} otherwise.
+     * @param iterator1 the first iterator to compare, or {@code null} which is treated as empty.
+     * @param iterator2 the second iterator to compare, or {@code null} which is treated as empty.
+     * @return {@code true} if the iterators contain equal elements in the same order, {@code false} otherwise. Two {@code null} or empty iterators are considered equal.
      */
     public static boolean equalsInOrder(final Iterator<?> iterator1, final Iterator<?> iterator2) {
         final boolean isIterator1Empty = N.isEmpty(iterator1);
@@ -852,7 +807,7 @@ public final class Iterators {
      *
      * @param <T> the type of elements in the array.
      * @param elements the array whose elements are to be cycled over.
-     * @return an iterator cycling over the elements of the array.
+     * @return an infinite iterator cycling over the elements of the array, or an empty iterator if {@code elements} is {@code null} or empty.
      * @see #repeat(Object, int)
      * @see #repeat(Object, long)
      */
@@ -902,7 +857,7 @@ public final class Iterators {
      *
      * @param <T> the type of elements in the iterable.
      * @param iterable the iterable whose elements are to be cycled over.
-     * @return an iterator cycling over the elements of the iterable.
+     * @return an infinite iterator cycling over the elements of the iterable, or an empty iterator if {@code iterable} is {@code null} or empty.
      * @see #cycle(Object...)
      * @see #cycle(Iterable, long)
      * @see #cycleToSize(Collection, long)
@@ -972,9 +927,9 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the iterable.
-     * @param iterable the iterable whose elements are to be cycled over.
-     * @param rounds the number of times to cycle over the iterable's elements.
-     * @return an {@code ObjIterator} cycling over the elements of the iterable for the specified number of rounds.
+     * @param iterable the iterable whose elements are to be cycled over, or {@code null} to return an empty iterator.
+     * @param rounds the number of times to cycle over the iterable's elements. Must be non-negative.
+     * @return an {@code ObjIterator} cycling over the elements of the iterable for the specified number of rounds, or an empty iterator if {@code iterable} is {@code null}/empty or {@code rounds} is {@code 0}.
      * @throws IllegalArgumentException if {@code rounds} is negative.
      * @see #cycle(Object...)
      * @see #cycle(Iterable)
@@ -1978,8 +1933,10 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the Iterators.
-     * @param c the collection of iterators to be concatenated.
-     * @return an ObjIterator that will iterate over the elements of each provided Iterator in order.
+     * @param c the collection of iterators to be concatenated, or {@code null}/empty to return an empty iterator.
+     * @return an ObjIterator that will iterate over the elements of each provided Iterator in order, or an empty iterator if {@code c} is {@code null} or empty.
+     * @see #concat(Iterator...)
+     * @see #concatIterables(Collection)
      */
     public static <T> ObjIterator<T> concat(final Collection<? extends Iterator<? extends T>> c) {
         if (N.isEmpty(c)) {
@@ -2065,8 +2022,8 @@ public final class Iterators {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BiIterator<String, Integer> iter1 = BiIterator.of("a", 1);
-     * BiIterator<String, Integer> iter2 = BiIterator.of("b", 2);
+     * BiIterator<String, Integer> iter1 = BiIterator.of(N.asMap("a", 1));
+     * BiIterator<String, Integer> iter2 = BiIterator.of(N.asMap("b", 2));
      * BiIterator<String, Integer> result = Iterators.concat(iter1, iter2);
      * // result.next() => Pair("a", 1)
      * // result.next() => Pair("b", 2)
@@ -2169,11 +2126,11 @@ public final class Iterators {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * TriIterator<String, Integer, Boolean> iter1 = TriIterator.of("a", 1, true);
-     * TriIterator<String, Integer, Boolean> iter2 = TriIterator.of("b", 2, false);
-     * TriIterator<String, Integer, Boolean> result = Iterators.concat(iter1, iter2);
-     * // result.next() => Triple("a", 1, true)
-     * // result.next() => Triple("b", 2, false)
+     * TriIterator<Integer, Integer, Integer> iter1 = TriIterator.generate(0, 1, (i, t) -> t.set(1, 2, 3));
+     * TriIterator<Integer, Integer, Integer> iter2 = TriIterator.generate(0, 1, (i, t) -> t.set(4, 5, 6));
+     * TriIterator<Integer, Integer, Integer> result = Iterators.concat(iter1, iter2);
+     * // result.next() => Triple(1, 2, 3)
+     * // result.next() => Triple(4, 5, 6)
      * }</pre>
      *
      * @param <A> the type of the first element in the TriIterator.
@@ -2281,11 +2238,14 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the iterators.
-     * @param a the first iterator to be merged.
-     * @param b the second iterator to be merged.
+     * @param a the first iterator to be merged, or {@code null} which is treated as an empty iterator.
+     * @param b the second iterator to be merged, or {@code null} which is treated as an empty iterator.
      * @param nextSelector a {@code BiFunction} that determines the order of elements in the resulting iterator.
+     *                     The element from {@code a} (the first parameter) is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the element from {@code b} (the second parameter) is selected.
      * @return an {@code ObjIterator} that will iterate over the elements of the provided iterators in the order determined by {@code nextSelector}.
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
+     * @see #merge(Collection, BiFunction)
+     * @see #mergeSorted(Iterator, Iterator, Comparator)
      */
     public static <T> ObjIterator<T> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalArgumentException {
@@ -2499,8 +2459,8 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the iterators.
-     * @param sortedA the first iterator to be merged. It should be in non-descending order.
-     * @param sortedB the second iterator to be merged. It should be in non-descending order.
+     * @param sortedA the first iterator to be merged. It should already be sorted according to {@code cmp}.
+     * @param sortedB the second iterator to be merged. It should already be sorted according to {@code cmp}.
      * @param cmp the {@code Comparator} to determine the order of elements in the resulting iterator.
      * @return an {@code ObjIterator} that will iterate over the elements of the provided iterators in a sorted order.
      * @throws IllegalArgumentException if {@code cmp} is {@code null}.
@@ -2546,8 +2506,8 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the {@code Iterable} objects.
-     * @param sortedA the first {@code Iterable} object to be merged. It should be in non-descending order.
-     * @param sortedB the second {@code Iterable} object to be merged. It should be in non-descending order.
+     * @param sortedA the first {@code Iterable} object to be merged. It should already be sorted according to {@code cmp}.
+     * @param sortedB the second {@code Iterable} object to be merged. It should already be sorted according to {@code cmp}.
      * @param cmp the {@code Comparator} to determine the order of elements in the resulting iterator.
      * @return an {@code ObjIterator} that will iterate over the elements of the provided {@code Iterable} objects in a sorted order.
      * @throws IllegalArgumentException if {@code cmp} is {@code null}.
@@ -2575,11 +2535,12 @@ public final class Iterators {
      * @param <A> the type of elements in the first iterator.
      * @param <B> the type of elements in the second iterator.
      * @param <R> the type of elements in the resulting {@code ObjIterator}.
-     * @param a the first iterator to be zipped.
-     * @param b the second iterator to be zipped.
+     * @param a the first iterator to be zipped, or {@code null} which is treated as an empty iterator.
+     * @param b the second iterator to be zipped, or {@code null} which is treated as an empty iterator.
      * @param zipFunction a {@code BiFunction} that takes an element from each iterator and returns a new element for the resulting {@code ObjIterator}.
-     * @return an {@code ObjIterator} that will iterate over the elements created by {@code zipFunction}.
+     * @return an {@code ObjIterator} that will iterate over the elements created by {@code zipFunction}. The resulting iterator stops as soon as either input iterator is exhausted.
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @see #zip(Iterator, Iterator, Object, Object, BiFunction)
      */
     public static <A, B, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
         N.checkArgNotNull(zipFunction, cs.function);
@@ -2646,12 +2607,12 @@ public final class Iterators {
      * @param <B> the type of elements in the second iterator.
      * @param <C> the type of elements in the third iterator.
      * @param <R> the type of elements in the resulting {@code ObjIterator}.
-     * @param a the first iterator to be zipped.
-     * @param b the second iterator to be zipped.
-     * @param c the third iterator to be zipped.
+     * @param a the first iterator to be zipped, or {@code null} which is treated as an empty iterator.
+     * @param b the second iterator to be zipped, or {@code null} which is treated as an empty iterator.
+     * @param c the third iterator to be zipped, or {@code null} which is treated as an empty iterator.
      * @param zipFunction a {@code TriFunction} that takes an element from each iterator and returns a new element for the resulting {@code ObjIterator}.
-     * @return an {@code ObjIterator} that will iterate over the elements created by {@code zipFunction}.
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @return an {@code ObjIterator} that will iterate over the elements created by {@code zipFunction}. The resulting iterator stops as soon as any input iterator is exhausted.
+     * @see #zip(Iterator, Iterator, Iterator, Object, Object, Object, TriFunction)
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c,
             final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
@@ -2695,7 +2656,6 @@ public final class Iterators {
      * @param c the third {@code Iterable} to be zipped.
      * @param zipFunction a {@code TriFunction} that takes an element from each {@code Iterable} and returns a new element for the resulting {@code ObjIterator}.
      * @return an {@code ObjIterator} that will iterate over the elements created by {@code zipFunction}.
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c,
             final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
@@ -2729,7 +2689,8 @@ public final class Iterators {
      * @param valueForNoneA the default value to be used when the first Iterator is exhausted.
      * @param valueForNoneB the default value to be used when the second Iterator is exhausted.
      * @param zipFunction a BiFunction that takes an element from each Iterator and returns a new element for the resulting ObjIterator.
-     * @return an ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
+     * @return an ObjIterator that will iterate over the elements created by <i>zipFunction</i>. The resulting iterator continues until both input iterators are exhausted, substituting the corresponding default value for an exhausted iterator.
+     * @see #zip(Iterator, Iterator, BiFunction)
      */
     public static <A, B, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final A valueForNoneA, final B valueForNoneB,
             final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
@@ -2814,7 +2775,8 @@ public final class Iterators {
      * @param valueForNoneB the default value to be used when the second Iterator is exhausted.
      * @param valueForNoneC the default value to be used when the third Iterator is exhausted.
      * @param zipFunction a TriFunction that takes an element from each Iterator and returns a new element for the resulting ObjIterator.
-     * @return an ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
+     * @return an ObjIterator that will iterate over the elements created by <i>zipFunction</i>. The resulting iterator continues until all input iterators are exhausted, substituting the corresponding default value for an exhausted iterator.
+     * @see #zip(Iterator, Iterator, Iterator, TriFunction)
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c, final A valueForNoneA, final B valueForNoneB,
             final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {

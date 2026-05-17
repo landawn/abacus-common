@@ -17,7 +17,7 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents an operation upon two {@code byte} operands and producing a {@code byte} result.
- * This is the primitive type specialization of {@link BinaryOperator} for {@code byte}.
+ * This is the primitive type specialization of {@link java.util.function.BinaryOperator} for {@code byte}.
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsByte(byte, byte)}.
  *

@@ -709,6 +709,8 @@ public final class JsonUtil {
      * @param jsonObject the JSONObject to convert
      * @return a Map containing all key-value pairs from the JSONObject
      * @throws JSONException if there is an error during the conversion
+     * @see #unwrap(JSONObject, Class)
+     * @see #unwrap(JSONObject, Type)
      */
     public static Map<String, Object> unwrap(final JSONObject jsonObject) throws JSONException {
         return unwrap(jsonObject, Map.class);
@@ -769,7 +771,9 @@ public final class JsonUtil {
      *
      * <p>
      * The method performs deep conversion, recursively transforming nested JSONObjects
-     * and JSONArrays according to the specified type information.
+     * and JSONArrays according to the specified type information. If {@code targetType}
+     * is itself assignable from {@link JSONObject} (and is not {@code Object}), the input
+     * {@code jsonObject} is returned unchanged.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -891,7 +895,7 @@ public final class JsonUtil {
      * List<Object> list = JsonUtil.unwrap(json);
      * // list.get(0) returns "text" (String)
      * // list.get(1) returns 123 (Integer)
-     * // list.get(2) returns {@code true} (Boolean)
+     * // list.get(2) returns true (Boolean)
      * // list.get(3) returns null
      * // list.get(4) returns Map with "key"="value"
      * // list.get(5) returns List [1,2,3]
@@ -963,8 +967,10 @@ public final class JsonUtil {
      * </p>
      * <ul>
      *   <li>Object type defaults to List&lt;Object&gt;</li>
-     *   <li>Primitive arrays use default values for {@code null} elements</li>
-     *   <li>JSONObject.NULL is converted to Java null</li>
+     *   <li>Primitive arrays use the element type's default value for {@code null} elements</li>
+     *   <li>{@link JSONObject#NULL} is converted to Java {@code null}</li>
+     *   <li>If {@code targetType} is assignable from {@link JSONArray} (and is not {@code Object}),
+     *       the input {@code jsonArray} is returned unchanged</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>

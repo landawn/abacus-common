@@ -5220,8 +5220,8 @@ public class SheetTest extends AbstractTest {
 
         Sheet.empty().println();
 
-        Sheet<String, String, Object> sheet = Sheet.rows(N.toList("r1", "r2", "r3"), N.toList("c1", "c2"),
-                new Object[][] { { 1, "a" }, { null, "b" }, { 5, "c" } });
+        Sheet<String, String, Object> sheet = Sheet.rows(N.toList("r1", "r2", "Bob海😀洋"), N.toList("Bob海😀洋", "c2"),
+                new Object[][] { { 1, "a" }, { null, "Bob海😀洋" }, { 5, "Charlie" } });
 
         sheet.println();
         sheet.toDatasetByRow().println();
@@ -5281,6 +5281,22 @@ public class SheetTest extends AbstractTest {
         assertNotNull(output);
         assertTrue(output.length() > 0);
         assertTrue(output.contains("Custom Prefix"));
+    }
+
+    @Test
+    public void testPrintlnWithWideCharacters() {
+        Sheet<String, String, Object> wideSheet = Sheet.rows(Arrays.asList("row1", "行2"), Arrays.asList("name", "城市"),
+                new Object[][] { { "Bob李海洋", "LA" }, { "Alice", "上海" } });
+        StringWriter writer = new StringWriter();
+
+        wideSheet.println(writer);
+
+        assertEquals("       +-----------+------+\n" //
+                + "       | name      | 城市 |\n" //
+                + "+------+-----------+------+\n" //
+                + "| row1 | Bob李海洋 | LA   |\n" //
+                + "| 行2  | Alice     | 上海 |\n" //
+                + "+------+-----------+------+\n", writer.toString());
     }
 
     @Test
@@ -6147,5 +6163,62 @@ public class SheetTest extends AbstractTest {
         assertEquals(Arrays.asList("z", "a", "m"), rk);
         List<String> ck = new ArrayList<>(s.columnKeySet());
         assertEquals(Arrays.asList("y", "b", "n"), ck);
+    }
+
+    // -------- regression: init() must keep row/column index maps non-null --------
+
+    @Test
+    public void testAddRowAfterMoveRow_indexMapResetRegression() {
+        // moveRow() sets _rowKeyIndexMap = null while the sheet stays initialized.
+        // Before the fix, addRow() relied on init() (a no-op when already initialized)
+        // and threw NullPointerException because the index map was still null.
+        Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1", "r2"), Arrays.asList("c1"),
+                new Integer[][] { { 1 }, { 2 } });
+
+        s.moveRow("r1", 1);
+        assertEquals(Arrays.asList("r2", "r1"), new ArrayList<>(s.rowKeySet()));
+
+        s.addRow("r3", Arrays.asList(3));
+
+        assertEquals(Arrays.asList("r2", "r1", "r3"), new ArrayList<>(s.rowKeySet()));
+        assertEquals(Integer.valueOf(2), s.get("r2", "c1"));
+        assertEquals(Integer.valueOf(1), s.get("r1", "c1"));
+        assertEquals(Integer.valueOf(3), s.get("r3", "c1"));
+        assertEquals(Integer.valueOf(3), s.get(2, 0));
+    }
+
+    @Test
+    public void testAddColumnAfterMoveColumn_indexMapResetRegression() {
+        // moveColumn() sets _columnKeyIndexMap = null while the sheet stays initialized.
+        // Before the fix, addColumn() threw NullPointerException for the same reason.
+        Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1"), Arrays.asList("c1", "c2"),
+                new Integer[][] { { 10, 20 } });
+
+        s.moveColumn("c1", 1);
+        assertEquals(Arrays.asList("c2", "c1"), new ArrayList<>(s.columnKeySet()));
+
+        s.addColumn("c3", Arrays.asList(30));
+
+        assertEquals(Arrays.asList("c2", "c1", "c3"), new ArrayList<>(s.columnKeySet()));
+        assertEquals(Integer.valueOf(20), s.get("r1", "c2"));
+        assertEquals(Integer.valueOf(10), s.get("r1", "c1"));
+        assertEquals(Integer.valueOf(30), s.get("r1", "c3"));
+        assertEquals(Integer.valueOf(30), s.get(0, 2));
+    }
+
+    @Test
+    public void testAddRowAtIndexAfterMoveRow_indexMapResetRegression() {
+        Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1", "r2", "r3"), Arrays.asList("c1"),
+                new Integer[][] { { 1 }, { 2 }, { 3 } });
+
+        s.moveRow("r3", 0); // resets _rowKeyIndexMap to null; order -> r3, r1, r2
+
+        s.addRow(1, "rX", Arrays.asList(99)); // before fix: NPE at _rowKeyIndexMap.size()
+
+        assertEquals(Arrays.asList("r3", "rX", "r1", "r2"), new ArrayList<>(s.rowKeySet()));
+        assertEquals(Integer.valueOf(3), s.get("r3", "c1"));
+        assertEquals(Integer.valueOf(99), s.get("rX", "c1"));
+        assertEquals(Integer.valueOf(1), s.get("r1", "c1"));
+        assertEquals(Integer.valueOf(2), s.get("r2", "c1"));
     }
 }

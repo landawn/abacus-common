@@ -19,7 +19,7 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents a function that accepts two {@code byte}-valued arguments and produces a result.
- * This is the primitive type specialization of {@link BiFunction} for {@code byte}.
+ * This is the primitive type specialization of {@link java.util.function.BiFunction} for {@code byte}.
  *
  * <p>This is a functional interface whose functional method is {@link #apply(byte, byte)}.
  *

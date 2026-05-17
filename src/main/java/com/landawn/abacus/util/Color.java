@@ -113,10 +113,10 @@ public enum Color {
      * Color green = Color.valueOf(5);   // returns Color.GREEN
      * }</pre>
      *
-     * @param intValue the integer value to look up (must be between 0 and 8 inclusive)
-     * @return the Color enum constant associated with the specified integer value
-     * @throws IllegalArgumentException if the intValue is not between 0 and 8, or
-     *         if no Color is mapped to the specified value
+     * @param intValue the integer value to look up; valid values are 0 through 8 inclusive
+     * @return the {@code Color} enum constant associated with the specified integer value
+     * @throws IllegalArgumentException if no {@code Color} is mapped to the specified value
+     *         (i.e. {@code intValue} is outside the range 0 through 8)
      */
     public static Color valueOf(final int intValue) {
         switch (intValue) {

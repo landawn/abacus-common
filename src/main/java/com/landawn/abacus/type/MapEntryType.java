@@ -55,6 +55,14 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
 
     private final JsonDeserConfig jdc;
 
+    /**
+     * Package-private constructor for {@code MapEntryType}.
+     * This constructor is called by the {@code TypeFactory} to create
+     * {@code Map.Entry<K, V>} type instances.
+     *
+     * @param keyTypeName the name of the key type parameter
+     * @param valueTypeName the name of the value type parameter
+     */
     MapEntryType(final String keyTypeName, final String valueTypeName) {
         super(getTypeName(keyTypeName, valueTypeName, false));
 

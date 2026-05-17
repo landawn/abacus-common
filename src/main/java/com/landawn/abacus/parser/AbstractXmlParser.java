@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
 
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.Attributes;
@@ -276,10 +277,14 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
         final String txtValue = XmlUtil.getTextContent(propNode);
 
         if (Strings.isEmpty(txtValue)) {
-            final Node attributeNode = propNode.getAttributes().getNamedItem(XmlConstants.IS_NULL);
+            final NamedNodeMap attributes = propNode.getAttributes();
 
-            if ((attributeNode != null) && Boolean.parseBoolean(attributeNode.getNodeValue())) { //NOSONAR
-                return null;
+            if (attributes != null) {
+                final Node attributeNode = attributes.getNamedItem(XmlConstants.IS_NULL);
+
+                if ((attributeNode != null) && Boolean.parseBoolean(attributeNode.getNodeValue())) { //NOSONAR
+                    return null;
+                }
             }
         }
 
@@ -620,6 +625,11 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
         return jsc;
     }
 
+    /**
+     * Internal enumeration of the structural roles an XML node can play during deserialization,
+     * used to track the parsing context (bean/entity, property, array, element, collection, map,
+     * map entry, key, or value).
+     */
     enum NodeType {
         ENTITY, PROPERTY, ARRAY, ELEMENT, COLLECTION, MAP, ENTRY, KEY, VALUE
     }

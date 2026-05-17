@@ -25,10 +25,6 @@ import com.landawn.abacus.util.Mutable;
  * <p>The generic parameter {@code T} is bounded by {@link Mutable}, giving a compile-time
  * guarantee that all concrete implementations work exclusively with mutable types.
  *
- * <p>Concrete subclasses include {@link MutableBooleanType}, {@link MutableByteType},
- * {@link MutableShortType}, {@link MutableIntType}, {@link MutableLongType},
- * {@link MutableFloatType}, {@link MutableDoubleType}, and {@link MutableCharType}.
- *
  * <p><b>Note on mutability:</b> unlike immutable types, objects handled by this class can be
  * modified in place. Callers must take care when caching or sharing instances across threads.
  *

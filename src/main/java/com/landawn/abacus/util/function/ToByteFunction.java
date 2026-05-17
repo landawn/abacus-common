@@ -53,7 +53,7 @@ public interface ToByteFunction<T> extends Throwables.ToByteFunction<T, RuntimeE
      *
      * ToByteFunction<Number> fromNum = ToByteFunction.FROM_NUM;
      * byte result3 = fromNum.applyAsByte(100);   // returns 100
-     * byte result4 = fromNum.applyAsByte(256);   // returns 0 (overflow)
+     * byte result4 = fromNum.applyAsByte(256);   // returns 0 (truncation: 256 mod 256)
      *
      * ToByteFunction<String> firstByte = str -> str != null && str.length() > 0 ? (byte) str.charAt(0) : 0;
      * byte result5 = firstByte.applyAsByte("Hello");   // returns 72 (ASCII 'H')

@@ -124,7 +124,8 @@ final class ReflectASM<T> {
      * @param <T> the type of the class
      * @param clsName the fully qualified name of the class
      * @return a ReflectASM instance for the specified class
-     * @throws IllegalArgumentException if the class cannot be located
+     * @throws IllegalArgumentException if the class with the given name cannot be located
+     * @see ClassUtil#forName(String)
      */
     public static <T> ReflectASM<T> on(final String clsName) {
         return on(ClassUtil.forName(clsName));
@@ -132,10 +133,10 @@ final class ReflectASM<T> {
 
     /**
      * Creates a ReflectASM instance for the specified class.
-     * This is used when you want to create new instances or access static members of a class.
+     * This is used when you want to create new instances of a class.
      *
      * <p>The returned ReflectASM instance can be used to create new instances of the class
-     * using the {@link #newInstance()} method, or to access static fields and methods.</p>
+     * using the {@link #newInstance()} method.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -148,9 +149,6 @@ final class ReflectASM<T> {
      *     .set("name", "Alice")
      *     .set("age", 25)
      *     .instance();
-     *
-     * // Access static members (if supported by implementation)
-     * ReflectASM<MyUtils> utils = ReflectASM.on(MyUtils.class);
      * }</pre>
      *
      * @param <T> the type of the class

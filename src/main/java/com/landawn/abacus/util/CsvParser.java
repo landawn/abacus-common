@@ -50,7 +50,7 @@ import com.landawn.abacus.exception.ParsingException;
  * // Parse with strict quotes (ignores characters outside quotes)
  * CsvParser strictParser = new CsvParser(',', '"', '\\', true);
  * List<String> result = strictParser.parseLine("\"clean\"dirty,\"text\"");
- * // Result: ["clean", "text"] - "dirty" is ignored
+ * // Result: ["clean", "text"] - the unquoted "dirty" outside the quotes is ignored
  * }</pre>
  *
  * @author Glen Smith
@@ -214,8 +214,7 @@ public class CsvParser {
      * <pre>{@code
      * CsvParser parser = new CsvParser(',', '"', '\\', true);
      * List<String> fields = parser.parseLine("\"clean\"dirty,\"text\"");
-     * // With strictQuotes=true: ["clean", "text"]
-     * // With strictQuotes=false: ["cleandirty", "text"]
+     * // With strictQuotes=true: ["clean", "text"] - "dirty" outside the quotes is ignored
      * }</pre>
      *
      * @param separator the delimiter to use for separating entries
@@ -253,10 +252,12 @@ public class CsvParser {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Parser that ignores quotes entirely
+     * // Parser that does not treat quoted regions as quoted (ignoreQuotations = true)
      * CsvParser parser = new CsvParser(',', '"', '\\', false, true, true);
      * List<String> fields = parser.parseLine("\"a\",\"b\",\"c\"");
-     * // Result: ["\"a\"", "\"b\"", "\"c\""] - quotes are treated as regular characters
+     * // Result: ["a", "b", "c"] - quote characters are still consumed, but the
+     * // regions they delimit are not treated as quoted (e.g. embedded separators
+     * // would not be protected)
      * }</pre>
      *
      * @param separator the delimiter to use for separating entries

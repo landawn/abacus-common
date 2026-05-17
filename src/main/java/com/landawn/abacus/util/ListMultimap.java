@@ -918,7 +918,8 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     /**
      * Returns a new ListMultimap and copies all key-value pairs from this ListMultimap to the new one.
      *
-     * <p>This method creates a deep copy of the ListMultimap, including all keys and their associated values.
+     * <p>This method creates a copy of the ListMultimap, including all keys and their associated values.
+     * The value lists are newly created, but the value elements themselves are shared by reference (shallow copy).
      * The new ListMultimap uses the same map supplier and value supplier as the original, ensuring it has
      * the same structural and hash characteristics.
      *

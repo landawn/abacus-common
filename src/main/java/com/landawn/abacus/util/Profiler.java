@@ -296,8 +296,8 @@ public final class Profiler {
      *         The returned statistics represent the final round of testing
      * @throws IllegalArgumentException if {@code threadNum <= 0} or {@code loopNum <= 0}, as these would
      *                                  result in invalid test configurations with no actual profiling
-     * @see #run(int, int, int, String, Throwables.Runnable) for tests with custom labels
-     * @see #run(int, long, int, long, int, String, Throwables.Runnable) for tests with timing delays
+     * @see #run(int, int, int, String, Throwables.Runnable)
+     * @see #run(int, long, int, long, int, String, Throwables.Runnable)
      */
     public static MultiLoopsStatistics run(final int threadNum, final int loopNum, final int roundNum, final Throwables.Runnable<? extends Exception> command) {
         return run(threadNum, loopNum, roundNum, "run", command);
@@ -371,8 +371,8 @@ public final class Profiler {
      *         The statistics object includes the label for easy identification
      * @throws IllegalArgumentException if {@code threadNum <= 0} or {@code loopNum <= 0},
      *                                  indicating invalid test configuration parameters
-     * @see #run(int, int, int, Throwables.Runnable) for basic testing without custom labels
-     * @see #run(int, long, int, long, int, String, Throwables.Runnable) for tests with timing delays and labels
+     * @see #run(int, int, int, Throwables.Runnable)
+     * @see #run(int, long, int, long, int, String, Throwables.Runnable)
      */
     public static MultiLoopsStatistics run(final int threadNum, final int loopNum, final int roundNum, final String label,
             final Throwables.Runnable<? extends Exception> command) {
@@ -461,9 +461,10 @@ public final class Profiler {
      * @param loopDelay the delay in milliseconds to wait between each loop iteration within a thread, must be >= 0.
      *                  A value of 0 means continuous execution. Use positive values to throttle execution rate.
      *                  This delay is NOT included in the measured execution time of each iteration
-     * @param roundNum the number of times to repeat the entire test (all threads and loops), must be greater than 0.
-     *                 Each round runs sequentially, with results from intermediate rounds printed to console.
-     *                 Multiple rounds help achieve statistically stable measurements
+     * @param roundNum the number of times to repeat the entire test (all threads and loops). A value
+     *                 less than or equal to 0 is treated as 1. Each round runs sequentially, with results
+     *                 from intermediate rounds printed to console. Multiple rounds help achieve
+     *                 statistically stable measurements
      * @param label a descriptive identifier for this test that appears in all result outputs.
      *              Use meaningful names to distinguish between different test scenarios.
      *              Can be {@code null}, defaulting to a generic identifier
@@ -476,8 +477,8 @@ public final class Profiler {
      * @throws IllegalArgumentException if {@code threadNum <= 0}, {@code loopNum <= 0},
      *                                  {@code threadDelay < 0}, or {@code loopDelay < 0}.
      *                                  These conditions indicate invalid test configurations
-     * @see #run(int, int, int, Throwables.Runnable) for basic testing without delays
-     * @see #run(int, int, int, String, Throwables.Runnable) for testing with labels but no delays
+     * @see #run(int, int, int, Throwables.Runnable)
+     * @see #run(int, int, int, String, Throwables.Runnable)
      */
     public static MultiLoopsStatistics run(final int threadNum, final long threadDelay, final int loopNum, final long loopDelay, final int roundNum,
             final String label, final Throwables.Runnable<? extends Exception> command) {
@@ -887,7 +888,7 @@ public final class Profiler {
      * @param yesOrNo {@code true} to suspend the profiler (minimal execution mode), {@code false} to resume
      *                normal profiler operation with full performance testing capabilities.
      *                The suspension state affects all subsequent profiler operations until changed again
-     * @see #isSuspended() to check the current suspension state
+     * @see #isSuspended()
      */
     public static void suspend(final boolean yesOrNo) {
         suspended = yesOrNo;
@@ -1570,6 +1571,13 @@ public final class Profiler {
      * This class aggregates all loop statistics and provides methods to analyze
      * the overall performance test results, including percentile calculations
      * and various output formats.
+     *
+     * <p>Instances of this class are produced by the {@code Profiler.run(...)} methods and
+     * represent the final test round. Use {@link #printResult()}, {@link #writeResult(Writer)},
+     * {@link #writeHtmlResult(Writer)}, or {@link #writeXmlResult(Writer)} to render the
+     * collected metrics.</p>
+     *
+     * @see Profiler#run(int, int, int, Throwables.Runnable)
      */
     public static class MultiLoopsStatistics extends AbstractStatistics implements LoopStatistics {
 
@@ -1865,11 +1873,14 @@ public final class Profiler {
          * identify performance outliers and distribution patterns.
          *
          * <p><b>Percentile Interpretation:</b>
+         * The percentile columns are computed from the executions sorted in descending order of
+         * elapsed time, so each column reports the elapsed-time threshold that the given fraction
+         * of executions took <em>at least</em> as long as.
          * <ul>
-         *   <li><b>0.01% >=:</b> The fastest 0.01% of executions took at least this long (best case scenario)</li>
-         *   <li><b>50% >= (median):</b> Half of all executions were at least this fast</li>
-         *   <li><b>99% >=:</b> Only 1% of executions were slower than this (typical "worst case")</li>
-         *   <li><b>99.99% >=:</b> Only 0.01% of executions were slower (extreme outliers)</li>
+         *   <li><b>0.01% &gt;=:</b> The slowest 0.01% of executions took at least this long (extreme worst-case tail)</li>
+         *   <li><b>50% &gt;= (median):</b> Half of all executions took at least this long</li>
+         *   <li><b>99% &gt;=:</b> 99% of executions took at least this long (i.e., the fast end of the distribution)</li>
+         *   <li><b>99.99% &gt;=:</b> Nearly all executions took at least this long (best-case end)</li>
          * </ul>
          *
          * <p><b>Typical Use Cases:</b>
@@ -2397,7 +2408,7 @@ public final class Profiler {
          *   <li><b>Metadata:</b> {@code <unit>}, {@code <threadNum>}, {@code <loops>}, timing information</li>
          *   <li><b>Method Elements:</b> {@code <method name="...">} for each profiled method</li>
          *   <li><b>Timing Statistics:</b> {@code <avgTime>}, {@code <minTime>}, {@code <maxTime>}</li>
-         *   <li><b>Percentiles:</b> {@code <_0.01>}, {@code <_0.1>}, {@code <_0.5>}, etc.</li>
+         *   <li><b>Percentiles:</b> {@code <_0.01>}, {@code <_0.5>}, {@code <_0.99>}, etc.</li>
          *   <li><b>Error Information:</b> {@code <errors>} count and individual {@code <error>} elements</li>
          * </ul>
          *

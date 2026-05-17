@@ -31,8 +31,13 @@ import com.landawn.abacus.util.Strings;
  */
 public class MutableDoubleType extends NumberType<MutableDouble> {
 
+    /** The type name constant for MutableDouble type identification, equal to {@code "MutableDouble"}. */
     public static final String MUTABLE_DOUBLE = MutableDouble.class.getSimpleName();
 
+    /**
+     * Constructor for {@code MutableDoubleType}.
+     * Instances are created by the {@code TypeFactory}.
+     */
     protected MutableDoubleType() {
         super(MUTABLE_DOUBLE);
     }

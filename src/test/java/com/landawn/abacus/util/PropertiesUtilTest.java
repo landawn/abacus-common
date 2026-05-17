@@ -1521,6 +1521,25 @@ public class PropertiesUtilTest extends TestBase {
     }
 
     @Test
+    public void testStoreToXml_Writer_ListProperty_isSerialized() throws IOException {
+        // Regression: a "<name>List" property holding a non-empty List, paired with a scalar
+        // sibling "<name>", must be serialized as repeated <name> elements. Previously the
+        // 'fooList' entry itself was skipped by the duplicate-scalar guard and the whole list
+        // was silently dropped.
+        Properties<String, Object> props = new Properties<>();
+        props.put("server", "last"); // scalar sibling/marker
+        props.put("serverList", new java.util.ArrayList<>(java.util.Arrays.asList("alpha", "beta")));
+
+        StringWriter sw = new StringWriter();
+        PropertiesUtil.storeToXml(props, "root", false, sw);
+        String xml = sw.toString();
+
+        // Both list elements must appear under the <server> tag.
+        assertTrue(xml.contains("<server>alpha</server>"), "Missing first list element in: " + xml);
+        assertTrue(xml.contains("<server>beta</server>"), "Missing second list element in: " + xml);
+    }
+
+    @Test
     public void testStoreToXml_Writer_CustomProperties_typeInfo() throws IOException {
         // When the property value is a custom Properties subclass, it should serialize with type info
         CustomProperties nested = new CustomProperties();

@@ -67,6 +67,11 @@ import com.landawn.abacus.type.Type;
  *   <li>Converting XML configuration to Java classes</li>
  * </ul>
  *
+ * <p>This is a final utility class and cannot be instantiated. All methods are static.
+ * When auto-refresh is enabled for a loaded resource, a single shared background scheduler
+ * polls registered files once per second and reloads any file whose last-modified timestamp
+ * has advanced.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Load properties from file
@@ -320,6 +325,8 @@ public final class PropertiesUtil {
      *
      * @param configDir the name of the configuration directory to find
      * @return the File object representing the found directory, or {@code null} if not found
+     * @throws RuntimeException if {@code configDir} is {@code null} or empty
+     * @see #findFile(String)
      */
     @MayReturnNull
     public static File findDir(final String configDir) {
@@ -340,6 +347,9 @@ public final class PropertiesUtil {
      *
      * @param configFileName the name of the configuration file to find
      * @return the File object representing the found file, or {@code null} if not found
+     * @throws RuntimeException if {@code configFileName} is {@code null} or empty
+     * @see #findDir(String)
+     * @see #findFileRelativeTo(File, String)
      */
     @MayReturnNull
     public static File findFile(final String configFileName) {
@@ -590,6 +600,9 @@ public final class PropertiesUtil {
      * @param source the file from which to load the properties.
      * @return a Properties object containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs while reading the file
+     * @see #load(File, boolean)
+     * @see #load(InputStream)
+     * @see #load(Reader)
      */
     public static Properties<String, String> load(final File source) {
         return load(source, false);
@@ -597,8 +610,10 @@ public final class PropertiesUtil {
 
     /**
      * Loads properties from the specified file with an option for auto-refresh.
-     * When auto-refresh is enabled, the properties will be automatically updated when the file is modified.
-     * A background thread checks the file's last modification time every second.
+     * When auto-refresh is enabled, the returned instance is registered with a shared
+     * background scheduler that reloads it whenever the source file's last-modified
+     * timestamp advances. If a properties instance for the same file has already been
+     * registered for auto-refresh, that same instance is returned instead of loading a new one.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -612,6 +627,7 @@ public final class PropertiesUtil {
      *                    A background thread checks the file last modification time every second.
      * @return a Properties object containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs while reading the file
+     * @see #load(File)
      */
     public static Properties<String, String> load(final File source, final boolean autoRefresh) {
         Properties<String, String> properties = null;
@@ -725,6 +741,9 @@ public final class PropertiesUtil {
     /**
      * Loads properties from the specified XML file.
      * The XML structure should have property names as element names and property values as element content.
+     * An optional {@code type} attribute on an element specifies the data type to convert its text content to;
+     * if absent, the value is kept as a (stripped) {@code String}. Elements with child elements are loaded
+     * recursively into nested {@link Properties} instances. Duplicated sibling element names are not supported.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -735,7 +754,10 @@ public final class PropertiesUtil {
      * @param source the XML file from which to load the properties.
      * @return a Properties object containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs while reading the file
-     * @throws ParsingException if the XML cannot be parsed or has invalid structure
+     * @throws ParsingException if the XML cannot be parsed or has no document element
+     * @throws RuntimeException if the XML contains duplicated sibling property names (same node tag name under the same parent)
+     * @see #loadFromXml(File, boolean)
+     * @see #loadFromXml(File, Class)
      */
     public static Properties<String, Object> loadFromXml(final File source) {
         return loadFromXml(source, false);
@@ -743,8 +765,10 @@ public final class PropertiesUtil {
 
     /**
      * Loads properties from the specified XML file with an option for auto-refresh.
-     * When auto-refresh is enabled, the properties will be automatically updated when the file is modified.
-     * A background thread checks the file's last modification time every second.
+     * When auto-refresh is enabled, the returned instance is registered with a shared
+     * background scheduler that reloads it whenever the source file's last-modified
+     * timestamp advances. If a properties instance for the same file has already been
+     * registered for auto-refresh, that same instance is returned instead of loading a new one.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -778,7 +802,9 @@ public final class PropertiesUtil {
      * @param source the InputStream from which to load the properties.
      * @return a Properties object containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs while reading the stream
-     * @throws ParsingException if the XML cannot be parsed or has invalid structure
+     * @throws ParsingException if the XML cannot be parsed or has no document element
+     * @throws RuntimeException if the XML contains duplicated sibling property names (same node tag name under the same parent)
+     * @see #loadFromXml(InputStream, Class)
      */
     public static Properties<String, Object> loadFromXml(final InputStream source) {
         return loadFromXml(source, Properties.class);
@@ -799,7 +825,9 @@ public final class PropertiesUtil {
      * @param source the Reader from which to load the properties.
      * @return a Properties object containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs while reading from the reader
-     * @throws ParsingException if the XML cannot be parsed or has invalid structure
+     * @throws ParsingException if the XML cannot be parsed or has no document element
+     * @throws RuntimeException if the XML contains duplicated sibling property names (same node tag name under the same parent)
+     * @see #loadFromXml(Reader, Class)
      */
     public static Properties<String, Object> loadFromXml(final Reader source) {
         return loadFromXml(source, Properties.class);
@@ -823,7 +851,10 @@ public final class PropertiesUtil {
      * @param targetClass the class of the target properties.
      * @return an instance of the target properties class containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs while reading the file
-     * @throws ParsingException if the XML cannot be parsed or has invalid structure
+     * @throws ParsingException if the XML cannot be parsed or has no document element
+     * @throws RuntimeException if the XML contains duplicated sibling property names (same node tag name under the same parent)
+     * @see #loadFromXml(File)
+     * @see #loadFromXml(File, boolean, Class)
      */
     public static <T extends Properties<String, Object>> T loadFromXml(final File source, final Class<? extends T> targetClass) {
         return loadFromXml(source, false, targetClass);
@@ -851,7 +882,9 @@ public final class PropertiesUtil {
      * @param targetClass the class of the target properties.
      * @return an instance of the target properties class containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs reading the file
-     * @throws ParsingException if the XML cannot be parsed or has invalid structure
+     * @throws ParsingException if the XML cannot be parsed or has no document element
+     * @throws RuntimeException if the XML contains duplicated sibling property names (same node tag name under the same parent)
+     * @see #loadFromXml(File, Class)
      */
     public static <T extends Properties<String, Object>> T loadFromXml(final File source, final boolean autoRefresh, final Class<? extends T> targetClass) {
         T properties = null;
@@ -899,7 +932,9 @@ public final class PropertiesUtil {
      * @param targetClass the class of the target properties.
      * @return an instance of the target properties class containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs reading the stream
-     * @throws ParsingException if the XML cannot be parsed or has invalid structure
+     * @throws ParsingException if the XML cannot be parsed or has no document element
+     * @throws RuntimeException if the XML contains duplicated sibling property names (same node tag name under the same parent)
+     * @see #loadFromXml(InputStream)
      */
     public static <T extends Properties<String, Object>> T loadFromXml(final InputStream source, final Class<? extends T> targetClass) {
         final DocumentBuilder docBuilder = XmlUtil.createDOMParser(true, true);
@@ -938,7 +973,9 @@ public final class PropertiesUtil {
      * @param targetClass the class of the target properties.
      * @return an instance of the target properties class containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs reading from the reader
-     * @throws ParsingException if the XML cannot be parsed or has invalid structure
+     * @throws ParsingException if the XML cannot be parsed or has no document element
+     * @throws RuntimeException if the XML contains duplicated sibling property names (same node tag name under the same parent)
+     * @see #loadFromXml(Reader)
      */
     public static <T extends Properties<String, Object>> T loadFromXml(final Reader source, final Class<? extends T> targetClass) {
         final DocumentBuilder docBuilder = XmlUtil.createDOMParser(true, true);
@@ -1074,9 +1111,11 @@ public final class PropertiesUtil {
      * }</pre>
      *
      * @param properties the properties to store.
-     * @param comments the comments to include in the stored file.
-     * @param output the file to which the properties will be stored.
+     * @param comments the comments to include as a leading comment line in the stored file; may be {@code null} for no comment.
+     * @param output the file to which the properties will be stored. The file is created if it does not already exist.
      * @throws UncheckedIOException if an I/O error occurs while writing to the file
+     * @see #store(Properties, String, OutputStream)
+     * @see #store(Properties, String, Writer)
      */
     public static void store(final Properties<?, ?> properties, final String comments, final File output) {
         OutputStream os = null;
@@ -1104,8 +1143,8 @@ public final class PropertiesUtil {
      * }</pre>
      *
      * @param properties the properties to store.
-     * @param comments the comments to include in the stored output.
-     * @param output the OutputStream to which the properties will be stored.
+     * @param comments the comments to include as a leading comment line in the stored output; may be {@code null} for no comment.
+     * @param output the OutputStream to which the properties will be stored. The stream is flushed but not closed.
      * @throws UncheckedIOException if an I/O error occurs while writing to the stream
      */
     public static void store(final Properties<?, ?> properties, final String comments, final OutputStream output) {
@@ -1132,8 +1171,8 @@ public final class PropertiesUtil {
      * }</pre>
      *
      * @param properties the properties to store.
-     * @param comments the comments to include in the stored output.
-     * @param output the Writer to which the properties will be stored.
+     * @param comments the comments to include as a leading comment line in the stored output; may be {@code null} for no comment.
+     * @param output the Writer to which the properties will be stored. The writer is flushed but not closed.
      * @throws UncheckedIOException if an I/O error occurs while writing to the writer
      */
     public static void store(final Properties<?, ?> properties, final String comments, final Writer output) {
@@ -1168,8 +1207,11 @@ public final class PropertiesUtil {
      * @param writeTypeInfo if {@code true}, type information will be written as attributes in the XML.
      *                      For example: {@code <port type="int">8080</port>} or {@code <enabled type="boolean">true</enabled>}.
      *                      When {@code false}, all values are written as plain text without type attributes.
-     * @param output the file to which the properties will be stored.
+     * @param output the file to which the properties will be stored, encoded as UTF-8. The file is created if it does not already exist.
      * @throws UncheckedIOException if an I/O error occurs while writing to the file
+     * @see #storeToXml(Properties, String, boolean, OutputStream)
+     * @see #storeToXml(Properties, String, boolean, Writer)
+     * @see #loadFromXml(File)
      */
     public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean writeTypeInfo, final File output) {
         OutputStream os = null;
@@ -1290,7 +1332,7 @@ public final class PropertiesUtil {
 
                 listPropValue = properties.get(listPropName);
 
-                if ((propValue == null) || (listPropValue instanceof List && ((List<?>) listPropValue).size() > 0)) {
+                if ((propValue == null) || (!(propValue instanceof List) && listPropValue instanceof List && ((List<?>) listPropValue).size() > 0)) {
                     continue;
                 }
 

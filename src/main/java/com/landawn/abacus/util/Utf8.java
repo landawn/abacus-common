@@ -78,7 +78,9 @@ public class Utf8 {
      *
      * @param sequence the character sequence to measure
      * @return the number of bytes needed to encode the sequence in UTF-8
-     * @throws IllegalArgumentException if the sequence contains ill-formed UTF-16 (unpaired surrogates)
+     * @throws NullPointerException if {@code sequence} is {@code null}
+     * @throws IllegalArgumentException if the sequence contains ill-formed UTF-16 (unpaired
+     *         surrogates), or if the encoded length exceeds {@link Integer#MAX_VALUE}
      */
     public static int encodedLength(final CharSequence sequence) {
         // Warning to maintainers: this implementation is highly optimized.
@@ -171,6 +173,8 @@ public class Utf8 {
      *
      * @param bytes the byte array to validate
      * @return {@code true} if the bytes form a valid UTF-8 sequence, {@code false} otherwise
+     * @throws NullPointerException if {@code bytes} is {@code null}
+     * @see #isWellFormed(byte[], int, int)
      */
     public static boolean isWellFormed(final byte[] bytes) {
         return isWellFormed(bytes, 0, bytes.length);

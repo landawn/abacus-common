@@ -5438,4 +5438,29 @@ public class BeansTest extends TestBase {
     public void testStream_NullBean() {
         assertThrows(IllegalArgumentException.class, () -> Beans.stream(null));
     }
+
+    @Test
+    public void testBeanToMap_ignoredPropNamesLargerThanBeanProps() {
+        // Regression: when the ignoredPropNames set is larger than the number of bean
+        // properties, the computed initial map capacity went negative and the map supplier
+        // threw IllegalArgumentException ("'size' can not be negative"). It should instead
+        // just produce an (effectively empty) map.
+        SimpleBean bean = new SimpleBean("John", 25);
+        bean.setActive(Boolean.TRUE);
+
+        // SimpleBean has 3 properties (name, age, active); ignore more names than that.
+        Set<String> ignored = new HashSet<>(Arrays.asList("name", "age", "active", "x1", "x2", "x3", "x4"));
+
+        Map<String, Object> map = assertDoesNotThrow(() -> Beans.beanToMap(bean, false, ignored));
+        assertNotNull(map);
+        assertTrue(map.isEmpty());
+
+        Map<String, Object> deepMap = assertDoesNotThrow(() -> Beans.deepBeanToMap(bean, false, ignored));
+        assertNotNull(deepMap);
+        assertTrue(deepMap.isEmpty());
+
+        Map<String, Object> flatMap = assertDoesNotThrow(() -> Beans.beanToFlatMap(bean, false, ignored));
+        assertNotNull(flatMap);
+        assertTrue(flatMap.isEmpty());
+    }
 }

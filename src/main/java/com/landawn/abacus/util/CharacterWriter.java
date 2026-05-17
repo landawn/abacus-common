@@ -297,6 +297,10 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
     /**
      * Converts a character to its JSON Unicode escape sequence of the form {@code \\uXXXX}.
      *
+     * <p>The result is always a six-character {@code String}: a backslash, the letter
+     * {@code u}, and four lowercase hexadecimal digits zero-padded to a width of four.
+     * The returned text is the escape sequence itself, not the character it represents.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String unicode = getCharNum('\u2028');   // Returns "\u2028"

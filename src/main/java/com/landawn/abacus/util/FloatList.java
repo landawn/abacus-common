@@ -256,7 +256,7 @@ import com.landawn.abacus.util.stream.FloatStream;
  *   <li><b>3D Graphics:</b> {@code FloatList vertices = FloatList.of(x1, y1, z1, x2, y2, z2);}</li>
  *   <li><b>Audio Processing:</b> {@code FloatList samples = new FloatList(sampleRate);}</li>
  *   <li><b>Machine Learning:</b> {@code FloatList features = dataset.stream().mapToFloat(...).collect(...);}</li>
- *   <li><b>Scientific Data:</b> {@code FloatList measurements = FloatList.random(minVal, maxVal, count);}</li>
+ *   <li><b>Scientific Data:</b> {@code FloatList measurements = FloatList.random(count);}</li>
  * </ul>
  *
  * <p><b>Related Classes:</b>
@@ -287,10 +287,9 @@ import com.landawn.abacus.util.stream.FloatStream;
  * float[] vertexArray = vertices.toArray();
  *
  * // Calculate bounding box
- * OptionalFloat minX = vertices.stream().skip(0).filter((i, v) -> i % 3 == 0).min();
- * OptionalFloat maxX = vertices.stream().skip(0).filter((i, v) -> i % 3 == 0).max();
- * OptionalFloat minY = vertices.stream().skip(1).filter((i, v) -> i % 3 == 1).min();
- * OptionalFloat maxY = vertices.stream().skip(1).filter((i, v) -> i % 3 == 1).max();
+ * float[] all = vertices.toArray();
+ * OptionalFloat minX = vertices.min();
+ * OptionalFloat maxX = vertices.max();
  * }</pre>
  *
  * @see PrimitiveList
@@ -571,8 +570,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * that they appear in the specified list. The behavior of this operation is undefined if
      * the specified list is modified during the operation.
      *
-     * @param c the FloatList containing elements to be added to this list. Must not be {@code null}.
-     * @return {@code true} if this list changed as a result of the call (i.e., if c was not empty)
+     * @param c the FloatList containing elements to be added to this list. May be {@code null} or empty.
+     * @return {@code true} if this list changed as a result of the call (i.e., if {@code c} was not {@code null} or empty)
      */
     @Override
     public boolean addAll(final FloatList c) {
@@ -598,8 +597,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * order that they appear in the specified list.
      *
      * @param index the index at which to insert the first element from the specified list. Must be between 0 and size (inclusive).
-     * @param c the FloatList containing elements to be inserted into this list. Must not be {@code null}.
-     * @return {@code true} if this list changed as a result of the call (i.e., if c was not empty)
+     * @param c the FloatList containing elements to be inserted into this list. May be {@code null} or empty.
+     * @return {@code true} if this list changed as a result of the call (i.e., if {@code c} was not {@code null} or empty)
      * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; size())
      */
     @Override
@@ -1248,9 +1247,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * Returns {@code true} if this list contains any of the elements in the specified FloatList.
      * The comparison is done using Float.compare() to handle NaN values correctly.
      *
-     * @param c the FloatList to be checked for containment in this list. Must not be {@code null}.
+     * @param c the FloatList to be checked for containment in this list. May be {@code null} or empty.
      * @return {@code true} if this list contains any element from the specified FloatList, {@code false} if this list
-     *         is empty, c is empty, or no elements match
+     *         is empty, {@code c} is {@code null} or empty, or no elements match
      */
     @Override
     public boolean containsAny(final FloatList c) {
@@ -1283,9 +1282,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * The frequency of elements is not considered; only presence is checked.
      * The comparison is done using Float.compare() to handle NaN values correctly.
      *
-     * @param c the FloatList to be checked for containment in this list. Must not be {@code null}.
+     * @param c the FloatList to be checked for containment in this list. May be {@code null} or empty.
      * @return {@code true} if this list contains all distinct elements from the specified FloatList,
-     *         {@code false} otherwise. Returns {@code true} if c is empty.
+     *         {@code false} otherwise. Returns {@code true} if {@code c} is {@code null} or empty.
      */
     @Override
     public boolean containsAll(final FloatList c) {
@@ -1338,9 +1337,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * Returns {@code true} if this list has no elements in common with the specified FloatList.
      * Two lists are disjoint if they share no common elements.
      *
-     * @param c the FloatList to be checked for disjointness with this list. Must not be {@code null}.
+     * @param c the FloatList to be checked for disjointness with this list. May be {@code null} or empty.
      * @return {@code true} if this list has no elements in common with the specified FloatList,
-     *         {@code false} if they share at least one element. Returns {@code true} if either list is empty.
+     *         {@code false} if they share at least one element. Returns {@code true} if either list is {@code null} or empty.
      */
     @Override
     public boolean disjoint(final FloatList c) {
@@ -1402,7 +1401,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * // One occurrence of '5.0f' (minimum count in both lists)
      * }</pre>
      *
-     * @param b the list to find common elements with this list
+     * @param b the list to find common elements with this list. May be {@code null} or empty.
      * @return a new FloatList containing elements present in both this list and the specified list,
      *         considering the minimum number of occurrences in either list.
      *         Returns an empty list if either list is {@code null} or empty.

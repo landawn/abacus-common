@@ -58,8 +58,8 @@ public interface IntToByteFunction {
      * byte result3 = clampToByte.applyAsByte(200);   // Returns 127 (clamped)
      * }</pre>
      *
-     * @param value the function argument, an int value to be converted to byte
-     * @return the function result as a byte value
+     * @param value the function argument, an int value to be converted to byte.
+     * @return the function result as a byte value.
      */
     byte applyAsByte(int value);
 }

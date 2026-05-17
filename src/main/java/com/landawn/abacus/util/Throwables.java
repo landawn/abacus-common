@@ -1078,7 +1078,6 @@ public final class Throwables {
          *
          * @param predicate the predicate to test each element
          * @return a new iterator containing only elements that satisfy the predicate
-         * @throws IllegalArgumentException if predicate is null
          */
         public Throwables.Iterator<T, E> filter(final Throwables.Predicate<? super T, E> predicate) {
             final Throwables.Iterator<T, E> iter = this;
@@ -1123,7 +1122,6 @@ public final class Throwables {
          * @param <U> the type of elements returned by the new iterator
          * @param mapper the function to apply to each element
          * @return a new iterator with the mapping function applied to each element
-         * @throws IllegalArgumentException if mapper is null
          */
         public <U> Throwables.Iterator<U, E> map(final Throwables.Function<? super T, U, E> mapper) {
             final Throwables.Iterator<T, E> iter = this;
@@ -1248,7 +1246,6 @@ public final class Throwables {
          *
          * @param action the action to be performed for each element
          * @throws E if an exception occurs while iterating through the elements
-         * @throws IllegalArgumentException if action is null
          */
         public void forEachRemaining(final java.util.function.Consumer<? super T> action) throws E { // NOSONAR
             while (hasNext()) {
@@ -1264,7 +1261,6 @@ public final class Throwables {
          * @param action the action to be performed for each element
          * @throws E if an exception occurs while iterating through the elements
          * @throws E2 if the action throws an exception
-         * @throws IllegalArgumentException if action is null
          */
         public <E2 extends Throwable> void foreachRemaining(final Throwables.Consumer<? super T, E2> action) throws E, E2 { // NOSONAR
             while (hasNext()) {
@@ -1281,7 +1277,7 @@ public final class Throwables {
          * @param action the action to be performed for each element with its index
          * @throws E if an exception occurs while iterating through the elements
          * @throws E2 if the action throws an exception
-         * @throws IllegalArgumentException if action is null
+         * @throws IllegalStateException if the iterator has more than {@code Integer.MAX_VALUE} elements
          */
         public <E2 extends Throwable> void foreachIndexed(final Throwables.IntObjConsumer<? super T, E2> action) throws E, E2 {
             int idx = 0;
@@ -1296,9 +1292,12 @@ public final class Throwables {
     }
 
     /**
-     * The Interface Runnable.
+     * Represents an operation that takes no arguments and returns no result, and that may throw
+     * a checked exception of type {@code E}. This is the exception-throwing equivalent of
+     * {@link java.lang.Runnable}.
      *
      * @param <E> the type of exception that may be thrown
+     * @see java.lang.Runnable
      */
     @FunctionalInterface
     public interface Runnable<E extends Throwable> {
@@ -1329,10 +1328,12 @@ public final class Throwables {
     }
 
     /**
-     * The Interface Callable.
+     * Represents a task that returns a result and may throw a checked exception of type {@code E}.
+     * This is the exception-typed equivalent of {@link java.util.concurrent.Callable}.
      *
      * @param <R> the type of the result
      * @param <E> the type of exception that may be thrown
+     * @see java.util.concurrent.Callable
      */
     @FunctionalInterface
     public interface Callable<R, E extends Throwable> {
@@ -1364,10 +1365,12 @@ public final class Throwables {
     }
 
     /**
-     * The Interface Supplier.
+     * Represents a supplier of results that may throw a checked exception of type {@code E}.
+     * This is the exception-throwing equivalent of {@link java.util.function.Supplier}.
      *
      * @param <T> the type of the value supplied
      * @param <E> the type of exception that may be thrown
+     * @see java.util.function.Supplier
      */
     @FunctionalInterface
     public interface Supplier<T, E extends Throwable> {
@@ -1399,7 +1402,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface BooleanSupplier.
+     * Represents a supplier of {@code boolean}-valued results that may throw a checked exception
+     * of type {@code E}. This is the {@code boolean}-producing primitive specialization of
+     * {@link Supplier}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -1423,7 +1428,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface CharSupplier.
+     * Represents a supplier of {@code char}-valued results that may throw a checked exception
+     * of type {@code E}. This is the {@code char}-producing primitive specialization of
+     * {@link Supplier}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -1440,7 +1447,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface ByteSupplier.
+     * Represents a supplier of {@code byte}-valued results that may throw a checked exception
+     * of type {@code E}. This is the {@code byte}-producing primitive specialization of
+     * {@link Supplier}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -1457,7 +1466,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface ShortSupplier.
+     * Represents a supplier of {@code short}-valued results that may throw a checked exception
+     * of type {@code E}. This is the {@code short}-producing primitive specialization of
+     * {@link Supplier}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -1474,7 +1485,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface IntSupplier.
+     * Represents a supplier of {@code int}-valued results that may throw a checked exception
+     * of type {@code E}. This is the {@code int}-producing primitive specialization of
+     * {@link Supplier}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -1491,7 +1504,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface LongSupplier.
+     * Represents a supplier of {@code long}-valued results that may throw a checked exception
+     * of type {@code E}. This is the {@code long}-producing primitive specialization of
+     * {@link Supplier}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -1508,7 +1523,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface FloatSupplier.
+     * Represents a supplier of {@code float}-valued results that may throw a checked exception
+     * of type {@code E}. This is the {@code float}-producing primitive specialization of
+     * {@link Supplier}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -1525,7 +1542,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface DoubleSupplier.
+     * Represents a supplier of {@code double}-valued results that may throw a checked exception
+     * of type {@code E}. This is the {@code double}-producing primitive specialization of
+     * {@link Supplier}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -1542,10 +1561,13 @@ public final class Throwables {
     }
 
     /**
-     * The Interface Predicate.
+     * Represents a predicate (boolean-valued function) of one argument that may throw a checked
+     * exception of type {@code E}. This is the exception-throwing equivalent of
+     * {@link java.util.function.Predicate}.
      *
      * @param <T> the type of the input to the predicate
      * @param <E> the type of exception that may be thrown
+     * @see java.util.function.Predicate
      */
     @FunctionalInterface
     public interface Predicate<T, E extends Throwable> {
@@ -1554,7 +1576,7 @@ public final class Throwables {
          * Evaluates this predicate on the given argument.
          *
          * @param t the input argument
-         * @return {@code true} if the input argument matches the predicate, otherwise false
+         * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
          * @throws E if an exception occurs during evaluation
          */
         boolean test(T t) throws E;
@@ -1587,11 +1609,14 @@ public final class Throwables {
     }
 
     /**
-     * The Interface BiPredicate.
+     * Represents a predicate (boolean-valued function) of two arguments that may throw a checked
+     * exception of type {@code E}. This is the exception-throwing equivalent of
+     * {@link java.util.function.BiPredicate}.
      *
      * @param <T> the type of the first input
      * @param <U> the type of the second input
      * @param <E> the type of exception that may be thrown
+     * @see java.util.function.BiPredicate
      */
     @FunctionalInterface
     public interface BiPredicate<T, U, E extends Throwable> {
@@ -1601,7 +1626,7 @@ public final class Throwables {
          *
          * @param t the first input argument
          * @param u the second input argument
-         * @return {@code true} if the input arguments match the predicate, otherwise false
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
          * @throws E if an exception occurs during evaluation
          */
         boolean test(T t, U u) throws E;
@@ -1625,7 +1650,8 @@ public final class Throwables {
     }
 
     /**
-     * The Interface TriPredicate.
+     * Represents a predicate (boolean-valued function) of three arguments that may throw a checked
+     * exception of type {@code E}. This is the three-arity specialization of {@link Predicate}.
      *
      * @param <A> the type of the first input
      * @param <B> the type of the second input
@@ -1641,14 +1667,15 @@ public final class Throwables {
          * @param a the first input argument
          * @param b the second input argument
          * @param c the third input argument
-         * @return {@code true} if the input arguments match the predicate, otherwise false
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
          * @throws E if an exception occurs during evaluation
          */
         boolean test(A a, B b, C c) throws E;
     }
 
     /**
-     * The Interface QuadPredicate.
+     * Represents a predicate (boolean-valued function) of four arguments that may throw a checked
+     * exception of type {@code E}. This is the four-arity specialization of {@link Predicate}.
      *
      * @param <A> the type of the first input
      * @param <B> the type of the second input
@@ -1666,18 +1693,21 @@ public final class Throwables {
          * @param b the second input argument
          * @param c the third input argument
          * @param d the fourth input argument
-         * @return {@code true} if the input arguments match the predicate, otherwise false
+         * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
          * @throws E if an exception occurs during evaluation
          */
         boolean test(A a, B b, C c, D d) throws E;
     }
 
     /**
-     * The Interface Function.
+     * Represents a function that accepts one argument and produces a result, and that may throw
+     * a checked exception of type {@code E}. This is the exception-throwing equivalent of
+     * {@link java.util.function.Function}.
      *
      * @param <T> the type of the input to the function
      * @param <R> the type of the result
      * @param <E> the type of exception that may be thrown
+     * @see java.util.function.Function
      */
     @FunctionalInterface
     public interface Function<T, R, E extends Throwable> {
@@ -1710,12 +1740,15 @@ public final class Throwables {
     }
 
     /**
-     * The Interface BiFunction.
+     * Represents a function that accepts two arguments and produces a result, and that may throw
+     * a checked exception of type {@code E}. This is the exception-throwing equivalent of
+     * {@link java.util.function.BiFunction}.
      *
      * @param <T> the type of the first input
      * @param <U> the type of the second input
      * @param <R> the type of the result
      * @param <E> the type of exception that may be thrown
+     * @see java.util.function.BiFunction
      */
     @FunctionalInterface
     public interface BiFunction<T, U, R, E extends Throwable> {
@@ -1749,7 +1782,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface TriFunction.
+     * Represents a function that accepts three arguments and produces a result, and that may throw
+     * a checked exception of type {@code E}. This is the three-arity specialization of
+     * {@link Function}.
      *
      * @param <A> the type of the first input
      * @param <B> the type of the second input
@@ -1773,7 +1808,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface QuadFunction.
+     * Represents a function that accepts four arguments and produces a result, and that may throw
+     * a checked exception of type {@code E}. This is the four-arity specialization of
+     * {@link Function}.
      *
      * @param <A> the type of the first input
      * @param <B> the type of the second input
@@ -1799,10 +1836,13 @@ public final class Throwables {
     }
 
     /**
-     * The Interface Consumer.
+     * Represents an operation that accepts a single input argument and returns no result, and that
+     * may throw a checked exception of type {@code E}. This is the exception-throwing equivalent of
+     * {@link java.util.function.Consumer}.
      *
      * @param <T> the type of the input to the consumer
      * @param <E> the type of exception that may be thrown
+     * @see java.util.function.Consumer
      */
     @FunctionalInterface
     public interface Consumer<T, E extends Throwable> {
@@ -1834,11 +1874,14 @@ public final class Throwables {
     }
 
     /**
-     * The Interface BiConsumer.
+     * Represents an operation that accepts two input arguments and returns no result, and that
+     * may throw a checked exception of type {@code E}. This is the exception-throwing equivalent of
+     * {@link java.util.function.BiConsumer}.
      *
      * @param <T> the type of the first input
      * @param <U> the type of the second input
      * @param <E> the type of exception that may be thrown
+     * @see java.util.function.BiConsumer
      */
     @FunctionalInterface
     public interface BiConsumer<T, U, E extends Throwable> {
@@ -1871,7 +1914,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface TriConsumer.
+     * Represents an operation that accepts three input arguments and returns no result, and that
+     * may throw a checked exception of type {@code E}. This is the three-arity specialization of
+     * {@link Consumer}.
      *
      * @param <A> the type of the first input
      * @param <B> the type of the second input
@@ -1893,7 +1938,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface QuadConsumer.
+     * Represents an operation that accepts four input arguments and returns no result, and that
+     * may throw a checked exception of type {@code E}. This is the four-arity specialization of
+     * {@link Consumer}.
      *
      * @param <A> the type of the first input
      * @param <B> the type of the second input
@@ -1917,7 +1964,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface BooleanConsumer.
+     * Represents an operation that accepts a single {@code boolean}-valued argument and returns no
+     * result, and that may throw a checked exception of type {@code E}. This is the {@code boolean}
+     * primitive specialization of {@link Consumer}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -1934,7 +1983,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface BooleanPredicate.
+     * Represents a predicate (boolean-valued function) of one {@code boolean}-valued argument that
+     * may throw a checked exception of type {@code E}. This is the {@code boolean} primitive
+     * specialization of {@link Predicate}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -1945,14 +1996,16 @@ public final class Throwables {
          * Evaluates this predicate on the given boolean argument.
          *
          * @param value the boolean input argument
-         * @return {@code true} if the input argument matches the predicate, otherwise false
+         * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
          * @throws E if an exception occurs during evaluation
          */
         boolean test(boolean value) throws E;
     }
 
     /**
-     * The Interface BooleanFunction.
+     * Represents a function that accepts a {@code boolean}-valued argument and produces a result,
+     * and that may throw a checked exception of type {@code E}. This is the {@code boolean}
+     * primitive specialization of {@link Function}.
      *
      * @param <R> the type of the result
      * @param <E> the type of exception that may be thrown
@@ -1971,7 +2024,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface CharConsumer.
+     * Represents an operation that accepts a single {@code char}-valued argument and returns no
+     * result, and that may throw a checked exception of type {@code E}. This is the {@code char}
+     * primitive specialization of {@link Consumer}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -1988,7 +2043,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface CharPredicate.
+     * Represents a predicate (boolean-valued function) of one {@code char}-valued argument that
+     * may throw a checked exception of type {@code E}. This is the {@code char} primitive
+     * specialization of {@link Predicate}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -1999,14 +2056,16 @@ public final class Throwables {
          * Evaluates this predicate on the given char argument.
          *
          * @param value the char input argument
-         * @return {@code true} if the input argument matches the predicate, otherwise false
+         * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
          * @throws E if an exception occurs during evaluation
          */
         boolean test(char value) throws E;
     }
 
     /**
-     * The Interface CharFunction.
+     * Represents a function that accepts a {@code char}-valued argument and produces a result,
+     * and that may throw a checked exception of type {@code E}. This is the {@code char}
+     * primitive specialization of {@link Function}.
      *
      * @param <R> the type of the result
      * @param <E> the type of exception that may be thrown
@@ -2025,7 +2084,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface ByteConsumer.
+     * Represents an operation that accepts a single {@code byte}-valued argument and returns no
+     * result, and that may throw a checked exception of type {@code E}. This is the {@code byte}
+     * primitive specialization of {@link Consumer}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -2042,7 +2103,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface BytePredicate.
+     * Represents a predicate (boolean-valued function) of one {@code byte}-valued argument that
+     * may throw a checked exception of type {@code E}. This is the {@code byte} primitive
+     * specialization of {@link Predicate}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -2053,14 +2116,16 @@ public final class Throwables {
          * Evaluates this predicate on the given byte argument.
          *
          * @param value the byte input argument
-         * @return {@code true} if the input argument matches the predicate, otherwise false
+         * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
          * @throws E if an exception occurs during evaluation
          */
         boolean test(byte value) throws E;
     }
 
     /**
-     * The Interface ByteFunction.
+     * Represents a function that accepts a {@code byte}-valued argument and produces a result,
+     * and that may throw a checked exception of type {@code E}. This is the {@code byte}
+     * primitive specialization of {@link Function}.
      *
      * @param <R> the type of the result
      * @param <E> the type of exception that may be thrown
@@ -2079,7 +2144,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface ShortConsumer.
+     * Represents an operation that accepts a single {@code short}-valued argument and returns no
+     * result, and that may throw a checked exception of type {@code E}. This is the {@code short}
+     * primitive specialization of {@link Consumer}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -2096,7 +2163,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface ShortPredicate.
+     * Represents a predicate (boolean-valued function) of one {@code short}-valued argument that
+     * may throw a checked exception of type {@code E}. This is the {@code short} primitive
+     * specialization of {@link Predicate}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -2107,14 +2176,16 @@ public final class Throwables {
          * Evaluates this predicate on the given short argument.
          *
          * @param value the short input argument
-         * @return {@code true} if the input argument matches the predicate, otherwise false
+         * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
          * @throws E if an exception occurs during evaluation
          */
         boolean test(short value) throws E;
     }
 
     /**
-     * The Interface ShortFunction.
+     * Represents a function that accepts a {@code short}-valued argument and produces a result,
+     * and that may throw a checked exception of type {@code E}. This is the {@code short}
+     * primitive specialization of {@link Function}.
      *
      * @param <R> the type of the result
      * @param <E> the type of exception that may be thrown
@@ -2133,7 +2204,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface IntConsumer.
+     * Represents an operation that accepts a single {@code int}-valued argument and returns no
+     * result, and that may throw a checked exception of type {@code E}. This is the {@code int}
+     * primitive specialization of {@link Consumer}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -2150,7 +2223,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface IntPredicate.
+     * Represents a predicate (boolean-valued function) of one {@code int}-valued argument that
+     * may throw a checked exception of type {@code E}. This is the {@code int} primitive
+     * specialization of {@link Predicate}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -2161,14 +2236,16 @@ public final class Throwables {
          * Evaluates this predicate on the given int argument.
          *
          * @param value the int input argument
-         * @return {@code true} if the input argument matches the predicate, otherwise false
+         * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
          * @throws E if an exception occurs during evaluation
          */
         boolean test(int value) throws E;
     }
 
     /**
-     * The Interface IntFunction.
+     * Represents a function that accepts an {@code int}-valued argument and produces a result,
+     * and that may throw a checked exception of type {@code E}. This is the {@code int}
+     * primitive specialization of {@link Function}.
      *
      * @param <R> the type of the result
      * @param <E> the type of exception that may be thrown
@@ -2187,7 +2264,8 @@ public final class Throwables {
     }
 
     /**
-     * The Interface IntToLongFunction.
+     * Represents a function that accepts an {@code int}-valued argument and produces a
+     * {@code long}-valued result, and that may throw a checked exception of type {@code E}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -2205,7 +2283,8 @@ public final class Throwables {
     }
 
     /**
-     * The Interface IntToDoubleFunction.
+     * Represents a function that accepts an {@code int}-valued argument and produces a
+     * {@code double}-valued result, and that may throw a checked exception of type {@code E}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -2223,7 +2302,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface LongConsumer.
+     * Represents an operation that accepts a single {@code long}-valued argument and returns no
+     * result, and that may throw a checked exception of type {@code E}. This is the {@code long}
+     * primitive specialization of {@link Consumer}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -2240,7 +2321,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface LongPredicate.
+     * Represents a predicate (boolean-valued function) of one {@code long}-valued argument that
+     * may throw a checked exception of type {@code E}. This is the {@code long} primitive
+     * specialization of {@link Predicate}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -2251,14 +2334,16 @@ public final class Throwables {
          * Evaluates this predicate on the given long argument.
          *
          * @param value the long input argument
-         * @return {@code true} if the input argument matches the predicate, otherwise false
+         * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
          * @throws E if an exception occurs during evaluation
          */
         boolean test(long value) throws E;
     }
 
     /**
-     * The Interface LongFunction.
+     * Represents a function that accepts a {@code long}-valued argument and produces a result,
+     * and that may throw a checked exception of type {@code E}. This is the {@code long}
+     * primitive specialization of {@link Function}.
      *
      * @param <R> the type of the result
      * @param <E> the type of exception that may be thrown
@@ -2277,7 +2362,8 @@ public final class Throwables {
     }
 
     /**
-     * The Interface LongToIntFunction.
+     * Represents a function that accepts a {@code long}-valued argument and produces an
+     * {@code int}-valued result, and that may throw a checked exception of type {@code E}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -2295,7 +2381,8 @@ public final class Throwables {
     }
 
     /**
-     * The Interface LongToDoubleFunction.
+     * Represents a function that accepts a {@code long}-valued argument and produces a
+     * {@code double}-valued result, and that may throw a checked exception of type {@code E}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -2313,7 +2400,8 @@ public final class Throwables {
     }
 
     /**
-     * The Interface FloatToIntFunction.
+     * Represents a function that accepts a {@code float}-valued argument and produces an
+     * {@code int}-valued result, and that may throw a checked exception of type {@code E}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -2330,7 +2418,8 @@ public final class Throwables {
     }
 
     /**
-     * The Interface FloatToLongFunction.
+     * Represents a function that accepts a {@code float}-valued argument and produces a
+     * {@code long}-valued result, and that may throw a checked exception of type {@code E}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -2347,7 +2436,8 @@ public final class Throwables {
     }
 
     /**
-     * The Interface FloatToDoubleFunction.
+     * Represents a function that accepts a {@code float}-valued argument and produces a
+     * {@code double}-valued result, and that may throw a checked exception of type {@code E}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -2364,7 +2454,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface FloatConsumer.
+     * Represents an operation that accepts a single {@code float}-valued argument and returns no
+     * result, and that may throw a checked exception of type {@code E}. This is the {@code float}
+     * primitive specialization of {@link Consumer}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -2381,7 +2473,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface FloatPredicate.
+     * Represents a predicate (boolean-valued function) of one {@code float}-valued argument that
+     * may throw a checked exception of type {@code E}. This is the {@code float} primitive
+     * specialization of {@link Predicate}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -2392,14 +2486,16 @@ public final class Throwables {
          * Evaluates this predicate on the given float argument.
          *
          * @param value the float input argument
-         * @return {@code true} if the input argument matches the predicate, otherwise false
+         * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
          * @throws E if an exception occurs during evaluation
          */
         boolean test(float value) throws E;
     }
 
     /**
-     * The Interface FloatFunction.
+     * Represents a function that accepts a {@code float}-valued argument and produces a result,
+     * and that may throw a checked exception of type {@code E}. This is the {@code float}
+     * primitive specialization of {@link Function}.
      *
      * @param <R> the type of the result
      * @param <E> the type of exception that may be thrown
@@ -2418,7 +2514,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface DoubleConsumer.
+     * Represents an operation that accepts a single {@code double}-valued argument and returns no
+     * result, and that may throw a checked exception of type {@code E}. This is the {@code double}
+     * primitive specialization of {@link Consumer}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -2435,7 +2533,9 @@ public final class Throwables {
     }
 
     /**
-     * The Interface DoublePredicate.
+     * Represents a predicate (boolean-valued function) of one {@code double}-valued argument that
+     * may throw a checked exception of type {@code E}. This is the {@code double} primitive
+     * specialization of {@link Predicate}.
      *
      * @param <E> the type of exception that may be thrown
      */
@@ -2446,7 +2546,7 @@ public final class Throwables {
          * Evaluates this predicate on the given double argument.
          *
          * @param value the double input argument
-         * @return {@code true} if the input argument matches the predicate, otherwise false
+         * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
          * @throws E if an exception occurs during evaluation
          */
         boolean test(double value) throws E;
@@ -3714,7 +3814,7 @@ public final class Throwables {
 
     /**
      * Represents an operation that accepts two int-valued arguments and returns no result.
-     * This is the int-specialized primitive type specialization of {@code BiConsumer}.
+     * This is the {@code int} primitive specialization of {@code BiConsumer}.
      *
      * @param <E> the type of exception that the consumer may throw
      */

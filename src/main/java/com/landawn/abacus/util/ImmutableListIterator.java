@@ -141,6 +141,7 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
      * @param <T> the type of elements returned by the iterator
      * @param iter the ListIterator to wrap, may be null
      * @return an ImmutableListIterator wrapping the provided iterator, or empty if iter is null
+     * @see #empty()
      */
     public static <T> ImmutableListIterator<T> of(final ListIterator<? extends T> iter) {
         if (iter == null) {

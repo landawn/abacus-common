@@ -53,7 +53,8 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
     private final IdentityHashMap<T, Object> map;
 
     /**
-     * Constructs a new, empty identity hash set with the default initial capacity (21).
+     * Constructs a new, empty identity hash set with the default initial capacity of the
+     * backing {@link IdentityHashMap}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

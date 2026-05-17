@@ -17,8 +17,8 @@ package com.landawn.abacus.util;
 /**
  * Represents a primitive long value paired with an index position.
  *
- * <p>This class is a specialized version of {@link Indexed} for primitive long values,
- * providing better performance by avoiding boxing/unboxing overhead.</p>
+ * <p>This class is a specialized version of {@code Indexed<Long>} for primitive long
+ * values, providing better performance by avoiding boxing/unboxing overhead.</p>
  *
  * <p>The class is immutable and extends {@link AbstractIndexed}.</p>
  *
@@ -26,7 +26,7 @@ package com.landawn.abacus.util;
  * <pre>{@code
  * IndexedLong indexedLong = IndexedLong.of(123456789L, 5);
  * long value = indexedLong.value();   // 123456789L
- * long index = indexedLong.index();   // 5
+ * int index = indexedLong.index();   // 5
  * }</pre>
  *
  * @see Indexed
@@ -44,9 +44,11 @@ public final class IndexedLong extends AbstractIndexed {
 
     /**
      * Constructs an IndexedLong instance with the specified index and value.
+     * This is a package-private constructor; use {@link #of(long, int)} or
+     * {@link #of(long, long)} factory methods for creating instances.
      *
-     * @param index the index position
-     * @param value the long value to be indexed
+     * @param index the index position (non-negative long value)
+     * @param value the long value to be associated with the index
      */
     IndexedLong(final long index, final long value) {
         super(index);
@@ -61,10 +63,10 @@ public final class IndexedLong extends AbstractIndexed {
      * IndexedLong indexed = IndexedLong.of(123456789L, 5);
      * }</pre>
      *
-     * @param value the long value to be indexed
-     * @param index the index position (must be non-negative)
-     * @return a new IndexedLong instance
-     * @throws IllegalArgumentException if index is negative
+     * @param value the long value to be associated with the index
+     * @param index the index position (must be non-negative, 0 to Integer.MAX_VALUE)
+     * @return a new immutable IndexedLong instance containing the specified value and index
+     * @throws IllegalArgumentException if index is negative (index &lt; 0)
      */
     public static IndexedLong of(final long value, final int index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
@@ -82,10 +84,10 @@ public final class IndexedLong extends AbstractIndexed {
      * IndexedLong indexed = IndexedLong.of(123456789L, 5000000000L);
      * }</pre>
      *
-     * @param value the long value to be indexed
-     * @param index the index position (must be non-negative)
-     * @return a new IndexedLong instance
-     * @throws IllegalArgumentException if index is negative
+     * @param value the long value to be associated with the index
+     * @param index the index position (must be non-negative, 0 to Long.MAX_VALUE)
+     * @return a new immutable IndexedLong instance containing the specified value and index
+     * @throws IllegalArgumentException if index is negative (index &lt; 0)
      */
     public static IndexedLong of(final long value, final long index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
@@ -96,13 +98,16 @@ public final class IndexedLong extends AbstractIndexed {
     /**
      * Returns the long value stored in this IndexedLong instance.
      *
+     * <p>The index associated with this value can be retrieved through the {@link #index()}
+     * method inherited from {@link AbstractIndexed}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedLong indexed = IndexedLong.of(123456789L, 5);
      * long value = indexed.value();   // 123456789L
      * }</pre>
      *
-     * @return the long value
+     * @return the long value associated with this index
      */
     public long value() {
         return value;
@@ -135,8 +140,9 @@ public final class IndexedLong extends AbstractIndexed {
      * indexed1.equals(indexed3);   // false
      * }</pre>
      *
-     * @param obj the object to compare with
-     * @return {@code true} if the objects are equal, {@code false} otherwise
+     * @param obj the object to compare with this IndexedLong instance for equality
+     * @return {@code true} if the specified object is an IndexedLong with the same
+     *         index and value, {@code false} otherwise
      */
     @Override
     public boolean equals(final Object obj) {

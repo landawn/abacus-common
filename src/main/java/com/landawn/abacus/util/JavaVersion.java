@@ -427,6 +427,7 @@ public enum JavaVersion {
      * @param requiredVersion the minimum version to check against, not null
      * @return {@code true} if this version is equal to or greater than the specified version,
      *         {@code false} otherwise
+     * @see #atMost(JavaVersion)
      */
     public boolean atLeast(final JavaVersion requiredVersion) {
         return value >= requiredVersion.value;
@@ -452,6 +453,7 @@ public enum JavaVersion {
      * @param requiredVersion the maximum version to check against, not null
      * @return {@code true} if this version is equal to or less than the specified version,
      *         {@code false} otherwise
+     * @see #atLeast(JavaVersion)
      */
     public boolean atMost(final JavaVersion requiredVersion) {
         return value <= requiredVersion.value;
@@ -627,9 +629,13 @@ public enum JavaVersion {
      * JavaVersion current = JavaVersion.of(System.getProperty("java.specification.version"));
      * }</pre>
      *
-     * @param versionStr the version string to parse (e.g., "1.8", "11", "17.0.1")
-     * @return the corresponding JavaVersion enum constant
-     * @throws IllegalArgumentException if the version string cannot be parsed or doesn't match any known Java version
+     * <p>Version strings resolving to a number above Java 39 return {@link #JAVA_RECENT}.</p>
+     *
+     * @param versionStr the version string to parse (e.g., "1.8", "11", "17.0.1"); must not be {@code null} or empty
+     * @return the corresponding JavaVersion enum constant, never {@code null}
+     * @throws IllegalArgumentException if the version string is {@code null}, empty, cannot be parsed,
+     *         or does not match any known Java version
+     * @see #get(String)
      */
     public static JavaVersion of(final String versionStr) {
         if (Strings.isEmpty(versionStr)) {

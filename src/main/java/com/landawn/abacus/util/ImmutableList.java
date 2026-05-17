@@ -34,7 +34,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * <p>This class provides several static factory methods for creating instances:
  * <ul>
  *   <li>{@link #empty()} - returns an empty list</li>
- *   <li>{@link #of(Object)} (and arity-overloads up to ten elements) - creates lists with specific elements</li>
+ *   <li>{@link #of(Object)} (and arity-overloads up to nine elements) - creates lists with specific elements</li>
  *   <li>{@link #copyOf(Collection)} - creates a defensive copy from another collection</li>
  *   <li>{@link #wrap(List)} - wraps an existing list (changes to the underlying list will be reflected)</li>
  *   <li>{@link #builder()} - provides a builder for constructing lists incrementally</li>
@@ -414,8 +414,12 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * }</pre>
      *
      * @param <E> the type of elements in the collection.
-     * @param c the collection whose elements are to be placed into the ImmutableList.
-     * @return an ImmutableList containing all elements from the collection, or the same instance if already an ImmutableList.
+     * @param c the collection whose elements are to be placed into the {@code ImmutableList};
+     *        may be {@code null} or empty.
+     * @return the same instance if {@code c} is already an {@code ImmutableList};
+     *         an empty {@code ImmutableList} if {@code c} is {@code null} or empty;
+     *         otherwise a new {@code ImmutableList} containing a defensive copy of the collection's elements.
+     * @see #copyOf(Object[])
      */
     public static <E> ImmutableList<E> copyOf(final Collection<? extends E> c) {
         if (c instanceof ImmutableList) {
@@ -448,8 +452,11 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * }</pre>
      *
      * @param <E> the type of elements in the list.
-     * @param list the list to be wrapped into an ImmutableList.
-     * @return an ImmutableList view of the provided list, or the same instance if already an ImmutableList.
+     * @param list the list to be wrapped into an {@code ImmutableList}; may be {@code null}.
+     * @return the same instance if {@code list} is already an {@code ImmutableList};
+     *         an empty {@code ImmutableList} if {@code list} is {@code null};
+     *         otherwise an {@code ImmutableList} view backed by {@code list}.
+     * @see #copyOf(Collection)
      */
     @Beta
     public static <E> ImmutableList<E> wrap(final List<? extends E> list) {
@@ -727,7 +734,8 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * // backToOriginal is the same instance as original
      * }</pre>
      *
-     * @return an immutable view of this list with elements in reverse order.
+     * @return an immutable view of this list with elements in reverse order;
+     *         this same instance if this list has zero or one element.
      */
     public ImmutableList<E> reversed() {
         return (size() <= 1) ? this : new ReverseImmutableList<>(this);
@@ -892,6 +900,42 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
                 result[size] = null;
             }
             return result;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+
+            if (!(obj instanceof java.util.List<?> other)) {
+                return false;
+            }
+
+            if (other.size() != size) {
+                return false;
+            }
+
+            final Iterator<?> otherItr = other.iterator();
+
+            for (int i = 0; i < size; i++) {
+                if (!N.equals(forwardList.get(reverseIndex(i)), otherItr.next())) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int hashCode = 1;
+
+            for (int i = 0; i < size; i++) {
+                hashCode = 31 * hashCode + N.hashCode(forwardList.get(reverseIndex(i)));
+            }
+
+            return hashCode;
         }
 
         private int reverseIndex(final int index) {

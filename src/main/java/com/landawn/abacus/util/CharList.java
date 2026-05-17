@@ -256,7 +256,7 @@ import com.landawn.abacus.util.stream.CharStream;
  * <p><b>Common Patterns:</b>
  * <ul>
  *   <li><b>Text Building:</b> {@code CharList buffer = new CharList(expectedLength);}</li>
- *   <li><b>Character Analysis:</b> {@code CharList chars = CharList.of(text);}</li>
+ *   <li><b>Character Analysis:</b> {@code CharList chars = CharList.of(text.toCharArray());}</li>
  *   <li><b>Alphabet Generation:</b> {@code CharList letters = CharList.range('a', 'z');}</li>
  *   <li><b>Character Filtering:</b> {@code CharList filtered = chars.stream().filter(...).collect(...);}</li>
  * </ul>
@@ -274,7 +274,7 @@ import com.landawn.abacus.util.stream.CharStream;
  * <pre>{@code
  * // Process text document
  * String document = "The Quick Brown Fox Jumps Over The Lazy Dog";
- * CharList text = CharList.of(document);
+ * CharList text = CharList.of(document.toCharArray());
  *
  * // Character analysis
  * long letterCount = text.stream().filter(Character::isLetter).count();
@@ -294,13 +294,13 @@ import com.landawn.abacus.util.stream.CharStream;
  *
  * // Build modified text
  * CharList result = new CharList();
- * result.addAll("Processed: ");
+ * result.addAll("Processed: ".toCharArray());
  * result.addAll(lowercase);
  * result.add('!');
  * String processed = result.toString();
  *
  * // Pattern matching
- * CharList vowels = CharList.of("aeiou");
+ * CharList vowels = CharList.of("aeiou".toCharArray());
  * CharList consonants = CharList.range('a', 'z').difference(vowels);
  * boolean hasAllVowels = vowels.stream().allMatch(v -> text.contains(v));
  * }</pre>
@@ -527,7 +527,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @param len the length of the list to create
      * @return a new CharList containing random char values
-     * @throws IllegalArgumentException if {@code len} is negative
+     * @throws NegativeArraySizeException if {@code len} is negative
      */
     public static CharList random(final int len) {
         final char[] a = new char[len];
@@ -547,7 +547,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param endExclusive the maximum value (exclusive)
      * @param len the length of the list to create
      * @return a new CharList containing random char values within the specified range
-     * @throws IllegalArgumentException if {@code startInclusive >= endExclusive} or {@code len} is negative
+     * @throws IllegalArgumentException if {@code startInclusive >= endExclusive}
+     * @throws NegativeArraySizeException if {@code len} is negative
      */
     public static CharList random(final char startInclusive, final char endExclusive, final int len) {
         if (startInclusive >= endExclusive) {
@@ -571,7 +572,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param candidates the array of candidate chars to choose from
      * @param len the length of the list to create
      * @return a new CharList containing randomly selected chars from the candidates
-     * @throws IllegalArgumentException if candidates is empty or has Integer.MAX_VALUE elements, or if {@code len} is negative
+     * @throws IllegalArgumentException if {@code candidates} is empty or has {@code Integer.MAX_VALUE} elements
+     * @throws NegativeArraySizeException if {@code len} is negative
      */
     public static CharList random(final char[] candidates, final int len) {
         if (N.isEmpty(candidates) || candidates.length == Integer.MAX_VALUE) {
@@ -1083,6 +1085,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * Elements are removed in descending order of indices to maintain correctness.
      *
      * @param indices the indices of elements to be removed
+     * @throws IndexOutOfBoundsException if any index is out of range ({@code index < 0 || index >= size()})
      */
     @Override
     public void removeAt(final int... indices) {
@@ -2348,6 +2351,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return size == 0;
     }
 
+    /**
+     * Returns the number of elements in this list.
+     *
+     * @return the number of elements in this list
+     */
     @Override
     public int size() {
         return size;

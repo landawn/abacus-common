@@ -16,7 +16,7 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Represents an operation upon two {@code boolean} operands and producing a {@code boolean} result.
+ * Represents an operation on two {@code boolean} operands that produces a {@code boolean} result.
  * This is the primitive type specialization of {@link BinaryOperator} for {@code boolean}.
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsBoolean(boolean, boolean)}.

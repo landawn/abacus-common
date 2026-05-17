@@ -1568,4 +1568,38 @@ public class XmlMappersTest extends TestBase {
         Assertions.assertTrue(xml.contains("DataOutput"));
     }
 
+    /**
+     * Regression: when a {@code null} SerializationConfig is passed, {@code getXmlMapper(null)}
+     * returns the shared {@code defaultXmlMapper}. The old {@code recycle(...)} only guarded
+     * against {@code null} and therefore added the shared default mapper into the pool (and
+     * mutated its config), corrupting it for concurrent {@code toXml(obj)} callers. The fix
+     * mirrors {@code JsonMappers.recycle} by also skipping the shared default mappers.
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testRecycle_doesNotPoolSharedDefaultMapper_onNullConfig() throws Exception {
+        java.lang.reflect.Field poolField = XmlMappers.class.getDeclaredField("mapperPool");
+        poolField.setAccessible(true);
+        java.lang.reflect.Field defField = XmlMappers.class.getDeclaredField("defaultXmlMapper");
+        defField.setAccessible(true);
+
+        List<XmlMapper> pool = (List<XmlMapper>) poolField.get(null);
+        XmlMapper sharedDefault = (XmlMapper) defField.get(null);
+
+        synchronized (pool) {
+            pool.clear();
+        }
+
+        // Passing a null SerializationConfig is a documented-valid input that routes to
+        // getXmlMapper(null) -> shared defaultXmlMapper, then recycle(...) in finally.
+        XmlMappers.toXml(new Person("Pooling", 1), (SerializationConfig) null);
+
+        synchronized (pool) {
+            for (XmlMapper m : pool) {
+                Assertions.assertNotSame(sharedDefault, m,
+                        "The shared defaultXmlMapper must never be placed into the mapper pool");
+            }
+        }
+    }
+
 }

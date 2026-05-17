@@ -28,8 +28,8 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
     public static final String OPTIONAL_CHAR = OptionalChar.class.getSimpleName();
 
     /**
-     * Package-private constructor for OptionalCharType.
-     * This constructor is called by the TypeFactory to create OptionalChar type instances.
+     * Constructs a new OptionalCharType instance.
+     * Instances are normally obtained via the TypeFactory rather than constructed directly.
      */
     protected OptionalCharType() {
         super(OPTIONAL_CHAR);

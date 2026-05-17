@@ -17,8 +17,8 @@ package com.landawn.abacus.util;
 /**
  * Represents a primitive int value paired with an index position.
  *
- * <p>This class is a specialized version of {@link Indexed} for primitive int values,
- * providing better performance by avoiding boxing/unboxing overhead.</p>
+ * <p>This class is a specialized version of {@code Indexed<Integer>} for primitive int
+ * values, providing better performance by avoiding boxing/unboxing overhead.</p>
  *
  * <p>The class is immutable and extends {@link AbstractIndexed}.</p>
  *
@@ -26,7 +26,7 @@ package com.landawn.abacus.util;
  * <pre>{@code
  * IndexedInt indexedInt = IndexedInt.of(42, 5);
  * int value = indexedInt.value();   // 42
- * long index = indexedInt.index();   // 5
+ * int index = indexedInt.index();   // 5
  * }</pre>
  *
  * @see Indexed
@@ -44,9 +44,11 @@ public final class IndexedInt extends AbstractIndexed {
 
     /**
      * Constructs an IndexedInt instance with the specified index and value.
+     * This is a package-private constructor; use {@link #of(int, int)} or
+     * {@link #of(int, long)} factory methods for creating instances.
      *
-     * @param index the index position
-     * @param value the int value to be indexed
+     * @param index the index position (non-negative long value)
+     * @param value the int value to be associated with the index
      */
     IndexedInt(final long index, final int value) {
         super(index);
@@ -61,10 +63,10 @@ public final class IndexedInt extends AbstractIndexed {
      * IndexedInt indexed = IndexedInt.of(42, 5);
      * }</pre>
      *
-     * @param value the int value to be indexed
-     * @param index the index position (must be non-negative)
-     * @return a new IndexedInt instance
-     * @throws IllegalArgumentException if index is negative
+     * @param value the int value to be associated with the index
+     * @param index the index position (must be non-negative, 0 to Integer.MAX_VALUE)
+     * @return a new immutable IndexedInt instance containing the specified value and index
+     * @throws IllegalArgumentException if index is negative (index &lt; 0)
      */
     public static IndexedInt of(final int value, final int index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
@@ -82,10 +84,10 @@ public final class IndexedInt extends AbstractIndexed {
      * IndexedInt indexed = IndexedInt.of(42, 5000000000L);
      * }</pre>
      *
-     * @param value the int value to be indexed
-     * @param index the index position (must be non-negative)
-     * @return a new IndexedInt instance
-     * @throws IllegalArgumentException if index is negative
+     * @param value the int value to be associated with the index
+     * @param index the index position (must be non-negative, 0 to Long.MAX_VALUE)
+     * @return a new immutable IndexedInt instance containing the specified value and index
+     * @throws IllegalArgumentException if index is negative (index &lt; 0)
      */
     public static IndexedInt of(final int value, final long index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
@@ -96,13 +98,16 @@ public final class IndexedInt extends AbstractIndexed {
     /**
      * Returns the int value stored in this IndexedInt instance.
      *
+     * <p>The index associated with this value can be retrieved through the {@link #index()}
+     * method inherited from {@link AbstractIndexed}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedInt indexed = IndexedInt.of(42, 5);
      * int value = indexed.value();   // 42
      * }</pre>
      *
-     * @return the int value
+     * @return the int value associated with this index
      */
     public int value() {
         return value;
@@ -135,8 +140,9 @@ public final class IndexedInt extends AbstractIndexed {
      * indexed1.equals(indexed3);   // false
      * }</pre>
      *
-     * @param obj the object to compare with
-     * @return {@code true} if the objects are equal, {@code false} otherwise
+     * @param obj the object to compare with this IndexedInt instance for equality
+     * @return {@code true} if the specified object is an IndexedInt with the same
+     *         index and value, {@code false} otherwise
      */
     @Override
     public boolean equals(final Object obj) {

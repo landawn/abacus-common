@@ -312,9 +312,10 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * {@code hasNext()} hasn't been called. The returned line does not include any
      * line-termination characters (such as {@code \n} or {@code \r\n}).
      * <p>
-     * You must call {@link #hasNext()} before calling this method to check if a line is
-     * available, or ensure you handle the {@link NoSuchElementException} that will be thrown
-     * if no more lines are available.
+     * Calling {@link #hasNext()} first is not required, since this method invokes it
+     * internally; however, if no more lines are available a {@link NoSuchElementException}
+     * is thrown, so either guard the call with {@link #hasNext()} or be prepared to handle
+     * that exception.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

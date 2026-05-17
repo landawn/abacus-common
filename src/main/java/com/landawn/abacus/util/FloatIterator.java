@@ -136,8 +136,8 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * @param a the float array (may be {@code null})
      * @param fromIndex the start index (inclusive)
      * @param toIndex the end index (exclusive)
-     * @return a new {@code FloatIterator} over the specified range, or an empty iterator if the array is {@code null} or fromIndex equals toIndex
-     * @throws IndexOutOfBoundsException if the indices are out of range
+     * @return a new {@code FloatIterator} over the specified range, or an empty iterator if the array is {@code null} or {@code fromIndex == toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > a.length}, or {@code fromIndex > toIndex}
      */
     public static FloatIterator of(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -692,6 +692,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * @param <E> the type of exception the action may throw
      * @param action the action to be performed for each element with its index, must not be null
      * @throws IllegalArgumentException if action is null
+     * @throws IllegalStateException if the iterator yields more than {@code Integer.MAX_VALUE} elements (index overflow)
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntFloatConsumer<E> action) throws IllegalArgumentException, E {

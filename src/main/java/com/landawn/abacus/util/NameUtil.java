@@ -132,7 +132,8 @@ public final class NameUtil {
      * @param name the name string to cache, which may be {@code null}
      * @param force if {@code true}, ignores whether the name is already cached;
      *              if {@code false}, skips caching if already present
-     * @return the interned version of the name string, or {@code null} if {@code name} is {@code null}
+     * @return the interned and cached version of the name string if it was cached by this call;
+     *         otherwise the original {@code name}, or {@code null} if {@code name} is {@code null}
      */
     public static String cacheName(String name, final boolean force) {
         if (name == null) {

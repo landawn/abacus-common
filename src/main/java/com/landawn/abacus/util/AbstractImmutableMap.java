@@ -74,9 +74,11 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
      * System.out.println(map.getOrDefault("c", 99));   // 99
      * }</pre>
      *
-     * @param key the key whose associated value is to be returned.
-     * @param defaultValue the value to return if the map contains no mapping for the key.
-     * @return the value to which the specified key is mapped, or defaultValue if no mapping exists.
+     * @param key the key whose associated value is to be returned
+     * @param defaultValue the value to return if this map contains no mapping for the key
+     * @return the value to which the specified key is mapped, or {@code defaultValue} if this
+     *         map contains no mapping for the key
+     * @see java.util.Map#getOrDefault(Object, Object)
      */
     @Override
     public V getOrDefault(final Object key, final V defaultValue) {

@@ -2987,6 +2987,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * <p>
      * Reorders the rows according to the specified comparator applied to their keys.
      * All row data moves with their respective keys to maintain data integrity.
+     * If the comparator is {@code null}, natural ordering is used (row keys must implement {@code Comparable}).
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -3002,7 +3003,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // Rows are now ordered: ["a", "medium", "long_name"]
      * }</pre>
      *
-     * @param cmp the comparator to determine row key ordering; must not be {@code null}
+     * @param cmp the comparator to determine row key ordering; {@code null} for natural ordering
      * @throws IllegalStateException if this Sheet is frozen
      * @see #sortByRowKey()
      * @see #sortByColumnKey(Comparator)
@@ -3720,6 +3721,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @return a new Sheet object that is a deep copy of the current Sheet.
      * @throws UnsupportedOperationException if the Kryo library is not available on the classpath
+     * @see #clone(boolean)
+     * @see #copy()
      */
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Beta
@@ -3736,6 +3739,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param freeze a boolean value that determines whether the copied Sheet should be frozen (read-only).
      * @return a new Sheet object that is a deep copy of the current Sheet.
      * @throws UnsupportedOperationException if the Kryo library is not available on the classpath
+     * @see #clone()
+     * @see #freeze()
+     * @see #copy()
      */
     public Sheet<R, C, V> clone(final boolean freeze) {
         if (kryoParser == null) {
@@ -3787,7 +3793,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * # | row3 | 30   | 40   |
      * # +------+------+------+
      *
-     * // Add values where both exist, use non-null value otherwise
+     * // Combine values from both sheets into a "a#b" string ({@code null} where a sheet has no value)
      * Sheet<String, String, String> merged = sheet1.merge(sheet2, (a, b) -> a + "#" + b);
      * merged.println();
      *
@@ -5624,7 +5630,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, 2}, {3, 4}}
      * );
      *
-     * // Map each row to its sum
+     * // Map each row to a joined string of its values
      * sheet.rows((rowIndex, row) -> row.join("-"))
      *      .forEach(pair -> System.out.println(pair.left() + ": " + pair.right()));
      * // Prints:
@@ -5632,10 +5638,16 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // row2: 3-4
      * }</pre>
      *
+     * <p>Note: the {@code DisposableObjArray} passed to {@code rowMapper} is reused across
+     * invocations and must not be retained beyond the scope of the mapper call.</p>
+     *
      * @param <T> the type of the mapped value for each row.
      * @param rowMapper a function that takes an integer and a DisposableObjArray as input and produces an object of type T.
      *                  The integer represents the index of the row in the Sheet, and the DisposableObjArray represents the row itself.
      * @return a Stream of Pair objects, where each Pair consists of a row key and a mapped value obtained by applying the {@code rowMapper} function to the row's values, ordered by rows.
+     * @see #rows()
+     * @see #rows(int, int, IntObjFunction)
+     * @see #columns(IntObjFunction)
      */
     public <T> Stream<Pair<R, T>> rows(final IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper) {
         return rows(0, rowCount(), rowMapper);
@@ -5656,13 +5668,16 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, 2}, {3, 4}, {5, 6}}
      * );
      *
-     * // Map each row to its sum for rows 0 and 1 (excluding row 2)
+     * // Map rows 0 and 1 (excluding row 2) to a joined string of their values
      * sheet.rows(0, 2, (rowIndex, row) -> row.join("-"))
      *      .forEach(pair -> System.out.println(pair.left() + ": " + pair.right()));
      * // Prints:
      * // row1: 1-2
      * // row2: 3-4
      * }</pre>
+     *
+     * <p>Note: the {@code DisposableObjArray} passed to {@code rowMapper} is reused across
+     * invocations and must not be retained beyond the scope of the mapper call.</p>
      *
      * @param <T> the type of the mapped value for each row.
      * @param fromRowIndex the starting row index (inclusive)
@@ -5671,6 +5686,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      *                  The integer represents the index of the row in the Sheet, and the DisposableObjArray represents the row itself.
      * @return a Stream of Pair objects for the specified row range, where each Pair consists of a row key and a mapped value obtained by applying the {@code rowMapper} function to the row's values, ordered by rows.
      * @throws IndexOutOfBoundsException if indices are out of bounds or fromRowIndex &gt; toRowIndex
+     * @see #rows(IntObjFunction)
+     * @see #columns(int, int, IntObjFunction)
      */
     public <T> Stream<Pair<R, T>> rows(final int fromRowIndex, final int toRowIndex, final IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper) {
         checkRowFromToIndex(fromRowIndex, toRowIndex, rowCount());
@@ -5857,7 +5874,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, 2}, {3, 4}}
      * );
      *
-     * // Map each column to its sum
+     * // Map each column to a joined string of its values
      * sheet.columns((colIndex, col) -> col.join("-"))
      *      .forEach(pair -> System.out.println(pair.left() + ": " + pair.right()));
      * // Prints:
@@ -5865,10 +5882,16 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // col2: 2-4
      * }</pre>
      *
+     * <p>Note: the {@code DisposableObjArray} passed to {@code columnMapper} is reused across
+     * invocations and must not be retained beyond the scope of the mapper call.</p>
+     *
      * @param <T> the type of the mapped value for each column.
      * @param columnMapper a function that takes an integer and a DisposableObjArray as input and produces an object of type T.
      *                     The integer represents the index of the column in the Sheet, and the DisposableObjArray represents the column itself.
      * @return a Stream of Pair objects, where each Pair consists of a column key and a mapped value obtained by applying the {@code columnMapper} function to the column's values, ordered by columns.
+     * @see #columns()
+     * @see #columns(int, int, IntObjFunction)
+     * @see #rows(IntObjFunction)
      */
     public <T> Stream<Pair<C, T>> columns(final IntObjFunction<? super DisposableObjArray, ? extends T> columnMapper) {
         return columns(0, columnCount(), columnMapper);
@@ -5889,13 +5912,16 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
      * );
      *
-     * // Map each column to its sum for columns 0 and 1 (excluding column 2)
+     * // Map columns 0 and 1 (excluding column 2) to a joined string of their values
      * sheet.columns(0, 2, (colIndex, col) -> col.join("-"))
      *      .forEach(pair -> System.out.println(pair.left() + ": " + pair.right()));
      * // Prints:
      * // col1: 1-4-7
      * // col2: 2-5-8
      * }</pre>
+     *
+     * <p>Note: the {@code DisposableObjArray} passed to {@code columnMapper} is reused across
+     * invocations and must not be retained beyond the scope of the mapper call.</p>
      *
      * @param <T> the type of the mapped value for each column.
      * @param fromColumnIndex the starting column index (inclusive)
@@ -5904,6 +5930,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      *                     The integer represents the index of the column in the Sheet, and the DisposableObjArray represents the column itself.
      * @return a Stream of Pair objects for the specified column range, where each Pair consists of a column key and a mapped value obtained by applying the {@code columnMapper} function to the column's values, ordered by columns.
      * @throws IndexOutOfBoundsException if indices are out of bounds or fromColumnIndex &gt; toColumnIndex
+     * @see #columns(IntObjFunction)
+     * @see #rows(int, int, IntObjFunction)
      */
     public <T> Stream<Pair<C, T>> columns(final int fromColumnIndex, final int toColumnIndex,
             final IntObjFunction<? super DisposableObjArray, ? extends T> columnMapper) {
@@ -6632,13 +6660,13 @@ public final class Sheet<R, C, V> implements Cloneable {
 
                 for (int i = 0; i < columnLen; i++) {
                     final List<String> strColumn = new ArrayList<>(rowLen);
-                    int maxLen = N.len(columnNameList.get(i));
+                    int maxLen = Strings.displayWidth(columnNameList.get(i));
                     String str = null;
 
                     if (i == 0) {
                         for (final R rk : rowKeySet) {
                             str = N.toString(rk);
-                            maxLen = N.max(maxLen, N.len(str));
+                            maxLen = N.max(maxLen, Strings.displayWidth(str));
                             strColumn.add(str);
                         }
                     } else if (columnIndices[i] < 0) {
@@ -6650,7 +6678,7 @@ public final class Sheet<R, C, V> implements Cloneable {
                     } else {
                         for (final int rowIndex : rowIndices) {
                             str = N.toString(_columnList.get(columnIndices[i]).get(rowIndex));
-                            maxLen = N.max(maxLen, N.len(str));
+                            maxLen = N.max(maxLen, Strings.displayWidth(str));
                             strColumn.add(str);
                         }
                     }
@@ -6681,7 +6709,7 @@ public final class Sheet<R, C, V> implements Cloneable {
                         appendable.append(" | ");
                     }
 
-                    appendable.append(Strings.padEnd(columnNameList.get(i), maxColumnLens[i]));
+                    appendable.append(Strings.padEndByDisplayWidth(columnNameList.get(i), maxColumnLens[i]));
                 }
 
                 appendable.append(" |");
@@ -6709,7 +6737,7 @@ public final class Sheet<R, C, V> implements Cloneable {
                             appendable.append(" | ");
                         }
 
-                        appendable.append(Strings.padEnd(strColumnList.get(i).get(j), maxColumnLens[i]));
+                        appendable.append(Strings.padEndByDisplayWidth(strColumnList.get(i).get(j), maxColumnLens[i]));
                     }
 
                     appendable.append(" |");
@@ -6907,9 +6935,12 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     private void init() {
-        if (!_isInitialized) {
-            initIndexMap();
+        // Always ensure the row/column index maps exist. They may have been reset to null
+        // (e.g. by moveRow/moveColumn) while the sheet remains initialized; callers such as
+        // addRow/addColumn rely on these maps right after invoking init().
+        initIndexMap();
 
+        if (!_isInitialized) {
             final int rowLength = rowCount();
             final int columnLength = columnCount();
             _columnList = new ArrayList<>(columnLength);
@@ -7134,14 +7165,20 @@ public final class Sheet<R, C, V> implements Cloneable {
             }
         }
 
+        /** The point at the origin, with both {@code rowIndex} and {@code columnIndex} equal to {@code 0}. */
         public static final Point ZERO = CACHE[0][0];
 
         /**
-         * Creates a new Point with the specified row index and column index.
+         * Returns a Point with the specified row index and column index.
+         * <p>
+         * Points whose row and column indices are both within the small-value cache range are returned
+         * from a shared cache; other values produce a newly created instance. Because {@code Point} is an
+         * immutable record, callers should not rely on instance identity.
+         * </p>
          *
          * @param rowIndex the index of the row
          * @param columnIndex the index of the column
-         * @return a new Point with the specified row index and column index
+         * @return a Point with the specified row index and column index
          */
         public static Point of(final int rowIndex, final int columnIndex) {
             if (rowIndex >= 0 && rowIndex < MAX_CACHE_SIZE && columnIndex >= 0 && columnIndex < MAX_CACHE_SIZE) {

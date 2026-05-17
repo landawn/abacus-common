@@ -70,8 +70,12 @@ public final class Hex {
      * }</pre>
      *
      * @param data the byte array to convert to hexadecimal characters.
-     * @return a char array containing lowercase hexadecimal characters representing the input bytes.
-     * @throws IllegalArgumentException if data is null.
+     * @return a char array containing lowercase hexadecimal characters representing the input bytes;
+     *         exactly twice the length of {@code data}.
+     * @throws IllegalArgumentException if {@code data} is {@code null}.
+     * @see #encode(byte[], boolean)
+     * @see #encodeToString(byte[])
+     * @see #decode(char[])
      */
     public static char[] encode(final byte[] data) {
         return encode(data, true);
@@ -92,8 +96,11 @@ public final class Hex {
      *
      * @param data the byte array to convert to hexadecimal characters.
      * @param toLowerCase if {@code true}, returns lowercase hex digits; if {@code false}, returns uppercase.
-     * @return a char array containing hexadecimal characters representing the input bytes.
-     * @throws IllegalArgumentException if data is null.
+     * @return a char array containing hexadecimal characters representing the input bytes;
+     *         exactly twice the length of {@code data}.
+     * @throws IllegalArgumentException if {@code data} is {@code null}.
+     * @see #encode(byte[])
+     * @see #encodeToString(byte[], boolean)
      */
     public static char[] encode(final byte[] data, final boolean toLowerCase) {
         if (data == null) {
@@ -116,8 +123,12 @@ public final class Hex {
      * }</pre>
      *
      * @param data the byte array to convert to a hexadecimal string.
-     * @return a string containing lowercase hexadecimal characters representing the input bytes.
-     * @throws IllegalArgumentException if data is null.
+     * @return a string containing lowercase hexadecimal characters representing the input bytes;
+     *         exactly twice the length of {@code data}.
+     * @throws IllegalArgumentException if {@code data} is {@code null}.
+     * @see #encode(byte[])
+     * @see #encodeToString(byte[], boolean)
+     * @see #decode(String)
      */
     public static String encodeToString(final byte[] data) {
         return String.valueOf(encode(data));
@@ -139,8 +150,11 @@ public final class Hex {
      *
      * @param data the byte array to convert to a hexadecimal string.
      * @param toLowerCase if {@code true}, returns lowercase hex digits; if {@code false}, returns uppercase.
-     * @return a string containing hexadecimal characters representing the input bytes.
-     * @throws IllegalArgumentException if data is null.
+     * @return a string containing hexadecimal characters representing the input bytes;
+     *         exactly twice the length of {@code data}.
+     * @throws IllegalArgumentException if {@code data} is {@code null}.
+     * @see #encodeToString(byte[])
+     * @see #encode(byte[], boolean)
      */
     public static String encodeToString(final byte[] data, final boolean toLowerCase) {
         return String.valueOf(encode(data, toLowerCase));
@@ -214,8 +228,11 @@ public final class Hex {
      * }</pre>
      *
      * @param data an array of characters containing hexadecimal digits.
-     * @return a byte array containing the binary data decoded from the hexadecimal characters.
-     * @throws IllegalArgumentException if data is {@code null}, the array has an odd number of elements, or contains non-hexadecimal characters.
+     * @return a byte array containing the binary data decoded from the hexadecimal characters;
+     *         exactly half the length of {@code data}.
+     * @throws IllegalArgumentException if {@code data} is {@code null}, the array has an odd number of elements, or contains non-hexadecimal characters.
+     * @see #decode(String)
+     * @see #encode(byte[])
      */
     public static byte[] decode(final char[] data) throws IllegalArgumentException {
         if (data == null) {

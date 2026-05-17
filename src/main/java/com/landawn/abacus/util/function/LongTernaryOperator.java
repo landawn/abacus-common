@@ -17,7 +17,7 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents an operation on three {@code long}-valued operands that produces a {@code long}-valued result.
- * This is the three-arity primitive specialization of {@link java.util.function.LongBinaryOperator} for {@code long}.
+ * This is the three-arity counterpart of {@link java.util.function.LongBinaryOperator}.
  *
  * <p>Note: arithmetic operations on {@code long} values are subject to overflow
  * (silently wraps around). {@code long} values range from {@link Long#MIN_VALUE} to
