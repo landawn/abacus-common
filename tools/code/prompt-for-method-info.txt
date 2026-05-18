@@ -157,5 +157,5 @@ Validation rules:
   1) API.md (Markdown)
   2) api-index.json (JSON)
 
-Now, read the provided library sources/signatures and generate both artifacts.
+Now, read the provided library sources/signatures and generate both artifacts, and same them to folder: ./docs/ai/.
 
