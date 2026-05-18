@@ -591,8 +591,9 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * Retrieves and removes an object from the pool within the specified timeout period.
      * This method blocks until an object becomes available, the timeout expires, or the thread is interrupted.
      *
-     * <p>Expired objects are automatically destroyed and the method continues waiting
-     * for a valid object until the timeout expires. The object's activity print is updated to reflect this access.
+     * <p>Expired objects encountered are destroyed (with {@link Caller#EVICT}) and skipped; the
+     * method keeps retrying for a valid object until one is found or the timeout expires. When a
+     * valid object is returned, its activity print's last access time and access count are updated.
      *
      * @param timeout the maximum time to wait
      * @param unit the time unit of the timeout argument

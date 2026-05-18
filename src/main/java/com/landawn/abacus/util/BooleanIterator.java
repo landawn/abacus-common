@@ -234,8 +234,8 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * // Generates infinite random boolean values
      * }</pre>
      *
-     * @param supplier the supplier function to generate boolean values
-     * @return an infinite BooleanIterator
+     * @param supplier the supplier function to generate boolean values; must not be {@code null}
+     * @return an infinite {@code BooleanIterator} whose {@code hasNext()} always returns {@code true}
      * @throws IllegalArgumentException if {@code supplier} is {@code null}
      */
     public static BooleanIterator generate(final BooleanSupplier supplier) throws IllegalArgumentException {
@@ -267,9 +267,10 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * // Generates 5 boolean values based on even/odd counter
      * }</pre>
      *
-     * @param hasNext the supplier that determines if there are more elements
-     * @param supplier the supplier function to generate boolean values
-     * @return a conditional BooleanIterator
+     * @param hasNext the {@link BooleanSupplier} that determines if there are more elements;
+     *        must not be {@code null}
+     * @param supplier the supplier function to generate boolean values; must not be {@code null}
+     * @return a conditional {@code BooleanIterator}
      * @throws IllegalArgumentException if {@code hasNext} or {@code supplier} is {@code null}
      */
     public static BooleanIterator generate(final BooleanSupplier hasNext, final BooleanSupplier supplier) throws IllegalArgumentException {
@@ -296,7 +297,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Returns the next boolean value in the iteration as a boxed Boolean.
      *
-     * @return the next boolean value as a Boolean object
+     * @return the next boolean value as a boxed {@link Boolean} object
      * @throws NoSuchElementException if the iteration has no more elements
      * @deprecated use {@link #nextBoolean()} instead to avoid boxing overhead
      */
@@ -322,22 +323,19 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     public abstract boolean nextBoolean();
 
     /**
-     * Skips the specified number of elements in the iteration.
-     *
-     * <p><b>Important:</b> This method returns a wrapper iterator that internally uses this iterator.
-     * After calling this method, the original iterator should not be used directly as it may lead to
-     * unexpected behavior. Always use the returned iterator instead.</p>
+     * Returns a new {@code BooleanIterator} that skips the first {@code n} elements.
+     * If {@code n} is greater than the number of remaining elements, all elements are skipped.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false, true, false);
      * BooleanIterator skipped = iter.skip(2);
-     * // Do not use 'iter' anymore, use 'skipped' instead
      * boolean value = skipped.nextBoolean();   // true (third element)
      * }</pre>
      *
      * @param n the number of elements to skip; must be non-negative
-     * @return a new {@code BooleanIterator} with the first {@code n} elements skipped, or this iterator if {@code n} is 0
+     * @return this iterator unchanged if {@code n == 0}, otherwise a new {@code BooleanIterator}
+     *         with the first {@code n} elements skipped
      * @throws IllegalArgumentException if {@code n} is negative
      */
     public BooleanIterator skip(final long n) throws IllegalArgumentException {
@@ -383,17 +381,20 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * Limits the number of elements returned by this iterator.
+     * Returns a new {@code BooleanIterator} that will iterate over at most {@code count} elements.
+     * If {@code count} is 0, an empty iterator is returned. If {@code count} exceeds the number
+     * of remaining elements, all remaining elements are included.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false, true, false);
      * BooleanIterator limited = iter.limit(2);
-     * // Will only return the first two elements
+     * // Will only return the first two elements: true, false
      * }</pre>
      *
      * @param count the maximum number of elements to return; must be non-negative
-     * @return a new {@code BooleanIterator} limited to the specified count, or an empty iterator if {@code count} is 0
+     * @return an empty iterator if {@code count == 0}, otherwise a new {@code BooleanIterator}
+     *         limited to at most {@code count} elements
      * @throws IllegalArgumentException if {@code count} is negative
      */
     public BooleanIterator limit(final long count) throws IllegalArgumentException {
@@ -426,17 +427,18 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * Filters elements based on the provided predicate.
+     * Returns a new {@code BooleanIterator} containing only elements that satisfy the given predicate.
+     * Elements that do not match the predicate are skipped.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false, true, false);
-     * BooleanIterator filtered = iter.filter(b -> b == true);
+     * BooleanIterator filtered = iter.filter(b -> b);
      * // Will only return true values
      * }</pre>
      *
-     * @param predicate the predicate to test elements
-     * @return a new BooleanIterator containing only elements that match the predicate
+     * @param predicate the predicate to test each element; must not be {@code null}
+     * @return a new {@code BooleanIterator} containing only elements that satisfy the predicate
      * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     public BooleanIterator filter(final BooleanPredicate predicate) throws IllegalArgumentException {
@@ -493,7 +495,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * boolean[] empty = BooleanIterator.empty().toArray();   // empty.length == 0
      * }</pre>
      *
-     * @return a boolean array containing all remaining elements
+     * @return a {@code boolean} array containing all remaining elements; an empty array if there are none
      */
     @SuppressWarnings("deprecation")
     public boolean[] toArray() {
@@ -516,7 +518,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * BooleanList empty = BooleanIterator.empty().toList();   // empty.size() == 0
      * }</pre>
      *
-     * @return a BooleanList containing all remaining elements
+     * @return a {@link BooleanList} containing all remaining elements; an empty list if there are none
      */
     public BooleanList toList() {
         final BooleanList list = new BooleanList();
@@ -529,7 +531,9 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * Converts this iterator to a Stream of Boolean values.
+     * Converts this iterator to a boxed {@link Stream}{@code <Boolean>}.
+     * Note: unlike the primitive-specific iterator types, {@code BooleanIterator} does not
+     * have a corresponding primitive stream type, so this method returns a boxed stream.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -539,23 +543,23 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      *     .count();   // Returns 2
      * }</pre>
      *
-     * @return a Stream of Boolean values
+     * @return a {@link Stream}{@code <Boolean>} backed by this iterator
      */
     public Stream<Boolean> stream() {
         return Stream.of(this);
     }
 
     /**
-     * Returns an iterator of IndexedBoolean elements with indices starting from 0.
+     * Returns an iterator that pairs each remaining element with its zero-based index.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false);
      * ObjIterator<IndexedBoolean> indexed = iter.indexed();
-     * // Produces IndexedBoolean values printed as: [0]=true, [1]=false
+     * // Produces: IndexedBoolean(index=0, value=true), IndexedBoolean(index=1, value=false)
      * }</pre>
      *
-     * @return an ObjIterator of IndexedBoolean elements
+     * @return an {@link ObjIterator} of {@link IndexedBoolean} elements with indices starting at 0
      */
     @Beta
     public ObjIterator<IndexedBoolean> indexed() {
@@ -563,17 +567,18 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * Returns an iterator of IndexedBoolean elements with indices starting from the specified value.
+     * Returns an iterator that pairs each remaining element with its index,
+     * with indices starting from the specified {@code startIndex}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false);
      * ObjIterator<IndexedBoolean> indexed = iter.indexed(10);
-     * // Produces IndexedBoolean values printed as: [10]=true, [11]=false
+     * // Produces: IndexedBoolean(index=10, value=true), IndexedBoolean(index=11, value=false)
      * }</pre>
      *
      * @param startIndex the starting index value; must be non-negative
-     * @return an {@code ObjIterator} of {@code IndexedBoolean} elements
+     * @return an {@link ObjIterator} of {@link IndexedBoolean} elements with indices starting at {@code startIndex}
      * @throws IllegalArgumentException if {@code startIndex} is negative
      */
     @Beta
@@ -598,10 +603,11 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * For each remaining element, performs the given action.
+     * Performs the given action for each remaining element, boxing each {@code boolean} to a {@link Boolean}.
+     * This method is deprecated because it causes boxing overhead.
      *
      * @param action the action to be performed for each element
-     * @deprecated use {@link #foreachRemaining(Throwables.BooleanConsumer)} instead to avoid boxing
+     * @deprecated use {@link #foreachRemaining(Throwables.BooleanConsumer)} instead to avoid boxing overhead
      */
     @Deprecated
     @Override
@@ -610,7 +616,8 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * Performs the given action for each remaining element.
+     * Performs the given action for each remaining element without boxing overhead.
+     * This method consumes the iterator; after it returns, {@code hasNext()} will return {@code false}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -620,7 +627,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * }</pre>
      *
      * @param <E> the type of exception that the action may throw
-     * @param action the action to be performed for each element, must not be {@code null}
+     * @param action the action to be performed for each element; must not be {@code null}
      * @throws IllegalArgumentException if {@code action} is {@code null}
      * @throws E if the action throws an exception
      */
@@ -633,7 +640,8 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * Performs the given action for each remaining element, providing the element index.
+     * Performs the given action for each remaining element along with its zero-based index.
+     * This method consumes the iterator; after it returns, {@code hasNext()} will return {@code false}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -644,9 +652,10 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * }</pre>
      *
      * @param <E> the type of exception that the action may throw
-     * @param action the action to be performed for each element with its index, must not be {@code null}
+     * @param action the action to be performed for each (index, value) pair; must not be {@code null}
      * @throws IllegalArgumentException if {@code action} is {@code null}
-     * @throws IllegalStateException if the iterator contains more than {@code Integer.MAX_VALUE} elements (index overflow)
+     * @throws IllegalStateException if the iterator contains more than {@link Integer#MAX_VALUE} elements,
+     *         causing the index to overflow
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntBooleanConsumer<E> action) throws IllegalArgumentException, E {

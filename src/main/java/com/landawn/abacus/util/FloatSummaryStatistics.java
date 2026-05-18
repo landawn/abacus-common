@@ -76,11 +76,11 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * FloatSummaryStatistics stats = new FloatSummaryStatistics(5, 1.0f, 10.0f, 30.0);
      * }</pre>
      *
-     * @param count the count of values (must be non-negative)
-     * @param min the minimum value
-     * @param max the maximum value
-     * @param sum the sum of all values
-     * @throws IllegalArgumentException if count is negative or minimum is greater than maximum
+     * @param count the count of values; must be non-negative
+     * @param min the minimum {@code float} value
+     * @param max the maximum {@code float} value
+     * @param sum the sum of all values as a {@code double}
+     * @throws IllegalArgumentException if {@code count} is negative or {@code min} is greater than {@code max}
      */
     public FloatSummaryStatistics(final long count, final float min, final float max, final double sum) {
         if (count < 0) {
@@ -222,18 +222,19 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * double sum = stats.getSum();   // Returns 6.6 (approximately)
      * }</pre>
      *
-     * @return the sum of values, or zero if none
+     * @return the sum of values as a {@code double}, or {@code 0.0} if none
      */
     public final double getSum() {
         return summation.sum();
     }
 
     /**
-     * Returns the arithmetic mean of values recorded, or zero if no values have been recorded.
-     * The average is calculated as sum / count using high-precision arithmetic.
+     * Returns the arithmetic mean of values recorded, or {@code 0.0} if no values
+     * have been recorded. The average is calculated as sum / count, where the sum
+     * is accumulated with Kahan compensated summation to reduce floating-point error.
      *
-     * <p>Note: If the sum is NaN or infinite, or if the count is zero,
-     * special rules apply as per floating-point arithmetic.</p>
+     * <p>Note: If any recorded value was NaN or the sum is infinite, the result
+     * may be NaN or infinite per standard floating-point arithmetic rules.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -244,7 +245,7 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * double avg = stats.getAverage();   // Returns 4.0
      * }</pre>
      *
-     * @return the arithmetic mean of values, or zero if none
+     * @return the arithmetic mean of values as a {@code double}, or {@code 0.0} if none
      */
     public final double getAverage() {
         return summation.average().orElse(0d);

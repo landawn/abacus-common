@@ -54,10 +54,10 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 final class ISO8601Util {
 
     /**
-     * The default length of an ISO8601 formatted string with milliseconds and timezone offset.
-     * Layout: {@code yyyy-MM-ddTHH:mm:ss.SSS+00:00} (29 characters, 24-hour clock).
-     * Note: The template string uses lowercase {@code hh} only as a length reference; the actual
-     * formatted output always uses 24-hour {@code HH} notation.
+     * The expected maximum length (29 characters) of an ISO 8601 formatted string that includes
+     * milliseconds and a UTC-offset timezone suffix, e.g. {@code yyyy-MM-ddTHH:mm:ss.SSS+00:00}.
+     * The literal string passed to {@code .length()} uses {@code hh} purely as a two-character
+     * placeholder; the actual formatted output always uses 24-hour {@code HH} notation.
      */
     static final int DEF_8601_LEN = "yyyy-MM-ddThh:mm:ss.SSS+00:00".length();
 
@@ -122,7 +122,7 @@ final class ISO8601Util {
      * @param tz the timezone to use for formatting
      * @return the formatted date string in ISO8601 format
      * @throws NullPointerException if {@code date} or {@code tz} is {@code null}
-     * @deprecated Use {@link #format(Date, boolean, TimeZone, Locale)} instead
+     * @deprecated since 2.9; use {@link #format(Date, boolean, TimeZone, Locale)} instead
      */
     @Deprecated // since 2.9
     public static String format(final Date date, final boolean millis, final TimeZone tz) {
@@ -227,8 +227,9 @@ final class ISO8601Util {
      * }</pre>
      *
      * @param date the ISO8601 string to parse
-     * @param pos the ParsePosition to start parsing from and update with the end position
-     * @return the parsed Date object
+     * @param pos the parse position indicating the offset at which to begin; on success it is
+     *            updated to the index immediately after the last consumed character
+     * @return the parsed {@link Date} object
      * @throws IllegalArgumentException if the date string cannot be parsed or is malformed
      */
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")

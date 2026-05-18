@@ -878,8 +878,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p>This method runs in quadratic time in the worst case, but uses a more efficient
      * set-based algorithm when the size conditions make it beneficial.</p>
      *
+     * <p><b>Note:</b> If {@code c} is {@code null} or empty, all elements of this list are removed
+     * (the list is cleared), because no elements can be retained.</p>
+     *
      * @param c the BooleanList containing elements to be retained in this list.
-     *          If {@code null} or empty, this list remains unchanged
+     *          If {@code null} or empty, all elements of this list are removed
      * @return {@code true} if this list was modified as a result of the call;
      *         {@code false} otherwise
      */
@@ -901,8 +904,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * <p>This method is equivalent to {@code retainAll(BooleanList.of(a))}.</p>
      *
+     * <p><b>Note:</b> If {@code a} is {@code null} or empty, all elements of this list are removed
+     * (the list is cleared), because no elements can be retained.</p>
+     *
      * @param a the array containing elements to be retained in this list.
-     *          If {@code null} or empty, this list remains unchanged
+     *          If {@code null} or empty, all elements of this list are removed
      * @return {@code true} if this list was modified as a result of the call;
      *         {@code false} otherwise
      */
@@ -1810,10 +1816,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * it is treated as 0 when {@code fromIndex > toIndex}.</p>
      *
      * @param fromIndex the starting index (inclusive) of the range to process
-     * @param toIndex the ending index (exclusive) of the range to process, or -1 to process from fromIndex to 0
+     * @param toIndex the ending index (exclusive) of the range to process, or {@code -1} to process
+     *                from {@code fromIndex} down to index 0 (exclusive) when {@code fromIndex > toIndex}
      * @param action the action to be performed for each element; must not be {@code null}
-     * @throws IndexOutOfBoundsException if {@code fromIndex} or {@code toIndex} is out of range
-     *         ({@code fromIndex < 0 || toIndex > size() || (fromIndex > toIndex && toIndex != -1)})
+     * @throws IndexOutOfBoundsException if the effective range is out of bounds for this list
+     *         (i.e., {@code min(fromIndex, max(toIndex,0)) < 0} or
+     *         {@code max(fromIndex, toIndex) > size()})
      */
     public void forEach(final int fromIndex, final int toIndex, final BooleanConsumer action) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
@@ -2406,11 +2414,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Returns a hash code value for this list. The hash code is calculated based on
-     * the elements in the list and their order.
+     * the elements in the list and their order, equivalent to the following:
      *
-     * <p>The hash code is defined to be the result of the following calculation:
-     *
-     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int hashCode = 1;
      * for (boolean e : list)

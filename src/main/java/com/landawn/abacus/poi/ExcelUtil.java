@@ -175,7 +175,7 @@ public final class ExcelUtil {
      * Cell to String converter function that converts any cell value to its string representation.
      * This function normalizes all cell types to {@code String}, making it useful for text-based
      * processing, CSV conversion, or when uniform string representation is required. Handles all
-     * standard cell types including STRING, NUMERIC, BOOLEAN, FORMULA, and BLANK cells.
+     * standard cell types including STRING, NUMERIC, BOOLEAN, FORMULA, BLANK, and ERROR cells.
      *
      * <p>Numeric values are converted using {@code String.valueOf()}, boolean values are converted
      * to "true" or "false", formula cells return the formula text (not the evaluated result), and
@@ -1259,12 +1259,12 @@ public final class ExcelUtil {
 
         /**
          * Creates a row mapper that converts rows to delimited strings with a custom separator.
-         * Each cell is converted to its string representation using the default CELL_TO_STRING mapper
-         * and the resulting strings are joined together with the specified separator. Useful for
+         * Each cell is converted to its string representation using the default {@link #CELL_TO_STRING}
+         * mapper and the resulting strings are joined together with the specified separator. Useful for
          * creating custom text representations of Excel rows.
          *
-         * <p>This method uses CELL_TO_STRING for cell conversion, which handles all cell types
-         * (STRING, NUMERIC, BOOLEAN, FORMULA, BLANK) and converts them to appropriate string
+         * <p>This method uses {@link #CELL_TO_STRING} for cell conversion, which handles all cell types
+         * (STRING, NUMERIC, BOOLEAN, FORMULA, BLANK, ERROR) and converts them to appropriate string
          * representations.</p>
          *
          * <p><b>Usage Examples:</b></p>

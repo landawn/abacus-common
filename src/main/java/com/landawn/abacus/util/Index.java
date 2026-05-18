@@ -624,10 +624,11 @@ public final class Index {
      *
      * @param source the double array to be searched, may be {@code null}
      * @param valueToFind the double value to search for
-     * @param tolerance the tolerance for matching; must be non-negative. A value matches if it's within
+     * @param tolerance the tolerance for matching; must be non-negative and not NaN. A value matches if it's within
      *                  {@code valueToFind ± tolerance}
      * @return an OptionalInt containing the zero-based index of the first occurrence of a value within tolerance,
      *         or an empty OptionalInt if no value is found within tolerance or the array is {@code null}
+     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
      * @see #of(double[], double, double, int)
      * @see #of(double[], double)
      * @see N#indexOf(double[], double, double)
@@ -645,11 +646,12 @@ public final class Index {
      *
      * @param source the double array to be searched, may be {@code null}
      * @param valueToFind the double value to search for
-     * @param tolerance the tolerance for matching; must be non-negative. A value matches if it's within
+     * @param tolerance the tolerance for matching; must be non-negative and not NaN. A value matches if it's within
      *                  {@code valueToFind ± tolerance}
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
      * @return an OptionalInt containing the zero-based index of the first occurrence of a value within tolerance at or after {@code fromIndex},
      *         or an empty OptionalInt if no value is found within tolerance, the array is {@code null}, or {@code fromIndex >= array.length}
+     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
      * @see #of(double[], double, double)
      * @see #of(double[], double, int)
      * @see N#indexOf(double[], double, double, int)
@@ -2375,7 +2377,7 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified float value in the given array.
+     * Returns the index of the last occurrence of the specified float value in the given array.
      * <p>
      * This method works identically to {@link #last(boolean[], boolean)} for {@code float} values.
      * Comparison is performed using {@link Float#compare(float, float)}, which handles NaN and -0.0/+0.0 correctly.
@@ -2394,7 +2396,7 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified float value in the given array, searching backwards from a specified position.
+     * Returns the index of the last occurrence of the specified float value in the given array, searching backwards from a specified position.
      * <p>
      * This method works identically to {@link #last(boolean[], boolean, int)} for {@code float} values.
      * Comparison is performed using {@link Float#compare(float, float)}, which handles NaN and -0.0/+0.0 correctly.
@@ -2414,7 +2416,7 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified double value in the given array.
+     * Returns the index of the last occurrence of the specified double value in the given array.
      * <p>
      * This method works identically to {@link #last(boolean[], boolean)} for {@code double} values.
      * Comparison is performed using {@link Double#compare(double, double)}, which handles NaN and -0.0/+0.0 correctly.
@@ -2433,7 +2435,7 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified double value in the given array, searching backwards from a specified position.
+     * Returns the index of the last occurrence of the specified double value in the given array, searching backwards from a specified position.
      * <p>
      * This method works identically to {@link #last(boolean[], boolean, int)} for {@code double} values.
      * Comparison is performed using {@link Double#compare(double, double)}, which handles NaN and -0.0/+0.0 correctly.
@@ -2453,7 +2455,7 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified double value in the given array, within a specified tolerance.
+     * Returns the index of the last occurrence of the specified double value in the given array, within a specified tolerance.
      * <p>
      * This method searches backwards from the end of the array for the last occurrence of a value
      * that falls within the range {@code [valueToFind - tolerance, valueToFind + tolerance]}.
@@ -2461,13 +2463,14 @@ public final class Index {
      *
      * @param source the double array to be searched, may be {@code null}
      * @param valueToFind the double value to search for
-     * @param tolerance the tolerance for matching; must be non-negative. A value matches if it's within
+     * @param tolerance the tolerance for matching; must be non-negative and not NaN. A value matches if it's within
      *                  {@code valueToFind ± tolerance}
      * @return an OptionalInt containing the zero-based index of the last occurrence of a value within tolerance,
      *         or an empty OptionalInt if no value is found within tolerance or the array is {@code null}
+     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
      * @see #last(double[], double, double, int)
      * @see #last(double[], double)
-     * @see N#lastIndexOf(double[], double, double, int)
+     * @see N#lastIndexOf(double[], double, double)
      */
     public static OptionalInt last(final double[] source, final double valueToFind, final double tolerance) {
         return toOptionalInt(N.lastIndexOf(source, valueToFind, tolerance));
@@ -2479,15 +2482,16 @@ public final class Index {
      * <p>
      * This method searches backwards from {@code startIndexFromBack} for the last occurrence of a value
      * that falls within the range {@code [valueToFind - tolerance, valueToFind + tolerance]}.
-     * Comparison is performed using {@link Double#compare(double, double)}.
+     * Matching uses {@link Numbers#fuzzyEquals(double, double, double)}.
      *
      * @param source the double array to be searched, may be {@code null}
      * @param valueToFind the double value to search for
-     * @param tolerance the tolerance for matching; must be non-negative. A value matches if it's within
+     * @param tolerance the tolerance for matching; must be non-negative and not NaN. A value matches if it's within
      *                  {@code valueToFind ± tolerance}
      * @param startIndexFromBack the position to start the backwards search from (inclusive)
      * @return an OptionalInt containing the zero-based index of the last occurrence of a value within tolerance at or before {@code startIndexFromBack},
      *         or an empty OptionalInt if no value is found within tolerance or the array is {@code null}
+     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
      * @see #last(double[], double, double)
      * @see #last(double[], double, int)
      * @see N#lastIndexOf(double[], double, double, int)
@@ -2680,7 +2684,7 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified substring in the given string, ignoring case.
+     * Returns the index of the last occurrence of the specified substring in the given string, ignoring case.
      * <p>
      * This method performs a case-insensitive backwards search for {@code valueToFind} within {@code source},
      * starting from the end of the string. Both ASCII and Unicode characters are compared case-insensitively.
@@ -2752,7 +2756,7 @@ public final class Index {
     }
 
     /**
-     * Returns the last index of the specified subarray in the given source array, searching backwards from a specified position.
+     * Returns the index of the last occurrence of a portion of the specified subarray in the given source array, searching backwards from a specified position.
      * <p>
      * This method searches backwards for the last occurrence of a portion of {@code subArrayToFind} within {@code source},
      * starting the backwards search at {@code startIndexFromBack}. It looks for {@code sizeToMatch} elements from
@@ -4114,10 +4118,11 @@ public final class Index {
      *
      * @param source the double array to be searched, may be {@code null}
      * @param valueToFind the double value to search for
-     * @param tolerance the tolerance for matching; must be non-negative. A value matches if it's within
+     * @param tolerance the tolerance for matching; must be non-negative and not NaN. A value matches if it's within
      *                  {@code valueToFind ± tolerance}
      * @return a BitSet containing the zero-based indices of all occurrences of values within tolerance;
      *         returns an empty BitSet if no values are found within tolerance or the array is {@code null} or empty
+     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
      * @see #allOf(double[], double, double, int)
      * @see #allOf(double[], double)
      */
@@ -4317,7 +4322,7 @@ public final class Index {
      * <p>
      * This method tests each element in the array against the predicate and returns a BitSet
      * containing the indices of all elements for which the predicate returns {@code true}.
-     * The predicate is not invoked for elements beyond a {@code null} array boundary.
+     * If {@code source} is {@code null} or empty, returns an empty BitSet without invoking the predicate.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4423,7 +4428,7 @@ public final class Index {
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
      * @return a BitSet containing the zero-based indices (in iteration order) of all elements at or after {@code fromIndex} matching the predicate;
      *         returns an empty BitSet if no elements match, the collection is {@code null} or empty, or {@code fromIndex >= collection.size()}
-     * @throws NullPointerException if {@code predicate} is {@code null} (when the collection is non-empty and {@code fromIndex} is within range)
+     * @throws NullPointerException if {@code predicate} is {@code null} and the collection is non-null, non-empty, and {@code fromIndex} is within range
      * @see #allOf(Collection, Predicate)
      */
     public static <T> BitSet allOf(final Collection<? extends T> source, final Predicate<? super T> predicate, final int fromIndex) {

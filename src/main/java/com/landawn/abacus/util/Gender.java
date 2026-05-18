@@ -28,9 +28,7 @@ package com.landawn.abacus.util;
  *
  * // Get integer value from gender
  * int maleValue = Gender.MALE.intValue();   // Returns 2
- *
- * // Get integer value from gender
- * int xValue = Gender.X.intValue();   // Returns 3
+ * int xValue = Gender.X.intValue();         // Returns 3
  *
  * // Use in switch statements
  * switch(gender) {

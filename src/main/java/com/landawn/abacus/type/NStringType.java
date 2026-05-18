@@ -27,6 +27,7 @@ import java.sql.SQLException;
  */
 public class NStringType extends AbstractStringType {
 
+    /** The type name constant for NString type identification, equal to {@code "NString"}. */
     public static final String NSTRING = "NString";
 
     /**

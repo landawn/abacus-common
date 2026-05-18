@@ -660,7 +660,7 @@ public final class XmlMappers {
 
     /**
      * Deserializes XML from a URL into an object of the specified type.
-     * This method performs an HTTP request to fetch the XML content.
+     * The URL may use any supported protocol (e.g., {@code http}, {@code file}, {@code jar}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -672,7 +672,7 @@ public final class XmlMappers {
      * @param xml the URL pointing to XML data
      * @param targetType the class of the object to deserialize to
      * @return the deserialized object
-     * @throws RuntimeException if deserialization fails or URL cannot be accessed
+     * @throws RuntimeException if deserialization fails or the URL cannot be accessed
      * @see com.fasterxml.jackson.core.type.TypeReference
      */
     @SuppressWarnings("deprecation")
@@ -686,13 +686,14 @@ public final class XmlMappers {
 
     /**
      * Deserializes XML from a URL into an object of the specified type using a custom deserialization configuration.
+     * The URL may use any supported protocol (e.g., {@code http}, {@code file}, {@code jar}).
      *
      * @param <T> the type of the object to return
      * @param xml the URL pointing to XML data
      * @param targetType the class of the object to deserialize to
      * @param config the deserialization configuration to use
      * @return the deserialized object
-     * @throws RuntimeException if deserialization fails or URL cannot be accessed
+     * @throws RuntimeException if deserialization fails or the URL cannot be accessed
      * @see com.fasterxml.jackson.core.type.TypeReference
      */
     @SuppressWarnings("deprecation")
@@ -989,13 +990,13 @@ public final class XmlMappers {
 
     /**
      * Deserializes XML from a URL into an object of the specified generic type.
-     * This method performs an HTTP request to fetch the XML content.
+     * The URL may use any supported protocol (e.g., {@code http}, {@code file}, {@code jar}).
      *
      * @param <T> the type of the object to return
      * @param xml the URL pointing to XML data
      * @param targetType the type reference describing the target type
      * @return the deserialized object
-     * @throws RuntimeException if deserialization fails or URL cannot be accessed
+     * @throws RuntimeException if deserialization fails or the URL cannot be accessed
      * @see com.fasterxml.jackson.core.type.TypeReference
      */
     @SuppressWarnings("deprecation")
@@ -1009,13 +1010,14 @@ public final class XmlMappers {
 
     /**
      * Deserializes XML from a URL into an object of the specified generic type using a custom deserialization configuration.
+     * The URL may use any supported protocol (e.g., {@code http}, {@code file}, {@code jar}).
      *
      * @param <T> the type of the object to return
      * @param xml the URL pointing to XML data
      * @param targetType the type reference describing the target type
      * @param config the deserialization configuration to use
      * @return the deserialized object
-     * @throws RuntimeException if deserialization fails or URL cannot be accessed
+     * @throws RuntimeException if deserialization fails or the URL cannot be accessed
      * @see com.fasterxml.jackson.core.type.TypeReference
      */
     @SuppressWarnings("deprecation")
@@ -1240,6 +1242,13 @@ public final class XmlMappers {
         private final XmlMapper xmlMapper;
         private final XmlMapper xmlMapperForPretty;
 
+        /**
+         * Creates a {@code One} instance wrapping the specified {@link XmlMapper}.
+         * A copy of the mapper with {@link SerializationFeature#INDENT_OUTPUT} enabled is
+         * created internally to support pretty-print serialization.
+         *
+         * @param xmlMapper the XmlMapper to wrap; must not be {@code null}
+         */
         One(final XmlMapper xmlMapper) {
             this.xmlMapper = xmlMapper;
             xmlMapperForPretty = xmlMapper.copy();
@@ -1476,12 +1485,13 @@ public final class XmlMappers {
         /**
          * Deserializes XML from a URL into an object of the specified type
          * using the wrapped XmlMapper.
+         * The URL may use any supported protocol (e.g., {@code http}, {@code file}, {@code jar}).
          *
          * @param <T> the type of the object to return
          * @param xml the URL pointing to XML data
          * @param targetType the class of the object to deserialize to
          * @return the deserialized object
-         * @throws RuntimeException if deserialization fails or URL cannot be accessed
+         * @throws RuntimeException if deserialization fails or the URL cannot be accessed
          * @see com.fasterxml.jackson.core.type.TypeReference
          */
         @SuppressWarnings("deprecation")
@@ -1637,12 +1647,13 @@ public final class XmlMappers {
         /**
          * Deserializes XML from a URL into an object of the specified generic type
          * using the wrapped XmlMapper.
+         * The URL may use any supported protocol (e.g., {@code http}, {@code file}, {@code jar}).
          *
          * @param <T> the type of the object to return
          * @param xml the URL pointing to XML data
          * @param targetType the type reference describing the target type, can be the {@code Type} of {@code Bean/Array/Collection/Map}
          * @return the deserialized object
-         * @throws RuntimeException if deserialization fails or URL cannot be accessed
+         * @throws RuntimeException if deserialization fails or the URL cannot be accessed
          * @see com.fasterxml.jackson.core.type.TypeReference
          */
         @SuppressWarnings("deprecation")

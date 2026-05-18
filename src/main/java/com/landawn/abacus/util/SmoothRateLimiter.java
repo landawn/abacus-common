@@ -19,6 +19,16 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * Abstract base class for smooth rate-limiter implementations that manage stored permits
+ * and throttling time calculations. Two concrete subclasses are provided:
+ * {@link SmoothBursty} for a bursty rate limiter that gives out stored permits with zero
+ * throttling, and {@link SmoothWarmingUp} for a warming-up rate limiter that increases
+ * throughput gradually from a cold start.
+ *
+ * <p>The limiter tracks a "next free ticket" time rather than the last granted time,
+ * allowing large requests to be granted immediately while deferring subsequent ones.
+ * Stored permits accumulate during idle periods up to {@code maxPermits}.</p>
+ *
  * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
  */
 abstract class SmoothRateLimiter extends RateLimiter {
@@ -215,12 +225,27 @@ abstract class SmoothRateLimiter extends RateLimiter {
         /** The cold factor. */
         private final double coldFactor;
 
+        /**
+         * Constructs a {@code SmoothWarmingUp} rate limiter.
+         *
+         * @param stopwatch     the stopwatch used to measure elapsed time
+         * @param warmupPeriod  the duration of the warmup period
+         * @param timeUnit      the time unit of {@code warmupPeriod}
+         * @param coldFactor    the ratio of the cold interval to the stable interval; must be &gt; 1.0
+         */
         SmoothWarmingUp(final SleepingStopwatch stopwatch, final long warmupPeriod, final TimeUnit timeUnit, final double coldFactor) {
             super(stopwatch);
             warmupPeriodMicros = timeUnit.toMicros(warmupPeriod);
             this.coldFactor = coldFactor;
         }
 
+        /**
+         * Recalculates {@code thresholdPermits}, {@code maxPermits}, {@code slope}, and
+         * {@code storedPermits} whenever the rate changes.
+         *
+         * @param permitsPerSecond    the new target rate in permits per second
+         * @param stableIntervalMicros the stable interval corresponding to the new rate, in microseconds
+         */
         @Override
         void doSetRate(final double permitsPerSecond, final double stableIntervalMicros) {
             final double oldMaxPermits = maxPermits;
@@ -237,6 +262,14 @@ abstract class SmoothRateLimiter extends RateLimiter {
             }
         }
 
+        /**
+         * Computes the throttling time for consuming {@code permitsToTake} permits from stored permits,
+         * integrating over the trapezoidal region of the warmup function.
+         *
+         * @param storedPermits  the current number of stored permits before consumption
+         * @param permitsToTake  the number of stored permits to consume
+         * @return the wait time in microseconds
+         */
         @Override
         long storedPermitsToWaitTime(final double storedPermits, double permitsToTake) {
             final double availablePermitsAboveThreshold = storedPermits - thresholdPermits;
@@ -255,10 +288,24 @@ abstract class SmoothRateLimiter extends RateLimiter {
             return micros;
         }
 
+        /**
+         * Returns the throttling interval (in microseconds per permit) at the given stored-permit level,
+         * by interpolating linearly between the stable interval and the cold interval.
+         *
+         * @param permits the stored-permit level at which to evaluate the interval
+         * @return the throttling interval in microseconds per permit at that level
+         */
         private double permitsToTime(final double permits) {
             return stableIntervalMicros + permits * slope;
         }
 
+        /**
+         * Returns the microseconds per permit during the cooldown (idle accumulation) phase.
+         * Stored permits are accumulated at a rate of {@code maxPermits / warmupPeriodMicros}
+         * permits per microsecond, so the inverse is the cooldown interval.
+         *
+         * @return the cooldown interval in microseconds per permit
+         */
         @Override
         double coolDownIntervalMicros() {
             return warmupPeriodMicros / maxPermits;
@@ -276,11 +323,25 @@ abstract class SmoothRateLimiter extends RateLimiter {
         /** The work (permits) of how many seconds can be saved up if this RateLimiter is unused. */
         final double maxBurstSeconds;
 
+        /**
+         * Constructs a {@code SmoothBursty} rate limiter.
+         *
+         * @param stopwatch       the stopwatch used to measure elapsed time
+         * @param maxBurstSeconds the maximum number of seconds' worth of permits that can be saved
+         *                        while the limiter is idle; must be &gt;= 0.0
+         */
         SmoothBursty(final SleepingStopwatch stopwatch, final double maxBurstSeconds) {
             super(stopwatch);
             this.maxBurstSeconds = maxBurstSeconds;
         }
 
+        /**
+         * Recalculates {@code maxPermits} and {@code storedPermits} whenever the rate changes.
+         *
+         * @param permitsPerSecond     the new target rate in permits per second
+         * @param stableIntervalMicros the stable interval corresponding to the new rate, in microseconds
+         *                             (unused by this implementation)
+         */
         @Override
         void doSetRate(final double permitsPerSecond, final double stableIntervalMicros) {
             final double oldMaxPermits = maxPermits;
@@ -294,11 +355,24 @@ abstract class SmoothRateLimiter extends RateLimiter {
             }
         }
 
+        /**
+         * Returns zero because stored permits in a bursty limiter are given out at no throttling cost.
+         *
+         * @param storedPermits the current number of stored permits (unused)
+         * @param permitsToTake the number of stored permits to consume (unused)
+         * @return always {@code 0L}
+         */
         @Override
         long storedPermitsToWaitTime(final double storedPermits, final double permitsToTake) {
             return 0L;
         }
 
+        /**
+         * Returns the stable interval as the cooldown interval, meaning that stored permits
+         * accumulate at the same rate as they are consumed at the stable rate.
+         *
+         * @return the stable interval in microseconds per permit
+         */
         @Override
         double coolDownIntervalMicros() {
             return stableIntervalMicros;
@@ -327,10 +401,22 @@ abstract class SmoothRateLimiter extends RateLimiter {
      */
     private long nextFreeTicketMicros = 0L; // could be either in the past or future
 
+    /**
+     * Constructs a {@code SmoothRateLimiter} backed by the given stopwatch.
+     *
+     * @param stopwatch the stopwatch used to measure elapsed time
+     */
     private SmoothRateLimiter(final SleepingStopwatch stopwatch) {
         super(stopwatch);
     }
 
+    /**
+     * Updates the stable rate by resyncing stored permits and delegating to the subclass
+     * implementation of {@link #doSetRate(double, double)}.
+     *
+     * @param permitsPerSecond the new target rate in permits per second
+     * @param nowMicros        the current time in microseconds from the stopwatch epoch
+     */
     @Override
     final void doSetRate(final double permitsPerSecond, final long nowMicros) {
         resync(nowMicros);
@@ -340,23 +426,45 @@ abstract class SmoothRateLimiter extends RateLimiter {
     }
 
     /**
-     * Do set rate.
+     * Updates the rate-limiter state (stored permits, thresholds, etc.) for the new target rate.
+     * Called by {@link #doSetRate(double, long)} after computing the stable interval.
      *
-     * @param permitsPerSecond the number of permits per second
-     * @param stableIntervalMicros the stable interval in microseconds
+     * @param permitsPerSecond     the new target rate in permits per second
+     * @param stableIntervalMicros the stable interval (microseconds per permit) for the new rate
      */
     abstract void doSetRate(double permitsPerSecond, double stableIntervalMicros);
 
+    /**
+     * Returns the current stable rate in permits per second.
+     *
+     * @return the number of permits per second
+     */
     @Override
     final double doGetRate() {
         return SECONDS.toMicros(1L) / stableIntervalMicros;
     }
 
+    /**
+     * Returns the earliest time at which a permit is available, which is simply the time of the
+     * next free ticket regardless of {@code nowMicros}.
+     *
+     * @param nowMicros the current time in microseconds (unused by this implementation)
+     * @return {@code nextFreeTicketMicros}, i.e. the time when the next permit becomes available
+     */
     @Override
     final long queryEarliestAvailable(final long nowMicros) {
         return nextFreeTicketMicros;
     }
 
+    /**
+     * Reserves the earliest available time for the specified number of permits, advancing
+     * {@code nextFreeTicketMicros} by the computed wait time, and returns the time at which
+     * the caller may proceed (i.e., the value of {@code nextFreeTicketMicros} before the update).
+     *
+     * @param requiredPermits the number of permits to reserve; must be positive
+     * @param nowMicros       the current time in microseconds
+     * @return the microsecond timestamp at which the reserved permits become available
+     */
     @Override
     final long reserveEarliestAvailable(final int requiredPermits, final long nowMicros) {
         resync(nowMicros);

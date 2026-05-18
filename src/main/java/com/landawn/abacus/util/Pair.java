@@ -134,9 +134,9 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     /**
      * Returns a type-safe empty array of Pair instances.
      *
-     * <p>This method provides a reusable empty array, avoiding the need to create
-     * a new empty array each time. The returned array is immutable and shared across
-     * all calls to this method.</p>
+     * <p>This method returns a shared, reusable empty array, avoiding the need to allocate
+     * a new empty array each time. The array has length zero. Note that the array reference
+     * itself is shared; the caller should not store elements into it.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -154,7 +154,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * @param <L> the type of the left elements in the array.
      * @param <R> the type of the right elements in the array.
-     * @return an empty, immutable array of Pair instances.
+     * @return a shared empty array of Pair instances with length zero.
      */
     @SuppressWarnings("unchecked")
     public static <L, R> Pair<L, R>[] emptyArray() {
@@ -510,8 +510,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
 
     /**
      * Creates and returns a new Pair with the left and right elements swapped.
-     * The original pair remains unchanged. This method is marked as @Beta,
-     * indicating it may be subject to change in future versions.
+     * The original pair remains unchanged.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -637,9 +636,9 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * @param <E> the type of exception that the consumer may throw.
      * @param consumer the action to be performed on each element; must accept a common
-     *                 supertype of both L and R (typically Object)
+     *                 supertype of both L and R (typically {@code Object}); must not be {@code null}.
      * @throws E if the consumer throws an exception.
-     * @throws ClassCastException if the consumer cannot accept the types of the elements.
+     * @throws ClassCastException if the consumer cannot accept the runtime types of the elements.
      */
     public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E {
         final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
@@ -667,7 +666,8 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * }</pre>
      *
      * @param <E> the type of exception that the action may throw.
-     * @param action the action to be performed with the left and right elements as arguments.
+     * @param action the action to be performed with the left and right elements as arguments;
+     *               must not be {@code null}.
      * @throws E if the action throws an exception.
      */
     public <E extends Exception> void accept(final Throwables.BiConsumer<? super L, ? super R, E> action) throws E {
@@ -695,7 +695,8 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * }</pre>
      *
      * @param <E> the type of exception that the action may throw.
-     * @param action the action to be performed with this pair as the argument.
+     * @param action the action to be performed with this pair as the argument;
+     *               must not be {@code null}.
      * @throws E if the action throws an exception.
      */
     public <E extends Exception> void accept(final Throwables.Consumer<? super Pair<L, R>, E> action) throws E {
@@ -720,7 +721,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * @param <U> the type of the result.
      * @param <E> the type of exception that the mapper function may throw.
-     * @param mapper the function to apply to the left and right elements.
+     * @param mapper the function to apply to the left and right elements; must not be {@code null}.
      * @return the result of applying the mapper function to both elements.
      * @throws E if the mapper function throws an exception.
      */
@@ -745,7 +746,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * @param <U> the type of the result.
      * @param <E> the type of exception that the mapper function may throw.
-     * @param mapper the function to apply to this pair.
+     * @param mapper the function to apply to this pair; must not be {@code null}.
      * @return the result of applying the mapper function to this pair.
      * @throws E if the mapper function throws an exception.
      */
@@ -775,9 +776,9 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw.
-     * @param predicate the condition to test with the left and right elements.
+     * @param predicate the condition to test with the left and right elements; must not be {@code null}.
      * @return an Optional containing this pair if the predicate returns {@code true},
-     *         otherwise an empty Optional
+     *         otherwise an empty Optional.
      * @throws E if the predicate throws an exception.
      */
     public <E extends Exception> Optional<Pair<L, R>> filter(final Throwables.BiPredicate<? super L, ? super R, E> predicate) throws E {
@@ -807,9 +808,9 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw.
-     * @param predicate the condition to test with this pair.
+     * @param predicate the condition to test with this pair; must not be {@code null}.
      * @return an Optional containing this pair if the predicate returns {@code true},
-     *         otherwise an empty Optional
+     *         otherwise an empty Optional.
      * @throws E if the predicate throws an exception.
      */
     public <E extends Exception> Optional<Pair<L, R>> filter(final Throwables.Predicate<? super Pair<L, R>, E> predicate) throws E {
@@ -934,11 +935,12 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
 
     /**
      * Returns a hash code value for this pair.
-     * The hash code is computed using both the left and right elements.
+     * The hash code is computed as the XOR of the hash codes of the left and right elements.
      *
-     * <p>This implementation ensures that pairs with the same elements
-     * in the same order will have the same hash code, making them suitable
-     * for use as keys in hash-based collections.</p>
+     * <p>Equal pairs (as determined by {@link #equals(Object)}) are guaranteed to have the
+     * same hash code, making them suitable for use as keys in hash-based collections.
+     * Note that because XOR is commutative, pairs with swapped elements may share the
+     * same hash code.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

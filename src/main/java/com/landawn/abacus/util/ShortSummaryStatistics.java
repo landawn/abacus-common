@@ -75,9 +75,9 @@ public class ShortSummaryStatistics implements ShortConsumer {
      * }</pre>
      *
      * @param count the count of values; must be non-negative
-     * @param min the minimum value
-     * @param max the maximum value
-     * @param sum the sum of all values
+     * @param min the minimum {@code short} value
+     * @param max the maximum {@code short} value
+     * @param sum the sum of all values as a {@code long}
      * @throws IllegalArgumentException if {@code count} is negative or {@code min} is greater than {@code max}
      */
     public ShortSummaryStatistics(final long count, final short min, final short max, final long sum) {

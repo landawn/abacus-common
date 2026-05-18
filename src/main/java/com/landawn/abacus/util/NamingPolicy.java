@@ -218,6 +218,11 @@ public enum NamingPolicy {
 
     private final Function<String, String> converter;
 
+    /**
+     * Constructs a {@code NamingPolicy} with the given conversion function.
+     *
+     * @param converter the function that transforms an input string according to this policy's rules
+     */
     NamingPolicy(final Function<String, String> converter) {
         this.converter = converter;
     }
@@ -279,9 +284,8 @@ public enum NamingPolicy {
      * }</pre>
      *
      * @return the function that performs the string transformation for this policy
-     * @deprecated This method is deprecated. Use {@link #convert(String)} directly or obtain
-     *             the converter through other means. This API is experimental and may be removed
-     *             in a future release.
+     * @deprecated Use {@link #convert(String)} directly instead. This method exposes an internal
+     *             implementation detail and may be removed in a future release.
      */
     @Deprecated
     @Beta

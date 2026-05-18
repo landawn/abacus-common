@@ -622,7 +622,7 @@ public final class Objectory {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (Writer fileWriter = new FileWriter("output.txt")) {
-     *     BufferedWriter bw = Objectory.createBufferedWriter(fileWriter);
+     *     java.io.BufferedWriter bw = Objectory.createBufferedWriter(fileWriter);
      *     try {
      *         bw.write("Hello World");
      *         bw.newLine();
@@ -904,7 +904,7 @@ public final class Objectory {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String text = "Line 1\nLine 2\nLine 3";
-     * BufferedReader reader = Objectory.createBufferedReader(text);
+     * java.io.BufferedReader reader = Objectory.createBufferedReader(text);
      * try {
      *     String line;
      *     while ((line = reader.readLine()) != null) {
@@ -956,7 +956,7 @@ public final class Objectory {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (Reader fileReader = new FileReader("input.txt")) {
-     *     BufferedReader br = Objectory.createBufferedReader(fileReader);
+     *     java.io.BufferedReader br = Objectory.createBufferedReader(fileReader);
      *     try {
      *         String line = br.readLine();
      *         // Process line
@@ -1314,17 +1314,18 @@ public final class Objectory {
     }
 
     /**
-     * Returns a {@link BufferedWriter} to the object pool for reuse.
+     * Returns a {@link java.io.BufferedWriter} to the object pool for reuse.
      * The writer's buffer is flushed to its underlying target and the writer is
      * reset before being added to the pool. This method dispatches to the
      * appropriate pool based on the concrete writer type (the library's JSON,
      * XML, CSV, or plain buffered writer). A {@code null} writer, or any writer
      * that is not one of these library types (for example a plain
-     * {@link java.io.BufferedWriter}), is silently ignored.
+     * {@link java.io.BufferedWriter} instance not created by this class), is
+     * silently ignored.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BufferedWriter writer = Objectory.createBufferedWriter(outputStream);
+     * java.io.BufferedWriter writer = Objectory.createBufferedWriter(outputStream);
      * try {
      *     writer.write("Some text");
      *     writer.flush();
@@ -1333,7 +1334,7 @@ public final class Objectory {
      * }
      * }</pre>
      *
-     * @param writer the BufferedWriter to recycle; may be {@code null}
+     * @param writer the {@code BufferedWriter} to recycle; may be {@code null}
      * @throws UncheckedIOException if an I/O error occurs while flushing the buffer
      * @see #createBufferedWriter()
      */
@@ -1357,14 +1358,14 @@ public final class Objectory {
     }
 
     /**
-     * Returns a {@link BufferedReader} to the object pool for reuse.
+     * Returns a {@link java.io.BufferedReader} to the object pool for reuse.
      * The reader is reset before being added to the pool. Only instances of the
      * library's internal {@code BufferedReader} are pooled; a {@code null}
      * reader or any other {@link java.io.BufferedReader} is silently ignored.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BufferedReader reader = Objectory.createBufferedReader(inputStream);
+     * java.io.BufferedReader reader = Objectory.createBufferedReader(inputStream);
      * try {
      *     String line = reader.readLine();
      *     // Process line
@@ -1373,7 +1374,8 @@ public final class Objectory {
      * }
      * }</pre>
      *
-     * @param reader the BufferedReader to recycle; may be {@code null}
+     * @param reader the {@code BufferedReader} to recycle; may be {@code null}
+     * @see #createBufferedReader(InputStream)
      * @see #createBufferedReader(Reader)
      */
     public static void recycle(final java.io.BufferedReader reader) {

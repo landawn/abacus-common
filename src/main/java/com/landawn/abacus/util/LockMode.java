@@ -155,6 +155,11 @@ public enum LockMode {
      */
     private final int intValue;
 
+    /**
+     * Constructs a LockMode enum constant with the specified bitmask value.
+     *
+     * @param value the bitmask integer value for this lock mode
+     */
     LockMode(final int value) {
         intValue = value;
     }

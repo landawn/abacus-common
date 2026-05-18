@@ -66,7 +66,7 @@ public final class PrefixSearchTable<K, V> {
     /**
      * Searches the table for the longest prefix match of {@code compoundKey}.
      *
-     * @param compoundKey the compound key to search for
+     * @param compoundKey the non-empty compound key to search for; elements must not be {@code null}
      * @return an {@code Optional} holding the value mapped to the longest (non-empty) prefix of
      *         {@code compoundKey}; an empty {@code Optional} if no non-empty prefix is present
      * @throws IllegalArgumentException if {@code compoundKey} is empty
@@ -79,14 +79,15 @@ public final class PrefixSearchTable<K, V> {
     }
 
     /**
-     * Searches the table for prefixes of {@code compoundKey} and returns a <em>lazy</em> EntryStream of
-     * all mappings in ascending order of prefix length.
+     * Searches the table for prefixes of {@code compoundKey} and returns a <em>lazy</em>
+     * {@link EntryStream} of all matching mappings in ascending order of prefix length.
      *
-     * <p>If no non-empty prefix exists in the table, an empty EntryStream is returned.
+     * <p>The returned stream is backed by a single-use iterator and should be consumed at most once.
+     * If no non-empty prefix exists in the table, an empty {@code EntryStream} is returned.
      *
-     * <p>To get the longest matched prefix, use {@link #get} instead.
+     * <p>To get only the longest matched prefix, use {@link #get(List)} instead.
      *
-     * @param compoundKey the compound key to search for
+     * @param compoundKey the non-empty compound key to search for; elements must not be {@code null}
      * @return a lazy {@code EntryStream} pairing each matched prefix of {@code compoundKey}
      *         (as an unmodifiable {@code List}) with its mapped value, in ascending order of
      *         prefix length; empty if no non-empty prefix is present
@@ -141,9 +142,11 @@ public final class PrefixSearchTable<K, V> {
     }
 
     /**
-     * Returns a new builder initialized with the same prefix mappings in this table.
+     * Returns a new {@link Builder} pre-populated with all prefix-to-value mappings in this table.
+     * The returned builder can be used to add further mappings and produce a new table
+     * without modifying this instance.
      *
-     * @return a builder initialized with the current mappings
+     * @return a new builder containing all current mappings of this table
      */
     public Builder<K, V> toBuilder() {
         Builder<K, V> builder = builder();
@@ -224,14 +227,17 @@ public final class PrefixSearchTable<K, V> {
         }
 
         /**
-         * Builds a PrefixSearchTable from the accumulated mappings.
+         * Builds an immutable {@link PrefixSearchTable} from the accumulated mappings.
          *
-         * @return a new PrefixSearchTable containing all added mappings
+         * @return a new {@code PrefixSearchTable} containing all mappings added to this builder
          */
         public PrefixSearchTable<K, V> build() {
             return new PrefixSearchTable<>(EntryStream.of(nodes).mapValue(Node.Builder::build).toMap());
         }
 
+        /**
+         * Package-private constructor; use {@link PrefixSearchTable#builder()} to obtain an instance.
+         */
         Builder() {
         }
     }

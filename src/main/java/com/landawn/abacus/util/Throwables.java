@@ -880,7 +880,8 @@ public final class Throwables {
          * @param <T> the type of elements returned by the iterators
          * @param <E> the type of exception that may be thrown
          * @param a the array of iterators to concatenate
-         * @return a single iterator that iterates over all elements from all iterators in order
+         * @return a single iterator that iterates over all elements from all iterators in order,
+         *         or an empty iterator if {@code a} is {@code null} or empty
          */
         @SafeVarargs
         public static <T, E extends Exception> Throwables.Iterator<T, E> concat(final Throwables.Iterator<? extends T, ? extends E>... a) {
@@ -1016,9 +1017,10 @@ public final class Throwables {
 
         /**
          * Advances the iterator by skipping the specified number of elements.
-         * If n is greater than the number of remaining elements, the iterator will be positioned at the end.
+         * If {@code n} is greater than the number of remaining elements, the iterator will be
+         * positioned at the end. If {@code n} is zero or negative, this method has no effect.
          *
-         * @param n the number of elements to skip, must be non-negative
+         * @param n the number of elements to skip; no-op if zero or negative
          * @throws E if an exception occurs while advancing the iterator
          */
         public void advance(long n) throws E {
@@ -1067,6 +1069,11 @@ public final class Throwables {
             closeResource();
         }
 
+        /**
+         * Releases any resources held by this iterator. Called by {@link #close()} exactly once.
+         * Subclasses should override this method to perform specific cleanup, such as closing
+         * underlying streams or readers. The default implementation does nothing.
+         */
         @Internal
         protected void closeResource() {
 
@@ -1074,10 +1081,11 @@ public final class Throwables {
 
         /**
          * Returns a new iterator that contains only elements matching the specified predicate.
-         * Elements that don't satisfy the predicate will be skipped.
+         * Elements that do not satisfy the predicate will be skipped.
          *
          * @param predicate the predicate to test each element
          * @return a new iterator containing only elements that satisfy the predicate
+         * @throws E if an exception occurs while iterating or evaluating the predicate
          */
         public Throwables.Iterator<T, E> filter(final Throwables.Predicate<? super T, E> predicate) {
             final Throwables.Iterator<T, E> iter = this;
@@ -1122,6 +1130,7 @@ public final class Throwables {
          * @param <U> the type of elements returned by the new iterator
          * @param mapper the function to apply to each element
          * @return a new iterator with the mapping function applied to each element
+         * @throws E if an exception occurs while iterating or applying the mapping function
          */
         public <U> Throwables.Iterator<U, E> map(final Throwables.Function<? super T, U, E> mapper) {
             final Throwables.Iterator<T, E> iter = this;
@@ -2553,8 +2562,9 @@ public final class Throwables {
     }
 
     /**
-     * Represents a function that accepts a double-valued argument and produces a result.
-     * This is the double-consuming primitive specialization for {@code Function}.
+     * Represents a function that accepts a {@code double}-valued argument and produces a result,
+     * and that may throw a checked exception of type {@code E}. This is the {@code double}
+     * primitive specialization of {@link Function}.
      *
      * @param <R> the type of the result of the function
      * @param <E> the type of exception that the function may throw
@@ -2563,18 +2573,18 @@ public final class Throwables {
     public interface DoubleFunction<R, E extends Throwable> {
 
         /**
-         * Applies this function to the given double-valued argument.
+         * Applies this function to the given double argument.
          *
-         * @param value the double value to be processed
+         * @param value the double function argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if an exception occurs during function application
          */
         R apply(double value) throws E;
     }
 
     /**
-     * Represents a function that accepts a double-valued argument and produces an int-valued result.
-     * This is the double-to-int primitive specialization for {@code Function}.
+     * Represents a function that accepts a {@code double}-valued argument and produces an
+     * {@code int}-valued result, and that may throw a checked exception of type {@code E}.
      *
      * @param <E> the type of exception that the function may throw
      */
@@ -2582,18 +2592,18 @@ public final class Throwables {
     public interface DoubleToIntFunction<E extends Throwable> {
 
         /**
-         * Applies this function to the given double value and returns an int result.
+         * Applies this function to the given double argument and produces an int result.
          *
-         * @param value the double value to be processed
-         * @return the int result
-         * @throws E if an error occurs during function execution
+         * @param value the double function argument
+         * @return the int function result
+         * @throws E if an exception occurs during function application
          */
         int applyAsInt(double value) throws E;
     }
 
     /**
-     * Represents a function that accepts a double-valued argument and produces a long-valued result.
-     * This is the double-to-long primitive specialization for {@code Function}.
+     * Represents a function that accepts a {@code double}-valued argument and produces a
+     * {@code long}-valued result, and that may throw a checked exception of type {@code E}.
      *
      * @param <E> the type of exception that the function may throw
      */
@@ -2601,11 +2611,11 @@ public final class Throwables {
     public interface DoubleToLongFunction<E extends Throwable> {
 
         /**
-         * Applies this function to the given double value and returns a long result.
+         * Applies this function to the given double argument and produces a long result.
          *
-         * @param value the double value to be processed
-         * @return the long result
-         * @throws E if an error occurs during function execution
+         * @param value the double function argument
+         * @return the long function result
+         * @throws E if an exception occurs during function application
          */
         long applyAsLong(double value) throws E;
     }

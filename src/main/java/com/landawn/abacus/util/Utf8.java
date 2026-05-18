@@ -80,7 +80,7 @@ public class Utf8 {
      * @return the number of bytes needed to encode the sequence in UTF-8
      * @throws NullPointerException if {@code sequence} is {@code null}
      * @throws IllegalArgumentException if the sequence contains ill-formed UTF-16 (unpaired
-     *         surrogates), or if the encoded length exceeds {@link Integer#MAX_VALUE}
+     *         surrogates), or if the UTF-8 encoded length overflows {@code int}
      */
     public static int encodedLength(final CharSequence sequence) {
         // Warning to maintainers: this implementation is highly optimized.
@@ -146,9 +146,9 @@ public class Utf8 {
     }
 
     /**
-     * Returns {@code true} if the given byte array is a well-formed UTF-8 byte sequence
-     * according to Unicode 6.0 standards. This method performs stricter validation than
-     * simple decoding - it ensures the bytes follow proper UTF-8 encoding rules.
+     * Returns {@code true} if the given byte array is a well-formed UTF-8 byte sequence.
+     * This method performs stricter validation than simple decoding — it rejects
+     * "non-shortest form" byte sequences as defined by Unicode 3.1 and later standards.
      *
      * <p>The validation checks for:</p>
      * <ul>
@@ -201,7 +201,9 @@ public class Utf8 {
      * @param off the offset in the buffer of the first byte to validate
      * @param len the number of bytes to validate from the buffer
      * @return {@code true} if the specified byte range forms a valid UTF-8 sequence
-     * @throws IndexOutOfBoundsException if offset and length are out of bounds
+     * @throws NullPointerException if {@code bytes} is {@code null}
+     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or
+     *         {@code off + len} is greater than {@code bytes.length}
      */
     public static boolean isWellFormed(final byte[] bytes, final int off, final int len) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(off, len, bytes.length);

@@ -107,8 +107,8 @@ import com.landawn.abacus.util.stream.Stream;
  *     Fnn.rateLimiter(10.0);   // 10 requests per second
  *
  * // Map entry manipulation
- * Map<String, Integer> scores = data.stream()
- *     .collect(Collectors.toMap(Fnn.key(), Fnn.value()));
+ * Map<String, Integer> scores = entryStream
+ *     .toMap(Fnn.key(), Fnn.value());
  * }</pre>
  *
  * <p><b>Naming Convention:</b>
@@ -128,9 +128,9 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Synchronization:</b> {@code sp()}, {@code sc()}, {@code sf()} for synchronized variants</li>
  *   <li><b>Type Conversion:</b> {@code c2f()}, {@code f2c()}, {@code r2c()}, {@code c2r()}</li>
  *   <li><b>Java Interop:</b> {@code jr2r()}, {@code r2jr()}, {@code jc2c()}, {@code c2jc()}</li>
- *   <li><b>Null Safety:</b> {@code isNull()}, {@code notNull()}, {@code isNullOrEmpty()}</li>
+ *   <li><b>Null Safety:</b> {@code isNull()}, {@code notNull()}, {@code isEmpty()}, {@code isBlank()}, {@code notEmpty()}, {@code notBlank()}</li>
  *   <li><b>Map Operations:</b> {@code key()}, {@code value()}, {@code invert()}</li>
- *   <li><b>Utility Functions:</b> {@code length()}, {@code size()}, {@code pair()}, {@code triple()}</li>
+ *   <li><b>Utility Functions:</b> {@code pair()}, {@code triple()}, {@code tuple1()}, {@code tuple2()}, {@code tuple3()}</li>
  * </ul>
  *
  * <p><b>Memoization Features:</b>
@@ -249,7 +249,7 @@ import com.landawn.abacus.util.stream.Stream;
  */
 public final class Fnn {
     private Fnn() {
-        // Singleton for utility class
+        // Utility class; do not instantiate.
     }
 
     /**
@@ -399,9 +399,8 @@ public final class Fnn {
      * @param <T> the type of the input to the function
      * @param <R> the type of the result of the function
      * @param <E> the type of exception that may be thrown by the function
-     * @param func the function to memoize; must not be null
+     * @param func the function to memoize; must not be {@code null}
      * @return a memoized version of the function that caches results by input value
-     * @throws IllegalArgumentException if func is null
      * @see #memoize(Throwables.Supplier)
      * @see #memoizeWithExpiration(Throwables.Supplier, long, TimeUnit)
      * @see ConcurrentHashMap
@@ -963,12 +962,13 @@ public final class Fnn {
 
     /**
      * Returns a {@code Throwables.Consumer} that sleeps for the specified number of milliseconds.
-     * The consumer ignores its input and calls {@link N#sleep(long)}.
+     * The consumer ignores its input and calls {@link N#sleep(long)}. If the sleeping thread is
+     * interrupted, the interrupt flag is restored.
      *
      * @param <T> the type of the input to the consumer
      * @param <E> the type of exception that may be thrown
-     * @param millis the number of milliseconds to sleep
-     * @return a Consumer that sleeps for the specified duration on each invocation
+     * @param millis the number of milliseconds to sleep; must not be negative
+     * @return a Consumer that sleeps for {@code millis} milliseconds on each invocation
      * @see N#sleep(long)
      * @see #sleepUninterruptibly(long)
      */
@@ -979,11 +979,12 @@ public final class Fnn {
     /**
      * Returns a {@code Throwables.Consumer} that sleeps uninterruptibly for the specified number of milliseconds.
      * The consumer ignores its input and calls {@link N#sleepUninterruptibly(long)}.
+     * Unlike {@link #sleep(long)}, interruptions are suppressed and the sleep continues for the full duration.
      *
      * @param <T> the type of the input to the consumer
      * @param <E> the type of exception that may be thrown
-     * @param millis the number of milliseconds to sleep
-     * @return a Consumer that sleeps uninterruptibly for the specified duration on each invocation
+     * @param millis the number of milliseconds to sleep; must not be negative
+     * @return a Consumer that sleeps uninterruptibly for {@code millis} milliseconds on each invocation
      * @see N#sleepUninterruptibly(long)
      * @see #sleep(long)
      */
@@ -993,15 +994,16 @@ public final class Fnn {
 
     /**
      * Returns a stateful Throwables.Consumer that rate limits execution to the specified permits per second.
-     * The consumer uses a RateLimiter internally to control the rate of execution.
-     * This consumer is stateful and should not be saved or cached for reuse, but it can be used in parallel streams.
+     * The consumer calls {@link RateLimiter#acquire()} before allowing execution to proceed, blocking
+     * until a permit is available. This consumer is stateful and should not be saved or cached for reuse,
+     * but it can be used in parallel streams.
      *
      * @param <T> the type of the input to the consumer
      * @param <E> the type of exception that may be thrown
-     * @param permitsPerSecond the number of permits per second
-     * @return a stateful Consumer that rate limits execution
-     * @see RateLimiter#acquire()
+     * @param permitsPerSecond the desired throughput in permits per second; must be positive
+     * @return a stateful Consumer that rate limits execution to {@code permitsPerSecond} invocations per second
      * @see RateLimiter#create(double)
+     * @see #rateLimiter(RateLimiter)
      */
     @Stateful
     public static <T, E extends Exception> Throwables.Consumer<T, E> rateLimiter(final double permitsPerSecond) {
@@ -1010,14 +1012,16 @@ public final class Fnn {
 
     /**
      * Returns a stateful Throwables.Consumer that rate limits execution using the provided RateLimiter.
-     * The consumer calls rateLimiter.acquire() before allowing execution to proceed.
-     * This consumer is stateful and should not be saved or cached for reuse, but it can be used in parallel streams.
+     * The consumer calls {@link RateLimiter#acquire()} before allowing each invocation to proceed,
+     * blocking until a permit is available. This consumer is stateful and should not be saved or cached
+     * for reuse, but it can be used in parallel streams.
      *
      * @param <T> the type of the input to the consumer
      * @param <E> the type of exception that may be thrown
-     * @param rateLimiter the RateLimiter to use
-     * @return a stateful Consumer that rate limits execution
+     * @param rateLimiter the RateLimiter to acquire a permit from before each invocation; must not be null
+     * @return a stateful Consumer that acquires a permit from {@code rateLimiter} before each invocation
      * @see RateLimiter#acquire()
+     * @see #rateLimiter(double)
      */
     @Stateful
     public static <T, E extends Exception> Throwables.Consumer<T, E> rateLimiter(final RateLimiter rateLimiter) {
@@ -1146,11 +1150,14 @@ public final class Fnn {
 
     /**
      * Returns a Throwables.Predicate that tests if a CharSequence is blank.
-     * The predicate returns {@code true} if the CharSequence is empty or contains only whitespace characters.
+     * The predicate returns {@code true} if the CharSequence is {@code null}, empty, or contains only
+     * whitespace characters.
      *
      * @param <T> the type of CharSequence
      * @param <E> the type of exception that may be thrown
-     * @return a Predicate that returns {@code true} if the CharSequence is blank
+     * @return a Predicate that returns {@code true} if the CharSequence is {@code null}, empty, or whitespace-only
+     * @see #isEmpty()
+     * @see #notBlank()
      */
     public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> isBlank() {
         return (Throwables.Predicate<T, E>) Fn.IS_BLANK;
@@ -1159,11 +1166,11 @@ public final class Fnn {
     /**
      * Returns a Throwables.Predicate that tests if an array is empty.
      * The predicate returns {@code true} if the array is {@code null} or has length 0.
-     * This method is marked as Beta.
      *
      * @param <T> the component type of the array
      * @param <E> the type of exception that may be thrown
-     * @return a Predicate that returns {@code true} if the array is empty
+     * @return a Predicate that returns {@code true} if the array is {@code null} or has length 0
+     * @see #notEmptyArray()
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -1174,11 +1181,11 @@ public final class Fnn {
     /**
      * Returns a Throwables.Predicate that tests if a Collection is empty.
      * The predicate returns {@code true} if the Collection is {@code null} or has size 0.
-     * This method is marked as Beta.
      *
      * @param <T> the type of Collection
      * @param <E> the type of exception that may be thrown
-     * @return a Predicate that returns {@code true} if the Collection is empty
+     * @return a Predicate that returns {@code true} if the Collection is {@code null} or empty
+     * @see #notEmptyCollection()
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -1189,11 +1196,11 @@ public final class Fnn {
     /**
      * Returns a Throwables.Predicate that tests if a Map is empty.
      * The predicate returns {@code true} if the Map is {@code null} or has size 0.
-     * This method is marked as Beta.
      *
      * @param <T> the type of Map
      * @param <E> the type of exception that may be thrown
-     * @return a Predicate that returns {@code true} if the Map is empty
+     * @return a Predicate that returns {@code true} if the Map is {@code null} or empty
+     * @see #notEmptyMap()
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -1287,12 +1294,15 @@ public final class Fnn {
     }
 
     /**
-     * Returns a BinaryOperator that throws an exception when attempting to merge duplicate keys.
-     * This merger is typically used in Collectors.toMap() when duplicate keys should not be allowed.
+     * Returns a BinaryOperator that throws an {@link IllegalStateException} when invoked, indicating
+     * that duplicate keys are not allowed. This merger is typically used in {@code Collectors.toMap()}
+     * when duplicate keys should cause an immediate failure rather than silent merging.
      *
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
-     * @return a BinaryOperator that throws an exception for any merge operation
+     * @return a BinaryOperator that always throws {@code IllegalStateException} with a message describing the duplicate values
+     * @see #ignoringMerger()
+     * @see #replacingMerger()
      * @see java.util.stream.Collectors#toMap(java.util.function.Function, java.util.function.Function, java.util.function.BinaryOperator, Supplier)
      */
     public static <T, E extends Exception> Throwables.BinaryOperator<T, E> throwingMerger() {
@@ -1301,11 +1311,14 @@ public final class Fnn {
 
     /**
      * Returns a BinaryOperator that ignores the second value and returns the first value.
-     * This merger is typically used in Collectors.toMap() when keeping the first occurrence of duplicate keys.
+     * This merger is typically used in {@code Collectors.toMap()} when keeping the first occurrence
+     * of duplicate keys is the desired behavior.
      *
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
-     * @return a BinaryOperator that returns the first operand
+     * @return a BinaryOperator that always returns the first operand, discarding the second
+     * @see #throwingMerger()
+     * @see #replacingMerger()
      * @see java.util.stream.Collectors#toMap(java.util.function.Function, java.util.function.Function, java.util.function.BinaryOperator, Supplier)
      */
     public static <T, E extends Exception> Throwables.BinaryOperator<T, E> ignoringMerger() {
@@ -1314,11 +1327,14 @@ public final class Fnn {
 
     /**
      * Returns a BinaryOperator that replaces the first value with the second value.
-     * This merger is typically used in Collectors.toMap() when keeping the last occurrence of duplicate keys.
+     * This merger is typically used in {@code Collectors.toMap()} when keeping the last occurrence
+     * of duplicate keys is the desired behavior.
      *
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
-     * @return a BinaryOperator that returns the second operand
+     * @return a BinaryOperator that always returns the second operand, discarding the first
+     * @see #throwingMerger()
+     * @see #ignoringMerger()
      * @see java.util.stream.Collectors#toMap(java.util.function.Function, java.util.function.Function, java.util.function.BinaryOperator, Supplier)
      */
     public static <T, E extends Exception> Throwables.BinaryOperator<T, E> replacingMerger() {
@@ -1742,11 +1758,14 @@ public final class Fnn {
      * while the counter is positive and {@code false} once it reaches zero. This predicate is thread-safe
      * and can be used in parallel streams.
      *
+     * <p><b>Note:</b> This predicate is stateful and should not be saved or cached for reuse.</p>
+     *
      * @param <T> the type of the input to the predicate
      * @param <E> the type of the exception that may be thrown
-     * @param count the maximum number of times the predicate should return true
-     * @return a stateful Predicate that limits the number of {@code true} results. Don't save or cache for reuse.
-     * @throws IllegalArgumentException if count is negative
+     * @param count the maximum number of times the predicate should return {@code true}; must not be negative
+     * @return a stateful Predicate that returns {@code true} for the first {@code count} evaluations,
+     *         then {@code false} for all subsequent evaluations
+     * @throws IllegalArgumentException if {@code count} is negative
      */
     @Beta
     @Stateful
@@ -2450,8 +2469,9 @@ public final class Fnn {
      *
      * @param <T> the type of the operand and result of the operator
      * @param <E> the type of the exception that may be thrown
-     * @param unaryOperator the unary operator to return
+     * @param unaryOperator the unary operator to return; must not be {@code null}
      * @return the unary operator unchanged
+     * @throws IllegalArgumentException if unaryOperator is null
      */
     @Beta
     public static <T, E extends Throwable> Throwables.UnaryOperator<T, E> o(final Throwables.UnaryOperator<T, E> unaryOperator) {
@@ -2472,8 +2492,9 @@ public final class Fnn {
      *
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
-     * @param binaryOperator the binary operator to return
+     * @param binaryOperator the binary operator to return; must not be {@code null}
      * @return the binary operator unchanged
+     * @throws IllegalArgumentException if binaryOperator is null
      */
     @Beta
     public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> o(final Throwables.BinaryOperator<T, E> binaryOperator) {
@@ -2504,8 +2525,9 @@ public final class Fnn {
      * @param <T> the type of the first argument to the consumer
      * @param <U> the type of elements to be accepted by the result consumer
      * @param <E> the type of the exception that may be thrown
-     * @param mapper the mapping bi-consumer to return
+     * @param mapper the mapping bi-consumer to return; must not be {@code null}
      * @return the bi-consumer unchanged
+     * @throws IllegalArgumentException if mapper is null
      * @see Seq#mapMulti(Throwables.BiConsumer)
      * @see Stream#mapMulti(java.util.function.BiConsumer)
      * @see Fn#mc(java.util.function.BiConsumer)
@@ -3506,9 +3528,10 @@ public final class Fnn {
     }
 
     /**
-     * Casts a standard java.lang.Runnable to a Throwables.Runnable that can throw checked exceptions.
-     * This method performs an unchecked cast and should be used with caution.
-     * It enables using standard Java runnables in exception-throwing contexts.
+     * Casts a standard {@link Runnable} to a {@code Throwables.Runnable} that can throw checked exceptions.
+     * This method performs an unchecked cast; since a standard {@code Runnable} will never actually throw
+     * a checked exception, the cast is safe at runtime. Use {@link #jr2r(java.lang.Runnable)} for a safe
+     * wrapper that does not rely on the cast.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3517,17 +3540,19 @@ public final class Fnn {
      * }</pre>
      *
      * @param <E> the type of the checked exception that the returned runnable may throw
-     * @param runnable the standard Runnable to cast
-     * @return a Throwables.Runnable that wraps the provided Runnable
+     * @param runnable the standard Runnable to cast; may be {@code null}
+     * @return the {@code runnable} cast to {@code Throwables.Runnable}
+     * @see #jr2r(java.lang.Runnable)
      */
     public static <E extends Throwable> Throwables.Runnable<E> rr(final Runnable runnable) {
         return (Throwables.Runnable<E>) runnable;
     }
 
     /**
-     * Casts a standard java.util.concurrent.Callable to a Throwables.Callable that can throw checked exceptions.
-     * This method performs an unchecked cast and should be used with caution.
-     * It enables using standard Java callables in exception-throwing contexts.
+     * Casts a standard {@link java.util.concurrent.Callable} to a {@code Throwables.Callable} that can
+     * throw checked exceptions. This method performs an unchecked cast; since a standard
+     * {@code java.util.concurrent.Callable} can already throw {@code Exception}, the cast is safe at
+     * runtime. Use {@link #jc2c(java.util.concurrent.Callable)} for a safe wrapper that avoids the cast.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3537,8 +3562,9 @@ public final class Fnn {
      *
      * @param <R> the type of the result of the callable
      * @param <E> the type of the checked exception that the returned callable may throw
-     * @param callable the standard Callable to cast
-     * @return a Throwables.Callable that wraps the provided Callable
+     * @param callable the standard {@code java.util.concurrent.Callable} to cast; may be {@code null}
+     * @return the {@code callable} cast to {@code Throwables.Callable}
+     * @see #jc2c(java.util.concurrent.Callable)
      */
     public static <R, E extends Throwable> Throwables.Callable<R, E> cc(final Callable<R> callable) {
         return (Throwables.Callable<R, E>) callable;
@@ -3572,10 +3598,11 @@ public final class Fnn {
     }
 
     /**
-     * Converts a Throwables.Runnable to a standard java.lang.Runnable.
-     * If the input is already a java.lang.Runnable, it is returned as-is.
-     * Otherwise, a new java.lang.Runnable is created that wraps the Throwables.Runnable
-     * and converts any checked exceptions to runtime exceptions.
+     * Converts a {@code Throwables.Runnable} to a standard {@link java.lang.Runnable}.
+     * If the input is already a {@code java.lang.Runnable}, it is returned as-is.
+     * Otherwise, a new {@code java.lang.Runnable} is created that wraps the {@code Throwables.Runnable}
+     * and converts any thrown {@code Throwable} (checked or unchecked) to a {@code RuntimeException}
+     * via {@link ExceptionUtil#toRuntimeException(Throwable, boolean)}.
      * This enables using exception-throwing runnables in standard Java contexts.
      *
      * <p><b>Usage Examples:</b></p>
@@ -3585,9 +3612,10 @@ public final class Fnn {
      * executor.execute(javaRunnable);
      * }</pre>
      *
-     * @param <E> the type of the checked exception that the input runnable may throw
-     * @param runnable the Throwables.Runnable to convert
-     * @return a standard java.lang.Runnable that wraps the provided Throwables.Runnable
+     * @param <E> the type of the exception that the input runnable may throw
+     * @param runnable the Throwables.Runnable to convert; must not be {@code null}
+     * @return a standard {@code java.lang.Runnable} that wraps the provided {@code Throwables.Runnable},
+     *         re-throwing any exception as an unchecked {@code RuntimeException}
      * @throws IllegalArgumentException if runnable is null
      */
     public static <E extends Throwable> java.lang.Runnable r2jr(final Throwables.Runnable<E> runnable) throws IllegalArgumentException {
@@ -3607,21 +3635,23 @@ public final class Fnn {
     }
 
     /**
-     * Converts a standard java.util.concurrent.Callable to a Throwables.Callable that can throw checked exceptions.
-     * If the input is already a Throwables.Callable, it is returned as-is.
-     * Otherwise, a new Throwables.Callable is created that wraps the standard Callable.
-     * This provides safe conversion between standard and exception-throwing callables.
+     * Converts a standard {@link java.util.concurrent.Callable} to a {@code Throwables.Callable<R, Exception>}.
+     * If the input is already a {@code Throwables.Callable}, it is returned as-is (cast to
+     * {@code Throwables.Callable<R, Exception>}). Otherwise, a new {@code Throwables.Callable} is created
+     * that delegates to the standard {@code Callable}. This provides safe conversion between standard
+     * and exception-throwing callables.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Callable<String> javaCallable = () -> "result";
+     * java.util.concurrent.Callable<String> javaCallable = () -> "result";
      * Throwables.Callable<String, Exception> throwableCallable = Fnn.jc2c(javaCallable);
      * }</pre>
      *
      * @param <R> the type of the result of the callable
-     * @param callable the standard Callable to convert
-     * @return a Throwables.Callable that wraps the provided Callable
+     * @param callable the standard {@code java.util.concurrent.Callable} to convert; must not be {@code null}
+     * @return a {@code Throwables.Callable<R, Exception>} that delegates to the provided callable
      * @throws IllegalArgumentException if callable is null
+     * @see #c2jc(Throwables.Callable)
      */
     public static <R> Throwables.Callable<R, Exception> jc2c(final java.util.concurrent.Callable<R> callable) throws IllegalArgumentException {
         N.checkArgNotNull(callable);
@@ -3647,9 +3677,10 @@ public final class Fnn {
      * }</pre>
      *
      * @param <R> the type of the result of the callable
-     * @param callable the Throwables.Callable to convert
-     * @return a standard java.util.concurrent.Callable that wraps the provided Throwables.Callable
+     * @param callable the Throwables.Callable to convert; must not be {@code null}
+     * @return a standard {@code java.util.concurrent.Callable} that delegates to the provided callable
      * @throws IllegalArgumentException if callable is null
+     * @see #jc2c(java.util.concurrent.Callable)
      */
     public static <R> java.util.concurrent.Callable<R> c2jc(final Throwables.Callable<R, ? extends Exception> callable) throws IllegalArgumentException {
         N.checkArgNotNull(callable);

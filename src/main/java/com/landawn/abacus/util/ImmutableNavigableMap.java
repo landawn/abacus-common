@@ -59,6 +59,13 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
 
     private final NavigableMap<K, V> navigableMap;
 
+    /**
+     * Constructs an {@code ImmutableNavigableMap} backed by the given navigable map.
+     * The provided map must not be modified externally after this constructor is called;
+     * use {@link #copyOf(Map)} to ensure a defensive copy is made.
+     *
+     * @param navigableMap the navigable map to back this immutable map
+     */
     ImmutableNavigableMap(final NavigableMap<? extends K, ? extends V> navigableMap) {
         super(navigableMap);
         this.navigableMap = (NavigableMap<K, V>) navigableMap;
@@ -532,7 +539,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param key the reference key whose immediate predecessor entry is requested
      * @return an entry with the greatest key less than {@code key}, or {@code null} if there is no such key
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
-     *         or its comparator does not permit {@code null} keys
+     * @throws NullPointerException if {@code key} is {@code null} and this map's comparator does not permit {@code null} keys
      */
     @Override
     public ImmutableEntry<K, V> lowerEntry(final K key) {
@@ -557,7 +564,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param key the reference key whose immediate predecessor key is requested
      * @return the greatest key less than {@code key}, or {@code null} if there is no such key
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
-     *         or its comparator does not permit {@code null} keys
+     * @throws NullPointerException if {@code key} is {@code null} and this map's comparator does not permit {@code null} keys
      */
     @Override
     public K lowerKey(final K key) {
@@ -582,7 +589,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param key the reference key whose floor entry is requested
      * @return an entry with the greatest key less than or equal to {@code key}, or {@code null} if there is no such key
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
-     *         or its comparator does not permit {@code null} keys
+     * @throws NullPointerException if {@code key} is {@code null} and this map's comparator does not permit {@code null} keys
      */
     @Override
     public ImmutableEntry<K, V> floorEntry(final K key) {
@@ -607,7 +614,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param key the reference key whose floor key is requested
      * @return the greatest key less than or equal to {@code key}, or {@code null} if there is no such key
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
-     *         or its comparator does not permit {@code null} keys
+     * @throws NullPointerException if {@code key} is {@code null} and this map's comparator does not permit {@code null} keys
      */
     @Override
     public K floorKey(final K key) {
@@ -632,7 +639,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param key the reference key whose ceiling entry is requested
      * @return an entry with the least key greater than or equal to {@code key}, or {@code null} if there is no such key
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
-     *         or its comparator does not permit {@code null} keys
+     * @throws NullPointerException if {@code key} is {@code null} and this map's comparator does not permit {@code null} keys
      */
     @Override
     public ImmutableEntry<K, V> ceilingEntry(final K key) {
@@ -657,7 +664,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param key the reference key whose ceiling key is requested
      * @return the least key greater than or equal to {@code key}, or {@code null} if there is no such key
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
-     *         or its comparator does not permit {@code null} keys
+     * @throws NullPointerException if {@code key} is {@code null} and this map's comparator does not permit {@code null} keys
      */
     @Override
     public K ceilingKey(final K key) {
@@ -682,7 +689,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param key the reference key whose immediate successor entry is requested
      * @return an entry with the least key greater than {@code key}, or {@code null} if there is no such key
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
-     *         or its comparator does not permit {@code null} keys
+     * @throws NullPointerException if {@code key} is {@code null} and this map's comparator does not permit {@code null} keys
      */
     @Override
     public ImmutableEntry<K, V> higherEntry(final K key) {
@@ -707,7 +714,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param key the reference key whose immediate successor key is requested
      * @return the least key greater than {@code key}, or {@code null} if there is no such key
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
-     *         or its comparator does not permit {@code null} keys
+     * @throws NullPointerException if {@code key} is {@code null} and this map's comparator does not permit {@code null} keys
      */
     @Override
     public K higherKey(final K key) {
@@ -808,8 +815,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     /**
      * Returns an immutable navigable set view of the keys contained in this map.
      * The set's iterator returns the keys in ascending order.
-     * The set is backed by the map, so changes to the map are reflected in the set.
-     * However, since the map is immutable, the set is effectively immutable as well.
+     * The set is backed by this immutable map and is itself effectively immutable.
      *
      * <p>The returned set supports all of the navigable set operations, such as
      * {@code lower}, {@code floor}, {@code ceiling}, {@code higher}, etc., allowing
@@ -837,8 +843,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     /**
      * Returns an immutable navigable set view of the keys contained in this map in descending order.
      * The set's iterator returns the keys in descending order.
-     * The set is backed by the map, so changes to the map are reflected in the set.
-     * However, since the map is immutable, the set is effectively immutable as well.
+     * The set is backed by this immutable map and is itself effectively immutable.
      *
      * <p>The returned set supports all of the navigable set operations, providing
      * descending order navigation of the keys without requiring individual map lookups.</p>
@@ -862,11 +867,10 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * Returns a view of the portion of this map whose keys range from {@code fromKey} to
+     * Returns an immutable view of the portion of this map whose keys range from {@code fromKey} to
      * {@code toKey}. If {@code fromKey} and {@code toKey} are equal, the returned map is empty
      * unless {@code fromInclusive} and {@code toInclusive} are both {@code true}. The returned map is
-     * backed by this map, so changes in the returned map are reflected in this map, and vice-versa.
-     * The returned map supports all optional map operations that this map supports.
+     * backed by this map. Since this map is immutable, the returned view is also immutable.
      *
      * <p>The returned map will throw an {@code IllegalArgumentException} if the starting key is greater
      * than the ending key considering the order of this map's comparator.
@@ -890,7 +894,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param fromInclusive {@code true} if the low endpoint is to be included in the returned view
      * @param toKey high endpoint of the keys in the returned map
      * @param toInclusive {@code true} if the high endpoint is to be included in the returned view
-     * @return a view of the portion of this map whose keys range from {@code fromKey} to {@code toKey}
+     * @return an immutable view of the portion of this map whose keys range from {@code fromKey} to {@code toKey}
      * @throws ClassCastException if {@code fromKey} and {@code toKey} cannot be compared to one another
      *         using this map's comparator (or, if the map has no comparator, using natural ordering)
      * @throws NullPointerException if {@code fromKey} or {@code toKey} is {@code null} and this map's comparator
@@ -903,10 +907,9 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * Returns a view of the portion of this map whose keys are less than (or equal to,
-     * if {@code inclusive} is true) {@code toKey}. The returned map is backed by this map,
-     * so changes in the returned map are reflected in this map, and vice-versa.
-     * The returned map supports all optional map operations that this map supports.
+     * Returns an immutable view of the portion of this map whose keys are less than (or equal to,
+     * if {@code inclusive} is true) {@code toKey}. The returned map is backed by this map.
+     * Since this map is immutable, the returned view is also immutable.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -925,10 +928,11 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *
      * @param toKey high endpoint of the keys in the returned map
      * @param inclusive {@code true} if the high endpoint is to be included in the returned view
-     * @return a view of the portion of this map whose keys are less than (or equal to,
+     * @return an immutable view of the portion of this map whose keys are less than (or equal to,
      *         if {@code inclusive} is true) {@code toKey}
      * @throws ClassCastException if {@code toKey} is not compatible with this map's comparator
      *         (or, if the map has no comparator, if {@code toKey} does not implement {@link Comparable})
+     * @throws NullPointerException if {@code toKey} is {@code null} and this map's comparator does not permit {@code null} keys
      */
     @Override
     public ImmutableNavigableMap<K, V> headMap(final K toKey, final boolean inclusive) {
@@ -936,10 +940,9 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * Returns a view of the portion of this map whose keys are greater than (or equal to,
-     * if {@code inclusive} is true) {@code fromKey}. The returned map is backed by this map,
-     * so changes in the returned map are reflected in this map, and vice-versa.
-     * The returned map supports all optional map operations that this map supports.
+     * Returns an immutable view of the portion of this map whose keys are greater than (or equal to,
+     * if {@code inclusive} is true) {@code fromKey}. The returned map is backed by this map.
+     * Since this map is immutable, the returned view is also immutable.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -958,21 +961,35 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *
      * @param fromKey low endpoint of the keys in the returned map
      * @param inclusive {@code true} if the low endpoint is to be included in the returned view
-     * @return a view of the portion of this map whose keys are greater than (or equal to,
+     * @return an immutable view of the portion of this map whose keys are greater than (or equal to,
      *         if {@code inclusive} is true) {@code fromKey}
      * @throws ClassCastException if {@code fromKey} is not compatible with this map's comparator
      *         (or, if the map has no comparator, if {@code fromKey} does not implement {@link Comparable})
+     * @throws NullPointerException if {@code fromKey} is {@code null} and this map's comparator does not permit {@code null} keys
      */
     @Override
     public ImmutableNavigableMap<K, V> tailMap(final K fromKey, final boolean inclusive) {
         return wrap(navigableMap.tailMap(fromKey, inclusive));
     }
 
+    /**
+     * Compares the specified object with this map for equality.
+     * Returns {@code true} if the given object is also a map and the two maps represent the same mappings,
+     * as defined by {@link Map#equals(Object)}.
+     *
+     * @param obj the object to be compared for equality with this map
+     * @return {@code true} if the specified object is equal to this map
+     */
     @Override
     public boolean equals(final Object obj) {
         return super.equals(obj);
     }
 
+    /**
+     * Returns the hash code value for this map, as defined by {@link Map#hashCode()}.
+     *
+     * @return the hash code value for this map
+     */
     @Override
     public int hashCode() {
         return super.hashCode();

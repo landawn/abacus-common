@@ -145,7 +145,12 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * Retrieves the value associated with the specified property name or returns the default value if the property is not found.
+     * Retrieves the value associated with the specified property name, or returns the default value
+     * if the property is not found or its stored value is {@code null}.
+     *
+     * <p>Note: unlike {@link Map#getOrDefault(Object, Object)}, which only falls back to the
+     * default when the key is absent, this implementation also returns {@code defaultValue} when
+     * the key is present but mapped to {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -157,8 +162,9 @@ public class Properties<K, V> implements Map<K, V> {
      * }</pre>
      *
      * @param propName the name of the property whose associated value is to be returned
-     * @param defaultValue the value to be returned if the specified property name is not found or its value is {@code null}
-     * @return the value associated with the specified property name, or {@code defaultValue} if the property is not found or its value is {@code null}
+     * @param defaultValue the value to be returned if the specified property is not found or its value is {@code null}
+     * @return the value associated with the specified property name, or {@code defaultValue} if the
+     *         property is not found or its value is {@code null}
      * @see #get(Object)
      * @see #get(Object, Class)
      * @see #getOrDefault(Object, Object, Class)
@@ -278,7 +284,11 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * Associates the specified value with the specified key in this map if the key is not already associated with a value.
+     * Associates the specified value with the specified key in this map only if the key is not already
+     * associated with a non-{@code null} value.
+     *
+     * <p>Note: this implementation checks for a {@code null} result from {@link #get(Object)}, so it
+     * will also insert when the key is present but mapped to {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -291,7 +301,8 @@ public class Properties<K, V> implements Map<K, V> {
      *
      * @param propName the key with which the specified value is to be associated
      * @param propValue the value to be associated with the specified key
-     * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the key
+     * @return the existing value associated with the specified key, or {@code null} if there was no
+     *         non-{@code null} mapping for the key (in which case {@code propValue} is inserted)
      */
     @Override
     public V putIfAbsent(final K propName, final V propValue) {
@@ -610,8 +621,8 @@ public class Properties<K, V> implements Map<K, V> {
 
     /**
      * Compares the specified object with this Properties for equality.
-     * Returns {@code true} if the given object is also a Properties instance
-     * and the two Properties represent the same mappings.
+     * Returns {@code true} if the given object is also a {@code Properties} instance
+     * and the two instances' underlying maps are equal.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -624,8 +635,8 @@ public class Properties<K, V> implements Map<K, V> {
      * boolean same = props1.equals(props2);   // Returns true
      * }</pre>
      *
-     * @param obj object to be compared for equality with this Properties
-     * @return {@code true} if the specified object is equal to this Properties
+     * @param obj the object to be compared for equality with this Properties
+     * @return {@code true} if the specified object is a {@code Properties} instance with the same key-value mappings
      */
     @Override
     public boolean equals(final Object obj) {

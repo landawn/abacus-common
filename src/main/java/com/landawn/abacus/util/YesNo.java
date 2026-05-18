@@ -36,7 +36,6 @@ package com.landawn.abacus.util;
  * int storedValue = resultSet.getInt("active");
  * YesNo isActive = YesNo.valueOf(storedValue);
  * }</pre>
- *
  */
 public enum YesNo {
 
@@ -52,6 +51,11 @@ public enum YesNo {
 
     private final int intValue;
 
+    /**
+     * Constructs a YesNo enum constant with the specified integer value.
+     *
+     * @param intValue the integer representation of this constant (0 for NO, 1 for YES)
+     */
     YesNo(final int intValue) {
         this.intValue = intValue;
     }

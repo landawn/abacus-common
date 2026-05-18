@@ -46,11 +46,6 @@ package com.landawn.abacus.util;
  * }
  * }</pre>
  *
- * @see ServiceStatus
- * @see AccountStatus
- * @see WeekDay
- * @see Color
- * @see EnumType
  */
 public enum UnifiedStatus {
 
@@ -353,6 +348,11 @@ public enum UnifiedStatus {
 
     private final int code;
 
+    /**
+     * Constructs a {@code UnifiedStatus} enum constant with the specified numeric code.
+     *
+     * @param code the numeric code uniquely identifying this status
+     */
     UnifiedStatus(int code) {
         this.code = code;
     }

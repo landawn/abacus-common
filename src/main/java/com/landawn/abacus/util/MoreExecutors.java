@@ -106,6 +106,7 @@ public final class MoreExecutors {
      * @param terminationTimeout the maximum time to wait for the executor to terminate
      * @param timeUnit the time unit for the termination timeout
      * @return an unconfigurable ExecutorService that will shut down on JVM exit
+     * @throws IllegalArgumentException if {@code timeUnit} is {@code null}
      */
     public static ExecutorService getExitingExecutorService(final ThreadPoolExecutor executor, final long terminationTimeout, final TimeUnit timeUnit) {
         useDaemonThreadFactory(executor);
@@ -166,6 +167,7 @@ public final class MoreExecutors {
      * @param terminationTimeout the maximum time to wait for the executor to terminate
      * @param timeUnit the time unit for the termination timeout
      * @return an unconfigurable ScheduledExecutorService that will shut down on JVM exit
+     * @throws IllegalArgumentException if {@code timeUnit} is {@code null}
      */
     public static ScheduledExecutorService getExitingScheduledExecutorService(final ScheduledThreadPoolExecutor executor, final long terminationTimeout,
             final TimeUnit timeUnit) {

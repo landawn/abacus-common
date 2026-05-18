@@ -705,6 +705,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      *
      * @param predicate the predicate to apply to each element
      * @return a new {@code ObjIterator} yielding only the matching elements
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @see Iterators#filter(Iterator, Predicate)
      */
     public ObjIterator<T> filter(final Predicate<? super T> predicate) {
@@ -726,6 +727,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @param <U> the type of elements in the returned iterator
      * @param mapper the function to apply to each element
      * @return a new {@code ObjIterator} with transformed elements
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see Iterators#map(Iterator, Function)
      */
     @Beta
@@ -803,8 +805,9 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      *
      * @return an {@code Optional} containing the first {@code non-null} element,
      *         or an empty {@code Optional} if none is found
-     * @deprecated inconsistent data may be returned, as elements consumed before the
-     *         first {@code non-null} element are discarded
+     * @deprecated This method may leave the iterator in a partially consumed state;
+     *         elements consumed before the first {@code non-null} element are discarded,
+     *         which can cause inconsistent results. Use {@link #skipNulls()} instead.
      */
     @Deprecated
     public u.Optional<T> firstNonNull() {
@@ -879,6 +882,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @param a the array into which the elements are stored, if it is big enough;
      *          otherwise a new array of the same runtime type is allocated
      * @return an array containing all remaining elements
+     * @throws NullPointerException if {@code a} is {@code null}
      */
     public <A> A[] toArray(final A[] a) {
         return toList().toArray(a);

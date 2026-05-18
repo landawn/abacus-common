@@ -321,6 +321,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * The size of the list will be set to the length of the array.
      *
      * @param a the array to be used as the backing array for this list; must not be {@code null}
+     * @throws NullPointerException if {@code a} is {@code null}
      */
     public ByteList(final byte[] a) {
         this(N.requireNonNull(a), a.length);
@@ -470,12 +471,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Creates a ByteList containing the specified element repeated a given number of times.
      * This method is useful for initializing lists with a default value.
-     * If len is zero or negative, an empty list is returned.
+     * If len is zero, an empty list is returned.
      *
      * @param element the byte value to be repeated
      * @param len the number of times to repeat the element. Must be non-negative.
-     * @return a new ByteList containing len copies of the specified element
-     * @throws IllegalArgumentException if len is negative
+     * @return a new ByteList containing {@code len} copies of the specified element
+     * @throws IllegalArgumentException if {@code len} is negative
      */
     public static ByteList repeat(final byte element, final int len) {
         return of(Array.repeat(element, len));
@@ -488,8 +489,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * across all possible byte values.
      *
      * @param len the number of random byte values to generate. Must be non-negative.
-     * @return a new ByteList containing len random byte values
-     * @throws IllegalArgumentException if len is negative
+     * @return a new ByteList containing {@code len} random byte values
+     * @throws NegativeArraySizeException if {@code len} is negative
      */
     public static ByteList random(final int len) {
         final byte[] a = new byte[len];
@@ -849,6 +850,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param p the predicate which returns {@code true} for elements to be removed; must not be {@code null}
      * @return {@code true} if any elements were removed; {@code false} if the list was unchanged
+     * @throws NullPointerException if {@code p} is {@code null}
      */
     public boolean removeIf(final BytePredicate p) {
         final ByteList tmp = new ByteList(size());
@@ -1042,7 +1044,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * }</pre>
      *
      * @param indices the indices of elements to remove. Can be {@code null} or empty.
-     *                Invalid indices (negative or &gt;= size) are ignored.
+     * @throws IndexOutOfBoundsException if any index is negative or &gt;= size()
      */
     @Override
     public void removeAt(final int... indices) {
@@ -1270,6 +1272,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * }</pre>
      *
      * @param operator the operator to apply to each element; must not be {@code null}
+     * @throws NullPointerException if {@code operator} is {@code null}
      */
     public void replaceAll(final ByteUnaryOperator operator) {
         for (int i = 0, len = size(); i < len; i++) {
@@ -1295,6 +1298,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param predicate the predicate to test each element; must not be {@code null}
      * @param newValue the value to replace matching elements with
      * @return {@code true} if at least one element was replaced; {@code false} if no elements matched
+     * @throws NullPointerException if {@code predicate} is {@code null}
      */
     public boolean replaceIf(final BytePredicate predicate, final byte newValue) {
         boolean result = false;
@@ -1918,7 +1922,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * }
      * }</pre>
      *
-     * @param action the action to be performed for each element
+     * @param action the action to be performed for each element; must not be {@code null}
+     * @throws NullPointerException if {@code action} is {@code null}
      */
     public void forEach(final ByteConsumer action) {
         forEach(0, size, action);
@@ -1944,8 +1949,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive), or -1 for backward iteration to the start
-     * @param action the action to be performed for each element
+     * @param action the action to be performed for each element; must not be {@code null}
      * @throws IndexOutOfBoundsException if the indices are out of range
+     * @throws NullPointerException if {@code action} is {@code null}
      */
     public void forEach(final int fromIndex, final int toIndex, final ByteConsumer action) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
@@ -2076,12 +2082,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * Sorts all elements in this list in ascending order.
      *
      * <p>This method modifies the list in-place, rearranging elements so that they are in ascending
-     * order. Bytes are compared as signed values, so the order will be from -128 to 127. The sort
-     * is stable, meaning that equal elements retain their relative order.</p>
+     * order. Bytes are compared as signed values, so the order will be from -128 to 127.</p>
      *
      * <p>The sorting algorithm used is optimized for primitive arrays and typically performs in
      * O(n log n) time. For small lists or lists that are already nearly sorted, the performance
-     * may be better.</p>
+     * may be better. The sort is not guaranteed to be stable.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2107,7 +2112,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * For smaller lists, the overhead of parallelization may make this method slower than the
      * sequential {@link #sort()} method.</p>
      *
-     * <p>The sort is stable and compares bytes as signed values (-128 to 127).</p>
+     * <p>The sort is not guaranteed to be stable and compares bytes as signed values (-128 to 127).</p>
      */
     public void parallelSort() {
         if (size > 1) {
@@ -2122,8 +2127,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * descending order. The result is that elements are arranged from highest to lowest value,
      * with bytes compared as signed values (127 down to -128).</p>
      *
-     * <p>This is equivalent to calling {@link #sort()} followed by {@link #reverse()}, but may
-     * be slightly more efficient as it's implemented as a single operation.</p>
+     * <p>This is implemented as a call to {@link #sort()} followed by {@link #reverse()}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2300,7 +2304,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * list.shuffle(rnd);                // Will always produce the same shuffle with this seed
      * }</pre>
      *
-     * @param rnd the random number generator to use for shuffling
+     * @param rnd the random number generator to use for shuffling; must not be {@code null}
+     * @throws NullPointerException if {@code rnd} is {@code null}
      */
     @Override
     public void shuffle(final Random rnd) {
@@ -2608,9 +2613,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param <C> the type of Collection to create
      * @param fromIndex the starting index (inclusive) of elements to include
      * @param toIndex the ending index (exclusive) of elements to include
-     * @param supplier a function that creates a new Collection instance given the required size
+     * @param supplier a function that creates a new Collection instance given the required size; must not be {@code null}
      * @return a new Collection containing boxed elements from the specified range
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
+     * @throws NullPointerException if {@code supplier} is {@code null}
      */
     @Override
     public <C extends Collection<Byte>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
@@ -2633,9 +2639,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param fromIndex the starting index (inclusive) of elements to include
      * @param toIndex the ending index (exclusive) of elements to include
-     * @param supplier a function that creates a new Multiset instance given the required size
+     * @param supplier a function that creates a new Multiset instance given the required size; must not be {@code null}
      * @return a new Multiset containing elements from the specified range with their counts
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
+     * @throws NullPointerException if {@code supplier} is {@code null}
      */
     @Override
     public Multiset<Byte> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Byte>> supplier) throws IndexOutOfBoundsException {

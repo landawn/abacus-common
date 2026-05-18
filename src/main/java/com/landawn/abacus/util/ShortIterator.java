@@ -176,7 +176,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * Creates a ShortIterator that is initialized lazily using the provided Supplier.
      * The actual iterator is not created until the first method call on the returned iterator.
-     * This is useful for deferring expensive iterator creation until it's actually needed.
+     * This is useful for deferring expensive iterator creation until it is actually needed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -334,9 +334,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * ShortIterator skipped = iter.skip(2);   // Will iterate over 3, 4, 5
      * }</pre>
      *
-     * @param n the number of elements to skip
-     * @return a new {@code ShortIterator} that skips the first {@code n} elements;
-     *         returns this iterator unchanged if {@code n <= 0}
+     * @param n the number of elements to skip; must be non-negative
+     * @return this iterator unchanged if {@code n == 0}, otherwise a new {@code ShortIterator}
+     *         that skips the first {@code n} elements
      * @throws IllegalArgumentException if {@code n} is negative
      * @see #limit(long)
      */
@@ -384,7 +384,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
 
     /**
      * Returns a new ShortIterator that limits the number of elements to iterate over.
-     * The returned iterator will iterate over at most count elements.
+     * The returned iterator will iterate over at most {@code count} elements.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -392,9 +392,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * ShortIterator limited = iter.limit(3);   // Will only return three 1s
      * }</pre>
      *
-     * @param count the maximum number of elements to iterate
-     * @return a new {@code ShortIterator} limited to {@code count} elements;
-     *         returns an empty iterator if {@code count == 0}
+     * @param count the maximum number of elements to iterate; must be non-negative
+     * @return an empty iterator if {@code count == 0}, otherwise a new {@code ShortIterator}
+     *         limited to at most {@code count} elements
      * @throws IllegalArgumentException if {@code count} is negative
      * @see #skip(long)
      */
@@ -429,7 +429,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
 
     /**
      * Returns a new ShortIterator that only includes elements matching the given predicate.
-     * Elements that don't satisfy the predicate are skipped.
+     * Elements that do not satisfy the predicate are skipped.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -438,7 +438,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * }</pre>
      *
      * @param predicate the predicate to test each element; must not be {@code null}
-     * @return a new filtered {@code ShortIterator}
+     * @return a new {@code ShortIterator} containing only elements that satisfy the predicate
      * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     public ShortIterator filter(final ShortPredicate predicate) throws IllegalArgumentException {
@@ -551,17 +551,16 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * Returns an iterator of IndexedShort objects pairing each element with its index.
-     * Indexing starts from 0.
+     * Returns an iterator that pairs each remaining element with its zero-based index.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator iter = ShortIterator.of(new short[] {10, 20, 30});
      * ObjIterator<IndexedShort> indexed = iter.indexed();
-     * // Will produce: IndexedShort(10, 0), IndexedShort(20, 1), IndexedShort(30, 2)
+     * // Produces: IndexedShort(index=0, value=10), IndexedShort(index=1, value=20), IndexedShort(index=2, value=30)
      * }</pre>
      *
-     * @return an {@link ObjIterator} of {@link IndexedShort} objects
+     * @return an {@link ObjIterator} of {@link IndexedShort} objects with indices starting at 0
      * @see #indexed(long)
      */
     @Beta
@@ -570,18 +569,18 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * Returns an iterator of IndexedShort objects pairing each element with its index.
-     * Indexing starts from the specified startIndex.
+     * Returns an iterator that pairs each remaining element with its index,
+     * with indices starting from the specified {@code startIndex}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator iter = ShortIterator.of(new short[] {10, 20, 30});
      * ObjIterator<IndexedShort> indexed = iter.indexed(100);
-     * // Will produce: IndexedShort(10, 100), IndexedShort(20, 101), IndexedShort(30, 102)
+     * // Produces: IndexedShort(index=100, value=10), IndexedShort(index=101, value=20), IndexedShort(index=102, value=30)
      * }</pre>
      *
-     * @param startIndex the starting index value
-     * @return an {@link ObjIterator} of {@link IndexedShort} objects
+     * @param startIndex the starting index value; must be non-negative
+     * @return an {@link ObjIterator} of {@link IndexedShort} objects with indices starting at {@code startIndex}
      * @throws IllegalArgumentException if {@code startIndex} is negative
      * @see #indexed()
      */
@@ -607,8 +606,8 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * Performs the given action for each remaining element using Java's Consumer interface.
-     * This method is deprecated because it causes boxing of primitive shorts.
+     * Performs the given action for each remaining element.
+     * This method is deprecated because it boxes each primitive {@code short} to a {@link Short} object.
      *
      * @param action the action to perform on each element
      * @deprecated use {@link #foreachRemaining(Throwables.ShortConsumer)} instead to avoid boxing overhead
@@ -620,8 +619,8 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * Performs the given action for each remaining short element.
-     * This method avoids boxing overhead by using a specialized ShortConsumer.
+     * Performs the given action for each remaining {@code short} element without boxing overhead.
+     * This method consumes the iterator; after it returns, {@code hasNext()} will return {@code false}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -630,7 +629,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
-     * @param action the action to perform on each element
+     * @param action the action to perform on each element; must not be {@code null}
      * @throws IllegalArgumentException if {@code action} is {@code null}
      * @throws E if the action throws an exception
      */
@@ -643,8 +642,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * Performs the given action for each remaining element along with its index.
-     * The index starts from 0 and increments for each element.
+     * Performs the given action for each remaining element along with its zero-based index.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -658,9 +656,10 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
-     * @param action the action to perform on each element with its index; must not be {@code null}
+     * @param action the action to perform on each (index, value) pair; must not be {@code null}
      * @throws IllegalArgumentException if {@code action} is {@code null}
-     * @throws IllegalStateException if the iterator has more than {@link Integer#MAX_VALUE} elements (index overflow)
+     * @throws IllegalStateException if the iterator contains more than {@link Integer#MAX_VALUE} elements,
+     *         causing the index to overflow
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntShortConsumer<E> action) throws IllegalArgumentException, E {

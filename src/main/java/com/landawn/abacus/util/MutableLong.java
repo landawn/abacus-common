@@ -422,9 +422,10 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * int result = a.compareTo(b);   // returns negative value
      * }</pre>
      *
-     * @param other the other MutableLong to compare to, not null
+     * @param other the other MutableLong to compare to, not {@code null}
      * @return a negative integer, zero, or a positive integer as this value
      *         is less than, equal to, or greater than the specified MutableLong
+     * @throws NullPointerException if {@code other} is {@code null}
      */
     @Override
     public int compareTo(final MutableLong other) {

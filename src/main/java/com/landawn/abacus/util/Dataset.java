@@ -470,7 +470,7 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param columnNames the collection of column names(case-sensitive) to check.
-     * @return {@code true} if all the specified columns are included in the this {@code Dataset}
+     * @return {@code true} if all the specified columns are included in this {@code Dataset}
      */
     boolean containsAllColumns(Collection<String> columnNames);
 
@@ -4102,8 +4102,8 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("dept", "name"), new Object[][] {{"IT", "Alice"}});
-     * ListMultimap<String, Object> byDept = dataset.toMultimap("dept", "name");
+     * Dataset dataset = Dataset.rows(Arrays.asList("dept", "name"), new Object[][] {{"IT", "Alice"}, {"HR", "Bob"}});
+     * Multimap<String, String, List<String>> byDept = dataset.toMultimap(0, 2, "dept", "name", LinkedListMultimap::new);
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -4157,8 +4157,9 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("dept", "name"), new Object[][] {{"IT", "Alice"}});
-     * ListMultimap<String, Object> byDept = dataset.toMultimap("dept", "name");
+     * Dataset dataset = Dataset.rows(Arrays.asList("department", "name", "salary"), data);
+     * Multimap<String, Employee, List<Employee>> byDept =
+     *     dataset.toMultimap("department", Arrays.asList("name", "salary"), Employee.class, LinkedListMultimap::new);
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -4185,8 +4186,9 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("dept", "name"), new Object[][] {{"IT", "Alice"}});
-     * ListMultimap<String, Object> byDept = dataset.toMultimap("dept", "name");
+     * Dataset dataset = Dataset.rows(Arrays.asList("department", "name", "salary"), data);
+     * ListMultimap<String, Employee> byDept =
+     *     dataset.toMultimap(0, 10, "department", Arrays.asList("name", "salary"), Employee.class);
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -4214,8 +4216,9 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("dept", "name"), new Object[][] {{"IT", "Alice"}});
-     * ListMultimap<String, Object> byDept = dataset.toMultimap("dept", "name");
+     * Dataset dataset = Dataset.rows(Arrays.asList("department", "name", "salary"), data);
+     * Multimap<String, Employee, List<Employee>> byDept =
+     *     dataset.toMultimap(0, 10, "department", Arrays.asList("name", "salary"), Employee.class, LinkedListMultimap::new);
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -4246,8 +4249,9 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("dept", "name"), new Object[][] {{"IT", "Alice"}});
-     * ListMultimap<String, Object> byDept = dataset.toMultimap("dept", "name");
+     * Dataset dataset = Dataset.rows(Arrays.asList("department", "name", "salary"), data);
+     * ListMultimap<String, Map<String, Object>> byDept =
+     *     dataset.toMultimap("department", Arrays.asList("name", "salary"), size -> new HashMap<>(size));
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -4272,8 +4276,10 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("dept", "name"), new Object[][] {{"IT", "Alice"}});
-     * ListMultimap<String, Object> byDept = dataset.toMultimap("dept", "name");
+     * Dataset dataset = Dataset.rows(Arrays.asList("department", "name", "salary"), data);
+     * Multimap<String, Map<String, Object>, List<Map<String, Object>>> byDept =
+     *     dataset.toMultimap("department", Arrays.asList("name", "salary"),
+     *         size -> new HashMap<>(size), LinkedListMultimap::new);
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -4300,8 +4306,9 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("dept", "name"), new Object[][] {{"IT", "Alice"}});
-     * ListMultimap<String, Object> byDept = dataset.toMultimap("dept", "name");
+     * Dataset dataset = Dataset.rows(Arrays.asList("department", "name", "salary"), data);
+     * ListMultimap<String, Map<String, Object>> byDept =
+     *     dataset.toMultimap(0, 10, "department", Arrays.asList("name", "salary"), size -> new HashMap<>(size));
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -4329,8 +4336,10 @@ public sealed interface Dataset permits RowDataset {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.rows(Arrays.asList("dept", "name"), new Object[][] {{"IT", "Alice"}});
-     * ListMultimap<String, Object> byDept = dataset.toMultimap("dept", "name");
+     * Dataset dataset = Dataset.rows(Arrays.asList("department", "name", "salary"), data);
+     * Multimap<String, Map<String, Object>, List<Map<String, Object>>> byDept =
+     *     dataset.toMultimap(0, 10, "department", Arrays.asList("name", "salary"),
+     *         size -> new HashMap<>(size), LinkedListMultimap::new);
      * }</pre>
      *
      * @param <K> the type of the keys in the resulting map.
@@ -10779,7 +10788,7 @@ public sealed interface Dataset permits RowDataset {
      * Creates a Stream of objects of type {@code T} from rows in the Dataset.
      * <br />
      * The type of objects in the resulting Stream is determined by the provided rowType.
-     * Only the columns specified in the {@code columnNames} collection will be included to {@code rowType}.
+     * Only the columns specified in the {@code columnNames} collection will be included in {@code rowType}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -10788,7 +10797,7 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param <T> the type of objects in the resulting Stream.
-     * @param columnNames the collection of column names to be included to the {@code rowType}.
+     * @param columnNames the collection of column names to be included in the {@code rowType}.
      * @param rowType the class of the objects in the resulting Stream. It must be one of the supported types - Object[], Collection, Map, or Bean class.
      * @return a Stream of objects of type T, created from rows in the Dataset.
      * @throws IllegalArgumentException if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class, or if the columnNames are not found in the Dataset or {@code columnNames} is empty.
@@ -10799,7 +10808,7 @@ public sealed interface Dataset permits RowDataset {
      * Creates a Stream of objects of type {@code T} from a subset of rows in the Dataset.
      * <br />
      * The type of objects in the resulting Stream is determined by the provided rowType.
-     * Only the columns specified in the {@code columnNames} collection will be included to {@code rowType}.
+     * Only the columns specified in the {@code columnNames} collection will be included in {@code rowType}.
      * The subset of rows is determined by the provided fromRowIndex and toRowIndex.
      *
      * <p><b>Usage Examples:</b></p>
@@ -10811,7 +10820,7 @@ public sealed interface Dataset permits RowDataset {
      * @param <T> the type of objects in the resulting Stream.
      * @param fromRowIndex the starting index of the row range (inclusive).
      * @param toRowIndex the ending index of the row range (exclusive).
-     * @param columnNames the collection of column names to be included to the {@code rowType}.
+     * @param columnNames the collection of column names to be included in the {@code rowType}.
      * @param rowType the class of the objects in the resulting Stream. It must be one of the supported types - Object[], Collection, Map, or Bean class.
      * @return a Stream of objects of type T, created from the subset of rows in the Dataset.
      * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the Dataset's range.
@@ -10866,7 +10875,7 @@ public sealed interface Dataset permits RowDataset {
      * Creates a Stream of objects of type {@code T} from the Dataset.
      * <br />
      * The type of objects in the resulting Stream is determined by the provided rowSupplier function.
-     * Only the columns specified in the {@code columnNames} collection will be included to the instances created by rowSupplier.
+     * Only the columns specified in the {@code columnNames} collection will be included in the instances created by rowSupplier.
      * The rowSupplier function is responsible for creating new instances of {@code T} for each row in the Dataset.
      *
      * <p><b>Usage Examples:</b></p>
@@ -10876,7 +10885,7 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param <T> the type of objects in the resulting Stream.
-     * @param columnNames the collection of column names to be included to the instances created by rowSupplier.
+     * @param columnNames the collection of column names to be included in the instances created by rowSupplier.
      * @param rowSupplier a function that creates a new instance of {@code T} for each row in the Dataset.
      * @return a Stream of objects of type T, created from the Dataset.
      * @throws IllegalArgumentException if the columnNames are not found in the Dataset or {@code columnNames} is empty, or if the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
@@ -10888,7 +10897,7 @@ public sealed interface Dataset permits RowDataset {
      * <br />
      * The type of objects in the resulting Stream is determined by the provided rowSupplier function.
      * The rowSupplier function is responsible for creating new instances of {@code T} for each row in the Dataset.
-     * Only the columns specified in the {@code columnNames} collection will be included to the instances created by rowSupplier.
+     * Only the columns specified in the {@code columnNames} collection will be included in the instances created by rowSupplier.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -10899,7 +10908,7 @@ public sealed interface Dataset permits RowDataset {
      * @param <T> the type of objects in the resulting Stream.
      * @param fromRowIndex the starting index of the row range (inclusive).
      * @param toRowIndex the ending index of the row range (exclusive).
-     * @param columnNames the collection of column names to be included to the instances created by rowSupplier.
+     * @param columnNames the collection of column names to be included in the instances created by rowSupplier.
      * @param rowSupplier a function that creates a new instance of {@code T} for each row in the Dataset.
      * @return a Stream of objects of type T, created from the subset of rows in the Dataset.
      * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the Dataset's range.

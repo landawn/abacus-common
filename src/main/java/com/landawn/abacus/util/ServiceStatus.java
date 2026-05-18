@@ -90,6 +90,11 @@ public enum ServiceStatus {
 
     private final int code;
 
+    /**
+     * Constructs a {@code ServiceStatus} constant with the specified integer code.
+     *
+     * @param code the integer code associated with this status
+     */
     ServiceStatus(final int code) {
         this.code = code;
     }

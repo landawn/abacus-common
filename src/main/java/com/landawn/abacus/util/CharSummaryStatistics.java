@@ -73,11 +73,11 @@ public class CharSummaryStatistics implements CharConsumer {
      * // Creates statistics for 5 chars ranging from 'A' to 'E' with sum of 335
      * }</pre>
      *
-     * @param count the count of values
-     * @param min the minimum value
-     * @param max the maximum value
-     * @param sum the sum of all values
-     * @throws IllegalArgumentException if count is negative or minimum is greater than maximum
+     * @param count the count of values; must be non-negative
+     * @param min the minimum {@code char} value
+     * @param max the maximum {@code char} value
+     * @param sum the sum of the Unicode code point values of all recorded chars
+     * @throws IllegalArgumentException if {@code count} is negative or {@code min} is greater than {@code max}
      */
     public CharSummaryStatistics(final long count, final char min, final char max, final long sum) {
         if (count < 0) {
@@ -244,7 +244,7 @@ public class CharSummaryStatistics implements CharConsumer {
      * System.out.println(stats.getAverage());   // 66.0
      * }</pre>
      *
-     * @return the arithmetic mean of values, or zero if none
+     * @return the arithmetic mean of Unicode code point values as a {@code double}, or {@code 0.0} if none
      */
     public final double getAverage() {
         return getCount() > 0 ? (double) getSum() / getCount() : 0.0d;

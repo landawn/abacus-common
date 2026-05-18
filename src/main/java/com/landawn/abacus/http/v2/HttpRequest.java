@@ -109,10 +109,13 @@ public final class HttpRequest {
     /**
      * Creates a new HttpRequest instance with the specified URL and HTTP client.
      *
+     * <p>Note: the URL string is not validated here. An {@link IllegalArgumentException} may be
+     * thrown later, when the request is executed, if it is not a valid {@code http} or
+     * {@code https} URI.</p>
+     *
      * @param url the URL string for the request
      * @param httpClient the HttpClient to use for executing the request
      * @return a new HttpRequest instance
-     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
     public static HttpRequest create(final String url, final HttpClient httpClient) {
         return new HttpRequest(url, null, httpClient, null, java.net.http.HttpRequest.newBuilder()).closeHttpClientAfterExecution(false);
@@ -121,10 +124,13 @@ public final class HttpRequest {
     /**
      * Creates a new HttpRequest instance with the specified URL and HTTP client.
      *
+     * <p>Note: the URL is not validated here. An {@link IllegalArgumentException} may be
+     * thrown later, when the request is executed, if it is not a valid {@code http} or
+     * {@code https} URI.</p>
+     *
      * @param url the URL object for the request
      * @param httpClient the HttpClient to use for executing the request
      * @return a new HttpRequest instance
-     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
     public static HttpRequest create(final URL url, final HttpClient httpClient) {
         return new HttpRequest(url.toString(), null, httpClient, null, java.net.http.HttpRequest.newBuilder()).closeHttpClientAfterExecution(false);
@@ -133,10 +139,13 @@ public final class HttpRequest {
     /**
      * Creates a new HttpRequest instance with the specified URI and HTTP client.
      *
+     * <p>Note: the URI is not validated here. An {@link IllegalArgumentException} may be
+     * thrown later, when the request is executed, if its scheme is not {@code http} or
+     * {@code https}.</p>
+     *
      * @param uri the URI object for the request
      * @param httpClient the HttpClient to use for executing the request
      * @return a new HttpRequest instance
-     * @throws IllegalArgumentException if the scheme of {@code uri} is not {@code http} or {@code https}.
      */
     public static HttpRequest create(final URI uri, final HttpClient httpClient) {
         return new HttpRequest(null, uri, httpClient, null, java.net.http.HttpRequest.newBuilder()).closeHttpClientAfterExecution(false);
@@ -150,9 +159,12 @@ public final class HttpRequest {
      * HttpRequest request = HttpRequest.url("http://localhost:18080/users");
      * }</pre>
      *
+     * <p>Note: the URL string is not validated here. An {@link IllegalArgumentException} may be
+     * thrown later, when the request is executed, if it is not a valid {@code http} or
+     * {@code https} URI.</p>
+     *
      * @param url the URL string for the request
      * @return a new HttpRequest instance
-     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
     public static HttpRequest url(final String url) {
         return new HttpRequest(url, null, DEFAULT_HTTP_CLIENT, null, java.net.http.HttpRequest.newBuilder()).closeHttpClientAfterExecution(false);
@@ -180,9 +192,12 @@ public final class HttpRequest {
     /**
      * Creates a new HttpRequest instance with the specified URL using the default HTTP client.
      *
+     * <p>Note: the URL is not validated here. An {@link IllegalArgumentException} may be
+     * thrown later, when the request is executed, if it is not a valid {@code http} or
+     * {@code https} URI.</p>
+     *
      * @param url the URL object for the request
      * @return a new HttpRequest instance
-     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
     public static HttpRequest url(final URL url) {
         return new HttpRequest(url.toString(), null, DEFAULT_HTTP_CLIENT, null, java.net.http.HttpRequest.newBuilder()).closeHttpClientAfterExecution(false);
@@ -205,9 +220,12 @@ public final class HttpRequest {
     /**
      * Creates a new HttpRequest instance with the specified URI using the default HTTP client.
      *
+     * <p>Note: the URI is not validated here. An {@link IllegalArgumentException} may be
+     * thrown later, when the request is executed, if its scheme is not {@code http} or
+     * {@code https}.</p>
+     *
      * @param uri the URI object for the request
      * @return a new HttpRequest instance
-     * @throws IllegalArgumentException if the scheme of {@code uri} is not {@code http} or {@code https}.
      */
     public static HttpRequest url(final URI uri) {
         return new HttpRequest(null, uri, DEFAULT_HTTP_CLIENT, null, java.net.http.HttpRequest.newBuilder()).closeHttpClientAfterExecution(false);

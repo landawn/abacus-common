@@ -56,8 +56,9 @@ public final class Password {
      * Password md5Password = new Password("MD5");
      * }</pre>
      *
-     * @param algorithm the name of the hashing algorithm to use
-     * @throws RuntimeException if the specified algorithm is not available
+     * @param algorithm the name of the hashing algorithm to use (e.g., {@code "MD5"}, {@code "SHA-1"}, {@code "SHA-256"})
+     * @throws RuntimeException wrapping {@link java.security.NoSuchAlgorithmException} if the specified algorithm
+     *         is not available from any registered security provider
      * @see MessageDigest#getInstance(String)
      */
     public Password(final String algorithm) {
@@ -97,8 +98,8 @@ public final class Password {
      * // encrypted contains the Base64-encoded hash
      * }</pre>
      *
-     * @param x the plain-text password to hash
-     * @return the Base64-encoded digest, or {@code null} if {@code x} is {@code null}
+     * @param x the plain-text password to hash; may be {@code null}
+     * @return the Base64-encoded digest of {@code x}, or {@code null} if {@code x} is {@code null}
      */
     @MayReturnNull
     public synchronized String encrypt(final String x) {
@@ -127,10 +128,11 @@ public final class Password {
      * boolean notMatches = password.isEqual("wrongPassword", encrypted);   // false
      * }</pre>
      *
-     * @param plainPassword the plain-text password to verify
-     * @param encryptedPassword the Base64-encoded hashed password to compare against
-     * @return {@code true} if the passwords match, {@code false} otherwise.
-     *         Returns {@code true} if both are {@code null}, {@code false} if only one is {@code null}
+     * @param plainPassword the plain-text password to verify; may be {@code null}
+     * @param encryptedPassword the Base64-encoded hashed password to compare against; may be {@code null}
+     * @return {@code true} if {@code encrypt(plainPassword)} equals {@code encryptedPassword},
+     *         or if both arguments are {@code null}; {@code false} if only one is {@code null}
+     *         or if the hashes do not match
      */
     public boolean isEqual(final String plainPassword, final String encryptedPassword) {
         if (plainPassword == null) {

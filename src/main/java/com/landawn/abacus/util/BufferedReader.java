@@ -194,7 +194,6 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * @return the number of characters read, or -1 if the end of the stream
      *         has been reached
      * @throws IOException if an I/O error occurs
-     * @throws IndexOutOfBoundsException if off or len are invalid
      */
     private int read1(final char[] cbuf, final int off, final int len) throws IOException { // NOSONAR
         if (nextChar >= nChars) {
@@ -528,8 +527,9 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
     /**
      * Tells whether this stream is ready to be read.
      *
-     * <p>A stream is ready if the buffer contains data or if the underlying
-     * stream is ready.</p>
+     * <p>When reading from a {@link String}, this method always returns {@code true}.
+     * When reading from an underlying {@link Reader}, a stream is ready if the buffer
+     * contains data or if the underlying reader is ready.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -539,8 +539,8 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * }
      * }</pre>
      *
-     * @return {@code true} if the next read() is guaranteed not to block for input,
-     *         {@code false} otherwise
+     * @return {@code true} if the next {@link #read()} is guaranteed not to block for input,
+     *         {@code false} otherwise; always {@code true} when reading from a string
      * @throws IOException if an I/O error occurs
      */
     @Override
@@ -673,6 +673,11 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
         lock = reader;
     }
 
+    /**
+     * Resets all internal state to release resources: recycles the character buffer,
+     * clears string and reader references, and zeroes position counters.
+     * This method is called during {@link #close()} to release held resources.
+     */
     void _reset() { //NOSONAR
         //noinspection SynchronizeOnNonFinalField
         synchronized (lock) {
@@ -729,15 +734,31 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
     }
 
     /**
-     * A dummy Reader implementation used as a placeholder.
+     * A dummy {@link Reader} implementation used as a placeholder when constructing a
+     * {@link BufferedReader} that reads from a {@link String} directly.
+     * All operations throw {@link UnsupportedOperationException}.
      */
     static final class DummyReader extends Reader {
 
+        /**
+         * Always throws {@link UnsupportedOperationException}.
+         *
+         * @param cbuf ignored
+         * @param off ignored
+         * @param len ignored
+         * @return never returns normally
+         * @throws UnsupportedOperationException always
+         */
         @Override
         public int read(final char[] cbuf, final int off, final int len) throws UnsupportedOperationException {
             throw new UnsupportedOperationException();
         }
 
+        /**
+         * Always throws {@link UnsupportedOperationException}.
+         *
+         * @throws UnsupportedOperationException always
+         */
         @Override
         public void close() throws UnsupportedOperationException {
             throw new UnsupportedOperationException();

@@ -161,21 +161,23 @@ public final class StringWriter extends AppendableWriter {
     }
 
     /**
-     * Appends a portion of a character sequence to this writer.
-     * If the sequence is {@code null}, then characters are appended as if the sequence
-     * contained the four characters "null".
+     * Appends a subsequence of the specified character sequence to this writer.
+     * Characters from index {@code start} (inclusive) to index {@code end} (exclusive)
+     * are appended. If {@code csq} is {@code null}, characters are appended as if
+     * {@code csq} contained the four characters {@code "null"}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.append("Hello World", 0, 5);   // Appends "Hello"
      * }</pre>
      *
-     * @param csq the character sequence to append, may be null
-     * @param start the index of the first character to append
-     * @param end the index after the last character to append
+     * @param csq the character sequence from which a subsequence is appended, may be {@code null}
+     * @param start the index of the first character to append (inclusive)
+     * @param end the index of the last character to append (exclusive)
      * @return this StringWriter instance for method chaining
-     * @throws IndexOutOfBoundsException if start or end are negative,
-     *         start is greater than end, or end is greater than csq.length()
+     * @throws IndexOutOfBoundsException if {@code start} or {@code end} are negative,
+     *         {@code start} is greater than {@code end}, or {@code end} is greater than
+     *         {@code csq.length()}
      */
     @Override
     public StringWriter append(final CharSequence csq, final int start, final int end) {
@@ -231,10 +233,10 @@ public final class StringWriter extends AppendableWriter {
      * }</pre>
      *
      * @param cbuf the character array containing data to write
-     * @param off the offset from which to start writing characters
+     * @param off the index of the first character in {@code cbuf} to write
      * @param len the number of characters to write
-     * @throws IndexOutOfBoundsException if off is negative, len is negative,
-     *         or off + len is greater than cbuf.length
+     * @throws IndexOutOfBoundsException if {@code off} is negative, {@code len} is negative,
+     *         or {@code off + len} is greater than {@code cbuf.length}
      */
     @Override
     public void write(final char[] cbuf, final int off, final int len) {
@@ -269,10 +271,10 @@ public final class StringWriter extends AppendableWriter {
      * }</pre>
      *
      * @param str the string containing data to write
-     * @param off the offset from which to start writing characters
+     * @param off the index of the first character to write
      * @param len the number of characters to write
-     * @throws IndexOutOfBoundsException if off is negative, len is negative,
-     *         or off + len is greater than str.length()
+     * @throws StringIndexOutOfBoundsException if {@code off} is negative, {@code len} is negative,
+     *         or {@code off + len} is greater than {@code str.length()}
      */
     @Override
     public void write(final String str, final int off, final int len) {

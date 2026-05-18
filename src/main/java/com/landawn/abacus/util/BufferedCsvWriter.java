@@ -43,10 +43,11 @@ import java.io.Writer;
  * }
  * }</pre>
  *
- * @see com.landawn.abacus.util.CsvUtil
+ * @see CsvUtil
  * @see CharacterWriter
  */
 public final class BufferedCsvWriter extends CharacterWriter {
+    /** Backslash-escape sequence used for double quotes when backslash escaping is enabled ({@code \"}). */
     private static final char[] BACK_SLASH_CHAR_ARRAY = "\\\"".toCharArray();
     // start
     // ======================================================================================================>>>
@@ -70,7 +71,16 @@ public final class BufferedCsvWriter extends CharacterWriter {
      * We also escape '\u2028' and '\u2029', which JavaScript interprets as newline characters. This prevents eval()
      * from failing with a syntax error. http://code.google.com/p/google-gson/issues/detail?id=341
      */
+    /**
+     * Standard CSV character replacement mappings (RFC 4180 double-quote escaping).
+     * Double quotes are escaped as {@code ""}, while other special characters are passed through literally.
+     */
     static final char[][] REPLACEMENT_CHARS;
+
+    /**
+     * CSV character replacement mappings using backslash escaping.
+     * Double quotes are escaped as {@code \"} instead of the RFC 4180 {@code ""} form.
+     */
     static final char[][] REPLACEMENT_CHARS_BACK_SLASH;
 
     static {
@@ -108,6 +118,7 @@ public final class BufferedCsvWriter extends CharacterWriter {
 
     }
 
+    /** The maximum index in the {@code REPLACEMENT_CHARS} array. */
     static final int LENGTH_OF_REPLACEMENT_CHARS = REPLACEMENT_CHARS.length - 1;
 
     // end

@@ -55,6 +55,11 @@ public enum OperationType {
 
     private final int intValue;
 
+    /**
+     * Constructs an OperationType enum constant with the specified integer flag value.
+     *
+     * @param intValue the integer flag value for this operation type (1, 2, 4, or 8)
+     */
     OperationType(final int intValue) {
         this.intValue = intValue;
     }

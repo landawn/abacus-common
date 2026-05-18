@@ -370,11 +370,16 @@ public final class Reflection<T> {
 
     /**
      * Returns the declared constructor matching the specified parameter types.
+     * Results are cached per class for performance. If no exact match is found,
+     * assignability (including primitive/wrapper equivalence) is used to locate
+     * a compatible constructor.
      *
      * @param cls the class to search for the constructor
-     * @param argTypes the array of parameter types for the constructor
+     * @param argTypes the array of parameter types for the constructor; individual
+     *        elements may be {@code null} to match any type at that position
      * @return the Constructor object matching the parameter types
      * @throws SecurityException if a security manager denies access to the constructor
+     * @throws RuntimeException if no compatible constructor is found
      */
     private Constructor<T> getDeclaredConstructor(final Class<T> cls, final Class<?>[] argTypes) throws SecurityException {
         Map<Wrapper<Class<?>[]>, Constructor<?>> constructorPool = clsConstructorPool.computeIfAbsent(cls, k -> new ConcurrentHashMap<>());
@@ -424,12 +429,17 @@ public final class Reflection<T> {
 
     /**
      * Returns the declared method matching the specified name and parameter types.
+     * Results are cached per class for performance. If no exact match is found,
+     * assignability (including primitive/wrapper equivalence) is used to locate
+     * a compatible method.
      *
      * @param cls the class to search for the method
      * @param methodName the name of the method to retrieve
-     * @param argTypes the array of parameter types for the method
+     * @param argTypes the array of parameter types for the method; individual
+     *        elements may be {@code null} to match any type at that position
      * @return the Method object matching the name and parameter types
      * @throws SecurityException if a security manager denies access to the method
+     * @throws RuntimeException if no compatible method is found
      */
     private Method getDeclaredMethod(final Class<?> cls, final String methodName, final Class<?>[] argTypes) throws SecurityException {
         Map<String, Map<Wrapper<Class<?>[]>, Method>> methodPool = clsMethodPool.computeIfAbsent(cls, k -> new ConcurrentHashMap<>());
@@ -479,6 +489,15 @@ public final class Reflection<T> {
         return result;
     }
 
+    /**
+     * Returns an array of runtime classes corresponding to the supplied argument values.
+     * A {@code null} value in {@code values} produces a {@code null} entry in the returned
+     * array, which is then treated as a wildcard when matching constructors or methods.
+     *
+     * @param values the argument values whose types are to be extracted
+     * @return an array of {@code Class} objects (may contain {@code null} entries),
+     *         or {@link #EMPTY_CLASSES} if {@code values} is null or empty
+     */
     private Class<?>[] getTypes(final Object... values) {
         if (N.isEmpty(values)) {
             return EMPTY_CLASSES;

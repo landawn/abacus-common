@@ -932,9 +932,8 @@ public final class Suppliers {
      * backed by the specified type of Map.</p>
      *
      * @param <T> the type of elements in the multiset
-     * @param valueMapType the class of {@code Map} to use for storing element counts
+     * @param valueMapType the class of {@code Map} to use for storing element counts, must not be {@code null}
      * @return a supplier that creates new Multiset instances backed by the specified map type
-     * @throws IllegalArgumentException if {@code valueMapType} is {@code null}
      */
     @SuppressWarnings("rawtypes")
     public static <T> Supplier<Multiset<T>> ofMultiset(final Class<? extends Map> valueMapType) {
@@ -948,9 +947,8 @@ public final class Suppliers {
      * backed by a Map created by the provided supplier.</p>
      *
      * @param <T> the type of elements in the multiset
-     * @param mapSupplier supplier to create the backing {@code Map} used for storing element counts
+     * @param mapSupplier supplier to create the backing {@code Map} used for storing element counts, must not be {@code null}
      * @return a supplier that creates new Multiset instances backed by maps from the given supplier
-     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}
      */
     public static <T> Supplier<Multiset<T>> ofMultiset(final java.util.function.Supplier<? extends Map<T, ?>> mapSupplier) {
         return () -> N.newMultiset(mapSupplier);
@@ -979,9 +977,8 @@ public final class Suppliers {
      *
      * @param <K> the type of keys maintained by the multimap
      * @param <E> the type of mapped values
-     * @param mapType the Class object representing the Map implementation to use
+     * @param mapType the Class object representing the Map implementation to use, must not be {@code null}
      * @return a Supplier that creates new ListMultimap instances with the specified Map type
-     * @throws IllegalArgumentException if mapType is null
      */
     @SuppressWarnings("rawtypes")
     public static <K, E> Supplier<ListMultimap<K, E>> ofListMultimap(final Class<? extends Map> mapType) {
@@ -996,10 +993,9 @@ public final class Suppliers {
      *
      * @param <K> the type of keys maintained by the multimap
      * @param <E> the type of mapped values
-     * @param mapType the Class object representing the Map implementation to use
-     * @param valueType the Class object representing the List implementation to use for values
+     * @param mapType the Class object representing the Map implementation to use, must not be {@code null}
+     * @param valueType the Class object representing the List implementation to use for values, must not be {@code null}
      * @return a Supplier that creates new ListMultimap instances with the specified types
-     * @throws IllegalArgumentException if mapType or valueType is null
      */
     @SuppressWarnings("rawtypes")
     public static <K, E> Supplier<ListMultimap<K, E>> ofListMultimap(final Class<? extends Map> mapType, final Class<? extends List> valueType) {
@@ -1015,10 +1011,9 @@ public final class Suppliers {
      *
      * @param <K> the type of keys maintained by the multimap
      * @param <E> the type of mapped values
-     * @param mapSupplier supplier that creates the backing Map instances
-     * @param valueSupplier supplier that creates the List instances for values
+     * @param mapSupplier supplier that creates the backing Map instances, must not be {@code null}
+     * @param valueSupplier supplier that creates the List instances for values, must not be {@code null}
      * @return a Supplier that creates new ListMultimap instances using the provided suppliers
-     * @throws IllegalArgumentException if mapSupplier or valueSupplier is null
      */
     public static <K, E> Supplier<ListMultimap<K, E>> ofListMultimap(final java.util.function.Supplier<? extends Map<K, List<E>>> mapSupplier,
             final java.util.function.Supplier<? extends List<E>> valueSupplier) {
@@ -1048,9 +1043,8 @@ public final class Suppliers {
      *
      * @param <K> the type of keys maintained by the multimap
      * @param <E> the type of mapped values
-     * @param mapType the Class object representing the Map implementation to use
+     * @param mapType the Class object representing the Map implementation to use, must not be {@code null}
      * @return a Supplier that creates new SetMultimap instances with the specified Map type
-     * @throws IllegalArgumentException if mapType is null
      */
     @SuppressWarnings("rawtypes")
     public static <K, E> Supplier<SetMultimap<K, E>> ofSetMultimap(final Class<? extends Map> mapType) {
@@ -1065,10 +1059,9 @@ public final class Suppliers {
      *
      * @param <K> the type of keys maintained by the multimap
      * @param <E> the type of mapped values
-     * @param mapType the Class object representing the Map implementation to use
-     * @param valueType the Class object representing the Set implementation to use for values
+     * @param mapType the Class object representing the Map implementation to use, must not be {@code null}
+     * @param valueType the Class object representing the Set implementation to use for values, must not be {@code null}
      * @return a Supplier that creates new SetMultimap instances with the specified types
-     * @throws IllegalArgumentException if mapType or valueType is null
      */
     @SuppressWarnings("rawtypes")
     public static <K, E> Supplier<SetMultimap<K, E>> ofSetMultimap(final Class<? extends Map> mapType, final Class<? extends Set> valueType) {
@@ -1084,10 +1077,9 @@ public final class Suppliers {
      *
      * @param <K> the type of keys maintained by the multimap
      * @param <E> the type of mapped values
-     * @param mapSupplier supplier that creates the backing Map instances
-     * @param valueSupplier supplier that creates the Set instances for values
+     * @param mapSupplier supplier that creates the backing Map instances, must not be {@code null}
+     * @param valueSupplier supplier that creates the Set instances for values, must not be {@code null}
      * @return a Supplier that creates new SetMultimap instances using the provided suppliers
-     * @throws IllegalArgumentException if mapSupplier or valueSupplier is null
      */
     public static <K, E> Supplier<SetMultimap<K, E>> ofSetMultimap(final java.util.function.Supplier<? extends Map<K, Set<E>>> mapSupplier,
             final java.util.function.Supplier<? extends Set<E>> valueSupplier) {
@@ -1104,10 +1096,9 @@ public final class Suppliers {
      * @param <K> the type of keys maintained by the multimap
      * @param <E> the type of mapped values
      * @param <V> the type of Collection used to store values
-     * @param mapSupplier supplier that creates the backing Map instances
-     * @param valueSupplier supplier that creates the Collection instances for values
+     * @param mapSupplier supplier that creates the backing Map instances, must not be {@code null}
+     * @param valueSupplier supplier that creates the Collection instances for values, must not be {@code null}
      * @return a Supplier that creates new Multimap instances using the provided suppliers
-     * @throws IllegalArgumentException if mapSupplier or valueSupplier is null
      */
     public static <K, E, V extends Collection<E>> Supplier<Multimap<K, E, V>> ofMultimap(final java.util.function.Supplier<? extends Map<K, V>> mapSupplier,
             final java.util.function.Supplier<? extends V> valueSupplier) {
@@ -1136,13 +1127,18 @@ public final class Suppliers {
      *
      * <p>Supported types include:
      * <ul>
-     *   <li>Collection, List, ArrayList - returns ArrayList supplier</li>
-     *   <li>LinkedList - returns LinkedList supplier</li>
-     *   <li>Set, HashSet - returns HashSet supplier</li>
-     *   <li>LinkedHashSet - returns LinkedHashSet supplier</li>
-     *   <li>SortedSet, TreeSet - returns TreeSet supplier</li>
-     *   <li>Queue, Deque - returns LinkedList supplier (as Deque)</li>
-     *   <li>Various concurrent collections</li>
+     *   <li>{@code Collection}, {@code List}, {@code ArrayList}, {@code AbstractCollection}, {@code AbstractList} - returns ArrayList supplier</li>
+     *   <li>{@code LinkedList} - returns LinkedList supplier</li>
+     *   <li>{@code Set}, {@code HashSet}, {@code AbstractSet} - returns HashSet supplier</li>
+     *   <li>{@code LinkedHashSet} - returns LinkedHashSet supplier</li>
+     *   <li>{@code SortedSet}, {@code NavigableSet}, {@code TreeSet} (and subtypes) - returns TreeSet supplier</li>
+     *   <li>{@code Queue}, {@code Deque}, {@code AbstractQueue} - returns LinkedList supplier (as Deque)</li>
+     *   <li>{@code BlockingQueue}, {@code LinkedBlockingQueue} - returns LinkedBlockingQueue supplier</li>
+     *   <li>{@code BlockingDeque}, {@code LinkedBlockingDeque} - returns LinkedBlockingDeque supplier</li>
+     *   <li>{@code ConcurrentLinkedQueue} - returns ConcurrentLinkedQueue supplier</li>
+     *   <li>{@code PriorityQueue} - returns PriorityQueue supplier</li>
+     *   <li>{@code ImmutableList} (and subtypes) - returns ArrayList supplier</li>
+     *   <li>{@code ImmutableSet} (and subtypes) - returns HashSet supplier</li>
      * </ul>
      *
      * @param <T> the element type of the collection
@@ -1227,12 +1223,15 @@ public final class Suppliers {
      *
      * <p>Supported types include:
      * <ul>
-     *   <li>Map, HashMap - returns HashMap supplier</li>
-     *   <li>LinkedHashMap - returns LinkedHashMap supplier</li>
-     *   <li>SortedMap, TreeMap - returns TreeMap supplier</li>
-     *   <li>IdentityHashMap - returns IdentityHashMap supplier</li>
-     *   <li>ConcurrentHashMap - returns ConcurrentHashMap supplier</li>
-     *   <li>BiMap - returns BiMap supplier</li>
+     *   <li>{@code Map}, {@code HashMap}, {@code AbstractMap}, {@code EnumMap} - returns HashMap supplier</li>
+     *   <li>{@code ConcurrentMap} - returns ConcurrentHashMap supplier</li>
+     *   <li>{@code LinkedHashMap} - returns LinkedHashMap supplier</li>
+     *   <li>{@code ConcurrentNavigableMap}, {@code ConcurrentSkipListMap} - returns ConcurrentSkipListMap supplier</li>
+     *   <li>{@code SortedMap} (and subtypes) - returns TreeMap supplier</li>
+     *   <li>{@code IdentityHashMap} (and subtypes) - returns IdentityHashMap supplier</li>
+     *   <li>{@code ConcurrentHashMap} (and subtypes) - returns ConcurrentHashMap supplier</li>
+     *   <li>{@code BiMap} (and subtypes) - returns BiMap supplier</li>
+     *   <li>{@code ImmutableMap} (and subtypes) - returns HashMap supplier</li>
      * </ul>
      *
      * @param <K> the type of keys maintained by the map

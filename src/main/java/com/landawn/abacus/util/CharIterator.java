@@ -328,7 +328,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * interface, but incurs boxing overhead. For better performance, use {@link #nextChar()} instead.</p>
      *
      * @return the next char value as a {@code Character} object
-     * @throws NoSuchElementException if no more elements are available
+     * @throws NoSuchElementException if the iteration has no more elements
      * @deprecated use {@link #nextChar()} instead to avoid boxing overhead
      */
     @Deprecated
@@ -663,6 +663,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * use {@link #foreachRemaining(Throwables.CharConsumer)} instead.</p>
      *
      * @param action the action to perform on each element, must not be {@code null}
+     * @throws NullPointerException if {@code action} is {@code null}
      * @deprecated use {@link #foreachRemaining(Throwables.CharConsumer)} instead to avoid boxing overhead
      */
     @Deprecated

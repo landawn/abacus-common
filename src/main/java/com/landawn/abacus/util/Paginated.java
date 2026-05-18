@@ -28,7 +28,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Key concepts:</b></p>
  * <ul>
- *   <li>Pages are typically numbered starting from 0 or 1 (implementation-specific)</li>
+ *   <li>Pages are numbered starting from 0 (0-based index)</li>
  *   <li>Each page contains a fixed number of items (except possibly the last page)</li>
  *   <li>Navigation between pages is supported through various methods</li>
  *   <li>The interface is generic to support any type of paginated content</li>
@@ -151,9 +151,9 @@ public interface Paginated<T> extends Iterable<T> {
      * }
      * }</pre>
      *
-     * @param pageNum the page number to retrieve (0-based index)
+     * @param pageNum the 0-based page number to retrieve
      * @return the data contained in the specified page
-     * @throws IllegalArgumentException if {@code pageNum} is negative or {@code >= totalPages()}
+     * @throws IllegalArgumentException if {@code pageNum} is negative or greater than or equal to {@link #totalPages()}
      */
     T getPage(int pageNum);
 

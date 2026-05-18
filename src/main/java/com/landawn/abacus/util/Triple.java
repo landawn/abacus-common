@@ -690,6 +690,7 @@ public final class Triple<L, M, R> implements Mutable {
      * @param a the array into which the elements are to be stored, if it has length &gt;= 3;
      *          otherwise, a new array of the same runtime type is allocated
      * @return an array containing the three elements of this Triple.
+     * @throws NullPointerException if {@code a} is {@code null}
      * @throws ArrayStoreException if the runtime type of the specified array is not a
      *         supertype of the runtime type of the elements in this Triple
      */

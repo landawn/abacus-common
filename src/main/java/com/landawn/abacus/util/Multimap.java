@@ -1045,9 +1045,9 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * multimap.removeEntriesIf(key -> !key.equals("archived"), 1);
      * // "active" -> [2, 1, 3], "inactive" -> [2, 3], "archived" -> [1, 2]
      * }</pre>
+     *
      * @param keyPredicate the predicate that determines which keys to process
      * @param value the value to be removed from matching collections
-     *
      * @return {@code true} if at least one value was removed from any collection,
      *         {@code false} if no values were removed (either no keys matched or value not found)
      * @see #removeEntry(Object, Object)
@@ -1153,6 +1153,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *
      * <p><b>Note:</b> This method mutates this Multimap in place. If all values are removed
      * from a key's collection, the key is removed from the Multimap.</p>
+     *
      * @param keyPredicate the predicate that determines which keys to process
      * @param valuesToRemove the collection of values to remove from matching collections
      * @return {@code true} if any values were removed from any collection,
@@ -1881,6 +1882,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param function the function applied to each key and its current value collection; it should
      *                 return the new collection of values for that key (or {@code null}/empty to
      *                 remove the key)
+     * @throws NullPointerException if {@code function} is {@code null}
      * @throws IllegalStateException if the returned non-empty collection of values cannot be added
      *         back into the existing value collection for a key
      * @see #compute(Object, BiFunction)
@@ -3495,8 +3497,10 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * Checks if this Multimap contains no keys.
      * Returns {@code true} if there are no keys in the Multimap, {@code false} otherwise.
      *
-     * <p>This method checks whether the Multimap has any keys. It returns {@code true}
-     * only when {@link #totalValueCount()} would return 0.</p>
+     * <p>This method checks whether the Multimap has any keys. Because this Multimap
+     * automatically removes a key when its value collection becomes empty, a key is always
+     * associated with at least one value; therefore this method returns {@code true}
+     * if and only if {@link #totalValueCount()} would also return 0.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

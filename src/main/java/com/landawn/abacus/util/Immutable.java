@@ -23,7 +23,7 @@ package com.landawn.abacus.util;
  * data structures. All mutating operations on implementing classes should throw
  * {@link UnsupportedOperationException}.</p>
  *
- * <p>Immutable objects provide several benefits:
+ * <p>Immutable objects provide several benefits:</p>
  * <ul>
  * <li>Thread-safety: Immutable objects can be shared between threads without synchronization</li>
  * <li>Simplicity: No need to worry about defensive copying or unexpected modifications</li>
@@ -31,7 +31,7 @@ package com.landawn.abacus.util;
  * <li>Hash stability: Hash codes never change, making them ideal for use as map keys</li>
  * </ul>
  *
- * <p>Common implementations include:
+ * <p>Common implementations include:</p>
  * <ul>
  * <li>{@link ImmutableList} - An immutable list implementation</li>
  * <li>{@link ImmutableSet} - An immutable set implementation</li>

@@ -374,7 +374,7 @@ public final class ClassUtil {
      * A sentinel {@code Class} placeholder used internally to represent the absence of a class
      * in cache pools (since {@code null} cannot be stored as a pool value).
      *
-     * @deprecated for internal only.
+     * @deprecated For internal use only.
      */
     @Deprecated
     @Internal
@@ -384,7 +384,7 @@ public final class ClassUtil {
      * A sentinel {@code Method} placeholder used internally to represent the absence of a method
      * in cache pools (since {@code null} cannot be stored as a pool value).
      *
-     * @deprecated for internal only.
+     * @deprecated For internal use only.
      */
     @Deprecated
     @Internal
@@ -394,7 +394,7 @@ public final class ClassUtil {
      * A sentinel {@code Field} placeholder used internally to represent the absence of a field
      * in cache pools (since {@code null} cannot be stored as a pool value).
      *
-     * @deprecated for internal only.
+     * @deprecated For internal use only.
      */
     @Deprecated
     @Internal
@@ -765,9 +765,10 @@ public final class ClassUtil {
      * }</pre>
      *
      * @param <T> the type the returned {@code Class} object is parameterized to (the caller-expected type)
-     * @param clsName the fully qualified name of the desired class
+     * @param clsName the fully qualified name of the desired class; must not be {@code null}
      * @return the Class object for the class with the specified name
      * @throws IllegalArgumentException if the class cannot be located by the specified name
+     * @throws NullPointerException if {@code clsName} is {@code null}
      */
     public static <T> Class<T> forName(final String clsName) throws IllegalArgumentException {
         return forName(clsName, true);
@@ -919,6 +920,7 @@ public final class ClassUtil {
      *
      * @param cls the class whose canonical name is to be retrieved
      * @return the canonical name of the class, or the class name if the canonical name is not available
+     * @throws NullPointerException if {@code cls} is {@code null}
      * @see Class#getCanonicalName()
      */
     public static String getCanonicalClassName(final Class<?> cls) {
@@ -948,6 +950,7 @@ public final class ClassUtil {
      *
      * @param cls the class whose name is to be retrieved
      * @return the fully qualified name of the class
+     * @throws NullPointerException if {@code cls} is {@code null}
      */
     public static String getClassName(final Class<?> cls) {
 
@@ -965,6 +968,7 @@ public final class ClassUtil {
      *
      * @param cls the class whose simple name is to be retrieved
      * @return the simple name of the class
+     * @throws NullPointerException if {@code cls} is {@code null}
      */
     public static String getSimpleClassName(final Class<?> cls) {
 
@@ -982,6 +986,7 @@ public final class ClassUtil {
      *
      * @param cls the class whose package is to be retrieved
      * @return the package of the class, or {@code null} if the class is a primitive type or no package is defined
+     * @throws NullPointerException if {@code cls} is {@code null}
      */
     @MayReturnNull
     public static Package getPackage(final Class<?> cls) {
@@ -1013,6 +1018,7 @@ public final class ClassUtil {
      *
      * @param cls the class whose package name is to be retrieved
      * @return the package name of the class, or an empty string if the class is a primitive type or no package is defined
+     * @throws NullPointerException if {@code cls} is {@code null}
      */
     public static String getPackageName(final Class<?> cls) {
         String pkgName = packageNamePool.get(cls);
@@ -1927,8 +1933,7 @@ public final class ClassUtil {
      *                              Null values are handled gracefully.
      * @return a formatted, human-readable type name with prefixes removed, array notation normalized,
      *         inner class notation converted to dot notation (when applicable), and built-in type mappings applied.
-     *         Returns null if the input is null, or an appropriately formatted string representation
-     *         that is suitable for display, logging, documentation, or user interface purposes.
+     *         Returns the input unchanged if it is {@code null} or empty.
      *
      * @see Class#getTypeName()
      * @see Class#getSimpleName()
@@ -2054,7 +2059,7 @@ public final class ClassUtil {
      * }
      * }</pre>
      *
-     * @param type the type to get the class hierarchy from
+     * @param type the type to get the class hierarchy from; if {@code null}, an empty iterator is returned
      * @return an iterator over the class hierarchy of the given class, excluding interfaces
      * @see #hierarchy(Class, boolean)
      */
@@ -2076,7 +2081,7 @@ public final class ClassUtil {
      * }
      * }</pre>
      *
-     * @param type the type to get the class hierarchy from
+     * @param type the type to get the class hierarchy from; if {@code null}, an empty iterator is returned
      * @param includeInterface if {@code true}, includes interfaces; if {@code false}, excludes interfaces
      * @return an iterator over the class hierarchy of the given class
      * @see #hierarchy(Class)
@@ -2182,6 +2187,7 @@ public final class ClassUtil {
      * @param constructor the constructor to be invoked
      * @param args the arguments to be passed to the constructor
      * @return the newly created object
+     * @throws NullPointerException if {@code constructor} is {@code null}
      * @throws RuntimeException if the class that declares the underlying constructor represents an abstract class,
      *         or the underlying constructor is inaccessible, or the underlying constructor throws an exception
      */
@@ -2207,6 +2213,7 @@ public final class ClassUtil {
      * @param method the static method to be invoked
      * @param args the arguments to be passed to the method
      * @return the result of invoking the method
+     * @throws NullPointerException if {@code method} is {@code null}
      * @throws RuntimeException if the underlying method is inaccessible, the method is invoked with incorrect arguments,
      *         or the underlying method throws an exception
      * @see #invokeMethod(Object, Method, Object...)
@@ -2231,6 +2238,7 @@ public final class ClassUtil {
      * @param method the method to be invoked
      * @param args the arguments to be passed to the method
      * @return the result of invoking the method
+     * @throws NullPointerException if {@code method} is {@code null}
      * @throws RuntimeException if the underlying method is inaccessible, the method is invoked with incorrect arguments,
      *         or the underlying method throws an exception
      * @see #invokeMethod(Method, Object...)
@@ -2269,8 +2277,9 @@ public final class ClassUtil {
      * Object value = field.get(instance);   // Can now access private field
      * }</pre>
      *
-     * @param accessibleObject the object whose accessibility is to be set
+     * @param accessibleObject the object whose accessibility is to be set; does nothing if {@code null}
      * @param flag the new accessibility flag ({@code true} to make accessible, {@code false} otherwise)
+     * @throws SecurityException if a security manager is present and denies the access request
      */
     @SuppressWarnings("deprecation")
     public static void setAccessible(final AccessibleObject accessibleObject, final boolean flag) {
@@ -2387,6 +2396,7 @@ public final class ClassUtil {
      *
      * @param cls the class to be checked
      * @return {@code true} if the specified class is an anonymous class, {@code false} otherwise
+     * @throws NullPointerException if {@code cls} is {@code null}
      */
     public static boolean isAnonymousClass(final Class<?> cls) {
 
@@ -2407,6 +2417,7 @@ public final class ClassUtil {
      *
      * @param cls the class to be checked
      * @return {@code true} if the specified class is a member class, {@code false} otherwise
+     * @throws NullPointerException if {@code cls} is {@code null}
      */
     public static boolean isMemberClass(final Class<?> cls) {
 
@@ -2424,6 +2435,7 @@ public final class ClassUtil {
      *
      * @param cls the class to be checked
      * @return {@code true} if the specified class is either an anonymous class or a member class, {@code false} otherwise
+     * @throws NullPointerException if {@code cls} is {@code null}
      */
     public static boolean isAnonymousOrMemberClass(final Class<?> cls) {
         Boolean v = anonymousClassMap.computeIfAbsent(cls, k -> cls.isAnonymousClass());

@@ -787,8 +787,9 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * @param <K> the type of the keys in the map.
      * @param <V> the type of the values in the map.
-     * @param map the map whose entries are to be placed into the new BiMap.
+     * @param map the map whose entries are to be placed into the new BiMap, must not be {@code null}.
      * @return a new BiMap containing the same entries as the provided map.
+     * @throws NullPointerException if {@code map} itself is {@code null}.
      * @throws IllegalArgumentException if any key or value in {@code map} is {@code null}, or if {@code map} contains a duplicated value (bound to more than one key).
      */
     public static <K, V> BiMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
@@ -848,8 +849,8 @@ public final class BiMap<K, V> implements Map<K, V> {
      * }</pre>
      *
      * @param value the value whose associated key is to be returned.
-     * @param defaultValue the default key to be returned if the map contains no mapping for the value.
-     * @return The key to which the specified value is mapped, or the default key if this map contains no mapping for the value.
+     * @param defaultValue the key to return if this map contains no mapping for the given value.
+     * @return the key to which the specified value is mapped, or {@code defaultValue} if this map contains no mapping for the value.
      */
     public K getByValueOrDefault(final Object value, final K defaultValue) {
         //noinspection SuspiciousMethodCalls
@@ -990,7 +991,8 @@ public final class BiMap<K, V> implements Map<K, V> {
      * biMap.putAll(map);
      * }</pre>
      *
-     * @param m the map whose entries are to be added to this BiMap.
+     * @param m the map whose entries are to be added to this BiMap, must not be {@code null}.
+     * @throws NullPointerException if {@code m} is {@code null}.
      * @throws IllegalArgumentException if any key or value is {@code null}, or if an attempt to {@code put} any entry fails due to a duplicate value. Note that some map entries may have been added to the BiMap before the exception was thrown.
      * @see #put(Object, Object)
      */
@@ -1338,9 +1340,10 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * @param <K> the type of the keys in the BiMap.
      * @param <V> the type of the values in the BiMap.
-     * @param map the map whose entries are to be placed into the new BiMap.
+     * @param map the map whose entries are to be placed into the new BiMap, must not be {@code null}.
      * @return a new Builder instance for a BiMap with the specified map as its initial data.
-     * @throws IllegalArgumentException if {@code map} is {@code null}.
+     * @throws IllegalArgumentException if {@code map} is {@code null}, or if any key or value
+     *         in {@code map} is {@code null}, or if {@code map} contains duplicate values.
      */
     public static <K, V> Builder<K, V> builder(final Map<K, V> map) throws IllegalArgumentException {
         N.checkArgNotNull(map);
@@ -1435,7 +1438,7 @@ public final class BiMap<K, V> implements Map<K, V> {
          *     .build();
          * }</pre>
          *
-         * @param m the map whose entries are to be added to this BiMap.
+         * @param m the map whose entries are to be added to this BiMap; a {@code null} or empty map is silently ignored.
          * @return This Builder instance to allow for chaining of calls to builder methods.
          * @throws IllegalArgumentException if any key or value is {@code null}, or if an attempt to {@code put} any entry fails due to a duplicate value. Note that some map entries may have been added to the BiMap before the exception was thrown.
          * @see #put(Object, Object)

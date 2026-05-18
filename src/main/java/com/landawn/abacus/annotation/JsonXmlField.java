@@ -165,9 +165,9 @@ public @interface JsonXmlField {
      *
      * <p><b>Options:</b></p>
      * <ul>
-     *   <li>{@link EnumType#NAME} (default) - Use the enum constant name</li>
-     *   <li>{@link EnumType#ORDINAL} - Use the enum ordinal value</li>
-     *   <li>{@link EnumType#CODE} - Use an integer code defined by the enum (for example, via {@code public int code()})</li>
+     *   <li>{@link EnumType#NAME} (default) - Uses the enum constant name.</li>
+     *   <li>{@link EnumType#ORDINAL} - Uses the enum ordinal value.</li>
+     *   <li>{@link EnumType#CODE} - Uses an integer code defined by the enum (for example, via {@code public int code()}).</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>

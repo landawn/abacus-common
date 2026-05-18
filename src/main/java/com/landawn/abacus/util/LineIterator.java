@@ -328,6 +328,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      *
      * @return the next line from the input, never {@code null} (empty lines are returned as empty strings)
      * @throws NoSuchElementException if there is no line to return (end of stream reached)
+     * @throws UncheckedIOException if an I/O error occurs while reading from the underlying reader
      */
     @Override
     public String next() {
@@ -352,7 +353,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * the {@code Reader} remains open, potentially causing resource leaks.
      * <p>
      * This method can safely be called multiple times; subsequent calls have no effect.
-     * The method is synchronized to ensure thread safety.
+     * This method is synchronized and may be called concurrently with other threads.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

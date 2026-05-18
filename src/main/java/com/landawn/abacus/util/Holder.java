@@ -52,8 +52,8 @@ public final class Holder<T> implements Mutable {
     /**
      * Constructs a new Holder with a {@code null} value.
      *
-     * <p>This is equivalent to calling {@code Holder(null)}. The created Holder can later
-     * be populated with a value using {@link #setValue(Object)} or other setter methods.
+     * <p>The created Holder can later be populated with a value using
+     * {@link #setValue(Object)} or other setter methods.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -124,7 +124,7 @@ public final class Holder<T> implements Mutable {
      * }</pre>
      *
      * @return the value held by this Holder, may be {@code null}.
-     * @deprecated This method is deprecated in favor of the more concise {@link #value()} method.
+     * @deprecated Use the more concise {@link #value()} method instead.
      */
     @Deprecated
     public T getValue() {
@@ -196,7 +196,7 @@ public final class Holder<T> implements Mutable {
     }
 
     /**
-     * Updates the current value with the results of applying the given function,
+     * Updates the current value with the result of applying the given function,
      * returning the previous value.
      *
      * <p>The function is applied to the current value to compute a new value, which then replaces
@@ -212,7 +212,8 @@ public final class Holder<T> implements Mutable {
      * }</pre>
      *
      * @param <E> the type of exception that the update function may throw.
-     * @param updateFunction the function that takes the current value and returns a new value, must not be {@code null}.
+     * @param updateFunction the function that takes the current value and returns a new value;
+     *                       must not be {@code null}.
      * @return the previous value held by this Holder before the update, may be {@code null}.
      * @throws E if the update function throws an exception.
      */
@@ -223,7 +224,7 @@ public final class Holder<T> implements Mutable {
     }
 
     /**
-     * Updates the current value with the results of applying the given function,
+     * Updates the current value with the result of applying the given function,
      * returning the updated value.
      *
      * <p>The function is applied to the current value to compute a new value, which then replaces
@@ -239,7 +240,8 @@ public final class Holder<T> implements Mutable {
      * }</pre>
      *
      * @param <E> the type of exception that the update function may throw.
-     * @param updateFunction the function that takes the current value and returns a new value, must not be {@code null}.
+     * @param updateFunction the function that takes the current value and returns a new value;
+     *                       must not be {@code null}.
      * @return the new value held by this Holder after the update, may be {@code null}.
      * @throws E if the update function throws an exception.
      */
@@ -426,9 +428,10 @@ public final class Holder<T> implements Mutable {
      * }</pre>
      *
      * @param <E> the type of exception that the action may throw.
-     * @param action the action to be performed with the value, must not be {@code null}.
+     * @param action the action to be performed with the value; must not be {@code null}.
      * @throws E if the action throws an exception.
-     * @deprecated use {@link #ifNotNull(Throwables.Consumer)} for conditional execution or direct value access for unconditional use.
+     * @deprecated Use {@link #ifNotNull(Throwables.Consumer)} for null-conditional execution,
+     *             or access the value directly via {@link #value()} for unconditional use.
      */
     @Deprecated
     public <E extends Exception> void accept(final Throwables.Consumer<? super T, E> action) throws E {
@@ -465,7 +468,7 @@ public final class Holder<T> implements Mutable {
      *
      * <p>This method unconditionally applies the mapper function to the current value, even if
      * it is {@code null}. The mapper is responsible for handling {@code null} inputs if necessary.
-     * For conditional mapping that only applies to {@code non-null} values, use {@link #mapIfNotNull(Throwables.Function)}.
+     * For null-safe mapping, use {@link #mapIfNotNull(Throwables.Function)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -475,7 +478,7 @@ public final class Holder<T> implements Mutable {
      *
      * @param <U> the type of the result of the mapping function.
      * @param <E> the type of exception that the mapping function may throw.
-     * @param mapper the mapping function to apply to the value, must not be {@code null}.
+     * @param mapper the mapping function to apply to the value; must not be {@code null}.
      * @return the result of applying the mapping function to the value, may be {@code null}.
      * @throws E if the mapping function throws an exception.
      */
@@ -490,18 +493,24 @@ public final class Holder<T> implements Mutable {
      * <p>This method provides safe, null-aware mapping. The mapper is only invoked when the
      * value is not {@code null}, eliminating the need for {@code null} checks within the mapper.
      * The result is wrapped in a {@code Nullable}, which can itself contain {@code null}.
+     * If the held value is {@code null}, an empty {@code Nullable} is returned without invoking
+     * the mapper.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of("hello");
      * Nullable<Integer> length = holder.mapIfNotNull(String::length);   // Nullable.of(5)
+     *
+     * Holder<String> nullHolder = Holder.of(null);
+     * Nullable<Integer> empty = nullHolder.mapIfNotNull(String::length);   // Nullable.empty()
      * }</pre>
      *
      * @param <U> the type of the result of the mapping function.
      * @param <E> the type of exception that the mapping function may throw.
-     * @param mapper the mapping function to apply to the {@code non-null} value, must not be {@code null}.
-     * @return a {@code Nullable} containing the mapped value if the value was not {@code null}, otherwise an empty {@code Nullable}.
-     * @throws IllegalArgumentException if the mapper is {@code null}.
+     * @param mapper the mapping function to apply to the non-{@code null} value; must not be {@code null}.
+     * @return a {@code Nullable} containing the mapped value if the held value was not {@code null},
+     *         otherwise an empty {@code Nullable}.
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @throws E if the mapping function throws an exception.
      */
     public <U, E extends Exception> Nullable<U> mapIfNotNull(final Throwables.Function<? super T, ? extends U, E> mapper) throws IllegalArgumentException, E {
@@ -519,21 +528,27 @@ public final class Holder<T> implements Mutable {
      * and returns an {@code Optional} containing the mapped value.
      *
      * <p>This method is similar to {@link #mapIfNotNull(Throwables.Function)} but returns an
-     * {@code Optional} instead of {@code Nullable}. The key difference is that the mapper must
-     * return a {@code non-null} value, which is then wrapped in an {@code Optional}. If the original
-     * value is {@code null}, an empty {@code Optional} is returned.
+     * {@code Optional} instead of a {@code Nullable}. Because {@code Optional} cannot hold
+     * {@code null}, the mapper must return a non-{@code null} result; if it returns {@code null},
+     * a {@code NullPointerException} is thrown. If the original held value is {@code null},
+     * an empty {@code Optional} is returned without invoking the mapper.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of("test");
      * Optional<Integer> length = holder.mapToNonNullIfNotNull(String::length);   // Optional.of(4)
+     *
+     * Holder<String> nullHolder = Holder.of(null);
+     * Optional<Integer> empty = nullHolder.mapToNonNullIfNotNull(String::length);   // Optional.empty()
      * }</pre>
      *
      * @param <U> the type of the result of the mapping function.
      * @param <E> the type of exception that the mapping function may throw.
-     * @param mapper the mapping function to apply to the {@code non-null} value, must not be {@code null} and must not return {@code null}.
-     * @return an {@code Optional} containing the mapped value if the value was not {@code null}, otherwise an empty {@code Optional}.
-     * @throws IllegalArgumentException if the mapper is {@code null}.
+     * @param mapper the mapping function to apply to the non-{@code null} value;
+     *               must not be {@code null} and must not return {@code null}.
+     * @return an {@code Optional} containing the mapped value if the held value was not {@code null},
+     *         otherwise an empty {@code Optional}.
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @throws NullPointerException if the mapping function returns {@code null}.
      * @throws E if the mapping function throws an exception.
      */
@@ -553,8 +568,8 @@ public final class Holder<T> implements Mutable {
      * if the predicate returns {@code true}, otherwise returns an empty {@code Nullable}.
      *
      * <p>This method applies the predicate unconditionally to the current value, even if it is
-     * {@code null}. The predicate must handle {@code null} inputs appropriately. For conditional
-     * filtering that only applies to {@code non-null} values, use {@link #filterIfNotNull(Throwables.Predicate)}.
+     * {@code null}. The predicate must handle {@code null} inputs appropriately. For null-safe
+     * filtering that skips {@code null} values entirely, use {@link #filterIfNotNull(Throwables.Predicate)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -563,8 +578,9 @@ public final class Holder<T> implements Mutable {
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw.
-     * @param predicate the predicate to test the value, must not be {@code null}.
-     * @return a {@code Nullable} containing the value if the predicate returns {@code true}, otherwise an empty {@code Nullable}.
+     * @param predicate the predicate to test the value; must not be {@code null}.
+     * @return a {@code Nullable} containing the value if the predicate returns {@code true},
+     *         otherwise an empty {@code Nullable}.
      * @throws E if the predicate throws an exception.
      */
     public <E extends Exception> Nullable<T> filter(final Throwables.Predicate<? super T, E> predicate) throws E {
@@ -576,7 +592,7 @@ public final class Holder<T> implements Mutable {
     }
 
     /**
-     * Tests the value with the given predicate if the value is not {@code null} and returns
+     * Tests the value with the given predicate if the value is not {@code null}, and returns
      * an {@code Optional} containing the value if the predicate returns {@code true}.
      *
      * <p>This method provides safe, null-aware filtering. The predicate is only invoked when the
@@ -588,12 +604,16 @@ public final class Holder<T> implements Mutable {
      * <pre>{@code
      * Holder<Integer> holder = Holder.of(10);
      * Optional<Integer> filtered = holder.filterIfNotNull(n -> n > 5);   // Optional.of(10)
+     *
+     * Holder<Integer> nullHolder = Holder.of(null);
+     * Optional<Integer> empty = nullHolder.filterIfNotNull(n -> n > 5);  // Optional.empty()
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw.
-     * @param predicate the predicate to test the {@code non-null} value, must not be {@code null}.
-     * @return an {@code Optional} containing the value if it is not {@code null} and the predicate returns {@code true}, otherwise an empty {@code Optional}.
-     * @throws IllegalArgumentException if the predicate is {@code null}.
+     * @param predicate the predicate to test the non-{@code null} value; must not be {@code null}.
+     * @return an {@code Optional} containing the value if it is not {@code null} and the predicate
+     *         returns {@code true}, otherwise an empty {@code Optional}.
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception.
      */
     public <E extends Exception> Optional<T> filterIfNotNull(final Throwables.Predicate<? super T, E> predicate) throws IllegalArgumentException, E {
@@ -610,17 +630,20 @@ public final class Holder<T> implements Mutable {
      * Returns the value if it is not {@code null}, otherwise returns the given default value.
      *
      * <p>This method provides a simple way to supply a default value when the Holder contains
-     * {@code null}. The default value is evaluated eagerly. For lazy evaluation, use
-     * {@link #orElseGetIfNull(Supplier)}.
+     * {@code null}. The default value is evaluated eagerly (always computed before this method
+     * is called). For lazy evaluation of the default, use {@link #orElseGetIfNull(Supplier)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of(null);
      * String value = holder.orElseIfNull("default");   // returns "default"
+     *
+     * Holder<String> nonNull = Holder.of("hello");
+     * String value2 = nonNull.orElseIfNull("default");   // returns "hello"
      * }</pre>
      *
-     * @param other the value to be returned if the held value is {@code null}, may be {@code null}.
-     * @return the value if not {@code null}, otherwise {@code other}.
+     * @param other the value to be returned if the held value is {@code null}; may be {@code null}.
+     * @return the held value if not {@code null}, otherwise {@code other}.
      */
     public T orElseIfNull(final T other) {
         return isNotNull() ? value : other;
@@ -631,7 +654,7 @@ public final class Holder<T> implements Mutable {
      *
      * <p>This method provides lazy evaluation of the default value. The supplier is only invoked
      * when the value is {@code null}, which is useful when computing the default value is expensive
-     * or has side effects. For simple default values, use {@link #orElseIfNull(Object)}.
+     * or has side effects. For a simple eager default, use {@link #orElseIfNull(Object)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -639,9 +662,11 @@ public final class Holder<T> implements Mutable {
      * String value = holder.orElseGetIfNull(() -> computeExpensiveDefault());   // supplier only called if needed
      * }</pre>
      *
-     * @param other the supplier whose result is returned if the held value is {@code null}, must not be {@code null}.
-     * @return the value if not {@code null}, otherwise the result of {@code other.get()}, may be {@code null}.
-     * @throws IllegalArgumentException if the supplier is {@code null}.
+     * @param other the supplier whose result is returned if the held value is {@code null};
+     *              must not be {@code null}.
+     * @return the held value if not {@code null}, otherwise the result of {@code other.get()},
+     *         which may itself be {@code null}.
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     public T orElseGetIfNull(final Supplier<? extends T> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, "other");
@@ -657,7 +682,7 @@ public final class Holder<T> implements Mutable {
      * Returns the value if it is not {@code null}, otherwise throws {@code NoSuchElementException}.
      *
      * <p>This method is useful when the absence of a value should be treated as an error condition.
-     * It enforces that a {@code non-null} value must be present or an exception will be thrown.
+     * It enforces that a non-{@code null} value must be present or an exception will be thrown.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -665,7 +690,7 @@ public final class Holder<T> implements Mutable {
      * String value = holder.orElseThrowIfNull();   // returns "value"
      * }</pre>
      *
-     * @return the value held by this Holder.
+     * @return the non-{@code null} value held by this Holder.
      * @throws NoSuchElementException if the value is {@code null}.
      */
     public T orElseThrowIfNull() throws NoSuchElementException {
@@ -681,7 +706,7 @@ public final class Holder<T> implements Mutable {
      * with the specified error message.
      *
      * <p>This method allows you to provide a custom error message that will be included in the
-     * exception if the value is {@code null}. This helps provide more context about what went wrong.
+     * exception when the value is {@code null}, helping provide more context about what went wrong.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -689,8 +714,8 @@ public final class Holder<T> implements Mutable {
      * String value = holder.orElseThrowIfNull("User name is required");   // throws with custom message
      * }</pre>
      *
-     * @param errorMessage the detail message to be used in the exception if the value is {@code null}.
-     * @return the value held by this Holder.
+     * @param errorMessage the detail message for the exception if the value is {@code null}.
+     * @return the non-{@code null} value held by this Holder.
      * @throws NoSuchElementException if the value is {@code null}.
      */
     @Beta
@@ -706,8 +731,8 @@ public final class Holder<T> implements Mutable {
      * Returns the value if it is not {@code null}, otherwise throws {@code NoSuchElementException}
      * with a formatted error message using the specified message template and parameter.
      *
-     * <p>This method allows you to provide a parameterized error message. The message template
-     * can contain placeholders that will be replaced with the provided parameter value.
+     * <p>The message template may contain a placeholder (e.g. {@code %s}) that is substituted
+     * with the string representation of {@code param} via {@code N.format}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -715,9 +740,9 @@ public final class Holder<T> implements Mutable {
      * User user = holder.orElseThrowIfNull("User with id %s not found", userId);
      * }</pre>
      *
-     * @param errorMessage the error message template which may contain a placeholder for the parameter.
+     * @param errorMessage the error message template, which may contain a placeholder for the parameter.
      * @param param the parameter to be substituted into the error message.
-     * @return the value held by this Holder.
+     * @return the non-{@code null} value held by this Holder.
      * @throws NoSuchElementException if the value is {@code null}.
      */
     @Beta
@@ -742,10 +767,10 @@ public final class Holder<T> implements Mutable {
      * Item item = holder.orElseThrowIfNull("Item %s in category %s not found", itemId, categoryId);
      * }</pre>
      *
-     * @param errorMessage the error message template which may contain placeholders for the parameters.
+     * @param errorMessage the error message template, which may contain placeholders for the parameters.
      * @param param1 the first parameter to be substituted into the error message.
      * @param param2 the second parameter to be substituted into the error message.
-     * @return the value held by this Holder.
+     * @return the non-{@code null} value held by this Holder.
      * @throws NoSuchElementException if the value is {@code null}.
      */
     @Beta
@@ -769,11 +794,11 @@ public final class Holder<T> implements Mutable {
      * Record rec = holder.orElseThrowIfNull("Record %s-%s in table %s not found", id1, id2, tableName);
      * }</pre>
      *
-     * @param errorMessage the error message template which may contain placeholders for the parameters.
+     * @param errorMessage the error message template, which may contain placeholders for the parameters.
      * @param param1 the first parameter to be substituted into the error message.
      * @param param2 the second parameter to be substituted into the error message.
      * @param param3 the third parameter to be substituted into the error message.
-     * @return the value held by this Holder.
+     * @return the non-{@code null} value held by this Holder.
      * @throws NoSuchElementException if the value is {@code null}.
      */
     @Beta
@@ -789,8 +814,9 @@ public final class Holder<T> implements Mutable {
      * Returns the value if it is not {@code null}, otherwise throws {@code NoSuchElementException}
      * with a formatted error message using the specified message template and parameters.
      *
-     * <p>This is the varargs overload that accepts any number of parameters. Use this when you
-     * need to format an error message with four or more parameters.
+     * <p>This is the varargs overload that accepts any number of parameters. Prefer this overload
+     * when four or more substitution parameters are needed; use the fixed-arity overloads for
+     * one, two, or three parameters to avoid varargs array allocation.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -798,9 +824,9 @@ public final class Holder<T> implements Mutable {
      * Data data = holder.orElseThrowIfNull("Data not found: %s, %s, %s, %s", p1, p2, p3, p4);
      * }</pre>
      *
-     * @param errorMessage the error message template which may contain placeholders for the parameters.
+     * @param errorMessage the error message template, which may contain placeholders for the parameters.
      * @param params the parameters to be substituted into the error message.
-     * @return the value held by this Holder.
+     * @return the non-{@code null} value held by this Holder.
      * @throws NoSuchElementException if the value is {@code null}.
      */
     @Beta
@@ -815,9 +841,9 @@ public final class Holder<T> implements Mutable {
     /**
      * Returns the value if it is not {@code null}, otherwise throws an exception provided by the given supplier.
      *
-     * <p>This method provides maximum flexibility for exception handling. You can supply any type
-     * of exception (checked or unchecked) with custom logic for creating the exception. The
-     * supplier is only invoked when the value is {@code null}.
+     * <p>This method provides maximum flexibility for exception handling: any type of exception
+     * (checked or unchecked) may be supplied with custom construction logic. The supplier is
+     * only invoked when the value is {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -826,9 +852,10 @@ public final class Holder<T> implements Mutable {
      * }</pre>
      *
      * @param <E> the type of exception to be thrown.
-     * @param exceptionSupplier the supplier that will provide the exception to be thrown if the value is {@code null}, must not be {@code null}.
-     * @return the value held by this Holder.
-     * @throws IllegalArgumentException if the exception supplier is {@code null}.
+     * @param exceptionSupplier the supplier that provides the exception to throw if the value is
+     *                          {@code null}; must not be {@code null}.
+     * @return the non-{@code null} value held by this Holder.
+     * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
      * @throws E if the value is {@code null}.
      */
     public <E extends Throwable> T orElseThrowIfNull(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {

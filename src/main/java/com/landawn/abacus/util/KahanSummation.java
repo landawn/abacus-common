@@ -121,9 +121,9 @@ public final class KahanSummation { // NOSONAR
     }
 
     /**
-     * Combines this summation with values from simple summation (count and sum).
-     * <p>
-     * This method is useful when combining pre-computed sums.
+     * Combines this summation with a pre-computed count and sum.
+     * The provided {@code sumA} is incorporated via the Kahan algorithm to maintain precision.
+     * This method is useful when merging externally computed partial sums.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -131,11 +131,11 @@ public final class KahanSummation { // NOSONAR
      * sum1.add(1.0);
      *
      * // Combine with pre-computed values
-     * sum1.combine(5, 10.0);   // Add 5 values with sum 10.0
+     * sum1.combine(5, 10.0);   // Merges 5 values whose total is 10.0
      * }</pre>
      *
-     * @param countA the count of values to combine
-     * @param sumA the sum of values to combine
+     * @param countA the number of values represented by {@code sumA}
+     * @param sumA the pre-computed sum of those values
      */
     public void combine(final long countA, final double sumA) {
         count += countA;
@@ -220,7 +220,7 @@ public final class KahanSummation { // NOSONAR
      * System.out.println(avg.orElse(0));   // 2.5
      * }</pre>
      *
-     * @return an {@code OptionalDouble} containing the average, or an empty {@code OptionalDouble} if no values have been added
+     * @return an {@link OptionalDouble} containing the average, or an empty {@link OptionalDouble} if no values have been added
      * @see #sum()
      * @see #count()
      */

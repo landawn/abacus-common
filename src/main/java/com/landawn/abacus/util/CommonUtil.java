@@ -26229,11 +26229,11 @@ sealed class CommonUtil permits N {
     //     * @param beanClass the class of the bean to be filled
     //     * @return a new instance of the specified bean class with properties filled with random values
     //     * @throws IllegalArgumentException if the specified beanClass is {@code null} or the bean class is not a valid JavaBean
-    //     * @deprecated Use {@link Beans#newRandom(Class)} instead
+    //     * @deprecated Use {@link Beans#newRandomBean(Class)} instead
     //     */
     //    @Deprecated
     //    public static <T> T fill(final Class<? extends T> beanClass) throws IllegalArgumentException {
-    //        return Beans.newRandom(beanClass);
+    //        return Beans.newRandomBean(beanClass);
     //    }
     //
     //    /**
@@ -26244,11 +26244,11 @@ sealed class CommonUtil permits N {
     //     * @param count the number of instances to create and fill
     //     * @return a list of new instances of the specified bean class with properties filled with random values
     //     * @throws IllegalArgumentException if the specified beanClass is {@code null} or the bean class is not a valid JavaBean
-    //     * @deprecated Use {@link Beans#newRandomList(Class, int)} instead
+    //     * @deprecated Use {@link Beans#newRandomBeanList(Class, int)} instead
     //     */
     //    @Deprecated
     //    public static <T> List<T> fill(final Class<? extends T> beanClass, final int count) throws IllegalArgumentException {
-    //        return Beans.newRandomList(beanClass, count);
+    //        return Beans.newRandomBeanList(beanClass, count);
     //    }
 
     /**

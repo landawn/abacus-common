@@ -149,10 +149,11 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * Creates an HBaseColumn instance with the specified value and the latest timestamp.
+     * Creates an HBaseColumn instance with the specified value and the latest timestamp
+     * ({@code Long.MAX_VALUE}).
      *
      * @param <T> the type of the column value
-     * @param value the column value
+     * @param value the column value (may be {@code null})
      * @return a new HBaseColumn instance
      */
     public static <T> HBaseColumn<T> valueOf(final T value) {
@@ -163,7 +164,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * Creates an HBaseColumn instance with the specified value and version.
      *
      * @param <T> the type of the column value
-     * @param value the column value
+     * @param value the column value (may be {@code null})
      * @param version the version timestamp
      * @return a new HBaseColumn instance
      */
@@ -172,71 +173,73 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * Creates a List containing a single HBaseColumn with the specified value and latest timestamp.
+     * Creates a {@link List} containing a single HBaseColumn with the specified value
+     * and the latest timestamp ({@code Long.MAX_VALUE}).
      *
      * @param <T> the type of the column value
      * @param value the column value
-     * @return a List containing the HBaseColumn
+     * @return a mutable {@link List} containing the HBaseColumn
      */
     public static <T> List<HBaseColumn<T>> asList(final T value) {
         return N.toList(new HBaseColumn<>(value));
     }
 
     /**
-     * Creates a List containing a single HBaseColumn with the specified value and version.
+     * Creates a {@link List} containing a single HBaseColumn with the specified value and version.
      *
      * @param <T> the type of the column value
      * @param value the column value
      * @param version the version timestamp
-     * @return a List containing the HBaseColumn
+     * @return a mutable {@link List} containing the HBaseColumn
      */
     public static <T> List<HBaseColumn<T>> asList(final T value, final long version) {
         return N.toList(new HBaseColumn<>(value, version));
     }
 
     /**
-     * Creates a Set containing a single HBaseColumn with the specified value and latest timestamp.
+     * Creates a {@link Set} containing a single HBaseColumn with the specified value
+     * and the latest timestamp ({@code Long.MAX_VALUE}).
      *
      * @param <T> the type of the column value
      * @param value the column value
-     * @return a Set containing the HBaseColumn
+     * @return a mutable {@link Set} containing the HBaseColumn
      */
     public static <T> Set<HBaseColumn<T>> asSet(final T value) {
         return N.toSet(new HBaseColumn<>(value));
     }
 
     /**
-     * Creates a Set containing a single HBaseColumn with the specified value and version.
+     * Creates a {@link Set} containing a single HBaseColumn with the specified value and version.
      *
      * @param <T> the type of the column value
      * @param value the column value
      * @param version the version timestamp
-     * @return a Set containing the HBaseColumn
+     * @return a mutable {@link Set} containing the HBaseColumn
      */
     public static <T> Set<HBaseColumn<T>> asSet(final T value, final long version) {
         return N.toSet(new HBaseColumn<>(value, version));
     }
 
     /**
-     * Creates a SortedSet containing a single HBaseColumn with the specified value,
-     * sorted by version in descending order.
+     * Creates a {@link SortedSet} containing a single HBaseColumn with the specified value
+     * and the latest timestamp ({@code Long.MAX_VALUE}), sorted by version in descending order.
      *
      * @param <T> the type of the column value
      * @param value the column value
-     * @return a SortedSet containing the HBaseColumn
+     * @return a {@link SortedSet} containing the HBaseColumn, ordered by version descending
      */
     public static <T> SortedSet<HBaseColumn<T>> asSortedSet(final T value) {
         return asSortedSet(value, DESC_HBASE_COLUMN_COMPARATOR);
     }
 
     /**
-     * Creates a SortedSet containing a single HBaseColumn with the specified value,
-     * using the provided comparator for sorting.
+     * Creates a {@link SortedSet} containing a single HBaseColumn with the specified value
+     * and the latest timestamp ({@code Long.MAX_VALUE}), using the provided comparator for ordering.
      *
      * @param <T> the type of the column value
      * @param value the column value
-     * @param cmp the comparator to use for sorting, or {@code null} to use DESC_HBASE_COLUMN_COMPARATOR
-     * @return a SortedSet containing the HBaseColumn
+     * @param cmp the comparator to use for sorting; if {@code null}, {@link #DESC_HBASE_COLUMN_COMPARATOR} is used
+     * @return a {@link SortedSet} containing the HBaseColumn
      */
     public static <T> SortedSet<HBaseColumn<T>> asSortedSet(final T value, final Comparator<HBaseColumn<?>> cmp) {
         final SortedSet<HBaseColumn<T>> set = new TreeSet<>(cmp == null ? DESC_HBASE_COLUMN_COMPARATOR : cmp);
@@ -247,27 +250,27 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * Creates a SortedSet containing a single HBaseColumn with the specified value and version,
+     * Creates a {@link SortedSet} containing a single HBaseColumn with the specified value and version,
      * sorted by version in descending order.
      *
      * @param <T> the type of the column value
      * @param value the column value
      * @param version the version timestamp
-     * @return a SortedSet containing the HBaseColumn
+     * @return a {@link SortedSet} containing the HBaseColumn, ordered by version descending
      */
     public static <T> SortedSet<HBaseColumn<T>> asSortedSet(final T value, final long version) {
         return asSortedSet(value, version, DESC_HBASE_COLUMN_COMPARATOR);
     }
 
     /**
-     * Creates a SortedSet containing a single HBaseColumn with the specified value and version,
-     * using the provided comparator for sorting.
+     * Creates a {@link SortedSet} containing a single HBaseColumn with the specified value and version,
+     * using the provided comparator for ordering.
      *
      * @param <T> the type of the column value
      * @param value the column value
      * @param version the version timestamp
-     * @param cmp the comparator to use for sorting, or {@code null} to use DESC_HBASE_COLUMN_COMPARATOR
-     * @return a SortedSet containing the HBaseColumn
+     * @param cmp the comparator to use for sorting; if {@code null}, {@link #DESC_HBASE_COLUMN_COMPARATOR} is used
+     * @return a {@link SortedSet} containing the HBaseColumn
      */
     public static <T> SortedSet<HBaseColumn<T>> asSortedSet(final T value, final long version, final Comparator<HBaseColumn<?>> cmp) {
         final SortedSet<HBaseColumn<T>> set = new TreeSet<>(cmp == null ? DESC_HBASE_COLUMN_COMPARATOR : cmp);
@@ -278,12 +281,12 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * Creates a Map with a single entry mapping the version to an HBaseColumn
-     * containing the specified value with latest timestamp.
+     * Creates a {@link Map} with a single entry mapping the version ({@code Long.MAX_VALUE}) to an
+     * HBaseColumn containing the specified value and the latest timestamp.
      *
      * @param <T> the type of the column value
      * @param value the column value
-     * @return a Map with version as key and HBaseColumn as value
+     * @return a mutable {@link Map} with the version as key and the HBaseColumn as value
      */
     public static <T> Map<Long, HBaseColumn<T>> asMap(final T value) {
         final HBaseColumn<T> hbaseColumn = HBaseColumn.valueOf(value);
@@ -295,13 +298,13 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * Creates a Map with a single entry mapping the version to an HBaseColumn
+     * Creates a {@link Map} with a single entry mapping the given version to an HBaseColumn
      * containing the specified value and version.
      *
      * @param <T> the type of the column value
      * @param value the column value
      * @param version the version timestamp
-     * @return a Map with version as key and HBaseColumn as value
+     * @return a mutable {@link Map} with the version as key and the HBaseColumn as value
      */
     public static <T> Map<Long, HBaseColumn<T>> asMap(final T value, final long version) {
         final HBaseColumn<T> hbaseColumn = HBaseColumn.valueOf(value, version);
@@ -312,25 +315,26 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * Creates a SortedMap with a single entry mapping the version to an HBaseColumn
-     * containing the specified value, sorted by version in descending order.
+     * Creates a {@link SortedMap} with a single entry mapping the version ({@code Long.MAX_VALUE}) to
+     * an HBaseColumn containing the specified value, sorted by version in descending order.
      *
      * @param <T> the type of the column value
      * @param value the column value
-     * @return a SortedMap with version as key and HBaseColumn as value
+     * @return a {@link SortedMap} with the version as key and the HBaseColumn as value,
+     *         ordered by version descending
      */
     public static <T> SortedMap<Long, HBaseColumn<T>> asSortedMap(final T value) {
         return asSortedMap(value, DESC_HBASE_VERSION_COMPARATOR);
     }
 
     /**
-     * Creates a SortedMap with a single entry mapping the version to an HBaseColumn
-     * containing the specified value, using the provided comparator for sorting versions.
+     * Creates a {@link SortedMap} with a single entry mapping the version ({@code Long.MAX_VALUE}) to
+     * an HBaseColumn containing the specified value, using the provided comparator for ordering keys.
      *
      * @param <T> the type of the column value
      * @param value the column value
-     * @param cmp the comparator for sorting versions, or {@code null} to use DESC_HBASE_VERSION_COMPARATOR
-     * @return a SortedMap with version as key and HBaseColumn as value
+     * @param cmp the comparator for ordering version keys; if {@code null}, {@link #DESC_HBASE_VERSION_COMPARATOR} is used
+     * @return a {@link SortedMap} with the version as key and the HBaseColumn as value
      */
     public static <T> SortedMap<Long, HBaseColumn<T>> asSortedMap(final T value, final Comparator<Long> cmp) {
         final SortedMap<Long, HBaseColumn<T>> map = new TreeMap<>(cmp == null ? DESC_HBASE_VERSION_COMPARATOR : cmp);
@@ -342,27 +346,28 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * Creates a SortedMap with a single entry mapping the version to an HBaseColumn
+     * Creates a {@link SortedMap} with a single entry mapping the given version to an HBaseColumn
      * containing the specified value and version, sorted by version in descending order.
      *
      * @param <T> the type of the column value
      * @param value the column value
      * @param version the version timestamp
-     * @return a SortedMap with version as key and HBaseColumn as value
+     * @return a {@link SortedMap} with the version as key and the HBaseColumn as value,
+     *         ordered by version descending
      */
     public static <T> SortedMap<Long, HBaseColumn<T>> asSortedMap(final T value, final long version) {
         return asSortedMap(value, version, DESC_HBASE_VERSION_COMPARATOR);
     }
 
     /**
-     * Creates a SortedMap with a single entry mapping the version to an HBaseColumn
-     * containing the specified value and version, using the provided comparator for sorting versions.
+     * Creates a {@link SortedMap} with a single entry mapping the given version to an HBaseColumn
+     * containing the specified value and version, using the provided comparator for ordering keys.
      *
      * @param <T> the type of the column value
      * @param value the column value
      * @param version the version timestamp
-     * @param cmp the comparator for sorting versions, or {@code null} to use DESC_HBASE_VERSION_COMPARATOR
-     * @return a SortedMap with version as key and HBaseColumn as value
+     * @param cmp the comparator for ordering version keys; if {@code null}, {@link #DESC_HBASE_VERSION_COMPARATOR} is used
+     * @return a {@link SortedMap} with the version as key and the HBaseColumn as value
      */
     public static <T> SortedMap<Long, HBaseColumn<T>> asSortedMap(final T value, final long version, final Comparator<Long> cmp) {
         final SortedMap<Long, HBaseColumn<T>> map = new TreeMap<>(cmp == null ? DESC_HBASE_VERSION_COMPARATOR : cmp);
@@ -401,14 +406,13 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * Checks if this HBaseColumn is {@code null} (empty).
-     * An HBaseColumn is considered {@code null} if:
-     * <ul>
-     * <li>Both value is {@code null} and version is 0, or</li>
-     * <li>It is one of the predefined empty column constants</li>
-     * </ul>
+     * Returns {@code true} if this HBaseColumn is considered null/empty.
+     * A column is considered null/empty if its value is {@code null} and its version is {@code 0},
+     * or if it is equal (by {@link #equals(Object)}) to any of the predefined empty column
+     * constants registered in the internal pool (e.g. {@link #EMPTY_INT_COLUMN},
+     * {@link #EMPTY_OBJECT_COLUMN}, etc.).
      *
-     * @return {@code true} if this column is null/empty, {@code false} otherwise
+     * @return {@code true} if this column is null/empty; {@code false} otherwise
      */
     public boolean isNull() {
         return (value == null && version == 0) || emptyColumnPool.containsValue(this);

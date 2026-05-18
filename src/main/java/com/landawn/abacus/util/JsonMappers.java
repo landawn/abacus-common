@@ -601,9 +601,8 @@ public final class JsonMappers {
      * @param offset the offset in the array where JSON data starts
      * @param len the number of bytes to read from the offset
      * @param targetType the class of the object to deserialize to
-     * @return the deserialized object; never {@code null} unless JSON contains "null"
-     * @throws RuntimeException if deserialization fails or array bounds are invalid
-     * @throws IndexOutOfBoundsException if offset or length are invalid
+     * @return the deserialized object; {@code null} if JSON contains "null"
+     * @throws RuntimeException if deserialization fails, the JSON is invalid, or the array bounds are invalid
      * @see #fromJson(byte[], Class)
      */
     public static <T> T fromJson(final byte[] json, final int offset, final int len, final Class<? extends T> targetType) {
@@ -1178,8 +1177,7 @@ public final class JsonMappers {
      * @param len the number of bytes to read from the offset
      * @param targetType TypeReference capturing the generic type information
      * @return the deserialized object; {@code null} if JSON contains "null"
-     * @throws RuntimeException if deserialization fails or bounds are invalid
-     * @throws IndexOutOfBoundsException if offset or length are invalid
+     * @throws RuntimeException if deserialization fails, the JSON is invalid, or the array bounds are invalid
      * @see TypeReference
      * @see #fromJson(byte[], int, int, Class)
      */
@@ -1392,11 +1390,10 @@ public final class JsonMappers {
 
     /**
      * Deserializes JSON from an input stream using TypeReference for generic types.
-     * The stream is not closed by this method.
+     * The stream is not closed by this method; the caller is responsible for closing it.
      *
      * <p>This method is ideal for deserializing collections, maps, and other generic
-     * types from network streams, file streams, or resources. The caller is responsible
-     * for closing the stream.</p>
+     * types from network streams, file streams, or classpath resources.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1431,31 +1428,29 @@ public final class JsonMappers {
     }
 
     /**
-     * Deserializes JSON from an InputStream into a Java object of the specified generic type with custom deserialization configuration.
-     * This method allows fine-grained control over the deserialization process through a custom {@link DeserializationConfig}.
-     *
-     * <p>This method is ideal for deserializing collections, maps, and other generic
-     * types from network streams, file streams, or resources. The caller is responsible
-     * for closing the stream.</p>
+     * Deserializes JSON from an input stream into a Java object of the specified generic type with
+     * custom deserialization configuration. The stream is not closed by this method.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Read a list of users with custom configuration
-     * FileInputStream fis = new FileInputStream("users.json");
-     * DeserializationConfig config = JsonMappers.createDeserializationConfig()
-     *     .with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-     * List<User> users = JsonMappers.fromJson(fis,
-     *     new TypeReference<List<User>>() {}, config);
+     * try (FileInputStream fis = new FileInputStream("users.json")) {
+     *     DeserializationConfig config = JsonMappers.createDeserializationConfig()
+     *         .without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+     *     List<User> users = JsonMappers.fromJson(fis,
+     *         new TypeReference<List<User>>() {}, config);
+     * }
      * }</pre>
      *
      * @param <T> the type of the object to deserialize to
-     * @param json the InputStream containing JSON data to deserialize
-     * @param targetType TypeReference describing the target type, can be Bean/Array/Collection/Map types
-     * @param config custom deserialization configuration, if {@code null} uses default configuration
-     * @return the deserialized object of type T
-     * @throws RuntimeException wrapping any IOException that occurs during deserialization
+     * @param json the input stream containing JSON content; not closed by this method
+     * @param targetType TypeReference capturing the generic type information
+     * @param config the custom deserialization configuration; if {@code null}, uses default
+     * @return the deserialized object; {@code null} if JSON contains "null"
+     * @throws RuntimeException if reading fails or the JSON is invalid
      * @see TypeReference
      * @see DeserializationConfig
+     * @see #fromJson(InputStream, TypeReference)
      */
     public static <T> T fromJson(final InputStream json, final TypeReference<? extends T> targetType, final DeserializationConfig config) {
         final JsonMapper jsonMapper = getJsonMapper(config);
@@ -1470,12 +1465,9 @@ public final class JsonMappers {
     }
 
     /**
-     * Deserializes JSON from a Reader into a Java object of the specified generic type using default configuration.
-     * This method is suitable for reading JSON from character-based sources like StringReader or FileReader.
-     *
-     * <p>This method is ideal for deserializing collections, maps, and other generic
-     * types from network streams, file streams, or resources. The caller is responsible
-     * for closing the stream/Reader.</p>
+     * Deserializes JSON from a Reader into a Java object of the specified generic type using default
+     * configuration. Suitable for character-based sources such as {@link java.io.StringReader} or
+     * {@link java.io.FileReader}. The reader is not closed by this method.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1486,11 +1478,13 @@ public final class JsonMappers {
      * }</pre>
      *
      * @param <T> the type of the object to deserialize to
-     * @param json the Reader containing JSON data to deserialize
-     * @param targetType TypeReference describing the target type, can be Bean/Array/Collection/Map types
-     * @return the deserialized object of type T
-     * @throws RuntimeException wrapping any IOException that occurs during deserialization
+     * @param json the reader containing JSON content; not closed by this method
+     * @param targetType TypeReference capturing the generic type information
+     * @return the deserialized object; {@code null} if JSON contains "null"
+     * @throws RuntimeException if reading fails or the JSON is invalid
      * @see TypeReference
+     * @see #fromJson(Reader, TypeReference, DeserializationConfig)
+     * @see #fromJson(Reader, Class)
      */
     public static <T> T fromJson(final Reader json, final TypeReference<? extends T> targetType) {
         try {
@@ -1501,31 +1495,29 @@ public final class JsonMappers {
     }
 
     /**
-     * Deserializes JSON from a Reader into a Java object of the specified generic type with custom deserialization configuration.
-     * This method combines the flexibility of Reader-based input with custom configuration control.
-     *
-     * <p>This method is ideal for deserializing collections, maps, and other generic
-     * types from network streams, file streams, or resources. The caller is responsible
-     * for closing the stream/Reader.</p>
+     * Deserializes JSON from a Reader into a Java object of the specified generic type with custom
+     * deserialization configuration. The reader is not closed by this method.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Read JSON with lenient parsing configuration
-     * FileReader reader = new FileReader("data.json");
-     * DeserializationConfig config = JsonMappers.createDeserializationConfig()
-     *     .without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-     * Map<String, Object> data = JsonMappers.fromJson(reader,
-     *     new TypeReference<Map<String, Object>>() {}, config);
+     * try (FileReader reader = new FileReader("data.json")) {
+     *     DeserializationConfig config = JsonMappers.createDeserializationConfig()
+     *         .without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+     *     Map<String, Object> data = JsonMappers.fromJson(reader,
+     *         new TypeReference<Map<String, Object>>() {}, config);
+     * }
      * }</pre>
      *
      * @param <T> the type of the object to deserialize to
-     * @param json the Reader containing JSON data to deserialize
-     * @param targetType TypeReference describing the target type, can be Bean/Array/Collection/Map types
-     * @param config custom deserialization configuration, if {@code null} uses default configuration
-     * @return the deserialized object of type T
-     * @throws RuntimeException wrapping any IOException that occurs during deserialization
+     * @param json the reader containing JSON content; not closed by this method
+     * @param targetType TypeReference capturing the generic type information
+     * @param config the custom deserialization configuration; if {@code null}, uses default
+     * @return the deserialized object; {@code null} if JSON contains "null"
+     * @throws RuntimeException if reading fails or the JSON is invalid
      * @see TypeReference
      * @see DeserializationConfig
+     * @see #fromJson(Reader, TypeReference)
      */
     public static <T> T fromJson(final Reader json, final TypeReference<? extends T> targetType, final DeserializationConfig config) {
         final JsonMapper jsonMapper = getJsonMapper(config);
@@ -1544,8 +1536,7 @@ public final class JsonMappers {
      * This method fetches JSON content from the specified URL and deserializes it.
      *
      * <p>This method is ideal for deserializing collections, maps, and other generic
-     * types from network streams, file streams, or resources. The caller is responsible
-     * for closing the stream/Reader.</p>
+     * types fetched from remote HTTP endpoints or classpath resources.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1557,10 +1548,12 @@ public final class JsonMappers {
      *
      * @param <T> the type of the object to deserialize to
      * @param json the URL pointing to JSON data to deserialize
-     * @param targetType TypeReference describing the target type
-     * @return the deserialized object of type T
-     * @throws RuntimeException wrapping any IOException that occurs during network access or deserialization
+     * @param targetType TypeReference capturing the generic type information
+     * @return the deserialized object; {@code null} if JSON contains "null"
+     * @throws RuntimeException if network access fails or the JSON is invalid
      * @see TypeReference
+     * @see #fromJson(URL, TypeReference, DeserializationConfig)
+     * @see #fromJson(URL, Class)
      */
     @SuppressWarnings("deprecation")
     public static <T> T fromJson(final URL json, final TypeReference<? extends T> targetType) {
@@ -1575,10 +1568,6 @@ public final class JsonMappers {
      * Deserializes JSON from a URL into a Java object of the specified generic type with custom deserialization configuration.
      * This method provides control over the deserialization process when fetching JSON from URLs.
      *
-     * <p>This method is ideal for deserializing collections, maps, and other generic
-     * types from network streams, file streams, or resources. The caller is responsible
-     * for closing the stream/Reader.</p>
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Fetch JSON with custom date handling
@@ -1591,12 +1580,13 @@ public final class JsonMappers {
      *
      * @param <T> the type of the object to deserialize to
      * @param json the URL pointing to JSON data to deserialize
-     * @param targetType TypeReference describing the target type
-     * @param config custom deserialization configuration, if {@code null} uses default configuration
-     * @return the deserialized object of type T
-     * @throws RuntimeException wrapping any IOException that occurs during network access or deserialization
+     * @param targetType TypeReference capturing the generic type information
+     * @param config the custom deserialization configuration; if {@code null}, uses default
+     * @return the deserialized object; {@code null} if JSON contains "null"
+     * @throws RuntimeException if network access fails or the JSON is invalid
      * @see TypeReference
      * @see DeserializationConfig
+     * @see #fromJson(URL, TypeReference)
      */
     @SuppressWarnings("deprecation")
     public static <T> T fromJson(final URL json, final TypeReference<? extends T> targetType, final DeserializationConfig config) {
@@ -1612,27 +1602,25 @@ public final class JsonMappers {
     }
 
     /**
-     * Deserializes JSON from a DataInput into a Java object of the specified generic type using default configuration.
-     * This method is useful for reading JSON from custom binary protocols or specialized I/O streams.
-     *
-     * <p>This method is ideal for deserializing collections, maps, and other generic
-     * types from network streams, file streams, or resources. The caller is responsible
-     * for closing the stream/Reader.</p>
+     * Deserializes JSON from a {@link DataInput} into a Java object of the specified generic type
+     * using the default configuration. Useful for reading JSON embedded in custom binary protocols.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Read JSON from a DataInputStream
      * DataInputStream dis = new DataInputStream(inputStream);
-     * Product product = JsonMappers.fromJson(dis,
-     *     new TypeReference<Product>() {});
+     * List<Product> products = JsonMappers.fromJson(dis,
+     *     new TypeReference<List<Product>>() {});
      * }</pre>
      *
      * @param <T> the type of the object to deserialize to
-     * @param json the DataInput containing JSON data to deserialize
-     * @param targetType TypeReference describing the target type
-     * @return the deserialized object of type T
-     * @throws RuntimeException wrapping any IOException that occurs during deserialization
+     * @param json the DataInput containing JSON content
+     * @param targetType TypeReference capturing the generic type information
+     * @return the deserialized object; {@code null} if JSON contains "null"
+     * @throws RuntimeException if reading fails or the JSON is invalid
      * @see TypeReference
+     * @see #fromJson(DataInput, TypeReference, DeserializationConfig)
+     * @see #fromJson(DataInput, Class)
      * @see DataInput
      */
     public static <T> T fromJson(final DataInput json, final TypeReference<? extends T> targetType) {
@@ -1644,12 +1632,9 @@ public final class JsonMappers {
     }
 
     /**
-     * Deserializes JSON from a DataInput into a Java object of the specified generic type with custom deserialization configuration.
-     * This method combines DataInput flexibility with custom configuration control.
-     *
-     * <p>This method is ideal for deserializing collections, maps, and other generic
-     * types from network streams, file streams, or resources. The caller is responsible
-     * for closing the stream/Reader.</p>
+     * Deserializes JSON from a {@link DataInput} into a Java object of the specified generic type
+     * with custom deserialization configuration. Useful for reading JSON embedded in custom binary
+     * protocols where special deserialization handling is required.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1657,18 +1642,19 @@ public final class JsonMappers {
      * DataInputStream dis = new DataInputStream(socket.getInputStream());
      * DeserializationConfig config = JsonMappers.createDeserializationConfig()
      *     .with(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
-     * Order order = JsonMappers.fromJson(dis,
-     *     new TypeReference<Order>() {}, config);
+     * List<Order> orders = JsonMappers.fromJson(dis,
+     *     new TypeReference<List<Order>>() {}, config);
      * }</pre>
      *
      * @param <T> the type of the object to deserialize to
-     * @param json the DataInput containing JSON data to deserialize
-     * @param targetType TypeReference describing the target type
-     * @param config custom deserialization configuration, if {@code null} uses default configuration
-     * @return the deserialized object of type T
-     * @throws RuntimeException wrapping any IOException that occurs during deserialization
+     * @param json the DataInput containing JSON content
+     * @param targetType TypeReference capturing the generic type information
+     * @param config the custom deserialization configuration; if {@code null}, uses default
+     * @return the deserialized object; {@code null} if JSON contains "null"
+     * @throws RuntimeException if reading fails or the JSON is invalid
      * @see TypeReference
      * @see DeserializationConfig
+     * @see #fromJson(DataInput, TypeReference)
      * @see DataInput
      */
     public static <T> T fromJson(final DataInput json, final TypeReference<? extends T> targetType, final DeserializationConfig config) {
@@ -1809,8 +1795,9 @@ public final class JsonMappers {
      * MyObject obj = jsonOps.fromJson(json, MyObject.class);
      * }</pre>
      *
-     * @param jsonMapper the ObjectMapper instance to wrap
-     * @return a One instance wrapping the provided ObjectMapper
+     * @param jsonMapper the ObjectMapper instance to wrap; must not be {@code null}
+     * @return a {@link One} instance wrapping the provided ObjectMapper
+     * @throws NullPointerException if {@code jsonMapper} is {@code null}
      * @see One
      * @see ObjectMapper
      */
@@ -1859,9 +1846,9 @@ public final class JsonMappers {
          * // Result: {"name":"John","age":30}
          * }</pre>
          *
-         * @param obj the object to serialize to JSON
-         * @return JSON string representation of the object
-         * @throws RuntimeException wrapping any JsonProcessingException that occurs during serialization
+         * @param obj the object to serialize; can be {@code null} (produces {@code "null"})
+         * @return a JSON string representation of the object
+         * @throws RuntimeException if serialization fails
          */
         public String toJson(final Object obj) {
             try {
@@ -1889,10 +1876,11 @@ public final class JsonMappers {
          * // }
          * }</pre>
          *
-         * @param obj the object to serialize to JSON
-         * @param prettyFormat if {@code true}, formats the JSON with indentation and line breaks
-         * @return JSON string representation of the object, optionally formatted
-         * @throws RuntimeException wrapping any JsonProcessingException that occurs during serialization
+         * @param obj the object to serialize; can be {@code null} (produces {@code "null"})
+         * @param prettyFormat if {@code true}, formats the JSON with indentation and line breaks;
+         *                     if {@code false}, output is compact (single line)
+         * @return a JSON string representation of the object
+         * @throws RuntimeException if serialization fails
          */
         public String toJson(final Object obj, final boolean prettyFormat) {
             try {
@@ -1917,9 +1905,9 @@ public final class JsonMappers {
          * jsonOps.toJson(users, outputFile);
          * }</pre>
          *
-         * @param obj the object to serialize to JSON
-         * @param output the file to write the JSON to
-         * @throws RuntimeException wrapping any IOException that occurs during file writing
+         * @param obj the object to serialize; can be {@code null} (produces {@code "null"})
+         * @param output the file to write the JSON to; created or overwritten as needed
+         * @throws RuntimeException if serialization fails or the file cannot be written
          */
         public void toJson(final Object obj, final File output) {
             try {
@@ -1941,9 +1929,9 @@ public final class JsonMappers {
          * }
          * }</pre>
          *
-         * @param obj the object to serialize to JSON
-         * @param output the OutputStream to write the JSON to
-         * @throws RuntimeException wrapping any IOException that occurs during writing
+         * @param obj the object to serialize; can be {@code null} (produces {@code "null"})
+         * @param output the output stream to write the JSON to; not closed by this method
+         * @throws RuntimeException if serialization fails or writing to the stream fails
          */
         public void toJson(final Object obj, final OutputStream output) {
             try {
@@ -1966,9 +1954,9 @@ public final class JsonMappers {
          * }
          * }</pre>
          *
-         * @param obj the object to serialize to JSON
-         * @param output the Writer to write the JSON to
-         * @throws RuntimeException wrapping any IOException that occurs during writing
+         * @param obj the object to serialize; can be {@code null} (produces {@code "null"})
+         * @param output the writer to write the JSON to; not closed by this method
+         * @throws RuntimeException if serialization fails or writing fails
          */
         public void toJson(final Object obj, final Writer output) {
             try {
@@ -1989,9 +1977,9 @@ public final class JsonMappers {
          * jsonOps.toJson(message, dos);
          * }</pre>
          *
-         * @param obj the object to serialize to JSON
+         * @param obj the object to serialize; can be {@code null} (produces {@code "null"})
          * @param output the DataOutput to write the JSON to
-         * @throws RuntimeException wrapping any IOException that occurs during writing
+         * @throws RuntimeException if serialization fails or writing fails
          * @see DataOutput
          */
         public void toJson(final Object obj, final DataOutput output) {
@@ -2015,7 +2003,7 @@ public final class JsonMappers {
          * @param <T> the type of the object to deserialize to
          * @param json byte array containing JSON data
          * @param targetType the class of the target object
-         * @return the deserialized object of type T
+         * @return the deserialized object; {@code null} if JSON contains "null"
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          */
         public <T> T fromJson(final byte[] json, final Class<? extends T> targetType) {
@@ -2042,7 +2030,7 @@ public final class JsonMappers {
          * @param offset the starting position in the array
          * @param len the number of bytes to read
          * @param targetType the class of the target object
-         * @return the deserialized object of type T
+         * @return the deserialized object; {@code null} if JSON contains "null"
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          */
         public <T> T fromJson(final byte[] json, final int offset, final int len, final Class<? extends T> targetType) {
@@ -2066,7 +2054,7 @@ public final class JsonMappers {
          * @param <T> the type of the object to deserialize to
          * @param json JSON string to deserialize
          * @param targetType the class of the target object
-         * @return the deserialized object of type T
+         * @return the deserialized object; {@code null} if JSON contains "null"
          * @throws RuntimeException wrapping any JsonProcessingException that occurs during deserialization
          */
         public <T> T fromJson(final String json, final Class<? extends T> targetType) {
@@ -2090,7 +2078,7 @@ public final class JsonMappers {
          * @param <T> the type of the object to deserialize to
          * @param json the file containing JSON data
          * @param targetType the class of the target object
-         * @return the deserialized object of type T
+         * @return the deserialized object; {@code null} if JSON contains "null"
          * @throws RuntimeException wrapping any IOException that occurs during file reading or deserialization
          */
         public <T> T fromJson(final File json, final Class<? extends T> targetType) {
@@ -2115,7 +2103,7 @@ public final class JsonMappers {
          * @param <T> the type of the object to deserialize to
          * @param json the InputStream containing JSON data
          * @param targetType the class of the target object
-         * @return the deserialized object of type T
+         * @return the deserialized object; {@code null} if JSON contains "null"
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          */
         public <T> T fromJson(final InputStream json, final Class<? extends T> targetType) {
@@ -2140,7 +2128,7 @@ public final class JsonMappers {
          * @param <T> the type of the object to deserialize to
          * @param json the Reader containing JSON data
          * @param targetType the class of the target object
-         * @return the deserialized object of type T
+         * @return the deserialized object; {@code null} if JSON contains "null"
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          */
         public <T> T fromJson(final Reader json, final Class<? extends T> targetType) {
@@ -2164,7 +2152,7 @@ public final class JsonMappers {
          * @param <T> the type of the object to deserialize to
          * @param json the URL pointing to JSON data
          * @param targetType the class of the target object
-         * @return the deserialized object of type T
+         * @return the deserialized object; {@code null} if JSON contains "null"
          * @throws RuntimeException wrapping any IOException that occurs during network access or deserialization
          */
         @SuppressWarnings("deprecation")
@@ -2189,7 +2177,7 @@ public final class JsonMappers {
          * @param <T> the type of the object to deserialize to
          * @param json the DataInput containing JSON data
          * @param targetType the class of the target object
-         * @return the deserialized object of type T
+         * @return the deserialized object; {@code null} if JSON contains "null"
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          * @see DataInput
          */
@@ -2215,7 +2203,7 @@ public final class JsonMappers {
          * @param <T> the type of the object to deserialize to
          * @param json byte array containing JSON data
          * @param targetType TypeReference describing the target type
-         * @return the deserialized object of type T
+         * @return the deserialized object; {@code null} if JSON contains "null"
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          * @see TypeReference
          */
@@ -2244,7 +2232,7 @@ public final class JsonMappers {
          * @param offset the starting position in the array
          * @param len the number of bytes to read
          * @param targetType TypeReference describing the target type
-         * @return the deserialized object of type T
+         * @return the deserialized object; {@code null} if JSON contains "null"
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          * @see TypeReference
          */
@@ -2274,7 +2262,7 @@ public final class JsonMappers {
          * @param <T> the type of the object to deserialize to
          * @param json JSON string to deserialize
          * @param targetType TypeReference describing the target type, can be Bean/Array/Collection/Map
-         * @return the deserialized object of type T
+         * @return the deserialized object; {@code null} if JSON contains "null"
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          * @see TypeReference
          */
@@ -2300,7 +2288,7 @@ public final class JsonMappers {
          * @param <T> the type of the object to deserialize to
          * @param json the file containing JSON data
          * @param targetType TypeReference describing the target type, can be Bean/Array/Collection/Map
-         * @return the deserialized object of type T
+         * @return the deserialized object; {@code null} if JSON contains "null"
          * @throws RuntimeException wrapping any IOException that occurs during file reading or deserialization
          * @see TypeReference
          */
@@ -2327,7 +2315,7 @@ public final class JsonMappers {
          * @param <T> the type of the object to deserialize to
          * @param json the InputStream containing JSON data
          * @param targetType TypeReference describing the target type, can be Bean/Array/Collection/Map
-         * @return the deserialized object of type T
+         * @return the deserialized object; {@code null} if JSON contains "null"
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          * @see TypeReference
          */
@@ -2353,7 +2341,7 @@ public final class JsonMappers {
          * @param <T> the type of the object to deserialize to
          * @param json the Reader containing JSON data
          * @param targetType TypeReference describing the target type, can be Bean/Array/Collection/Map
-         * @return the deserialized object of type T
+         * @return the deserialized object; {@code null} if JSON contains "null"
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          * @see TypeReference
          */
@@ -2379,7 +2367,7 @@ public final class JsonMappers {
          * @param <T> the type of the object to deserialize to
          * @param json the URL pointing to JSON data
          * @param targetType TypeReference describing the target type
-         * @return the deserialized object of type T
+         * @return the deserialized object; {@code null} if JSON contains "null"
          * @throws RuntimeException wrapping any IOException that occurs during network access or deserialization
          * @see TypeReference
          */
@@ -2406,7 +2394,7 @@ public final class JsonMappers {
          * @param <T> the type of the object to deserialize to
          * @param json the DataInput containing JSON data
          * @param targetType TypeReference describing the target type
-         * @return the deserialized object of type T
+         * @return the deserialized object; {@code null} if JSON contains "null"
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          * @see TypeReference
          * @see DataInput

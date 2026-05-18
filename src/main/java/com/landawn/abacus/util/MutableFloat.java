@@ -537,7 +537,9 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     /**
      * Returns the value of this MutableFloat as a double after a widening primitive conversion.
-     * The conversion is exact for all float values that are representable as double.
+     * Every finite {@code float} value is exactly representable as a {@code double},
+     * so no precision is lost. Special values ({@code NaN}, positive and negative infinity)
+     * are also preserved exactly.
      *
      * @return the numeric value represented by this object after conversion to type double
      */
@@ -555,8 +557,8 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      *
      * <p>Comparison rules:</p>
      * <ul>
-     * <li>NaN is considered equal to NaN and greater than all other values</li>
-     * <li>Positive zero is considered greater than negative zero</li>
+     * <li>NaN is considered equal to NaN and greater than all other float values</li>
+     * <li>Positive zero ({@code +0.0f}) is considered greater than negative zero ({@code -0.0f})</li>
      * <li>All other comparisons follow natural numeric ordering</li>
      * </ul>
      *
@@ -575,10 +577,10 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * Collections.sort(list);   // Sorts in ascending order
      * }</pre>
      *
-     * @param other the other MutableFloat to compare to, not null
+     * @param other the other MutableFloat to compare to, not {@code null}
      * @return a negative integer, zero, or a positive integer as this object
      *         is less than, equal to, or greater than the specified object
-     * @throws NullPointerException if {@code other} is null
+     * @throws NullPointerException if {@code other} is {@code null}
      */
     @Override
     public int compareTo(final MutableFloat other) {

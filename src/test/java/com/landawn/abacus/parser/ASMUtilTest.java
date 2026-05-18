@@ -31,7 +31,7 @@ public class ASMUtilTest extends TestBase {
 
     @Test
     public void test_performance() {
-        XBean xbean = Beans.newRandom(XBean.class);
+        XBean xbean = Beans.newRandomBean(XBean.class);
 
         {
             BeanInfo beanInfo = ParserUtil.getBeanInfo(XBean.class, false);

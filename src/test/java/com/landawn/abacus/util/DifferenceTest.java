@@ -2083,8 +2083,8 @@ public class DifferenceTest extends AbstractTest {
 
     @Test
     public void test_002() {
-        List<Account> listA = Beans.newRandomList(Account.class, 10);
-        List<Account> listB = Beans.newRandomList(Account.class, 10);
+        List<Account> listA = Beans.newRandomBeanList(Account.class, 10);
+        List<Account> listB = Beans.newRandomBeanList(Account.class, 10);
 
         listA.get(0).setGUI(listB.get(3).getGUI());
         listA.get(5).setGUI(listB.get(7).getGUI());

@@ -288,10 +288,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param <T> the type of the array.
-     * @param componentType the Class object representing the component type of the new array.
+     * @param componentType the Class object representing the component type of the new array. Must not be {@code null}.
      * @param length the length of the new array.
-     * @return the new array.
+     * @return a new array of the specified component type and length.
      * @throws NegativeArraySizeException if the specified length is negative.
+     * @throws IllegalArgumentException if {@code componentType} is {@code null}.
      */
     public static <T> T newInstance(final Class<?> componentType, final int length) throws NegativeArraySizeException {
         N.checkArgNotNull(componentType, cs.componentType);
@@ -318,9 +319,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param <T> the type of the array.
-     * @param componentType the Class object representing the component type of the new array.
-     * @param dimensions the dimensions of the new array.
-     * @return the new array.
+     * @param componentType the Class object representing the component type of the new array. Must not be {@code null}.
+     * @param dimensions the dimensions of the new array. Must not be {@code null} or empty.
+     * @return a new multi-dimensional array of the specified component type and dimensions.
      * @throws IllegalArgumentException if the component type or dimensions are not valid for array creation.
      * @throws NegativeArraySizeException if any of the specified dimensions is negative.
      * @see java.lang.reflect.Array#newInstance(Class, int...)
@@ -781,8 +782,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>The returned list is:</p>
      * <ul>
      *   <li>Fixed-size - cannot be resized (no add/remove operations)</li>
-     *   <li>Backed by the original array - changes to the list affect the array and vice versa</li>
-     *   <li>Immutable empty list if the input array is {@code null} or empty</li>
+     *   <li>Backed by the original array when non-empty - changes to the list affect the array and vice versa</li>
+     *   <li>An unmodifiable empty list if the input array is {@code null} or empty</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -951,8 +952,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * String[] names = Array.of("Alice", "Bob", "Charlie");     // returns String array of names
      * }</pre>
      *
-     * @param <T> the type of the elements in the array.
-     * @param a the input array of CharSequence.
+     * @param <T> the type of the elements, which must extend {@code CharSequence}.
+     * @param a the input array.
      * @return the same input array.
      * @see N#asArray(Object...)
      */
@@ -1043,7 +1044,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param <T> the type of the elements in the array.
      * @param a the input array.
      * @return the same input array.
-     * @deprecated replaced by {@code N.asArray(Object...)}.
+     * @deprecated replaced by {@link N#asArray(Object...)}.
      * @see #ofValues(Object...)
      * @see N#asArray(Object...)
      */
@@ -1211,7 +1212,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param startInclusive the first long integer (inclusive) in the long array.
      * @param endExclusive the upper bound (exclusive) of the long array.
      * @return a long array containing long integers from <i>startInclusive</i> to <i>endExclusive</i>, or an empty array if startInclusive &gt;= endExclusive.
-     * @throws IllegalArgumentException if the range size is negative or exceeds Integer.MAX_VALUE (overflow detected).
+     * @throws IllegalArgumentException if the computed range size exceeds {@code Integer.MAX_VALUE} (overflow detected).
      */
     public static long[] range(long startInclusive, final long endExclusive) {
         if (startInclusive >= endExclusive) {
@@ -1639,7 +1640,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param startInclusive the first long integer (inclusive) in the long array.
      * @param endInclusive the upper bound (inclusive) of the long array.
      * @return a long array containing long integers from <i>startInclusive</i> to <i>endInclusive</i>, or an empty array if startInclusive &gt; endInclusive.
-     * @throws IllegalArgumentException if the range size is invalid (negative or exceeds Integer.MAX_VALUE - overflow detected).
+     * @throws IllegalArgumentException if the computed range size exceeds {@code Integer.MAX_VALUE} (overflow detected).
      */
     public static long[] rangeClosed(long startInclusive, final long endInclusive) {
         if (startInclusive > endInclusive) {
@@ -4008,7 +4009,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param fromIndex the start index of the portion to be converted (inclusive).
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Character objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      */
     @MayReturnNull
     public static Character[] box(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -4068,7 +4069,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param fromIndex the start index of the portion to be converted (inclusive).
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Byte objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      */
     @MayReturnNull
     public static Byte[] box(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -4128,7 +4129,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param fromIndex the start index of the portion to be converted (inclusive).
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Short objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      */
     @MayReturnNull
     public static Short[] box(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -4248,7 +4249,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param fromIndex the start index of the portion to be converted (inclusive).
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Long objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      */
     @MayReturnNull
     public static Long[] box(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -4308,7 +4309,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param fromIndex the start index of the portion to be converted (inclusive).
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Float objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      */
     @MayReturnNull
     public static Float[] box(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -4368,7 +4369,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param fromIndex the start index of the portion to be converted (inclusive).
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Double objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      */
     @MayReturnNull
     public static Double[] box(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -4770,6 +4771,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @see #unbox(Boolean[], boolean)
      * @see #unbox(Boolean[], int, int, boolean)
      */
+    @MayReturnNull
     public static boolean[] unbox(final Boolean... a) {
         return unbox(a, false);
     }
@@ -4785,9 +4787,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * boolean[] withFalse = Array.unbox(objects, false);   // returns {true, false, false}
      * }</pre>
      *
-     * @param a the array of Boolean objects to be converted.
+     * @param a the array of Boolean objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return an array of primitive booleans, {@code null} if the input array is {@code null}.
+     * @return an array of primitive booleans, or {@code null} if the input array is {@code null}.
      * @see #unbox(Boolean[], int, int, boolean)
      */
     @MayReturnNull
@@ -4842,13 +4844,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts an array of Character objects into an array of primitive chars.
-     * If a {@code null} value is encountered in the input array, it is replaced with the default value (char) 0.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code (char) 0}.
      *
-     * @param a the array of Character objects to be converted.
-     * @return an array of primitive chars, {@code null} if the input array is {@code null}.
+     * @param a the array of Character objects to be converted. May be {@code null}.
+     * @return an array of primitive chars, or {@code null} if the input array is {@code null}.
      * @see #unbox(Character[], char)
      * @see #unbox(Character[], int, int, char)
      */
+    @MayReturnNull
     public static char[] unbox(final Character... a) {
         return unbox(a, (char) 0);
     }
@@ -4857,9 +4860,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Character objects into an array of primitive chars.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the array of Character objects to be converted.
+     * @param a the array of Character objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return an array of primitive chars, {@code null} if the input array is {@code null}.
+     * @return an array of primitive chars, or {@code null} if the input array is {@code null}.
      * @see #unbox(Character[], int, int, char)
      */
     @MayReturnNull
@@ -4908,13 +4911,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts an array of Byte objects into an array of primitive bytes.
-     * If a {@code null} value is encountered in the input array, it is replaced with the default value (byte) 0.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code (byte) 0}.
      *
-     * @param a the array of Byte objects to be converted.
-     * @return an array of primitive bytes, {@code null} if the input array is {@code null}.
+     * @param a the array of Byte objects to be converted. May be {@code null}.
+     * @return an array of primitive bytes, or {@code null} if the input array is {@code null}.
      * @see #unbox(Byte[], byte)
      * @see #unbox(Byte[], int, int, byte)
      */
+    @MayReturnNull
     public static byte[] unbox(final Byte... a) {
         return unbox(a, (byte) 0);
     }
@@ -4923,9 +4927,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Byte objects into an array of primitive bytes.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the array of Byte objects to be converted.
+     * @param a the array of Byte objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return an array of primitive bytes, {@code null} if the input array is {@code null}.
+     * @return an array of primitive bytes, or {@code null} if the input array is {@code null}.
      * @see #unbox(Byte[], int, int, byte)
      */
     @MayReturnNull
@@ -4974,13 +4978,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts an array of Short objects into an array of primitive shorts.
-     * If a {@code null} value is encountered in the input array, it is replaced with the default value (short) 0.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code (short) 0}.
      *
-     * @param a the array of Short objects to be converted.
-     * @return an array of primitive shorts, {@code null} if the input array is {@code null}.
+     * @param a the array of Short objects to be converted. May be {@code null}.
+     * @return an array of primitive shorts, or {@code null} if the input array is {@code null}.
      * @see #unbox(Short[], short)
      * @see #unbox(Short[], int, int, short)
      */
+    @MayReturnNull
     public static short[] unbox(final Short... a) {
         return unbox(a, (short) 0);
     }
@@ -4989,9 +4994,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Short objects into an array of primitive shorts.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the array of Short objects to be converted.
+     * @param a the array of Short objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return an array of primitive shorts, {@code null} if the input array is {@code null}.
+     * @return an array of primitive shorts, or {@code null} if the input array is {@code null}.
      * @see #unbox(Short[], int, int, short)
      */
     @MayReturnNull
@@ -5054,6 +5059,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @see #unbox(Integer[], int)
      * @see #unbox(Integer[], int, int, int)
      */
+    @MayReturnNull
     public static int[] unbox(final Integer... a) {
         return unbox(a, 0);
     }
@@ -5069,9 +5075,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * int[] withZeros = Array.unbox(objects, 0);     // returns {1, 0, 3, 0, 5}
      * }</pre>
      *
-     * @param a the array of Integer objects to be converted.
+     * @param a the array of Integer objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return an array of primitive integers, {@code null} if the input array is {@code null}.
+     * @return an array of primitive integers, or {@code null} if the input array is {@code null}.
      * @see #unbox(Integer[], int, int, int)
      * @see #unbox(Integer...)
      */
@@ -5128,7 +5134,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts an array of Long objects into an array of primitive longs.
-     * If a {@code null} value is encountered in the input array, it is replaced with the default value (long) 0.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code 0L}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5142,6 +5148,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @see #unbox(Long[], long)
      * @see #unbox(Long[], int, int, long)
      */
+    @MayReturnNull
     public static long[] unbox(final Long... a) {
         return unbox(a, 0L);
     }
@@ -5157,9 +5164,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * long[] withZeros = Array.unbox(objects, 0L);     // returns {100L, 0L, 300L, 0L, 500L}
      * }</pre>
      *
-     * @param a the array of Long objects to be converted.
+     * @param a the array of Long objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return an array of primitive longs, {@code null} if the input array is {@code null}.
+     * @return an array of primitive longs, or {@code null} if the input array is {@code null}.
      * @see #unbox(Long[], int, int, long)
      * @see #unbox(Long...)
      */
@@ -5216,13 +5223,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts an array of Float objects into an array of primitive floats.
-     * If a {@code null} value is encountered in the input array, it is replaced with the default value (float) 0.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code 0.0f}.
      *
-     * @param a the array of Float objects to be converted.
-     * @return an array of primitive floats, {@code null} if the input array is {@code null}.
+     * @param a the array of Float objects to be converted. May be {@code null}.
+     * @return an array of primitive floats, or {@code null} if the input array is {@code null}.
      * @see #unbox(Float[], float)
      * @see #unbox(Float[], int, int, float)
      */
+    @MayReturnNull
     public static float[] unbox(final Float... a) {
         return unbox(a, 0f);
     }
@@ -5231,9 +5239,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Float objects into an array of primitive floats.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the array of Float objects to be converted.
+     * @param a the array of Float objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return an array of primitive floats, {@code null} if the input array is {@code null}.
+     * @return an array of primitive floats, or {@code null} if the input array is {@code null}.
      * @see #unbox(Float[], int, int, float)
      * @see #unbox(Float...)
      */
@@ -5250,11 +5258,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a portion of an array of Float objects into an array of primitive floats.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the array of Float objects to be converted.
+     * @param a the array of Float objects to be converted. May be {@code null}.
      * @param fromIndex the starting index (inclusive) in the array to be converted.
      * @param toIndex the ending index (exclusive) in the array to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return an array of primitive floats, {@code null} if the input array is {@code null}.
+     * @return an array of primitive floats, or {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      * @see #unbox(Float[], float)
      * @see #unbox(Float...)
@@ -5283,7 +5291,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts an array of Double objects into an array of primitive doubles.
-     * If a {@code null} value is encountered in the input array, it is replaced with the default value (double) 0.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code 0.0}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5297,6 +5305,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @see #unbox(Double[], double)
      * @see #unbox(Double[], int, int, double)
      */
+    @MayReturnNull
     public static double[] unbox(final Double... a) {
         return unbox(a, 0d);
     }
@@ -5312,9 +5321,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * double[] withZeros = Array.unbox(objects, 0.0);     // returns {1.1, 0.0, 3.3, 0.0, 5.5}
      * }</pre>
      *
-     * @param a the array of Double objects to be converted.
+     * @param a the array of Double objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return an array of primitive doubles, {@code null} if the input array is {@code null}.
+     * @return an array of primitive doubles, or {@code null} if the input array is {@code null}.
      * @see #unbox(Double[], int, int, double)
      * @see #unbox(Double...)
      */
@@ -5338,11 +5347,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * double[] empty = Array.unbox(objects, 2, 2, 0.0);     // returns empty double array
      * }</pre>
      *
-     * @param a the array of Double objects to be converted.
+     * @param a the array of Double objects to be converted. May be {@code null}.
      * @param fromIndex the starting index (inclusive) in the array to be converted.
      * @param toIndex the ending index (exclusive) in the array to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return an array of primitive doubles, {@code null} if the input array is {@code null}.
+     * @return an array of primitive doubles, or {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      * @see #unbox(Double[], double)
      * @see #unbox(Double...)
@@ -5371,13 +5380,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts a two-dimensional array of Boolean objects into a two-dimensional array of primitive booleans.
-     * If a {@code null} value is encountered in the input array, it is replaced with the default value (boolean) {@code false}.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code false}.
      *
-     * @param a the two-dimensional array of Boolean objects to be converted.
-     * @return a two-dimensional array of primitive booleans, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of Boolean objects to be converted. May be {@code null}.
+     * @return a two-dimensional array of primitive booleans, or {@code null} if the input array is {@code null}.
      * @see #unbox(Boolean[][], boolean)
      * @see #unbox(Boolean[])
      */
+    @MayReturnNull
     public static boolean[][] unbox(final Boolean[][] a) {
         return unbox(a, false);
     }
@@ -5386,9 +5396,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a two-dimensional array of Boolean objects into a two-dimensional array of primitive booleans.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the two-dimensional array of Boolean objects to be converted.
+     * @param a the two-dimensional array of Boolean objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a two-dimensional array of primitive booleans, {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive booleans, or {@code null} if the input array is {@code null}.
      * @see #unbox(Boolean[], boolean)
      */
     @MayReturnNull
@@ -5408,13 +5418,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts a two-dimensional array of Character objects into a two-dimensional array of primitive chars.
-     * If a {@code null} value is encountered in the input array, it is replaced with the default value (char) 0.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code (char) 0}.
      *
-     * @param a the two-dimensional array of Character objects to be converted.
-     * @return a two-dimensional array of primitive chars, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of Character objects to be converted. May be {@code null}.
+     * @return a two-dimensional array of primitive chars, or {@code null} if the input array is {@code null}.
      * @see #unbox(Character[][], char)
      * @see #unbox(Character[])
      */
+    @MayReturnNull
     public static char[][] unbox(final Character[][] a) {
         return unbox(a, (char) 0);
     }
@@ -5423,9 +5434,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a two-dimensional array of Character objects into a two-dimensional array of primitive chars.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the two-dimensional array of Character objects to be converted.
+     * @param a the two-dimensional array of Character objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a two-dimensional array of primitive chars, {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive chars, or {@code null} if the input array is {@code null}.
      * @see #unbox(Character[], char)
      */
     @MayReturnNull
@@ -5445,13 +5456,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts a two-dimensional array of Byte objects into a two-dimensional array of primitive bytes.
-     * If a {@code null} value is encountered in the input array, it is replaced with the default value (byte) 0.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code (byte) 0}.
      *
-     * @param a the two-dimensional array of Byte objects to be converted.
-     * @return a two-dimensional array of primitive bytes, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of Byte objects to be converted. May be {@code null}.
+     * @return a two-dimensional array of primitive bytes, or {@code null} if the input array is {@code null}.
      * @see #unbox(Byte[][], byte)
      * @see #unbox(Byte[])
      */
+    @MayReturnNull
     public static byte[][] unbox(final Byte[][] a) {
         return unbox(a, (byte) 0);
     }
@@ -5460,9 +5472,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a two-dimensional array of Byte objects into a two-dimensional array of primitive bytes.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the two-dimensional array of Byte objects to be converted.
+     * @param a the two-dimensional array of Byte objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a two-dimensional array of primitive bytes, {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive bytes, or {@code null} if the input array is {@code null}.
      * @see #unbox(Byte[], byte)
      */
     @MayReturnNull
@@ -5482,13 +5494,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts a two-dimensional array of Short objects into a two-dimensional array of primitive shorts.
-     * If a {@code null} value is encountered in the input array, it is replaced with the default value (short) 0.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code (short) 0}.
      *
-     * @param a the two-dimensional array of Short objects to be converted.
-     * @return a two-dimensional array of primitive shorts, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of Short objects to be converted. May be {@code null}.
+     * @return a two-dimensional array of primitive shorts, or {@code null} if the input array is {@code null}.
      * @see #unbox(Short[][], short)
      * @see #unbox(Short[])
      */
+    @MayReturnNull
     public static short[][] unbox(final Short[][] a) {
         return unbox(a, (short) 0);
     }
@@ -5497,9 +5510,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a two-dimensional array of Short objects into a two-dimensional array of primitive shorts.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the two-dimensional array of Short objects to be converted.
+     * @param a the two-dimensional array of Short objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a two-dimensional array of primitive shorts, {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive shorts, or {@code null} if the input array is {@code null}.
      * @see #unbox(Short[], short)
      */
     @MayReturnNull
@@ -5519,13 +5532,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts a two-dimensional array of Integer objects into a two-dimensional array of primitive integers.
-     * If a {@code null} value is encountered in the input array, it is replaced with the default value (int) 0.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code 0}.
      *
-     * @param a the two-dimensional array of Integer objects to be converted.
-     * @return a two-dimensional array of primitive integers, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of Integer objects to be converted. May be {@code null}.
+     * @return a two-dimensional array of primitive integers, or {@code null} if the input array is {@code null}.
      * @see #unbox(Integer[][], int)
      * @see #unbox(Integer[])
      */
+    @MayReturnNull
     public static int[][] unbox(final Integer[][] a) {
         return unbox(a, 0);
     }
@@ -5534,9 +5548,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a two-dimensional array of Integer objects into a two-dimensional array of primitive integers.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the two-dimensional array of Integer objects to be converted.
+     * @param a the two-dimensional array of Integer objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a two-dimensional array of primitive integers, {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive integers, or {@code null} if the input array is {@code null}.
      * @see #unbox(Integer[], int)
      */
     @MayReturnNull
@@ -5556,13 +5570,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts a two-dimensional array of Long objects into a two-dimensional array of primitive longs.
-     * If a {@code null} value is encountered in the input array, it is replaced with the default value (long) 0.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code 0L}.
      *
-     * @param a the two-dimensional array of Long objects to be converted.
-     * @return a two-dimensional array of primitive longs, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of Long objects to be converted. May be {@code null}.
+     * @return a two-dimensional array of primitive longs, or {@code null} if the input array is {@code null}.
      * @see #unbox(Long[][], long)
      * @see #unbox(Long[])
      */
+    @MayReturnNull
     public static long[][] unbox(final Long[][] a) {
         return unbox(a, 0L);
     }
@@ -5571,9 +5586,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a two-dimensional array of Long objects into a two-dimensional array of primitive longs.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the two-dimensional array of Long objects to be converted.
+     * @param a the two-dimensional array of Long objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a two-dimensional array of primitive longs, {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive longs, or {@code null} if the input array is {@code null}.
      * @see #unbox(Long[], long)
      */
     @MayReturnNull
@@ -5593,13 +5608,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts a two-dimensional array of Float objects into a two-dimensional array of primitive floats.
-     * If a {@code null} value is encountered in the input array, it is replaced with the default value (float) 0.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code 0.0f}.
      *
-     * @param a the two-dimensional array of Float objects to be converted.
-     * @return a two-dimensional array of primitive floats, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of Float objects to be converted. May be {@code null}.
+     * @return a two-dimensional array of primitive floats, or {@code null} if the input array is {@code null}.
      * @see #unbox(Float[][], float)
      * @see #unbox(Float[])
      */
+    @MayReturnNull
     public static float[][] unbox(final Float[][] a) {
         return unbox(a, 0f);
     }
@@ -5608,9 +5624,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a two-dimensional array of Float objects into a two-dimensional array of primitive floats.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the two-dimensional array of Float objects to be converted.
+     * @param a the two-dimensional array of Float objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a two-dimensional array of primitive floats, {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive floats, or {@code null} if the input array is {@code null}.
      * @see #unbox(Float[], float)
      */
     @MayReturnNull
@@ -5630,13 +5646,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts a two-dimensional array of Double objects into a two-dimensional array of primitive doubles.
-     * If a {@code null} value is encountered in the input array, it is replaced with the default value (double) 0.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code 0.0}.
      *
-     * @param a the two-dimensional array of Double objects to be converted.
-     * @return a two-dimensional array of primitive doubles, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of Double objects to be converted. May be {@code null}.
+     * @return a two-dimensional array of primitive doubles, or {@code null} if the input array is {@code null}.
      * @see #unbox(Double[][], double)
      * @see #unbox(Double[])
      */
+    @MayReturnNull
     public static double[][] unbox(final Double[][] a) {
         return unbox(a, 0d);
     }
@@ -5645,9 +5662,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a two-dimensional array of Double objects into a two-dimensional array of primitive doubles.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the two-dimensional array of Double objects to be converted.
+     * @param a the two-dimensional array of Double objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a two-dimensional array of primitive doubles, {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive doubles, or {@code null} if the input array is {@code null}.
      * @see #unbox(Double[], double)
      */
     @MayReturnNull
@@ -5667,12 +5684,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts a three-dimensional array of Boolean objects into a three-dimensional array of primitive booleans.
-     * If a {@code null} value is encountered in the input array, it is replaced with the default value (boolean) {@code false}.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code false}.
      *
-     * @param a the three-dimensional array of Boolean objects to be converted.
-     * @return a three-dimensional array of primitive booleans, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of Boolean objects to be converted. May be {@code null}.
+     * @return a three-dimensional array of primitive booleans, or {@code null} if the input array is {@code null}.
      * @see #unbox(Boolean[][][], boolean)
      */
+    @MayReturnNull
     public static boolean[][][] unbox(final Boolean[][][] a) {
         return unbox(a, false);
     }
@@ -5681,9 +5699,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a three-dimensional array of Boolean objects into a three-dimensional array of primitive booleans.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the three-dimensional array of Boolean objects to be converted.
+     * @param a the three-dimensional array of Boolean objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a three-dimensional array of primitive booleans, {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive booleans, or {@code null} if the input array is {@code null}.
      * @see #unbox(Boolean[][], boolean)
      */
     @MayReturnNull
@@ -5703,12 +5721,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts a three-dimensional array of Character objects into a three-dimensional array of primitive chars.
-     * If a {@code null} value is encountered in the input array, it is replaced with the default value (char) 0.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code (char) 0}.
      *
-     * @param a the three-dimensional array of Character objects to be converted.
-     * @return a three-dimensional array of primitive chars, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of Character objects to be converted. May be {@code null}.
+     * @return a three-dimensional array of primitive chars, or {@code null} if the input array is {@code null}.
      * @see #unbox(Character[][][], char)
      */
+    @MayReturnNull
     public static char[][][] unbox(final Character[][][] a) {
         return unbox(a, (char) 0);
     }
@@ -5717,9 +5736,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a three-dimensional array of Character objects into a three-dimensional array of primitive chars.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the three-dimensional array of Character objects to be converted.
+     * @param a the three-dimensional array of Character objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a three-dimensional array of primitive chars, {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive chars, or {@code null} if the input array is {@code null}.
      * @see #unbox(Character[][], char)
      */
     @MayReturnNull
@@ -5739,12 +5758,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts a three-dimensional array of Byte objects into a three-dimensional array of primitive bytes.
-     * If a {@code null} value is encountered in the input array, it is replaced with the default value (byte) 0.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code (byte) 0}.
      *
-     * @param a the three-dimensional array of Byte objects to be converted.
-     * @return a three-dimensional array of primitive bytes, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of Byte objects to be converted. May be {@code null}.
+     * @return a three-dimensional array of primitive bytes, or {@code null} if the input array is {@code null}.
      * @see #unbox(Byte[][][], byte)
      */
+    @MayReturnNull
     public static byte[][][] unbox(final Byte[][][] a) {
         return unbox(a, (byte) 0);
     }
@@ -5753,9 +5773,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a three-dimensional array of Byte objects into a three-dimensional array of primitive bytes.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the three-dimensional array of Byte objects to be converted.
+     * @param a the three-dimensional array of Byte objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a three-dimensional array of primitive bytes, {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive bytes, or {@code null} if the input array is {@code null}.
      * @see #unbox(Byte[][], byte)
      */
     @MayReturnNull
@@ -5775,12 +5795,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts a three-dimensional array of Short objects into a three-dimensional array of primitive shorts.
-     * If a {@code null} value is encountered in the input array, it is replaced with the default value (short) 0.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code (short) 0}.
      *
-     * @param a the three-dimensional array of Short objects to be converted.
-     * @return a three-dimensional array of primitive shorts, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of Short objects to be converted. May be {@code null}.
+     * @return a three-dimensional array of primitive shorts, or {@code null} if the input array is {@code null}.
      * @see #unbox(Short[][][], short)
      */
+    @MayReturnNull
     public static short[][][] unbox(final Short[][][] a) {
         return unbox(a, (short) 0);
     }
@@ -5789,9 +5810,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a three-dimensional array of Short objects into a three-dimensional array of primitive shorts.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the three-dimensional array of Short objects to be converted.
+     * @param a the three-dimensional array of Short objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a three-dimensional array of primitive shorts, {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive shorts, or {@code null} if the input array is {@code null}.
      * @see #unbox(Short[][], short)
      */
     @MayReturnNull
@@ -5811,12 +5832,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts a three-dimensional array of Integer objects into a three-dimensional array of primitive integers.
-     * If a {@code null} value is encountered in the input array, it is replaced with the default value (int) 0.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code 0}.
      *
-     * @param a the three-dimensional array of Integer objects to be converted.
-     * @return a three-dimensional array of primitive integers, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of Integer objects to be converted. May be {@code null}.
+     * @return a three-dimensional array of primitive integers, or {@code null} if the input array is {@code null}.
      * @see #unbox(Integer[][][], int)
      */
+    @MayReturnNull
     public static int[][][] unbox(final Integer[][][] a) {
         return unbox(a, 0);
     }
@@ -5825,9 +5847,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a three-dimensional array of Integer objects into a three-dimensional array of primitive integers.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the three-dimensional array of Integer objects to be converted.
+     * @param a the three-dimensional array of Integer objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a three-dimensional array of primitive integers, {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive integers, or {@code null} if the input array is {@code null}.
      * @see #unbox(Integer[][], int)
      */
     @MayReturnNull
@@ -5847,12 +5869,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts a three-dimensional array of Long objects into a three-dimensional array of primitive longs.
-     * If a {@code null} value is encountered in the input array, it is replaced with the default value (long) 0.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code 0L}.
      *
-     * @param a the three-dimensional array of Long objects to be converted.
-     * @return a three-dimensional array of primitive longs, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of Long objects to be converted. May be {@code null}.
+     * @return a three-dimensional array of primitive longs, or {@code null} if the input array is {@code null}.
      * @see #unbox(Long[][][], long)
      */
+    @MayReturnNull
     public static long[][][] unbox(final Long[][][] a) {
         return unbox(a, 0L);
     }
@@ -5861,9 +5884,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a three-dimensional array of Long objects into a three-dimensional array of primitive longs.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the three-dimensional array of Long objects to be converted.
+     * @param a the three-dimensional array of Long objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a three-dimensional array of primitive longs, {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive longs, or {@code null} if the input array is {@code null}.
      * @see #unbox(Long[][], long)
      */
     @MayReturnNull
@@ -5883,12 +5906,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts a three-dimensional array of Float objects into a three-dimensional array of primitive floats.
-     * If a {@code null} value is encountered in the input array, it is replaced with the default value (float) 0.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code 0.0f}.
      *
-     * @param a the three-dimensional array of Float objects to be converted.
-     * @return a three-dimensional array of primitive floats, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of Float objects to be converted. May be {@code null}.
+     * @return a three-dimensional array of primitive floats, or {@code null} if the input array is {@code null}.
      * @see #unbox(Float[][][], float)
      */
+    @MayReturnNull
     public static float[][][] unbox(final Float[][][] a) {
         return unbox(a, 0f);
     }
@@ -5897,9 +5921,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a three-dimensional array of Float objects into a three-dimensional array of primitive floats.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the three-dimensional array of Float objects to be converted.
+     * @param a the three-dimensional array of Float objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a three-dimensional array of primitive floats, {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive floats, or {@code null} if the input array is {@code null}.
      * @see #unbox(Float[][], float)
      */
     @MayReturnNull
@@ -5919,12 +5943,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts a three-dimensional array of Double objects into a three-dimensional array of primitive doubles.
-     * If a {@code null} value is encountered in the input array, it is replaced with the default value (double) 0.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code 0.0}.
      *
-     * @param a the three-dimensional array of Double objects to be converted.
-     * @return a three-dimensional array of primitive doubles, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of Double objects to be converted. May be {@code null}.
+     * @return a three-dimensional array of primitive doubles, or {@code null} if the input array is {@code null}.
      * @see #unbox(Double[][][], double)
      */
+    @MayReturnNull
     public static double[][][] unbox(final Double[][][] a) {
         return unbox(a, 0d);
     }
@@ -5933,9 +5958,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a three-dimensional array of Double objects into a three-dimensional array of primitive doubles.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the three-dimensional array of Double objects to be converted.
+     * @param a the three-dimensional array of Double objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a three-dimensional array of primitive doubles, {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive doubles, or {@code null} if the input array is {@code null}.
      * @see #unbox(Double[][], double)
      */
     @MayReturnNull
@@ -5971,7 +5996,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Original matrix is 2x3, transposed is 3x2
      * }</pre>
      *
-     * @param a the two-dimensional array to be transposed.
+     * @param a the two-dimensional array to be transposed. May be {@code null}.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
      */
@@ -6015,7 +6040,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
-     * @param a the two-dimensional array to be transposed.
+     * @param a the two-dimensional array to be transposed. May be {@code null}.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
      */
@@ -6059,7 +6084,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
-     * @param a the two-dimensional array to be transposed.
+     * @param a the two-dimensional array to be transposed. May be {@code null}.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
      */
@@ -6103,7 +6128,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
-     * @param a the two-dimensional array to be transposed.
+     * @param a the two-dimensional array to be transposed. May be {@code null}.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
      */
@@ -6147,7 +6172,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
-     * @param a the two-dimensional array to be transposed.
+     * @param a the two-dimensional array to be transposed. May be {@code null}.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
      */
@@ -6191,7 +6216,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
-     * @param a the two-dimensional array to be transposed.
+     * @param a the two-dimensional array to be transposed. May be {@code null}.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
      */
@@ -6235,7 +6260,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
-     * @param a the two-dimensional array to be transposed.
+     * @param a the two-dimensional array to be transposed. May be {@code null}.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
      */
@@ -6279,7 +6304,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
-     * @param a the two-dimensional array to be transposed.
+     * @param a the two-dimensional array to be transposed. May be {@code null}.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
      */

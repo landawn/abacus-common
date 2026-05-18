@@ -30,7 +30,7 @@ import com.landawn.abacus.util.stream.ObjIteratorEx;
  * Provides static methods for generating permutations of collections.
  * This class offers two main approaches for generating permutations:
  * <ul>
- *   <li>Plain Changes algorithm - generates all permutations without considering order</li>
+ *   <li>Plain Changes algorithm - generates all permutations in an unspecified (non-sorted) order</li>
  *   <li>Lexicographical algorithm - generates permutations in a specific order based on a comparator</li>
  * </ul>
  *

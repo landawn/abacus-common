@@ -190,16 +190,16 @@ public final class Indexed<T> extends AbstractIndexed {
     private final T value;
 
     /**
-     * Constructs an Indexed instance with the specified index and value.
+     * Constructs an {@code Indexed} instance with the specified index and value.
      * This is a package-private constructor; use {@link #of(Object, int)} or
-     * {@link #of(Object, long)} factory methods for creating instances.
+     * {@link #of(Object, long)} factory methods for creating instances, as those
+     * validate that the index is non-negative.
      *
-     * <p>The constructor initializes the index through the superclass {@link AbstractIndexed}
-     * and stores the value in this class. Both the index and value become immutable after
-     * construction.</p>
+     * <p>The constructor delegates index storage to the superclass {@link AbstractIndexed}
+     * and stores the value in this class. Both fields become effectively final after construction.</p>
      *
-     * @param index the index position (non-negative long value).
-     * @param value the value to be associated with the index (can be null).
+     * @param index the index position; the factory methods enforce that this is non-negative.
+     * @param value the value to be associated with the index; may be {@code null}.
      */
     Indexed(final long index, final T value) {
         super(index);

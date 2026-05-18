@@ -209,7 +209,8 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * This method blocks until an object is available, the timeout expires, or the thread is interrupted.
      *
      * <p>The object's activity print is updated to reflect the access.
-     * Expired objects are automatically destroyed and the method continues waiting.
+     * Expired objects encountered are automatically destroyed (with {@link Poolable.Caller#EVICT})
+     * and skipped; the method keeps retrying until a valid object is found or the timeout expires.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

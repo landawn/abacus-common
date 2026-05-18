@@ -95,7 +95,8 @@ public final class FastJson {
      *
      * @param obj the object to be converted to JSON string
      * @param prettyFormat {@code true} to enable pretty formatting with indentation and line breaks, {@code false} for compact output
-     * @return the JSON string representation of the object with or without pretty formatting
+     * @return the pretty-formatted or compact JSON string representation of the object,
+     *         or the literal string {@code "null"} if {@code obj} is {@code null}
      */
     public static String toJson(final Object obj, final boolean prettyFormat) {
         if (prettyFormat) {
@@ -620,8 +621,11 @@ public final class FastJson {
 
     /**
      * Deserializes JSON from a Reader into an object of the specified target type using the given JSONReader context.
-     * This method provides comprehensive control over Reader-based deserialization by first reading all content
-     * into a string and then parsing with the specified context.
+     * This method reads the entire content of the Reader into a string first, then parses it with the
+     * specified context. The caller is responsible for closing the Reader.
+     *
+     * <p><b>Note:</b> This method is marked {@link Beta} because it buffers the full Reader content
+     * into memory before parsing, which may be unsuitable for very large inputs.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -630,7 +634,7 @@ public final class FastJson {
      * }</pre>
      *
      * @param <T> the type of the target object
-     * @param json the Reader containing JSON data
+     * @param json the Reader containing JSON data; its full content is read into memory
      * @param targetType the Class object representing the target type
      * @param context the JSONReader context containing deserialization configuration
      * @return the deserialized object of type T, or {@code null} if the JSON represents null
@@ -688,8 +692,11 @@ public final class FastJson {
 
     /**
      * Deserializes JSON from a Reader into an object of the specified target Type using the given JSONReader context.
-     * This method provides comprehensive control over Type-based deserialization from character-based input sources
-     * by first reading all content into a string and then parsing with the specified context.
+     * This method reads the entire content of the Reader into a string first, then parses it with the
+     * specified context. The caller is responsible for closing the Reader.
+     *
+     * <p><b>Note:</b> This method is marked {@link Beta} because it buffers the full Reader content
+     * into memory before parsing, which may be unsuitable for very large inputs.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -699,7 +706,7 @@ public final class FastJson {
      * }</pre>
      *
      * @param <T> the type of the target object
-     * @param json the Reader containing JSON data
+     * @param json the Reader containing JSON data; its full content is read into memory
      * @param targetType the Type object representing the target type
      * @param context the JSONReader context containing deserialization configuration
      * @return the deserialized object of type T, or {@code null} if the JSON represents null

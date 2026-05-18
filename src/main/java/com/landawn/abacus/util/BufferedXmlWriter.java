@@ -56,6 +56,11 @@ import java.io.Writer;
  */
 public final class BufferedXmlWriter extends CharacterWriter {
 
+    /**
+     * XML character replacement mappings. Contains escape sequences for XML special characters
+     * ({@code &}, {@code <}, {@code >}, {@code "}, {@code '}) and numeric character references
+     * for control characters (U+0000–U+001F and U+007F).
+     */
     // start
     // ======================================================================================================>>>
     /*

@@ -272,7 +272,7 @@ public abstract class AbstractLogger implements Logger {
      * }</pre>
      *
      * @param t the exception or error to log
-     * @param msg the message to log
+     * @param msg the message accompanying the exception
      */
     @Override
     public void trace(final Throwable t, final String msg) {

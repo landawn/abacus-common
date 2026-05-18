@@ -53,41 +53,70 @@ import com.landawn.abacus.type.Type;
  */
 final class Utils {
 
+    /** Shared JSON parser instance; always non-{@code null}. */
     // Eagerly initialized; ParserFactory.createJsonParser() must always be available.
     static final JsonParser jsonParser = ParserFactory.createJsonParser();
 
+    /**
+     * Shared Abacus XML parser instance; {@code null} if the Abacus XML parser library
+     * is not present on the classpath.
+     */
     static final XmlParser abacusXmlParser = ParserFactory.isAbacusXmlParserAvailable() ? ParserFactory.createAbacusXmlParser() : null;
 
+    /**
+     * Shared general XML parser instance; {@code null} if the XML parser library
+     * is not present on the classpath.
+     */
     static final XmlParser xmlParser = ParserFactory.isXmlParserAvailable() ? ParserFactory.createXmlParser() : null;
 
+    /**
+     * Shared Kryo parser instance; {@code null} if the Kryo library
+     * is not present on the classpath.
+     */
     static final KryoParser kryoParser = ParserFactory.isKryoParserAvailable() ? ParserFactory.createKryoParser() : null;
 
+    /** Default JSON serialization configuration: quoted property names and quoted map keys. */
     static final JsonSerConfig jsc = JsonSerConfig.create().setQuotePropName(true).setQuoteMapKey(true);
 
+    /** JSON serialization configuration with pretty-printing enabled, quoted property names, and quoted map keys. */
     static final JsonSerConfig jscPrettyFormat = JsonSerConfig.create().setQuotePropName(true).setQuoteMapKey(true).setPrettyFormat(true);
 
+    /** Default XML serialization configuration. */
     static final XmlSerConfig xsc = XmlSerConfig.create();
 
+    /** XML serialization configuration with pretty-printing enabled. */
     static final XmlSerConfig xscPrettyFormat = XmlSerConfig.create().setPrettyFormat(true);
 
+    /** XML serialization configuration used for object cloning; includes type information in the output. */
     static final XmlSerConfig xscForClone = XmlSerConfig.create().setWriteTypeInfo(true);
 
+    /** Cached {@link Type} descriptor for the primitive {@code boolean} type. */
     static final Type<Boolean> booleanType = Type.of(boolean.class);
 
+    /** Cached {@link Type} descriptor for the primitive {@code char} type. */
     static final Type<Character> charType = Type.of(char.class);
 
+    /** Cached {@link Type} descriptor for the primitive {@code byte} type. */
     static final Type<Byte> byteType = Type.of(byte.class);
 
+    /** Cached {@link Type} descriptor for the primitive {@code short} type. */
     static final Type<Short> shortType = Type.of(short.class);
 
+    /** Cached {@link Type} descriptor for the primitive {@code int} type. */
     static final Type<Integer> intType = Type.of(int.class);
 
+    /** Cached {@link Type} descriptor for the primitive {@code long} type. */
     static final Type<Long> longType = Type.of(long.class);
 
+    /** Cached {@link Type} descriptor for the primitive {@code float} type. */
     static final Type<Float> floatType = Type.of(float.class);
 
+    /** Cached {@link Type} descriptor for the primitive {@code double} type. */
     static final Type<Double> doubleType = Type.of(double.class);
 
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     */
     private Utils() {
         // Utility class - prevent instantiation
     }

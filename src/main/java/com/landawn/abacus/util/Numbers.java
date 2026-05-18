@@ -1303,10 +1303,10 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.format(12.105f, "0.00");    // returns "12.10"
-     * Numbers.format(12.105f, "#.##");    // returns "12.1"
-     * Numbers.format(0.121, "#.##%");     // returns "12.1%"
-     * Numbers.format(0.12156, "#.##%");   // returns "12.16%"
+     * Numbers.format(12.105f, "0.00");     // returns "12.10"
+     * Numbers.format(12.105f, "#.##");     // returns "12.1"
+     * Numbers.format(0.121f, "#.##%");     // returns "12.1%"
+     * Numbers.format(0.12156f, "#.##%");   // returns "12.16%"
      * }</pre>
      *
      * @param x the float value to be formatted.
@@ -1341,11 +1341,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.format(12.105f, "0.00");    // returns "12.10"
-     * Numbers.format(12.105f, "#.##");    // returns "12.1"
-     * Numbers.format(null, "0.00");       // returns "0.00"
-     * Numbers.format(0.121, "#.##%");     // returns "12.1%"
-     * Numbers.format(0.12156, "#.##%");   // returns "12.16%"
+     * Numbers.format(12.105f, "0.00");     // returns "12.10"
+     * Numbers.format(12.105f, "#.##");     // returns "12.1"
+     * Numbers.format(null, "0.00");        // returns "0.00"
+     * Numbers.format(0.121f, "#.##%");     // returns "12.1%"
+     * Numbers.format(0.12156f, "#.##%");   // returns "12.16%"
      * }</pre>
      *
      * @param x the Float value to be formatted. If {@code null}, it will be treated as 0f.
@@ -2261,7 +2261,7 @@ public final class Numbers {
      * Converts the given object to a long value.
      *
      * <p>This method attempts to convert the provided object to a long. If the object is {@code null},
-     * default value {@code 0} is returned. If the object is a Number, its long value is returned.
+     * default value {@code 0L} is returned. If the object is a Number, its long value is returned.
      * Otherwise, the method attempts to parse the object's string representation as a long.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -3451,7 +3451,7 @@ public final class Numbers {
      * }</pre>
      *
      * @param str the string to check
-     * @return {@code true} if str contains only Unicode numeric
+     * @return {@code true} if {@code str} contains only Unicode digit characters, {@code false} otherwise
      * @see #isNumber(String)
      * @see #isParsable(String)
      * @see Strings#isNumeric(CharSequence)
@@ -3510,7 +3510,7 @@ public final class Numbers {
      * <p>Returns {@code true} if s is {@code null} or empty.</p>
      *
      * @param str the String to check
-     * @return if it is all zeros or {@code null}
+     * @return {@code true} if {@code str} is {@code null}, empty, or contains only '0' characters; {@code false} otherwise
      */
     private static boolean isAllZeros(final String str) {
         if (str == null) {
@@ -3690,6 +3690,7 @@ public final class Numbers {
      * Numbers.isConvertibleToNumber(null)        = false
      * Numbers.isConvertibleToNumber("")          = false
      * }</pre>
+     *
      * @param str the string to check
      * @return {@code true} if the string is a correctly formatted number
      * @see #isNumber(String)
@@ -3822,12 +3823,13 @@ public final class Numbers {
      * <p>{@code null} and empty/blank {@code String} will return {@code false}.</p>
      *
      * <p>Note, {@link #createNumber(String)} should return a number for every input resulting in {@code true}.</p>
+     *
      * @param str the string to check
      * @return {@code true} if the string is a correctly formatted number
      * @see #isNumber(String)
      * @see #isParsable(String)
      * @see #isConvertibleToNumber(String)
-     * @deprecated replaced by {@code isConvertibleToNumber}
+     * @deprecated replaced by {@link #isConvertibleToNumber(String)}
      */
     @Deprecated
     public static boolean isCreatable(final String str) {
@@ -7336,10 +7338,10 @@ public final class Numbers {
      * }</pre>
      *
      * @param x the float value to be rounded
-     * @param decimalFormat the DecimalFormat pattern to use for rounding
+     * @param decimalFormat the {@link java.text.DecimalFormat} pattern to use for rounding
      * @return the rounded float value
-     * @throws IllegalArgumentException if the decimalFormat is null
-     * @see DecimalFormat#format(double)
+     * @throws IllegalArgumentException if {@code decimalFormat} is {@code null}
+     * @see java.text.DecimalFormat#format(double)
      * @see #toFloat(String)
      * @see #round(float, int)
      */
@@ -7367,10 +7369,10 @@ public final class Numbers {
      * }</pre>
      *
      * @param x the double value to be rounded
-     * @param decimalFormat the DecimalFormat pattern to use for rounding
+     * @param decimalFormat the {@link java.text.DecimalFormat} pattern to use for rounding
      * @return the rounded double value
-     * @throws IllegalArgumentException if the decimalFormat is null
-     * @see DecimalFormat#format(double)
+     * @throws IllegalArgumentException if {@code decimalFormat} is {@code null}
+     * @see java.text.DecimalFormat#format(double)
      * @see #toDouble(String)
      * @see #round(double, int)
      */
@@ -7396,10 +7398,10 @@ public final class Numbers {
      * }</pre>
      *
      * @param x the float value to be rounded
-     * @param decimalFormat the DecimalFormat instance to use for rounding
+     * @param decimalFormat the {@link java.text.DecimalFormat} instance to use for rounding
      * @return the rounded float value
-     * @throws IllegalArgumentException if the decimalFormat is null
-     * @see DecimalFormat#format(double)
+     * @throws IllegalArgumentException if {@code decimalFormat} is {@code null}
+     * @see java.text.DecimalFormat#format(double)
      * @see #round(float, String)
      * @see #round(float, int)
      */
@@ -7433,10 +7435,10 @@ public final class Numbers {
      * }</pre>
      *
      * @param x the double value to be rounded
-     * @param decimalFormat the DecimalFormat instance to use for rounding
+     * @param decimalFormat the {@link java.text.DecimalFormat} instance to use for rounding
      * @return the rounded double value
-     * @throws IllegalArgumentException if the decimalFormat is null
-     * @see DecimalFormat#format(double)
+     * @throws IllegalArgumentException if {@code decimalFormat} is {@code null}
+     * @see java.text.DecimalFormat#format(double)
      * @see #round(double, String)
      * @see #round(double, int)
      */
@@ -7582,11 +7584,12 @@ public final class Numbers {
      *
      * @param a the first float value to compare
      * @param b the second float value to compare
-     * @param tolerance the maximum absolute difference allowed between the two values to consider them equal
+     * @param tolerance the maximum absolute difference allowed between the two values to consider them equal; must be non-negative
      * @return {@code true} if the absolute difference between {@code a} and {@code b} is less than or equal to {@code tolerance},
-     *         {@code false} otherwise
+     *         or if both are NaN; {@code false} otherwise
      * @throws IllegalArgumentException if {@code tolerance} is {@code < 0} or NaN
      * @see #fuzzyEquals(double, double, double)
+     * @see #fuzzyCompare(float, float, float)
      * @see Float#compare(float, float)
      */
     public static boolean fuzzyEquals(final float a, final float b, final float tolerance) {
@@ -7625,9 +7628,12 @@ public final class Numbers {
      *
      * @param a the first double value to compare
      * @param b the second double value to compare
-     * @param tolerance the maximum absolute difference allowed between the two values to consider them equal
-     * @return {@code true} if the absolute difference between {@code a} and {@code b} is less than or equal to {@code tolerance}, {@code false} otherwise
+     * @param tolerance the maximum absolute difference allowed between the two values to consider them equal; must be non-negative
+     * @return {@code true} if the absolute difference between {@code a} and {@code b} is less than or equal to {@code tolerance},
+     *         or if both are NaN; {@code false} otherwise
      * @throws IllegalArgumentException if {@code tolerance} is {@code < 0} or NaN
+     * @see #fuzzyEquals(float, float, float)
+     * @see #fuzzyCompare(double, double, double)
      */
     public static boolean fuzzyEquals(final double a, final double b, final double tolerance) {
         // Check that tolerance is valid (non-negative and not NaN)

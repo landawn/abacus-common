@@ -54,11 +54,12 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     final Collection<E> coll;
 
     /**
-     * Constructs an ImmutableCollection backed by the provided collection.
-     * The collection is stored as-is; subclasses are responsible for wrapping it
-     * in an unmodifiable view if necessary.
+     * Constructs an {@code ImmutableCollection} backed by the provided collection.
+     * The collection reference is stored directly; subclasses that need modification
+     * protection should wrap the collection (e.g. via {@link java.util.Collections#unmodifiableCollection})
+     * before passing it to this constructor.
      *
-     * @param c the collection to back this ImmutableCollection; must not be {@code null}
+     * @param c the backing collection; must not be {@code null}
      */
     protected ImmutableCollection(final Collection<? extends E> c) {
         coll = (Collection<E>) c;
@@ -217,6 +218,8 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * @param valueToFind element whose presence in this collection is to be tested
      * @return {@code true} if this collection contains the specified element
      * @throws ClassCastException if the type of the specified element is incompatible with this collection (optional)
+     * @throws NullPointerException if the specified element is {@code null} and this collection
+     *         does not permit {@code null} elements (optional)
      */
     @Override
     public boolean contains(final Object valueToFind) {
@@ -225,7 +228,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
 
     /**
      * Returns an iterator over the elements in this collection.
-     * The iterator provides read-only access and does not support the remove() operation.
+     * The returned iterator's {@code remove()} method throws {@link UnsupportedOperationException}.
      *
      * <p>The order of elements returned by the iterator depends on the underlying
      * collection type. For ordered collections (like List), the iteration order
@@ -240,7 +243,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * }
      * }</pre>
      *
-     * @return an ObjIterator over the elements in this collection
+     * @return an {@link ObjIterator} over the elements in this collection
      */
     @Override
     public ObjIterator<E> iterator() {
@@ -311,6 +314,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * @return an array containing all of the elements in this collection
      * @throws ArrayStoreException if the runtime type of the specified array
      *         is not a supertype of the runtime type of every element in this collection
+     * @throws NullPointerException if the specified array is {@code null}
      */
     @Override
     public <T> T[] toArray(final T[] a) {

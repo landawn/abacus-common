@@ -528,7 +528,7 @@ public final class Beans {
     }
 
     /**
-     * Retrieves or creates a {@link BeanInfo} instance for the specified class.
+     * Retrieves or creates a {@link BeanInfo} instance for the specified type.
      *
      * <p>This method maintains a cache of BeanInfo instances to improve performance.
      * The BeanInfo contains metadata about the class including property information,
@@ -544,8 +544,7 @@ public final class Beans {
      * }</pre>
      *
      * @param beanType the bean type to get bean information for.
-     * @return a BeanInfo instance containing metadata about the class.
-     * @throws IllegalArgumentException if the class is not a bean class (no properties).
+     * @return a {@link BeanInfo} instance containing metadata about the specified type.
      * @see ParserUtil#getBeanInfo(Class)
      */
     public static BeanInfo getBeanInfo(final java.lang.reflect.Type beanType) {
@@ -555,10 +554,9 @@ public final class Beans {
     /**
      * Refreshes the cached bean property information for the specified class.
      *
-     * <p>This method removes the cached BeanInfo for the specified class, forcing
-     * it to be recreated on the next call to {@link #getBeanInfo(java.lang.reflect.Type)}.</p>
-     *
-     * <p>This method is marked as deprecated and is for internal use only.</p>
+     * <p>This method invalidates the cached {@link BeanInfo} for the specified class, forcing
+     * it to be recreated on the next call to {@link #getBeanInfo(java.lang.reflect.Type)}.
+     * This is only needed when a class's structure is modified dynamically at runtime.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -566,7 +564,7 @@ public final class Beans {
      * Beans.refreshBeanPropInfo(ModifiedClass.class);
      * }</pre>
      *
-     * @param cls the class whose bean property information should be refreshed.
+     * @param cls the class whose cached bean property information should be refreshed.
      * @see ParserUtil#refreshBeanPropInfo(java.lang.reflect.Type)
      * @deprecated internal use only
      */
@@ -599,8 +597,9 @@ public final class Beans {
      *
      * @param cls the class for which the builder information is to be retrieved.
      * @return a tuple containing the builder class type, a supplier for creating builder instances,
-     *         and a function to build the target object from the builder, or {@code null} if no builder is found.
-     * @throws IllegalArgumentException if the specified class is {@code null}.
+     *         and a function to build the target object from the builder,
+     *         or {@code null} if no builder pattern is detected for the class.
+     * @throws IllegalArgumentException if {@code cls} is {@code null}.
      */
     @MayReturnNull
     public static Tuple3<Class<?>, com.landawn.abacus.util.function.Supplier<Object>, com.landawn.abacus.util.function.Function<Object, Object>> getBuilderInfo(
@@ -775,9 +774,9 @@ public final class Beans {
     }
 
     /**
-     * Registers a property get/set method for the specified property name.
-     * The method must be a getter or setter recognized by {@code Beans} (for example,
-     * a method whose name starts with {@code get/is/has/set}, or a field-named accessor).
+     * Registers a getter or setter method as the property accessor for the specified property name.
+     * The method must be recognized as a getter (starts with {@code get}, {@code is}, or {@code has},
+     * or matches a field name) or a setter (starts with {@code set}, or matches a field name).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -786,10 +785,10 @@ public final class Beans {
      * // Now fetchName() is recognized as the getter for property "name"
      * }</pre>
      *
-     * @param propName the name of the property.
-     * @param method the method to be registered as a property get/set method.
+     * @param propName the name of the property to associate with the method.
+     * @param method the getter or setter method to register as the property accessor.
      * @throws IllegalArgumentException if the method is not a valid getter or setter,
-     *         or if the property is already registered with a different method.
+     *         or if {@code propName} is already registered with a different method.
      */
     @SuppressWarnings("deprecation")
     public static void registerPropertyAccessor(final String propName, final Method method) {
@@ -985,8 +984,8 @@ public final class Beans {
      * Returns an immutable list of property names for the specified class.
      *
      * <p>The list includes all properties that have getter and/or setter methods
-     * following JavaBean conventions. The order is consistent with the declaration
-     * order in the class.</p>
+     * following JavaBean conventions. The order reflects the field declaration
+     * order in the class hierarchy.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -994,8 +993,9 @@ public final class Beans {
      * // Returns ["id", "name", "email", "age"] for a typical User class
      * }</pre>
      *
-     * @param cls the class whose property names are to be retrieved.
+     * @param cls the class whose property names are to be retrieved; must not be {@code null}.
      * @return an immutable list of property names for the specified class.
+     * @throws IllegalArgumentException if {@code cls} is {@code null}.
      */
     public static ImmutableList<String> getPropNameList(final Class<?> cls) {
         N.checkArgNotNull(cls, cs.cls);
@@ -1081,7 +1081,8 @@ public final class Beans {
     static final BiPredicate<String, Object> NON_PROP_VALUE = (propName, propValue) -> propValue != null;
 
     /**
-     * Retrieves the property names of the given bean object.
+     * Retrieves the property names of the given bean object, optionally filtering out
+     * properties with {@code null} values.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1097,10 +1098,11 @@ public final class Beans {
      * }</pre>
      *
      * @param bean the bean object whose property names are to be retrieved.
-     * @param ignoreNullValue if {@code true}, the method will ignore property names with {@code null} values.
-     * @return a list of strings representing the property names of the given bean object. If {@code ignoreNullValue} is {@code true}, properties with {@code null} values are not included in the list.
-     * @see #getPropNameList
-     * @see #getPropNames
+     * @param ignoreNullValue if {@code true}, properties with {@code null} values are excluded from the result.
+     * @return a mutable list of property names of the given bean object;
+     *         properties with {@code null} values are excluded when {@code ignoreNullValue} is {@code true}.
+     * @see #getPropNameList(Class)
+     * @see #getPropNames(Object, Predicate)
      */
     public static List<String> getPropNames(final Object bean, final boolean ignoreNullValue) {
         if (ignoreNullValue) {
@@ -1180,9 +1182,11 @@ public final class Beans {
     }
 
     /**
-     * Retrieves a set of property names that are ignored during the {@code MapDifference.of(Object, Object)} operation for the specified class.
+     * Retrieves an immutable set of property names that are excluded from diff operations
+     * (e.g., {@link com.landawn.abacus.util.Difference.BeanDifference#of(Object, Object)}) for the specified class.
      *
-     * <p>Properties are ignored if they are annotated with {@code @DiffIgnore} or similar annotations.</p>
+     * <p>A property is excluded if it is annotated with {@link DiffIgnore} or an annotation
+     * whose simple name equals {@code "DiffIgnore"} or {@code "DifferenceIgnore"}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1196,8 +1200,8 @@ public final class Beans {
      * // Returns ["lastModified"]
      * }</pre>
      *
-     * @param cls the class for which the {@code MapDifference.of(Object, Object)} operation ignored property names are to be retrieved.
-     * @return an immutable set of property names that are ignored during the {@code MapDifference.of(Object, Object)} operation.
+     * @param cls the class for which the diff-ignored property names are to be retrieved.
+     * @return an immutable set of property names excluded from diff operations; never {@code null}.
      * @see com.landawn.abacus.util.Difference.MapDifference
      * @see com.landawn.abacus.util.Difference.BeanDifference#of(Object, Object)
      */
@@ -1628,11 +1632,11 @@ public final class Beans {
 
     /**
      * Retrieves the declared field with the specified name from the given class.
-     * {@code null} is returned if no field is found by the specified name.
+     * Returns {@code null} if no field is found by the specified name.
      *
      * @param cls the class from which the field is to be retrieved.
      * @param fieldName the name of the field to retrieve.
-     * @return the declared field with the specified name.
+     * @return the declared field with the specified name, or {@code null} if not found.
      */
     private static Field getDeclaredField(final Class<?> cls, final String fieldName) {
         try {
@@ -1680,9 +1684,9 @@ public final class Beans {
      * }</pre>
      *
      * @param cls the class from which the field is to be retrieved.
-     * @param propName the name of the property whose field is to be retrieved.
-     * @return the field associated with the specified property name, or {@code null} if no field is found.
-     * @throws IllegalArgumentException if the class is not a bean class.
+     * @param propName the name of the property whose backing field is to be retrieved.
+     * @return the field associated with the specified property name, or {@code null} if no matching field is found.
+     * @throws IllegalArgumentException if no property getter/setter or public field is found in the class.
      */
     @MayReturnNull
     @SuppressWarnings("deprecation")
@@ -1734,9 +1738,11 @@ public final class Beans {
     }
 
     /**
-     * Retrieves an immutable map of property fields for the specified class.
+     * Returns an immutable map of the backing fields for all bean properties of the specified class,
+     * keyed by property name.
      *
-     * <p>The map contains all fields that back bean properties, keyed by property name.</p>
+     * <p>Only properties that have a corresponding declared field in the class hierarchy are included.
+     * Properties backed solely by getter/setter methods without a matching field are not included.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1747,7 +1753,7 @@ public final class Beans {
      * }</pre>
      *
      * @param cls the class whose property fields are to be retrieved.
-     * @return an immutable map of property fields for the specified class.
+     * @return an immutable map of property name to backing {@link Field} for the specified class; never {@code null}.
      */
     public static ImmutableMap<String, Field> getPropFields(final Class<?> cls) {
         ImmutableMap<String, Field> getterMethodList = beanDeclaredPropFieldPool.get(cls);
@@ -1832,8 +1838,8 @@ public final class Beans {
      * // Map: {"name" -> getName(), "age" -> getAge(), ...}
      * }</pre>
      *
-     * @param cls the class from which the property get methods are to be retrieved.
-     * @return an immutable map of property getter methods for the specified class.
+     * @param cls the class from which the property getter methods are to be retrieved.
+     * @return an immutable map of property name to getter {@link Method} for the specified class; never {@code null}.
      */
     public static ImmutableMap<String, Method> getPropGetters(final Class<?> cls) {
         ImmutableMap<String, Method> getterMethodList = beanDeclaredPropGetMethodPool.get(cls);
@@ -1918,8 +1924,8 @@ public final class Beans {
      * // Map: {"name" -> setName(String), "age" -> setAge(int), ...}
      * }</pre>
      *
-     * @param cls the class from which the property set methods are to be retrieved.
-     * @return an immutable map of property set methods for the specified class.
+     * @param cls the class from which the property setter methods are to be retrieved.
+     * @return an immutable map of property name to setter {@link Method} for the specified class; never {@code null}.
      */
     public static ImmutableMap<String, Method> getPropSetters(final Class<?> cls) {
         ImmutableMap<String, Method> setterMethodList = beanDeclaredPropSetMethodPool.get(cls);
@@ -1942,11 +1948,12 @@ public final class Beans {
      * // Equivalent to: String name = userInstance.getName();
      * }</pre>
      *
-     * @param <T> the type of the property value
+     * @param <T> the type of the property value.
      * @param bean the object from which the property value is to be retrieved.
-     * @param propGetMethod the method to be invoked to get the property value.
-     * @return the value of the specified property.
-     * @throws RuntimeException if the method cannot be invoked.
+     * @param propGetMethod the getter method to invoke on the bean.
+     * @return the value returned by the getter method; may be {@code null}.
+     * @throws RuntimeException wrapping {@link IllegalAccessException} or {@link InvocationTargetException}
+     *         if the method cannot be invoked.
      */
     @SuppressWarnings("unchecked")
     public static <T> T getPropValue(final Object bean, final Method propGetMethod) {
@@ -1958,7 +1965,12 @@ public final class Beans {
     }
 
     /**
-     * Returns the value of the specified property by invoking the getter method associated with the given property name on the provided bean.
+     * Returns the value of the specified property by invoking the getter method associated
+     * with the given property name on the provided bean.
+     *
+     * <p>This is a convenience overload equivalent to
+     * {@link #getPropValue(Object, String, boolean) getPropValue(bean, propName, false)},
+     * which throws {@link IllegalArgumentException} if the property is not found.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1967,12 +1979,13 @@ public final class Beans {
      * Integer age = Beans.getPropValue(user, "age");    // Returns 25
      * }</pre>
      *
-     * @param <T> the type of the property value
+     * @param <T> the type of the property value.
      * @param bean the object from which the property value is to be retrieved.
      * @param propName the name of the property whose value is to be retrieved.
-     * @return the value of the specified property.
-     * @throws IllegalArgumentException if the property cannot be found.
+     * @return the value of the specified property; may be {@code null}.
+     * @throws IllegalArgumentException if no property with the given name is found.
      * @see #getPropValue(Object, Method)
+     * @see #getPropValue(Object, String, boolean)
      */
     public static <T> T getPropValue(final Object bean, final String propName) {
         return getPropValue(bean, propName, false);
@@ -1985,8 +1998,8 @@ public final class Beans {
      * <p>This method also supports nested properties using dot notation.</p>
      *
      * <p>For nested paths, if an intermediate property resolves to {@code null}, this method returns
-     * the default value of the final getter's return type (for example {@code 0} for primitives),
-     * not {@code null}.</p>
+     * the default value of the final getter's return type (e.g., {@code 0} for primitive numeric types,
+     * {@code false} for {@code boolean}), not {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2002,12 +2015,14 @@ public final class Beans {
      * Object value = Beans.getPropValue(user, "unknown", true);   // null
      * }</pre>
      *
-     * @param <T> the type of the property value
+     * @param <T> the type of the property value.
      * @param bean the object from which the property value is to be retrieved.
-     * @param propName the name of the property whose value is to be retrieved.
-     * @param ignoreUnmatchedProperty if {@code true}, ignores unmatched properties and returns null.
-     * @return the value of the specified property, or {@code null} if the property is not found and ignoreUnmatchedProperty is true.
-     * @throws IllegalArgumentException if the specified property cannot be retrieved and ignoreUnmatchedProperty is false.
+     * @param propName the name of the property whose value is to be retrieved; supports dot notation for nested properties.
+     * @param ignoreUnmatchedProperty if {@code true}, returns {@code null} when the property is not found;
+     *        if {@code false}, throws {@link IllegalArgumentException}.
+     * @return the value of the specified property, or {@code null} if the property is not found and
+     *         {@code ignoreUnmatchedProperty} is {@code true}.
+     * @throws IllegalArgumentException if the specified property cannot be found and {@code ignoreUnmatchedProperty} is {@code false}.
      */
     @MayReturnNull
     public static <T> T getPropValue(final Object bean, final String propName, final boolean ignoreUnmatchedProperty) {
@@ -2093,10 +2108,11 @@ public final class Beans {
      * }</pre>
      *
      * @param bean the object on which the property value is to be set.
-     * @param propSetMethod the method to be invoked to set the property value.
-     * @param propValue the value to be set to the property.
-     * @return the final value that was set to the property.
-     * @throws RuntimeException if the underlying method is inaccessible or the method is invoked with incorrect arguments or the underlying method throws an exception.
+     * @param propSetMethod the setter method to be invoked on the bean.
+     * @param propValue the value to be set; if {@code null}, the type's default value is used instead.
+     * @return the actual value that was passed to the setter (after any type conversion).
+     * @throws RuntimeException wrapping {@link IllegalAccessException} or {@link InvocationTargetException}
+     *         if the method cannot be invoked and conversion also fails.
      */
     public static Object setPropValue(final Object bean, final Method propSetMethod, Object propValue) {
         final Class<?>[] paramTypes = propSetMethod.getParameterTypes();
@@ -2156,8 +2172,8 @@ public final class Beans {
      *
      * @param bean the object on which the property value is to be set.
      * @param propName the name of the property whose value is to be set.
-     * @param propValue the value to be set to the property.
-     * @throws IllegalArgumentException if the specified property cannot be set.
+     * @param propValue the value to set; if {@code null}, the property's type default is used.
+     * @throws IllegalArgumentException if the specified property cannot be found or set.
      * @deprecated replaced by {@link ParserUtil.BeanInfo#setPropValue(Object, String, Object)}
      */
     @Deprecated
@@ -2188,10 +2204,12 @@ public final class Beans {
      *
      * @param bean the object on which the property value is to be set.
      * @param propName the name of the property whose value is to be set.
-     * @param propValue the value to be set to the property.
-     * @param ignoreUnmatchedProperty if {@code true}, ignores unmatched properties and returns false.
-     * @return {@code true} if the property value has been set, {@code false} otherwise.
-     * @throws IllegalArgumentException if the specified property cannot be set and ignoreUnmatchedProperty is false.
+     * @param propValue the value to set; if {@code null}, the property's type default is used.
+     * @param ignoreUnmatchedProperty if {@code true}, returns {@code false} when the property is not found
+     *        instead of throwing an exception.
+     * @return {@code true} if the property value was set successfully, {@code false} if the property
+     *         was not found and {@code ignoreUnmatchedProperty} is {@code true}.
+     * @throws IllegalArgumentException if the property cannot be found and {@code ignoreUnmatchedProperty} is {@code false}.
      * @deprecated replaced by {@link ParserUtil.BeanInfo#setPropValue(Object, String, Object, boolean)}
      */
     @Deprecated
@@ -2219,9 +2237,12 @@ public final class Beans {
      * }</pre>
      *
      * @param bean the object on which the property value is to be set.
-     * @param propGetMethod the method to be invoked to get the property value.
-     * @param propValue the value to be set to the property.
-     * @throws IllegalArgumentException if the getter doesn't return a Collection or Map.
+     * @param propGetMethod the getter method whose return value (a {@link java.util.Collection} or {@link Map})
+     *        will be cleared and repopulated with the contents of {@code propValue}.
+     * @param propValue the new contents to populate into the existing collection or map;
+     *        must be the same collection/map type as the getter's return type.
+     *        If {@code null}, the method does nothing.
+     * @throws IllegalArgumentException if the getter does not return a {@link java.util.Collection} or {@link Map}.
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static void setPropValueByGetter(final Object bean, final Method propGetMethod, final Object propValue) {
@@ -2261,8 +2282,8 @@ public final class Beans {
      * String formal3 = Beans.normalizePropName("class");        // Returns "clazz"
      * }</pre>
      *
-     * @param str the property name to be normalized.
-     * @return the normalized property name.
+     * @param str the property name to be normalized; returned as-is if {@code null} or empty.
+     * @return the normalized (camelCase, keyword-mapped) property name, or the original string if empty.
      */
     public static String normalizePropName(final String str) {
         if (Strings.isEmpty(str)) {
@@ -2298,8 +2319,8 @@ public final class Beans {
      * String camel3 = Beans.toCamelCase("address-line-1");   // Returns "addressLine1"
      * }</pre>
      *
-     * @param str the property name to be converted.
-     * @return the camel case version of the property name.
+     * @param str the string to be converted; returned as-is if {@code null} or empty.
+     * @return the camelCase version of the input string, or the original string if empty.
      */
     public static String toCamelCase(final String str) {
         if (Strings.isEmpty(str)) {
@@ -2327,8 +2348,8 @@ public final class Beans {
      * String snake3 = Beans.toSnakeCase("userID");      // Returns "user_id"
      * }</pre>
      *
-     * @param str the string to be converted.
-     * @return the lower case version of the string with underscores.
+     * @param str the string to be converted; returned as-is if {@code null} or empty.
+     * @return the snake_case (lowercase with underscores) version of the string, or the original string if empty.
      */
     public static String toSnakeCase(final String str) {
         if (Strings.isEmpty(str)) {
@@ -2355,8 +2376,8 @@ public final class Beans {
      * String upper3 = Beans.toScreamingSnakeCase("userID");      // Returns "USER_ID"
      * }</pre>
      *
-     * @param str the string to be converted.
-     * @return the upper case version of the string with underscores.
+     * @param str the string to be converted; returned as-is if {@code null} or empty.
+     * @return the SCREAMING_SNAKE_CASE (uppercase with underscores) version of the string, or the original string if empty.
      */
     public static String toScreamingSnakeCase(final String str) {
         if (Strings.isEmpty(str)) {
@@ -2573,10 +2594,11 @@ public final class Beans {
      * }</pre>
      *
      * @param <T> the type of the bean object to be returned.
-     * @param map the map to be converted into a bean object.
-     * @param targetType the type of the bean object to be returned.
-     * @return a bean object of the specified type with its properties set to the values from the map.
-     * @throws IllegalArgumentException if {@code targetType} is not a valid bean class
+     * @param map the map to be converted; if {@code null}, {@code null} is returned.
+     * @param targetType the class of the bean to create; must be a valid bean class.
+     * @return a new bean of the specified type with properties populated from the map,
+     *         or {@code null} if {@code map} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetType} is not a valid bean class.
      * @see #mapToBean(Map, boolean, boolean, Class)
      * @see #mapToBean(Map, Collection, Class)
      */
@@ -2611,12 +2633,16 @@ public final class Beans {
      * }</pre>
      *
      * @param <T> the type of the bean object to be returned.
-     * @param map the map to be converted into a bean object.
-     * @param ignoreNullProperty if {@code true}, {@code null} values in the map will not be set on the bean.
-     * @param ignoreUnmatchedProperty if {@code true}, map entries with keys that don't match any bean property will be ignored; if {@code false}, an exception will be thrown.
-     * @param targetType the type of the bean object to be returned.
-     * @return a bean object of the specified type with its properties set to the values from the map, or {@code null} if the input map is {@code null}.
-     * @throws IllegalArgumentException if {@code targetType} is not a valid bean class, or if {@code ignoreUnmatchedProperty} is {@code false} and an unmatched property is encountered
+     * @param map the map to be converted; if {@code null}, {@code null} is returned.
+     * @param ignoreNullProperty if {@code true}, map entries with {@code null} values are skipped and
+     *        the corresponding bean properties are left at their default values.
+     * @param ignoreUnmatchedProperty if {@code true}, map keys that do not correspond to any bean property
+     *        are silently ignored; if {@code false}, an {@link IllegalArgumentException} is thrown.
+     * @param targetType the class of the bean to create; must be a valid bean class.
+     * @return a new bean of the specified type with properties populated from the map,
+     *         or {@code null} if {@code map} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetType} is not a valid bean class, or if
+     *         {@code ignoreUnmatchedProperty} is {@code false} and an unmatched key is encountered.
      * @see #mapToBean(Map, Collection, Class)
      */
     @MayReturnNull
@@ -2685,11 +2711,14 @@ public final class Beans {
      * }</pre>
      *
      * @param <T> the type of the bean object to be returned.
-     * @param map the map to be converted into a bean object.
-     * @param selectPropNames a collection of property names to be included in the resulting bean objects.
-     * @param targetType the type of the bean object to be returned.
-     * @return a bean object of the specified type with its properties set to the values from the map, or {@code null} if the input map is {@code null}.
-     * @throws IllegalArgumentException if {@code targetType} is not a valid bean class or a selected property does not exist
+     * @param map the map to be converted; if {@code null}, {@code null} is returned.
+     * @param selectPropNames the property names to copy from the map to the bean.
+     *        Properties not in this collection are left at their default values.
+     * @param targetType the class of the bean to create; must be a valid bean class.
+     * @return a new bean of the specified type with the selected properties populated from the map,
+     *         or {@code null} if {@code map} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetType} is not a valid bean class,
+     *         or if a selected property does not exist in the target bean class.
      */
     @MayReturnNull
     public static <T> T mapToBean(final Map<String, Object> map, final Collection<String> selectPropNames, final Class<? extends T> targetType) {
@@ -2750,10 +2779,10 @@ public final class Beans {
      * }</pre>
      *
      * @param <T> the type of the bean objects to be returned.
-     * @param mapList the collection of maps to be converted into bean objects.
-     * @param targetType the type of the bean objects to be returned.
-     * @return a list of bean objects of the specified type with their properties set to the values from the corresponding map.
-     * @throws IllegalArgumentException if {@code targetType} is not a valid bean class
+     * @param mapList the collection of maps to convert; must not be {@code null}.
+     * @param targetType the class of the bean to create for each map; must be a valid bean class.
+     * @return a list of new bean instances with properties populated from the corresponding map entries.
+     * @throws IllegalArgumentException if {@code targetType} is not a valid bean class.
      * @see #mapToBean(Collection, Collection, Class)
      */
     public static <T> List<T> mapToBean(final Collection<? extends Map<String, Object>> mapList, final Class<? extends T> targetType) {
@@ -2787,11 +2816,13 @@ public final class Beans {
      * }</pre>
      *
      * @param <T> the type of the bean objects to be returned.
-     * @param mapList the collection of maps to be converted into bean objects.
-     * @param ignoreNullProperty a boolean that determines whether {@code null} properties should be ignored.
-     * @param ignoreUnmatchedProperty a boolean that determines whether unmatched properties should be ignored.
-     * @param targetType the type of the bean objects to be returned.
-     * @return a list of bean objects of the specified type with their properties set to the values from the corresponding map.
+     * @param mapList the collection of maps to convert; must not be {@code null}.
+     * @param ignoreNullProperty if {@code true}, map entries with {@code null} values are skipped.
+     * @param ignoreUnmatchedProperty if {@code true}, map keys without a matching bean property are silently ignored;
+     *        if {@code false}, an {@link IllegalArgumentException} is thrown for unmatched keys.
+     * @param targetType the class of the bean to create for each map; must be a valid bean class.
+     * @return a list of new bean instances with properties populated from the corresponding map entries.
+     * @throws IllegalArgumentException if {@code targetType} is not a valid bean class.
      */
     public static <T> List<T> mapToBean(final Collection<? extends Map<String, Object>> mapList, final boolean ignoreNullProperty,
             final boolean ignoreUnmatchedProperty, final Class<? extends T> targetType) {
@@ -2833,11 +2864,12 @@ public final class Beans {
      * }</pre>
      *
      * @param <T> the type of the bean objects to be returned.
-     * @param mapList the collection of maps to be converted into bean objects.
-     * @param selectPropNames a collection of property names to be included in the resulting bean objects.
-     *        If this is empty, no properties are set; use the non-select overload to include all properties.
-     * @param targetType the type of the bean objects to be returned.
-     * @return a list of bean objects of the specified type with their properties set to the values from the corresponding map.
+     * @param mapList the collection of maps to convert; must not be {@code null}.
+     * @param selectPropNames the property names to populate on each bean from the corresponding map.
+     * @param targetType the class of the bean to create for each map; must be a valid bean class.
+     * @return a list of new bean instances with the selected properties populated from the corresponding maps.
+     * @throws IllegalArgumentException if {@code targetType} is not a valid bean class,
+     *         or if a selected property does not exist in the target bean class.
      */
     public static <T> List<T> mapToBean(final Collection<? extends Map<String, Object>> mapList, final Collection<String> selectPropNames,
             final Class<? extends T> targetType) {
@@ -2871,8 +2903,9 @@ public final class Beans {
      * // userMap: {name=John, age=25, email=john@example.com}
      * }</pre>
      *
-     * @param bean the bean object to be converted into a map.
-     * @return a map where the keys are the property names of the bean and the values are the corresponding property values of the bean.
+     * @param bean the bean object to be converted into a map; if {@code null}, an empty map is returned.
+     * @return a {@link java.util.LinkedHashMap} where the keys are property names and the values are
+     *         the corresponding non-{@code null} property values of the bean; never {@code null}.
      */
     public static Map<String, Object> beanToMap(final Object bean) {
         return beanToMap(bean, IntFunctions.ofLinkedHashMap());
@@ -2901,9 +2934,10 @@ public final class Beans {
      * }</pre>
      *
      * @param <M> the type of the resulting Map.
-     * @param bean the bean object to be converted into a map.
-     * @param mapSupplier a function that generates a new Map instance.
-     * @return a map where the keys are the property names of the bean and the values are the corresponding property values of the bean.
+     * @param bean the bean object to be converted into a map; if {@code null}, an empty map is returned.
+     * @param mapSupplier a function that creates a new Map instance given an initial capacity.
+     * @return a map of the specified type containing the non-{@code null} property name-value pairs of the bean;
+     *         never {@code null}.
      */
     public static <M extends Map<String, Object>> M beanToMap(final Object bean, final IntFunction<? extends M> mapSupplier) {
         return beanToMap(bean, null, mapSupplier);
@@ -2932,11 +2966,12 @@ public final class Beans {
      * // age and password are not included
      * }</pre>
      *
-     * @param bean the bean object to be converted into a map.
+     * @param bean the bean object to be converted into a map; if {@code null}, an empty map is returned.
      * @param selectPropNames a collection of property names to be included in the map.
-     *        If this is {@code null} or empty, all non-{@code null} properties are included.
-     * @return a map where the keys are the selected property names of the bean and the values are the corresponding property values of the bean.
-     * @throws IllegalArgumentException if a selected property does not exist
+     *        If {@code null} or empty, all non-{@code null} properties are included.
+     * @return a {@link java.util.LinkedHashMap} with the selected (or all non-{@code null}) property name-value pairs;
+     *         never {@code null}.
+     * @throws IllegalArgumentException if a selected property does not exist in the bean class.
      */
     public static Map<String, Object> beanToMap(final Object bean, final Collection<String> selectPropNames) {
         return beanToMap(bean, selectPropNames, IntFunctions.ofLinkedHashMap());
@@ -2964,12 +2999,13 @@ public final class Beans {
      * }</pre>
      *
      * @param <M> the type of the resulting Map.
-     * @param bean the bean object to be converted into a map.
+     * @param bean the bean object to be converted into a map; if {@code null}, an empty map is returned.
      * @param selectPropNames a collection of property names to be included in the map.
-     *        If this is {@code null} or empty, all non-{@code null} properties are included.
-     * @param mapSupplier a function that generates a new Map instance.
-     * @return a map where the keys are the selected property names of the bean and the values are the corresponding property values of the bean.
-     * @throws IllegalArgumentException if a selected property does not exist
+     *        If {@code null} or empty, all non-{@code null} properties are included.
+     * @param mapSupplier a function that creates a new Map instance given an initial capacity.
+     * @return a map of the specified type with the selected (or all non-{@code null}) property name-value pairs;
+     *         never {@code null}.
+     * @throws IllegalArgumentException if a selected property does not exist in the bean class.
      */
     public static <M extends Map<String, Object>> M beanToMap(final Object bean, final Collection<String> selectPropNames,
             final IntFunction<? extends M> mapSupplier) {
@@ -3000,12 +3036,12 @@ public final class Beans {
      * }</pre>
      *
      * @param <M> the type of the map to be returned.
-     * @param bean the bean object to be converted into a map.
-     * @param selectPropNames the collection of property names to be included in the map.
-     * @param keyNamingPolicy the naming policy to be used for the keys in the map.
-     * @param mapSupplier the supplier function to create a new instance of the map.
-     * @return a map where the keys are the property names of the bean and the values are the corresponding property values of the bean.
-     * @throws IllegalArgumentException if a selected property does not exist
+     * @param bean the bean object to be converted into a map; if {@code null}, an empty map is returned.
+     * @param selectPropNames the property names to include; if {@code null} or empty, all non-{@code null} properties are included.
+     * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to {@link NamingPolicy#CAMEL_CASE}.
+     * @param mapSupplier a function that creates a new Map instance given an initial capacity.
+     * @return a map of the specified type with property name-value pairs; never {@code null}.
+     * @throws IllegalArgumentException if a selected property does not exist in the bean class.
      */
     public static <M extends Map<String, Object>> M beanToMap(final Object bean, final Collection<String> selectPropNames, final NamingPolicy keyNamingPolicy,
             final IntFunction<? extends M> mapSupplier) {
@@ -3040,8 +3076,8 @@ public final class Beans {
      * }</pre>
      *
      * @param <M> the type of the map to be filled.
-     * @param bean the bean object to be converted into a map.
-     * @param output the map into which the bean's properties will be put.
+     * @param bean the bean object to be converted into a map; if {@code null}, the output map is not modified.
+     * @param output the map into which the bean's non-{@code null} properties will be put.
      */
     public static <M extends Map<String, Object>> void beanToMap(final Object bean, final M output) {
         beanToMap(bean, null, output);
@@ -3071,11 +3107,11 @@ public final class Beans {
      * }</pre>
      *
      * @param <M> the type of the map to be filled.
-     * @param bean the bean object to be converted into a map.
+     * @param bean the bean object to be converted into a map; if {@code null}, the output map is not modified.
      * @param selectPropNames a collection of property names to be included in the map.
-     *        If this is {@code null} or empty, all non-{@code null} properties are included.
+     *        If {@code null} or empty, all non-{@code null} properties are included.
      * @param output the map into which the bean's properties will be put.
-     * @throws IllegalArgumentException if a selected property does not exist
+     * @throws IllegalArgumentException if a selected property does not exist in the bean class.
      */
     public static <M extends Map<String, Object>> void beanToMap(final Object bean, final Collection<String> selectPropNames, final M output) {
         beanToMap(bean, selectPropNames, NamingPolicy.CAMEL_CASE, output);
@@ -3104,11 +3140,11 @@ public final class Beans {
      * }</pre>
      *
      * @param <M> the type of the map to be filled.
-     * @param bean the bean object to be converted into a map.
-     * @param selectPropNames the set of property names to be included during the conversion.
-     * @param keyNamingPolicy the naming policy to be used for the keys in the map.
+     * @param bean the bean object to be converted into a map; if {@code null}, the output map is not modified.
+     * @param selectPropNames the property names to include; if {@code null} or empty, all non-{@code null} properties are included.
+     * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to {@link NamingPolicy#CAMEL_CASE}.
      * @param output the map into which the bean's properties will be put.
-     * @throws IllegalArgumentException if a selected property does not exist
+     * @throws IllegalArgumentException if a selected property does not exist in the bean class.
      */
     public static <M extends Map<String, Object>> void beanToMap(final Object bean, final Collection<String> selectPropNames, NamingPolicy keyNamingPolicy,
             final M output) {
@@ -3167,9 +3203,9 @@ public final class Beans {
      * // mapWithoutNulls: {name=John, email=john@example.com}
      * }</pre>
      *
-     * @param bean the bean object to be converted into a map.
-     * @param ignoreNullProperty if {@code true}, properties of the bean with {@code null} values will not be included in the map.
-     * @return a map where the keys are the property names of the bean and the values are the corresponding property values of the bean.
+     * @param bean the bean object to be converted into a map; if {@code null}, an empty map is returned.
+     * @param ignoreNullProperty if {@code true}, properties with {@code null} values are excluded from the map.
+     * @return a {@link java.util.LinkedHashMap} with the bean's property name-value pairs; never {@code null}.
      */
     public static Map<String, Object> beanToMap(final Object bean, final boolean ignoreNullProperty) {
         return beanToMap(bean, ignoreNullProperty, (Set<String>) null);
@@ -3198,10 +3234,10 @@ public final class Beans {
      * // age (null) and password (ignored) are not included
      * }</pre>
      *
-     * @param bean the bean object to be converted into a map.
-     * @param ignoreNullProperty if {@code true}, properties of the bean with {@code null} values will not be included in the map.
-     * @param ignoredPropNames a set of property names to be ignored during the conversion. If this is {@code null}, no properties are ignored.
-     * @return a map where the keys are the property names of the bean and the values are the corresponding property values of the bean.
+     * @param bean the bean object to be converted into a map; if {@code null}, an empty map is returned.
+     * @param ignoreNullProperty if {@code true}, properties with {@code null} values are excluded from the map.
+     * @param ignoredPropNames a set of property names to exclude from the map; ignored if {@code null}.
+     * @return a {@link java.util.LinkedHashMap} with the bean's property name-value pairs; never {@code null}.
      */
     public static Map<String, Object> beanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) {
         return beanToMap(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.CAMEL_CASE);
@@ -3230,11 +3266,11 @@ public final class Beans {
      * }</pre>
      *
      * @param <M> the type of the map to be returned.
-     * @param bean the bean object to be converted into a map.
-     * @param ignoreNullProperty if {@code true}, properties of the bean with {@code null} values will not be included in the map.
-     * @param ignoredPropNames a set of property names to be ignored during the conversion. If this is {@code null}, no properties are ignored.
-     * @param mapSupplier a function that returns a new map.
-     * @return a map where the keys are the property names of the bean and the values are the corresponding property values of the bean.
+     * @param bean the bean object to be converted into a map; if {@code null}, an empty map is returned.
+     * @param ignoreNullProperty if {@code true}, properties with {@code null} values are excluded from the map.
+     * @param ignoredPropNames a set of property names to exclude from the map; ignored if {@code null}.
+     * @param mapSupplier a function that creates a new Map instance given an initial capacity.
+     * @return a map of the specified type with the bean's property name-value pairs; never {@code null}.
      */
     public static <M extends Map<String, Object>> M beanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final IntFunction<? extends M> mapSupplier) {
@@ -3265,11 +3301,11 @@ public final class Beans {
      * // age is not included because it's null
      * }</pre>
      *
-     * @param bean the bean object to be converted into a map.
-     * @param ignoreNullProperty if {@code true}, properties of the bean with {@code null} values will not be included in the map.
-     * @param ignoredPropNames a set of property names to be ignored during the conversion. If this is {@code null}, no properties are ignored.
-     * @param keyNamingPolicy the policy used to name the keys in the map.
-     * @return a map where the keys are the property names of the bean and the values are the corresponding property values of the bean.
+     * @param bean the bean object to be converted into a map; if {@code null}, an empty map is returned.
+     * @param ignoreNullProperty if {@code true}, properties with {@code null} values are excluded from the map.
+     * @param ignoredPropNames a set of property names to exclude from the map; ignored if {@code null}.
+     * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to {@link NamingPolicy#CAMEL_CASE}.
+     * @return a {@link java.util.LinkedHashMap} with the bean's property name-value pairs; never {@code null}.
      */
     public static Map<String, Object> beanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy) {
@@ -3299,12 +3335,12 @@ public final class Beans {
      * }</pre>
      *
      * @param <M> the type of the map to be returned.
-     * @param bean the bean object to be converted into a map.
-     * @param ignoreNullProperty if {@code true}, properties of the bean with {@code null} values will not be included in the map.
-     * @param ignoredPropNames the set of property names to be ignored during the conversion.
-     * @param keyNamingPolicy the naming policy to be used for the keys in the map.
-     * @param mapSupplier the supplier function to create a new instance of the map.
-     * @return a map where the keys are the property names of the bean and the values are the corresponding property values of the bean.
+     * @param bean the bean object to be converted into a map; if {@code null}, an empty map is returned.
+     * @param ignoreNullProperty if {@code true}, properties with {@code null} values are excluded from the map.
+     * @param ignoredPropNames a set of property names to exclude from the map; ignored if {@code null}.
+     * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to {@link NamingPolicy#CAMEL_CASE}.
+     * @param mapSupplier a function that creates a new Map instance given an initial capacity.
+     * @return a map of the specified type with the bean's property name-value pairs; never {@code null}.
      */
     public static <M extends Map<String, Object>> M beanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
@@ -3346,9 +3382,9 @@ public final class Beans {
      * }</pre>
      *
      * @param <M> the type of the output map.
-     * @param bean the bean object to be converted into a map.
-     * @param ignoreNullProperty if {@code true}, properties of the bean with {@code null} values will not be included in the map.
-     * @param output the map where the result should be stored.
+     * @param bean the bean object to be converted into a map; if {@code null}, the output map is not modified.
+     * @param ignoreNullProperty if {@code true}, properties with {@code null} values are not added to the output map.
+     * @param output the map into which the bean's properties will be put.
      */
     public static <M extends Map<String, Object>> void beanToMap(final Object bean, final boolean ignoreNullProperty, final M output) {
         beanToMap(bean, ignoreNullProperty, null, output);
@@ -3378,10 +3414,10 @@ public final class Beans {
      * }</pre>
      *
      * @param <M> the type of the output map.
-     * @param bean the bean object to be converted into a map.
-     * @param ignoreNullProperty if {@code true}, properties of the bean with {@code null} values will not be included in the map.
-     * @param ignoredPropNames a set of property names to be ignored during the conversion. If this is {@code null}, no properties are ignored.
-     * @param output the map where the result should be stored.
+     * @param bean the bean object to be converted into a map; if {@code null}, the output map is not modified.
+     * @param ignoreNullProperty if {@code true}, properties with {@code null} values are not added to the output map.
+     * @param ignoredPropNames a set of property names to exclude from the output map; ignored if {@code null}.
+     * @param output the map into which the bean's properties will be put.
      */
     public static <M extends Map<String, Object>> void beanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final M output) {
@@ -3413,11 +3449,11 @@ public final class Beans {
      * }</pre>
      *
      * @param <M> the type of the map to be filled.
-     * @param bean the bean object to be converted into a map.
-     * @param ignoreNullProperty if {@code true}, properties of the bean with {@code null} values will not be included in the map.
-     * @param ignoredPropNames the set of property names to be ignored during the conversion.
-     * @param keyNamingPolicy the naming policy to be used for the keys in the map.
-     * @param output the map to be filled with the bean's properties.
+     * @param bean the bean object to be converted into a map; if {@code null}, the output map is not modified.
+     * @param ignoreNullProperty if {@code true}, properties with {@code null} values are not added to the output map.
+     * @param ignoredPropNames a set of property names to exclude from the output map; ignored if {@code null}.
+     * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to {@link NamingPolicy#CAMEL_CASE}.
+     * @param output the map into which the bean's properties will be put.
      */
     public static <M extends Map<String, Object>> void beanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             NamingPolicy keyNamingPolicy, final M output) {
@@ -4692,10 +4728,10 @@ public final class Beans {
      * // Equivalent to: User user = new User();
      * }</pre>
      *
-     * @param <T> the type of the object to be created
-     * @param targetType the class of the object to be created.
-     * @return a new instance of the specified class.
-     * @throws IllegalArgumentException if the class is abstract or cannot be instantiated.
+     * @param <T> the type of the object to be created.
+     * @param targetType the class to instantiate; must have an accessible no-argument constructor.
+     * @return a new instance of the specified class; never {@code null}.
+     * @throws IllegalArgumentException if the class cannot be instantiated (e.g., abstract, no accessible no-arg constructor).
      */
     public static <T> T newBean(final Class<T> targetType) {
         return N.newInstance(targetType);
@@ -4724,9 +4760,9 @@ public final class Beans {
      * // originalUser.getAddress().getStreet() is still "123 Main St"
      * }</pre>
      *
-     * @param <T> the type of the object to be cloned
-     * @param obj a Java object which must be serializable and deserializable through Kryo or XML.
-     * @return a deep clone of the object, or {@code null} if the input is {@code null}.
+     * @param <T> the type of the object to be cloned.
+     * @param obj the object to clone; must be serializable via Kryo or Abacus XML.
+     * @return a deep clone of the object, or {@code null} if {@code obj} is {@code null}.
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
@@ -4761,10 +4797,10 @@ public final class Beans {
      * User emptyUser = Beans.deepCopyAs(null, User.class);
      * }</pre>
      *
-     * @param <T> the type of the target object
-     * @param obj a Java object which must be serializable and deserializable through Kryo or XML.
-     * @param targetType the class of the target type to create.
-     * @return a new instance of the target type with properties cloned from the source object.
+     * @param <T> the type of the target object.
+     * @param obj the source object; if {@code null}, a new empty instance of {@code targetType} is returned.
+     * @param targetType the class of the target type to create; must not be {@code null}.
+     * @return a new instance of the target type populated from the source object; never {@code null}.
      * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      */
     @SuppressWarnings("unchecked")
@@ -4819,9 +4855,10 @@ public final class Beans {
      * // originalUser.getAddress().getStreet() is now also "456 Oak St"
      * }</pre>
      *
-     * @param <T> the type of the source bean
-     * @param sourceBean the source bean to copy.
-     * @return a new instance with properties copied from the source bean, or {@code null} if the source is {@code null}.
+     * @param <T> the type of the source bean.
+     * @param sourceBean the source bean to copy; may be {@code null}.
+     * @return a new instance of the same type with all properties shallow-copied from {@code sourceBean},
+     *         or {@code null} if {@code sourceBean} is {@code null}.
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
@@ -4854,10 +4891,11 @@ public final class Beans {
      * // partialCopy.getPhone() returns null
      * }</pre>
      *
-     * @param <T> the type of the source bean
-     * @param sourceBean the source bean to copy.
-     * @param selectPropNames the collection of property names to be copied.
-     * @return a new instance with selected properties copied from the source bean, or {@code null} if the source is {@code null}.
+     * @param <T> the type of the source bean.
+     * @param sourceBean the source bean to copy; may be {@code null}.
+     * @param selectPropNames the property names to copy; unselected properties retain their default values.
+     * @return a new instance of the same type with the selected properties copied from {@code sourceBean},
+     *         or {@code null} if {@code sourceBean} is {@code null}.
      */
     @MayReturnNull
     public static <T> T copy(final T sourceBean, final Collection<String> selectPropNames) {
@@ -4891,10 +4929,12 @@ public final class Beans {
      *     (propName, propValue) -> propValue instanceof String);
      * }</pre>
      *
-     * @param <T> the type of the source bean
-     * @param sourceBean the source bean to copy.
-     * @param propFilter the predicate to filter properties to be copied.
-     * @return a new instance with filtered properties copied from the source bean, or {@code null} if the source is {@code null}.
+     * @param <T> the type of the source bean.
+     * @param sourceBean the source bean to copy; may be {@code null}.
+     * @param propFilter a predicate receiving the property name and value; returns {@code true} to include
+     *        the property in the copy.
+     * @return a new instance of the same type with matching properties copied from {@code sourceBean},
+     *         or {@code null} if {@code sourceBean} is {@code null}.
      * @see BiPredicates#alwaysTrue()
      * @see Fn#identity()
      * @see Fn#selectFirst()
@@ -4924,10 +4964,11 @@ public final class Beans {
      * // dto will have matching properties copied from entity
      * }</pre>
      *
-     * @param <T> the type of the target bean
-     * @param sourceBean the source bean to copy properties from.
-     * @param targetType the class of the target type.
-     * @return a new instance of the target type with properties copied from the source.
+     * @param <T> the type of the target bean.
+     * @param sourceBean the source bean to copy properties from; may be {@code null}.
+     * @param targetType the class of the target bean to create; must not be {@code null}.
+     * @return a new instance of the target type with matching properties copied from {@code sourceBean};
+     *         never {@code null}.
      * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      */
     public static <T> T copyAs(final Object sourceBean, final Class<? extends T> targetType) throws IllegalArgumentException {
@@ -4952,11 +4993,12 @@ public final class Beans {
      * // dto will have name, age, and email but not password
      * }</pre>
      *
-     * @param <T> the type of the target bean
-     * @param sourceBean the source bean to copy properties from.
-     * @param selectPropNames the collection of property names to be copied.
-     * @param targetType the class of the target type.
-     * @return a new instance of the target type with selected properties copied.
+     * @param <T> the type of the target bean.
+     * @param sourceBean the source bean to copy properties from; may be {@code null}.
+     * @param selectPropNames the property names to copy; unselected properties retain their default values.
+     *        If {@code null}, all matching properties are copied.
+     * @param targetType the class of the target bean to create; must not be {@code null}.
+     * @return a new instance of the target type with the selected properties copied; never {@code null}.
      * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      */
     public static <T> T copyAs(final Object sourceBean, final Collection<String> selectPropNames, @NotNull final Class<? extends T> targetType)
@@ -4987,12 +5029,13 @@ public final class Beans {
      * // dto.last_name will be "Doe"
      * }</pre>
      *
-     * @param <T> the type of the target bean
-     * @param sourceBean the source bean to copy properties from.
-     * @param selectPropNames the collection of property names to be copied.
-     * @param propNameConverter function to convert property names from source to target format.
-     * @param targetType the class of the target type.
-     * @return a new instance of the target type with converted and copied properties.
+     * @param <T> the type of the target bean.
+     * @param sourceBean the source bean to copy properties from; may be {@code null}.
+     * @param selectPropNames the source property names to copy; if {@code null}, all matching properties are copied.
+     * @param propNameConverter a function that converts each source property name to the corresponding
+     *        target property name; use {@link Fn#identity()} to keep names unchanged.
+     * @param targetType the class of the target bean to create; must not be {@code null}.
+     * @return a new instance of the target type with properties copied and names converted; never {@code null}.
      * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @see BiPredicates#alwaysTrue()
      * @see Fn#identity()
@@ -5050,12 +5093,13 @@ public final class Beans {
      * // dto will have name and age but not email (null) or password
      * }</pre>
      *
-     * @param <T> the type of the target bean
-     * @param sourceBean the source bean to copy properties from
-     * @param propFilter predicate to filter which properties should be copied
-     * @param targetType the class of the target type
-     * @return a new instance of the target type with filtered properties copied
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}
+     * @param <T> the type of the target bean.
+     * @param sourceBean the source bean to copy properties from; may be {@code null}.
+     * @param propFilter a predicate receiving the property name and value; returns {@code true} to include
+     *        the property in the copy.
+     * @param targetType the class of the target bean to create; must not be {@code null}.
+     * @return a new instance of the target type with filtered properties copied; never {@code null}.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @see BiPredicates#alwaysTrue()
      * @see Fn#identity()
      * @see Fn#selectFirst()
@@ -5089,13 +5133,16 @@ public final class Beans {
      * // password is excluded
      * }</pre>
      *
-     * @param <T> the type of the target bean
-     * @param sourceBean the source bean to copy properties from
-     * @param propFilter predicate to filter which properties should be copied
-     * @param propNameConverter function to convert property names from source to target format
-     * @param targetType the class of the target type
-     * @return a new instance of the target type with filtered and converted properties
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}
+     * @param <T> the type of the target bean.
+     * @param sourceBean the source bean to copy properties from; may be {@code null}.
+     * @param propFilter a predicate receiving the property name and value; returns {@code true} to include
+     *        the property in the copy.
+     * @param propNameConverter a function that converts each source property name to the corresponding
+     *        target property name; use {@link Fn#identity()} to keep names unchanged.
+     * @param targetType the class of the target bean to create; must not be {@code null}.
+     * @return a new instance of the target type with filtered and name-converted properties copied;
+     *         never {@code null}.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @see BiPredicates#alwaysTrue()
      * @see Fn#identity()
      * @see Fn#selectFirst()
@@ -5154,13 +5201,16 @@ public final class Beans {
      * // dto will have all properties except password and internalId
      * }</pre>
      *
-     * @param <T> the type of the target bean
-     * @param sourceBean the source bean to copy properties from
-     * @param ignoreUnmatchedProperty if {@code true}, properties not found in target are ignored; if {@code false}, throws exception
-     * @param ignoredPropNames set of property names to exclude from copying
-     * @param targetType the class of the target type
-     * @return a new instance of the target type with properties copied except ignored ones
-     * @throws IllegalArgumentException if {@code targetType} is {@code null} or if unmatched properties found when not ignoring
+     * @param <T> the type of the target bean.
+     * @param sourceBean the source bean to copy properties from; may be {@code null}.
+     * @param ignoreUnmatchedProperty if {@code true}, source properties without a matching target property
+     *        are silently skipped; if {@code false}, an {@link IllegalArgumentException} is thrown.
+     * @param ignoredPropNames a set of source property names to exclude from copying; ignored if {@code null}.
+     * @param targetType the class of the target bean to create; must not be {@code null}.
+     * @return a new instance of the target type with properties copied (excluding ignored ones);
+     *         never {@code null}.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}, or if
+     *         {@code ignoreUnmatchedProperty} is {@code false} and an unmatched property is found.
      */
     @SuppressWarnings({ "unchecked" })
     public static <T> T copyAs(final Object sourceBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
@@ -5203,9 +5253,9 @@ public final class Beans {
      * Merges properties from the source bean into the target bean.
      *
      * <p>This method copies all properties from the source bean to the target bean.
-     * The default merge strategy keeps the source value unless it is {@code null}, in which case
-     * the existing target value is retained. Unlike {@code copy} methods which create new
-     * instances, this modifies the existing target bean.</p>
+     * The default merge strategy uses the source value when it is non-{@code null}; when the
+     * source value is {@code null}, the existing target value is retained. Unlike {@code copy}
+     * methods, which create new instances, this modifies the existing target bean in place.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5217,11 +5267,11 @@ public final class Beans {
      * // existingUser now has age=26 and email="john@example.com"
      * }</pre>
      *
-     * @param <T> the type of the target bean
-     * @param sourceBean the source bean from which properties are copied
-     * @param targetBean the target bean into which properties are merged
-     * @return the same target bean instance with merged properties
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}
+     * @param <T> the type of the target bean.
+     * @param sourceBean the source bean from which properties are copied; if {@code null}, the target bean is returned unchanged.
+     * @param targetBean the target bean into which properties are merged; must not be {@code null}.
+     * @return {@code targetBean} with merged properties applied.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
     public static <T> T copyInto(final Object sourceBean, final T targetBean) throws IllegalArgumentException {
         return copyInto(sourceBean, targetBean, (Collection<String>) null);
@@ -5251,12 +5301,13 @@ public final class Beans {
      * // existingUser.getScore() is now 100 (max of 100 and 50)
      * }</pre>
      *
-     * @param <T> the type of the target bean
-     * @param sourceBean the source bean from which properties are copied
-     * @param targetBean the target bean into which properties are merged
-     * @param mergeFunc binary operator to determine the merged value for each property
-     * @return the same target bean instance with merged properties
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}
+     * @param <T> the type of the target bean.
+     * @param sourceBean the source bean from which properties are copied; if {@code null}, the target bean is returned unchanged.
+     * @param targetBean the target bean into which properties are merged; must not be {@code null}.
+     * @param mergeFunc a binary operator that receives {@code (sourceValue, targetValue)} and returns
+     *        the value to set on the target; must not be {@code null}.
+     * @return {@code targetBean} with merged properties applied.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      * @see BiPredicates#alwaysTrue()
      * @see Fn#identity()
      * @see Fn#selectFirst()
@@ -5285,13 +5336,15 @@ public final class Beans {
      * // target.first_name is now "John"
      * }</pre>
      *
-     * @param <T> the type of the target bean
-     * @param sourceBean the source bean from which properties are copied
-     * @param targetBean the target bean into which properties are merged
-     * @param propNameConverter function to convert property names from source to target format
-     * @param mergeFunc binary operator to determine the merged value for each property
-     * @return the same target bean instance with merged properties
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}
+     * @param <T> the type of the target bean.
+     * @param sourceBean the source bean from which properties are copied; if {@code null}, the target bean is returned unchanged.
+     * @param targetBean the target bean into which properties are merged; must not be {@code null}.
+     * @param propNameConverter a function that converts each source property name to the corresponding
+     *        target property name; use {@link Fn#identity()} to keep names unchanged.
+     * @param mergeFunc a binary operator that receives {@code (sourceValue, targetValue)} and returns
+     *        the value to set on the target.
+     * @return {@code targetBean} with merged properties applied.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      * @see BiPredicates#alwaysTrue()
      * @see Fn#identity()
      * @see Fn#selectFirst()
@@ -5317,12 +5370,13 @@ public final class Beans {
      * // existingUser still has name="John", age=25, but email="jane@new.com"
      * }</pre>
      *
-     * @param <T> the type of the target bean
-     * @param sourceBean the source bean from which properties are copied
-     * @param targetBean the target bean into which properties are merged
-     * @param selectPropNames collection of property names to merge
-     * @return the same target bean instance with selected properties merged
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}
+     * @param <T> the type of the target bean.
+     * @param sourceBean the source bean from which properties are copied; if {@code null}, the target bean is returned unchanged.
+     * @param targetBean the target bean into which properties are merged; must not be {@code null}.
+     * @param selectPropNames the source property names to merge; must not be {@code null}.
+     * @return {@code targetBean} with the selected properties merged.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a selected property
+     *         is not found in the source bean.
      */
     public static <T> T copyInto(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames)
             throws IllegalArgumentException {
@@ -5354,13 +5408,14 @@ public final class Beans {
      * // existingUser: name="John", age=30, score=200
      * }</pre>
      *
-     * @param <T> the type of the target bean
-     * @param sourceBean the source bean from which properties are copied
-     * @param targetBean the target bean into which properties are merged
-     * @param selectPropNames collection of property names to merge
-     * @param mergeFunc binary operator to determine the merged value for each property
-     * @return the same target bean instance with selected properties merged
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}
+     * @param <T> the type of the target bean.
+     * @param sourceBean the source bean from which properties are copied; if {@code null}, the target bean is returned unchanged.
+     * @param targetBean the target bean into which properties are merged; must not be {@code null}.
+     * @param selectPropNames the source property names to merge.
+     * @param mergeFunc a binary operator that receives {@code (sourceValue, targetValue)} and returns
+     *        the value to set on the target.
+     * @return {@code targetBean} with the selected properties merged.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      * @see BiPredicates#alwaysTrue()
      * @see Fn#identity()
      * @see Fn#selectFirst()
@@ -5391,13 +5446,14 @@ public final class Beans {
      * // target.first_name is now "John"
      * }</pre>
      *
-     * @param <T> the type of the target bean
-     * @param sourceBean the source bean from which properties are copied
-     * @param targetBean the target bean into which properties are merged
-     * @param selectPropNames collection of property names to merge
-     * @param propNameConverter function to convert property names from source to target format
-     * @return the same target bean instance with selected properties merged
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}
+     * @param <T> the type of the target bean.
+     * @param sourceBean the source bean from which properties are copied; if {@code null}, the target bean is returned unchanged.
+     * @param targetBean the target bean into which properties are merged; must not be {@code null}.
+     * @param selectPropNames the source property names to merge.
+     * @param propNameConverter a function that converts each source property name to the corresponding
+     *        target property name; use {@link Fn#identity()} to keep names unchanged.
+     * @return {@code targetBean} with the selected (and name-converted) properties merged.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      * @see BiPredicates#alwaysTrue()
      * @see Fn#identity()
      * @see Fn#selectFirst()
@@ -5439,14 +5495,16 @@ public final class Beans {
      * // target.total_amount = 250 (150 + 100)
      * }</pre>
      *
-     * @param <T> the type of the target bean
-     * @param sourceBean the source bean from which properties are copied
-     * @param targetBean the target bean into which properties are merged
-     * @param selectPropNames collection of property names to merge
-     * @param propNameConverter function to convert property names from source to target format
-     * @param mergeFunc binary operator to determine the merged value for each property
-     * @return the same target bean instance with selected properties merged
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}
+     * @param <T> the type of the target bean.
+     * @param sourceBean the source bean from which properties are copied; if {@code null}, the target bean is returned unchanged.
+     * @param targetBean the target bean into which properties are merged; must not be {@code null}.
+     * @param selectPropNames the source property names to merge.
+     * @param propNameConverter a function that converts each source property name to the corresponding
+     *        target property name; use {@link Fn#identity()} to keep names unchanged.
+     * @param mergeFunc a binary operator that receives {@code (sourceValue, targetValue)} and returns
+     *        the value to set on the target.
+     * @return {@code targetBean} with the selected, name-converted, and merged properties applied.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      * @see BiPredicates#alwaysTrue()
      * @see Fn#identity()
      * @see Fn#selectFirst()
@@ -5478,12 +5536,13 @@ public final class Beans {
      * // target keeps age=25 and email="jane@example.com" but name becomes "John"
      * }</pre>
      *
-     * @param <T> the type of the target bean
-     * @param sourceBean the source bean from which properties are copied
-     * @param targetBean the target bean into which properties are merged
-     * @param propFilter predicate to determine which properties should be merged
-     * @return the same target bean instance with filtered properties merged
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}
+     * @param <T> the type of the target bean.
+     * @param sourceBean the source bean from which properties are copied; if {@code null}, the target bean is returned unchanged.
+     * @param targetBean the target bean into which properties are merged; must not be {@code null}.
+     * @param propFilter a predicate receiving the property name and source value; returns {@code true} to
+     *        merge the property into the target.
+     * @return {@code targetBean} with matching properties merged.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      * @see BiPredicates#alwaysTrue()
      * @see Fn#identity()
      * @see Fn#selectFirst()
@@ -5516,13 +5575,15 @@ public final class Beans {
      * // target: name="New Name", price=250, quantity=15
      * }</pre>
      *
-     * @param <T> the type of the target bean
-     * @param sourceBean the source bean from which properties are copied
-     * @param targetBean the target bean into which properties are merged
-     * @param propFilter predicate to determine which properties should be merged
-     * @param mergeFunc binary operator to determine the merged value for each property
-     * @return the same target bean instance with filtered properties merged
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}
+     * @param <T> the type of the target bean.
+     * @param sourceBean the source bean from which properties are copied; if {@code null}, the target bean is returned unchanged.
+     * @param targetBean the target bean into which properties are merged; must not be {@code null}.
+     * @param propFilter a predicate receiving the property name and source value; returns {@code true} to
+     *        merge the property into the target.
+     * @param mergeFunc a binary operator that receives {@code (sourceValue, targetValue)} and returns
+     *        the value to set on the target.
+     * @return {@code targetBean} with filtered and merged properties applied.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      * @see BiPredicates#alwaysTrue()
      * @see Fn#identity()
      * @see Fn#selectFirst()
@@ -5554,13 +5615,15 @@ public final class Beans {
      * // target.first_name = "John", last_name is not merged
      * }</pre>
      *
-     * @param <T> the type of the target bean
-     * @param sourceBean the source bean from which properties are copied
-     * @param targetBean the target bean into which properties are merged
-     * @param propFilter predicate to determine which properties should be merged
-     * @param propNameConverter function to convert property names from source to target format
-     * @return the same target bean instance with filtered and converted properties merged
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}
+     * @param <T> the type of the target bean.
+     * @param sourceBean the source bean from which properties are copied; if {@code null}, the target bean is returned unchanged.
+     * @param targetBean the target bean into which properties are merged; must not be {@code null}.
+     * @param propFilter a predicate receiving the property name and source value; returns {@code true} to
+     *        merge the property into the target.
+     * @param propNameConverter a function that converts each source property name to the corresponding
+     *        target property name; use {@link Fn#identity()} to keep names unchanged.
+     * @return {@code targetBean} with filtered and name-converted properties merged.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      * @see BiPredicates#alwaysTrue()
      * @see Fn#identity()
      * @see Fn#selectFirst()
@@ -5605,14 +5668,17 @@ public final class Beans {
      * // Result: first_name="John", total_count=15, last_updated=most recent date
      * }</pre>
      *
-     * @param <T> the type of the target bean
-     * @param sourceBean the source bean from which properties are copied
-     * @param targetBean the target bean into which properties are merged; must not be {@code null}
-     * @param propFilter predicate to determine which properties should be merged; must not be {@code null}
-     * @param propNameConverter function to convert property names from source to target format; must not be {@code null}
-     * @param mergeFunc binary operator to determine the merged value for each property; must not be {@code null}
-     * @return the same target bean instance with filtered, converted, and merged properties
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}
+     * @param <T> the type of the target bean.
+     * @param sourceBean the source bean from which properties are copied; if {@code null}, the target bean is returned unchanged.
+     * @param targetBean the target bean into which properties are merged; must not be {@code null}.
+     * @param propFilter a predicate receiving the property name and source value; returns {@code true} to
+     *        merge the property into the target; must not be {@code null}.
+     * @param propNameConverter a function that converts each source property name to the corresponding
+     *        target property name; use {@link Fn#identity()} to keep names unchanged; must not be {@code null}.
+     * @param mergeFunc a binary operator that receives {@code (sourceValue, targetValue)} and returns
+     *        the value to set on the target; must not be {@code null}.
+     * @return {@code targetBean} with filtered, name-converted, and merged properties applied.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      * @see BiPredicates#alwaysTrue()
      * @see Fn#identity()
      * @see Fn#selectFirst()
@@ -5645,13 +5711,15 @@ public final class Beans {
      * // target: name="John", age=30, email="john@example.com", password="oldpass"
      * }</pre>
      *
-     * @param <T> the type of the target bean
-     * @param sourceBean the source bean from which properties are copied
-     * @param targetBean the target bean into which properties are merged
-     * @param ignoreUnmatchedProperty if {@code true}, properties not found in target are ignored; if {@code false}, throws exception
-     * @param ignoredPropNames set of property names to exclude from merging
-     * @return the same target bean instance with properties merged except ignored ones
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null} or if unmatched properties found when not ignoring
+     * @param <T> the type of the target bean.
+     * @param sourceBean the source bean from which properties are copied; if {@code null}, the target bean is returned unchanged.
+     * @param targetBean the target bean into which properties are merged; must not be {@code null}.
+     * @param ignoreUnmatchedProperty if {@code true}, source properties without a matching target property
+     *        are silently skipped; if {@code false}, an {@link IllegalArgumentException} is thrown.
+     * @param ignoredPropNames a set of source property names to exclude from merging; ignored if {@code null}.
+     * @return {@code targetBean} with properties merged (excluding ignored ones).
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if
+     *         {@code ignoreUnmatchedProperty} is {@code false} and an unmatched property is found.
      */
     public static <T> T copyInto(final Object sourceBean, @NotNull final T targetBean, final boolean ignoreUnmatchedProperty,
             final Set<String> ignoredPropNames) throws IllegalArgumentException {
@@ -5684,14 +5752,17 @@ public final class Beans {
      * // target: name="New Product", price=350, quantity=25, createdDate="2023-01-01"
      * }</pre>
      *
-     * @param <T> the type of the target bean
-     * @param sourceBean the source bean from which properties are copied
-     * @param targetBean the target bean into which properties are merged
-     * @param ignoreUnmatchedProperty if {@code true}, properties not found in target are ignored; if {@code false}, throws exception
-     * @param ignoredPropNames set of property names to exclude from merging
-     * @param mergeFunc binary operator to determine the merged value for each property
-     * @return the same target bean instance with properties merged using custom logic
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null} or if unmatched properties found when not ignoring
+     * @param <T> the type of the target bean.
+     * @param sourceBean the source bean from which properties are copied; if {@code null}, the target bean is returned unchanged.
+     * @param targetBean the target bean into which properties are merged; must not be {@code null}.
+     * @param ignoreUnmatchedProperty if {@code true}, source properties without a matching target property
+     *        are silently skipped; if {@code false}, an {@link IllegalArgumentException} is thrown.
+     * @param ignoredPropNames a set of source property names to exclude from merging; ignored if {@code null}.
+     * @param mergeFunc a binary operator that receives {@code (sourceValue, targetValue)} and returns
+     *        the value to set on the target.
+     * @return {@code targetBean} with properties merged using custom logic.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if
+     *         {@code ignoreUnmatchedProperty} is {@code false} and an unmatched property is found.
      */
     public static <T> T copyInto(final Object sourceBean, @NotNull final T targetBean, final boolean ignoreUnmatchedProperty,
             final Set<String> ignoredPropNames, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
@@ -5889,8 +5960,8 @@ public final class Beans {
      * // user.getName() still returns "John"
      * }</pre>
      *
-     * @param bean the bean object whose properties are to be erased
-     * @param propNames the names of the properties to be erased
+     * @param bean the bean object whose properties are to be cleared; if {@code null}, the method does nothing.
+     * @param propNames the names of the properties to clear; if empty, the method does nothing.
      */
     public static void clearProps(final Object bean, final String... propNames) {
         if (bean == null || N.isEmpty(propNames)) {
@@ -5921,8 +5992,8 @@ public final class Beans {
      * // user.getPhone() returns null
      * }</pre>
      *
-     * @param bean the bean object whose properties are to be erased
-     * @param propNames the collection of property names to be erased
+     * @param bean the bean object whose properties are to be cleared; if {@code null}, the method does nothing.
+     * @param propNames the collection of property names to clear; if empty, the method does nothing.
      */
     public static void clearProps(final Object bean, final Collection<String> propNames) {
         if (bean == null || N.isEmpty(propNames)) {
@@ -5999,8 +6070,8 @@ public final class Beans {
      * System.out.println(person.getName());   // e.g., "a1b2c3d4-e5f6-78"
      * }</pre>
      *
-     * @param bean a bean object with getter/setter methods
-     * @throws IllegalArgumentException if bean is {@code null} or not a valid bean class
+     * @param bean the bean object to populate; must not be {@code null} and must be a valid bean class.
+     * @throws IllegalArgumentException if {@code bean} is {@code null} or not a valid bean class.
      */
     public static void randomize(final Object bean) throws IllegalArgumentException {
         N.checkArgNotNull(bean, cs.bean);
@@ -6024,9 +6095,10 @@ public final class Beans {
      * // Only username and email are filled, other properties remain unchanged
      * }</pre>
      *
-     * @param bean a bean object with getter/setter methods
-     * @param propNamesToFill collection of property names to fill
-     * @throws IllegalArgumentException if bean is {@code null} or not a valid bean class
+     * @param bean the bean object to populate; must not be {@code null} and must be a valid bean class.
+     * @param propNamesToFill the names of the properties to fill with random values; must not be {@code null}.
+     * @throws IllegalArgumentException if {@code bean} is {@code null} or not a valid bean class,
+     *         or if a property name is not found in the bean.
      */
     public static void randomize(final Object bean, final Collection<String> propNamesToFill) {
         N.checkArgNotNull(bean, cs.bean);
@@ -6043,22 +6115,22 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a fully populated test object
-     * Customer customer = Beans.newRandom(Customer.class);
+     * Customer customer = Beans.newRandomBean(Customer.class);
      * // Use the customer object in tests
      * assertNotNull(customer.getName());
      * assertNotNull(customer.getAddress());
      * }</pre>
      *
-     * @param <T> the type of the bean
-     * @param beanClass bean class with getter/setter methods
-     * @return a new instance with all properties filled with random values
-     * @throws IllegalArgumentException if beanClass is {@code null} or not a valid bean class
+     * @param <T> the type of the bean.
+     * @param beanClass the class to instantiate and populate; must not be {@code null} and must be a valid bean class.
+     * @return a new instance with all properties filled with random values; never {@code null}.
+     * @throws IllegalArgumentException if {@code beanClass} is {@code null} or not a valid bean class.
      */
-    public static <T> T newRandom(final Class<? extends T> beanClass) throws IllegalArgumentException {
+    public static <T> T newRandomBean(final Class<? extends T> beanClass) throws IllegalArgumentException {
         N.checkArgNotNull(beanClass, cs.beanClass);
         checkBeanClass(beanClass);
 
-        return newRandom(beanClass, Beans.getPropNameList(beanClass));
+        return newRandomBean(beanClass, Beans.getPropNameList(beanClass));
     }
 
     /**
@@ -6069,17 +6141,18 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a user with only required fields filled
-     * User user = Beans.newRandom(User.class, Arrays.asList("id", "username", "email"));
+     * User user = Beans.newRandomBean(User.class, Arrays.asList("id", "username", "email"));
      * // Other fields like address, phone, etc. remain null/default
      * }</pre>
      *
-     * @param <T> the type of the bean
-     * @param beanClass bean class with getter/setter methods
-     * @param propNamesToFill collection of property names to fill
-     * @return a new instance with specified properties filled with random values
-     * @throws IllegalArgumentException if beanClass is {@code null} or not a valid bean class
+     * @param <T> the type of the bean.
+     * @param beanClass the class to instantiate and populate; must not be {@code null} and must be a valid bean class.
+     * @param propNamesToFill the names of the properties to fill with random values; must not be {@code null}.
+     * @return a new instance with the specified properties filled with random values; never {@code null}.
+     * @throws IllegalArgumentException if {@code beanClass} is {@code null} or not a valid bean class,
+     *         or if a property name is not found in the class.
      */
-    public static <T> T newRandom(final Class<? extends T> beanClass, final Collection<String> propNamesToFill) throws IllegalArgumentException {
+    public static <T> T newRandomBean(final Class<? extends T> beanClass, final Collection<String> propNamesToFill) throws IllegalArgumentException {
         N.checkArgNotNull(beanClass, cs.beanClass);
         checkBeanClass(beanClass);
 
@@ -6103,7 +6176,7 @@ public final class Beans {
         return beanInfo.finishBeanResult(result);
     }
 
-    /** Per-thread visited-class set used by {@link #newRandom(Class, Collection)} to break cycles. */
+    /** Per-thread visited-class set used by {@link #newRandomBean(Class, Collection)} to break cycles. */
     private static final ThreadLocal<java.util.Set<Class<?>>> NEW_RANDOM_VISITED = ThreadLocal.withInitial(java.util.HashSet::new);
 
     /**
@@ -6115,22 +6188,24 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Generate 50 test users
-     * List<User> testUsers = Beans.newRandomList(User.class, 50);
+     * List<User> testUsers = Beans.newRandomBeanList(User.class, 50);
      * // Use in batch operations or performance tests
      * userService.saveAll(testUsers);
      * }</pre>
      *
-     * @param <T> the type of the bean
-     * @param beanClass bean class with getter/setter methods
-     * @param count number of instances to create
-     * @return a list containing the specified number of filled bean instances
-     * @throws IllegalArgumentException if beanClass is {@code null}, not a valid bean class, or count is negative
+     * @param <T> the type of the bean.
+     * @param beanClass the class to instantiate and populate; must not be {@code null} and must be a valid bean class.
+     * @param count the number of instances to create; must not be negative.
+     * @return a list containing exactly {@code count} newly created and fully populated bean instances;
+     *         never {@code null}.
+     * @throws IllegalArgumentException if {@code beanClass} is {@code null}, not a valid bean class,
+     *         or {@code count} is negative.
      */
-    public static <T> List<T> newRandomList(final Class<? extends T> beanClass, final int count) throws IllegalArgumentException {
+    public static <T> List<T> newRandomBeanList(final Class<? extends T> beanClass, final int count) throws IllegalArgumentException {
         N.checkArgNotNull(beanClass, cs.beanClass);
         checkBeanClass(beanClass);
 
-        return newRandomList(beanClass, Beans.getPropNameList(beanClass), count);
+        return newRandomBeanList(beanClass, Beans.getPropNameList(beanClass), count);
     }
 
     /**
@@ -6141,7 +6216,7 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create test data with only essential fields
-     * List<Product> products = Beans.newRandomList(
+     * List<Product> products = Beans.newRandomBeanList(
      *     Product.class,
      *     Arrays.asList("id", "name", "price"),
      *     100
@@ -6149,14 +6224,16 @@ public final class Beans {
      * // Each product has random id, name, and price, but other fields are default
      * }</pre>
      *
-     * @param <T> the type of the bean
-     * @param beanClass bean class with getter/setter methods
-     * @param propNamesToFill collection of property names to fill
-     * @param count number of instances to create
-     * @return a list containing the specified number of partially filled bean instances
-     * @throws IllegalArgumentException if beanClass is {@code null}, not a valid bean class, or count is negative
+     * @param <T> the type of the bean.
+     * @param beanClass the class to instantiate and populate; must not be {@code null} and must be a valid bean class.
+     * @param propNamesToFill the names of the properties to fill with random values; must not be {@code null}.
+     * @param count the number of instances to create; must not be negative.
+     * @return a list containing exactly {@code count} newly created bean instances with the specified
+     *         properties filled; never {@code null}.
+     * @throws IllegalArgumentException if {@code beanClass} is {@code null}, not a valid bean class,
+     *         {@code count} is negative, or a property name is not found in the class.
      */
-    public static <T> List<T> newRandomList(final Class<? extends T> beanClass, final Collection<String> propNamesToFill, final int count)
+    public static <T> List<T> newRandomBeanList(final Class<? extends T> beanClass, final Collection<String> propNamesToFill, final int count)
             throws IllegalArgumentException {
         N.checkArgNotNull(beanClass, cs.beanClass);
         checkBeanClass(beanClass);
@@ -6194,7 +6271,11 @@ public final class Beans {
             type = propInfo.jsonXmlType;
 
             if (String.class.equals(parameterClass)) {
-                propValue = Strings.uuid().substring(0, 16);
+                if (Strings.containsIgnoreCase(propName, "email")) {
+                    propValue = Strings.uuid().substring(0, 12) + "@email.com";
+                } else {
+                    propValue = Strings.uuid().substring(0, 16);
+                }
             } else if (boolean.class.equals(parameterClass) || Boolean.class.equals(parameterClass)) {
                 propValue = N.RAND.nextBoolean();
             } else if (char.class.equals(parameterClass) || Character.class.equals(parameterClass)) {
@@ -6221,7 +6302,7 @@ public final class Beans {
                 if (NEW_RANDOM_VISITED.get().contains(parameterClass)) {
                     propValue = type.defaultValue();
                 } else {
-                    propValue = newRandom(parameterClass);
+                    propValue = newRandomBean(parameterClass);
                 }
             } else {
                 propValue = type.defaultValue();
@@ -6246,10 +6327,11 @@ public final class Beans {
      * // Returns true if common properties (name, age) are equal
      * }</pre>
      *
-     * @param bean1 the first bean to compare; must not be null
-     * @param bean2 the second bean to compare; must not be null
-     * @return {@code true} if all the common properties of the beans are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if either bean is {@code null}, if either bean is not a valid bean class, or if no common property is found
+     * @param bean1 the first bean to compare; must not be {@code null}.
+     * @param bean2 the second bean to compare; must not be {@code null}.
+     * @return {@code true} if all common properties of the two beans are equal, {@code false} otherwise.
+     * @throws IllegalArgumentException if either bean is {@code null}, if either bean is not a valid
+     *         bean class, or if the two classes share no common properties.
      */
     public static boolean equalsByCommonProps(@NotNull final Object bean1, @NotNull final Object bean2) throws IllegalArgumentException {
         N.checkArgNotNull(bean1);
@@ -6282,11 +6364,11 @@ public final class Beans {
      * // Returns true because name and email are equal, age is not compared
      * }</pre>
      *
-     * @param bean1 the first bean to compare; must not be null
-     * @param bean2 the second bean to compare; must not be null
-     * @param propNamesToCompare the collection of property names to compare; must not be {@code null} or empty
-     * @return {@code true} if all the specified properties of the beans are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if {@code propNamesToCompare} is {@code null} or empty
+     * @param bean1 the first bean to compare; may be {@code null} (treated as less than any non-null bean).
+     * @param bean2 the second bean to compare; may be {@code null}.
+     * @param propNamesToCompare the property names to compare; must not be {@code null} or empty.
+     * @return {@code true} if all the specified properties of the two beans are equal, {@code false} otherwise.
+     * @throws IllegalArgumentException if {@code propNamesToCompare} is {@code null} or empty.
      */
     public static boolean equalsByProps(final Object bean1, final Object bean2, final Collection<String> propNamesToCompare) throws IllegalArgumentException {
         N.checkArgNotEmpty(propNamesToCompare, cs.propNamesToCompare);
@@ -6312,12 +6394,15 @@ public final class Beans {
      * <p><b>Note:</b> This method uses reflection to access properties which may impact
      * performance in tight loops or high-frequency operations.</p>
      *
-     * @param bean1 the first bean to compare; must not be null
-     * @param bean2 the second bean to compare; must not be null
-     * @param propNamesToCompare the collection of property names to compare; must not be {@code null}
-     * @return a negative integer, zero, or a positive integer as the first bean is less than, equal to, or greater than the second bean
-     * @throws IllegalArgumentException if any of the arguments are {@code null}, or if either bean is not a valid bean class, or if a specified property is not found in either bean class
-     * @deprecated calling {@code getPropValue} by reflection APIs during comparison or sorting may have a huge impact on performance. Use {@link ComparisonBuilder} instead.
+     * @param bean1 the first bean to compare; must not be {@code null}.
+     * @param bean2 the second bean to compare; must not be {@code null}.
+     * @param propNamesToCompare the property names to compare in order; must not be {@code null}.
+     * @return a negative integer, zero, or a positive integer as {@code bean1} is less than,
+     *         equal to, or greater than {@code bean2} with respect to the specified properties.
+     * @throws IllegalArgumentException if any argument is {@code null}, if either bean is not a valid
+     *         bean class, or if a specified property is not found in either bean.
+     * @deprecated Accessing property values via reflection during comparison or sorting can have a
+     *         significant performance impact. Use {@link ComparisonBuilder} instead.
      * @see Builder#compare(Object, Object, Comparator)
      * @see ComparisonBuilder
      */
@@ -6373,9 +6458,10 @@ public final class Beans {
      * // Outputs: name: John, age: 25, email: john@example.com
      * }</pre>
      *
-     * @param bean the bean object to extract properties from
-     * @return a stream of Map.Entry objects containing property names and values
-     * @throws IllegalArgumentException if bean is null
+     * @param bean the bean object to extract properties from; must not be {@code null}.
+     * @return a {@link Stream} of {@link Map.Entry} objects where each key is a property name
+     *         and each value is the corresponding property value (which may be {@code null}).
+     * @throws IllegalArgumentException if {@code bean} is {@code null}.
      */
     public static Stream<Map.Entry<String, Object>> stream(final Object bean) {
         N.checkArgNotNull(bean, cs.bean);
@@ -6400,10 +6486,13 @@ public final class Beans {
      * // Only outputs non-null properties: name: John, age: 25
      * }</pre>
      *
-     * @param bean the bean object to extract properties from
-     * @param propFilter a predicate that tests property name and value; returns {@code true} to include the property
-     * @return a stream of Map.Entry objects containing filtered property names and values
-     * @throws IllegalArgumentException if bean is null
+     * @param bean the bean object to extract properties from; must not be {@code null}.
+     * @param propFilter a {@link BiPredicate} that receives the property name and its value and returns
+     *        {@code true} to include the property in the stream, or {@code false} to skip it.
+     * @return a {@link Stream} of {@link Map.Entry} objects where each key is a property name
+     *         and each value is the corresponding property value (which may be {@code null}),
+     *         containing only those properties for which {@code propFilter} returned {@code true}.
+     * @throws IllegalArgumentException if {@code bean} is {@code null}.
      */
     public static Stream<Map.Entry<String, Object>> stream(final Object bean, final BiPredicate<String, Object> propFilter) {
         N.checkArgNotNull(bean, cs.bean);

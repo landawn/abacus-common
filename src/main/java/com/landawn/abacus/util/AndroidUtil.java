@@ -29,7 +29,7 @@ import com.landawn.abacus.annotation.Internal;
  * access to Android's {@code AsyncTask} executors if available. On non-Android platforms,
  * it provides equivalent fallback executors using standard Java concurrency utilities:
  * a single-threaded executor for serial execution and a fixed-size thread pool
- * (sized to {@link IOUtil#CPU_CORES}) for parallel execution.</p>
+ * (sized to {@link IOUtil#CPU_CORES CPU_CORES}) for parallel execution.</p>
  *
  * <p>On non-Android platforms a JVM shutdown hook is registered to gracefully
  * terminate the created executors on JVM exit.</p>
@@ -90,6 +90,9 @@ public final class AndroidUtil {
         }
     }
 
+    /**
+     * Private constructor. This class is not instantiable.
+     */
     private AndroidUtil() {
         // utility class;
     }

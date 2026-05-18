@@ -123,7 +123,9 @@ class SLF4JLogger extends AbstractLogger {
     /**
      * Logs a message at TRACE level.
      *
-     * <p>Delegates directly to the SLF4J logger.</p>
+     * <p>If the underlying logger supports location awareness ({@link LocationAwareLogger}),
+     * it is used to provide accurate caller location information. Otherwise, delegates
+     * directly to the standard SLF4J logger.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -144,7 +146,9 @@ class SLF4JLogger extends AbstractLogger {
     /**
      * Logs a message at TRACE level with an exception.
      *
-     * <p>Delegates directly to the SLF4J logger.</p>
+     * <p>If the underlying logger supports location awareness ({@link LocationAwareLogger}),
+     * it is used to provide accurate caller location information. Otherwise, delegates
+     * directly to the standard SLF4J logger.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -179,7 +183,9 @@ class SLF4JLogger extends AbstractLogger {
     /**
      * Logs a message at DEBUG level.
      *
-     * <p>Delegates directly to the SLF4J logger.</p>
+     * <p>If the underlying logger supports location awareness ({@link LocationAwareLogger}),
+     * it is used to provide accurate caller location information. Otherwise, delegates
+     * directly to the standard SLF4J logger.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -200,7 +206,9 @@ class SLF4JLogger extends AbstractLogger {
     /**
      * Logs a message at DEBUG level with an exception.
      *
-     * <p>Delegates directly to the SLF4J logger.</p>
+     * <p>If the underlying logger supports location awareness ({@link LocationAwareLogger}),
+     * it is used to provide accurate caller location information. Otherwise, delegates
+     * directly to the standard SLF4J logger.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -235,7 +243,9 @@ class SLF4JLogger extends AbstractLogger {
     /**
      * Logs a message at INFO level.
      *
-     * <p>Delegates directly to the SLF4J logger.</p>
+     * <p>If the underlying logger supports location awareness ({@link LocationAwareLogger}),
+     * it is used to provide accurate caller location information. Otherwise, delegates
+     * directly to the standard SLF4J logger.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -256,7 +266,9 @@ class SLF4JLogger extends AbstractLogger {
     /**
      * Logs a message at INFO level with an exception.
      *
-     * <p>Delegates directly to the SLF4J logger.</p>
+     * <p>If the underlying logger supports location awareness ({@link LocationAwareLogger}),
+     * it is used to provide accurate caller location information. Otherwise, delegates
+     * directly to the standard SLF4J logger.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

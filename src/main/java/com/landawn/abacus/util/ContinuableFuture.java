@@ -46,7 +46,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  * emphasizes readability and maintainability. Unlike traditional futures that require complex callback management,
  * this class provides intuitive methods for sequential, parallel, and conditional execution patterns.</p>
  *
- * <p><b>⚠️ IMPORTANT - Design Philosophy:</b>
+ * <p><b>IMPORTANT - Design Philosophy:</b>
  * <ul>
  *   <li><b>Simplicity Over Complexity:</b> Streamlined API focused on common asynchronous patterns</li>
  *   <li><b>Fluent Composition:</b> Method chaining enables readable asynchronous workflow construction</li>
@@ -334,7 +334,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param action the action to be executed asynchronously.
+     * @param action the action to be executed asynchronously; must not be {@code null}.
      * @return a {@code ContinuableFuture<Void>} representing the pending completion of the action.
      * @see N#asyncExecute(Throwables.Runnable)
      */
@@ -358,8 +358,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * }, customExecutor);
      * }</pre>
      *
-     * @param action the action to be executed asynchronously.
-     * @param executor the executor to use for running the action.
+     * @param action the action to be executed asynchronously; must not be {@code null}.
+     * @param executor the executor to use for running the action; must not be {@code null}.
      * @return a {@code ContinuableFuture<Void>} representing the pending completion of the action.
      */
     public static ContinuableFuture<Void> run(final Throwables.Runnable<? extends Exception> action, final Executor executor) {
@@ -392,7 +392,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param <T> the type of the result returned by the callable.
-     * @param action the callable action to be executed asynchronously.
+     * @param action the callable action to be executed asynchronously; must not be {@code null}.
      * @return a {@code ContinuableFuture<T>} representing the pending result of the action.
      * @see N#asyncExecute(Callable)
      */
@@ -416,8 +416,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param <T> the type of the result returned by the callable.
-     * @param action the callable action to be executed asynchronously.
-     * @param executor the executor to use for running the action.
+     * @param action the callable action to be executed asynchronously; must not be {@code null}.
+     * @param executor the executor to use for running the action; must not be {@code null}.
      * @return a {@code ContinuableFuture<T>} representing the pending result of the action.
      */
     public static <T> ContinuableFuture<T> call(final Callable<T> action, final Executor executor) {
@@ -513,7 +513,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param <T> the type of the value returned by the future.
-     * @param future the future to wrap.
+     * @param future the future to wrap; must not be {@code null}.
      * @return a {@code ContinuableFuture} that wraps the provided future.
      */
     public static <T> ContinuableFuture<T> wrap(final Future<T> future) {
@@ -855,7 +855,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @return the computed result if the computation is already complete, otherwise {@code defaultValue}.
      * @throws CancellationException if the computation was cancelled.
      * @throws ExecutionException if the computation threw an exception.
-     * @throws InterruptedException if the current thread was interrupted while checking.
+     * @throws InterruptedException if the current thread was interrupted (propagated from the underlying {@link Future#get()} call).
      */
     public T getNow(final T defaultValue) throws InterruptedException, ExecutionException {
         if (isDone()) {
@@ -1360,8 +1360,9 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param <R> the type of the result returned by the function.
-     * @param action the function to apply to the result.
+     * @param action the function to apply to the result; must not be {@code null}.
      * @return a new {@code ContinuableFuture<R>} with the transformed result.
+     * @see #map(Throwables.Function)
      */
     public <R> ContinuableFuture<R> thenCallAsync(final Throwables.Function<? super T, ? extends R, ? extends Exception> action) {
         return execute(() -> action.apply(get()));
@@ -1474,7 +1475,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <ul>
      *   <li>result1/exception1 are from this future</li>
      *   <li>result2/exception2 are from the other future</li>
-     *   <li>If a future succeeds, its result is {@code non-null} and exception is null</li>
+     *   <li>If a future succeeds, its result is non-null and exception is null</li>
      *   <li>If a future fails, its result is {@code null} and exception is non-null</li>
      * </ul>
      *
@@ -1995,9 +1996,9 @@ public class ContinuableFuture<T> implements Future<T> {
 
     /**
      * Executes the provided BiConsumer action asynchronously after the first successful completion between this ContinuableFuture
-     * and the other ContinuableFuture. The BiConsumer receives the result and exception, where at least one will be {@code non-null}.
+     * and the other ContinuableFuture. The BiConsumer receives the result and the exception.
      *
-     * <p><b>⚠️ BETA API - Subject to Change:</b></p>
+     * <p><b>BETA API - Subject to Change:</b></p>
      * <p>This method is marked as {@code @Beta} and may be subject to change in future versions.
      * Potential changes include:
      * <ul>
@@ -2144,7 +2145,7 @@ public class ContinuableFuture<T> implements Future<T> {
 
     /**
      * Executes the provided BiFunction asynchronously after the first successful completion between this ContinuableFuture
-     * and the other ContinuableFuture. The BiFunction receives the result and exception, where at least one will be {@code non-null}.
+     * and the other ContinuableFuture. The BiFunction receives the result and the exception.
      *
      * <p>If the first future to complete succeeds, the BiFunction receives (result, null).
      * If both futures fail, the BiFunction receives (null, firstException).
@@ -2279,7 +2280,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param delay the delay before executing subsequent operations.
      * @param unit the time unit for the delay.
      * @return a new ContinuableFuture with the specified configuration.
-     * @deprecated This is an internal method and should not be used directly. Use {@link #thenDelay} or {@link #thenUse} instead.
+     * @deprecated This is an internal method and should not be used directly. Use {@link #thenDelay(long, TimeUnit)} or {@link #thenUse(Executor)} instead.
      */
     @Deprecated
     ContinuableFuture<T> with(final Executor executor, final long delay, final TimeUnit unit) {

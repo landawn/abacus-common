@@ -516,14 +516,13 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
     /**
      * Creates a new IntList filled with random int values. Each element is generated
-     * using Random.nextInt(), which produces values across the entire range of int
-     * (from Integer.MIN_VALUE to Integer.MAX_VALUE).
+     * using {@link Random#nextInt()}, which produces values across the entire range of int
+     * (from {@link Integer#MIN_VALUE} to {@link Integer#MAX_VALUE}).
      *
      * @param len the number of random elements to generate. Must be non-negative.
      * @return a new IntList containing random int values
-     * @throws IllegalArgumentException if len is negative
+     * @throws NegativeArraySizeException if {@code len} is negative
      * @see Random#nextInt()
-     * @see Array#random(int)
      */
     public static IntList random(final int len) {
         final int[] a = new int[len];
@@ -546,9 +545,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param endExclusive the upper bound (exclusive) for the random values
      * @param len the number of random elements to generate. Must be non-negative.
      * @return a new IntList containing random values within the specified range
-     * @throws IllegalArgumentException if startInclusive &gt;= endExclusive or if len is negative
+     * @throws IllegalArgumentException if {@code startInclusive >= endExclusive}
+     * @throws NegativeArraySizeException if {@code len} is negative
      * @see Random#nextInt(int)
-     * @see Array#random(int, int, int)
      */
     public static IntList random(final int startInclusive, final int endExclusive, final int len) {
         if (startInclusive >= endExclusive) {
@@ -924,6 +923,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * @param p the predicate which returns {@code true} for elements to be removed. Must not be {@code null}.
      * @return {@code true} if any elements were removed; {@code false} if the list was unchanged
+     * @throws NullPointerException if {@code p} is {@code null}
      */
     public boolean removeIf(final IntPredicate p) {
         N.requireNonNull(p, cs.predicate);
@@ -1315,7 +1315,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Replaces each element of this list with the result of applying the specified operator
      * to that element. The operator is applied to each element in order.
      *
-     * @param operator the operator to apply to each element
+     * @param operator the operator to apply to each element; must not be {@code null}
+     * @throws NullPointerException if {@code operator} is {@code null}
      */
     public void replaceAll(final IntUnaryOperator operator) {
         N.requireNonNull(operator, "operator");
@@ -1328,9 +1329,10 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      * Replaces all elements in this list that satisfy the given predicate with the specified new value.
      *
-     * @param predicate the predicate which returns {@code true} for elements to be replaced
+     * @param predicate the predicate which returns {@code true} for elements to be replaced; must not be {@code null}
      * @param newValue the value to replace matching elements with
      * @return {@code true} if at least one element was replaced
+     * @throws NullPointerException if {@code predicate} is {@code null}
      */
     public boolean replaceIf(final IntPredicate predicate, final int newValue) {
         N.requireNonNull(predicate, cs.predicate);
@@ -1962,7 +1964,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Performs the given action for each element in this list in sequential order.
      * The action is executed once for each element, passing the element value as the argument.
      *
-     * @param action the action to be performed for each element
+     * @param action the action to be performed for each element; must not be {@code null}
+     * @throws NullPointerException if {@code action} is {@code null}
      */
     public void forEach(final IntConsumer action) {
         N.requireNonNull(action, cs.action);
@@ -1991,7 +1994,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive), or -1 for backward iteration to the start
-     * @param action the action to be performed for each element
+     * @param action the action to be performed for each element; must not be {@code null}
      * @throws IndexOutOfBoundsException if the specified range is out of bounds, i.e. if
      *         {@code min(fromIndex, toIndex == -1 ? 0 : toIndex) < 0} or
      *         {@code max(fromIndex, toIndex) > size()} (except for the special {@code toIndex == -1} case)

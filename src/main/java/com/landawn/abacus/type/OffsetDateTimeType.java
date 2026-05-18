@@ -37,6 +37,7 @@ import com.landawn.abacus.util.Numbers;
  */
 public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
 
+    /** The type name constant for OffsetDateTime type identification, equal to {@code "OffsetDateTime"}. */
     public static final String OFFSET_DATE_TIME = OffsetDateTime.class.getSimpleName();
 
     /**

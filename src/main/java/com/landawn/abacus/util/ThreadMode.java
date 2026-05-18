@@ -15,49 +15,49 @@
 package com.landawn.abacus.util;
 
 /**
- * Enumeration representing different threading modes for concurrent operations.
- * This enum is used to specify how operations should be executed in a multithreaded context.
+ * Enumeration representing the threading mode used for event delivery in the
+ * {@link com.landawn.abacus.eventbus.EventBus}. The mode controls whether subscriber
+ * methods are invoked on the posting thread or dispatched to a background thread pool.
  *
- * <p>The threading mode determines whether operations run in the default thread context
- * or are submitted to a thread pool for concurrent execution.
- *
- * <p><b>Usage Examples:</b></p>
+ * <p><b>Usage Example:</b></p>
  * <pre>{@code
- * // Execute operation in default thread mode
- * processor.execute(task, ThreadMode.DEFAULT);
+ * // Deliver events on the posting thread (default)
+ * @Subscribe(threadMode = ThreadMode.DEFAULT)
+ * public void onEvent(MyEvent event) { ... }
  *
- * // Execute operation using thread pool
- * processor.execute(task, ThreadMode.THREAD_POOL_EXECUTOR);
+ * // Deliver events asynchronously on a background thread pool
+ * @Subscribe(threadMode = ThreadMode.THREAD_POOL_EXECUTOR)
+ * public void onEvent(MyEvent event) { ... }
  * }</pre>
  *
+ * @see com.landawn.abacus.eventbus.EventBus
+ * @see com.landawn.abacus.eventbus.Subscribe
  */
 public enum ThreadMode {
 
     /**
-     * Default threading mode where operations are executed in the current thread context.
-     * This mode does not create additional threads and executes operations synchronously
-     * in the calling thread.
+     * Default threading mode. Events are delivered synchronously on the same thread
+     * that posted the event. No additional threads are created and no executor is involved.
      *
-     * <p>Use this mode when:
+     * <p>Use this mode when:</p>
      * <ul>
-     *   <li>Thread safety is not a concern</li>
-     *   <li>Operations are lightweight and don't require parallelization</li>
-     *   <li>You want to maintain the current thread context</li>
+     *   <li>Event handlers are lightweight and complete quickly</li>
+     *   <li>The handler does not perform blocking operations</li>
+     *   <li>Preserving the posting thread's context is required</li>
      * </ul>
      */
     DEFAULT,
 
     /**
-     * Thread pool executor mode where operations are submitted to a thread pool for execution.
-     * This mode enables concurrent execution of operations across multiple threads,
-     * potentially improving performance for CPU-intensive or I/O-bound tasks.
+     * Thread-pool executor mode. Events are delivered asynchronously on a background thread
+     * from the {@code EventBus}'s configured executor, decoupling the subscriber from the
+     * posting thread.
      *
-     * <p>Use this mode when:
+     * <p>Use this mode when:</p>
      * <ul>
-     *   <li>Operations can benefit from parallel execution</li>
-     *   <li>Tasks are independent and can run concurrently</li>
-     *   <li>You want to leverage multi-core processors</li>
-     *   <li>Operations involve blocking I/O that would benefit from async execution</li>
+     *   <li>Event handlers perform time-consuming or blocking operations</li>
+     *   <li>Parallel execution of independent event handlers is desired</li>
+     *   <li>The posting thread must not be blocked by subscriber processing</li>
      * </ul>
      */
     THREAD_POOL_EXECUTOR

@@ -143,10 +143,11 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param <A> the first type of elements returned by this iterator
      * @param <B> the second type of elements returned by this iterator
      * @param <C> the third type of elements returned by this iterator
-     * @param output A Consumer that accepts a Triple&lt;A, B, C&gt; and produces the next Triple&lt;A, B, C&gt; on each iteration.
-     * @return A TriIterator&lt;A, B, C&gt; that uses the provided output Consumer to generate its elements.
+     * @param output a {@link java.util.function.Consumer Consumer} that accepts a {@code Triple<A, B, C>} and populates it with the next values on each iteration
+     * @return a {@code TriIterator<A, B, C>} that uses the provided {@code output} consumer to generate its elements
      * @throws IllegalArgumentException if {@code output} is {@code null}
      * @see #generate(BooleanSupplier, Consumer)
+     * @see #generate(int, int, IntObjConsumer)
      */
     public static <A, B, C> TriIterator<A, B, C> generate(final Consumer<Triple<A, B, C>> output) {
         return generate(com.landawn.abacus.util.function.BooleanSupplier.TRUE, output);
@@ -179,10 +180,10 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param <A> the first type of elements returned by this iterator
      * @param <B> the second type of elements returned by this iterator
      * @param <C> the third type of elements returned by this iterator
-     * @param hasNext A BooleanSupplier that returns {@code true} if the iterator has more elements.
-     * @param output A Consumer that accepts a Triple&lt;A, B, C&gt; and produces the next Triple&lt;A, B, C&gt; on each iteration.
-     * @return A TriIterator&lt;A, B, C&gt; that uses the provided hasNext BooleanSupplier and output Consumer to generate its elements.
-     * @throws IllegalArgumentException If hasNext or output is {@code null}.
+     * @param hasNext a {@link BooleanSupplier} that returns {@code true} if the iterator has more elements
+     * @param output a {@link java.util.function.Consumer Consumer} that accepts a {@code Triple<A, B, C>} and populates it with the next values on each iteration
+     * @return a {@code TriIterator<A, B, C>} driven by the provided {@code hasNext} and {@code output}
+     * @throws IllegalArgumentException if {@code hasNext} or {@code output} is {@code null}
      */
     public static <A, B, C> TriIterator<A, B, C> generate(final BooleanSupplier hasNext, final Consumer<Triple<A, B, C>> output)
             throws IllegalArgumentException {
@@ -303,13 +304,12 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param <A> the first type of elements returned by this iterator
      * @param <B> the second type of elements returned by this iterator
      * @param <C> the third type of elements returned by this iterator
-     * @param fromIndex The starting index of the iterator (inclusive).
-     * @param toIndex The ending index of the iterator (exclusive).
-     * @param output An IntObjConsumer that accepts an integer index and a Triple&lt;A, B, C&gt; to populate on each iteration.
-     * @return A TriIterator&lt;A, B, C&gt; that uses the provided fromIndex, toIndex, and output IntObjConsumer to generate its elements.
+     * @param fromIndex the starting index of the iteration range (inclusive)
+     * @param toIndex the ending index of the iteration range (exclusive)
+     * @param output an {@link IntObjConsumer} that accepts the current integer index and a {@code Triple<A, B, C>} to populate on each iteration
+     * @return a {@code TriIterator<A, B, C>} that iterates over indices {@code [fromIndex, toIndex)} and populates each triple via {@code output}
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative or {@code fromIndex} is greater than {@code toIndex}
      * @throws IllegalArgumentException if {@code output} is {@code null}
-     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
-     *         {@code Integer.MAX_VALUE}, or {@code fromIndex} is greater than {@code toIndex}
      */
     public static <A, B, C> TriIterator<A, B, C> generate(final int fromIndex, final int toIndex, final IntObjConsumer<Triple<A, B, C>> output)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -460,7 +460,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * Zips three iterables into a TriIterator.
      * The resulting TriIterator will iterate over triples of elements from the three iterables.
      * If the iterables have different lengths, the resulting TriIterator will have the length of the shortest iterable.
-     * If any of iterable is {@code null}, returns an empty TriIterator.
+     * If any of the iterables is {@code null}, returns an empty TriIterator.
      *
      * @param <A> the type of elements in the first iterable
      * @param <B> the type of elements in the second iterable
@@ -516,7 +516,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * Zips three iterators into a TriIterator.
      * The resulting TriIterator will iterate over triples of elements from the three iterators.
      * If the iterators have different lengths, the resulting TriIterator will have the length of the shortest iterator.
-     * If any of iterator is {@code null}, returns an empty TriIterator.
+     * If any of the iterators is {@code null}, returns an empty TriIterator.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -856,8 +856,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     /**
      * Performs the given action for each remaining element in the iterator until all elements have been processed or the action throws an exception.
      *
-     * @param action the action to be performed for each element
-     * @deprecated use {@code forEachRemaining(TriConsumer)} to avoid creating the unnecessary {@code Triple} Objects.
+     * @param action the action to be performed for each remaining element, must not be {@code null}
+     * @deprecated use {@link #forEachRemaining(TriConsumer)} to avoid creating the unnecessary {@code Triple} objects.
      * @see #forEachRemaining(TriConsumer)
      */
     @Deprecated
@@ -885,7 +885,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      *     System.out.println(name + " (" + age + ") lives in " + city));
      * }</pre>
      *
-     * @param action the action to be performed for each element
+     * @param action the action to be performed for each remaining triple, must not be {@code null}
      */
     public abstract void forEachRemaining(final TriConsumer<? super A, ? super B, ? super C> action);
 
@@ -930,8 +930,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * }</pre>
      *
      * @param n the number of elements to skip
-     * @return A new TriIterator that skips the first <i>n</i> elements.
-     * @throws IllegalArgumentException If <i>n</i> is negative.
+     * @return a new {@code TriIterator} that skips the first {@code n} elements
+     * @throws IllegalArgumentException if {@code n} is negative
      */
     public TriIterator<A, B, C> skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -1030,8 +1030,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * }</pre>
      *
      * @param count the maximum number of elements to include in the resulting TriIterator
-     * @return a new TriIterator that contains at most the specified number of elements
-     * @throws IllegalArgumentException If <i>count</i> is negative.
+     * @return a new {@code TriIterator} that contains at most {@code count} elements
+     * @throws IllegalArgumentException if {@code count} is negative
      */
     public TriIterator<A, B, C> limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, cs.count);
@@ -1238,8 +1238,9 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * }</pre>
      *
      * @param <R> the type of elements in the resulting ObjIterator
-     * @param mapper the function to apply to each triple of elements
-     * @return an ObjIterator containing the elements produced by the mapper function
+     * @param mapper the function to apply to each triple of elements, must not be {@code null}
+     * @return an {@code ObjIterator} containing the elements produced by applying {@code mapper} to each triple
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     public abstract <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper);
 
@@ -1262,8 +1263,9 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * }</pre>
      *
      * @param <R> the type of elements in the resulting Stream
-     * @param mapper the function to apply to each triple of elements
-     * @return a {@code Stream} containing the elements produced by the mapper function
+     * @param mapper the function to apply to each triple of elements, must not be {@code null}
+     * @return a {@code Stream} containing the elements produced by applying {@code mapper} to each triple
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #map(TriFunction)
      */
     public <R> Stream<R> stream(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper) {
@@ -1284,7 +1286,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * }
      * }</pre>
      *
-     * @return An array containing the remaining triples of elements in this TriIterator.
+     * @return an array containing the remaining triples of elements in this TriIterator
      */
     @SuppressWarnings("deprecation")
     public Triple<A, B, C>[] toArray() {
@@ -1341,9 +1343,10 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * }</pre>
      *
      * @param supplier a Supplier that is invoked three times to provide a new {@code List} instance for
-     *                 each of the three components
+     *                 each of the three components, must not be {@code null}
      * @return a {@code Triple} of three lists holding, respectively, all the first, second, and third
      *         elements of the remaining triples
+     * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
      */
     public Triple<List<A>, List<B>, List<C>> toMultiList(@SuppressWarnings("rawtypes") final Supplier<? extends List> supplier) {
         final List<A> listA = supplier.get();
@@ -1376,9 +1379,10 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * }</pre>
      *
      * @param supplier a Supplier that is invoked three times to provide a new {@code Set} instance for
-     *                 each of the three components
+     *                 each of the three components, must not be {@code null}
      * @return a {@code Triple} of three sets holding, respectively, the distinct first, second, and third
      *         elements of the remaining triples
+     * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
      */
     public Triple<Set<A>, Set<B>, Set<C>> toMultiSet(@SuppressWarnings("rawtypes") final Supplier<? extends Set> supplier) {
         final Set<A> listA = supplier.get();

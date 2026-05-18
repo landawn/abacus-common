@@ -379,18 +379,21 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
     }
 
     /**
-     * Creates a {@code Fraction} instance with the specified numerator and denominator.
-     * The fraction is not reduced to its simplest form. For example, {@code Fraction.of(2, 4)}
-     * creates a fraction representing 2/4, not 1/2.
+     * Creates a {@code Fraction} instance with the specified numerator and denominator,
+     * without reducing the fraction. Any negative sign on the denominator is moved to
+     * the numerator. For example, {@code Fraction.of(2, 4)} creates a fraction
+     * representing 2/4 (not automatically reduced to 1/2), and {@code Fraction.of(3, -4)}
+     * creates -3/4.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fraction f1 = Fraction.of(3, 4);    // Creates 3/4
      * Fraction f2 = Fraction.of(-5, 8);   // Creates -5/8
+     * Fraction f3 = Fraction.of(2, 4);    // Creates 2/4 (not reduced to 1/2)
      * }</pre>
      *
      * @param numerator the numerator of the fraction
-     * @param denominator the denominator of the fraction
+     * @param denominator the denominator of the fraction, must not be zero
      * @return a new fraction instance
      * @throws ArithmeticException if the denominator is zero, or if the denominator is
      *         negative and either the numerator or the denominator equals
@@ -419,7 +422,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * }</pre>
      *
      * @param numerator the numerator of the fraction
-     * @param denominator the denominator of the fraction
+     * @param denominator the denominator of the fraction, must not be zero
      * @param reduce if {@code true}, reduces the fraction to its simplest form
      * @return a new fraction instance
      * @throws ArithmeticException if the denominator is zero, or if the denominator is
@@ -468,9 +471,9 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * Fraction f2 = Fraction.of(-2, 1, 3);   // -7/3
      * }</pre>
      *
-     * @param whole the whole number part
-     * @param numerator the numerator of the fractional part
-     * @param denominator the denominator of the fractional part
+     * @param whole the whole number part (use negative value for a negative mixed fraction)
+     * @param numerator the numerator of the fractional part, must be non-negative
+     * @param denominator the denominator of the fractional part, must be positive
      * @return a new fraction instance
      * @throws ArithmeticException if the denominator is zero, if the denominator is negative,
      *         if the numerator is negative, or if the resulting numerator exceeds {@code Integer.MAX_VALUE}
@@ -547,7 +550,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * @param value the double value to convert to a fraction
      * @return a new fraction instance that approximates the given value
      * @throws ArithmeticException if the value is greater than {@code Integer.MAX_VALUE},
-     *         is {@code NaN}, or if the algorithm fails to converge within 25 iterations
+     *         is {@code NaN}, is infinite, or if the algorithm fails to converge within 25 iterations
      */
     public static Fraction of(double value) {
         final int sign = value < 0 ? -1 : 1;
@@ -626,10 +629,11 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * Fraction f4 = Fraction.of("-5");      // Creates -5/1
      * }</pre>
      *
-     * @param str the string to parse
+     * @param str the string to parse, must not be {@code null}
      * @return a new fraction instance
-     * @throws IllegalArgumentException if the string is {@code null}
-     * @throws NumberFormatException if the string format is invalid or cannot be parsed
+     * @throws IllegalArgumentException if {@code str} is {@code null}
+     * @throws NumberFormatException if the string is not in a recognised format, or if
+     *         an integer component is out of range, or if the decimal form cannot be parsed
      */
     public static Fraction of(String str) {
         if (str == null) {
@@ -1026,6 +1030,8 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * }</pre>
      *
      * @return this instance if positive or zero, otherwise a new positive fraction
+     * @throws ArithmeticException if the numerator is {@code Integer.MIN_VALUE}
+     *         (cannot be negated due to integer overflow)
      */
     public Fraction abs() {
         if (numerator >= 0) {
@@ -1396,11 +1402,11 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * Fraction f3 = Fraction.of(3, 4);
      *
      * f1.compareTo(f2);   // Returns 0 (numerically equal)
-     * f1.compareTo(f3);   // Returns -1 (f1 < f3)
-     * f3.compareTo(f1);   // Returns 1 (f3 > f1)
+     * f1.compareTo(f3);   // Returns negative (f1 < f3)
+     * f3.compareTo(f1);   // Returns positive (f3 > f1)
      * }</pre>
      *
-     * @param other the fraction to compare to
+     * @param other the fraction to compare to, must not be {@code null}
      * @return a negative integer if this fraction is less than the other, zero if equal
      *         in value, or a positive integer if this fraction is greater than the other
      * @throws NullPointerException if {@code other} is {@code null}

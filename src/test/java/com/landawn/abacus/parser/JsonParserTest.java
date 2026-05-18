@@ -1718,10 +1718,10 @@ public class JsonParserTest extends AbstractJsonParserTest {
     @Test
     public void test_PropHandler() {
 
-        final Account account = Beans.newRandom(Account.class);
+        final Account account = Beans.newRandomBean(Account.class);
         N.println(account);
 
-        account.setDevices(Beans.newRandomList(AccountDevice.class, 10));
+        account.setDevices(Beans.newRandomBeanList(AccountDevice.class, 10));
 
         final String json = N.toJson(account);
         assertEquals(account, N.fromJson(json, Account.class));

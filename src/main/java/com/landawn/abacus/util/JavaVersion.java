@@ -248,15 +248,16 @@ public enum JavaVersion {
     /**
      * Java 24.
      * <p>
-     * Expected release in March 2025. Features are subject to change until official release.
+     * Released in March 2025, made unnamed variables and patterns standard, and finalized
+     * stream gatherers and class-file API.
      * </p>
      */
     JAVA_24(24.0f, "24"),
 
     /**
-     * Java 25.
+     * Java 25 (LTS - Long Term Support).
      * <p>
-     * Expected release in September 2025. Features are subject to change until official release.
+     * Released in September 2025.
      * </p>
      */
     JAVA_25(25.0f, "25"),
@@ -497,8 +498,9 @@ public enum JavaVersion {
      * }</pre>
      *
      * @param versionStr the version string to parse (e.g., "1.8", "11", "17.0.1")
-     * @return the corresponding JavaVersion enum constant, or JAVA_RECENT for versions &gt; 39
-     * @throws IllegalArgumentException if the version string is {@code null}, invalid, or unrecognized
+     * @return the corresponding JavaVersion enum constant, or {@link #JAVA_RECENT} for versions &gt; 39
+     * @throws IllegalArgumentException if the version string is {@code null}, empty, or does not correspond
+     *         to any known Java version and cannot be interpreted as a version number greater than 39
      */
     static JavaVersion get(final String versionStr) {
         if (Strings.isEmpty(versionStr)) {
@@ -712,8 +714,8 @@ public enum JavaVersion {
      * Returns {@code -1} if the string cannot be parsed as a number.</p>
      *
      * @param value the version string to convert
-     * @return the float representation of the version, or {@code -1} if parsing fails
-     * @throws IllegalArgumentException if the version string is not a valid number
+     * @return the float representation of the version, or {@code -1} if the string cannot be parsed
+     * @throws IllegalArgumentException if the numeric portion of the version string causes a {@link NumberFormatException}
      */
     private static float toFloatVersion(final String value) {
         try {

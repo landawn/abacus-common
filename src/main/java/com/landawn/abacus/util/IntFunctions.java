@@ -260,6 +260,9 @@ public final class IntFunctions {
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super SetMultimap> SET_MULTIMAP_FACTORY = N::newSetMultimap;
 
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     */
     private IntFunctions() {
         // utility class
     }
@@ -302,7 +305,8 @@ public final class IntFunctions {
     /**
      * Returns an {@code IntFunction} that creates {@code char[]} arrays of the specified length.
      *
-     * <p>The returned function creates new char arrays with all elements initialized to '\u0000'.</p>
+     * <p>The returned function creates new {@code char[]} arrays with all elements initialized to the null character.
+     * The same shared function instance is returned on every call.</p>
      *
      * @return an {@code IntFunction} that, given a length, creates a new {@code char[]} of that length
      */
@@ -651,11 +655,14 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction that creates ArrayDeque instances with the specified initial capacity.
-     * The returned function can be used to create pre-sized ArrayDeque collections for performance optimization.
+     * Returns an {@code IntFunction} that creates {@link ArrayDeque} instances with the specified initial capacity.
+     *
+     * <p>The returned function creates new {@code ArrayDeque} instances pre-sized with the given initial
+     * capacity to avoid resizing during element addition. The same shared function instance is returned
+     * on every call.</p>
      *
      * @param <T> the type of elements to be stored in the ArrayDeque
-     * @return an IntFunction that accepts an initial capacity and returns a new ArrayDeque instance
+     * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code ArrayDeque}
      * @see ArrayDeque#ArrayDeque(int)
      */
     @SuppressWarnings("rawtypes")
@@ -664,11 +671,13 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction that creates LinkedBlockingQueue instances with the specified initial capacity.
-     * The returned function can be used to create thread-safe blocking queues with bounded capacity.
+     * Returns an {@code IntFunction} that creates {@link LinkedBlockingQueue} instances with the specified capacity.
+     *
+     * <p>The returned function creates new thread-safe, optionally-bounded blocking queues backed by
+     * linked nodes. The same shared function instance is returned on every call.</p>
      *
      * @param <T> the type of elements to be stored in the LinkedBlockingQueue
-     * @return an IntFunction that accepts an initial capacity and returns a new LinkedBlockingQueue instance
+     * @return an {@code IntFunction} that, given a capacity, creates a new {@code LinkedBlockingQueue}
      * @see LinkedBlockingQueue#LinkedBlockingQueue(int)
      */
     @SuppressWarnings("rawtypes")
@@ -677,11 +686,13 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction that creates ArrayBlockingQueue instances with the specified capacity.
-     * The returned function creates fixed-size, thread-safe blocking queues backed by an array.
+     * Returns an {@code IntFunction} that creates {@link ArrayBlockingQueue} instances with the specified capacity.
+     *
+     * <p>The returned function creates new fixed-size, thread-safe blocking queues backed by an array.
+     * The same shared function instance is returned on every call.</p>
      *
      * @param <T> the type of elements to be stored in the ArrayBlockingQueue
-     * @return an IntFunction that accepts a capacity and returns a new ArrayBlockingQueue instance
+     * @return an {@code IntFunction} that, given a capacity, creates a new {@code ArrayBlockingQueue}
      * @see ArrayBlockingQueue#ArrayBlockingQueue(int)
      */
     @SuppressWarnings("rawtypes")
@@ -690,11 +701,13 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction that creates LinkedBlockingDeque instances with the specified initial capacity.
-     * The returned function creates thread-safe, optionally-bounded blocking deques based on linked nodes.
+     * Returns an {@code IntFunction} that creates {@link LinkedBlockingDeque} instances with the specified capacity.
+     *
+     * <p>The returned function creates new thread-safe, optionally-bounded blocking deques backed by
+     * linked nodes. The same shared function instance is returned on every call.</p>
      *
      * @param <T> the type of elements to be stored in the LinkedBlockingDeque
-     * @return an IntFunction that accepts an initial capacity and returns a new LinkedBlockingDeque instance
+     * @return an {@code IntFunction} that, given a capacity, creates a new {@code LinkedBlockingDeque}
      * @see LinkedBlockingDeque#LinkedBlockingDeque(int)
      */
     @SuppressWarnings("rawtypes")
@@ -703,12 +716,14 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction that creates ConcurrentLinkedQueue instances.
-     * The returned function creates unbounded thread-safe queues based on linked nodes.
-     * Note: The capacity parameter is ignored as ConcurrentLinkedQueue is always unbounded.
+     * Returns an {@code IntFunction} that creates {@link ConcurrentLinkedQueue} instances.
+     *
+     * <p>The returned function creates new unbounded, thread-safe queues based on linked nodes.
+     * Note that the capacity argument is ignored, as {@code ConcurrentLinkedQueue} is always unbounded.
+     * The same shared function instance is returned on every call.</p>
      *
      * @param <T> the type of elements to be stored in the ConcurrentLinkedQueue
-     * @return an IntFunction that accepts a capacity (ignored) and returns a new ConcurrentLinkedQueue instance
+     * @return an {@code IntFunction} that creates a new {@code ConcurrentLinkedQueue} (the capacity argument is ignored)
      * @see ConcurrentLinkedQueue#ConcurrentLinkedQueue()
      */
     @SuppressWarnings("rawtypes")
@@ -717,11 +732,13 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction that creates PriorityQueue instances with the specified initial capacity.
-     * The returned function creates unbounded priority queues based on a priority heap.
+     * Returns an {@code IntFunction} that creates {@link PriorityQueue} instances with the specified initial capacity.
+     *
+     * <p>The returned function creates new unbounded priority queues ordered by their natural ordering.
+     * The same shared function instance is returned on every call.</p>
      *
      * @param <T> the type of elements to be stored in the PriorityQueue
-     * @return an IntFunction that accepts an initial capacity and returns a new PriorityQueue instance
+     * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code PriorityQueue}
      * @see PriorityQueue#PriorityQueue(int)
      */
     @SuppressWarnings("rawtypes")
@@ -730,12 +747,15 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction that creates HashMap instances with the specified initial capacity.
-     * The returned function creates hash table based Map implementations.
+     * Returns an {@code IntFunction} that creates {@link HashMap} instances sized for the specified
+     * expected number of elements.
+     *
+     * <p>The returned function creates new {@code HashMap} instances pre-sized to avoid rehashing.
+     * The same shared function instance is returned on every call.</p>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
-     * @return an IntFunction that accepts an initial capacity and returns a new HashMap instance
+     * @return an {@code IntFunction} that, given an expected element count, creates a new {@code HashMap}
      * @see HashMap#HashMap(int)
      */
     @SuppressWarnings("rawtypes")
@@ -744,13 +764,15 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction that creates LinkedHashMap instances with the specified initial capacity.
-     * The returned function creates hash table and linked list implementations of the Map interface,
-     * with predictable iteration order.
+     * Returns an {@code IntFunction} that creates {@link LinkedHashMap} instances sized for the specified
+     * expected number of elements.
+     *
+     * <p>The returned function creates new {@code LinkedHashMap} instances that maintain insertion order
+     * and are pre-sized to avoid rehashing. The same shared function instance is returned on every call.</p>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
-     * @return an IntFunction that accepts an initial capacity and returns a new LinkedHashMap instance
+     * @return an {@code IntFunction} that, given an expected element count, creates a new {@code LinkedHashMap}
      * @see LinkedHashMap#LinkedHashMap(int)
      */
     @SuppressWarnings("rawtypes")
@@ -759,12 +781,15 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction that creates IdentityHashMap instances with the specified expected maximum size.
-     * The returned function creates maps that use reference-equality instead of object-equality when comparing keys.
+     * Returns an {@code IntFunction} that creates {@link IdentityHashMap} instances with the specified expected maximum size.
+     *
+     * <p>The returned function creates new maps that use reference-equality ({@code ==}) instead of
+     * object-equality ({@code equals}) when comparing keys. The same shared function instance is returned
+     * on every call.</p>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
-     * @return an IntFunction that accepts an expected maximum size and returns a new IdentityHashMap instance
+     * @return an {@code IntFunction} that, given an expected maximum size, creates a new {@code IdentityHashMap}
      * @see IdentityHashMap#IdentityHashMap(int)
      */
     @SuppressWarnings("rawtypes")
@@ -773,13 +798,15 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction that creates TreeMap instances.
-     * The returned function creates Red-Black tree based NavigableMap implementations.
-     * Note: The capacity parameter is ignored as TreeMap doesn't have a capacity constructor.
+     * Returns an {@code IntFunction} that creates {@link TreeMap} instances typed as {@link SortedMap}.
+     *
+     * <p>The returned function creates new Red-Black tree based navigable map instances that maintain
+     * keys in sorted order. Note that the capacity argument is ignored, as {@code TreeMap} does not
+     * support an initial capacity. The same shared function instance is returned on every call.</p>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
-     * @return an IntFunction that accepts a capacity (ignored) and returns a new TreeMap instance as SortedMap
+     * @return an {@code IntFunction} that creates a new {@code TreeMap} as a {@code SortedMap} (the capacity argument is ignored)
      * @see TreeMap#TreeMap()
      */
     @SuppressWarnings("rawtypes")
@@ -788,13 +815,16 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction that creates TreeMap instances.
-     * The returned function creates Red-Black tree based NavigableMap implementations.
-     * Note: The capacity parameter is ignored as TreeMap doesn't have a capacity constructor.
+     * Returns an {@code IntFunction} that creates {@link TreeMap} instances typed as {@link NavigableMap}.
+     *
+     * <p>The returned function creates new Red-Black tree based maps that provide navigation methods
+     * for accessing elements relative to other elements. Note that the capacity argument is ignored,
+     * as {@code TreeMap} does not support an initial capacity. The same shared function instance is
+     * returned on every call.</p>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
-     * @return an IntFunction that accepts a capacity (ignored) and returns a new TreeMap instance as NavigableMap
+     * @return an {@code IntFunction} that creates a new {@code TreeMap} as a {@code NavigableMap} (the capacity argument is ignored)
      * @see TreeMap#TreeMap()
      */
     @SuppressWarnings("rawtypes")
@@ -803,13 +833,15 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction that creates TreeMap instances.
-     * The returned function creates Red-Black tree based NavigableMap implementations.
-     * Note: The capacity parameter is ignored as TreeMap doesn't have a capacity constructor.
+     * Returns an {@code IntFunction} that creates {@link TreeMap} instances.
+     *
+     * <p>The returned function creates new Red-Black tree based maps that maintain keys in sorted
+     * order. Note that the capacity argument is ignored, as {@code TreeMap} does not support an
+     * initial capacity. The same shared function instance is returned on every call.</p>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
-     * @return an IntFunction that accepts a capacity (ignored) and returns a new TreeMap instance
+     * @return an {@code IntFunction} that creates a new {@code TreeMap} (the capacity argument is ignored)
      * @see TreeMap#TreeMap()
      */
     @SuppressWarnings("rawtypes")
@@ -818,12 +850,15 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction that creates ConcurrentHashMap instances with the specified initial capacity.
-     * The returned function creates thread-safe hash table based Map implementations.
+     * Returns an {@code IntFunction} that creates {@link ConcurrentHashMap} instances with the specified initial capacity,
+     * typed as {@link ConcurrentMap}.
+     *
+     * <p>The returned function creates new thread-safe, hash table based map instances.
+     * The same shared function instance is returned on every call.</p>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
-     * @return an IntFunction that accepts an initial capacity and returns a new ConcurrentHashMap instance as ConcurrentMap
+     * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code ConcurrentHashMap} as a {@code ConcurrentMap}
      * @see ConcurrentHashMap#ConcurrentHashMap(int)
      */
     @SuppressWarnings("rawtypes")
@@ -832,12 +867,14 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction that creates ConcurrentHashMap instances with the specified initial capacity.
-     * The returned function creates thread-safe hash table based Map implementations.
+     * Returns an {@code IntFunction} that creates {@link ConcurrentHashMap} instances with the specified initial capacity.
+     *
+     * <p>The returned function creates new thread-safe, hash table based map instances.
+     * The same shared function instance is returned on every call.</p>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
-     * @return an IntFunction that accepts an initial capacity and returns a new ConcurrentHashMap instance
+     * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code ConcurrentHashMap}
      * @see ConcurrentHashMap#ConcurrentHashMap(int)
      */
     @SuppressWarnings("rawtypes")
@@ -846,12 +883,14 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction that creates BiMap instances with the specified initial capacity.
-     * BiMap is a bidirectional map that preserves the uniqueness of its values as well as that of its keys.
+     * Returns an {@code IntFunction} that creates {@link BiMap} instances with the specified initial capacity.
+     *
+     * <p>{@code BiMap} is a bidirectional map that preserves the uniqueness of its values as well as
+     * that of its keys. The same shared function instance is returned on every call.</p>
      *
      * @param <K> the type of keys maintained by the BiMap
      * @param <V> the type of mapped values
-     * @return an IntFunction that accepts an initial capacity and returns a new BiMap instance
+     * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code BiMap}
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> IntFunction<BiMap<K, V>> ofBiMap() {
@@ -859,11 +898,13 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction that creates Multiset instances with the specified initial capacity.
-     * A Multiset is a collection that supports order-independent equality and may contain duplicate elements.
+     * Returns an {@code IntFunction} that creates {@link Multiset} instances with the specified initial capacity.
+     *
+     * <p>A {@code Multiset} is a collection that supports order-independent equality and may contain
+     * duplicate elements. The same shared function instance is returned on every call.</p>
      *
      * @param <T> the type of elements in the Multiset
-     * @return an IntFunction that accepts an initial capacity and returns a new Multiset instance
+     * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code Multiset}
      */
     @SuppressWarnings("rawtypes")
     public static <T> IntFunction<Multiset<T>> ofMultiset() {
@@ -871,12 +912,15 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction that creates ListMultimap instances with the specified initial capacity.
-     * A ListMultimap is a Multimap that can hold duplicate key-value pairs and maintains insertion ordering of values for a given key.
+     * Returns an {@code IntFunction} that creates {@link ListMultimap} instances with the specified initial capacity.
+     *
+     * <p>A {@code ListMultimap} is a {@code Multimap} that can hold duplicate key-value pairs and
+     * maintains insertion order of values for a given key. The same shared function instance is
+     * returned on every call.</p>
      *
      * @param <K> the type of keys maintained by the multimap
      * @param <E> the type of mapped values
-     * @return an IntFunction that accepts an initial capacity and returns a new ListMultimap instance
+     * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code ListMultimap}
      */
     @SuppressWarnings("rawtypes")
     public static <K, E> IntFunction<ListMultimap<K, E>> ofListMultimap() {
@@ -884,12 +928,14 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction that creates SetMultimap instances with the specified initial capacity.
-     * A SetMultimap is a Multimap that cannot hold duplicate key-value pairs.
+     * Returns an {@code IntFunction} that creates {@link SetMultimap} instances with the specified initial capacity.
+     *
+     * <p>A {@code SetMultimap} is a {@code Multimap} that cannot hold duplicate key-value pairs.
+     * The same shared function instance is returned on every call.</p>
      *
      * @param <K> the type of keys maintained by the multimap
      * @param <E> the type of mapped values
-     * @return an IntFunction that accepts an initial capacity and returns a new SetMultimap instance
+     * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code SetMultimap}
      */
     @SuppressWarnings("rawtypes")
     public static <K, E> IntFunction<SetMultimap<K, E>> ofSetMultimap() {
@@ -897,11 +943,14 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns a new created stateful IntFunction whose apply method will return the same DisposableObjArray instance.
-     * The DisposableObjArray is created lazily on first call and reused for subsequent calls.
-     * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
+     * Returns a new stateful {@code IntFunction} that always returns the same {@link DisposableObjArray} instance.
      *
-     * @return a stateful IntFunction that returns a reusable DisposableObjArray instance
+     * <p>The {@code DisposableObjArray} is created lazily on the first {@code apply} call and reused
+     * for all subsequent calls. Because the same array instance is reused, the returned function
+     * must not be saved, cached, or used in parallel streams.
+     *
+     * @return a stateful {@code IntFunction} that, given a length, lazily creates and then reuses a
+     *         {@code DisposableObjArray} of that length
      */
     @Beta
     @SequentialOnly
@@ -922,13 +971,18 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns a new created stateful IntFunction whose apply method will return the same DisposableArray instance.
-     * The DisposableArray is created lazily on first call with the specified component type and reused for subsequent calls.
-     * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
+     * Returns a new stateful {@code IntFunction} that always returns the same {@link DisposableArray} instance
+     * of the specified component type.
+     *
+     * <p>The {@code DisposableArray} is created lazily on the first {@code apply} call and reused
+     * for all subsequent calls. Because the same array instance is reused, the returned function
+     * must not be saved, cached, or used in parallel streams.
      *
      * @param <T> the component type of the array
-     * @param componentType the Class object representing the component type of the array
-     * @return a stateful IntFunction that returns a reusable DisposableArray instance
+     * @param componentType the {@code Class} object representing the component type of the array, must not be {@code null}
+     * @return a stateful {@code IntFunction} that, given a length, lazily creates and then reuses a
+     *         {@code DisposableArray} of that component type and length
+     * @throws NullPointerException if {@code componentType} is {@code null}
      */
     @Beta
     @SequentialOnly
@@ -952,14 +1006,18 @@ public final class IntFunctions {
     private static final Map<Class<?>, IntFunction> collectionCreatorPool = new ConcurrentHashMap<>();
 
     /**
-     * Returns an IntFunction that creates Collection instances of the specified target type with the given initial capacity.
-     * This method supports various Collection implementations and attempts to find an appropriate constructor or factory method.
-     * The returned IntFunction is cached for performance optimization.
+     * Returns an {@code IntFunction} that creates {@link Collection} instances of the specified target type
+     * with the given initial capacity.
+     *
+     * <p>This method supports all standard {@code Collection} implementations and uses reflection to
+     * find an appropriate constructor or factory for custom types. The returned function is cached
+     * per target type for performance.</p>
      *
      * @param <T> the type of elements in the collection
-     * @param targetType the Class object representing the desired Collection implementation
-     * @return an IntFunction that accepts an initial capacity and returns a new Collection instance of the specified type
-     * @throws IllegalArgumentException if targetType is not a Collection class or if no suitable constructor/factory can be found
+     * @param targetType the {@code Class} object representing the desired {@code Collection} implementation, must not be {@code null}
+     * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code Collection} instance of the specified type
+     * @throws IllegalArgumentException if {@code targetType} is not a {@code Collection} class, is abstract with no
+     *         suitable constructor, or no appropriate factory can be found
      */
     @SuppressWarnings("rawtypes")
     public static <T> IntFunction<? extends Collection<T>> ofCollection(final Class<? extends Collection> targetType) throws IllegalArgumentException {
@@ -1054,15 +1112,19 @@ public final class IntFunctions {
     private static final Map<Class<?>, IntFunction> mapCreatorPool = new ConcurrentHashMap<>();
 
     /**
-     * Returns an IntFunction that creates Map instances of the specified target type with the given initial capacity.
-     * This method supports various Map implementations and attempts to find an appropriate constructor or factory method.
-     * The returned IntFunction is cached for performance optimization.
+     * Returns an {@code IntFunction} that creates {@link Map} instances of the specified target type
+     * with the given initial capacity.
+     *
+     * <p>This method supports all standard {@code Map} implementations and uses reflection to find
+     * an appropriate constructor or factory for custom types. The returned function is cached per
+     * target type for performance.</p>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
-     * @param targetType the Class object representing the desired Map implementation
-     * @return an IntFunction that accepts an initial capacity and returns a new Map instance of the specified type
-     * @throws IllegalArgumentException if targetType is not a Map class or if no suitable constructor/factory can be found
+     * @param targetType the {@code Class} object representing the desired {@code Map} implementation, must not be {@code null}
+     * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code Map} instance of the specified type
+     * @throws IllegalArgumentException if {@code targetType} is not a {@code Map} class, is abstract with no
+     *         suitable constructor, or no appropriate factory can be found
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> IntFunction<? extends Map<K, V>> ofMap(final Class<? extends Map> targetType) throws IllegalArgumentException {
@@ -1139,15 +1201,16 @@ public final class IntFunctions {
     }
 
     /**
-     * Registers a custom IntFunction creator for the specified Collection target class.
-     * The registered creator will be used by ofCollection method to create instances of the target class.
-     * Built-in collection classes cannot be registered.
+     * Registers a custom {@code IntFunction} creator for the specified {@code Collection} target class.
+     *
+     * <p>The registered creator will be used by {@link #ofCollection(Class)} to create instances of
+     * the target class. Built-in collection classes cannot be registered.</p>
      *
      * @param <T> the type of Collection to register
-     * @param targetClass the Class object representing the Collection type to register
-     * @param creator the IntFunction that creates instances of the target class with specified capacity
+     * @param targetClass the {@code Class} object representing the {@code Collection} type to register, must not be {@code null}
+     * @param creator the {@code IntFunction} that creates instances of the target class with the specified capacity, must not be {@code null}
      * @return {@code true} if the registration was successful, {@code false} if a creator was already registered for this class
-     * @throws IllegalArgumentException if targetClass or creator is {@code null}, or if targetClass is a built-in class
+     * @throws IllegalArgumentException if {@code targetClass} or {@code creator} is {@code null}, or if {@code targetClass} is a built-in class
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Collection> boolean registerForCollection(final Class<T> targetClass, final java.util.function.IntFunction<T> creator)
@@ -1167,15 +1230,16 @@ public final class IntFunctions {
     }
 
     /**
-     * Registers a custom IntFunction creator for the specified Map target class.
-     * The registered creator will be used by ofMap method to create instances of the target class.
-     * Built-in map classes cannot be registered.
+     * Registers a custom {@code IntFunction} creator for the specified {@code Map} target class.
+     *
+     * <p>The registered creator will be used by {@link #ofMap(Class)} to create instances of the
+     * target class. Built-in map classes cannot be registered.</p>
      *
      * @param <T> the type of Map to register
-     * @param targetClass the Class object representing the Map type to register
-     * @param creator the IntFunction that creates instances of the target class with specified capacity
+     * @param targetClass the {@code Class} object representing the {@code Map} type to register, must not be {@code null}
+     * @param creator the {@code IntFunction} that creates instances of the target class with the specified capacity, must not be {@code null}
      * @return {@code true} if the registration was successful, {@code false} if a creator was already registered for this class
-     * @throws IllegalArgumentException if targetClass or creator is {@code null}, or if targetClass is a built-in class
+     * @throws IllegalArgumentException if {@code targetClass} or {@code creator} is {@code null}, or if {@code targetClass} is a built-in class
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Map> boolean registerForMap(final Class<T> targetClass, final java.util.function.IntFunction<T> creator)
@@ -1196,11 +1260,11 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction for creating ImmutableList instances.
-     * This operation is not supported.
+     * Returns an {@code IntFunction} for creating {@link ImmutableList} instances.
+     * This operation is not supported and always throws {@link UnsupportedOperationException}.
      *
      * @return never returns normally
-     * @throws UnsupportedOperationException always thrown as this operation is not supported
+     * @throws UnsupportedOperationException always
      * @deprecated unsupported operation
      */
     @Deprecated
@@ -1209,11 +1273,11 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction for creating ImmutableSet instances.
-     * This operation is not supported.
+     * Returns an {@code IntFunction} for creating {@link ImmutableSet} instances.
+     * This operation is not supported and always throws {@link UnsupportedOperationException}.
      *
      * @return never returns normally
-     * @throws UnsupportedOperationException always thrown as this operation is not supported
+     * @throws UnsupportedOperationException always
      * @deprecated unsupported operation
      */
     @Deprecated
@@ -1222,11 +1286,11 @@ public final class IntFunctions {
     }
 
     /**
-     * Returns an IntFunction for creating ImmutableMap instances.
-     * This operation is not supported.
+     * Returns an {@code IntFunction} for creating {@link ImmutableMap} instances.
+     * This operation is not supported and always throws {@link UnsupportedOperationException}.
      *
      * @return never returns normally
-     * @throws UnsupportedOperationException always thrown as this operation is not supported
+     * @throws UnsupportedOperationException always
      * @deprecated unsupported operation
      */
     @Deprecated

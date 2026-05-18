@@ -349,7 +349,9 @@ public final class ExceptionUtil {
      * }</pre>
      *
      * @param e the exception to unwrap, which may be {@code null}
-     * @return the original checked exception if found, otherwise the input exception itself ({@code null} if {@code e} is {@code null})
+     * @return the unwrapped cause if {@code e} is a recognized unchecked wrapper (e.g. {@link com.landawn.abacus.exception.UncheckedException},
+     *         {@link java.util.concurrent.ExecutionException}, or {@link java.lang.reflect.InvocationTargetException});
+     *         otherwise returns {@code e} itself. Returns {@code null} if {@code e} is {@code null}.
      */
     public static Exception tryToGetOriginalCheckedException(final Exception e) {
         return tryToGetOriginalCheckedException(e, MAX_DEPTH_FOR_LOOP_CAUSE);
@@ -478,8 +480,8 @@ public final class ExceptionUtil {
      * }
      * }</pre>
      *
-     * @param e the exception to check
-     * @return {@code true} if the exception chain contains a SQL-related exception
+     * @param e the exception to check, which may be {@code null}
+     * @return {@code true} if the exception chain contains a SQL-related exception; {@code false} if {@code e} is {@code null}
      */
     public static boolean hasSQLCause(final Throwable e) {
         if (e == null) {
@@ -515,8 +517,8 @@ public final class ExceptionUtil {
      * }
      * }</pre>
      *
-     * @param e the exception to check
-     * @return {@code true} if the exception chain contains an IO-related exception
+     * @param e the exception to check, which may be {@code null}
+     * @return {@code true} if the exception chain contains an IO-related exception; {@code false} if {@code e} is {@code null}
      */
     public static boolean hasIOCause(final Throwable e) {
         if (e == null) {
@@ -553,7 +555,7 @@ public final class ExceptionUtil {
      * }
      * }</pre>
      *
-     * @param e the throwable to check
+     * @param e the throwable to check; {@code null} will return {@code false}
      * @return {@code true} if the throwable is NullPointerException or IllegalArgumentException
      */
     @Beta

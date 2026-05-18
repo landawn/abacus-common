@@ -94,8 +94,9 @@ public final class WebUtil {
      *             and must start with "curl" (case-insensitive)
      * @return Java code string for creating an equivalent HttpRequest, formatted
      *         with proper indentation and line separators
-     * @throws IllegalArgumentException if the curl parameter is {@code null}, empty, or
-     *                                  doesn't start with "curl"
+     * @throws IllegalArgumentException if the curl parameter is {@code null}, empty, doesn't
+     *                                  start with "curl", contains an unclosed quote, or
+     *                                  contains no URL
      * @see #curlToOkHttpRequestCode(String)
      */
     public static String curlToHttpRequestCode(final String curl) {
@@ -255,8 +256,9 @@ public final class WebUtil {
      *             and must start with "curl" (case-insensitive)
      * @return Java code string for creating an equivalent OkHttpRequest, formatted
      *         with proper indentation and line separators
-     * @throws IllegalArgumentException if the curl parameter is {@code null}, empty, or
-     *                                  doesn't start with "curl"
+     * @throws IllegalArgumentException if the curl parameter is {@code null}, empty, doesn't
+     *                                  start with "curl", contains an unclosed quote, or
+     *                                  contains no URL
      * @see #curlToHttpRequestCode(String)
      */
     public static String curlToOkHttpRequestCode(final String curl) {

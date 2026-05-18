@@ -956,8 +956,9 @@ public abstract class Tuple<TP> implements Immutable {
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <T> the type of the element in the tuple.
-     * @param tp the Tuple1 to convert to a list, must not be null.
+     * @param tp the Tuple1 to convert to a list, must not be {@code null}.
      * @return a List containing the single element from the tuple.
+     * @throws NullPointerException if {@code tp} is {@code null}.
      */
     @Beta
     public static <T> List<T> toList(final Tuple1<? extends T> tp) {
@@ -978,8 +979,9 @@ public abstract class Tuple<TP> implements Immutable {
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <T> the common type of the elements in the tuple.
-     * @param tp the Tuple2 to convert to a list, must not be null.
+     * @param tp the Tuple2 to convert to a list, must not be {@code null}.
      * @return a List containing the two elements from the tuple in order.
+     * @throws NullPointerException if {@code tp} is {@code null}.
      */
     @Beta
     public static <T> List<T> toList(final Tuple2<? extends T, ? extends T> tp) {
@@ -1000,8 +1002,9 @@ public abstract class Tuple<TP> implements Immutable {
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <T> the common type of the elements in the tuple.
-     * @param tp the Tuple3 to convert to a list, must not be null.
+     * @param tp the Tuple3 to convert to a list, must not be {@code null}.
      * @return a List containing the three elements from the tuple in order.
+     * @throws NullPointerException if {@code tp} is {@code null}.
      */
     @Beta
     public static <T> List<T> toList(final Tuple3<? extends T, ? extends T, ? extends T> tp) {
@@ -1022,8 +1025,9 @@ public abstract class Tuple<TP> implements Immutable {
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <T> the common type of the elements in the tuple.
-     * @param tp the Tuple4 to convert to a list, must not be null.
+     * @param tp the Tuple4 to convert to a list, must not be {@code null}.
      * @return a List containing the four elements from the tuple in order.
+     * @throws NullPointerException if {@code tp} is {@code null}.
      */
     @Beta
     public static <T> List<T> toList(final Tuple4<? extends T, ? extends T, ? extends T, ? extends T> tp) {
@@ -1045,8 +1049,9 @@ public abstract class Tuple<TP> implements Immutable {
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <T> the common type of the elements in the tuple.
-     * @param tp the Tuple5 to convert to a list, must not be null.
+     * @param tp the Tuple5 to convert to a list, must not be {@code null}.
      * @return a List containing the five elements from the tuple in order.
+     * @throws NullPointerException if {@code tp} is {@code null}.
      */
     @Beta
     public static <T> List<T> toList(final Tuple5<? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
@@ -1068,8 +1073,9 @@ public abstract class Tuple<TP> implements Immutable {
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <T> the common type of the elements in the tuple.
-     * @param tp the Tuple6 to convert to a list, must not be null.
+     * @param tp the Tuple6 to convert to a list, must not be {@code null}.
      * @return a List containing the six elements from the tuple in order.
+     * @throws NullPointerException if {@code tp} is {@code null}.
      */
     @Beta
     public static <T> List<T> toList(final Tuple6<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
@@ -1091,8 +1097,9 @@ public abstract class Tuple<TP> implements Immutable {
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <T> the common type of the elements in the tuple.
-     * @param tp the Tuple7 to convert to a list, must not be null.
+     * @param tp the Tuple7 to convert to a list, must not be {@code null}.
      * @return a List containing the seven elements from the tuple in order.
+     * @throws NullPointerException if {@code tp} is {@code null}.
      */
     @Beta
     public static <T> List<T> toList(final Tuple7<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
@@ -1114,8 +1121,9 @@ public abstract class Tuple<TP> implements Immutable {
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <T> the common type of the elements in the tuple.
-     * @param tp the Tuple8 to convert to a list, must not be null.
+     * @param tp the Tuple8 to convert to a list, must not be {@code null}.
      * @return a List containing the eight elements from the tuple in order.
+     * @throws NullPointerException if {@code tp} is {@code null}.
      */
     @Beta
     public static <T> List<T> toList(final Tuple8<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
@@ -1137,8 +1145,9 @@ public abstract class Tuple<TP> implements Immutable {
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <T> the common type of the elements in the tuple.
-     * @param tp the Tuple9 to convert to a list, must not be null.
+     * @param tp the Tuple9 to convert to a list, must not be {@code null}.
      * @return a List containing the nine elements from the tuple in order.
+     * @throws NullPointerException if {@code tp} is {@code null}.
      */
     @Beta
     public static <T> List<T> toList(
@@ -1164,10 +1173,10 @@ public abstract class Tuple<TP> implements Immutable {
      *
      * @param <T1> the type of the first element in the nested tuple.
      * @param <T2> the type of the second element in the nested tuple.
-     * @param <T3> the type of the third element (second element of outer tuple).
+     * @param <T3> the type of the third element (second element of the outer tuple).
      * @param tp the nested tuple structure to flatten, must not be {@code null}.
-     * @return a new {@code Tuple3} containing {@code tp._1._1}, {@code tp._1._2} and {@code tp._2} in order.
-     * @throws NullPointerException if {@code tp} or its first element is {@code null}.
+     * @return a new {@code Tuple3} containing {@code tp._1._1}, {@code tp._1._2}, and {@code tp._2} in order.
+     * @throws NullPointerException if {@code tp} or its first element ({@code tp._1}) is {@code null}.
      */
     @Beta
     public static <T1, T2, T3> Tuple3<T1, T2, T3> flatten(final Tuple2<Tuple2<T1, T2>, T3> tp) {
@@ -1193,11 +1202,11 @@ public abstract class Tuple<TP> implements Immutable {
      * @param <T1> the type of the first element in the nested tuple.
      * @param <T2> the type of the second element in the nested tuple.
      * @param <T3> the type of the third element in the nested tuple.
-     * @param <T4> the type of the fourth element (second element of outer tuple).
-     * @param <T5> the type of the fifth element (third element of outer tuple).
+     * @param <T4> the type of the fourth element (second element of the outer tuple).
+     * @param <T5> the type of the fifth element (third element of the outer tuple).
      * @param tp the nested tuple structure to flatten, must not be {@code null}.
-     * @return a new {@code Tuple5} containing {@code tp._1._1}, {@code tp._1._2}, {@code tp._1._3}, {@code tp._2} and {@code tp._3} in order.
-     * @throws NullPointerException if {@code tp} or its first element is {@code null}.
+     * @return a new {@code Tuple5} containing {@code tp._1._1}, {@code tp._1._2}, {@code tp._1._3}, {@code tp._2}, and {@code tp._3} in order.
+     * @throws NullPointerException if {@code tp} or its first element ({@code tp._1}) is {@code null}.
      */
     @Beta
     public static <T1, T2, T3, T4, T5> Tuple5<T1, T2, T3, T4, T5> flatten(final Tuple3<Tuple3<T1, T2, T3>, T4, T5> tp) {
@@ -1248,10 +1257,10 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * Checks if all elements in this tuple are {@code null}.
          *
-         * <p>For Tuple0, this returns {@code true} following the mathematical convention
-         * that "all elements" of an empty set satisfy any predicate (vacuous truth).</p>
+         * <p>For Tuple0, this always returns {@code true} by vacuous truth: an empty tuple
+         * has no non-null elements, so the condition holds trivially.</p>
          *
-         * @return {@code true}, following the vacuous truth principle.
+         * @return {@code true}, since there are no elements that could be non-null.
          */
         @Override
         public boolean allNull() {
@@ -1284,15 +1293,16 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * Returns the specified array with a {@code null} terminator if it has space.
+         * Returns the specified array, setting {@code a[0]} to {@code null} if the array is non-empty.
          *
-         * <p>For Tuple0 (empty tuple), if the provided array has length &gt; 0,
-         * element at index 0 is set to {@code null} to mark the end of tuple elements,
-         * following Java Collection contract.</p>
+         * <p>For Tuple0 (empty tuple), no elements need to be stored. If the provided array
+         * has length greater than 0, index 0 is set to {@code null} following the
+         * {@link java.util.Collection#toArray(Object[])} contract for marking the end of elements.
+         * The provided array is always returned; a new array is never created.</p>
          *
          * @param <A> the component type of the array.
-         * @param a the array to use or a template for creating a new array.
-         * @return the same array, potentially with {@code a[0]} set to {@code null} if {@code a.length > 0}.
+         * @param a the array to return; if its length is greater than 0, {@code a[0]} is set to {@code null}.
+         * @return the same array {@code a}, with {@code a[0]} set to {@code null} if {@code a.length > 0}.
          * @throws NullPointerException if the specified array is {@code null}
          */
         @Override
@@ -1306,13 +1316,13 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * Performs the given action for each element of this tuple.
          *
-         * <p>For Tuple0, this method validates the consumer but performs no action
-         * since there are no elements to iterate over.</p>
+         * <p>For Tuple0, this method validates that {@code consumer} is not {@code null}
+         * but performs no further action since there are no elements to iterate over.</p>
          *
-         * @param <E> the type of exception that may be thrown.
-         * @param consumer the action to be performed for each element.
-         * @throws IllegalArgumentException if consumer is null.
-         * @throws E if the consumer throws an exception (won't happen for Tuple0).
+         * @param <E> the type of exception that the consumer may throw.
+         * @param consumer the action to be performed for each element; must not be {@code null}.
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+         * @throws E if the consumer throws an exception.
          */
         @Override
         public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
@@ -1432,8 +1442,12 @@ public abstract class Tuple<TP> implements Immutable {
          * Returns an array containing this tuple's element, using the specified array type.
          *
          * @param <A> the component type of the array.
-         * @param a the array into which the element is to be stored, if it is big enough.
-         * @return an array containing the tuple element.
+         * @param a the array into which the element is to be stored, if it is big enough;
+         *          otherwise a new array of the same runtime type is allocated.
+         * @return an array containing the single tuple element.
+         * @throws ArrayStoreException if the runtime type of the specified array is not a supertype
+         *         of the runtime type of the element in this tuple.
+         * @throws NullPointerException if the specified array is {@code null}.
          */
         @Override
         public <A> A[] toArray(A[] a) {
@@ -1624,8 +1638,12 @@ public abstract class Tuple<TP> implements Immutable {
          * Returns an array containing this tuple's elements, using the specified array type.
          *
          * @param <A> the component type of the array.
-         * @param a the array into which the elements are to be stored, if it is big enough.
-         * @return an array containing the tuple elements.
+         * @param a the array into which the elements are to be stored, if it is big enough;
+         *          otherwise a new array of the same runtime type is allocated.
+         * @return an array containing the two tuple elements in order.
+         * @throws ArrayStoreException if the runtime type of the specified array is not a supertype
+         *         of the runtime type of every element in this tuple.
+         * @throws NullPointerException if the specified array is {@code null}.
          */
         @Override
         public <A> A[] toArray(A[] a) {
@@ -1875,13 +1893,13 @@ public abstract class Tuple<TP> implements Immutable {
      */
     public static final class Tuple3<T1, T2, T3> extends Tuple<Tuple3<T1, T2, T3>> {
 
-        /** The first element of this tuple */
+        /** The first element of this tuple. May be {@code null}. */
         public final T1 _1;
 
-        /** The second element of this tuple */
+        /** The second element of this tuple. May be {@code null}. */
         public final T2 _2;
 
-        /** The third element of this tuple */
+        /** The third element of this tuple. May be {@code null}. */
         public final T3 _3;
 
         /**
@@ -2163,16 +2181,16 @@ public abstract class Tuple<TP> implements Immutable {
      */
     public static final class Tuple4<T1, T2, T3, T4> extends Tuple<Tuple4<T1, T2, T3, T4>> {
 
-        /** The first element of this tuple */
+        /** The first element of this tuple. May be {@code null}. */
         public final T1 _1;
 
-        /** The second element of this tuple */
+        /** The second element of this tuple. May be {@code null}. */
         public final T2 _2;
 
-        /** The third element of this tuple */
+        /** The third element of this tuple. May be {@code null}. */
         public final T3 _3;
 
-        /** The fourth element of this tuple */
+        /** The fourth element of this tuple. May be {@code null}. */
         public final T4 _4;
 
         /**
@@ -2377,19 +2395,19 @@ public abstract class Tuple<TP> implements Immutable {
      */
     public static final class Tuple5<T1, T2, T3, T4, T5> extends Tuple<Tuple5<T1, T2, T3, T4, T5>> {
 
-        /** The first element of this tuple */
+        /** The first element of this tuple. May be {@code null}. */
         public final T1 _1;
 
-        /** The second element of this tuple */
+        /** The second element of this tuple. May be {@code null}. */
         public final T2 _2;
 
-        /** The third element of this tuple */
+        /** The third element of this tuple. May be {@code null}. */
         public final T3 _3;
 
-        /** The fourth element of this tuple */
+        /** The fourth element of this tuple. May be {@code null}. */
         public final T4 _4;
 
-        /** The fifth element of this tuple */
+        /** The fifth element of this tuple. May be {@code null}. */
         public final T5 _5;
 
         /**
@@ -2601,22 +2619,22 @@ public abstract class Tuple<TP> implements Immutable {
      */
     public static final class Tuple6<T1, T2, T3, T4, T5, T6> extends Tuple<Tuple6<T1, T2, T3, T4, T5, T6>> {
 
-        /** The first element of this tuple */
+        /** The first element of this tuple. May be {@code null}. */
         public final T1 _1;
 
-        /** The second element of this tuple */
+        /** The second element of this tuple. May be {@code null}. */
         public final T2 _2;
 
-        /** The third element of this tuple */
+        /** The third element of this tuple. May be {@code null}. */
         public final T3 _3;
 
-        /** The fourth element of this tuple */
+        /** The fourth element of this tuple. May be {@code null}. */
         public final T4 _4;
 
-        /** The fifth element of this tuple */
+        /** The fifth element of this tuple. May be {@code null}. */
         public final T5 _5;
 
-        /** The sixth element of this tuple */
+        /** The sixth element of this tuple. May be {@code null}. */
         public final T6 _6;
 
         /**
@@ -2834,25 +2852,25 @@ public abstract class Tuple<TP> implements Immutable {
      */
     public static final class Tuple7<T1, T2, T3, T4, T5, T6, T7> extends Tuple<Tuple7<T1, T2, T3, T4, T5, T6, T7>> {
 
-        /** The first element of this tuple */
+        /** The first element of this tuple. May be {@code null}. */
         public final T1 _1;
 
-        /** The second element of this tuple */
+        /** The second element of this tuple. May be {@code null}. */
         public final T2 _2;
 
-        /** The third element of this tuple */
+        /** The third element of this tuple. May be {@code null}. */
         public final T3 _3;
 
-        /** The fourth element of this tuple */
+        /** The fourth element of this tuple. May be {@code null}. */
         public final T4 _4;
 
-        /** The fifth element of this tuple */
+        /** The fifth element of this tuple. May be {@code null}. */
         public final T5 _5;
 
-        /** The sixth element of this tuple */
+        /** The sixth element of this tuple. May be {@code null}. */
         public final T6 _6;
 
-        /** The seventh element of this tuple */
+        /** The seventh element of this tuple. May be {@code null}. */
         public final T7 _7;
 
         /**
@@ -3075,28 +3093,28 @@ public abstract class Tuple<TP> implements Immutable {
      */
     public static final class Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> extends Tuple<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> {
 
-        /** The first element of this tuple */
+        /** The first element of this tuple. May be {@code null}. */
         public final T1 _1;
 
-        /** The second element of this tuple */
+        /** The second element of this tuple. May be {@code null}. */
         public final T2 _2;
 
-        /** The third element of this tuple */
+        /** The third element of this tuple. May be {@code null}. */
         public final T3 _3;
 
-        /** The fourth element of this tuple */
+        /** The fourth element of this tuple. May be {@code null}. */
         public final T4 _4;
 
-        /** The fifth element of this tuple */
+        /** The fifth element of this tuple. May be {@code null}. */
         public final T5 _5;
 
-        /** The sixth element of this tuple */
+        /** The sixth element of this tuple. May be {@code null}. */
         public final T6 _6;
 
-        /** The seventh element of this tuple */
+        /** The seventh element of this tuple. May be {@code null}. */
         public final T7 _7;
 
-        /** The eighth element of this tuple */
+        /** The eighth element of this tuple. May be {@code null}. */
         public final T8 _8;
 
         /**
@@ -3328,31 +3346,31 @@ public abstract class Tuple<TP> implements Immutable {
      */
     public static final class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends Tuple<Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> {
 
-        /** The first element of this tuple */
+        /** The first element of this tuple. May be {@code null}. */
         public final T1 _1;
 
-        /** The second element of this tuple */
+        /** The second element of this tuple. May be {@code null}. */
         public final T2 _2;
 
-        /** The third element of this tuple */
+        /** The third element of this tuple. May be {@code null}. */
         public final T3 _3;
 
-        /** The fourth element of this tuple */
+        /** The fourth element of this tuple. May be {@code null}. */
         public final T4 _4;
 
-        /** The fifth element of this tuple */
+        /** The fifth element of this tuple. May be {@code null}. */
         public final T5 _5;
 
-        /** The sixth element of this tuple */
+        /** The sixth element of this tuple. May be {@code null}. */
         public final T6 _6;
 
-        /** The seventh element of this tuple */
+        /** The seventh element of this tuple. May be {@code null}. */
         public final T7 _7;
 
-        /** The eighth element of this tuple */
+        /** The eighth element of this tuple. May be {@code null}. */
         public final T8 _8;
 
-        /** The ninth element of this tuple */
+        /** The ninth element of this tuple. May be {@code null}. */
         public final T9 _9;
 
         /**
@@ -3367,27 +3385,6 @@ public abstract class Tuple<TP> implements Immutable {
             this(null, null, null, null, null, null, null, null, null);
         }
 
-        /**
-         * Creates a new Tuple9 with the specified elements.
-         *
-         * <p>Any or all elements may be {@code null}. The tuple is immutable once created.</p>
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t =
-         *     new Tuple9<>("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
-         * }</pre>
-         *
-         * @param _1 the first element.
-         * @param _2 the second element.
-         * @param _3 the third element.
-         * @param _4 the fourth element.
-         * @param _5 the fifth element.
-         * @param _6 the sixth element.
-         * @param _7 the seventh element.
-         * @param _8 the eighth element.
-         * @param _9 the ninth element.
-         */
         Tuple9(final T1 _1, final T2 _2, final T3 _3, final T4 _4, final T5 _5, final T6 _6, final T7 _7, final T8 _8, final T9 _9) {
             this._1 = _1;
             this._2 = _2;

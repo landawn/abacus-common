@@ -61,11 +61,10 @@ import com.landawn.abacus.util.stream.DoubleStream;
 public abstract class DoubleIterator extends ImmutableIterator<Double> {
 
     /**
-     * Constructs a new DoubleIterator.
-     *
-     * <p>This constructor is protected to allow subclassing. Subclasses should
-     * implement the abstract {@link #nextDouble()} method and override {@link #hasNext()}
-     * to provide custom iteration logic over double values.</p>
+     * Constructs a new {@code DoubleIterator}.
+     * Intended for use by subclasses. Subclasses must implement the abstract
+     * {@link #nextDouble()} method and override {@link #hasNext()} to provide
+     * custom iteration logic over {@code double} values.
      */
     protected DoubleIterator() {
     }
@@ -143,10 +142,12 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * }</pre>
      *
      * @param a the double array (may be {@code null})
-     * @param fromIndex the start index (inclusive)
-     * @param toIndex the end index (exclusive)
-     * @return a new {@code DoubleIterator} over the specified range, or an empty iterator if the array is {@code null} or fromIndex equals toIndex
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return a new {@code DoubleIterator} over the specified range, or an empty iterator if
+     *         the array is {@code null} or {@code fromIndex == toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > a.length},
+     *         or {@code fromIndex > toIndex}
      */
     public static DoubleIterator of(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -189,8 +190,9 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * Creates a DoubleIterator that is initialized lazily using the provided Supplier.
-     * The Supplier is invoked only when the first method on the returned iterator is called.
+     * Creates a {@code DoubleIterator} that is initialized lazily using the provided {@link Supplier}.
+     * The supplier is invoked only when the first method on the returned iterator is called.
+     * The supplier must not return {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -201,9 +203,10 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * });
      * }</pre>
      *
-     * @param iteratorSupplier a Supplier that provides the DoubleIterator when needed
-     * @return a lazily initialized DoubleIterator
-     * @throws IllegalArgumentException if iteratorSupplier is null
+     * @param iteratorSupplier a {@link Supplier} that provides the {@code DoubleIterator} when needed;
+     *        must not be {@code null}
+     * @return a lazily initialized {@code DoubleIterator}
+     * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}
      * @throws IllegalStateException if the supplier returns {@code null} when invoked
      */
     public static DoubleIterator defer(final Supplier<? extends DoubleIterator> iteratorSupplier) throws IllegalArgumentException {
@@ -244,7 +247,8 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * Creates an infinite DoubleIterator that generates values using the provided supplier.
+     * Creates an infinite {@code DoubleIterator} that generates values using the provided supplier.
+     * The iterator's {@code hasNext()} always returns {@code true}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -255,9 +259,9 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * randomIter.limit(5).foreachRemaining(System.out::println);
      * }</pre>
      *
-     * @param supplier the DoubleSupplier that generates values
-     * @return an infinite DoubleIterator
-     * @throws IllegalArgumentException if supplier is null
+     * @param supplier the {@link DoubleSupplier} that generates values; must not be {@code null}
+     * @return an infinite {@code DoubleIterator} whose {@code hasNext()} always returns {@code true}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      */
     public static DoubleIterator generate(final DoubleSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier, cs.supplier);
@@ -276,7 +280,9 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * Creates a DoubleIterator that generates values while the hasNext condition is {@code true}.
+     * Creates a {@code DoubleIterator} that generates values while the {@code hasNext} condition
+     * returns {@code true}. The {@code hasNext} supplier is called at most once per element;
+     * its result is cached until the next call to {@code nextDouble()}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -287,10 +293,11 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * );
      * }</pre>
      *
-     * @param hasNext the BooleanSupplier that determines if more elements exist
-     * @param supplier the DoubleSupplier that generates values
-     * @return a conditional DoubleIterator
-     * @throws IllegalArgumentException if hasNext or supplier is null
+     * @param hasNext the {@link BooleanSupplier} that determines if more elements exist;
+     *        must not be {@code null}
+     * @param supplier the {@link DoubleSupplier} that generates values; must not be {@code null}
+     * @return a conditional {@code DoubleIterator}
+     * @throws IllegalArgumentException if {@code hasNext} or {@code supplier} is {@code null}
      */
     public static DoubleIterator generate(final BooleanSupplier hasNext, final DoubleSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(hasNext);
@@ -351,7 +358,8 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     public abstract double nextDouble();
 
     /**
-     * Skips the specified number of elements in this iterator.
+     * Returns a new {@code DoubleIterator} that skips the first {@code n} elements.
+     * If {@code n} is greater than the number of remaining elements, all elements are skipped.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -360,9 +368,10 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * // iter will start from 3.0
      * }</pre>
      *
-     * @param n the number of elements to skip
-     * @return a new DoubleIterator with the first n elements skipped
-     * @throws IllegalArgumentException if n is negative
+     * @param n the number of elements to skip; must be non-negative
+     * @return this iterator unchanged if {@code n == 0}, otherwise a new {@code DoubleIterator}
+     *         with the first {@code n} elements skipped
+     * @throws IllegalArgumentException if {@code n} is negative
      */
     public DoubleIterator skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -407,7 +416,9 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * Limits this iterator to return at most the specified number of elements.
+     * Returns a new {@code DoubleIterator} that will iterate over at most {@code count} elements.
+     * If {@code count} is 0, an empty iterator is returned. If {@code count} exceeds the number
+     * of remaining elements, all remaining elements are included.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -416,9 +427,10 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * // iter will only return 1.0, 2.0, 3.0
      * }</pre>
      *
-     * @param count the maximum number of elements to iterate
-     * @return a new DoubleIterator limited to the specified count
-     * @throws IllegalArgumentException if count is negative
+     * @param count the maximum number of elements to iterate; must be non-negative
+     * @return an empty iterator if {@code count == 0}, otherwise a new {@code DoubleIterator}
+     *         limited to at most {@code count} elements
+     * @throws IllegalArgumentException if {@code count} is negative
      */
     public DoubleIterator limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, cs.count);
@@ -450,7 +462,8 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * Returns a filtered DoubleIterator that only includes elements matching the predicate.
+     * Returns a new {@code DoubleIterator} that only includes elements satisfying the given predicate.
+     * Elements that do not match the predicate are skipped.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -460,9 +473,9 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * // iter will only return 3.5, 4.5
      * }</pre>
      *
-     * @param predicate the predicate to test each element
-     * @return a new filtered DoubleIterator
-     * @throws IllegalArgumentException if predicate is null
+     * @param predicate the predicate to test each element; must not be {@code null}
+     * @return a new {@code DoubleIterator} containing only elements that satisfy the predicate
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     public DoubleIterator filter(final DoublePredicate predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate);
@@ -503,11 +516,11 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * Converts the remaining elements to a double array.
+     * Converts the remaining elements to a {@code double} array.
      *
      * <p>This method consumes the iterator. After calling this method, the iterator
-     * will be empty (hasNext() returns false). If the iterator is already empty,
-     * returns an empty array.</p>
+     * will be empty ({@code hasNext()} returns {@code false}). If the iterator is already
+     * empty, returns an empty array.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -518,7 +531,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * double[] empty = DoubleIterator.empty().toArray();   // empty.length == 0
      * }</pre>
      *
-     * @return a double array containing all remaining elements
+     * @return a {@code double} array containing all remaining elements; an empty array if there are none
      */
     @SuppressWarnings("deprecation")
     public double[] toArray() {
@@ -526,11 +539,11 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * Converts the remaining elements to a DoubleList.
+     * Converts the remaining elements to a {@link DoubleList}.
      *
      * <p>This method consumes the iterator. After calling this method, the iterator
-     * will be empty (hasNext() returns false). If the iterator is already empty,
-     * returns an empty DoubleList.</p>
+     * will be empty ({@code hasNext()} returns {@code false}). If the iterator is already
+     * empty, returns an empty {@link DoubleList}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -541,7 +554,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * DoubleList empty = DoubleIterator.empty().toList();   // empty.size() == 0
      * }</pre>
      *
-     * @return a DoubleList containing all remaining elements
+     * @return a {@link DoubleList} containing all remaining elements; an empty list if there are none
      */
     public DoubleList toList() {
         final DoubleList list = new DoubleList();
@@ -575,10 +588,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * Returns an iterator of IndexedDouble objects that pairs each element with its index.
-     * The indexing starts from 0.
-     *
-     * <p><b>Note:</b> This is a {@code @Beta} method and its API may change in future releases.</p>
+     * Returns an iterator that pairs each remaining element with its zero-based index.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -589,7 +599,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      *     );
      * }</pre>
      *
-     * @return an ObjIterator of IndexedDouble objects
+     * @return an {@link ObjIterator} of {@link IndexedDouble} objects with indices starting at 0
      */
     @Beta
     public ObjIterator<IndexedDouble> indexed() {
@@ -597,10 +607,8 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * Returns an iterator of IndexedDouble objects that pairs each element with its index,
-     * starting from the specified start index.
-     *
-     * <p><b>Note:</b> This is a {@code @Beta} method and its API may change in future releases.</p>
+     * Returns an iterator that pairs each remaining element with its index,
+     * with indices starting from the specified {@code startIndex}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -612,9 +620,9 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * // Prints indices 100, 101, 102 with corresponding values
      * }</pre>
      *
-     * @param startIndex the starting index value
-     * @return an ObjIterator of IndexedDouble objects
-     * @throws IllegalArgumentException if startIndex is negative
+     * @param startIndex the starting index value; must be non-negative
+     * @return an {@link ObjIterator} of {@link IndexedDouble} objects with indices starting at {@code startIndex}
+     * @throws IllegalArgumentException if {@code startIndex} is negative
      */
     @Beta
     public ObjIterator<IndexedDouble> indexed(final long startIndex) {
@@ -638,11 +646,12 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * Performs the given action for each remaining element.
-     * This method is deprecated; use type-specific methods instead.
+     * Performs the given action for each remaining element, boxing each {@code double} to a {@link Double}.
+     * This method is deprecated; use {@link #foreachRemaining(Throwables.DoubleConsumer)} instead
+     * to avoid boxing overhead.
      *
-     * @param action the action to perform on each element (must not be {@code null})
-     * @deprecated use {@link #foreachRemaining(Throwables.DoubleConsumer)} instead to avoid boxing
+     * @param action the action to perform on each element; must not be {@code null}
+     * @deprecated use {@link #foreachRemaining(Throwables.DoubleConsumer)} instead to avoid boxing overhead
      */
     @Deprecated
     @Override
@@ -651,7 +660,8 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * Performs the given action for each remaining double element.
+     * Performs the given action for each remaining {@code double} element without boxing overhead.
+     * This method consumes the iterator; after it returns, {@code hasNext()} will return {@code false}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -660,8 +670,8 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
-     * @param action the action to perform on each element
-     * @throws IllegalArgumentException if action is {@code null}
+     * @param action the action to perform on each element; must not be {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachRemaining(final Throwables.DoubleConsumer<E> action) throws E {//NOSONAR
@@ -673,7 +683,8 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * Performs the given action for each remaining element along with its index.
+     * Performs the given action for each remaining element along with its zero-based index.
+     * This method consumes the iterator; after it returns, {@code hasNext()} will return {@code false}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -684,9 +695,10 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
-     * @param action the action to perform on each element with its index
-     * @throws IllegalArgumentException if action is null
-     * @throws IllegalStateException if the iterator has more than Integer.MAX_VALUE elements
+     * @param action the action to perform on each (index, value) pair; must not be {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalStateException if the iterator contains more than {@link Integer#MAX_VALUE} elements,
+     *         causing the index to overflow
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntDoubleConsumer<E> action) throws IllegalArgumentException, E {

@@ -4861,7 +4861,7 @@ public class BeansTest extends TestBase {
     @Test
     public void testFillWithNullBeanShouldThrow() {
         assertThrows(IllegalArgumentException.class, () -> Beans.randomize((Object) null));
-        assertThrows(IllegalArgumentException.class, () -> Beans.newRandom((Class<?>) null));
+        assertThrows(IllegalArgumentException.class, () -> Beans.newRandomBean((Class<?>) null));
     }
 
     @Test
@@ -4871,7 +4871,7 @@ public class BeansTest extends TestBase {
 
     @Test
     public void testFillClassWithSelectProps() {
-        SimpleBean filled = Beans.newRandom(SimpleBean.class, Arrays.asList("name"));
+        SimpleBean filled = Beans.newRandomBean(SimpleBean.class, Arrays.asList("name"));
         assertNotNull(filled.getName());
         assertEquals(0, filled.getAge());
         assertNull(filled.getActive());
@@ -4879,7 +4879,7 @@ public class BeansTest extends TestBase {
 
     @Test
     public void testFillBeanClass() {
-        SimpleBean filled = Beans.newRandom(SimpleBean.class);
+        SimpleBean filled = Beans.newRandomBean(SimpleBean.class);
         assertNotNull(filled);
         assertNotNull(filled.getName());
         assertTrue(filled.getAge() != 0);
@@ -4887,7 +4887,7 @@ public class BeansTest extends TestBase {
 
     @Test
     public void testFillBeanClassWithSelectPropsOnly() {
-        SimpleBean filled = Beans.newRandom(SimpleBean.class, Arrays.asList("age"));
+        SimpleBean filled = Beans.newRandomBean(SimpleBean.class, Arrays.asList("age"));
         assertNotNull(filled);
         assertTrue(filled.getAge() != 0);
         assertNull(filled.getName());
@@ -4895,7 +4895,7 @@ public class BeansTest extends TestBase {
 
     @Test
     public void testNewRandom_WithSelectProps() {
-        SimpleBean bean = Beans.newRandom(SimpleBean.class, Arrays.asList("age"));
+        SimpleBean bean = Beans.newRandomBean(SimpleBean.class, Arrays.asList("age"));
         assertNotNull(bean);
         assertTrue(bean.getAge() != 0);
         assertNull(bean.getName());
@@ -4903,31 +4903,31 @@ public class BeansTest extends TestBase {
 
     @Test
     public void testFillClass() {
-        SimpleBean filled = Beans.newRandom(SimpleBean.class);
+        SimpleBean filled = Beans.newRandomBean(SimpleBean.class);
         assertNotNull(filled);
         assertNotNull(filled.getName());
 
-        List<SimpleBean> filledList = Beans.newRandomList(SimpleBean.class, 3);
+        List<SimpleBean> filledList = Beans.newRandomBeanList(SimpleBean.class, 3);
         assertEquals(3, filledList.size());
         for (SimpleBean b : filledList) {
             assertNotNull(b.getName());
         }
 
-        filled = Beans.newRandom(SimpleBean.class, Arrays.asList("age"));
+        filled = Beans.newRandomBean(SimpleBean.class, Arrays.asList("age"));
         assertTrue(filled.getAge() != 0);
         assertNull(filled.getName());
 
-        assertThrows(IllegalArgumentException.class, () -> Beans.newRandom((Class<?>) null));
+        assertThrows(IllegalArgumentException.class, () -> Beans.newRandomBean((Class<?>) null));
     }
 
     @Test
     public void testNewRandom_NullClass() {
-        assertThrows(IllegalArgumentException.class, () -> Beans.newRandom((Class<?>) null));
+        assertThrows(IllegalArgumentException.class, () -> Beans.newRandomBean((Class<?>) null));
     }
 
     @Test
     public void testFillClassWithCount() {
-        List<SimpleBean> filledList = Beans.newRandomList(SimpleBean.class, Arrays.asList("name", "age"), 2);
+        List<SimpleBean> filledList = Beans.newRandomBeanList(SimpleBean.class, Arrays.asList("name", "age"), 2);
         assertEquals(2, filledList.size());
         for (SimpleBean bean : filledList) {
             assertNotNull(bean.getName());
@@ -4937,7 +4937,7 @@ public class BeansTest extends TestBase {
 
     @Test
     public void testFillClassWithSelectPropsAndCount() {
-        List<SimpleBean> filledList = Beans.newRandomList(SimpleBean.class, Arrays.asList("name", "age"), 3);
+        List<SimpleBean> filledList = Beans.newRandomBeanList(SimpleBean.class, Arrays.asList("name", "age"), 3);
         assertEquals(3, filledList.size());
         for (SimpleBean bean : filledList) {
             assertNotNull(bean.getName());
@@ -4948,7 +4948,7 @@ public class BeansTest extends TestBase {
 
     @Test
     public void testFillBeanClassWithCount() {
-        List<SimpleBean> filledList = Beans.newRandomList(SimpleBean.class, 5);
+        List<SimpleBean> filledList = Beans.newRandomBeanList(SimpleBean.class, 5);
         assertEquals(5, filledList.size());
         for (SimpleBean bean : filledList) {
             assertNotNull(bean);
@@ -4958,7 +4958,7 @@ public class BeansTest extends TestBase {
 
     @Test
     public void testFillBeanClassWithSelectPropsAndCount() {
-        List<SimpleBean> filledList = Beans.newRandomList(SimpleBean.class, Arrays.asList("name"), 3);
+        List<SimpleBean> filledList = Beans.newRandomBeanList(SimpleBean.class, Arrays.asList("name"), 3);
         assertEquals(3, filledList.size());
         for (SimpleBean bean : filledList) {
             assertNotNull(bean.getName());
@@ -4968,7 +4968,7 @@ public class BeansTest extends TestBase {
 
     @Test
     public void testNewRandomList_BasicUsage() {
-        List<SimpleBean> list = Beans.newRandomList(SimpleBean.class, 5);
+        List<SimpleBean> list = Beans.newRandomBeanList(SimpleBean.class, 5);
         assertEquals(5, list.size());
         for (SimpleBean bean : list) {
             assertNotNull(bean);
@@ -4978,14 +4978,14 @@ public class BeansTest extends TestBase {
 
     @Test
     public void testNewRandomList_ZeroCount() {
-        List<SimpleBean> list = Beans.newRandomList(SimpleBean.class, 0);
+        List<SimpleBean> list = Beans.newRandomBeanList(SimpleBean.class, 0);
         assertNotNull(list);
         assertTrue(list.isEmpty());
     }
 
     @Test
     public void testNewRandomList_WithSelectProps_ZeroCount() {
-        List<SimpleBean> list = Beans.newRandomList(SimpleBean.class, Arrays.asList("name"), 0);
+        List<SimpleBean> list = Beans.newRandomBeanList(SimpleBean.class, Arrays.asList("name"), 0);
         assertNotNull(list);
         assertTrue(list.isEmpty());
     }

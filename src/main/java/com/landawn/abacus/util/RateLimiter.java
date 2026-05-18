@@ -684,7 +684,12 @@ public abstract class RateLimiter {
         /**
          * Sleeps for the specified duration in microseconds without being interrupted.
          *
-         * @param micros the duration to sleep in microseconds
+         * <p>Implementations must not return early due to an {@link InterruptedException}. If the
+         * thread is interrupted during sleep, the interrupt must either be suppressed or the sleep
+         * must be restarted for the remaining duration. If {@code micros} is zero or negative,
+         * implementations should return immediately without sleeping.
+         *
+         * @param micros the duration to sleep in microseconds; non-positive values should be ignored
          */
         protected abstract void sleepMicrosUninterruptibly(long micros);
 

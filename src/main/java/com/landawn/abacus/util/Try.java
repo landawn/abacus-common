@@ -66,6 +66,13 @@ public final class Try<T extends AutoCloseable> {
     private final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier;
     private final Runnable finalAction;
 
+    /**
+     * Package-private constructor. Use the static {@code with} factory methods to create instances.
+     *
+     * @param targetResource the pre-created resource, or {@code null} if a supplier is used
+     * @param targetResourceSupplier the supplier used to lazily create the resource, or {@code null} if the resource is pre-created
+     * @param finalAction the action to execute in the {@code finally} block after the resource is closed, or {@code null} if none
+     */
     Try(final T targetResource, final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier, final Runnable finalAction) {
         this.targetResource = targetResource;
         this.targetResourceSupplier = targetResourceSupplier;
@@ -513,7 +520,8 @@ public final class Try<T extends AutoCloseable> {
      *    });
      * }</pre>
      *
-     * @param cmd the consumer that operates on the managed resource.
+     * @param cmd the consumer that operates on the managed resource; must not be {@code null}
+     * @throws IllegalArgumentException if {@code cmd} is {@code null}
      * @throws RuntimeException if an exception occurs while creating the resource, executing the
      *         {@code cmd}, or closing the resource. Checked exceptions are converted via
      *         {@link ExceptionUtil#toRuntimeException(Throwable, boolean)}.
@@ -545,9 +553,10 @@ public final class Try<T extends AutoCloseable> {
      *    );
      * }</pre>
      *
-     * @param cmd the consumer that operates on the managed resource.
+     * @param cmd the consumer that operates on the managed resource; must not be {@code null}
      * @param actionOnError the error handler invoked with any exception thrown while creating the
-     *                      resource or executing the {@code cmd}.
+     *                      resource or executing the {@code cmd}; must not be {@code null}
+     * @throws IllegalArgumentException if {@code cmd} or {@code actionOnError} is {@code null}
      */
     public void run(final Throwables.Consumer<? super T, ? extends Exception> cmd, final Consumer<? super Exception> actionOnError) {
         try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
@@ -577,8 +586,9 @@ public final class Try<T extends AutoCloseable> {
      * }</pre>
      *
      * @param <R> the type of the result.
-     * @param cmd the function that operates on the managed resource and returns a result.
+     * @param cmd the function that operates on the managed resource and returns a result; must not be {@code null}
      * @return the result produced by the function.
+     * @throws IllegalArgumentException if {@code cmd} is {@code null}
      * @throws RuntimeException if an exception occurs while creating the resource, executing the
      *         {@code cmd}, or closing the resource. Checked exceptions are converted via
      *         {@link ExceptionUtil#toRuntimeException(Throwable, boolean)}.
@@ -611,9 +621,10 @@ public final class Try<T extends AutoCloseable> {
      * }</pre>
      *
      * @param <R> the type of the result.
-     * @param cmd the function that operates on the managed resource and returns a result.
-     * @param actionOnError the function to transform exceptions into return values.
+     * @param cmd the function that operates on the managed resource and returns a result; must not be {@code null}
+     * @param actionOnError the function to transform exceptions into return values; must not be {@code null}
      * @return the result from the command or from the error handler if an exception occurs.
+     * @throws IllegalArgumentException if {@code cmd} or {@code actionOnError} is {@code null}
      */
     public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd,
             final Function<? super Exception, ? extends R> actionOnError) {
@@ -644,9 +655,10 @@ public final class Try<T extends AutoCloseable> {
      * }</pre>
      *
      * @param <R> the type of the result.
-     * @param cmd the function that operates on the managed resource and returns a result.
-     * @param supplier the supplier to provide a fallback value if an exception occurs.
+     * @param cmd the function that operates on the managed resource and returns a result; must not be {@code null}
+     * @param supplier the supplier to provide a fallback value if an exception occurs; must not be {@code null}
      * @return the result from the command or from the supplier if an exception occurs.
+     * @throws IllegalArgumentException if {@code cmd} or {@code supplier} is {@code null}
      */
     public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd, final Supplier<R> supplier) {
         try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
@@ -675,9 +687,10 @@ public final class Try<T extends AutoCloseable> {
      * }</pre>
      *
      * @param <R> the type of the result.
-     * @param cmd the function that operates on the managed resource and returns a result.
-     * @param defaultValue the value to return if an exception occurs.
+     * @param cmd the function that operates on the managed resource and returns a result; must not be {@code null}
+     * @param defaultValue the value to return if an exception occurs; may be {@code null}
      * @return the result from the command or the default value if an exception occurs.
+     * @throws IllegalArgumentException if {@code cmd} is {@code null}
      * @see #call(Throwables.Function, Supplier)
      */
     public <R extends Comparable<? super R>> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd, final R defaultValue) {
@@ -710,10 +723,11 @@ public final class Try<T extends AutoCloseable> {
      * }</pre>
      *
      * @param <R> the type of the result.
-     * @param cmd the function that operates on the managed resource and returns a result.
-     * @param predicate the predicate to test exceptions.
-     * @param supplier the supplier to provide a fallback value for matching exceptions.
+     * @param cmd the function that operates on the managed resource and returns a result; must not be {@code null}
+     * @param predicate the predicate to test exceptions; must not be {@code null}
+     * @param supplier the supplier to provide a fallback value for matching exceptions; must not be {@code null}
      * @return the result from the command or from the supplier if a matching exception occurs.
+     * @throws IllegalArgumentException if {@code cmd}, {@code predicate}, or {@code supplier} is {@code null}
      * @throws RuntimeException if an exception occurs that doesn't match the predicate.
      */
     public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd, final Predicate<? super Exception> predicate,
@@ -750,10 +764,11 @@ public final class Try<T extends AutoCloseable> {
      * }</pre>
      *
      * @param <R> the type of the result.
-     * @param cmd the function that operates on the managed resource and returns a result.
-     * @param predicate the predicate to test exceptions.
-     * @param defaultValue the value to return for matching exceptions.
+     * @param cmd the function that operates on the managed resource and returns a result; must not be {@code null}
+     * @param predicate the predicate to test exceptions; must not be {@code null}
+     * @param defaultValue the value to return for matching exceptions; may be {@code null}
      * @return the result from the command or the default value if a matching exception occurs.
+     * @throws IllegalArgumentException if {@code cmd} or {@code predicate} is {@code null}
      * @throws RuntimeException if an exception occurs that doesn't match the predicate.
      * @see #call(Throwables.Function, Predicate, Supplier)
      */

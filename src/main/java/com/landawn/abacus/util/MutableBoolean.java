@@ -336,8 +336,9 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * int result = a.compareTo(b);   // returns negative value (false < true)
      * }</pre>
      *
-     * @param other the other MutableBoolean to compare to, not null
+     * @param other the other MutableBoolean to compare to, not {@code null}
      * @return negative if this is less (false &lt; true), zero if equal, positive if greater
+     * @throws NullPointerException if {@code other} is {@code null}
      */
     @Override
     public int compareTo(final MutableBoolean other) {

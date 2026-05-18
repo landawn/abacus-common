@@ -84,7 +84,7 @@ public class UtilTest extends TestBase {
         Assertions.assertNotNull(bean.getNested());
         Assertions.assertNotNull(bean.getNested().getValue());
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> Beans.newRandom(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Beans.newRandomBean(null));
     }
 
     @Test
@@ -98,12 +98,12 @@ public class UtilTest extends TestBase {
         Assertions.assertNull(bean.getCreatedDate());
         Assertions.assertNull(bean.getNested());
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> Beans.newRandom(null, Arrays.asList("name")));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Beans.newRandomBean(null, Arrays.asList("name")));
     }
 
     @Test
     public void testFillClass() {
-        TestBean bean = Beans.newRandom(TestBean.class);
+        TestBean bean = Beans.newRandomBean(TestBean.class);
 
         Assertions.assertNotNull(bean);
         Assertions.assertNotNull(bean.getName());
@@ -112,12 +112,12 @@ public class UtilTest extends TestBase {
         Assertions.assertNotNull(bean.getNested());
         Assertions.assertNotNull(bean.getNested().getValue());
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> Beans.newRandom(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Beans.newRandomBean(null));
     }
 
     @Test
     public void testFillClassWithCount() {
-        List<TestBean> beans = Beans.newRandomList(TestBean.class, 5);
+        List<TestBean> beans = Beans.newRandomBeanList(TestBean.class, 5);
 
         Assertions.assertEquals(5, beans.size());
 
@@ -129,17 +129,17 @@ public class UtilTest extends TestBase {
             Assertions.assertNotNull(bean.getNested());
         }
 
-        List<TestBean> emptyList = Beans.newRandomList(TestBean.class, 0);
+        List<TestBean> emptyList = Beans.newRandomBeanList(TestBean.class, 0);
         Assertions.assertTrue(emptyList.isEmpty());
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> Beans.newRandomList(TestBean.class, -1));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Beans.newRandomBeanList(TestBean.class, -1));
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> Beans.newRandomList(null, 5));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Beans.newRandomBeanList(null, 5));
     }
 
     @Test
     public void testFillClassWithPropNames() {
-        TestBean bean = Beans.newRandom(TestBean.class, Arrays.asList("name", "active"));
+        TestBean bean = Beans.newRandomBean(TestBean.class, Arrays.asList("name", "active"));
 
         Assertions.assertNotNull(bean);
         Assertions.assertNotNull(bean.getName());
@@ -148,7 +148,7 @@ public class UtilTest extends TestBase {
         Assertions.assertNull(bean.getCreatedDate());
         Assertions.assertNull(bean.getNested());
 
-        TestBean emptyBean = Beans.newRandom(TestBean.class, Arrays.asList());
+        TestBean emptyBean = Beans.newRandomBean(TestBean.class, Arrays.asList());
         Assertions.assertNotNull(emptyBean);
         Assertions.assertNull(emptyBean.getName());
         Assertions.assertEquals(0, emptyBean.getAge());
@@ -156,7 +156,7 @@ public class UtilTest extends TestBase {
 
     @Test
     public void testFillClassWithPropNamesAndCount() {
-        List<TestBean> beans = Beans.newRandomList(TestBean.class, Arrays.asList("name", "age"), 3);
+        List<TestBean> beans = Beans.newRandomBeanList(TestBean.class, Arrays.asList("name", "age"), 3);
 
         Assertions.assertEquals(3, beans.size());
 
@@ -169,13 +169,13 @@ public class UtilTest extends TestBase {
             Assertions.assertNull(bean.getNested());
         }
 
-        List<TestBean> emptyList = Beans.newRandomList(TestBean.class, Arrays.asList("name"), 0);
+        List<TestBean> emptyList = Beans.newRandomBeanList(TestBean.class, Arrays.asList("name"), 0);
         Assertions.assertTrue(emptyList.isEmpty());
     }
 
     @Test
     public void testFillWithDifferentTypes() {
-        TestBean bean = Beans.newRandom(TestBean.class);
+        TestBean bean = Beans.newRandomBean(TestBean.class);
 
         Assertions.assertNotNull(bean.getName());
         Assertions.assertTrue(bean.getName().length() > 0);
@@ -190,15 +190,15 @@ public class UtilTest extends TestBase {
 
     @Test
     public void testFillNonBeanClass() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> Beans.newRandom(String.class));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Beans.newRandomBean(String.class));
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> Beans.newRandom(Integer.class));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Beans.newRandomBean(Integer.class));
     }
 
     @Test
     public void testFillMultipleTimes() {
-        TestBean bean1 = Beans.newRandom(TestBean.class);
-        TestBean bean2 = Beans.newRandom(TestBean.class);
+        TestBean bean1 = Beans.newRandomBean(TestBean.class);
+        TestBean bean2 = Beans.newRandomBean(TestBean.class);
 
         Assertions.assertNotEquals(bean1.getName(), bean2.getName());
 
@@ -274,7 +274,7 @@ public class UtilTest extends TestBase {
 
     @Test
     public void testFillNumberTypes() {
-        NumberBean bean = Beans.newRandom(NumberBean.class);
+        NumberBean bean = Beans.newRandomBean(NumberBean.class);
 
         Assertions.assertNotNull(bean.getIntegerValue());
         Assertions.assertNotNull(bean.getLongValue());

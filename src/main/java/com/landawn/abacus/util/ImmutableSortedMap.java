@@ -101,6 +101,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @param k1 the key to be included in the ImmutableSortedMap
      * @param v1 the value to be associated with the key
      * @return an ImmutableSortedMap containing the provided key-value pair
+     * @throws NullPointerException if {@code k1} is {@code null}
      */
     public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1) {
         final SortedMap<K, V> map = N.newTreeMap();
@@ -131,6 +132,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @param k2 the second key to be included in the ImmutableSortedMap
      * @param v2 the value to be associated with the second key
      * @return an ImmutableSortedMap containing the provided key-value pairs
+     * @throws NullPointerException if any key is {@code null}
      */
     public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2) {
         final SortedMap<K, V> map = N.newTreeMap();
@@ -155,6 +157,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @param k3 the third key to be included in the ImmutableSortedMap
      * @param v3 the value to be associated with the third key
      * @return an ImmutableSortedMap containing the provided key-value pairs
+     * @throws NullPointerException if any key is {@code null}
      */
     public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
         final SortedMap<K, V> map = N.newTreeMap();
@@ -182,6 +185,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @param k4 the fourth key to be included in the ImmutableSortedMap
      * @param v4 the value to be associated with the fourth key
      * @return an ImmutableSortedMap containing the provided key-value pairs
+     * @throws NullPointerException if any key is {@code null}
      */
     public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
             final K k4, final V v4) {
@@ -213,6 +217,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @param k5 the fifth key to be included in the ImmutableSortedMap
      * @param v5 the value to be associated with the fifth key
      * @return an ImmutableSortedMap containing the provided key-value pairs
+     * @throws NullPointerException if any key is {@code null}
      */
     public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
             final K k4, final V v4, final K k5, final V v5) {
@@ -247,6 +252,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @param k6 the sixth key to be included in the ImmutableSortedMap
      * @param v6 the value to be associated with the sixth key
      * @return an ImmutableSortedMap containing the provided key-value pairs
+     * @throws NullPointerException if any key is {@code null}
      */
     public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
             final K k4, final V v4, final K k5, final V v5, final K k6, final V v6) {
@@ -284,6 +290,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @param k7 the seventh key to be included in the ImmutableSortedMap
      * @param v7 the value to be associated with the seventh key
      * @return an ImmutableSortedMap containing the provided key-value pairs
+     * @throws NullPointerException if any key is {@code null}
      */
     public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
             final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7) {
@@ -324,6 +331,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @param k8 the eighth key to be included in the ImmutableSortedMap
      * @param v8 the value to be associated with the eighth key
      * @return an ImmutableSortedMap containing the provided key-value pairs
+     * @throws NullPointerException if any key is {@code null}
      */
     public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
             final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) {
@@ -367,6 +375,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @param k9 the ninth key to be included in the ImmutableSortedMap
      * @param v9 the value to be associated with the ninth key
      * @return an ImmutableSortedMap containing the provided key-value pairs
+     * @throws NullPointerException if any key is {@code null}
      */
     public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
             final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9) {
@@ -413,6 +422,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @param k10 the tenth key to be included in the ImmutableSortedMap
      * @param v10 the value to be associated with the tenth key
      * @return an ImmutableSortedMap containing the provided key-value pairs
+     * @throws NullPointerException if any key is {@code null}
      */
     public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
             final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9,
@@ -439,7 +449,9 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * If the provided Map is {@code null} or empty, an empty ImmutableSortedMap is returned.
      * Otherwise, a new ImmutableSortedMap is created with the elements of the provided Map.
      *
-     * <p>The returned map will maintain the same ordering as the source map.</p>
+     * <p>If the source is a {@link SortedMap}, the returned map uses the same {@link Comparator}
+     * (or natural ordering) as the source. Otherwise, the entries are inserted into a new
+     * {@link TreeMap} using the natural ordering of the keys.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -456,6 +468,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @param map the Map whose mappings are to be placed in the {@code ImmutableSortedMap}
      * @return an {@code ImmutableSortedMap} containing the same mappings as the provided Map, or the same instance if it is already an {@code ImmutableSortedMap}, or an empty instance if {@code map} is {@code null} or empty
      * @throws ClassCastException if the keys are not mutually comparable (when the source map is not a {@code SortedMap})
+     * @throws NullPointerException if the map contains a {@code null} key and natural ordering is used
      * @see #wrap(SortedMap)
      */
     public static <K, V> ImmutableSortedMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
@@ -566,14 +579,15 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @param toKey high endpoint (exclusive) of the keys in the returned map
      * @return a view of the portion of this map whose keys range from
      *         {@code fromKey}, inclusive, to {@code toKey}, exclusive
-     * @throws ClassCastException if {@code fromKey} and {@code toKey}
-     *         cannot be compared to one another using this map's comparator
-     *         (or, if the map has no comparator, using natural ordering).
-     *         Implementations may, but are not required to, throw this
-     *         exception if {@code fromKey} or {@code toKey} cannot be compared to keys currently in the map
-     * @throws IllegalArgumentException if {@code fromKey} is greater than
-     *         {@code toKey}; or if this map itself has a restricted range,
-     *         and {@code fromKey} or {@code toKey} lies outside the bounds of the range
+     * @throws ClassCastException if {@code fromKey} and {@code toKey} cannot be compared to one another
+     *         using this map's comparator (or, if the map has no comparator, using natural ordering).
+     *         Implementations may, but are not required to, throw this exception if {@code fromKey}
+     *         or {@code toKey} cannot be compared to keys currently in the map
+     * @throws NullPointerException if {@code fromKey} or {@code toKey} is {@code null} and this map
+     *         does not permit null keys
+     * @throws IllegalArgumentException if {@code fromKey} is greater than {@code toKey}; or if this
+     *         map itself has a restricted range, and {@code fromKey} or {@code toKey} lies outside
+     *         the bounds of the range
      */
     @Override
     public ImmutableSortedMap<K, V> subMap(final K fromKey, final K toKey) {
@@ -597,6 +611,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @return a view of the portion of this map whose keys are strictly less than {@code toKey}
      * @throws ClassCastException if {@code toKey} is not compatible with
      *         this map's comparator (or, if the map has no comparator, using natural ordering)
+     * @throws NullPointerException if {@code toKey} is {@code null} and this map does not permit null keys
      * @throws IllegalArgumentException if this map itself has a restricted range,
      *         and {@code toKey} lies outside the bounds of the range
      */
@@ -622,6 +637,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @return a view of the portion of this map whose keys are greater than or equal to {@code fromKey}
      * @throws ClassCastException if {@code fromKey} is not compatible with
      *         this map's comparator (or, if the map has no comparator, using natural ordering)
+     * @throws NullPointerException if {@code fromKey} is {@code null} and this map does not permit null keys
      * @throws IllegalArgumentException if this map itself has a restricted range,
      *         and {@code fromKey} lies outside the bounds of the range
      */
@@ -649,11 +665,26 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
         return sortedMap.firstKey();
     }
 
+    /**
+     * Compares the specified object with this map for equality.
+     * Returns {@code true} if the given object is also a map and the two maps represent
+     * the same mappings, as defined by {@link java.util.AbstractMap#equals(Object)}.
+     *
+     * @param obj the object to be compared for equality with this map
+     * @return {@code true} if the specified object is equal to this map
+     */
     @Override
     public boolean equals(final Object obj) {
         return super.equals(obj);
     }
 
+    /**
+     * Returns the hash code value for this map.
+     * The hash code is defined as the sum of the hash codes of each entry in the map,
+     * as defined by {@link java.util.AbstractMap#hashCode()}.
+     *
+     * @return the hash code value for this map
+     */
     @Override
     public int hashCode() {
         return super.hashCode();

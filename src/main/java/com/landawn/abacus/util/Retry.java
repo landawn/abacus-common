@@ -141,20 +141,23 @@ public final class Retry<T> {
     }
 
     /**
-     * Executes the specified runnable operation and retries it if it fails according to the configured retry conditions.
+     * Executes the specified runnable operation and retries it if it fails according to the
+     * configured retry conditions.
      *
-     * <p>This method will execute the provided {@code cmd} and retry it up to {@code retryTimes} times if an exception
-     * is thrown and the retry condition is satisfied. Between retries, the thread will sleep for {@code retryIntervalInMillis}
-     * milliseconds if configured. If all retry attempts fail, the last exception thrown will be propagated.</p>
-     *
-     * <p>The retry logic is controlled by the retry conditions specified during construction:
+     * <p>On the first failure, the exception is tested against the retry condition(s):</p>
      * <ul>
-     *   <li>If {@code retryCondition} is set, the operation is retried when the predicate returns {@code true} for the thrown exception.</li>
-     *   <li>If {@code retryCondition2} is set, the operation is retried when the bi-predicate returns {@code true} for {@code null} result and the thrown exception.</li>
+     *   <li>If {@code retryCondition} (set via {@link #withFixedDelay(int, long, Predicate)}) is
+     *       present and returns {@code true} for the thrown exception, the operation is retried.</li>
+     *   <li>If {@code retryCondition2} (set via {@link #withFixedDelay(int, long, BiPredicate)}) is
+     *       present and returns {@code true} for {@code (null, exception)}, the operation is
+     *       retried.</li>
      * </ul>
+     * <p>If the condition is not satisfied the exception is rethrown immediately. Otherwise the
+     * thread sleeps for {@code retryIntervalInMillis} milliseconds (if positive) and the operation
+     * is attempted again, up to {@code retryTimes} additional times. If all retries are exhausted,
+     * the last exception is rethrown.</p>
      *
-     * <p><b>Special case:</b> If {@code retryTimes} is 0, the operation is executed exactly once without any retries,
-     * and any exception thrown by the operation is propagated immediately.</p>
+     * <p>If {@code retryTimes} is 0, the operation is executed exactly once without any retries.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -163,11 +166,9 @@ public final class Retry<T> {
      * retry.run(() -> performNetworkOperation());
      * }</pre>
      *
-     * @param cmd the runnable operation to execute, which may throw an exception.
-     * @throws Exception any exception thrown by the {@code cmd} operation. If the operation is retried and all retry attempts
-     *                   are exhausted without success, the last exception encountered during the final retry attempt is thrown.
-     *                   If the retry condition is not satisfied for a thrown exception, that exception is thrown immediately
-     *                   without further retries.
+     * @param cmd the runnable operation to execute; must not be {@code null}.
+     * @throws Exception the exception thrown by {@code cmd} if the retry condition is not satisfied,
+     *                   or the last exception thrown if all retry attempts are exhausted.
      */
     public void run(final Throwables.Runnable<? extends Exception> cmd) throws Exception {
         if (retryTimes > 0) {
@@ -208,40 +209,46 @@ public final class Retry<T> {
     }
 
     /**
-     * Executes the specified callable operation and retries it if it fails or returns an unsatisfactory result according to the configured retry conditions.
+     * Executes the specified callable operation and retries it if it fails or returns an
+     * unsatisfactory result according to the configured retry conditions.
      *
-     * <p>This method will execute the provided {@code callable} and retry it up to {@code retryTimes} times if:
+     * <p>The operation is retried when any of the following is true after an invocation:</p>
      * <ul>
-     *   <li>An exception is thrown and the retry condition (based on the exception) is satisfied.</li>
-     *   <li>The result is returned but {@code retryCondition2} evaluates to {@code true} for the result.</li>
+     *   <li>An exception is thrown and {@code retryCondition} (a {@link Predicate}) is present
+     *       and returns {@code true} for that exception.</li>
+     *   <li>An exception is thrown and {@code retryCondition2} (a {@link BiPredicate}) is present
+     *       and returns {@code true} for {@code (null, exception)}.</li>
+     *   <li>A result is returned and {@code retryCondition2} is present and returns {@code true}
+     *       for {@code (result, null)}.</li>
      * </ul>
-     * Between retries, the thread will sleep for {@code retryIntervalInMillis} milliseconds if configured.
+     * <p>If the condition is not satisfied the exception is rethrown (or the result returned)
+     * immediately. Otherwise the thread sleeps for {@code retryIntervalInMillis} milliseconds
+     * (if positive) and the operation is attempted again, up to {@code retryTimes} additional
+     * times.</p>
      *
-     * <p>The retry logic is controlled by the retry conditions specified during construction:
+     * <p>After all retries are exhausted:</p>
      * <ul>
-     *   <li>If {@code retryCondition} is set, the operation is retried when the predicate returns {@code true} for the thrown exception.</li>
-     *   <li>If {@code retryCondition2} is set, the operation is retried when the bi-predicate returns {@code true} for the result and/or exception.</li>
+     *   <li>If the last attempt threw an exception, that exception is rethrown.</li>
+     *   <li>If the last attempt returned a result that still satisfies {@code retryCondition2},
+     *       a {@link RuntimeException} is thrown describing the persistent failure.</li>
      * </ul>
      *
-     * <p><b>Special case:</b> If {@code retryTimes} is 0, the operation is executed exactly once without any retries,
-     * and the result is returned directly (or any exception is propagated immediately).</p>
+     * <p>If {@code retryTimes} is 0, the operation is executed exactly once without any retries.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Retry up to 3 times with 1 second interval if result is null or TimeoutException occurs
-     * Retry<String> retry = Retry.withFixedDelay(3, 1000, (result, ex) -> result == null || ex instanceof java.util.concurrent.TimeoutException);
+     * Retry<String> retry = Retry.withFixedDelay(3, 1000,
+     *     (result, ex) -> result == null || ex instanceof java.util.concurrent.TimeoutException);
      * String result = retry.call(() -> fetchDataFromServer());
      * }</pre>
      *
-     * @param callable the callable operation to execute, which may throw an exception or return a result.
-     * @return the result produced by the first invocation whose outcome does not satisfy the retry condition,
-     *         or the initial result if no retry is needed.
-     * @throws Exception any exception thrown by the {@code callable} operation. If the operation is retried and all retry attempts
-     *                   are exhausted without success, the last exception encountered during the final retry attempt is thrown.
-     *                   If the retry condition is not satisfied for a thrown exception, that exception is thrown immediately
-     *                   without further retries.
-     * @throws RuntimeException if all retry attempts are exhausted and the final result still satisfies {@code retryCondition2},
-     *                          indicating that every invocation completed with an unsatisfactory result.
+     * @param callable the callable operation to execute; must not be {@code null}.
+     * @return the result of the first invocation whose outcome does not satisfy the retry condition.
+     * @throws RuntimeException if all retry attempts are exhausted and the final invocation returned
+     *                          a result that still satisfies {@code retryCondition2}.
+     * @throws Exception the exception thrown by {@code callable} if the retry condition is not
+     *                   satisfied, or the last exception thrown if all retry attempts are exhausted.
      */
     @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE")
     public T call(final java.util.concurrent.Callable<T> callable) throws Exception {

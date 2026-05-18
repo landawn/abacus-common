@@ -26,6 +26,7 @@ import com.landawn.abacus.util.u.OptionalFloat;
  */
 public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
 
+    /** The type name constant for OptionalFloat type identification, equal to {@code "OptionalFloat"}. */
     public static final String OPTIONAL_FLOAT = OptionalFloat.class.getSimpleName();
 
     /**

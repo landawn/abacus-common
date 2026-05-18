@@ -1141,8 +1141,8 @@ public final class Multiset<E> implements Collection<E> {
     }
 
     /**
-     * Removes all occurrences of all elements in the specified collection from this multiset.
-     * This is equivalent to calling {@link #removeAll(Collection)}.
+     * Removes all occurrences of every element in the specified collection from this multiset.
+     * For each distinct element in {@code c}, all of its occurrences are removed regardless of count.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1151,7 +1151,7 @@ public final class Multiset<E> implements Collection<E> {
      * System.out.println(multiset);   // Only contains "c"
      * }</pre>
      *
-     * @param c the collection containing elements to be removed.
+     * @param c the collection containing elements whose occurrences are to be removed.
      * @return {@code true} if this multiset changed as a result of the call.
      */
     @SuppressWarnings("deprecation")
@@ -1256,8 +1256,9 @@ public final class Multiset<E> implements Collection<E> {
      * System.out.println(multiset.getCount("b"));   // Prints: 6
      * }</pre>
      *
-     * @param function the function to compute new counts.
-     * @throws IllegalArgumentException if the function is null
+     * @param function the function to compute new counts; returning {@code null} or a non-positive
+     *                 value causes the element to be removed from the multiset.
+     * @throws IllegalArgumentException if the function is null.
      */
     public void updateAllOccurrences(final ObjIntFunction<? super E, Integer> function) throws IllegalArgumentException {
         N.checkArgNotNull(function);
@@ -1302,7 +1303,9 @@ public final class Multiset<E> implements Collection<E> {
      *
      * @param e the element whose count is to be computed.
      * @param mappingFunction the function to compute a count.
-     * @return the current (existing or computed) count of the element
+     * @return the existing count if the element is already present; otherwise the value returned by
+     *         {@code mappingFunction} (which may be zero or negative if the function returns a
+     *         non-positive value, in which case the element is not added to the multiset)
      * @throws IllegalArgumentException if the mapping function is null
      */
     public int computeIfAbsent(final E e, final ToIntFunction<? super E> mappingFunction) throws IllegalArgumentException {
@@ -1335,8 +1338,10 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @param e the element whose count is to be computed.
-     * @param remappingFunction the function to compute a new count.
-     * @return the new count of the element, or 0 if not present
+     * @param remappingFunction the function to compute a new count; returning {@code null} or a
+     *                          non-positive value removes the element from the multiset.
+     * @return the new count of the element after applying the function, or 0 if the element was
+     *         not present or was removed by the function
      * @throws IllegalArgumentException if the remapping function is null
      */
     public int computeIfPresent(final E e, final ObjIntFunction<? super E, Integer> remappingFunction) throws IllegalArgumentException {
@@ -1378,8 +1383,10 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @param key the element whose count is to be computed.
-     * @param remappingFunction the function to compute a new count.
-     * @return the new count of the element
+     * @param remappingFunction the function to compute a new count from the element and its current
+     *                          count (0 if absent); returning {@code null} or a non-positive value
+     *                          removes the element from the multiset.
+     * @return the new count of the element, or 0 if the element was removed
      * @throws IllegalArgumentException if the remapping function is null
      */
     public int compute(final E key, final ObjIntFunction<? super E, Integer> remappingFunction) throws IllegalArgumentException {
@@ -1416,9 +1423,11 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @param key the element whose count is to be merged.
-     * @param value the value to merge with the existing count.
-     * @param remappingFunction the function to merge the old count and value.
-     * @return the new count of the element
+     * @param value the value to use as the new count if the element is absent, or to pass as the
+     *              second argument to {@code remappingFunction} if the element is already present.
+     * @param remappingFunction the function to compute the new count from the old count and {@code value};
+     *                          returning {@code null} or a non-positive value removes the element.
+     * @return the new count of the element, or 0 if the element was removed
      * @throws IllegalArgumentException if the remapping function is null
      */
     public int merge(final E key, final int value, final IntBiFunction<Integer> remappingFunction) throws IllegalArgumentException {
@@ -1965,7 +1974,8 @@ public final class Multiset<E> implements Collection<E> {
      *     Comparator.comparing(e -> e.getValue().value()));
      * }</pre>
      *
-     * @param cmp the comparator to be used for sorting the entries of the map. The comparator should compare Map.Entry objects.
+     * @param cmp the comparator to be used for sorting; it compares {@code Map.Entry<E, MutableInt>} objects
+     *            by their key, value, or both.
      * @return a map with the elements of this multiset as keys and their counts as values, sorted according to the provided comparator.
      */
     Map<E, Integer> toMapSortedBy(final Comparator<Map.Entry<E, MutableInt>> cmp) {
@@ -2242,9 +2252,9 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Returns a string representation of this Multiset.
      *
-     * The string representation consists of a list of key-value mappings in the Multiset, enclosed in braces ("{}").
-     * Adjacent mappings are separated by the characters ", " (comma and space).
-     * Each key-value mapping is rendered as the key followed by an equals sign ("=") followed by the associated value.
+     * <p>The string representation consists of a list of key-value mappings in the Multiset, enclosed in braces ({@code {}}).
+     * Adjacent mappings are separated by the characters {@code ", "} (comma and space).
+     * Each key-value mapping is rendered as the key followed by an equals sign ({@code =}) followed by the associated value.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2420,11 +2430,21 @@ public final class Multiset<E> implements Collection<E> {
             this.count = count;
         }
 
+        /**
+         * Returns the element associated with this entry.
+         *
+         * @return the element for this entry
+         */
         @Override
         public E element() {
             return element;
         }
 
+        /**
+         * Returns the occurrence count of the element at the time this entry was created.
+         *
+         * @return the snapshot count; always positive
+         */
         @Override
         public int count() {
             return count;

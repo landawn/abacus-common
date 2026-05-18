@@ -24,6 +24,7 @@ import com.landawn.abacus.util.u.OptionalBoolean;
  */
 public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
 
+    /** The type name constant for OptionalBoolean type identification, equal to {@code "OptionalBoolean"}. */
     public static final String OPTIONAL_BOOLEAN = OptionalBoolean.class.getSimpleName();
 
     /**

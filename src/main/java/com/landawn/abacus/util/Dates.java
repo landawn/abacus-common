@@ -265,7 +265,6 @@ import com.landawn.abacus.logging.LoggerFactory;
  * open source projects under the Apache License 2.0. Methods from these libraries may have been
  * modified for consistency, performance optimization, and null-safety enhancement.
  *
- * @see Comparable
  * @see DateTimeFormatter
  * @see ISO8601Util
  * @see CalendarField
@@ -295,7 +294,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     // ...
 
     /**
-     * Default {@code TimeZone} of the Java virtual machine
+     * Default {@code TimeZone} of the Java virtual machine.
      */
     public static final TimeZone DEFAULT_TIME_ZONE = TimeZone.getDefault();
 
@@ -311,12 +310,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * It is located at the prime meridian (0 degrees longitude) and does not observe daylight-saving time.
      * GMT is often used in various contexts, including aviation, computing, and international communications.
      * In many regions, GMT is replaced by Coordinated Universal Time (UTC), which is similar but more precise.
-     * When comparing other time zones, you can express them as offsets from GMT/UTC, such as GMT+2 or GMT-5
+     * When comparing other time zones, you can express them as offsets from GMT/UTC, such as GMT+2 or GMT-5.
      */
     public static final TimeZone GMT_TIME_ZONE = TimeZone.getTimeZone("GMT");
 
     /**
-     * Default {@code ZoneId} of the Java virtual machine
+     * Default {@code ZoneId} of the Java virtual machine.
      */
     public static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
 
@@ -620,8 +619,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
     public static final String RFC_1123_DATE_TIME_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
 
     /**
-     * This is half a month, so this represents whether a date is in the top or bottom half of the month.
-     * @see CalendarField
+     * Sentinel value representing half a month; used internally to indicate whether a date
+     * falls in the first or second half of the month during rounding operations.
+     *
+     * @see #round(java.util.Date, int)
+     * @see #truncate(java.util.Date, int)
+     * @see #ceiling(java.util.Date, int)
      */
     public static final int SEMI_MONTH = 1001;
 
@@ -1913,7 +1916,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * {@link java.sql.Time} contract) while the time-of-day is preserved. Raw epoch-millisecond
      * input (a purely numeric string parsed without a format) is used as-is without normalization.</p>
      *
-     * @param date the string representation of the time to be parsed.
+     * @param time the string representation of the time to be parsed.
      * @return the parsed {@code java.sql.Time} instance, or {@code null} if the input is {@code null}, empty, or the string "null".
      * @see #parseTime(String, String)
      * @see #parseTime(String, String, TimeZone)
@@ -1933,7 +1936,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Time time = Dates.parseTime("02:30:45 PM", "hh:mm:ss a");
      * }</pre>
      *
-     * @param date the string representation of the time to be parsed.
+     * @param time the string representation of the time to be parsed.
      * @param format the time format pattern; if {@code null}, common formats are attempted automatically.
      * @return the parsed {@code java.sql.Time} instance, or {@code null} if the input is {@code null}, empty, or the string "null".
      * @throws IllegalArgumentException if the time string cannot be parsed using the specified format.
@@ -1957,7 +1960,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Time time = Dates.parseTime("14:30:45", "HH:mm:ss", utc);
      * }</pre>
      *
-     * @param date the string representation of the time to be parsed.
+     * @param time the string representation of the time to be parsed.
      * @param format the time format pattern; if {@code null}, common formats are attempted automatically.
      * @param timeZone the time zone for parsing; if {@code null}, the default time zone is used.
      * @return the parsed {@code java.sql.Time} instance, or {@code null} if the input is {@code null}, empty, or the string "null".
@@ -2369,7 +2372,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * String formatted = Dates.formatLocalDate();   // e.g., "2025-10-22"
      * }</pre>
      *
-     * @return a string representation of the current local date.
+     * @return a non-null string representation of the current local date in {@code yyyy-MM-dd} format.
      * @see #formatLocalDateTime()
      * @see #formatCurrentDateTime()
      */
@@ -2387,7 +2390,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * String formatted = Dates.formatLocalDateTime();   // e.g., "2025-10-22 14:30:45"
      * }</pre>
      *
-     * @return a string representation of the current local date and time.
+     * @return a non-null string representation of the current local date and time in {@code yyyy-MM-dd HH:mm:ss} format.
      * @see #formatLocalDate()
      * @see #formatCurrentDateTime()
      */
@@ -2405,7 +2408,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * String formatted = Dates.formatCurrentDateTime();   // e.g., "2025-10-22T14:30:45Z"
      * }</pre>
      *
-     * @return a string representation of the current date and time in ISO 8601 format.
+     * @return a non-null string representation of the current date and time in ISO 8601 format {@code yyyy-MM-dd'T'HH:mm:ss'Z'}.
      * @see #formatLocalDateTime()
      * @see #formatCurrentTimestamp()
      * @see #format(java.util.Date)
@@ -2423,7 +2426,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * String formatted = Dates.formatCurrentTimestamp();   // e.g., "2025-10-22T14:30:45.123Z"
      * }</pre>
      *
-     * @return a string representation of the current timestamp in ISO 8601 format with milliseconds.
+     * @return a non-null string representation of the current timestamp in ISO 8601 format {@code yyyy-MM-dd'T'HH:mm:ss.SSS'Z'}.
      * @see #formatCurrentDateTime()
      * @see #format(java.util.Date)
      */
@@ -4654,13 +4657,13 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * of the current second (resulting in a number between 0 and 999). This
      * method will retrieve the number of milliseconds for any fragment.
      * For example, if you want to calculate the number of milliseconds past today,
-     * your fragment is Calendar.DATE or Calendar.DAY_OF_YEAR. The result will
-     * be all milliseconds of the past hour(s), minutes(s) and second(s).</p>
+     * your fragment is {@code Calendar.DATE} or {@code Calendar.DAY_OF_YEAR}. The result will
+     * be all milliseconds of the past hour(s), minute(s) and second(s).</p>
      *
-     * <p>Valid fragments are: Calendar.YEAR, Calendar.MONTH, both
-     * Calendar.DAY_OF_YEAR and Calendar.DATE, Calendar.HOUR_OF_DAY,
-     * Calendar.MINUTE, Calendar.SECOND and Calendar.MILLISECOND
-     * A fragment less than or equal to a SECOND field will return 0.</p>
+     * <p>Valid fragments are: {@code Calendar.YEAR}, {@code Calendar.MONTH}, both
+     * {@code Calendar.DAY_OF_YEAR} and {@code Calendar.DATE}, {@code Calendar.HOUR_OF_DAY},
+     * {@code Calendar.MINUTE}, {@code Calendar.SECOND} and {@code Calendar.MILLISECOND}.
+     * A fragment less than or equal to a MILLISECOND field will return 0.</p>
      *
      * <ul>
      *  <li>January 1, 2008 7:15:10.538 with Calendar.SECOND as fragment will return 538</li>
@@ -4697,12 +4700,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * of the current minute (resulting in a number between 0 and 59). This
      * method will retrieve the number of seconds for any fragment.
      * For example, if you want to calculate the number of seconds past today,
-     * your fragment is Calendar.DATE or Calendar.DAY_OF_YEAR. The result will
-     * be all seconds of the past hour(s) and minutes(s).</p>
+     * your fragment is {@code Calendar.DATE} or {@code Calendar.DAY_OF_YEAR}. The result will
+     * be all seconds of the past hour(s) and minute(s).</p>
      *
-     * <p>Valid fragments are: Calendar.YEAR, Calendar.MONTH, both
-     * Calendar.DAY_OF_YEAR and Calendar.DATE, Calendar.HOUR_OF_DAY,
-     * Calendar.MINUTE, Calendar.SECOND and Calendar.MILLISECOND
+     * <p>Valid fragments are: {@code Calendar.YEAR}, {@code Calendar.MONTH}, both
+     * {@code Calendar.DAY_OF_YEAR} and {@code Calendar.DATE}, {@code Calendar.HOUR_OF_DAY},
+     * {@code Calendar.MINUTE}, {@code Calendar.SECOND} and {@code Calendar.MILLISECOND}.
      * A fragment less than or equal to a SECOND field will return 0.</p>
      *
      * <ul>
@@ -4743,12 +4746,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * of the current hour (resulting in a number between 0 and 59). This
      * method will retrieve the number of minutes for any fragment.
      * For example, if you want to calculate the number of minutes past this month,
-     * your fragment is Calendar.MONTH. The result will be all minutes of the
+     * your fragment is {@code Calendar.MONTH}. The result will be all minutes of the
      * past day(s) and hour(s).</p>
      *
-     * <p>Valid fragments are: Calendar.YEAR, Calendar.MONTH, both
-     * Calendar.DAY_OF_YEAR and Calendar.DATE, Calendar.HOUR_OF_DAY,
-     * Calendar.MINUTE, Calendar.SECOND and Calendar.MILLISECOND
+     * <p>Valid fragments are: {@code Calendar.YEAR}, {@code Calendar.MONTH}, both
+     * {@code Calendar.DAY_OF_YEAR} and {@code Calendar.DATE}, {@code Calendar.HOUR_OF_DAY},
+     * {@code Calendar.MINUTE}, {@code Calendar.SECOND} and {@code Calendar.MILLISECOND}.
      * A fragment less than or equal to a MINUTE field will return 0.</p>
      *
      * <ul>
@@ -4789,12 +4792,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * of the current day (resulting in a number between 0 and 23). This
      * method will retrieve the number of hours for any fragment.
      * For example, if you want to calculate the number of hours past this month,
-     * your fragment is Calendar.MONTH. The result will be all hours of the
+     * your fragment is {@code Calendar.MONTH}. The result will be all hours of the
      * past day(s).</p>
      *
-     * <p>Valid fragments are: Calendar.YEAR, Calendar.MONTH, both
-     * Calendar.DAY_OF_YEAR and Calendar.DATE, Calendar.HOUR_OF_DAY,
-     * Calendar.MINUTE, Calendar.SECOND and Calendar.MILLISECOND
+     * <p>Valid fragments are: {@code Calendar.YEAR}, {@code Calendar.MONTH}, both
+     * {@code Calendar.DAY_OF_YEAR} and {@code Calendar.DATE}, {@code Calendar.HOUR_OF_DAY},
+     * {@code Calendar.MINUTE}, {@code Calendar.SECOND} and {@code Calendar.MILLISECOND}.
      * A fragment less than or equal to an HOUR field will return 0.</p>
      *
      * <ul>
@@ -4835,19 +4838,19 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * of the current month (resulting in a number between 1 and 31). This
      * method will retrieve the number of days for any fragment.
      * For example, if you want to calculate the number of days past this year,
-     * your fragment is Calendar.YEAR. The result will be all days of the
+     * your fragment is {@code Calendar.YEAR}. The result will be all days of the
      * past month(s).</p>
      *
-     * <p>Valid fragments are: Calendar.YEAR, Calendar.MONTH, both
-     * Calendar.DAY_OF_YEAR and Calendar.DATE, Calendar.HOUR_OF_DAY,
-     * Calendar.MINUTE, Calendar.SECOND and Calendar.MILLISECOND
+     * <p>Valid fragments are: {@code Calendar.YEAR}, {@code Calendar.MONTH}, both
+     * {@code Calendar.DAY_OF_YEAR} and {@code Calendar.DATE}, {@code Calendar.HOUR_OF_DAY},
+     * {@code Calendar.MINUTE}, {@code Calendar.SECOND} and {@code Calendar.MILLISECOND}.
      * A fragment less than or equal to a DAY field will return 0.</p>
      *
      * <ul>
      *  <li>January 28, 2008 with Calendar.MONTH as fragment will return 28
-     *   (equivalent to deprecated date.getDay())</li>
+     *   (equivalent to deprecated date.getDate())</li>
      *  <li>February 28, 2008 with Calendar.MONTH as fragment will return 28
-     *   (equivalent to deprecated date.getDay())</li>
+     *   (equivalent to deprecated date.getDate())</li>
      *  <li>January 28, 2008 with Calendar.YEAR as fragment will return 28</li>
      *  <li>February 28, 2008 with Calendar.YEAR as fragment will return 59</li>
      *  <li>January 28, 2008 with Calendar.MILLISECOND as fragment will return 0
@@ -4900,13 +4903,13 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p>Asking the milliseconds of any date will only return the number of milliseconds
      * of the current second (resulting in a number between 0 and 999). This
      * method will retrieve the number of milliseconds for any fragment.
-     * For example, if you want to calculate the number of seconds past today,
-     * your fragment is Calendar.DATE or Calendar.DAY_OF_YEAR. The result will
-     * be all seconds of the past hour(s), minutes(s) and second(s).</p>
+     * For example, if you want to calculate the number of milliseconds past today,
+     * your fragment is {@code Calendar.DATE} or {@code Calendar.DAY_OF_YEAR}. The result will
+     * be all milliseconds of the past hour(s), minute(s) and second(s).</p>
      *
-     * <p>Valid fragments are: Calendar.YEAR, Calendar.MONTH, both
-     * Calendar.DAY_OF_YEAR and Calendar.DATE, Calendar.HOUR_OF_DAY,
-     * Calendar.MINUTE, Calendar.SECOND and Calendar.MILLISECOND
+     * <p>Valid fragments are: {@code Calendar.YEAR}, {@code Calendar.MONTH}, both
+     * {@code Calendar.DAY_OF_YEAR} and {@code Calendar.DATE}, {@code Calendar.HOUR_OF_DAY},
+     * {@code Calendar.MINUTE}, {@code Calendar.SECOND} and {@code Calendar.MILLISECOND}.
      * A fragment less than or equal to a MILLISECOND field will return 0.</p>
      *
      * <ul>
@@ -4947,12 +4950,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * of the current minute (resulting in a number between 0 and 59). This
      * method will retrieve the number of seconds for any fragment.
      * For example, if you want to calculate the number of seconds past today,
-     * your fragment is Calendar.DATE or Calendar.DAY_OF_YEAR. The result will
-     * be all seconds of the past hour(s) and minutes(s).</p>
+     * your fragment is {@code Calendar.DATE} or {@code Calendar.DAY_OF_YEAR}. The result will
+     * be all seconds of the past hour(s) and minute(s).</p>
      *
-     * <p>Valid fragments are: Calendar.YEAR, Calendar.MONTH, both
-     * Calendar.DAY_OF_YEAR and Calendar.DATE, Calendar.HOUR_OF_DAY,
-     * Calendar.MINUTE, Calendar.SECOND and Calendar.MILLISECOND
+     * <p>Valid fragments are: {@code Calendar.YEAR}, {@code Calendar.MONTH}, both
+     * {@code Calendar.DAY_OF_YEAR} and {@code Calendar.DATE}, {@code Calendar.HOUR_OF_DAY},
+     * {@code Calendar.MINUTE}, {@code Calendar.SECOND} and {@code Calendar.MILLISECOND}.
      * A fragment less than or equal to a SECOND field will return 0.</p>
      *
      * <ul>
@@ -4993,19 +4996,19 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * of the current hour (resulting in a number between 0 and 59). This
      * method will retrieve the number of minutes for any fragment.
      * For example, if you want to calculate the number of minutes past this month,
-     * your fragment is Calendar.MONTH. The result will be all minutes of the
+     * your fragment is {@code Calendar.MONTH}. The result will be all minutes of the
      * past day(s) and hour(s).</p>
      *
-     * <p>Valid fragments are: Calendar.YEAR, Calendar.MONTH, both
-     * Calendar.DAY_OF_YEAR and Calendar.DATE, Calendar.HOUR_OF_DAY,
-     * Calendar.MINUTE, Calendar.SECOND and Calendar.MILLISECOND
+     * <p>Valid fragments are: {@code Calendar.YEAR}, {@code Calendar.MONTH}, both
+     * {@code Calendar.DAY_OF_YEAR} and {@code Calendar.DATE}, {@code Calendar.HOUR_OF_DAY},
+     * {@code Calendar.MINUTE}, {@code Calendar.SECOND} and {@code Calendar.MILLISECOND}.
      * A fragment less than or equal to a MINUTE field will return 0.</p>
      *
      * <ul>
      *  <li>January 1, 2008 7:15:10.538 with Calendar.HOUR_OF_DAY as fragment will return 15
-     *   (equivalent to calendar.get(Calendar.MINUTES))</li>
+     *   (equivalent to calendar.get(Calendar.MINUTE))</li>
      *  <li>January 6, 2008 7:15:10.538 with Calendar.HOUR_OF_DAY as fragment will return 15
-     *   (equivalent to calendar.get(Calendar.MINUTES))</li>
+     *   (equivalent to calendar.get(Calendar.MINUTE))</li>
      *  <li>January 1, 2008 7:15:10.538 with Calendar.MONTH as fragment will return 15</li>
      *  <li>January 6, 2008 7:15:10.538 with Calendar.MONTH as fragment will return 435 (7*60 + 15)</li>
      *  <li>January 16, 2008 7:15:10.538 with Calendar.MILLISECOND as fragment will return 0
@@ -5039,12 +5042,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * of the current day (resulting in a number between 0 and 23). This
      * method will retrieve the number of hours for any fragment.
      * For example, if you want to calculate the number of hours past this month,
-     * your fragment is Calendar.MONTH. The result will be all hours of the
+     * your fragment is {@code Calendar.MONTH}. The result will be all hours of the
      * past day(s).</p>
      *
-     * <p>Valid fragments are: Calendar.YEAR, Calendar.MONTH, both
-     * Calendar.DAY_OF_YEAR and Calendar.DATE, Calendar.HOUR_OF_DAY,
-     * Calendar.MINUTE, Calendar.SECOND and Calendar.MILLISECOND
+     * <p>Valid fragments are: {@code Calendar.YEAR}, {@code Calendar.MONTH}, both
+     * {@code Calendar.DAY_OF_YEAR} and {@code Calendar.DATE}, {@code Calendar.HOUR_OF_DAY},
+     * {@code Calendar.MINUTE}, {@code Calendar.SECOND} and {@code Calendar.MILLISECOND}.
      * A fragment less than or equal to an HOUR field will return 0.</p>
      *
      * <ul>
@@ -5085,12 +5088,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * of the current month (resulting in a number between 1 and 31). This
      * method will retrieve the number of days for any fragment.
      * For example, if you want to calculate the number of days past this year,
-     * your fragment is Calendar.YEAR. The result will be all days of the
+     * your fragment is {@code Calendar.YEAR}. The result will be all days of the
      * past month(s).</p>
      *
-     * <p>Valid fragments are: Calendar.YEAR, Calendar.MONTH, both
-     * Calendar.DAY_OF_YEAR and Calendar.DATE, Calendar.HOUR_OF_DAY,
-     * Calendar.MINUTE, Calendar.SECOND and Calendar.MILLISECOND
+     * <p>Valid fragments are: {@code Calendar.YEAR}, {@code Calendar.MONTH}, both
+     * {@code Calendar.DAY_OF_YEAR} and {@code Calendar.DATE}, {@code Calendar.HOUR_OF_DAY},
+     * {@code Calendar.MINUTE}, {@code Calendar.SECOND} and {@code Calendar.MILLISECOND}.
      * A fragment less than or equal to a DAY field will return 0.</p>
      *
      * <ul>
@@ -5873,12 +5876,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * // Result: false (ranges are adjacent but don't overlap)
      * }</pre>
      *
-     * @param startTimeOne Start time of the first range. Must not be {@code null}.
-     * @param endTimeOne End time of the first range. Must not be {@code null}.
-     * @param startTimeTwo Start time of the second range. Must not be {@code null}.
-     * @param endTimeTwo End time of the second range. Must not be {@code null}.
-     * @return {@code true} if the two date ranges overlap.
-     * @throws IllegalArgumentException if any date is {@code null} or invalid.
+     * @param startTimeOne start of the first range, not {@code null}.
+     * @param endTimeOne end of the first range, not {@code null}.
+     * @param startTimeTwo start of the second range, not {@code null}.
+     * @param endTimeTwo end of the second range, not {@code null}.
+     * @return {@code true} if the two date ranges overlap (exclusive of the endpoints).
+     * @throws IllegalArgumentException if any argument is {@code null}, or if a start date is after its corresponding end date.
      * @see #isBetween(java.util.Date, java.util.Date, java.util.Date)
      */
     public static boolean isOverlapping(java.util.Date startTimeOne, java.util.Date endTimeOne, java.util.Date startTimeTwo, java.util.Date endTimeTwo) {
@@ -5930,10 +5933,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * }</pre>
      *
      * @param date the date to check. Must not be {@code null}.
-     * @param startDate the start time of the range. Must not be {@code null}.
-     * @param endDate the end time of the range. Must not be {@code null}.
-     * @return {@code true} if the date is within the specified range.
-     * @throws IllegalArgumentException if any date is {@code null} or invalid.
+     * @param startDate the start of the range (inclusive). Must not be {@code null}.
+     * @param endDate the end of the range (inclusive). Must not be {@code null}.
+     * @return {@code true} if the date is within the specified range (inclusive).
+     * @throws IllegalArgumentException if any argument is {@code null}, or if {@code startDate} is after {@code endDate}.
      * @see N#geAndLe(Comparable, Comparable, Comparable)
      * @see N#gtAndLt(Comparable, Comparable, Comparable)
      */

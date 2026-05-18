@@ -18,7 +18,7 @@ package com.landawn.abacus.util;
  * Enumeration of supported compression modes for data compression operations.
  * This enum defines the available compression algorithms that can be used throughout the framework.
  *
- * <p>Supported compression modes:
+ * <p>Supported compression modes:</p>
  * <ul>
  *   <li>{@link #NONE} - No compression</li>
  *   <li>{@link #LZ4} - LZ4 compression algorithm (fast compression/decompression)</li>

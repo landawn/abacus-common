@@ -148,8 +148,8 @@ public final class Enumerations {
      * }</pre>
      *
      * @param <T> the type of elements
-     * @param a the elements to enumerate
-     * @return an Enumeration over the specified elements
+     * @param a the elements to enumerate; if {@code null} or empty, an empty Enumeration is returned
+     * @return an Enumeration over the specified elements, or an empty Enumeration if {@code a} is {@code null} or empty
      */
     @SafeVarargs
     public static <T> Enumeration<T> of(final T... a) {
@@ -214,8 +214,9 @@ public final class Enumerations {
      * }</pre>
      *
      * @param <T> the type of elements
-     * @param iter the iterator to wrap as an Enumeration
+     * @param iter the iterator to wrap as an Enumeration; must not be {@code null}
      * @return an Enumeration that delegates to the specified Iterator
+     * @throws NullPointerException if {@code iter} is {@code null}
      * @see #create(Collection)
      */
     public static <T> Enumeration<T> create(final Iterator<? extends T> iter) {
@@ -325,8 +326,8 @@ public final class Enumerations {
      * }</pre>
      *
      * @param <T> the type of elements
-     * @param e the Enumeration to convert, may be null
-     * @return an ObjIterator over the Enumeration's elements, or empty iterator if null
+     * @param e the Enumeration to convert; may be {@code null}
+     * @return an ObjIterator over the Enumeration's elements, or an empty iterator if {@code e} is {@code null}
      */
     public static <T> ObjIterator<T> toIterator(final Enumeration<? extends T> e) {
         if (e == null) {
@@ -359,8 +360,8 @@ public final class Enumerations {
      * }</pre>
      *
      * @param <T> the type of elements
-     * @param e the Enumeration to convert, may be null
-     * @return a new ArrayList containing all elements from the Enumeration, or empty list if null
+     * @param e the Enumeration to convert; may be {@code null}
+     * @return a new {@link ArrayList} containing all elements from the Enumeration, or an empty list if {@code e} is {@code null}
      */
     public static <T> List<T> toList(final Enumeration<? extends T> e) {
         if (e == null) {
@@ -379,7 +380,7 @@ public final class Enumerations {
     /**
      * Converts an Enumeration to a Set.
      * All elements from the Enumeration are consumed and added to a new HashSet.
-     * Duplicate elements (according to equals()) will be removed.
+     * Duplicate elements (according to {@link Object#equals(Object)}) will be removed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -389,8 +390,8 @@ public final class Enumerations {
      * }</pre>
      *
      * @param <T> the type of elements
-     * @param e the Enumeration to convert, may be null
-     * @return a new HashSet containing unique elements from the Enumeration, or empty set if null
+     * @param e the Enumeration to convert; may be {@code null}
+     * @return a new {@link HashSet} containing unique elements from the Enumeration, or an empty set if {@code e} is {@code null}
      */
     public static <T> Set<T> toSet(final Enumeration<? extends T> e) {
         if (e == null) {
@@ -423,9 +424,10 @@ public final class Enumerations {
      *
      * @param <T> the type of elements
      * @param <C> the type of the Collection to create
-     * @param e the Enumeration to convert, may be {@code null}
+     * @param e the Enumeration to convert; may be {@code null}
      * @param supplier the supplier to create the target collection; must not be {@code null}
      * @return the collection created by {@code supplier} containing all elements from the Enumeration; an empty collection if {@code e} is {@code null}
+     * @throws NullPointerException if {@code supplier} is {@code null}
      * @see #toList(Enumeration)
      * @see #toSet(Enumeration)
      */

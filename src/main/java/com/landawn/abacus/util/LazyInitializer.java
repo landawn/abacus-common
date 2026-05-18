@@ -63,9 +63,10 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
      * }</pre>
      *
      * @param <T> the type of the lazily initialized object
-     * @param supplier the supplier that will provide the value when first requested
-     * @return a LazyInitializer wrapping the supplier, or the supplier itself if it's already a LazyInitializer
-     * @throws IllegalArgumentException if supplier is null
+     * @param supplier the supplier that will provide the value when first requested; must not be {@code null}
+     * @return a {@code LazyInitializer} wrapping the supplier, or the supplier itself cast to
+     *         {@code LazyInitializer} if it is already an instance of {@code LazyInitializer}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      */
     public static <T> LazyInitializer<T> of(final Supplier<T> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier);
@@ -78,17 +79,17 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
     }
 
     /**
-     * Returns the lazily initialized value. On first successful call, the value is obtained from
+     * Returns the lazily initialized value. On the first successful call the value is obtained from
      * the supplier and cached. Subsequent calls return the cached value without invoking the supplier again.
      *
      * <p>This method is thread-safe and uses double-checked locking to ensure that, in the absence of
      * exceptions, the supplier is invoked exactly once even under concurrent access.</p>
      *
-     * <p><b>Exception handling:</b> If the supplier throws an exception, the initialization state
-     * is <em>not</em> marked as completed and the exception is propagated to the caller. Subsequent
-     * calls to {@code get()} will retry the initialization by invoking the supplier again. As a
-     * result, if the supplier consistently throws, every call will throw; if it eventually succeeds,
-     * the first successful result is cached.</p>
+     * <p><b>Exception handling:</b> If the supplier throws an unchecked exception during initialization,
+     * the initialization state is <em>not</em> marked as completed and the exception is propagated to the
+     * caller. Subsequent calls to {@code get()} will retry the initialization by invoking the supplier
+     * again. If the supplier consistently throws, every call will throw; once it succeeds, the result
+     * is cached and no further invocations occur.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -97,8 +98,8 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
      * Connection same = dbConnection.get();   // Returns cached connection
      * }</pre>
      *
-     * @return the lazily initialized value
-     * @throws RuntimeException if the supplier throws an exception during initialization
+     * @return the lazily initialized value (may be {@code null} if the supplier returns {@code null})
+     * @throws RuntimeException if the supplier throws an unchecked exception during initialization
      */
     @Override
     public T get() {

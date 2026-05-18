@@ -98,12 +98,12 @@ public final class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry
     }
 
     /**
-     * Creates an ImmutableEntry by copying the key and value from an existing Map.Entry.
-     * This method creates a defensive copy, so changes to the original entry after
-     * copying will not affect the created ImmutableEntry.
+     * Creates an {@code ImmutableEntry} by copying the key and value from an existing {@link Map.Entry}.
+     * The key and value are captured at the moment this method is called; subsequent changes to
+     * the source entry's value (if it is a mutable entry) do not affect the returned copy.
      *
-     * <p>If the provided entry contains {@code null} key or value, the ImmutableEntry will
-     * also contain {@code null} for those fields.
+     * <p>If the provided entry contains a {@code null} key or value, the returned
+     * {@code ImmutableEntry} will also contain {@code null} for those fields.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -113,15 +113,15 @@ public final class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry
      * Map.Entry<String, Integer> mutableEntry = map.entrySet().iterator().next();
      * ImmutableEntry<String, Integer> immutableCopy = ImmutableEntry.copyOf(mutableEntry);
      *
-     * // Original entry can be modified (if supported), but copy remains unchanged
-     * map.put("count", 200);
+     * // Modifying the source entry does not affect the snapshot copy
+     * mutableEntry.setValue(200);
      * System.out.println(immutableCopy.getValue());   // still prints: 100
      * }</pre>
      *
      * @param <K> the type of the key
      * @param <V> the type of the value
-     * @param entry the entry to copy, must not be null
-     * @return a new ImmutableEntry with the same key and value as the provided entry
+     * @param entry the entry whose key and value are to be copied; must not be {@code null}
+     * @return a new {@code ImmutableEntry} with the same key and value as the provided entry
      * @throws NullPointerException if {@code entry} is {@code null}
      */
     public static <K, V> ImmutableEntry<K, V> copyOf(final Map.Entry<? extends K, ? extends V> entry) {
@@ -129,16 +129,16 @@ public final class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry
     }
 
     /**
-     * This operation is not supported by ImmutableEntry.
-     * Attempting to call this method will always throw an UnsupportedOperationException.
+     * This operation is not supported by {@code ImmutableEntry}.
+     * Attempting to call this method will always throw an {@link UnsupportedOperationException}.
      *
      * <p>The immutability of this entry ensures that once created, the key-value
      * pair remains constant throughout its lifetime.
      *
-     * @param v the new value to be stored (ignored)
+     * @param v the new value (ignored; this entry is immutable)
      * @return never returns normally
-     * @throws UnsupportedOperationException always, as this entry is immutable
-     * @deprecated ImmutableEntry does not support value modification
+     * @throws UnsupportedOperationException always, because this entry is immutable
+     * @deprecated {@code ImmutableEntry} does not support value modification
      */
     @Deprecated
     @Override

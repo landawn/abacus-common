@@ -72,7 +72,9 @@ import com.landawn.abacus.util.URLEncodedUtil;
  *
  * <p><b>Key Features and Capabilities:</b>
  * <ul>
- *   <li><b>HTTP Method Support:</b> Full support for GET, POST, PUT, DELETE, HEAD, PATCH, and OPTIONS methods</li>
+ *   <li><b>HTTP Method Support:</b> Support for GET, POST, PUT, DELETE, HEAD, and OPTIONS methods.
+ *       PATCH is accepted by the API but is not supported by the underlying {@link HttpURLConnection};
+ *       see {@link HttpMethod#PATCH} for details and workarounds</li>
  *   <li><b>Content Serialization:</b> Automatic JSON, XML, Kryo, and form URL-encoded content handling</li>
  *   <li><b>Compression Support:</b> Built-in GZIP, LZ4, Snappy, and Brotli compression/decompression</li>
  *   <li><b>Asynchronous Execution:</b> Non-blocking operations with {@link ContinuableFuture} integration</li>
@@ -145,8 +147,11 @@ import com.landawn.abacus.util.URLEncodedUtil;
  *   <li><b>PUT:</b> {@code put()}, {@code asyncPut()} - Resource replacement with full entity updates</li>
  *   <li><b>DELETE:</b> {@code delete()}, {@code asyncDelete()} - Resource deletion operations</li>
  *   <li><b>HEAD:</b> {@code head()}, {@code asyncHead()} - Metadata retrieval without response body</li>
- *   <li><b>PATCH/OPTIONS:</b> Available via {@link #execute(HttpMethod, Object, HttpSettings, Class)} and
- *       {@link #asyncExecute(HttpMethod, Object, HttpSettings, Class)} with the corresponding {@link HttpMethod}</li>
+ *   <li><b>OPTIONS:</b> Available via {@link #execute(HttpMethod, Object, HttpSettings, Class)} and
+ *       {@link #asyncExecute(HttpMethod, Object, HttpSettings, Class)} with {@link HttpMethod#OPTIONS}</li>
+ *   <li><b>PATCH:</b> Accepted via {@link #execute(HttpMethod, Object, HttpSettings, Class)} with
+ *       {@link HttpMethod#PATCH}, but rejected by {@link HttpURLConnection} at request time;
+ *       see {@link HttpMethod#PATCH} for workarounds</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b>
@@ -395,7 +400,6 @@ import com.landawn.abacus.util.URLEncodedUtil;
  * @see URLEncodedUtil
  * @see com.landawn.abacus.util.AsyncExecutor
  * @see <a href="https://tools.ietf.org/html/rfc7231">RFC 7231: HTTP/1.1 Semantics and Content</a>
- * @see <a href="https://tools.ietf.org/html/rfc7540">RFC 7540: HTTP/2</a>
  */
 public final class HttpClient {
 
@@ -1557,7 +1561,8 @@ public final class HttpClient {
      * @param outputStream the output stream to write response to, or {@code null}.
      * @param outputWriter the writer to write response to, or {@code null}.
      * @param <T> the response type.
-     * @return the response parsed as the specified result class.
+     * @return the response parsed as the specified result class, or {@code null} for one-way
+     *         requests or when the response is written to {@code outputStream}/{@code outputWriter}.
      * @throws UncheckedIOException if an I/O error occurs.
      */
     private <T> T execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final Class<T> resultClass,
@@ -1824,6 +1829,8 @@ public final class HttpClient {
      * @param resultClass the expected response type
      * @param trackConnectionLimit whether to enforce/decrement the active connection counter
      * @return a configured HTTP connection
+     * @throws RuntimeException if {@code trackConnectionLimit} is {@code true} and the maximum
+     *         connection limit has been exceeded
      * @throws UncheckedIOException if an I/O error occurs while opening/configuring the connection
      */
     @SuppressWarnings("unused")

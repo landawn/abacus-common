@@ -395,15 +395,21 @@ public interface NoCachingNoUpdating {
     @Stateful
     class DisposableObjArray extends DisposableArray<Object> {
 
+        /**
+         * Constructs a DisposableObjArray wrapping the specified Object array.
+         *
+         * @param a the Object array to wrap; must not be {@code null}
+         */
         protected DisposableObjArray(final Object[] a) {
             super(a);
         }
 
         /**
-         * Creates a new DisposableObjArray with a new Object array of the specified length.
+         * Creates a new DisposableObjArray backed by a new Object array of the specified length.
          *
-         * @param len the length of the array
+         * @param len the length of the array; must be non-negative
          * @return a new DisposableObjArray instance
+         * @throws IllegalArgumentException if {@code len} is negative
          */
         public static DisposableObjArray create(final int len) {
             if (len < 0) {
@@ -431,8 +437,9 @@ public interface NoCachingNoUpdating {
         /**
          * Wraps an existing Object array in a DisposableObjArray.
          *
-         * @param a the Object array to wrap
+         * @param a the Object array to wrap; must not be {@code null}
          * @return a new DisposableObjArray wrapping the given array
+         * @throws IllegalArgumentException if {@code a} is {@code null}
          */
         public static DisposableObjArray wrap(final Object[] a) {
             return new DisposableObjArray(a);
@@ -461,16 +468,22 @@ public interface NoCachingNoUpdating {
         /** The element array */
         private final boolean[] a;
 
+        /**
+         * Constructs a DisposableBooleanArray wrapping the specified boolean array.
+         *
+         * @param a the boolean array to wrap; must not be {@code null}
+         */
         protected DisposableBooleanArray(final boolean[] a) {
             N.checkArgNotNull(a, cs.a);
             this.a = a;
         }
 
         /**
-         * Creates a new DisposableBooleanArray with a new boolean array of the specified length.
+         * Creates a new DisposableBooleanArray backed by a new boolean array of the specified length.
          *
-         * @param len the length of the array
+         * @param len the length of the array; must be non-negative
          * @return a new DisposableBooleanArray instance
+         * @throws IllegalArgumentException if {@code len} is negative
          */
         public static DisposableBooleanArray create(final int len) {
             if (len < 0) {
@@ -482,8 +495,9 @@ public interface NoCachingNoUpdating {
         /**
          * Wraps an existing boolean array in a DisposableBooleanArray.
          *
-         * @param a the boolean array to wrap
+         * @param a the boolean array to wrap; must not be {@code null}
          * @return a new DisposableBooleanArray wrapping the given array
+         * @throws IllegalArgumentException if {@code a} is {@code null}
          */
         public static DisposableBooleanArray wrap(final boolean[] a) {
             return new DisposableBooleanArray(a);
@@ -625,11 +639,23 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
+        /**
+         * Returns a string representation of the wrapped boolean array.
+         *
+         * @return a string representation of the array
+         */
         @Override
         public String toString() {
             return N.toString(a);
         }
 
+        /**
+         * Returns the wrapped boolean array directly, without copying.
+         * The returned array must not be cached or modified; use {@link #copy()} when an
+         * independent array is required.
+         *
+         * @return the wrapped boolean array (the live backing array, not a copy)
+         */
         protected boolean[] values() {
             return a;
         }
@@ -657,16 +683,22 @@ public interface NoCachingNoUpdating {
         /** The element array */
         private final char[] a;
 
+        /**
+         * Constructs a DisposableCharArray wrapping the specified char array.
+         *
+         * @param a the char array to wrap; must not be {@code null}
+         */
         protected DisposableCharArray(final char[] a) {
             N.checkArgNotNull(a, cs.a);
             this.a = a;
         }
 
         /**
-         * Creates a new DisposableCharArray with a new char array of the specified length.
+         * Creates a new DisposableCharArray backed by a new char array of the specified length.
          *
-         * @param len the length of the array
+         * @param len the length of the array; must be non-negative
          * @return a new DisposableCharArray instance
+         * @throws IllegalArgumentException if {@code len} is negative
          */
         public static DisposableCharArray create(final int len) {
             if (len < 0) {
@@ -678,8 +710,9 @@ public interface NoCachingNoUpdating {
         /**
          * Wraps an existing char array in a DisposableCharArray.
          *
-         * @param a the char array to wrap
+         * @param a the char array to wrap; must not be {@code null}
          * @return a new DisposableCharArray wrapping the given array
+         * @throws IllegalArgumentException if {@code a} is {@code null}
          */
         public static DisposableCharArray wrap(final char[] a) {
             return new DisposableCharArray(a);
@@ -853,11 +886,23 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
+        /**
+         * Returns a string representation of the wrapped char array.
+         *
+         * @return a string representation of the array
+         */
         @Override
         public String toString() {
             return N.toString(a);
         }
 
+        /**
+         * Returns the wrapped char array directly, without copying.
+         * The returned array must not be cached or modified; use {@link #copy()} when an
+         * independent array is required.
+         *
+         * @return the wrapped char array (the live backing array, not a copy)
+         */
         protected char[] values() {
             return a;
         }
@@ -885,16 +930,22 @@ public interface NoCachingNoUpdating {
         /** The element array */
         private final byte[] a;
 
+        /**
+         * Constructs a DisposableByteArray wrapping the specified byte array.
+         *
+         * @param a the byte array to wrap; must not be {@code null}
+         */
         protected DisposableByteArray(final byte[] a) {
             N.checkArgNotNull(a, cs.a);
             this.a = a;
         }
 
         /**
-         * Creates a new DisposableByteArray with a new byte array of the specified length.
+         * Creates a new DisposableByteArray backed by a new byte array of the specified length.
          *
-         * @param len the length of the array
+         * @param len the length of the array; must be non-negative
          * @return a new DisposableByteArray instance
+         * @throws IllegalArgumentException if {@code len} is negative
          */
         public static DisposableByteArray create(final int len) {
             if (len < 0) {
@@ -906,8 +957,9 @@ public interface NoCachingNoUpdating {
         /**
          * Wraps an existing byte array in a DisposableByteArray.
          *
-         * @param a the byte array to wrap
+         * @param a the byte array to wrap; must not be {@code null}
          * @return a new DisposableByteArray wrapping the given array
+         * @throws IllegalArgumentException if {@code a} is {@code null}
          */
         public static DisposableByteArray wrap(final byte[] a) {
             return new DisposableByteArray(a);
@@ -1079,11 +1131,23 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
+        /**
+         * Returns a string representation of the wrapped byte array.
+         *
+         * @return a string representation of the array
+         */
         @Override
         public String toString() {
             return N.toString(a);
         }
 
+        /**
+         * Returns the wrapped byte array directly, without copying.
+         * The returned array must not be cached or modified; use {@link #copy()} when an
+         * independent array is required.
+         *
+         * @return the wrapped byte array (the live backing array, not a copy)
+         */
         protected byte[] values() {
             return a;
         }
@@ -1111,16 +1175,22 @@ public interface NoCachingNoUpdating {
         /** The element array */
         private final short[] a;
 
+        /**
+         * Constructs a DisposableShortArray wrapping the specified short array.
+         *
+         * @param a the short array to wrap; must not be {@code null}
+         */
         protected DisposableShortArray(final short[] a) {
             N.checkArgNotNull(a, cs.a);
             this.a = a;
         }
 
         /**
-         * Creates a new DisposableShortArray with a new short array of the specified length.
+         * Creates a new DisposableShortArray backed by a new short array of the specified length.
          *
-         * @param len the length of the array
+         * @param len the length of the array; must be non-negative
          * @return a new DisposableShortArray instance
+         * @throws IllegalArgumentException if {@code len} is negative
          */
         public static DisposableShortArray create(final int len) {
             if (len < 0) {
@@ -1132,8 +1202,9 @@ public interface NoCachingNoUpdating {
         /**
          * Wraps an existing short array in a DisposableShortArray.
          *
-         * @param a the short array to wrap
+         * @param a the short array to wrap; must not be {@code null}
          * @return a new DisposableShortArray wrapping the given array
+         * @throws IllegalArgumentException if {@code a} is {@code null}
          */
         public static DisposableShortArray wrap(final short[] a) {
             return new DisposableShortArray(a);
@@ -1305,11 +1376,23 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
+        /**
+         * Returns a string representation of the wrapped short array.
+         *
+         * @return a string representation of the array
+         */
         @Override
         public String toString() {
             return N.toString(a);
         }
 
+        /**
+         * Returns the wrapped short array directly, without copying.
+         * The returned array must not be cached or modified; use {@link #copy()} when an
+         * independent array is required.
+         *
+         * @return the wrapped short array (the live backing array, not a copy)
+         */
         protected short[] values() {
             return a;
         }
@@ -1338,16 +1421,22 @@ public interface NoCachingNoUpdating {
         /** The element array */
         private final int[] a;
 
+        /**
+         * Constructs a DisposableIntArray wrapping the specified int array.
+         *
+         * @param a the int array to wrap; must not be {@code null}
+         */
         protected DisposableIntArray(final int[] a) {
             N.checkArgNotNull(a, cs.a);
             this.a = a;
         }
 
         /**
-         * Creates a new DisposableIntArray with a new int array of the specified length.
+         * Creates a new DisposableIntArray backed by a new int array of the specified length.
          *
-         * @param len the length of the array
+         * @param len the length of the array; must be non-negative
          * @return a new DisposableIntArray instance
+         * @throws IllegalArgumentException if {@code len} is negative
          */
         public static DisposableIntArray create(final int len) {
             if (len < 0) {
@@ -1359,8 +1448,9 @@ public interface NoCachingNoUpdating {
         /**
          * Wraps an existing int array in a DisposableIntArray.
          *
-         * @param a the int array to wrap
+         * @param a the int array to wrap; must not be {@code null}
          * @return a new DisposableIntArray wrapping the given array
+         * @throws IllegalArgumentException if {@code a} is {@code null}
          */
         public static DisposableIntArray wrap(final int[] a) {
             return new DisposableIntArray(a);
@@ -1532,11 +1622,23 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
+        /**
+         * Returns a string representation of the wrapped int array.
+         *
+         * @return a string representation of the array
+         */
         @Override
         public String toString() {
             return N.toString(a);
         }
 
+        /**
+         * Returns the wrapped int array directly, without copying.
+         * The returned array must not be cached or modified; use {@link #copy()} when an
+         * independent array is required.
+         *
+         * @return the wrapped int array (the live backing array, not a copy)
+         */
         protected int[] values() {
             return a;
         }
@@ -1564,16 +1666,22 @@ public interface NoCachingNoUpdating {
         /** The element array */
         private final long[] a;
 
+        /**
+         * Constructs a DisposableLongArray wrapping the specified long array.
+         *
+         * @param a the long array to wrap; must not be {@code null}
+         */
         protected DisposableLongArray(final long[] a) {
             N.checkArgNotNull(a, cs.a);
             this.a = a;
         }
 
         /**
-         * Creates a new DisposableLongArray with a new long array of the specified length.
+         * Creates a new DisposableLongArray backed by a new long array of the specified length.
          *
-         * @param len the length of the array
+         * @param len the length of the array; must be non-negative
          * @return a new DisposableLongArray instance
+         * @throws IllegalArgumentException if {@code len} is negative
          */
         public static DisposableLongArray create(final int len) {
             if (len < 0) {
@@ -1585,8 +1693,9 @@ public interface NoCachingNoUpdating {
         /**
          * Wraps an existing long array in a DisposableLongArray.
          *
-         * @param a the long array to wrap
+         * @param a the long array to wrap; must not be {@code null}
          * @return a new DisposableLongArray wrapping the given array
+         * @throws IllegalArgumentException if {@code a} is {@code null}
          */
         public static DisposableLongArray wrap(final long[] a) {
             return new DisposableLongArray(a);
@@ -1758,11 +1867,23 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
+        /**
+         * Returns a string representation of the wrapped long array.
+         *
+         * @return a string representation of the array
+         */
         @Override
         public String toString() {
             return N.toString(a);
         }
 
+        /**
+         * Returns the wrapped long array directly, without copying.
+         * The returned array must not be cached or modified; use {@link #copy()} when an
+         * independent array is required.
+         *
+         * @return the wrapped long array (the live backing array, not a copy)
+         */
         protected long[] values() {
             return a;
         }
@@ -1790,16 +1911,22 @@ public interface NoCachingNoUpdating {
         /** The element array */
         private final float[] a;
 
+        /**
+         * Constructs a DisposableFloatArray wrapping the specified float array.
+         *
+         * @param a the float array to wrap; must not be {@code null}
+         */
         protected DisposableFloatArray(final float[] a) {
             N.checkArgNotNull(a, cs.a);
             this.a = a;
         }
 
         /**
-         * Creates a new DisposableFloatArray with a new float array of the specified length.
+         * Creates a new DisposableFloatArray backed by a new float array of the specified length.
          *
-         * @param len the length of the array
+         * @param len the length of the array; must be non-negative
          * @return a new DisposableFloatArray instance
+         * @throws IllegalArgumentException if {@code len} is negative
          */
         public static DisposableFloatArray create(final int len) {
             if (len < 0) {
@@ -1811,8 +1938,9 @@ public interface NoCachingNoUpdating {
         /**
          * Wraps an existing float array in a DisposableFloatArray.
          *
-         * @param a the float array to wrap
+         * @param a the float array to wrap; must not be {@code null}
          * @return a new DisposableFloatArray wrapping the given array
+         * @throws IllegalArgumentException if {@code a} is {@code null}
          */
         public static DisposableFloatArray wrap(final float[] a) {
             return new DisposableFloatArray(a);
@@ -1984,11 +2112,23 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
+        /**
+         * Returns a string representation of the wrapped float array.
+         *
+         * @return a string representation of the array
+         */
         @Override
         public String toString() {
             return N.toString(a);
         }
 
+        /**
+         * Returns the wrapped float array directly, without copying.
+         * The returned array must not be cached or modified; use {@link #copy()} when an
+         * independent array is required.
+         *
+         * @return the wrapped float array (the live backing array, not a copy)
+         */
         protected float[] values() {
             return a;
         }
@@ -2017,16 +2157,22 @@ public interface NoCachingNoUpdating {
         /** The element array */
         private final double[] a;
 
+        /**
+         * Constructs a DisposableDoubleArray wrapping the specified double array.
+         *
+         * @param a the double array to wrap; must not be {@code null}
+         */
         protected DisposableDoubleArray(final double[] a) {
             N.checkArgNotNull(a, cs.a);
             this.a = a;
         }
 
         /**
-         * Creates a new DisposableDoubleArray with a new double array of the specified length.
+         * Creates a new DisposableDoubleArray backed by a new double array of the specified length.
          *
-         * @param len the length of the array
+         * @param len the length of the array; must be non-negative
          * @return a new DisposableDoubleArray instance
+         * @throws IllegalArgumentException if {@code len} is negative
          */
         public static DisposableDoubleArray create(final int len) {
             if (len < 0) {
@@ -2038,8 +2184,9 @@ public interface NoCachingNoUpdating {
         /**
          * Wraps an existing double array in a DisposableDoubleArray.
          *
-         * @param a the double array to wrap
+         * @param a the double array to wrap; must not be {@code null}
          * @return a new DisposableDoubleArray wrapping the given array
+         * @throws IllegalArgumentException if {@code a} is {@code null}
          */
         public static DisposableDoubleArray wrap(final double[] a) {
             return new DisposableDoubleArray(a);
@@ -2211,11 +2358,23 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
+        /**
+         * Returns a string representation of the wrapped double array.
+         *
+         * @return a string representation of the array
+         */
         @Override
         public String toString() {
             return N.toString(a);
         }
 
+        /**
+         * Returns the wrapped double array directly, without copying.
+         * The returned array must not be cached or modified; use {@link #copy()} when an
+         * independent array is required.
+         *
+         * @return the wrapped double array (the live backing array, not a copy)
+         */
         protected double[] values() {
             return a;
         }
@@ -2246,17 +2405,23 @@ public interface NoCachingNoUpdating {
         /** The deque. */
         private final Deque<T> deque;
 
+        /**
+         * Constructs a DisposableDeque wrapping the specified deque.
+         *
+         * @param deque the deque to wrap; must not be {@code null}
+         */
         protected DisposableDeque(final Deque<T> deque) {
             N.checkArgNotNull(deque, cs.deque);
             this.deque = deque;
         }
 
         /**
-         * Creates a new DisposableDeque with a new ArrayDeque of the specified initial capacity.
+         * Creates a new DisposableDeque backed by a new ArrayDeque with the specified initial capacity.
          *
          * @param <T> the type of elements in the deque
-         * @param len the initial capacity of the deque
+         * @param len the initial capacity of the deque; must be non-negative
          * @return a new DisposableDeque instance
+         * @throws IllegalArgumentException if {@code len} is negative
          */
         public static <T> DisposableDeque<T> create(final int len) {
             if (len < 0) {
@@ -2269,8 +2434,9 @@ public interface NoCachingNoUpdating {
          * Wraps an existing Deque in a DisposableDeque.
          *
          * @param <T> the type of elements in the deque
-         * @param deque the deque to wrap
+         * @param deque the deque to wrap; must not be {@code null}
          * @return a new DisposableDeque wrapping the given deque
+         * @throws IllegalArgumentException if {@code deque} is {@code null}
          */
         public static <T> DisposableDeque<T> wrap(final Deque<T> deque) {
             return new DisposableDeque<>(deque);
@@ -2306,12 +2472,18 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * Copies all elements from the deque to the specified array.
-         * If the array is too small, a new array of the same type is allocated.
+         * Returns an array containing all elements of the deque.
+         * If the supplied array is large enough, the elements are stored in it; otherwise a new
+         * array of the same runtime type is allocated. Follows the same contract as
+         * {@link java.util.Collection#toArray(Object[])}.
+         * The returned array is safe to cache and modify.
          *
-         * @param <A> the type of the array elements
-         * @param a the array into which the elements are to be stored
+         * @param <A> the runtime type of the target array
+         * @param a the array into which the elements are to be stored if it is large enough;
+         *          otherwise a new array of the same runtime type is allocated
          * @return an array containing all elements from the deque
+         * @throws ArrayStoreException if the runtime type of {@code a} is not a supertype of the element type
+         * @throws NullPointerException if {@code a} is {@code null}
          */
         public <A> A[] toArray(final A[] a) {
             return deque.toArray(a);

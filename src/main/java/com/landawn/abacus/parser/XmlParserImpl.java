@@ -60,7 +60,7 @@ import com.landawn.abacus.util.XmlUtil;
  * Implementation of the XmlParser interface providing XML serialization and deserialization capabilities.
  * This parser supports both StAX (Streaming API for XML) and DOM (Document Object Model) parsing modes.
  *
- * <p>The parser handles various Java types including:
+ * <p>The parser handles various Java types including:</p>
  * <ul>
  *   <li>Primitive types and their wrappers</li>
  *   <li>Arrays and Collections</li>
@@ -68,7 +68,7 @@ import com.landawn.abacus.util.XmlUtil;
  *   <li>JavaBeans with getter/setter methods</li>
  * </ul>
  *
- * <p>Key features:
+ * <p>Key features:</p>
  * <ul>
  *   <li>Circular reference detection and handling</li>
  *   <li>Type information preservation</li>

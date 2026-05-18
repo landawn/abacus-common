@@ -545,8 +545,8 @@ public final class MapEntity implements Serializable {
          *        .put("age", 30);
          * }</pre>
          *
-         * @param idPropName the property name
-         * @param idPropVal the property value
+         * @param idPropName the name of the property to set
+         * @param idPropVal the value to associate with the property
          * @return this builder instance for method chaining
          */
         public MapEntityBuilder put(final String idPropName, final Object idPropVal) {

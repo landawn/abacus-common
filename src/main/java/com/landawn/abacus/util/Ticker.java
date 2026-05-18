@@ -22,7 +22,7 @@ package com.landawn.abacus.util;
  * elapsed time. By default, it uses {@link System#nanoTime()}, but custom implementations
  * can provide alternative time sources for testing or special requirements.</p>
  *
- * <p><b>Note:</b> This interface can only be used to measure elapsed time, not wall time.
+ * <p><b>Note:</b> This class can only be used to measure elapsed time, not wall time.
  * The values returned by {@link #read()} have no absolute meaning and can only be
  * interpreted relative to other values returned by the same ticker.</p>
  *

@@ -61,7 +61,7 @@ public final class InternalUtil {
      * <p>The pool size is dynamically calculated based on the JVM's maximum memory,
      * ranging from 1000 to 8192 elements.</p>
      *
-     * @deprecated DO NOT call the methods defined in this class. It's for internal use only.
+     * @deprecated This field is for internal use only. Do not access it directly.
      */
     @Deprecated
     public static final int POOL_SIZE;
@@ -130,10 +130,11 @@ public final class InternalUtil {
     }
 
     /**
-     * Creates an ArrayList by initializing its elements with the specified array.
+     * Creates a new, modifiable {@link java.util.ArrayList} containing the elements of the specified array.
      *
-     * <p>The returned list is a new, modifiable ArrayList containing the elements
-     * of the input array; it is not backed by the input array.</p>
+     * <p>The returned list is independent of the input array — changes to the array after
+     * this call do not affect the returned list, and vice versa.
+     * An empty {@code ArrayList} is returned if {@code a} is {@code null} or empty.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -143,8 +144,8 @@ public final class InternalUtil {
      * }</pre>
      *
      * @param <T> the element type
-     * @param a the array to create the list from
-     * @return a new ArrayList containing the elements of the array
+     * @param a the array whose elements are to be placed into the list; may be {@code null} or empty
+     * @return a new {@code ArrayList} containing the elements of {@code a}, or an empty list if {@code a} is {@code null} or empty
      * @deprecated DO NOT call the methods defined in this class. It's for internal use only.
      */
     @Deprecated
@@ -159,19 +160,19 @@ public final class InternalUtil {
     }
 
     /**
-     * Gets the character array from a string for read-only purposes.
+     * Returns a character array containing the characters of the given string.
      *
-     * <p>This method is intended for read-only access to a string's characters.
-     * The returned array should be treated as read-only and not modified.</p>
+     * <p>This method is intended for internal read-only access to a string's characters.
+     * The returned array is a copy produced by {@link String#toCharArray()}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = InternalUtil.getCharsForReadOnly("Hello");
-     * // Use chars for reading only, do not modify
+     * // Use chars for reading only
      * }</pre>
      *
-     * @param str the string to get characters from
-     * @return a character array containing the characters of {@code str} (treat as read-only, do not modify);
+     * @param str the string whose characters are to be returned; may be {@code null} or empty
+     * @return a {@code char[]} containing the characters of {@code str};
      *         an empty array if {@code str} is {@code null} or empty
      * @deprecated DO NOT call the methods defined in this class. It's for internal use only.
      */

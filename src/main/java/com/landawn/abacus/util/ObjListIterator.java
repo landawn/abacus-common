@@ -564,7 +564,9 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      *
      * @return an {@code Optional} containing the first {@code non-null} element,
      *         or an empty {@code Optional} if none is found
-     * @deprecated inconsistent data is returned
+     * @deprecated This method partially consumes the iterator and leaves it in an
+     *             intermediate state (elements after the first non-null element remain),
+     *             which produces inconsistent results when the iterator is used further.
      */
     @Deprecated
     public u.Optional<T> firstNonNull() {

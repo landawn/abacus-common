@@ -156,53 +156,48 @@ public final class RowDataset implements Dataset, Cloneable {
 
     private transient int modCount = 0; //NOSONAR
 
+    /**
+     * No-argument constructor reserved for Kryo serialization/deserialization.
+     * Do not call directly.
+     */
     // For Kryo
     protected RowDataset() {
         _properties = EMPTY_PROPERTIES;
     }
 
     /**
-     * Constructs a new RowDataset with the specified column names and column data.
+     * Constructs a new {@code RowDataset} with the specified column names and column data.
      *
-     * <p>This constructor creates a row-oriented dataset where data is organized in columns.
-     * Each column is represented as a List of Objects, and all columns must have the same size
-     * to maintain data integrity across rows.</p>
+     * <p>The supplied lists are used directly (not defensively copied), so callers should not
+     * mutate them after construction. All columns must have the same size to maintain a
+     * consistent row count.</p>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p><b>Usage example:</b></p>
      * <pre>{@code
-     * // Creating a simple dataset with 3 columns and 2 rows
      * List<String> columnNames = Arrays.asList("id", "name", "age");
      * List<List<Object>> columns = Arrays.asList(
-     *     Arrays.asList(1, 2),           // id column
-     *     Arrays.asList("Alice", "Bob"),  // name column
-     *     Arrays.asList(25, 30)           // age column
+     *     new ArrayList<>(Arrays.asList(1, 2)),
+     *     new ArrayList<>(Arrays.asList("Alice", "Bob")),
+     *     new ArrayList<>(Arrays.asList(25, 30))
      * );
      * RowDataset dataset = new RowDataset(columnNames, columns);
-     *
-     * // Accessing data
-     * System.out.println(dataset.size());          // prints: 2
-     * System.out.println(dataset.columnCount());   // prints: 3
-     * System.out.println(dataset.get(0, 1));       // prints: "Alice"
+     * System.out.println(dataset.size());        // 2
+     * System.out.println(dataset.columnCount()); // 3
+     * System.out.println(dataset.get(0, 1));     // "Alice"
      * }</pre>
      *
-     * @param columnNameList the list of column names for the dataset. Must not be {@code null},
-     *                      must not contain empty/null names, and must not contain duplicates.
-     *                      The order of names corresponds to the order of columns in columnList.
-     * @param columnList the list of columns, where each column is a List of Objects containing
-     *                  the data for that column. Must not be {@code null}, and each column must not be {@code null}.
-     *                  All columns must have the same size to ensure consistent row structure.
-     *
-     * @throws IllegalArgumentException if any of the following conditions are met:
-     *         <ul>
-     *         <li>columnNameList is {@code null}</li>
-     *         <li>columnList is {@code null}</li>
-     *         <li>columnNameList contains empty or {@code null} column names</li>
-     *         <li>columnNameList contains duplicate column names</li>
-     *         <li>the size of columnNameList differs from the size of columnList</li>
-     *         <li>any column in columnList is {@code null}</li>
-     *         <li>columns in columnList have different sizes</li>
-     *         </ul>
-     *
+     * @param columnNameList the ordered list of column names. Must not be {@code null},
+     *                       must not contain {@code null} or empty names, and must not
+     *                       contain duplicates. Size must equal {@code columnList.size()}.
+     * @param columnList the ordered list of columns, where each element is a {@code List<Object>}
+     *                   holding the values for that column. Must not be {@code null};
+     *                   each element must not be {@code null}. All columns must have the
+     *                   same size.
+     * @throws IllegalArgumentException if {@code columnNameList} or {@code columnList} is
+     *         {@code null}; if any column name is {@code null} or empty; if column names
+     *         contain duplicates; if the sizes of {@code columnNameList} and {@code columnList}
+     *         differ; if any column element is {@code null}; or if the column lists have
+     *         different sizes.
      * @see #RowDataset(List, List, Map)
      */
     public RowDataset(final List<String> columnNameList, final List<List<Object>> columnList) {
@@ -210,57 +205,42 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     /**
-     * Constructs a new RowDataset with the specified column names, column data, and properties.
+     * Constructs a new {@code RowDataset} with the specified column names, column data, and
+     * optional metadata properties.
      *
-     * <p>This constructor creates a row-oriented dataset where data is organized in columns.
-     * Each column is represented as a List of Objects, and all columns must have the same size
-     * to maintain data integrity across rows.</p>
+     * <p>The supplied {@code columnNameList} and {@code columnList} are used directly (not
+     * defensively copied). The {@code properties} map is copied into a new ordered map, so
+     * subsequent changes to the passed map will not affect this dataset.</p>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p><b>Usage example:</b></p>
      * <pre>{@code
-     * // Creating a dataset with properties/metadata
      * List<String> columnNames = Arrays.asList("id", "name", "score");
      * List<List<Object>> columns = Arrays.asList(
-     *     Arrays.asList(1, 2, 3),              // id column
-     *     Arrays.asList("Alice", "Bob", "Charlie"),  // name column
-     *     Arrays.asList(95, 87, 92)            // score column
+     *     new ArrayList<>(Arrays.asList(1, 2, 3)),
+     *     new ArrayList<>(Arrays.asList("Alice", "Bob", "Charlie")),
+     *     new ArrayList<>(Arrays.asList(95, 87, 92))
      * );
-     *
-     * Map<String, Object> properties = new HashMap<>();
-     * properties.put("source", "test_data");
-     * properties.put("created", LocalDateTime.now());
-     * properties.put("description", "Student scores dataset");
-     *
-     * RowDataset dataset = new RowDataset(columnNames, columns, properties);
-     *
-     * // Accessing dataset and properties
-     * System.out.println(dataset.size());                          // prints: 3
-     * System.out.println(dataset.getProperties().get("source"));   // prints: "test_data"
-     * System.out.println(dataset.get(0, 1));                        // prints: "Alice"
+     * Map<String, Object> props = new HashMap<>();
+     * props.put("source", "test_data");
+     * RowDataset dataset = new RowDataset(columnNames, columns, props);
+     * System.out.println(dataset.getProperties().get("source")); // "test_data"
      * }</pre>
      *
-     * @param columnNameList the list of column names for the dataset. Must not be {@code null},
-     *                      must not contain empty/null names, and must not contain duplicates.
-     *                      The order of names corresponds to the order of columns in columnList.
-     * @param columnList the list of columns, where each column is a List of Objects containing
-     *                  the data for that column. Must not be {@code null}, and each column must not be {@code null}.
-     *                  All columns must have the same size to ensure consistent row structure.
-     * @param properties optional properties map for storing metadata associated with this dataset.
-     *                  Can be {@code null}. A defensive copy is made of the provided properties.
-     *
-     * @throws IllegalArgumentException if any of the following conditions are met:
-     *         <ul>
-     *         <li>columnNameList is {@code null}</li>
-     *         <li>columnList is {@code null}</li>
-     *         <li>columnNameList contains empty or {@code null} column names</li>
-     *         <li>columnNameList contains duplicate column names</li>
-     *         <li>the size of columnNameList differs from the size of columnList</li>
-     *         <li>any column in columnList is {@code null}</li>
-     *         <li>columns in columnList have different sizes</li>
-     *         </ul>
-     *
+     * @param columnNameList the ordered list of column names. Must not be {@code null},
+     *                       must not contain {@code null} or empty names, and must not
+     *                       contain duplicates. Size must equal {@code columnList.size()}.
+     * @param columnList the ordered list of columns, where each element is a {@code List<Object>}
+     *                   holding the values for that column. Must not be {@code null};
+     *                   each element must not be {@code null}. All columns must have the
+     *                   same size.
+     * @param properties optional metadata map. May be {@code null}. A copy is made, so
+     *                   later changes to the provided map are not reflected in this dataset.
+     * @throws IllegalArgumentException if {@code columnNameList} or {@code columnList} is
+     *         {@code null}; if any column name is {@code null} or empty; if column names
+     *         contain duplicates; if the sizes of {@code columnNameList} and {@code columnList}
+     *         differ; if any column element is {@code null}; or if the column lists have
+     *         different sizes.
      * @see #RowDataset(List, List)
-     * @see #copyProperties(Map)
      */
     public RowDataset(final List<String> columnNameList, final List<List<Object>> columnList, final Map<String, Object> properties)
             throws IllegalArgumentException {
@@ -9563,50 +9543,101 @@ public final class RowDataset implements Dataset, Cloneable {
         return ret;
     }
 
+    /**
+     * Asserts that this dataset is not frozen.
+     *
+     * @throws IllegalStateException if this dataset has been frozen via {@link #freeze()}
+     */
     void checkFrozen() {
         if (_isFrozen) {
             throw new IllegalStateException("This Dataset is frozen and cannot be modified");
         }
     }
 
+    /**
+     * Validates that {@code rowIndex} is a valid row index for this dataset.
+     *
+     * @param rowIndex the row index to validate
+     * @throws IndexOutOfBoundsException if {@code rowIndex} is negative or {@code >= size()}
+     */
     void checkRowIndex(final int rowIndex) {
         if ((rowIndex < 0) || (rowIndex >= size())) {
             throw new IndexOutOfBoundsException("Invalid row index: " + rowIndex + ". It must be >= 0 and < " + size());
         }
     }
 
+    /**
+     * Validates that {@code [fromRowIndex, toRowIndex)} is a valid half-open row range for this dataset.
+     *
+     * @param fromRowIndex the inclusive start row index
+     * @param toRowIndex the exclusive end row index
+     * @throws IndexOutOfBoundsException if the range is invalid
+     */
     void checkRowIndex(final int fromRowIndex, final int toRowIndex) throws IndexOutOfBoundsException {
         checkRowIndex(fromRowIndex, toRowIndex, size());
     }
 
+    /**
+     * Validates that {@code [fromRowIndex, toRowIndex)} is a valid half-open row range for a
+     * dataset of the given {@code size}.
+     *
+     * @param fromRowIndex the inclusive start row index
+     * @param toRowIndex the exclusive end row index
+     * @param size the total row count to validate against
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex},
+     *         or {@code toRowIndex > size}
+     */
     void checkRowIndex(final int fromRowIndex, final int toRowIndex, final int size) throws IndexOutOfBoundsException {
         if ((fromRowIndex < 0) || (fromRowIndex > toRowIndex) || (toRowIndex > size)) {
             throw new IndexOutOfBoundsException("Row index range [" + fromRowIndex + ", " + toRowIndex + "] is out-of-bounds for length " + size);
         }
     }
 
+    /**
+     * Returns a hash-key representative for the given object suitable for use as a map key,
+     * handling arrays and other types that do not override {@code equals}/{@code hashCode} by value.
+     *
+     * @param obj the object to wrap as a hash key; may be {@code null}
+     * @return a hash-key object for {@code obj}
+     */
     static Object hashKey(final Object obj) {
         return N.hashKey(obj);
     }
 
+    /**
+     * A {@link Paginated} view of this {@code RowDataset}.
+     *
+     * <p>Pages are lazily computed as slices of the outer dataset and are cached in
+     * {@code pagePool} after their first access. The view detects concurrent
+     * structural modifications to the outer dataset via {@code modCount} and throws
+     * {@link ConcurrentModificationException} if one is detected.</p>
+     */
     private class PaginatedDataset implements Paginated<Dataset> {
-        /** The expected mod count. */
+        /** The mod-count snapshot taken when this view was created; used to detect concurrent modifications. */
         private final int expectedModCount = modCount;
 
-        /** The page pool. */
+        /** Cache of already-computed page slices, keyed by zero-based page number. */
         private final Map<Integer, Dataset> pagePool = new HashMap<>();
 
+        /** The column names included in each page. */
         private final Collection<String> columnNames;
 
-        /** The page size. */
+        /** The maximum number of rows per page. */
         private final int pageSize;
 
-        /** The page count. */
+        /** The total number of pages. */
         private final int totalPages;
 
         //    /** The current page num. */
         //    private int currentPageNum;
 
+        /**
+         * Creates a paginated view of the enclosing {@code RowDataset}.
+         *
+         * @param columnNames the column names to include in each page; must not be {@code null}
+         * @param pageSize the maximum number of rows per page; must be positive
+         * @throws IllegalArgumentException if {@code pageSize} is not positive
+         */
         private PaginatedDataset(final Collection<String> columnNames, final int pageSize) {
             // N.checkArgNotEmpty(columnNames, "columnNames");   // empty Dataset.
             N.checkArgPositive(pageSize, cs.pageSize);
@@ -9644,16 +9675,38 @@ public final class RowDataset implements Dataset, Cloneable {
             };
         }
 
+        /**
+         * Returns the first page, or an empty {@link Optional} if there are no pages.
+         *
+         * @return an {@link Optional} containing the first page, or empty if the dataset is empty
+         */
         @Override
         public Optional<Dataset> firstPage() {
             return pageCount() == 0 ? Optional.empty() : Optional.of(getPage(0));
         }
 
+        /**
+         * Returns the last page, or an empty {@link Optional} if there are no pages.
+         *
+         * @return an {@link Optional} containing the last page, or empty if the dataset is empty
+         */
         @Override
         public Optional<Dataset> lastPage() {
             return pageCount() == 0 ? Optional.empty() : Optional.of(getPage(totalPages - 1));
         }
 
+        /**
+         * Returns the page at the given zero-based page number.
+         *
+         * <p>Pages are computed lazily and cached for subsequent calls. Each page is a
+         * frozen slice of the outer dataset.</p>
+         *
+         * @param pageNum the zero-based page number; must be {@code >= 0} and {@code < totalPages()}
+         * @return a frozen {@link Dataset} slice representing the requested page
+         * @throws IllegalArgumentException if {@code pageNum} is out of range
+         * @throws ConcurrentModificationException if the outer dataset was structurally
+         *         modified since this {@code PaginatedDataset} was created
+         */
         @Override
         public Dataset getPage(final int pageNum) {
             checkConcurrentModification();
@@ -9673,22 +9726,43 @@ public final class RowDataset implements Dataset, Cloneable {
             }
         }
 
+        /**
+         * Returns the maximum number of rows per page.
+         *
+         * @return the page size
+         */
         @Override
         public int pageSize() {
             return pageSize;
         }
 
+        /**
+         * Returns the total number of pages.
+         *
+         * @return total number of pages
+         * @deprecated Use {@link #totalPages()} instead.
+         */
         @Deprecated
         @Override
         public int pageCount() {
             return totalPages;
         }
 
+        /**
+         * Returns the total number of pages.
+         *
+         * @return total number of pages
+         */
         @Override
         public int totalPages() {
             return totalPages;
         }
 
+        /**
+         * Returns a sequential {@link Stream} over all pages in order.
+         *
+         * @return a stream of {@link Dataset} pages
+         */
         @Override
         public Stream<Dataset> stream() {
             return Stream.of(iterator());

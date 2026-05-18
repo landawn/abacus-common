@@ -35,7 +35,7 @@ import com.landawn.abacus.util.Throwables;
 public interface ByteFunction<R> extends Throwables.ByteFunction<R, RuntimeException> { //NOSONAR
     /**
      * A predefined function that boxes a primitive {@code byte} value into a {@link Byte} object.
-     * This is equivalent to {@code Byte::valueOf} and provides a convenient way to convert
+     * This is equivalent to {@code Byte.valueOf(byte)} and provides a convenient way to convert
      * primitive bytes to their wrapper type.
      *
      * <p><b>Usage Examples:</b></p>

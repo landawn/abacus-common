@@ -447,8 +447,9 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * int result = a.compareTo(b);   // returns negative value
      * }</pre>
      *
-     * @param other the other MutableInt to compare to, not null
+     * @param other the other MutableInt to compare to, not {@code null}
      * @return negative if this is less, zero if equal, positive if greater
+     * @throws NullPointerException if {@code other} is {@code null}
      */
     @Override
     public int compareTo(final MutableInt other) {

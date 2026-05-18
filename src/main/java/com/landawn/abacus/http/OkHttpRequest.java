@@ -161,9 +161,12 @@ public final class OkHttpRequest {
      * OkHttpRequest request = OkHttpRequest.url("http://localhost:18080/users");
      * }</pre>
      *
+     * <p>Note: the URL string is not validated here. An {@link IllegalArgumentException} may be
+     * thrown later, when the request is executed, if it is not a valid HTTP or HTTPS URL. To
+     * validate up front, use {@link HttpUrl#parse(String)}, which returns {@code null} for invalid URLs.</p>
+     *
      * @param url the URL string for the request
      * @return a new OkHttpRequest instance
-     * @throws IllegalArgumentException if {@code url} is not a valid HTTP or HTTPS URL. Avoid this exception by calling {@link HttpUrl#parse}; it returns {@code null} for invalid URLs.
      */
     public static OkHttpRequest url(final String url) {
         return create(url, DEFAULT_CLIENT);

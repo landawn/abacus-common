@@ -118,6 +118,7 @@ import jakarta.xml.bind.Unmarshaller;
  */
 public final class XmlUtil {
 
+    /** Logger for this class, used to report security configuration warnings. */
     protected static final Logger logger = LoggerFactory.getLogger(XmlUtil.class);
 
     static final String NAME = "name";
@@ -355,7 +356,7 @@ public final class XmlUtil {
      * // Result: <?xml version="1.0" encoding="UTF-8" standalone="yes"?><person><age>30</age><name>John</name></person>
      * }</pre>
      *
-     * @param jaxbBean The JAXB-annotated bean to be marshaled
+     * @param jaxbBean The JAXB-annotated bean to be marshalled (must not be {@code null})
      * @return The XML string representation of the JAXB bean
      * @throws RuntimeException if marshalling fails (e.g. a {@code JAXBException} is raised)
      * @throws UncheckedIOException if an I/O error occurs while writing the XML
@@ -388,7 +389,7 @@ public final class XmlUtil {
     }
 
     /**
-     * Unmarshal the given XML string into an object of the specified class.
+     * Unmarshals the given XML string into an object of the specified class.
      * The JAXBContext is cached for the target class to improve performance on repeated operations.
      *
      * <p><b>Usage Examples:</b></p>
@@ -400,9 +401,9 @@ public final class XmlUtil {
      *
      * @param <T> The type of the object to be returned
      * @param cls The class of the object to be returned (must be JAXB-annotated)
-     * @param xml The XML string to be unmarshalled
+     * @param xml The XML string to be unmarshalled (must not be {@code null})
      * @return The unmarshalled object of the specified class
-     * @throws RuntimeException if unmarshalling fails
+     * @throws RuntimeException if unmarshalling fails (wraps {@link JAXBException})
      * @see JAXBContext#newInstance(Class...)
      * @see Unmarshaller#unmarshal(Reader)
      */
@@ -985,7 +986,7 @@ public final class XmlUtil {
      * XmlUtil.transform(doc, new File("output.xml"));
      * }</pre>
      *
-     * @param source The XML Document to be transformed
+     * @param source The XML Document to be transformed (must not be {@code null})
      * @param output The output file where the transformed XML will be written
      * @throws UncheckedIOException if an I/O error occurs while creating or writing the file
      * @throws RuntimeException if a {@code TransformerException} occurs during transformation
@@ -1023,9 +1024,9 @@ public final class XmlUtil {
      * String xmlString = baos.toString("UTF-8");
      * }</pre>
      *
-     * @param source The XML Document to be transformed
-     * @param output The OutputStream where the transformed XML will be written
-     * @throws RuntimeException if a TransformerException occurs
+     * @param source The XML Document to be transformed (must not be {@code null})
+     * @param output The OutputStream where the transformed XML will be written (not closed by this method)
+     * @throws RuntimeException if a {@code TransformerException} occurs
      * @see Transformer#transform(Source, Result)
      */
     public static void transform(final Document source, final OutputStream output) {
@@ -1053,9 +1054,9 @@ public final class XmlUtil {
      * String xmlString = writer.toString();
      * }</pre>
      *
-     * @param source The XML Document to be transformed
-     * @param output The Writer where the transformed XML will be written
-     * @throws RuntimeException if a TransformerException occurs
+     * @param source The XML Document to be transformed (must not be {@code null})
+     * @param output The Writer where the transformed XML will be written (not closed by this method)
+     * @throws RuntimeException if a {@code TransformerException} occurs
      * @see Transformer#transform(Source, Result)
      */
     public static void transform(final Document source, final Writer output) {

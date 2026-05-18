@@ -66,10 +66,10 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
     protected final int lengthOfReplacementsForChars;
 
     /**
-     * Constructs a CharacterWriter with internal buffering using the specified
+     * Constructs a {@code CharacterWriter} with internal buffering using the specified
      * character replacement table.
      *
-     * @param replacementsForChars the character replacement table for escaping
+     * @param replacementsForChars the character replacement table for escaping; must not be {@code null}
      */
     CharacterWriter(final char[][] replacementsForChars) {
         this.replacementsForChars = replacementsForChars;
@@ -77,11 +77,11 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
     }
 
     /**
-     * Constructs a CharacterWriter that writes to the specified OutputStream
+     * Constructs a {@code CharacterWriter} that writes to the specified {@link OutputStream}
      * using the specified character replacement table.
      *
-     * @param os the output stream to write to
-     * @param replacementsForChars the character replacement table for escaping
+     * @param os the output stream to write to; must not be {@code null}
+     * @param replacementsForChars the character replacement table for escaping; must not be {@code null}
      */
     CharacterWriter(final OutputStream os, final char[][] replacementsForChars) {
         super(os);
@@ -90,11 +90,11 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
     }
 
     /**
-     * Constructs a CharacterWriter that writes to the specified Writer
+     * Constructs a {@code CharacterWriter} that writes to the specified {@link Writer}
      * using the specified character replacement table.
      *
-     * @param writer the writer to write to
-     * @param replacementsForChars the character replacement table for escaping
+     * @param writer the writer to write to; must not be {@code null}
+     * @param replacementsForChars the character replacement table for escaping; must not be {@code null}
      */
     CharacterWriter(final Writer writer, final char[][] replacementsForChars) {
         super(writer);
@@ -139,8 +139,9 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * writer.writeCharacter(chars);   // Writes: Hello \"World\"
      * }</pre>
      *
-     * @param cbuf the character array to write
+     * @param cbuf the character array to write; must not be {@code null}
      * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code cbuf} is {@code null}
      */
     public void writeCharacter(final char[] cbuf) throws IOException {
         final int len = cbuf.length;
@@ -185,11 +186,12 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * writer.writeCharacter(chars, 6, 6);   // Writes: <data> (with escaping)
      * }</pre>
      *
-     * @param cbuf the character array containing data to write
-     * @param off the start offset in the array
-     * @param len the number of characters to write
+     * @param cbuf the character array containing data to write; must not be {@code null}
+     * @param off the start offset in the array; must be non-negative and not greater than {@code cbuf.length}
+     * @param len the number of characters to write; must be non-negative and {@code off + len} must not exceed {@code cbuf.length}
      * @throws IOException if an I/O error occurs
-     * @throws IndexOutOfBoundsException if off or len are invalid
+     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or {@code off + len} exceeds {@code cbuf.length}
+     * @throws NullPointerException if {@code cbuf} is {@code null}
      */
     public void writeCharacter(final char[] cbuf, final int off, int len) throws IOException {
         ensureOpen();
@@ -255,7 +257,9 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * Writes a portion of a string with automatic escaping.
      *
      * <p>Only the specified portion of the string is processed for escaping.
-     * Characters outside the specified range are not written.</p>
+     * Characters outside the specified range are not written.
+     * If {@code str} is {@code null}, the literal text {@code "null"} is used as the source,
+     * and {@code off}/{@code len} apply to that four-character array.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -263,11 +267,14 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * writer.writeCharacter(text, 6, 6);   // Writes: <data> (with escaping)
      * }</pre>
      *
-     * @param str the string containing data to write
-     * @param off the start offset in the string
-     * @param len the number of characters to write
+     * @param str the string containing data to write; if {@code null}, the literal {@code "null"} is used
+     * @param off the start offset in the string (or in {@code "null"} when {@code str} is {@code null});
+     *            must be non-negative and not greater than the effective string length
+     * @param len the number of characters to write; must be non-negative and {@code off + len} must
+     *            not exceed the effective string length
      * @throws IOException if an I/O error occurs
-     * @throws IndexOutOfBoundsException if off or len are invalid
+     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or {@code off + len}
+     *         exceeds the effective string length
      */
     @SuppressWarnings("deprecation")
     public void writeCharacter(final String str, final int off, final int len) throws IOException {
@@ -279,16 +286,18 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
     }
 
     /**
-     * Converts a character to its hexadecimal string representation.
-     * Used for numeric character references in XML.
+     * Converts a character code to an XML numeric character reference of the form
+     * {@code &#xXXXX;} using lowercase hexadecimal digits.
+     * Used for encoding control and non-printable characters in XML output.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String hex = getHexString(0x1F);   // Returns "&#x1f;"
+     * String hex2 = getHexString(0xA9);  // Returns "&#xa9;"
      * }</pre>
      *
      * @param ch the character code to convert
-     * @return the hexadecimal string representation
+     * @return the XML numeric character reference for the given code point
      */
     static String getHexString(final int ch) {
         return "&#x" + Integer.toHexString(ch) + ";";

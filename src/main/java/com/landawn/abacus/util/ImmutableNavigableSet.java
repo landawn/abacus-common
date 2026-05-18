@@ -110,6 +110,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @param <E> the type of element, must extend Comparable
      * @param e1 the element to be contained in the set
      * @return an ImmutableNavigableSet containing only the specified element
+     * @throws NullPointerException if {@code e1} is {@code null}
      * @see #of(Object, Object)
      */
     public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1) {
@@ -131,6 +132,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @param e1 the first element
      * @param e2 the second element
      * @return an ImmutableNavigableSet containing the specified elements in sorted order
+     * @throws NullPointerException if any element is {@code null}
      */
     public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1, final E e2) {
         return new ImmutableNavigableSet<>(new TreeSet<>(Arrays.asList(e1, e2)));
@@ -146,6 +148,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @param e2 the second element
      * @param e3 the third element
      * @return an ImmutableNavigableSet containing the specified elements in sorted order
+     * @throws NullPointerException if any element is {@code null}
      */
     public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3) {
         return new ImmutableNavigableSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3)));
@@ -162,6 +165,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @param e3 the third element
      * @param e4 the fourth element
      * @return an ImmutableNavigableSet containing the specified elements in sorted order
+     * @throws NullPointerException if any element is {@code null}
      */
     public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3, final E e4) {
         return new ImmutableNavigableSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4)));
@@ -179,6 +183,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @param e4 the fourth element
      * @param e5 the fifth element
      * @return an ImmutableNavigableSet containing the specified elements in sorted order
+     * @throws NullPointerException if any element is {@code null}
      */
     public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5) {
         return new ImmutableNavigableSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4, e5)));
@@ -197,6 +202,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @param e5 the fifth element
      * @param e6 the sixth element
      * @return an ImmutableNavigableSet containing the specified elements in sorted order
+     * @throws NullPointerException if any element is {@code null}
      */
     public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6) {
         return new ImmutableNavigableSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4, e5, e6)));
@@ -216,6 +222,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @param e6 the sixth element
      * @param e7 the seventh element
      * @return an ImmutableNavigableSet containing the specified elements in sorted order
+     * @throws NullPointerException if any element is {@code null}
      */
     public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6,
             final E e7) {
@@ -237,6 +244,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @param e7 the seventh element
      * @param e8 the eighth element
      * @return an ImmutableNavigableSet containing the specified elements in sorted order
+     * @throws NullPointerException if any element is {@code null}
      */
     public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6,
             final E e7, final E e8) {
@@ -259,6 +267,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @param e8 the eighth element
      * @param e9 the ninth element
      * @return an ImmutableNavigableSet containing the specified elements in sorted order
+     * @throws NullPointerException if any element is {@code null}
      */
     public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6,
             final E e7, final E e8, final E e9) {
@@ -282,6 +291,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @param e9 the ninth element
      * @param e10 the tenth element
      * @return an ImmutableNavigableSet containing the specified elements in sorted order
+     * @throws NullPointerException if any element is {@code null}
      */
     public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6,
             final E e7, final E e8, final E e9, final E e10) {
@@ -387,6 +397,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @param e the value to match
      * @return the greatest element less than {@code e}, or {@code null} if there is no such element
      * @throws ClassCastException if the specified element cannot be compared with the elements currently in the set
+     * @throws NullPointerException if the specified element is {@code null} and this set uses natural ordering,
      *         or its comparator does not permit {@code null} elements
      */
     @Override
@@ -409,6 +420,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @param e the value to match
      * @return the greatest element less than or equal to {@code e}, or {@code null} if there is no such element
      * @throws ClassCastException if the specified element cannot be compared with the elements currently in the set
+     * @throws NullPointerException if the specified element is {@code null} and this set uses natural ordering,
      *         or its comparator does not permit {@code null} elements
      */
     @Override
@@ -431,6 +443,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @param e the value to match
      * @return the least element greater than or equal to {@code e}, or {@code null} if there is no such element
      * @throws ClassCastException if the specified element cannot be compared with the elements currently in the set
+     * @throws NullPointerException if the specified element is {@code null} and this set uses natural ordering,
      *         or its comparator does not permit {@code null} elements
      */
     @Override
@@ -453,6 +466,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @param e the value to match
      * @return the least element greater than {@code e}, or {@code null} if there is no such element
      * @throws ClassCastException if the specified element cannot be compared with the elements currently in the set
+     * @throws NullPointerException if the specified element is {@code null} and this set uses natural ordering,
      *         or its comparator does not permit {@code null} elements
      */
     @Override
@@ -491,7 +505,8 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      * Returns a reverse order view of the elements contained in this set.
      * The descending set is backed by this set, so it remains immutable.
-     * The returned set has an ordering equivalent to Collections.reverseOrder(comparator()).
+     * The returned set has an ordering equivalent to
+     * {@link java.util.Collections#reverseOrder(java.util.Comparator) Collections.reverseOrder(comparator())}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -546,6 +561,8 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @param toInclusive {@code true} if the high endpoint is to be included in the returned view
      * @return a view of the portion of this set whose elements range from {@code fromElement} to {@code toElement}
      * @throws ClassCastException if {@code fromElement} and {@code toElement} cannot be compared to one another using this set's comparator
+     * @throws NullPointerException if {@code fromElement} or {@code toElement} is {@code null} and this set uses natural ordering,
+     *         or its comparator does not permit {@code null} elements
      * @throws IllegalArgumentException if {@code fromElement} is greater than {@code toElement}; or if this set itself has a restricted range, and {@code fromElement} or {@code toElement} lies outside the bounds of the range
      */
     @Override
@@ -568,6 +585,8 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @param inclusive {@code true} if the high endpoint is to be included in the returned view
      * @return a view of the portion of this set whose elements are less than (or equal to, if {@code inclusive} is true) {@code toElement}
      * @throws ClassCastException if {@code toElement} is not compatible with this set's comparator
+     * @throws NullPointerException if {@code toElement} is {@code null} and this set uses natural ordering,
+     *         or its comparator does not permit {@code null} elements
      * @throws IllegalArgumentException if this set itself has a restricted range, and {@code toElement} lies outside the bounds of the range
      */
     @Override
@@ -590,6 +609,8 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @param inclusive {@code true} if the low endpoint is to be included in the returned view
      * @return a view of the portion of this set whose elements are greater than (or equal to, if {@code inclusive} is true) {@code fromElement}
      * @throws ClassCastException if {@code fromElement} is not compatible with this set's comparator
+     * @throws NullPointerException if {@code fromElement} is {@code null} and this set uses natural ordering,
+     *         or its comparator does not permit {@code null} elements
      * @throws IllegalArgumentException if this set itself has a restricted range, and {@code fromElement} lies outside the bounds of the range
      */
     @Override

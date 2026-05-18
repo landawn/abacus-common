@@ -15,10 +15,10 @@
 package com.landawn.abacus.util;
 
 /**
- * An immutable holder of {@code index}, {@code key}, and {@code value}.
+ * An immutable holder of {@code index}, {@code key}, and {@code val}.
  *
  * <p>This type extends {@link Keyed} and adds positional information. Equality and hash code are
- * based on {@code index} and {@code key} only; {@code value} is intentionally ignored.</p>
+ * based on {@code index} and {@code key} only; {@code val} is intentionally ignored.</p>
  *
  * <p><b>Usage example:</b></p>
  * <pre>{@code
@@ -37,6 +37,7 @@ package com.landawn.abacus.util;
 @com.landawn.abacus.annotation.Immutable
 public final class IndexedKeyed<K, T> extends Keyed<K, T> {
 
+    /** The index position associated with this object. */
     private final int index;
 
     /**
@@ -67,9 +68,9 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
     }
 
     /**
-     * Returns the index component.
+     * Returns the index component of this {@code IndexedKeyed}.
      *
-     * @return index value
+     * @return the index value
      */
     public int index() {
         return index;
@@ -78,7 +79,8 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
     /**
      * Returns a hash code based on {@code index} and {@code key}.
      *
-     * <p>{@code value} is not included.</p>
+     * <p>The {@code val} component is not included in the hash code computation,
+     * consistent with the equality contract of this class.</p>
      *
      * @return hash code for this object
      */
@@ -88,12 +90,12 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
     }
 
     /**
-     * Returns {@code true} if {@code obj} is an {@code IndexedKeyed} with equal {@code index} and {@code key}.
+     * Returns {@code true} if {@code obj} is an {@code IndexedKeyed} with the same {@code index} and {@code key}.
      *
-     * <p>{@code value} is not considered.</p>
+     * <p>The {@code val} component is intentionally excluded from equality comparison.</p>
      *
-     * @param obj object to compare with
-     * @return {@code true} if equal by index and key; otherwise {@code false}
+     * @param obj the object to compare with
+     * @return {@code true} if equal by index and key; {@code false} otherwise
      */
     @Override
     public boolean equals(final Object obj) {
@@ -109,9 +111,11 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
     }
 
     /**
-     * Returns a string representation in the form {@code "{index=..., key=..., val=...}"}.
+     * Returns a string representation in the form {@code "{index=<index>, key=<key>, val=<val>}"}.
      *
-     * @return string form of this object
+     * <p>For example: {@code {index=0, key=user123, val=John}}</p>
+     *
+     * @return a string representation of this object
      */
     @Override
     public String toString() {

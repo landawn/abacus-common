@@ -20,10 +20,8 @@ package com.landawn.abacus.util;
  * <p>This class is currently under development and does not contain any implemented functionality.
  * It is intended to provide script execution capabilities in future releases.
  *
- * <p>The class is marked as final to prevent extension and uses NOSONAR to suppress
- * SonarQube warnings about the empty class definition.
- *
- * @see N
+ * <p>The class is declared {@code final} to prevent subclassing. The {@code //NOSONAR} annotation
+ * suppresses SonarQube warnings about the otherwise-empty class body.
  */
 // TODO Design to be done.
 public final class Script { //NOSONAR

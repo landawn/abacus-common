@@ -36,6 +36,7 @@ import com.landawn.abacus.util.u.Nullable;
 @SuppressWarnings("java:S2160")
 public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
 
+    /** The type name constant for Nullable type identification, equal to {@code "Nullable"}. */
     public static final String NULLABLE = Nullable.class.getSimpleName();
 
     private final String declaringName;

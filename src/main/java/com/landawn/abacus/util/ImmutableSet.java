@@ -540,8 +540,9 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * }</pre>
      *
      * @param <E> the type of elements to be maintained by the set.
-     * @param holder the set to be used as the backing storage for the Builder.
+     * @param holder the set to be used as the backing storage for the Builder; must not be {@code null}
      * @return a new Builder instance that will use the provided set.
+     * @throws NullPointerException if {@code holder} is {@code null}
      */
     public static <E> Builder<E> builder(final Set<E> holder) {
         return new Builder<>(holder);

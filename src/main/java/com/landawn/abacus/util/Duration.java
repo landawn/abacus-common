@@ -460,8 +460,8 @@ public final class Duration implements Comparable<Duration>, Immutable {
      *
      * <p><b>Time Zone:</b> Operates on UTC millisecond timestamps, unaffected by time zones.
      *
-     * @param start the start date (inclusive), must not be {@code null}.
-     * @param end the end date (exclusive), must not be {@code null}.
+     * @param start the start date, must not be {@code null}.
+     * @param end the end date, must not be {@code null}.
      * @return a {@link Duration} representing the time difference from {@code start} to {@code end},
      *         positive if {@code end} is after {@code start}, negative if {@code end} is before {@code start}.
      * @throws IllegalArgumentException if either date is {@code null}.
@@ -513,8 +513,8 @@ public final class Duration implements Comparable<Duration>, Immutable {
      *
      * <p><b>Time Zone:</b> Operates on UTC millisecond timestamps, unaffected by time zones.
      *
-     * @param start the start calendar (inclusive), must not be {@code null}.
-     * @param end the end calendar (exclusive), must not be {@code null}.
+     * @param start the start calendar, must not be {@code null}.
+     * @param end the end calendar, must not be {@code null}.
      * @return a {@link Duration} representing the time difference from {@code start} to {@code end},
      *         positive if {@code end} is after {@code start}, negative if {@code end} is before {@code start}.
      * @throws IllegalArgumentException if either calendar is {@code null}.
@@ -562,11 +562,13 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * }
      * }</pre>
      *
-     * @param start the start temporal (inclusive), must not be {@code null}.
-     * @param end the end temporal (exclusive), must not be {@code null}.
+     * @param start the start temporal, must not be {@code null}.
+     * @param end the end temporal, must not be {@code null}.
      * @return a {@link Duration} representing the time difference from {@code start} to {@code end},
      *         positive if {@code end} is after {@code start}, negative if {@code end} is before {@code start}.
      * @throws IllegalArgumentException if either temporal is {@code null}.
+     * @throws java.time.DateTimeException if the duration cannot be calculated (e.g., the temporal types are incompatible
+     *         or do not support {@link ChronoUnit#MILLIS}).
      * @see #between(java.util.Date, java.util.Date)
      * @see #between(java.util.Calendar, java.util.Calendar)
      * @see Temporal#until(java.time.temporal.Temporal, java.time.temporal.TemporalUnit)
@@ -649,8 +651,9 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * Duration twoHalfDays = oneDay.plus(Duration.ofHours(12));  // 1.5 days
      * }</pre>
      *
-     * @param duration the duration to add, not {@code null}.
+     * @param duration the duration to add, must not be {@code null}.
      * @return a Duration based on this duration with the specified duration added.
+     * @throws NullPointerException if {@code duration} is {@code null}.
      * @throws ArithmeticException if numeric overflow occurs.
      */
     public Duration plus(final Duration duration) {
@@ -804,8 +807,9 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * Duration twentyTwoHours = oneDay.minus(Duration.ofHours(2));  // 22 hours
      * }</pre>
      *
-     * @param duration the duration to subtract, not {@code null}.
+     * @param duration the duration to subtract, must not be {@code null}.
      * @return a Duration based on this duration with the specified duration subtracted.
+     * @throws NullPointerException if {@code duration} is {@code null}.
      * @throws ArithmeticException if numeric overflow occurs.
      */
     public Duration minus(final Duration duration) {
@@ -1231,8 +1235,9 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * regardless of whether the durations are positive or negative.
      * </p>
      *
-     * @param other the other duration to compare to, not {@code null}.
+     * @param other the other duration to compare to, must not be {@code null}.
      * @return the comparator value, negative if less, positive if greater, zero if equal.
+     * @throws NullPointerException if {@code other} is {@code null}.
      */
     @Override
     public int compareTo(final Duration other) {

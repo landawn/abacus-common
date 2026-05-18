@@ -90,6 +90,7 @@ public final class LZ4BlockInputStream extends InputStream {
      *
      * @param b the buffer into which the data is read
      * @return the total number of bytes read into the buffer, or -1 if there is no more data
+     *         because the end of the stream has been reached
      * @throws IOException if an I/O error occurs
      */
     @Override
@@ -113,6 +114,7 @@ public final class LZ4BlockInputStream extends InputStream {
      * @param off the start offset in the buffer at which the data is written
      * @param len the maximum number of bytes to read
      * @return the total number of bytes read into the buffer, or -1 if there is no more data
+     *         because the end of the stream has been reached
      * @throws IOException if an I/O error occurs
      */
     @Override
@@ -162,14 +164,14 @@ public final class LZ4BlockInputStream extends InputStream {
     }
 
     /**
-     * Marks the current position in this input stream. A subsequent call to the
-     * reset method repositions this stream at the last marked position so that
-     * subsequent reads re-read the same bytes.
+     * Marks the current position in this input stream.
      *
-     * <p>The readLimit argument tells this input stream to allow that many bytes
-     * to be read before the mark position gets invalidated.</p>
+     * <p>The underlying LZ4 block input stream does not support mark/reset,
+     * so this method has no effect.</p>
      *
      * @param readLimit the maximum limit of bytes that can be read before the mark position becomes invalid
+     * @see #reset()
+     * @see #markSupported()
      */
     @Override
     public synchronized void mark(final int readLimit) {
@@ -177,14 +179,15 @@ public final class LZ4BlockInputStream extends InputStream {
     }
 
     /**
-     * Repositions this stream to the position at the time the mark method was last
-     * called on this input stream.
+     * Repositions this stream to the position at the time the {@code mark} method
+     * was last called on this input stream.
      *
-     * <p>If the mark method has not been called since the stream was created, or if
-     * the number of bytes read from the stream since mark was last called is larger
-     * than the argument to mark, then an IOException might be thrown.</p>
+     * <p>The underlying LZ4 block input stream does not support mark/reset,
+     * so this method always throws an {@link IOException}.</p>
      *
-     * @throws IOException if the stream has not been marked or if the mark has been invalidated
+     * @throws IOException always, because the underlying LZ4 block input stream does not support mark/reset
+     * @see #mark(int)
+     * @see #markSupported()
      */
     @Override
     public synchronized void reset() throws IOException {
@@ -192,10 +195,13 @@ public final class LZ4BlockInputStream extends InputStream {
     }
 
     /**
-     * Tests if this input stream supports the mark and reset methods.
-     * The markSupported method returns the value from the underlying LZ4 implementation.
+     * Tests if this input stream supports the {@code mark} and {@code reset} methods.
+     * The underlying LZ4 block input stream does not support mark/reset, so this
+     * method returns {@code false}.
      *
-     * @return {@code true} if this stream instance supports the mark and reset methods; {@code false} otherwise
+     * @return {@code false}, because the underlying LZ4 block input stream does not support mark/reset
+     * @see #mark(int)
+     * @see #reset()
      */
     @Override
     public boolean markSupported() {

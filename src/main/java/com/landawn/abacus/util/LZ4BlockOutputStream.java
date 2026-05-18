@@ -112,6 +112,7 @@ public final class LZ4BlockOutputStream extends OutputStream {
      *
      * @param b the byte array to write
      * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code b} is {@code null}
      */
     @Override
     public void write(final byte[] b) throws IOException {
@@ -134,6 +135,9 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * @param off the start offset in the data
      * @param len the number of bytes to write
      * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code b} is {@code null}
+     * @throws IndexOutOfBoundsException if {@code off} is negative, {@code len} is negative,
+     *         or {@code off + len} is greater than {@code b.length}
      */
     @Override
     public void write(final byte[] b, final int off, final int len) throws IOException {

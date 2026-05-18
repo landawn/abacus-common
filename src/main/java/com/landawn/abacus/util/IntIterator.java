@@ -444,7 +444,8 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * Filters elements based on the given predicate.
+     * Returns a new IntIterator containing only elements that satisfy the given predicate.
+     * Elements that do not match the predicate are skipped.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -453,9 +454,9 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * evens.toArray();   // Returns [2, 4]
      * }</pre>
      *
-     * @param predicate the predicate to test elements
-     * @return a new IntIterator containing only elements that match the predicate
-     * @throws IllegalArgumentException if predicate is null
+     * @param predicate the predicate to test each element; must not be {@code null}
+     * @return a new {@code IntIterator} containing only elements that match the predicate
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     public IntIterator filter(final IntPredicate predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate);
@@ -499,8 +500,8 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * Converts the remaining elements to an int array.
      *
      * <p>This method consumes the iterator. After calling this method, the iterator
-     * will be empty (hasNext() returns false). If the iterator is already empty,
-     * returns an empty array.</p>
+     * will be empty ({@code hasNext()} returns {@code false}). If the iterator is already
+     * empty, returns an empty array.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -511,7 +512,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * int[] empty = IntIterator.empty().toArray();   // empty.length == 0
      * }</pre>
      *
-     * @return an int array containing all remaining elements
+     * @return an {@code int} array containing all remaining elements; an empty array if there are none
      */
     @SuppressWarnings("deprecation")
     public int[] toArray() {
@@ -519,11 +520,11 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * Converts the remaining elements to an IntList.
+     * Converts the remaining elements to an {@link IntList}.
      *
      * <p>This method consumes the iterator. After calling this method, the iterator
-     * will be empty (hasNext() returns false). If the iterator is already empty,
-     * returns an empty IntList.</p>
+     * will be empty ({@code hasNext()} returns {@code false}). If the iterator is already
+     * empty, returns an empty {@link IntList}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -534,7 +535,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * IntList empty = IntIterator.empty().toList();   // empty.size() == 0
      * }</pre>
      *
-     * @return an IntList containing all remaining elements
+     * @return an {@link IntList} containing all remaining elements; an empty list if there are none
      */
     public IntList toList() {
         final IntList list = new IntList();
@@ -564,8 +565,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * Returns an iterator that provides indexed access to elements.
-     * Each element is paired with its index starting from 0.
+     * Returns an iterator that pairs each remaining element with its zero-based index.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -575,7 +575,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * // Prints: 0: 10, 1: 20, 2: 30
      * }</pre>
      *
-     * @return an ObjIterator of IndexedInt elements
+     * @return an {@link ObjIterator} of {@link IndexedInt} elements with indices starting at 0
      */
     @Beta
     public ObjIterator<IndexedInt> indexed() {
@@ -583,8 +583,8 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * Returns an iterator that provides indexed access to elements.
-     * Each element is paired with its index starting from the specified value.
+     * Returns an iterator that pairs each remaining element with its index,
+     * with indices starting from the specified {@code startIndex}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -594,9 +594,9 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * // Prints: 100: 10, 101: 20, 102: 30
      * }</pre>
      *
-     * @param startIndex the starting index value
-     * @return an ObjIterator of IndexedInt elements
-     * @throws IllegalArgumentException if startIndex is negative
+     * @param startIndex the starting index value; must be non-negative
+     * @return an {@link ObjIterator} of {@link IndexedInt} elements with indices starting at {@code startIndex}
+     * @throws IllegalArgumentException if {@code startIndex} is negative
      */
     @Beta
     public ObjIterator<IndexedInt> indexed(final long startIndex) {
@@ -620,13 +620,13 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * Performs the given action for each remaining element, passing each value as a boxed {@code Integer}.
+     * Performs the given action for each remaining element, boxing each {@code int} to an {@link Integer}.
      *
      * <p><b>Note:</b> This method is deprecated because it causes unnecessary boxing overhead.
      * Use {@link #foreachRemaining(Throwables.IntConsumer)} instead for better performance.</p>
      *
      * @param action the action to perform on each remaining element
-     * @deprecated use {@link #foreachRemaining(Throwables.IntConsumer)} instead to avoid boxing
+     * @deprecated use {@link #foreachRemaining(Throwables.IntConsumer)} instead to avoid boxing overhead
      */
     @Deprecated
     @Override
@@ -635,10 +635,8 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * Performs the given action for each remaining element.
-     *
-     * <p>This method consumes the iterator. After calling this method, the iterator
-     * will be empty (hasNext() returns false).</p>
+     * Performs the given action for each remaining element without boxing overhead.
+     * This method consumes the iterator; after it returns, {@code hasNext()} will return {@code false}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -652,8 +650,8 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
-     * @param action the action to perform on each element, must not be null
-     * @throws IllegalArgumentException if action is null
+     * @param action the action to perform on each element; must not be {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachRemaining(final Throwables.IntConsumer<E> action) throws E {//NOSONAR

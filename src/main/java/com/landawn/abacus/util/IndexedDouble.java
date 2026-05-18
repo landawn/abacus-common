@@ -40,6 +40,7 @@ package com.landawn.abacus.util;
  */
 public final class IndexedDouble extends AbstractIndexed {
 
+    /** The double value associated with the index. */
     private final double value;
 
     /**
@@ -114,11 +115,13 @@ public final class IndexedDouble extends AbstractIndexed {
     }
 
     /**
-     * Returns the hash code of this IndexedDouble instance.
+     * Returns the hash code of this {@code IndexedDouble} instance.
      *
-     * <p>The hash code is computed based on both the index and the value.</p>
+     * <p>The hash code is computed from both the index and the value.
+     * Note: The double value is multiplied by 31 and then truncated to {@code int},
+     * so values that differ only in their fractional parts may produce the same hash code.</p>
      *
-     * @return the hash code
+     * @return the hash code value for this object
      */
     @Override
     public int hashCode() {
@@ -126,11 +129,10 @@ public final class IndexedDouble extends AbstractIndexed {
     }
 
     /**
-     * Checks if this IndexedDouble instance is equal to another object.
+     * Checks if this {@code IndexedDouble} instance is equal to another object.
      *
-     * <p>Two IndexedDouble instances are equal if they have the same index and value.
-     * Double values are compared using {@code N.equals} which handles
-     * NaN and positive/negative zero correctly.</p>
+     * <p>Two {@code IndexedDouble} instances are equal if they have the same index and value.
+     * Double comparison is delegated to {@link N#equals(double, double)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -142,8 +144,8 @@ public final class IndexedDouble extends AbstractIndexed {
      * indexed1.equals(indexed3);   // false
      * }</pre>
      *
-     * @param obj the object to compare with this IndexedDouble instance for equality
-     * @return {@code true} if the specified object is an IndexedDouble with the same
+     * @param obj the object to compare with this {@code IndexedDouble} instance for equality
+     * @return {@code true} if the specified object is an {@code IndexedDouble} with the same
      *         index and value, {@code false} otherwise
      */
     @Override

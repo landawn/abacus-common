@@ -471,7 +471,7 @@ public final class URLEncodedUtil {
      * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
      * @see #encode(Object, Charset)
      * @see #encode(Object, Charset, NamingPolicy)
-     * @see URLEncoder#encode(String, String)
+     * @see URLEncoder#encode(String, Charset)
      */
     public static String encode(final Object parameters) {
         return encode(parameters, Charsets.DEFAULT);
@@ -557,6 +557,8 @@ public final class URLEncodedUtil {
      * <p>
      * This method takes a base URL and parameters, encodes the parameters according to
      * application/x-www-form-urlencoded rules, and appends them to the URL with a '?' separator.
+     * If the URL already contains a '?' the encoded parameters are joined with '&amp;'. Any fragment
+     * identifier ({@code #...}) in the URL is preserved and placed after the encoded parameters.
      * If {@code parameters} is {@code null} or an empty Map, the original URL is returned unchanged.
      * </p>
      *
@@ -584,7 +586,9 @@ public final class URLEncodedUtil {
      * <p>
      * This method takes a base URL and parameters, encodes the parameters using the specified charset
      * according to application/x-www-form-urlencoded rules, and appends them to the URL with a '?'
-     * separator. If {@code parameters} is {@code null} or an empty Map, the original URL is returned unchanged.
+     * separator. If the URL already contains a '?' the encoded parameters are joined with '&amp;'. Any
+     * fragment identifier ({@code #...}) in the URL is preserved and placed after the encoded parameters.
+     * If {@code parameters} is {@code null} or an empty Map, the original URL is returned unchanged.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -612,7 +616,9 @@ public final class URLEncodedUtil {
      * <p>
      * This method takes a base URL and parameters, encodes the parameters using the specified charset and
      * naming policy according to application/x-www-form-urlencoded rules, and appends them to the URL with
-     * a '?' separator. Property/key names are transformed according to the naming policy before encoding.
+     * a '?' separator. If the URL already contains a '?' the encoded parameters are joined with '&amp;'.
+     * Any fragment identifier ({@code #...}) present in the URL is preserved and appended after the parameters.
+     * Property/key names are transformed according to the naming policy before encoding.
      * If {@code parameters} is {@code null} or an empty Map, the original URL is returned unchanged.
      * </p>
      *
@@ -747,8 +753,8 @@ public final class URLEncodedUtil {
      * @param namingPolicy the naming policy to transform property/key names (e.g., CAMEL_CASE, SCREAMING_SNAKE_CASE);
      *                     if {@code null} or NO_CHANGE, names are not transformed.
      * @param output the {@code Appendable} to which the encoded query string will be appended.
+     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
      * @throws UncheckedIOException if an I/O error occurs while appending to the output.
-     * @throws IllegalArgumentException if parameters is an Object array with odd length.
      * @see #encode(Object, Charset, Appendable)
      */
     @SuppressWarnings("rawtypes")
@@ -937,7 +943,7 @@ public final class URLEncodedUtil {
      *         returns an empty map if {@code urlQuery} is {@code null} or empty.
      * @see #decode(String, Charset)
      * @see #decodeToMultimap(String)
-     * @see URLDecoder#decode(String)
+     * @see URLDecoder#decode(String, String)
      */
     public static Map<String, String> decode(final String urlQuery) {
         return decode(urlQuery, Charsets.DEFAULT);
@@ -994,9 +1000,10 @@ public final class URLEncodedUtil {
      * @param <M> the type of the Map to return, must extend {@code Map<String, String>}.
      * @param urlQuery the URL query string to decode, may be {@code null} or empty.
      * @param charset the charset to use for decoding percent-encoded characters; if {@code null}, defaults to the platform default charset.
-     * @param mapSupplier a supplier that provides an instance of the desired Map implementation.
+     * @param mapSupplier a supplier that provides an instance of the desired Map implementation; must not be {@code null}.
      * @return a Map of type M containing parameter names as keys and decoded parameter values as values;
      *         returns an empty map (from supplier) if {@code urlQuery} is {@code null} or empty.
+     * @throws NullPointerException if {@code mapSupplier} is {@code null}.
      * @see #decode(String, Charset)
      */
     public static <M extends Map<String, String>> M decode(final String urlQuery, final Charset charset, final Supplier<M> mapSupplier) {

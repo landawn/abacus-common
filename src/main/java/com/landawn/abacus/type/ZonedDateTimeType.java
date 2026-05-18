@@ -282,7 +282,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * }</pre>
      *
      * @param rs the ResultSet to read from
-     * @param columnName the label for the column specified with the SQL AS clause
+     * @param columnName the label of the column containing the timestamp value
      * @return the ZonedDateTime value, or {@code null} if the database value is NULL
      * @throws SQLException if a database access error occurs or the column label is invalid
      */

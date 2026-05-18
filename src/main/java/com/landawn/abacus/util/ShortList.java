@@ -310,7 +310,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     @Serial
     private static final long serialVersionUID = 25682021483156507L;
 
+    /** Shared random number generator used by {@link #random(int)}. */
     static final Random RAND = new SecureRandom();
+    /** The number of distinct short values; used to map a non-negative random int to the full short range. */
     static final int BOUND = Short.MAX_VALUE - Short.MIN_VALUE + 1;
 
     /**
@@ -374,12 +376,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Creates a new ShortList containing the specified elements. The specified array is used directly
-     * as the backing array without copying, so subsequent modifications to the array will affect the list.
+     * Creates a new ShortList backed by the specified array without copying.
+     * Subsequent modifications to the array will affect the list and vice versa.
      * If the input array is {@code null}, an empty list is returned.
      *
-     * @param a the array of elements to be included in the new list. Can be {@code null}.
-     * @return a new ShortList containing the elements from the specified array, or an empty list if the array is {@code null}
+     * @param a the array of short values to be used as the backing array. May be {@code null}.
+     * @return a new ShortList backed by the specified array, or an empty list if the array is {@code null}
      * @see #copyOf(short[])
      * @see #of(short[], int)
      */
@@ -388,14 +390,13 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Creates a new ShortList containing the first {@code size} elements of the specified array.
-     * The array is used directly as the backing array without copying for efficiency.
+     * Creates a new ShortList backed by the first {@code size} elements of the specified array, without copying.
      * If the input array is {@code null}, it is treated as an empty array.
      *
-     * @param a the array of short values to be used as the backing array. Can be {@code null}.
+     * @param a the array of short values to be used as the backing array. May be {@code null}.
      * @param size the number of elements from the array to include in the list.
      *             Must be between 0 and the array length (inclusive).
-     * @return a new ShortList containing the first {@code size} elements of the specified array
+     * @return a new ShortList backed by the specified array with the given logical size
      * @throws IndexOutOfBoundsException if {@code size} is negative or greater than the array length
      * @see #of(short...)
      * @see #copyOf(short[], int, int)
@@ -1032,7 +1033,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * Removes all elements at the specified indices from this list. The indices array may contain
      * duplicates and does not need to be sorted. Elements are removed efficiently in a single pass.
      *
-     * @param indices the indices of elements to be removed. Can be empty, {@code null}, or contain duplicates.
+     * @param indices the indices of elements to be removed; may be empty or {@code null} (no-op), may contain duplicates
+     * @throws IndexOutOfBoundsException if any index is out of range ({@code index < 0 || index >= size()})
      */
     @Override
     public void removeAt(final int... indices) {
@@ -1207,11 +1209,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Replaces all occurrences of the specified value in this list with the new value.
-     * Uses == for comparison.
+     * Replaces all occurrences of {@code oldVal} in this list with {@code newVal}.
+     * Equality is tested by {@code ==} (primitive equality).
      *
      * @param oldVal the value to be replaced
-     * @param newVal the value to replace {@code oldVal}
+     * @param newVal the replacement value
      * @return the number of elements replaced; {@code 0} if no element matched
      * @see #replaceAll(ShortUnaryOperator)
      * @see #replaceIf(ShortPredicate, short)
@@ -1344,12 +1346,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Returns {@code true} if this list contains all of the elements in the specified ShortList.
-     * Each element's occurrences are counted independently - if an element appears twice
-     * in the specified list, this list must contain at least two occurrences of that element.
+     * Returns {@code true} if this list contains at least one occurrence of every distinct value
+     * present in the specified ShortList. Duplicate values in {@code c} do not require additional
+     * occurrences in this list; only value presence is checked.
      *
-     * @param c the ShortList to be checked for containment in this list
-     * @return {@code true} if this list contains all elements of the specified list
+     * @param c the ShortList whose distinct values must all be present in this list
+     * @return {@code true} if this list contains every distinct element of the specified list
      */
     @Override
     public boolean containsAll(final ShortList c) {
@@ -1379,12 +1381,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Returns {@code true} if this list contains all of the elements in the specified array.
-     * Each element's occurrences are counted independently - if an element appears twice
-     * in the specified array, this list must contain at least two occurrences of that element.
+     * Returns {@code true} if this list contains at least one occurrence of every distinct value
+     * present in the specified array. Duplicate values in {@code a} do not require additional
+     * occurrences in this list; only value presence is checked.
      *
-     * @param a the array to be checked for containment in this list
-     * @return {@code true} if this list contains all elements of the specified array
+     * @param a the array whose distinct values must all be present in this list
+     * @return {@code true} if this list contains every distinct element of the specified array
      */
     @Override
     public boolean containsAll(final short[] a) {
@@ -1895,12 +1897,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Performs the given action for each element in this list.
+     * Performs the given action for each element in this list in order, from first to last.
      *
-     * <p>The action is performed on each element in order, from the first element
-     * to the last element.</p>
-     *
-     * @param action the action to be performed for each element
+     * @param action the action to be performed for each element; must not be {@code null}
      */
     public void forEach(final ShortConsumer action) {
         forEach(0, size, action);
@@ -2208,18 +2207,19 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Creates and returns a new ShortList containing elements from the specified range with the given step.
-     *
-     * <p>The returned list contains elements starting at fromIndex, then fromIndex + step,
-     * fromIndex + 2*step, and so on, up to but not including toIndex. If step is negative,
-     * the elements are selected in reverse order.</p>
+     * Creates and returns a new ShortList containing elements from the specified range sampled
+     * at the given step. Elements are selected starting at {@code fromIndex}, then
+     * {@code fromIndex + step}, {@code fromIndex + 2*step}, and so on.
+     * A negative step selects elements in descending index order; {@code toIndex == -1}
+     * is treated as backward iteration to the beginning of the list (same semantics as
+     * {@link #forEach(int, int, ShortConsumer)}).
      *
      * @param fromIndex the starting index (inclusive) of the range to copy
-     * @param toIndex the ending index (exclusive) of the range to copy
-     * @param step the step size between selected elements. Must not be zero.
+     * @param toIndex the ending index (exclusive) of the range to copy; use {@code -1} for backward iteration to index 0
+     * @param step the stride between selected indices; must not be zero
      * @return a new ShortList containing the selected elements
-     * @throws IndexOutOfBoundsException if the range is invalid
-     * @throws IllegalArgumentException if step is zero
+     * @throws IndexOutOfBoundsException if the effective range is invalid
+     * @throws IllegalArgumentException if {@code step} is zero
      * @see N#copyOfRange(short[], int, int, int)
      */
     @Override
@@ -2376,15 +2376,14 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Returns a Collection containing the elements from the specified range converted to their boxed type.
-     * The type of Collection returned is determined by the provided supplier function.
-     * The returned collection is independent of this list.
+     * Returns a new Collection containing the boxed {@code Short} values from the specified range.
+     * The concrete type of collection is determined by the provided supplier function.
      *
-     * @param <C> the type of the collection
-     * @param fromIndex the starting index (inclusive) of the range to add
-     * @param toIndex the ending index (exclusive) of the range to add
-     * @param supplier a function that creates the collection with the specified initial capacity
-     * @return the collection with the added elements
+     * @param <C> the type of the collection to create
+     * @param fromIndex the starting index (inclusive) of the range
+     * @param toIndex the ending index (exclusive) of the range
+     * @param supplier a function that creates a new collection instance with the specified initial capacity
+     * @return a new collection containing the boxed elements from the specified range
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      */
     @Override
@@ -2402,14 +2401,13 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Returns a Multiset containing all elements from specified range converted to their boxed type.
-     * The type of Multiset returned is determined by the provided supplier function.
-     * A Multiset is a collection that allows duplicate elements and provides occurrence counting.
+     * Returns a Multiset containing the boxed {@code Short} elements from the specified range.
+     * The concrete type of Multiset is determined by the provided supplier function.
      *
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
-     * @param supplier a function that creates the Multiset with the specified initial capacity
-     * @return a Multiset containing the elements from the specified range
+     * @param supplier a function that creates a new Multiset instance with the specified initial capacity
+     * @return a new Multiset containing the boxed elements from the specified range
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      */
     @Override

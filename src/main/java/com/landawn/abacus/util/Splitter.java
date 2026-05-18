@@ -259,13 +259,14 @@ import com.landawn.abacus.util.stream.Stream;
 public final class Splitter {
 
     /**
-     * The default delimiter used to split delimited text when {@link #withDefault()} is used.
+     * The default delimiter ({@code ", "}) used to split delimited text when {@link #withDefault()} is used.
      * @see Joiner#DEFAULT_DELIMITER
      */
     public static final String DEFAULT_DELIMITER = Joiner.DEFAULT_DELIMITER;
 
     /**
-     * The default delimiter used to separate keys and values in key-value pairs.
+     * The default delimiter ({@code "="}) used to separate keys and values in key-value pairs
+     * when {@link MapSplitter#withDefault()} is used.
      * @see Joiner#DEFAULT_KEY_VALUE_DELIMITER
      */
     public static final String DEFAULT_KEY_VALUE_DELIMITER = Joiner.DEFAULT_KEY_VALUE_DELIMITER;
@@ -865,8 +866,9 @@ public final class Splitter {
      *
      * @param <C> the type of Collection to return.
      * @param source the CharSequence to split; may be {@code null}.
-     * @param supplier a Supplier that creates a new Collection instance to hold the results.
+     * @param supplier a Supplier that creates a new Collection instance to hold the results. Must not be {@code null}.
      * @return the Collection created by the supplier, populated with the split results.
+     * @throws NullPointerException if the specified supplier is {@code null}
      * @see #split(CharSequence)
      * @see #split(CharSequence, Class, Supplier)
      */
@@ -892,8 +894,9 @@ public final class Splitter {
      *
      * @param <T> the type of elements in the result list.
      * @param source the CharSequence to split; may be {@code null}.
-     * @param mapper a function to apply to each split string.
+     * @param mapper a function to apply to each split string. Must not be {@code null}.
      * @return a new List containing the mapped results.
+     * @throws NullPointerException if the specified mapper is {@code null}
      * @see #split(CharSequence)
      * @see #split(CharSequence, Class)
      * @see #splitThenApply(CharSequence, Function)
@@ -960,9 +963,10 @@ public final class Splitter {
      * @param <T> the target type for conversion.
      * @param <C> the type of Collection to return.
      * @param source the CharSequence to split; may be {@code null}.
-     * @param targetType the Class representing the type to convert each substring to.
-     * @param supplier a Supplier that creates a new Collection instance to hold the results.
+     * @param targetType the Class representing the type to convert each substring to. Must not be {@code null}.
+     * @param supplier a Supplier that creates a new Collection instance to hold the results. Must not be {@code null}.
      * @return the Collection created by the supplier, populated with the converted results.
+     * @throws IllegalArgumentException if targetType or supplier is {@code null}
      */
     public <T, C extends Collection<T>> C split(final CharSequence source, final Class<? extends T> targetType, final Supplier<? extends C> supplier) {
         final C result = supplier.get();
@@ -994,7 +998,7 @@ public final class Splitter {
      * @param source the CharSequence to split; may be {@code null}.
      * @param targetType the Type instance used for converting strings to the target type.
      * @return a List containing the converted results.
-     * @throws IllegalArgumentException if targetType is null.
+     * @throws IllegalArgumentException if targetType is {@code null}.
      */
     public <T> List<T> split(final CharSequence source, final Type<? extends T> targetType) throws IllegalArgumentException {
         N.checkArgNotNull(targetType, cs.targetType);
@@ -1025,9 +1029,10 @@ public final class Splitter {
      * @param <T> the target type for conversion.
      * @param <C> the type of Collection to return.
      * @param source the CharSequence to split; may be {@code null}.
-     * @param targetType the Type instance used for converting strings to the target type.
-     * @param supplier a Supplier that creates a new Collection instance to hold the results.
+     * @param targetType the Type instance used for converting strings to the target type. Must not be {@code null}.
+     * @param supplier a Supplier that creates a new Collection instance to hold the results. Must not be {@code null}.
      * @return the Collection created by the supplier, populated with the converted results.
+     * @throws IllegalArgumentException if targetType or supplier is {@code null}
      */
     public <T, C extends Collection<T>> C split(final CharSequence source, final Type<? extends T> targetType, final Supplier<? extends C> supplier) {
         final C result = supplier.get();
@@ -1212,8 +1217,9 @@ public final class Splitter {
      * }</pre>
      *
      * @param source the CharSequence to split; may be {@code null}.
-     * @param mapper a function to apply to each split string.
+     * @param mapper a function to apply to each split string. Must not be {@code null}.
      * @return a String array containing the mapped results.
+     * @throws NullPointerException if the specified mapper is {@code null}
      */
     public String[] splitToArray(final CharSequence source, final Function<? super String, String> mapper) {
         final List<String> substrs = split(source, mapper);
@@ -1353,8 +1359,9 @@ public final class Splitter {
      *
      * @param <R> the type of the result.
      * @param source the CharSequence to split; may be {@code null}.
-     * @param converter a function that transforms the list of split strings into a result.
+     * @param converter a function that transforms the list of split strings into a result. Must not be {@code null}.
      * @return the result of applying the converter function to the split results.
+     * @throws NullPointerException if the specified converter is {@code null}
      * @see #split(CharSequence)
      * @see #splitThenAccept(CharSequence, Consumer)
      */
@@ -1377,7 +1384,8 @@ public final class Splitter {
      * }</pre>
      *
      * @param source the CharSequence to split; may be {@code null}.
-     * @param consumer a consumer that processes the list of split strings.
+     * @param consumer a consumer that processes the list of split strings. Must not be {@code null}.
+     * @throws NullPointerException if the specified consumer is {@code null}
      * @see #split(CharSequence)
      * @see #splitThenApply(CharSequence, Function)
      * @see #splitThenForEach(CharSequence, Consumer)
@@ -1404,7 +1412,8 @@ public final class Splitter {
      * }</pre>
      *
      * @param source the CharSequence to split; may be {@code null}.
-     * @param action the Consumer to apply to each resulting substring.
+     * @param action the Consumer to apply to each resulting substring. Must not be {@code null}.
+     * @throws NullPointerException if the specified action is {@code null}
      * @see #splitToStream(CharSequence)
      * @see #splitThenAccept(CharSequence, Consumer)
      */
@@ -1424,9 +1433,8 @@ public final class Splitter {
      * configured options including delimiter type, omitEmptyStrings, trimResults,
      * stripResults, and limit settings.</p>
      *
-     * <p>The returned iterator is fail-fast and does not support the remove()
-     * operation. It produces substrings lazily, making it memory-efficient for
-     * large inputs.</p>
+     * <p>The returned iterator does not support the {@code remove()} operation. It
+     * produces substrings lazily, making it memory-efficient for large inputs.</p>
      *
      * @param source the CharSequence to split; may be {@code null}.
      * @return an ObjIterator that produces split substrings; returns an empty iterator if source is {@code null}.
@@ -2261,8 +2269,9 @@ public final class Splitter {
          *
          * @param <T> the type of the result
          * @param source the CharSequence to split into a map; may be {@code null}
-         * @param converter a function that transforms the parsed map into a result
+         * @param converter a function that transforms the parsed map into a result. Must not be {@code null}.
          * @return the result of applying the converter function to the parsed map
+         * @throws NullPointerException if the specified converter is {@code null}
          * @see #split(CharSequence)
          * @see #splitThenAccept(CharSequence, Consumer)
          */
@@ -2284,7 +2293,8 @@ public final class Splitter {
          * }</pre>
          *
          * @param source the CharSequence to split into a map; may be {@code null}
-         * @param consumer a consumer that processes the parsed map
+         * @param consumer a consumer that processes the parsed map. Must not be {@code null}.
+         * @throws NullPointerException if the specified consumer is {@code null}
          * @see #split(CharSequence)
          * @see #splitThenApply(CharSequence, Function)
          */

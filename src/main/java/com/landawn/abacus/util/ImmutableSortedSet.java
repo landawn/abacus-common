@@ -109,9 +109,11 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * Returns an ImmutableSortedSet containing a single element in sorted order.
      * The element must implement {@link Comparable} to determine its natural ordering.
      *
-     * @param <E> the type of element, must extend Comparable
+     * @param <E> the type of element, must extend {@link Comparable}
      * @param e1 the element to be contained in the set
-     * @return an ImmutableSortedSet containing only the specified element
+     * @return an {@code ImmutableSortedSet} containing only the specified element
+     * @throws NullPointerException if {@code e1} is {@code null}, since {@link java.util.TreeSet}
+     *         does not allow {@code null} elements when using natural ordering
      * @see #of(Object, Object)
      */
     public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E e1) {
@@ -120,7 +122,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
 
     /**
      * Returns an ImmutableSortedSet containing exactly two elements in sorted order.
-     * The elements must implement Comparable to determine their natural ordering.
+     * The elements must implement {@link Comparable} to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
      * <p><b>Usage Examples:</b></p>
@@ -129,10 +131,11 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * System.out.println(set);   // [alpha, beta]
      * }</pre>
      *
-     * @param <E> the type of elements, must extend Comparable
+     * @param <E> the type of elements, must extend {@link Comparable}
      * @param e1 the first element
      * @param e2 the second element
-     * @return an ImmutableSortedSet containing the specified elements in sorted order
+     * @return an {@code ImmutableSortedSet} containing the specified elements in sorted order
+     * @throws NullPointerException if any element is {@code null}
      */
     public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E e1, final E e2) {
         return new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(e1, e2)));
@@ -140,14 +143,15 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
 
     /**
      * Returns an ImmutableSortedSet containing exactly three elements in sorted order.
-     * The elements must implement Comparable to determine their natural ordering.
+     * The elements must implement {@link Comparable} to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
-     * @param <E> the type of elements, must extend Comparable
+     * @param <E> the type of elements, must extend {@link Comparable}
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
-     * @return an ImmutableSortedSet containing the specified elements in sorted order
+     * @return an {@code ImmutableSortedSet} containing the specified elements in sorted order
+     * @throws NullPointerException if any element is {@code null}
      */
     public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E e1, final E e2, final E e3) {
         return new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3)));
@@ -155,15 +159,16 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
 
     /**
      * Returns an ImmutableSortedSet containing exactly four elements in sorted order.
-     * The elements must implement Comparable to determine their natural ordering.
+     * The elements must implement {@link Comparable} to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
-     * @param <E> the type of elements, must extend Comparable
+     * @param <E> the type of elements, must extend {@link Comparable}
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
      * @param e4 the fourth element
-     * @return an ImmutableSortedSet containing the specified elements in sorted order
+     * @return an {@code ImmutableSortedSet} containing the specified elements in sorted order
+     * @throws NullPointerException if any element is {@code null}
      */
     public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E e1, final E e2, final E e3, final E e4) {
         return new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4)));
@@ -171,16 +176,17 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
 
     /**
      * Returns an ImmutableSortedSet containing exactly five elements in sorted order.
-     * The elements must implement Comparable to determine their natural ordering.
+     * The elements must implement {@link Comparable} to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
-     * @param <E> the type of elements, must extend Comparable
+     * @param <E> the type of elements, must extend {@link Comparable}
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
      * @param e4 the fourth element
      * @param e5 the fifth element
-     * @return an ImmutableSortedSet containing the specified elements in sorted order
+     * @return an {@code ImmutableSortedSet} containing the specified elements in sorted order
+     * @throws NullPointerException if any element is {@code null}
      */
     public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5) {
         return new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4, e5)));
@@ -188,17 +194,18 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
 
     /**
      * Returns an ImmutableSortedSet containing exactly six elements in sorted order.
-     * The elements must implement Comparable to determine their natural ordering.
+     * The elements must implement {@link Comparable} to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
-     * @param <E> the type of elements, must extend Comparable
+     * @param <E> the type of elements, must extend {@link Comparable}
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
      * @param e4 the fourth element
      * @param e5 the fifth element
      * @param e6 the sixth element
-     * @return an ImmutableSortedSet containing the specified elements in sorted order
+     * @return an {@code ImmutableSortedSet} containing the specified elements in sorted order
+     * @throws NullPointerException if any element is {@code null}
      */
     public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6) {
         return new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4, e5, e6)));
@@ -206,10 +213,10 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
 
     /**
      * Returns an ImmutableSortedSet containing exactly seven elements in sorted order.
-     * The elements must implement Comparable to determine their natural ordering.
+     * The elements must implement {@link Comparable} to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
-     * @param <E> the type of elements, must extend Comparable
+     * @param <E> the type of elements, must extend {@link Comparable}
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
@@ -217,7 +224,8 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @param e5 the fifth element
      * @param e6 the sixth element
      * @param e7 the seventh element
-     * @return an ImmutableSortedSet containing the specified elements in sorted order
+     * @return an {@code ImmutableSortedSet} containing the specified elements in sorted order
+     * @throws NullPointerException if any element is {@code null}
      */
     public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6,
             final E e7) {
@@ -226,10 +234,10 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
 
     /**
      * Returns an ImmutableSortedSet containing exactly eight elements in sorted order.
-     * The elements must implement Comparable to determine their natural ordering.
+     * The elements must implement {@link Comparable} to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
-     * @param <E> the type of elements, must extend Comparable
+     * @param <E> the type of elements, must extend {@link Comparable}
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
@@ -238,7 +246,8 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @param e6 the sixth element
      * @param e7 the seventh element
      * @param e8 the eighth element
-     * @return an ImmutableSortedSet containing the specified elements in sorted order
+     * @return an {@code ImmutableSortedSet} containing the specified elements in sorted order
+     * @throws NullPointerException if any element is {@code null}
      */
     public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7,
             final E e8) {
@@ -247,10 +256,10 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
 
     /**
      * Returns an ImmutableSortedSet containing exactly nine elements in sorted order.
-     * The elements must implement Comparable to determine their natural ordering.
+     * The elements must implement {@link Comparable} to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
-     * @param <E> the type of elements, must extend Comparable
+     * @param <E> the type of elements, must extend {@link Comparable}
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
@@ -260,7 +269,8 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @param e7 the seventh element
      * @param e8 the eighth element
      * @param e9 the ninth element
-     * @return an ImmutableSortedSet containing the specified elements in sorted order
+     * @return an {@code ImmutableSortedSet} containing the specified elements in sorted order
+     * @throws NullPointerException if any element is {@code null}
      */
     public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7,
             final E e8, final E e9) {
@@ -269,10 +279,10 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
 
     /**
      * Returns an ImmutableSortedSet containing exactly ten elements in sorted order.
-     * The elements must implement Comparable to determine their natural ordering.
+     * The elements must implement {@link Comparable} to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
-     * @param <E> the type of elements, must extend Comparable
+     * @param <E> the type of elements, must extend {@link Comparable}
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
@@ -283,7 +293,8 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @param e8 the eighth element
      * @param e9 the ninth element
      * @param e10 the tenth element
-     * @return an ImmutableSortedSet containing the specified elements in sorted order
+     * @return an {@code ImmutableSortedSet} containing the specified elements in sorted order
+     * @throws NullPointerException if any element is {@code null}
      */
     public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7,
             final E e8, final E e9, final E e10) {
@@ -421,6 +432,8 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @throws ClassCastException if {@code fromElement} and {@code toElement}
      *         cannot be compared to one another using this set's comparator
      *         (or, if the set has no comparator, using natural ordering)
+     * @throws NullPointerException if {@code fromElement} or {@code toElement} is {@code null}
+     *         and this set uses natural ordering, or its comparator does not permit {@code null} elements
      * @throws IllegalArgumentException if {@code fromElement} is greater than
      *         {@code toElement}; or if this set itself has a restricted range,
      *         and {@code fromElement} or {@code toElement} lies outside the
@@ -447,6 +460,8 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      *         less than {@code toElement}
      * @throws ClassCastException if {@code toElement} is not compatible with
      *         this set's comparator (or, if the set has no comparator, using natural ordering)
+     * @throws NullPointerException if {@code toElement} is {@code null} and this set uses natural ordering,
+     *         or its comparator does not permit {@code null} elements
      * @throws IllegalArgumentException if this set itself has a restricted range,
      *         and {@code toElement} lies outside the bounds of the range
      */
@@ -471,6 +486,8 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      *         than or equal to {@code fromElement}
      * @throws ClassCastException if {@code fromElement} is not compatible with
      *         this set's comparator (or, if the set has no comparator, using natural ordering)
+     * @throws NullPointerException if {@code fromElement} is {@code null} and this set uses natural ordering,
+     *         or its comparator does not permit {@code null} elements
      * @throws IllegalArgumentException if this set itself has a restricted range,
      *         and {@code fromElement} lies outside the bounds of the range
      */

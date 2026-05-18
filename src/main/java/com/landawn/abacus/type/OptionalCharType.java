@@ -25,6 +25,7 @@ import com.landawn.abacus.util.u.OptionalChar;
  */
 public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
 
+    /** The type name constant for OptionalChar type identification, equal to {@code "OptionalChar"}. */
     public static final String OPTIONAL_CHAR = OptionalChar.class.getSimpleName();
 
     /**

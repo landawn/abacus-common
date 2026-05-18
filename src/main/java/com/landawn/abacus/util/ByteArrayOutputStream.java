@@ -44,8 +44,10 @@ import java.util.Arrays;
  */
 public final class ByteArrayOutputStream extends OutputStream {
 
+    /** The internal buffer where data is stored. */
     byte[] buf;
 
+    /** The number of valid bytes currently stored in the buffer. */
     int count;
 
     /**
@@ -192,7 +194,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      * System.out.println(baos.capacity());   // Still 100
      * }</pre>
      *
-     * @return the current capacity, or 0 if the buffer is null
+     * @return the current capacity of the internal buffer in bytes
      */
     public int capacity() {
         return buf == null ? 0 : buf.length;

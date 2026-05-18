@@ -27,6 +27,7 @@ import java.sql.SQLException;
  */
 public class NCharacterStreamType extends ReaderType {
 
+    /** The type name constant for NCharacterStream type identification, equal to {@code "NCharacterStream"}. */
     public static final String N_CHARACTER_STREAM = "NCharacterStream";
 
     /**

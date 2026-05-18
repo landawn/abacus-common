@@ -287,7 +287,7 @@ public final class Profiler {
      *                Recommended range: 100-10,000 for balanced memory usage and statistical significance
      * @param roundNum the number of times to repeat the entire test (all threads and loops).
      *                 Multiple rounds help eliminate JVM warmup effects and provide stable measurements.
-     *                 Recommended: 3-5 rounds for most tests, 1 for quick checks
+     *                 A value of 0 or less is treated as 1. Recommended: 3-5 rounds for most tests, 1 for quick checks
      * @param command the code to be profiled and executed in each loop iteration.
      *                This should be a Runnable that can throw checked exceptions.
      *                The command is executed (threadNum * loopNum * roundNum) times in total
@@ -359,11 +359,11 @@ public final class Profiler {
      * @param loopNum the number of times each thread executes the command, must be greater than 0.
      *                Each iteration is measured individually for comprehensive statistics
      * @param roundNum the number of times to repeat the entire test sequence.
-     *                 Multiple rounds help produce stable, reliable performance measurements
+     *                 A value of 0 or less is treated as 1. Multiple rounds help produce stable, reliable performance measurements
      * @param label a descriptive identifier for this test that appears in all result outputs.
      *              Use meaningful names that clearly describe what is being tested.
      *              This label will appear in console output, HTML reports, and XML exports.
-     *              Can be {@code null}, in which case "run" is used as the default label
+     *              Should not be {@code null}; if {@code null} is passed, "null" may appear in output
      * @param command the code block to be profiled and executed in each loop iteration.
      *                Should be a Runnable that encapsulates the operation being benchmarked
      * @return a {@link MultiLoopsStatistics} object containing comprehensive performance metrics
@@ -467,7 +467,7 @@ public final class Profiler {
      *                 statistically stable measurements
      * @param label a descriptive identifier for this test that appears in all result outputs.
      *              Use meaningful names to distinguish between different test scenarios.
-     *              Can be {@code null}, defaulting to a generic identifier
+     *              Should not be {@code null}; if {@code null} is passed, "null" may appear in output
      * @param command the code block to be profiled and executed in each loop iteration.
      *                Execution time is measured individually for each invocation, excluding delay periods.
      *                The command can throw checked exceptions which will be caught and logged
@@ -895,11 +895,13 @@ public final class Profiler {
     }
 
     /**
-     * Checks if the profiler is currently suspended.
-     * When suspended, all profiler runs execute with only one thread and one loop,
-     * regardless of the specified parameters.
+     * Returns {@code true} if the profiler is currently suspended.
      *
-     * @return {@code true} if the profiler is suspended, {@code false} otherwise
+     * <p>When suspended, all profiler runs execute with exactly one thread, one loop, and one round,
+     * regardless of the parameters specified in the test method calls.</p>
+     *
+     * @return {@code true} if the profiler is suspended, {@code false} if it is running normally
+     * @see #suspend(boolean)
      */
     public static boolean isSuspended() {
         return suspended;
@@ -931,17 +933,21 @@ public final class Profiler {
     interface Statistics {
 
         /**
-         * Gets the result of the execution, typically {@code null} for successful runs
-         * or an Exception object if the execution failed.
+         * Returns the result of the execution.
+         * {@code null} indicates a successful execution.
+         * For failed executions, the result is the thrown {@link Exception} (or, when invoking via
+         * reflection, the {@link java.lang.reflect.InvocationTargetException#getTargetException() target exception}
+         * unwrapped from an {@code InvocationTargetException}).
          *
-         * @return the execution result
+         * @return the execution result, or {@code null} if the execution completed normally
          */
         Object getResult();
 
         /**
-         * Sets the result of the execution.
+         * Sets the execution result.
          *
-         * @param result the result value to set
+         * @param result the result to set; {@code null} represents a successful execution,
+         *               an {@link Exception} represents a failed execution
          */
         void setResult(Object result);
 
@@ -953,59 +959,60 @@ public final class Profiler {
         long getStartTimeInMillis();
 
         /**
-         * Sets the start time in milliseconds.
+         * Sets the start time in milliseconds since epoch.
          *
-         * @param startTimeInMillis the new start time in milliseconds
+         * @param startTimeInMillis the start time in milliseconds since epoch
          */
         void setStartTimeInMillis(long startTimeInMillis);
 
         /**
          * Gets the end time in milliseconds since epoch.
          *
-         * @return the end time in milliseconds
+         * @return the end time in milliseconds since epoch
          */
         long getEndTimeInMillis();
 
         /**
-         * Sets the end time in milliseconds.
+         * Sets the end time in milliseconds since epoch.
          *
-         * @param endTimeInMillis the new end time in milliseconds
+         * @param endTimeInMillis the end time in milliseconds since epoch
          */
         void setEndTimeInMillis(long endTimeInMillis);
 
         /**
-         * Gets the start time in nanoseconds.
+         * Gets the start time in nanoseconds, as returned by {@link System#nanoTime()}.
          *
          * @return the start time in nanoseconds
          */
         long getStartTimeInNano();
 
         /**
-         * Sets the start time in nanoseconds.
+         * Sets the start time in nanoseconds, as returned by {@link System#nanoTime()}.
          *
-         * @param startTimeInNano the new start time in nanoseconds
+         * @param startTimeInNano the start time in nanoseconds
          */
         void setStartTimeInNano(long startTimeInNano);
 
         /**
-         * Gets the end time in nanoseconds.
+         * Gets the end time in nanoseconds, as returned by {@link System#nanoTime()}.
          *
          * @return the end time in nanoseconds
          */
         long getEndTimeInNano();
 
         /**
-         * Sets the end time in nanoseconds.
+         * Sets the end time in nanoseconds, as returned by {@link System#nanoTime()}.
          *
-         * @param endTimeInNano the new end time in nanoseconds
+         * @param endTimeInNano the end time in nanoseconds
          */
         void setEndTimeInNano(long endTimeInNano);
 
         /**
          * Calculates and returns the elapsed time in milliseconds.
-         * The calculation is based on nanosecond precision for accuracy.
+         * The value is derived from the nanosecond timestamps for sub-millisecond precision.
          *
-         * @return the elapsed time in milliseconds
+         * @return the elapsed time in milliseconds (computed as
+         *         {@code (endTimeInNano - startTimeInNano) / 1,000,000.0})
          */
         double getElapsedTimeInMillis();
     }
@@ -1026,16 +1033,18 @@ public final class Profiler {
         List<String> getMethodNameList();
 
         /**
-         * Gets the method execution with the minimum elapsed time.
+         * Returns the method execution with the minimum elapsed time across all tracked executions.
          *
-         * @return the MethodStatistics with minimum elapsed time
+         * @return the {@link MethodStatistics} with the smallest elapsed time,
+         *         or {@code null} if no method executions have been recorded
          */
         MethodStatistics getMinElapsedTimeMethod();
 
         /**
-         * Gets the method execution with the maximum elapsed time.
+         * Returns the method execution with the maximum elapsed time across all tracked executions.
          *
-         * @return the MethodStatistics with maximum elapsed time
+         * @return the {@link MethodStatistics} with the largest elapsed time,
+         *         or {@code null} if no method executions have been recorded
          */
         MethodStatistics getMaxElapsedTimeMethod();
 
@@ -1132,10 +1141,21 @@ public final class Profiler {
         /** The result. */
         private Object result;
 
+        /**
+         * Constructs an {@code AbstractStatistics} with all timing fields set to zero.
+         */
         protected AbstractStatistics() {
             this(0, 0, 0, 0);
         }
 
+        /**
+         * Constructs an {@code AbstractStatistics} with the specified timing information.
+         *
+         * @param startTimeInMillis the start time in milliseconds since epoch
+         * @param endTimeInMillis the end time in milliseconds since epoch
+         * @param startTimeInNano the start time in nanoseconds (from {@link System#nanoTime()})
+         * @param endTimeInNano the end time in nanoseconds (from {@link System#nanoTime()})
+         */
         protected AbstractStatistics(final long startTimeInMillis, final long endTimeInMillis, final long startTimeInNano, final long endTimeInNano) {
             this.startTimeInMillis = startTimeInMillis;
             this.endTimeInMillis = endTimeInMillis;
@@ -1199,10 +1219,11 @@ public final class Profiler {
         }
 
         /**
-         * Converts a time in milliseconds to a formatted string representation.
+         * Converts a time value in milliseconds since epoch to a formatted date-time string.
          *
          * @param timeInMillis the time in milliseconds since epoch
-         * @return the formatted time string in ISO local date-time format
+         * @return the formatted date-time string using {@code Dates.ISO_LOCAL_DATE_TIME_FORMAT}
+         *         (e.g., {@code "2023-01-01T10:00:00"})
          */
         protected String timeToString(final long timeInMillis) {
             final Timestamp timestamp = Dates.createTimestamp(timeInMillis);
@@ -1237,10 +1258,10 @@ public final class Profiler {
          * Creates a new MethodStatistics instance with timing information.
          *
          * @param methodName the name of the method
-         * @param startTimeInMillis the start time in milliseconds
-         * @param endTimeInMillis the end time in milliseconds
-         * @param startTimeInNano the start time in nanoseconds
-         * @param endTimeInNano the end time in nanoseconds
+         * @param startTimeInMillis the start time in milliseconds since epoch
+         * @param endTimeInMillis the end time in milliseconds since epoch
+         * @param startTimeInNano the start time in nanoseconds (from {@link System#nanoTime()})
+         * @param endTimeInNano the end time in nanoseconds (from {@link System#nanoTime()})
          */
         public MethodStatistics(final String methodName, final long startTimeInMillis, final long endTimeInMillis, final long startTimeInNano,
                 final long endTimeInNano) {
@@ -1251,11 +1272,11 @@ public final class Profiler {
          * Creates a new MethodStatistics instance with complete information.
          *
          * @param methodName the name of the method
-         * @param startTimeInMillis the start time in milliseconds
-         * @param endTimeInMillis the end time in milliseconds
-         * @param startTimeInNano the start time in nanoseconds
-         * @param endTimeInNano the end time in nanoseconds
-         * @param result the execution result (null for success, Exception for failure)
+         * @param startTimeInMillis the start time in milliseconds since epoch
+         * @param endTimeInMillis the end time in milliseconds since epoch
+         * @param startTimeInNano the start time in nanoseconds (from {@link System#nanoTime()})
+         * @param endTimeInNano the end time in nanoseconds (from {@link System#nanoTime()})
+         * @param result the execution result ({@code null} for success, an {@link Exception} instance for failure)
          */
         public MethodStatistics(final String methodName, final long startTimeInMillis, final long endTimeInMillis, final long startTimeInNano,
                 final long endTimeInNano, final Object result) {
@@ -1273,21 +1294,39 @@ public final class Profiler {
             return methodName;
         }
 
+        /**
+         * Returns the execution result for this method invocation.
+         * {@code null} indicates a successful execution; an {@link Exception} instance indicates failure.
+         *
+         * <p>This field shadows the {@code result} field in {@code AbstractStatistics} so that
+         * {@link MethodStatistics} can maintain its own independent result state.</p>
+         *
+         * @return the execution result, or {@code null} if the method completed normally
+         */
         @Override
         public Object getResult() {
             return result;
         }
 
+        /**
+         * Sets the execution result for this method invocation.
+         *
+         * @param result the result to set; use {@code null} to indicate success, or an
+         *               {@link Exception} to indicate failure
+         */
         @Override
         public void setResult(final Object result) {
             this.result = result;
         }
 
         /**
-         * Checks if the method execution failed.
-         * A method is considered failed if the result is an Exception.
+         * Returns {@code true} if the method execution failed.
          *
-         * @return {@code true} if the execution failed, {@code false} otherwise
+         * <p>An execution is considered failed when its {@link #getResult() result} is an
+         * instance of {@link Exception} (i.e., an exception was thrown and captured during
+         * profiling). Successful executions have a {@code null} result.</p>
+         *
+         * @return {@code true} if the result is an {@code Exception} instance, {@code false} otherwise
          */
         public boolean isFailed() {
             return result instanceof Exception;
@@ -1313,7 +1352,9 @@ public final class Profiler {
     }
 
     /**
-     * The Class SingleLoopStatistics.
+     * Statistics for a single loop iteration, aggregating all {@link MethodStatistics} recorded
+     * during that loop. Instances of this class are created internally by the profiler for each
+     * loop iteration and are later aggregated into a {@link MultiLoopsStatistics}.
      */
     static class SingleLoopStatistics extends AbstractStatistics implements LoopStatistics {
 
@@ -1331,8 +1372,8 @@ public final class Profiler {
          *
          * @param startTimeInMillis the start time in milliseconds since epoch
          * @param endTimeInMillis the end time in milliseconds since epoch
-         * @param startTimeInNano the start time in nanoseconds
-         * @param endTimeInNano the end time in nanoseconds
+         * @param startTimeInNano the start time in nanoseconds (from {@link System#nanoTime()})
+         * @param endTimeInNano the end time in nanoseconds (from {@link System#nanoTime()})
          */
         public SingleLoopStatistics(final long startTimeInMillis, final long endTimeInMillis, final long startTimeInNano, final long endTimeInNano) {
             this(startTimeInMillis, endTimeInMillis, startTimeInNano, endTimeInNano, null);
@@ -1343,8 +1384,8 @@ public final class Profiler {
          *
          * @param startTimeInMillis the start time in milliseconds since epoch
          * @param endTimeInMillis the end time in milliseconds since epoch
-         * @param startTimeInNano the start time in nanoseconds
-         * @param endTimeInNano the end time in nanoseconds
+         * @param startTimeInNano the start time in nanoseconds (from {@link System#nanoTime()})
+         * @param endTimeInNano the end time in nanoseconds (from {@link System#nanoTime()})
          * @param methodStatisticsList the list of method statistics for this loop
          */
         public SingleLoopStatistics(final long startTimeInMillis, final long endTimeInMillis, final long startTimeInNano, final long endTimeInNano,
@@ -1367,9 +1408,10 @@ public final class Profiler {
         }
 
         /**
-         * Gets the method statistics list.
+         * Returns the list of all {@link MethodStatistics} recorded in this loop iteration.
+         * Lazily initializes the list if it has not been set.
          *
-         * @return the list of all method statistics
+         * @return a non-null (possibly empty) list of method statistics in this loop
          */
         public List<MethodStatistics> getMethodStatisticsList() {
             if (methodStatisticsList == null) {
@@ -1593,10 +1635,10 @@ public final class Profiler {
         /**
          * Creates a new MultiLoopsStatistics instance with timing information.
          *
-         * @param startTimeInMillis the overall start time in milliseconds
-         * @param endTimeInMillis the overall end time in milliseconds
-         * @param startTimeInNano the overall start time in nanoseconds
-         * @param endTimeInNano the overall end time in nanoseconds
+         * @param startTimeInMillis the overall start time in milliseconds since epoch
+         * @param endTimeInMillis the overall end time in milliseconds since epoch
+         * @param startTimeInNano the overall start time in nanoseconds (from {@link System#nanoTime()})
+         * @param endTimeInNano the overall end time in nanoseconds (from {@link System#nanoTime()})
          * @param threadNum the number of threads used in the test
          */
         public MultiLoopsStatistics(final long startTimeInMillis, final long endTimeInMillis, final long startTimeInNano, final long endTimeInNano,
@@ -1607,10 +1649,10 @@ public final class Profiler {
         /**
          * Creates a new MultiLoopsStatistics instance with complete information.
          *
-         * @param startTimeInMillis the overall start time in milliseconds
-         * @param endTimeInMillis the overall end time in milliseconds
-         * @param startTimeInNano the overall start time in nanoseconds
-         * @param endTimeInNano the overall end time in nanoseconds
+         * @param startTimeInMillis the overall start time in milliseconds since epoch
+         * @param endTimeInMillis the overall end time in milliseconds since epoch
+         * @param startTimeInNano the overall start time in nanoseconds (from {@link System#nanoTime()})
+         * @param endTimeInNano the overall end time in nanoseconds (from {@link System#nanoTime()})
          * @param threadNum the number of threads used in the test
          * @param loopStatisticsList the list of loop statistics from all threads
          */
@@ -1663,9 +1705,12 @@ public final class Profiler {
         }
 
         /**
-         * Adds the loop statistics to the list of all loop statistics.
+         * Adds the given loop statistics to this object's list of loop statistics.
          *
-         * @param loopStatistics the loop statistics to add
+         * <p><b>Note:</b> Despite the method name, this method adds a {@link LoopStatistics} entry
+         * (not a method statistics list) to the internal {@code loopStatisticsList}.</p>
+         *
+         * @param loopStatistics the loop statistics to add; must not be {@code null}
          */
         public void addMethodStatisticsList(final LoopStatistics loopStatistics) {
             getLoopStatisticsList().add(loopStatistics);
@@ -1873,14 +1918,15 @@ public final class Profiler {
          * identify performance outliers and distribution patterns.
          *
          * <p><b>Percentile Interpretation:</b>
-         * The percentile columns are computed from the executions sorted in descending order of
-         * elapsed time, so each column reports the elapsed-time threshold that the given fraction
-         * of executions took <em>at least</em> as long as.
+         * The percentile columns are computed from executions sorted in descending order of elapsed time
+         * (slowest first). Each column header {@code X% >=} means "this fraction of executions took
+         * <em>at least</em> the displayed time." In other words, higher percentages correspond to
+         * faster (shorter) elapsed times.
          * <ul>
-         *   <li><b>0.01% &gt;=:</b> The slowest 0.01% of executions took at least this long (extreme worst-case tail)</li>
-         *   <li><b>50% &gt;= (median):</b> Half of all executions took at least this long</li>
-         *   <li><b>99% &gt;=:</b> 99% of executions took at least this long (i.e., the fast end of the distribution)</li>
-         *   <li><b>99.99% &gt;=:</b> Nearly all executions took at least this long (best-case end)</li>
+         *   <li><b>0.01% &gt;=:</b> The worst-case tail — only the slowest 0.01% of executions were this slow or slower</li>
+         *   <li><b>50% &gt;= (median):</b> Half of all executions were at least this slow (the median)</li>
+         *   <li><b>99% &gt;=:</b> 99% of all executions were at least as long as this value (the fast end of the distribution)</li>
+         *   <li><b>99.99% &gt;=:</b> Nearly every execution was at least this long (near the minimum observed time)</li>
          * </ul>
          *
          * <p><b>Typical Use Cases:</b>
@@ -1897,17 +1943,17 @@ public final class Profiler {
          * ========================================================================================================================
          * (unit: milliseconds)
          * threadNum=4; loops=1000
-         * startTime: 2023-01-01 10:00:00
-         * endTime:   2023-01-01 10:00:05
+         * startTime: 2023-01-01T10:00:00
+         * endTime:   2023-01-01T10:00:05
          * totalElapsedTime: 5000.000
          *
          * <method name>,        |avg time|, |min time|, |max time|, |0.01% >=|, |0.1% >=|,  |1% >=|,    |10% >=|,   |20% >=|,   |50% >=|,   |80% >=|,   |90% >=|,   |99% >=|,   |99.9% >=|, |99.99% >=|
-         * databaseQuery,        1.234,      0.123,      12.345,      0.150,      0.200,      0.300,      0.800,      1.000,      1.200,      1.500,      2.000,      5.000,      8.000,       10.000
-         * cacheOperation,       0.456,      0.050,      2.100,       0.060,      0.070,      0.100,      0.250,      0.350,      0.450,      0.600,      0.750,      1.200,      1.500,       1.800
+         * databaseQuery,        1.234,      0.123,      12.345,     10.000,     8.000,      5.000,      2.000,      1.500,      1.200,      0.800,      0.500,      0.250,      0.150,      0.123
+         * cacheOperation,       0.456,      0.050,      2.100,       1.800,      1.500,      1.200,      0.750,      0.600,      0.450,      0.350,      0.250,      0.100,      0.070,       0.060
          *
          * Errors: 5 (0.125%)
          * --------------------------------------------------------------------------------
-         * method=databaseQuery, startTime=2023-01-01 10:00:01, endTime=2023-01-01 10:00:01, result=SQLException: Connection timeout.
+         * method=databaseQuery, startTime=2023-01-01T10:00:01, endTime=2023-01-01T10:00:01, result=SQLException: Connection timeout.
          * ========================================================================================================================
          * }</pre>
          *
@@ -2444,28 +2490,28 @@ public final class Profiler {
          *   <unit>milliseconds</unit>
          *   <threadNum>4</threadNum>
          *   <loops>1000</loops>
-         *   <startTime>2023-01-01 10:00:00</startTime>
-         *   <endTime>2023-01-01 10:00:05</endTime>
+         *   <startTime>2023-01-01T10:00:00</startTime>
+         *   <endTime>2023-01-01T10:00:05</endTime>
          *   <totalElapsedTime>5000.000</totalElapsedTime>
          *
          *   <method name="databaseQuery">
          *     <avgTime>1.234</avgTime>
          *     <minTime>0.123</minTime>
          *     <maxTime>12.345</maxTime>
-         *     <_0.0001>0.150</_0.0001>
-         *     <_0.001>0.200</_0.001>
-         *     <_0.01>0.300</_0.01>
-         *     <_0.2>1.000</_0.2>
+         *     <_0.0001>10.000</_0.0001>
+         *     <_0.001>8.000</_0.001>
+         *     <_0.01>5.000</_0.01>
+         *     <_0.2>1.500</_0.2>
          *     <_0.5>1.200</_0.5>
-         *     <_0.8>1.500</_0.8>
-         *     <_0.9>2.000</_0.9>
-         *     <_0.99>5.000</_0.99>
-         *     <_0.999>8.000</_0.999>
-         *     <_0.9999>10.000</_0.9999>
+         *     <_0.8>0.800</_0.8>
+         *     <_0.9>0.500</_0.9>
+         *     <_0.99>0.250</_0.99>
+         *     <_0.999>0.150</_0.999>
+         *     <_0.9999>0.123</_0.9999>
          *   </method>
          *
          *   <errors>5 (0.125%)</errors>
-         *   <error>method=databaseQuery, startTime=2023-01-01 10:00:01, result=SQLException: Connection timeout.</error>
+         *   <error>method=databaseQuery, startTime=2023-01-01T10:00:01, endTime=2023-01-01T10:00:01, result=SQLException: Connection timeout.</error>
          * </result>
          * }</pre>
          *

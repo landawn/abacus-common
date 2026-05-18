@@ -2748,9 +2748,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * satisfy the predicate are passed to the downstream collector. This is useful for
      * conditional collection and can be more efficient than filtering the stream first.</p>
      *
-     * <p>If the downstream collector is short-circuiting, this method returns a
-     * short-circuiting collector as well. This is similar to the JDK 9+ filtering
-     * collector but with short-circuiting support.</p>
+     * <p>The characteristics of the returned collector are inherited from the downstream
+     * collector. This behaves like the JDK 9+ {@code filtering} collector.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7048,8 +7047,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * handles Unicode surrogate pairs correctly, ensuring that the prefix doesn't end with
      * an incomplete surrogate pair.</p>
      *
-     * <p>This is a short-circuiting collector: it may stop processing elements once it
-     * determines that the common prefix is empty.</p>
+     * <p>Once the common prefix has been reduced to empty, subsequent elements no longer
+     * affect the result, though the stream is still fully traversed.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7102,8 +7101,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * handles Unicode surrogate pairs correctly, ensuring that the suffix doesn't start with
      * an incomplete surrogate pair.</p>
      *
-     * <p>This is a short-circuiting collector: it may stop processing elements once it
-     * determines that the common suffix is empty.</p>
+     * <p>Once the common suffix has been reduced to empty, subsequent elements no longer
+     * affect the result, though the stream is still fully traversed.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -8441,11 +8440,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a bidirectional map
-     * BiMap<Integer, String> result = Stream.of("apple", "banana", "cherry")
+     * BiMap<Integer, String> result = Stream.of("hi", "abc", "world")
      *     .collect(Collectors.toBiMap(
      *         String::length,
      *         Function.identity()));
-     * // Can retrieve key by value: result.inverse().get("apple") returns 5
+     * // Can retrieve key by value: result.inverse().get("world") returns 5
      * }</pre>
      *
      * @param <T> the type of input elements

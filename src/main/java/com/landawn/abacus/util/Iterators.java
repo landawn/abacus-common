@@ -680,10 +680,10 @@ public final class Iterators {
      * // Yields: 1, 1, 1, 2, 2, 2
      * }</pre>
      *
-     * @param <T> the type of elements in the collection.
-     * @param c the collection whose elements are to be repeated, or {@code null}/empty to return an empty iterator.
-     * @param n the number of times the collection's elements are to be repeated. Must be non-negative.
-     * @return an {@code ObjIterator} over the elements in the collection, repeated {@code n} times, or an empty iterator if {@code c} is {@code null}/empty or {@code n} is {@code 0}.
+     * @param <T> the type of elements in the iterable.
+     * @param c the iterable whose elements are to be repeated, or {@code null}/empty to return an empty iterator.
+     * @param n the number of times each element is to be repeated. Must be non-negative.
+     * @return an {@code ObjIterator} over the elements in the iterable, each repeated {@code n} times, or an empty iterator if {@code c} is {@code null}/empty or {@code n} is {@code 0}.
      * @throws IllegalArgumentException if {@code n} is negative.
      * @see #cycle(Object...)
      * @see #cycle(Iterable)
@@ -1065,8 +1065,8 @@ public final class Iterators {
      * // iter.nextBoolean() => true
      * }</pre>
      *
-     * @param a the boolean arrays to be concatenated.
-     * @return a BooleanIterator that will iterate over the elements of each provided boolean array in order.
+     * @param a the boolean arrays to be concatenated. {@code null} or empty arrays within {@code a} are skipped.
+     * @return a BooleanIterator that will iterate over the elements of each provided boolean array in order, or {@code BooleanIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
     public static BooleanIterator concat(final boolean[]... a) {
         if (N.isEmpty(a)) {
@@ -1112,8 +1112,8 @@ public final class Iterators {
      * // iter.nextChar() => 'c'
      * }</pre>
      *
-     * @param a the char arrays to be concatenated.
-     * @return a CharIterator that will iterate over the elements of each provided char array in order.
+     * @param a the char arrays to be concatenated. {@code null} or empty arrays within {@code a} are skipped.
+     * @return a CharIterator that will iterate over the elements of each provided char array in order, or {@code CharIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
     public static CharIterator concat(final char[]... a) {
         if (N.isEmpty(a)) {
@@ -1159,8 +1159,8 @@ public final class Iterators {
      * // iter.nextByte() => 3
      * }</pre>
      *
-     * @param a the byte arrays to be concatenated.
-     * @return a ByteIterator that will iterate over the elements of each provided byte array in order.
+     * @param a the byte arrays to be concatenated. {@code null} or empty arrays within {@code a} are skipped.
+     * @return a ByteIterator that will iterate over the elements of each provided byte array in order, or {@code ByteIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
     public static ByteIterator concat(final byte[]... a) {
         if (N.isEmpty(a)) {
@@ -1206,8 +1206,8 @@ public final class Iterators {
      * // iter.nextShort() => 30
      * }</pre>
      *
-     * @param a the short arrays to be concatenated.
-     * @return a ShortIterator that will iterate over the elements of each provided short array in order.
+     * @param a the short arrays to be concatenated. {@code null} or empty arrays within {@code a} are skipped.
+     * @return a ShortIterator that will iterate over the elements of each provided short array in order, or {@code ShortIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
     public static ShortIterator concat(final short[]... a) {
         if (N.isEmpty(a)) {
@@ -1254,8 +1254,8 @@ public final class Iterators {
      * // iter.nextInt() => 4
      * }</pre>
      *
-     * @param a the int arrays to be concatenated.
-     * @return an IntIterator that will iterate over the elements of each provided int array in order.
+     * @param a the int arrays to be concatenated. {@code null} or empty arrays within {@code a} are skipped.
+     * @return an IntIterator that will iterate over the elements of each provided int array in order, or {@code IntIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
     public static IntIterator concat(final int[]... a) {
         if (N.isEmpty(a)) {
@@ -1301,8 +1301,8 @@ public final class Iterators {
      * // iter.nextLong() => 3L
      * }</pre>
      *
-     * @param a the long arrays to be concatenated.
-     * @return a LongIterator that will iterate over the elements of each provided long array in order.
+     * @param a the long arrays to be concatenated. {@code null} or empty arrays within {@code a} are skipped.
+     * @return a LongIterator that will iterate over the elements of each provided long array in order, or {@code LongIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
     public static LongIterator concat(final long[]... a) {
         if (N.isEmpty(a)) {
@@ -1347,8 +1347,8 @@ public final class Iterators {
      * // iter.nextFloat() => 2.2f
      * }</pre>
      *
-     * @param a the float arrays to be concatenated.
-     * @return a FloatIterator that will iterate over the elements of each provided float array in order.
+     * @param a the float arrays to be concatenated. {@code null} or empty arrays within {@code a} are skipped.
+     * @return a FloatIterator that will iterate over the elements of each provided float array in order, or {@code FloatIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
     public static FloatIterator concat(final float[]... a) {
         if (N.isEmpty(a)) {
@@ -1394,8 +1394,8 @@ public final class Iterators {
      * // iter.nextDouble() => 3.3
      * }</pre>
      *
-     * @param a the double arrays to be concatenated.
-     * @return a DoubleIterator that will iterate over the elements of each provided double array in order.
+     * @param a the double arrays to be concatenated. {@code null} or empty arrays within {@code a} are skipped.
+     * @return a DoubleIterator that will iterate over the elements of each provided double array in order, or {@code DoubleIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
     public static DoubleIterator concat(final double[]... a) {
         if (N.isEmpty(a)) {
@@ -1442,7 +1442,7 @@ public final class Iterators {
      * }</pre>
      *
      * @param a the BooleanIterators to be concatenated.
-     * @return a BooleanIterator that will iterate over the elements of each provided BooleanIterator in order.
+     * @return a BooleanIterator that will iterate over the elements of each provided BooleanIterator in order, or {@code BooleanIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
     public static BooleanIterator concat(final BooleanIterator... a) {
         if (N.isEmpty(a)) {
@@ -1487,7 +1487,7 @@ public final class Iterators {
      * }</pre>
      *
      * @param a the CharIterators to be concatenated.
-     * @return a CharIterator that will iterate over the elements of each provided CharIterator in order.
+     * @return a CharIterator that will iterate over the elements of each provided CharIterator in order, or {@code CharIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
     public static CharIterator concat(final CharIterator... a) {
         if (N.isEmpty(a)) {
@@ -1532,7 +1532,7 @@ public final class Iterators {
      * }</pre>
      *
      * @param a the ByteIterators to be concatenated.
-     * @return a ByteIterator that will iterate over the elements of each provided ByteIterator in order.
+     * @return a ByteIterator that will iterate over the elements of each provided ByteIterator in order, or {@code ByteIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
     public static ByteIterator concat(final ByteIterator... a) {
         if (N.isEmpty(a)) {
@@ -1577,7 +1577,7 @@ public final class Iterators {
      * }</pre>
      *
      * @param a the ShortIterators to be concatenated.
-     * @return a ShortIterator that will iterate over the elements of each provided ShortIterator in order.
+     * @return a ShortIterator that will iterate over the elements of each provided ShortIterator in order, or {@code ShortIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
     public static ShortIterator concat(final ShortIterator... a) {
         if (N.isEmpty(a)) {
@@ -1622,7 +1622,7 @@ public final class Iterators {
      * }</pre>
      *
      * @param a the IntIterators to be concatenated.
-     * @return an IntIterator that will iterate over the elements of each provided IntIterator in order.
+     * @return an IntIterator that will iterate over the elements of each provided IntIterator in order, or {@code IntIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
     public static IntIterator concat(final IntIterator... a) {
         if (N.isEmpty(a)) {
@@ -1667,7 +1667,7 @@ public final class Iterators {
      * }</pre>
      *
      * @param a the LongIterators to be concatenated.
-     * @return a LongIterator that will iterate over the elements of each provided LongIterator in order.
+     * @return a LongIterator that will iterate over the elements of each provided LongIterator in order, or {@code LongIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
     public static LongIterator concat(final LongIterator... a) {
         if (N.isEmpty(a)) {
@@ -1712,7 +1712,7 @@ public final class Iterators {
      * }</pre>
      *
      * @param a the FloatIterators to be concatenated.
-     * @return a FloatIterator that will iterate over the elements of each provided FloatIterator in order.
+     * @return a FloatIterator that will iterate over the elements of each provided FloatIterator in order, or {@code FloatIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
     public static FloatIterator concat(final FloatIterator... a) {
         if (N.isEmpty(a)) {
@@ -1757,7 +1757,7 @@ public final class Iterators {
      * }</pre>
      *
      * @param a the DoubleIterators to be concatenated.
-     * @return a DoubleIterator that will iterate over the elements of each provided DoubleIterator in order.
+     * @return a DoubleIterator that will iterate over the elements of each provided DoubleIterator in order, or {@code DoubleIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
     public static DoubleIterator concat(final DoubleIterator... a) {
         if (N.isEmpty(a)) {
@@ -1802,8 +1802,8 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the arrays.
-     * @param a the arrays to be concatenated.
-     * @return an ObjIterator that will iterate over the elements of each provided array in order.
+     * @param a the arrays to be concatenated. {@code null} or empty arrays within {@code a} are skipped.
+     * @return an ObjIterator that will iterate over the elements of each provided array in order, or an empty iterator if {@code a} is {@code null} or empty.
      */
     @SafeVarargs
     public static <T> ObjIterator<T> concat(final T[]... a) {
@@ -1837,7 +1837,7 @@ public final class Iterators {
      *
      * @param <T> the type of elements in the Iterators.
      * @param a the Iterators to be concatenated.
-     * @return an ObjIterator that will iterate over the elements of each provided Iterator in order.
+     * @return an ObjIterator that will iterate over the elements of each provided Iterator in order, or an empty iterator if {@code a} is {@code null} or empty.
      */
     @SafeVarargs
     public static <T> ObjIterator<T> concat(final Iterator<? extends T>... a) {
@@ -1866,8 +1866,8 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the Iterable objects.
-     * @param a the Iterable objects to be concatenated.
-     * @return an ObjIterator that will iterate over the elements of each provided Iterable.
+     * @param a the Iterable objects to be concatenated. {@code null} Iterable elements within {@code a} are treated as empty.
+     * @return an ObjIterator that will iterate over the elements of each provided Iterable in order, or an empty iterator if {@code a} is {@code null} or empty.
      */
     @SafeVarargs
     public static <T> ObjIterator<T> concat(final Iterable<? extends T>... a) {
@@ -1897,8 +1897,8 @@ public final class Iterators {
      *
      * @param <K> the type of keys in the Maps.
      * @param <V> the type of values in the Maps.
-     * @param a the Maps to be concatenated.
-     * @return an ObjIterator of Map.Entry that will iterate over the entries of each provided Map.
+     * @param a the Maps to be concatenated. {@code null} or empty Maps in the array are skipped.
+     * @return an ObjIterator of Map.Entry that will iterate over the entries of each provided Map in order, or an empty iterator if {@code a} is {@code null} or empty.
      */
     @SafeVarargs
     public static <K, V> ObjIterator<Map.Entry<K, V>> concat(final Map<? extends K, ? extends V>... a) {
@@ -1983,8 +1983,8 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the Iterable objects.
-     * @param c the collection of Iterable objects to be concatenated.
-     * @return an ObjIterator that will iterate over the elements of each provided Iterable.
+     * @param c the collection of Iterable objects to be concatenated, or {@code null}/empty to return an empty iterator.
+     * @return an ObjIterator that will iterate over the elements of each provided Iterable, or an empty iterator if {@code c} is {@code null} or empty.
      * @see N#concat(Iterable...)
      * @see N#iterateEach(Collection)
      */
@@ -2032,7 +2032,7 @@ public final class Iterators {
      * @param <A> the type of the first element in the BiIterator.
      * @param <B> the type of the second element in the BiIterator.
      * @param a the BiIterators to be concatenated.
-     * @return a BiIterator that will iterate over the elements of each provided BiIterator in order.
+     * @return a BiIterator that will iterate over the elements of each provided BiIterator in order, or an empty BiIterator if {@code a} is {@code null} or empty.
      */
     @SafeVarargs
     public static <A, B> BiIterator<A, B> concat(final BiIterator<A, B>... a) {
@@ -2137,7 +2137,7 @@ public final class Iterators {
      * @param <B> the type of the second element in the TriIterator.
      * @param <C> the type of the third element in the TriIterator.
      * @param a the TriIterators to be concatenated.
-     * @return a TriIterator that will iterate over the elements of each provided TriIterator in order.
+     * @return a TriIterator that will iterate over the elements of each provided TriIterator in order, or an empty TriIterator if {@code a} is {@code null} or empty.
      */
     @SafeVarargs
     public static <A, B, C> TriIterator<A, B, C> concat(final TriIterator<A, B, C>... a) {
@@ -2919,6 +2919,7 @@ public final class Iterators {
      * @param iter the original Iterator to be unzipped.
      * @param unzip a BiConsumer that takes an element from the original Iterator and a Triple to be filled with the resulting elements for the TriIterator.
      * @return a TriIterator that will iterate over the elements created by <i>unzip</i>.
+     * @throws IllegalArgumentException if {@code unzip} is {@code null}.
      * @deprecated replaced by {@link TriIterator#unzip(Iterator, BiConsumer)}
      * @see TriIterator#unzip(Iterator, BiConsumer)
      * @see TriIterator#toMultiList(Supplier)
@@ -2954,6 +2955,7 @@ public final class Iterators {
      * @param c the original {@code Iterable} to be unzipped.
      * @param unzip a {@code BiConsumer} that takes an element from the original {@code Iterable} and a {@code Triple} to be filled with the resulting elements for the {@code TriIterator}.
      * @return a {@code TriIterator} that will iterate over the elements created by {@code unzip}.
+     * @throws IllegalArgumentException if {@code unzip} is {@code null}.
      * @deprecated replaced by {@link TriIterator#unzip(Iterable, BiConsumer)}
      * @see TriIterator#unzip(Iterable, BiConsumer)
      * @see TriIterator#toMultiList(Supplier)
@@ -3138,10 +3140,11 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the iterator.
-     * @param iter the iterator to be skipped and limited.
+     * @param iter the iterator to be skipped and limited, or {@code null} to return an empty iterator.
      * @param offset the number of elements to skip from the beginning. Must be non-negative.
      * @param count the maximum number of elements to return after skipping. Must be non-negative.
-     * @return an {@code ObjIterator} that will iterate over up to {@code count} elements starting from the (offset+1)th element.
+     * @return an {@code ObjIterator} that will iterate over up to {@code count} elements starting from the (offset+1)th element, or an empty iterator if {@code iter} is {@code null}.
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      * @see N#slice(Iterator, int, int)
      */
     public static <T> ObjIterator<T> skipAndLimit(final Iterator<? extends T> iter, final long offset, final long count) {
@@ -3237,8 +3240,8 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the iterable.
-     * @param c the iterable whose {@code null} elements should be skipped.
-     * @return an {@code ObjIterator} that iterates over only the {@code non-null} elements.
+     * @param c the iterable whose {@code null} elements should be skipped, or {@code null} to return an empty iterator.
+     * @return an {@code ObjIterator} that iterates over only the {@code non-null} elements, or an empty iterator if {@code c} is {@code null}.
      */
     @Beta
     public static <T> ObjIterator<T> skipNulls(final Iterable<? extends T> c) {
@@ -3261,8 +3264,8 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the iterator.
-     * @param iter the iterator whose {@code null} elements should be skipped.
-     * @return an {@code ObjIterator} that iterates over only the {@code non-null} elements.
+     * @param iter the iterator whose {@code null} elements should be skipped, or {@code null} to return an empty iterator.
+     * @return an {@code ObjIterator} that iterates over only the {@code non-null} elements, or an empty iterator if {@code iter} is {@code null}.
      */
     public static <T> ObjIterator<T> skipNulls(final Iterator<? extends T> iter) {
         return filter(iter, Fn.notNull());
@@ -3283,8 +3286,8 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the original Iterable.
-     * @param c the original Iterable to be processed for distinct elements.
-     * @return a new ObjIterator that will iterate over the distinct elements of the original Iterable.
+     * @param c the original Iterable to be processed for distinct elements, or {@code null} to return an empty iterator.
+     * @return a new ObjIterator that will iterate over the distinct elements of the original Iterable, or an empty iterator if {@code c} is {@code null}.
      */
     @Beta
     public static <T> ObjIterator<T> distinct(final Iterable<? extends T> c) {
@@ -3310,8 +3313,8 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the original Iterator.
-     * @param iter the original Iterator to be processed for distinct elements.
-     * @return a new ObjIterator that will iterate over the distinct elements of the original Iterator.
+     * @param iter the original Iterator to be processed for distinct elements, or {@code null} to return an empty iterator.
+     * @return a new ObjIterator that will iterate over the distinct elements of the original Iterator, or an empty iterator if {@code iter} is {@code null}.
      */
     public static <T> ObjIterator<T> distinct(final Iterator<? extends T> iter) {
         if (iter == null) {
@@ -4254,9 +4257,10 @@ public final class Iterators {
      * @param <T> the type of elements in the original iterator.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
      * @param iter the original iterator to be processed.
-     * @param offset the starting point in the iterator from where elements will be processed.
-     * @param count the maximum number of elements to be processed from the iterator.
+     * @param offset the starting point in the iterator from where elements will be processed. Must be non-negative.
+     * @param count the maximum number of elements to be processed from the iterator. Must be non-negative.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterator.
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      * @throws E if the {@code elementConsumer} encounters an exception.
      */
     public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final long offset, final long count,
@@ -4283,10 +4287,11 @@ public final class Iterators {
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
      * @param <E2> the type of exception that can be thrown by the {@code onComplete} action.
      * @param iter the original iterator to be processed.
-     * @param offset the starting point in the iterator from where elements will be processed.
-     * @param count the maximum number of elements to be processed from the iterator.
+     * @param offset the starting point in the iterator from where elements will be processed. Must be non-negative.
+     * @param count the maximum number of elements to be processed from the iterator. Must be non-negative.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterator.
      * @param onComplete a {@code Runnable} action to be executed after all elements in the iterator have been processed.
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      * @throws E if the {@code elementConsumer} encounters an exception.
      * @throws E2 if the {@code onComplete} action encounters an exception.
      */
@@ -4310,10 +4315,10 @@ public final class Iterators {
      * @param <T> the type of elements in the original iterator.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
      * @param iter the original iterator to be processed.
-     * @param offset the starting point in the iterator from where elements will be processed.
-     * @param count the maximum number of elements to be processed from the iterator.
-     * @param processThreadNum the number of threads to be used for processing.
-     * @param queueSize the size of the queue for holding elements before processing.
+     * @param offset the starting point in the iterator from where elements will be processed. Must be non-negative.
+     * @param count the maximum number of elements to be processed from the iterator. Must be non-negative.
+     * @param processThreadNum the number of threads to be used for processing. Use {@code 0} for single-threaded (caller-thread) processing.
+     * @param queueSize the size of the queue for holding elements before processing. Use {@code 0} for a default calculated size.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterator.
      * @throws E if the {@code elementConsumer} encounters an exception.
      */
@@ -4341,10 +4346,10 @@ public final class Iterators {
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
      * @param <E2> the type of exception that can be thrown by the {@code onComplete} action.
      * @param iter the original iterator to be processed.
-     * @param offset the starting point in the iterator from where processing should begin.
-     * @param count the maximum number of elements to process.
-     * @param processThreadNum the number of threads to be used for processing.
-     * @param queueSize the size of the queue to hold the processing records. The default size is 1024.
+     * @param offset the starting point in the iterator from where processing should begin. Must be non-negative.
+     * @param count the maximum number of elements to process. Must be non-negative.
+     * @param processThreadNum the number of threads to be used for processing. Use {@code 0} for single-threaded (caller-thread) processing.
+     * @param queueSize the size of the queue to hold the processing records. Use {@code 0} for a default calculated size.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterator.
      * @param onComplete a {@code Runnable} action to be performed once all elements have been processed.
      * @throws E if the {@code elementConsumer} encounters an exception.
@@ -4427,9 +4432,10 @@ public final class Iterators {
      * @param <T> the type of elements in the original iterators.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
      * @param iterators the original collection of iterators to be processed.
-     * @param offset the starting point in the iterators from where elements will be processed.
-     * @param count the maximum number of elements to be processed from the iterators.
+     * @param offset the starting point in the iterators from where elements will be processed. Must be non-negative.
+     * @param count the maximum number of elements to be processed from the iterators. Must be non-negative.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      * @throws E if the {@code elementConsumer} encounters an exception.
      */
     public static <T, E extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final long offset, final long count,
@@ -4456,10 +4462,11 @@ public final class Iterators {
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
      * @param <E2> the type of exception that can be thrown by the {@code onComplete} action.
      * @param iterators the original collection of iterators to be processed.
-     * @param offset the starting point in the iterators from where elements will be processed.
-     * @param count the maximum number of elements to be processed from the iterators.
+     * @param offset the starting point in the iterators from where elements will be processed. Must be non-negative.
+     * @param count the maximum number of elements to be processed from the iterators. Must be non-negative.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
      * @param onComplete a {@code Runnable} action to be executed after all elements in the iterators have been processed.
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      * @throws E if the {@code elementConsumer} encounters an exception.
      * @throws E2 if the {@code onComplete} action encounters an exception.
      */
@@ -4486,9 +4493,9 @@ public final class Iterators {
      * @param <T> the type of elements in the original iterators.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
      * @param iterators the original collection of iterators to be processed.
-     * @param readThreadNum the number of threads to be used for reading elements from the iterators.
-     * @param processThreadNum the number of threads to be used for processing elements.
-     * @param queueSize the size of the queue for holding elements before processing.
+     * @param readThreadNum the number of threads to be used for reading elements from the iterators. Use {@code 0} for single-threaded reading.
+     * @param processThreadNum the number of threads to be used for processing elements. Use {@code 0} for single-threaded (caller-thread) processing.
+     * @param queueSize the size of the queue for holding elements before processing. Use {@code 0} for a default calculated size.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
      * @throws E if the {@code elementConsumer} encounters an exception.
      */
@@ -4520,9 +4527,9 @@ public final class Iterators {
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
      * @param <E2> the type of exception that can be thrown by the {@code onComplete} action.
      * @param iterators the original collection of iterators to be processed.
-     * @param readThreadNum the number of threads to be used for reading elements from the iterators.
-     * @param processThreadNum the number of threads to be used for processing elements.
-     * @param queueSize the size of the queue for holding elements before processing.
+     * @param readThreadNum the number of threads to be used for reading elements from the iterators. Use {@code 0} for single-threaded reading.
+     * @param processThreadNum the number of threads to be used for processing elements. Use {@code 0} for single-threaded (caller-thread) processing.
+     * @param queueSize the size of the queue for holding elements before processing. Use {@code 0} for a default calculated size.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
      * @param onComplete a {@code Runnable} action to be executed after all elements in the iterators have been processed.
      * @throws E if the {@code elementConsumer} encounters an exception.
@@ -4552,12 +4559,13 @@ public final class Iterators {
      * @param <T> the type of elements in the original iterators.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
      * @param iterators the original collection of iterators to be processed.
-     * @param offset the starting point in the iterators from where elements will be processed.
-     * @param count the maximum number of elements to be processed from the iterators.
-     * @param readThreadNum the number of threads to be used for reading elements from the iterators.
-     * @param processThreadNum the number of threads to be used for processing elements.
-     * @param queueSize the size of the queue for holding elements before processing.
+     * @param offset the starting point in the iterators from where elements will be processed. Must be non-negative.
+     * @param count the maximum number of elements to be processed from the iterators. Must be non-negative.
+     * @param readThreadNum the number of threads to be used for reading elements from the iterators. Use {@code 0} for single-threaded reading.
+     * @param processThreadNum the number of threads to be used for processing elements. Use {@code 0} for single-threaded (caller-thread) processing.
+     * @param queueSize the size of the queue for holding elements before processing. Use {@code 0} for a default calculated size.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      * @throws E if the {@code elementConsumer} encounters an exception.
      */
     public static <T, E extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final long offset, final long count,
@@ -4587,11 +4595,11 @@ public final class Iterators {
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
      * @param <E2> the type of exception that can be thrown by the {@code onComplete} action.
      * @param iterators the original collection of iterators to be processed.
-     * @param offset the starting point in the iterators from where processing should begin.
-     * @param count the maximum number of elements to process.
-     * @param readThreadNum the number of threads to be used for reading.
-     * @param processThreadNum the number of threads to be used for processing.
-     * @param queueSize the size of the queue to hold the processing records.
+     * @param offset the starting point in the iterators from where processing should begin. Must be non-negative.
+     * @param count the maximum number of elements to process. Must be non-negative.
+     * @param readThreadNum the number of threads to be used for reading from the iterators. Use {@code 0} for single-threaded reading.
+     * @param processThreadNum the number of threads to be used for processing elements. Use {@code 0} for single-threaded (caller-thread) processing.
+     * @param queueSize the size of the queue to hold elements between reading and processing. Use {@code 0} for a default calculated size.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
      * @param onComplete a {@code Runnable} action to be performed once all elements have been processed.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.

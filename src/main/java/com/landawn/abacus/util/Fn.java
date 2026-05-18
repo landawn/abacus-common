@@ -6473,6 +6473,7 @@ public final class Fn {
      * @param mutex the object to synchronize on when applying the function
      * @param triFunction the tri-function to be wrapped with synchronization
      * @return a tri-function that delegates to the given tri-function within a synchronized block on the mutex
+     * @throws IllegalArgumentException if {@code mutex} or {@code triFunction} is {@code null}
      * @see #sf(Object, java.util.function.Function)
      * @see #sf(Object, java.util.function.BiFunction)
      */
@@ -6726,8 +6727,8 @@ public final class Fn {
      * <b>{@code cc}</b> stands for <b>Throwable Callable</b> (converts checked exceptions).
      * Wraps a throwable callable to convert checked exceptions to runtime exceptions.
      *
-     * <p>This method allows you to use callables that throw checked exceptions beyond the standard
-     * Exception in contexts that expect standard Callable interfaces.
+     * <p>This method allows you to use callables that throw checked exceptions in contexts
+     * that expect standard {@code Callable} interfaces.
      * See {@link #p(Predicate)} for the full list of shorthand abbreviations.</p>
      *
      * @param <R> the type of the result
@@ -6942,14 +6943,13 @@ public final class Fn {
 
     /**
      * <b>{@code jc2r}</b> stands for <b>Java Callable to (abacus) Runnable</b>.
-     * Converts a callable to a Java runnable by discarding the callable's return value.
+     * Converts a Java callable to an abacus {@code Runnable} by discarding the callable's return value.
      *
-     * <p>This method is useful when you have a callable but need a Java runnable for use with
-     * thread creation or other Java APIs that expect Runnable.
+     * <p>This method is useful when you have a Java callable but need an abacus {@code Runnable}.
      * See {@link #p(Predicate)} for the full list of shorthand abbreviations.</p>
      *
-     * @param callable the Java callable to convert to a runnable
-     * @return a Java runnable that executes the callable and discards its return value
+     * @param callable the Java callable to convert to an abacus {@code Runnable}
+     * @return an abacus {@code Runnable} that executes the callable and discards its return value
      * @throws IllegalArgumentException if the callable is null
      * @see #r2c(java.lang.Runnable)
      */

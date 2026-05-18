@@ -469,7 +469,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      *
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
+     * @param newPositionAfterMove the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and size() - lengthOfRange, inclusive.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the list
@@ -833,7 +833,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * after removing the minimum number of shared occurrences from both sources.
      *
      * <p>The order of elements is preserved, with elements from this list appearing first,
-     * followed by elements from the specified array.</p>
+     * followed by elements from the specified array that are not in this list (considering occurrences).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1501,7 +1501,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     }
 
     /**
-     * Returns a Multiset containing all elements from specified range converted to their boxed type.
+     * Returns a Multiset containing all elements from the specified range converted to their boxed type.
      * A Multiset is a collection that allows duplicate elements and provides occurrence counting.
      *
      * @param fromIndex the starting index (inclusive) of the range to convert
@@ -1531,7 +1531,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     }
 
     /**
-     * Returns a Multiset containing all elements from specified range converted to their boxed type.
+     * Returns a Multiset containing all elements from the specified range converted to their boxed type.
      * The type of Multiset returned is determined by the provided supplier function.
      * A Multiset is a collection that allows duplicate elements and provides occurrence counting.
      *

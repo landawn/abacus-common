@@ -333,7 +333,7 @@ import com.landawn.abacus.util.Tuple.Tuple7;
  * @see java.util.concurrent.Executor
  * @see com.landawn.abacus.util.Tuple
  * @see com.landawn.abacus.util.ObjIterator
- * @see com.landawn.abacus.util.function.Function
+ * @see java.util.function.Function
  * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/Future.html">Future Documentation</a>
  * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/CompletableFuture.html">CompletableFuture Documentation</a>
  */
@@ -1951,6 +1951,7 @@ public final class Futures {
      * @return an {@code ObjIterator} that yields transformed results in completion order
      *         (first-finished, first-out).
      * @throws IllegalArgumentException if {@code resultHandler} is {@code null}.
+     * @throws NullPointerException if {@code cfs} is {@code null}.
      */
     public static <T, R> ObjIterator<R> iterate(final Collection<? extends Future<? extends T>> cfs,
             final Function<? super Result<T, Exception>, ? extends R> resultHandler) {
@@ -2004,6 +2005,7 @@ public final class Futures {
      *         {@code resultHandler}.
      * @throws IllegalArgumentException if {@code totalTimeoutForAll} is not positive, or
      *         {@code unit} or {@code resultHandler} is {@code null}.
+     * @throws NullPointerException if {@code cfs} is {@code null}.
      */
     public static <T, R> ObjIterator<R> iterate(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll, final TimeUnit unit,
             final Function<? super Result<T, Exception>, ? extends R> resultHandler) {
@@ -2128,57 +2130,22 @@ public final class Futures {
     }
 
     /**
-     * Converts an ExecutionException to its underlying cause exception if the cause is an Exception.
-     * This utility method unwraps ExecutionExceptions to provide cleaner exception handling in
-     * future composition operations. If the exception is not an ExecutionException or its cause
-     * is not an Exception, the original exception is returned unchanged.
+     * Unwraps an {@link ExecutionException} to its underlying cause when the cause is itself
+     * an {@link Exception}. Used internally by the iteration machinery to avoid presenting
+     * callers with double-wrapped exceptions from {@link java.util.concurrent.CompletionService}.
      *
-     * <p>This method is used internally throughout the Futures utility to provide more meaningful
-     * exception information when futures fail, avoiding nested ExecutionException wrappers that
-     * can obscure the actual failure cause. It simplifies error handling by exposing the root
-     * cause directly.
-     *
-     * <p><b>Conversion Rules:</b>
+     * <p>Conversion rules:
      * <ul>
-     *   <li>If {@code e} is an {@link ExecutionException} and its cause is an Exception, returns the cause</li>
-     *   <li>If {@code e} is an {@link ExecutionException} but its cause is not an Exception (e.g., Error), returns {@code e} unchanged</li>
-     *   <li>If {@code e} is not an {@link ExecutionException}, returns {@code e} unchanged</li>
-     *   <li>If {@code e} is {@code null}, behavior is undefined (should not occur in normal usage)</li>
+     *   <li>If {@code e} is an {@link ExecutionException} and its cause is an {@code Exception},
+     *       returns the cause.</li>
+     *   <li>If {@code e} is an {@link ExecutionException} but its cause is not an
+     *       {@code Exception} (e.g., an {@link Error}), returns {@code e} unchanged.</li>
+     *   <li>If {@code e} is not an {@link ExecutionException}, returns {@code e} unchanged.</li>
      * </ul>
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * // Example 1: ExecutionException with Exception cause
-     * ExecutionException ex1 = new ExecutionException(new IOException("Network error"));
-     * Exception converted1 = Futures.convertException(ex1);
-     * // converted1 is the IOException, not the ExecutionException
-     *
-     * // Example 2: ExecutionException with Error cause (not converted)
-     * ExecutionException ex2 = new ExecutionException(new OutOfMemoryError());
-     * Exception converted2 = Futures.convertException(ex2);
-     * // converted2 is still the ExecutionException (cause is not an Exception)
-     *
-     * // Example 3: Non-ExecutionException (passed through)
-     * RuntimeException ex3 = new IllegalArgumentException("Invalid argument");
-     * Exception converted3 = Futures.convertException(ex3);
-     * // converted3 is the same IllegalArgumentException
-     *
-     * // Internal usage in Futures methods
-     * try {
-     *     future.get();
-     * } catch (Exception e) {
-     *     Exception unwrapped = Futures.convertException(e);
-     *     // unwrapped is now the actual cause, not the ExecutionException wrapper
-     *     handleException(unwrapped);
-     * }
-     * }</pre>
-     *
-     * @param e the exception to convert, typically from a Future.get() call. Should not be {@code null}.
-     * @return the unwrapped exception if {@code e} is an ExecutionException with an Exception cause,
-     *         otherwise returns {@code e} unchanged. Never returns {@code null} if {@code e} is not {@code null}.
+     * @param e the exception to convert; must not be {@code null}.
+     * @return the unwrapped cause if applicable, otherwise {@code e} itself; never {@code null}.
      * @see ExecutionException
-     * @see Future#get()
-     * @see Throwable#getCause()
      */
     static Exception convertException(final Exception e) {
         if (e instanceof ExecutionException && e.getCause() instanceof Exception ex) {

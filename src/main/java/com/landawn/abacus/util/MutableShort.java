@@ -464,8 +464,9 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      * int result = a.compareTo(b);   // returns negative value
      * }</pre>
      *
-     * @param other the other MutableShort to compare to, not null
+     * @param other the other MutableShort to compare to, not {@code null}
      * @return negative if this is less, zero if equal, positive if greater
+     * @throws NullPointerException if {@code other} is {@code null}
      */
     @Override
     public int compareTo(final MutableShort other) {

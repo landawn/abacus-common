@@ -83,6 +83,11 @@ public enum Color {
 
     private final int intValue;
 
+    /**
+     * Constructs a Color enum constant with the specified integer value.
+     *
+     * @param intValue the integer representation of this color
+     */
     Color(final int intValue) {
         this.intValue = intValue;
     }

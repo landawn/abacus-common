@@ -28,7 +28,7 @@ import com.landawn.abacus.type.Type;
  * This interface provides XML-specific serialization and deserialization methods,
  * including support for DOM nodes and node class mappings.
  *
- * <p>The XmlParser supports:
+ * <p>The XmlParser supports:</p>
  * <ul>
  *   <li>Serialization of Java objects to XML format</li>
  *   <li>Deserialization of XML content from various sources (String, File, InputStream, Reader, DOM Node)</li>

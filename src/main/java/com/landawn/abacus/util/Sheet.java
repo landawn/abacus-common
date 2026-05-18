@@ -729,7 +729,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param rowIndex the zero-based index of the row
      * @param columnIndex the zero-based index of the column
-     * @return {@code true} if the cell contains {@code null}, {@code false} otherwise
+     * @return {@code true} if the cell contains {@code null} or the Sheet has not been initialized with data, {@code false} otherwise
      * @throws IndexOutOfBoundsException if the indices are out of bounds
      * @see #isNull(Object, Object)
      * @see #isNull(Point)
@@ -760,7 +760,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @param point the Point containing row and column indices
-     * @return {@code true} if the cell contains {@code null}, {@code false} otherwise
+     * @return {@code true} if the cell contains {@code null} or the Sheet has not been initialized with data, {@code false} otherwise
      * @throws IndexOutOfBoundsException if the point's indices are out of bounds
      * @see #isNull(int, int)
      * @see #isNull(Object, Object)
@@ -790,7 +790,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param rowKey the key identifying the row
      * @param columnKey the key identifying the column
-     * @return the value in the cell, or {@code null} if the cell is empty
+     * @return the value in the cell, or {@code null} if the cell is uninitialized or explicitly contains {@code null}
      * @throws IllegalArgumentException if the row key or column key does not exist in this Sheet
      * @see #get(int, int)
      * @see #get(Point)
@@ -831,7 +831,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param rowIndex the zero-based index of the row
      * @param columnIndex the zero-based index of the column
-     * @return the value in the cell, or {@code null} if the cell is empty
+     * @return the value in the cell, or {@code null} if the cell is uninitialized or explicitly contains {@code null}
      * @throws IndexOutOfBoundsException if the indices are out of bounds
      * @see #get(Object, Object)
      * @see #get(Point)
@@ -864,7 +864,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @param point the Point containing row and column indices
-     * @return the value in the cell, or {@code null} if the cell is empty
+     * @return the value in the cell, or {@code null} if the cell is uninitialized or explicitly contains {@code null}
      * @throws IndexOutOfBoundsException if the point's indices are out of bounds
      * @see #get(int, int)
      * @see #get(Object, Object)
@@ -897,7 +897,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param rowKey the key identifying the row
      * @param columnKey the key identifying the column
      * @param value the new value to store in the cell (can be {@code null})
-     * @return the previous value in the cell, or {@code null} if the cell was empty
+     * @return the previous value in the cell, or {@code null} if the cell was uninitialized or previously {@code null}
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IllegalArgumentException if the row key or column key does not exist in this Sheet
      * @see #set(int, int, Object)
@@ -936,7 +936,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param rowIndex the zero-based index of the row
      * @param columnIndex the zero-based index of the column
      * @param value the new value to be stored in the cell
-     * @return the previous value in the cell, or {@code null} if the cell was empty
+     * @return the previous value in the cell, or {@code null} if the cell was uninitialized or previously {@code null}
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IndexOutOfBoundsException if the specified indices are out of bounds
      * @see #set(Object, Object, Object)
@@ -978,7 +978,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param point the Point containing row and column indices
      * @param value the new value to be stored in the cell
-     * @return the previous value in the cell, or {@code null} if the cell was empty
+     * @return the previous value in the cell, or {@code null} if the cell was uninitialized or previously {@code null}
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IndexOutOfBoundsException if the point's indices are out of bounds
      * @see #set(int, int, Object)
@@ -1091,8 +1091,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * targetSheet.putAll(sourceSheet, (target, source) -> target + source);
      *
      * // Now targetSheet contains:
-     * // col1: [6, 10]
-     * // col2: [8, 12]
+     * // row1: [6, 8]   (1+5, 2+6)
+     * // row2: [10, 12] (3+7, 4+8)
      * }</pre>
      *
      * @param source the source Sheet from which to get the values
@@ -1152,7 +1152,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param rowKey the row key of the cell to clear
      * @param columnKey the column key of the cell to clear
-     * @return the value that was previously stored in the cell, or {@code null} if the cell was empty
+     * @return the value that was previously stored in the cell, or {@code null} if the cell was uninitialized or already {@code null}
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IllegalArgumentException if the row key or column key does not exist in this Sheet
      * @see #remove(int, int)
@@ -1197,7 +1197,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param rowIndex the zero-based index of the row
      * @param columnIndex the zero-based index of the column
-     * @return the value that was previously stored in the cell, or {@code null} if the cell was empty
+     * @return the value that was previously stored in the cell, or {@code null} if the cell was uninitialized or already {@code null}
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IndexOutOfBoundsException if rowIndex &lt; 0 or rowIndex &gt;= rowCount() or columnIndex &lt; 0 or columnIndex &gt;= columnCount()
      * @see #remove(Object, Object)
@@ -1237,7 +1237,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @param point the Point containing the row and column indices of the cell
-     * @return the value that was previously stored in the cell, or {@code null} if the cell was empty
+     * @return the value that was previously stored in the cell, or {@code null} if the cell was uninitialized or already {@code null}
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IndexOutOfBoundsException if the point indices are out of bounds
      * @see #remove(int, int)
@@ -2023,7 +2023,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @param columnKey the key identifying the column to retrieve
-     * @return an immutable list of values in the column, in row order
+     * @return an immutable view of the column's values in row order; reflects subsequent changes to the Sheet
      * @throws IllegalArgumentException if the column key does not exist in this Sheet
      * @see #rowValues(Object)
      * @see #setColumn(Object, Collection)
@@ -3638,11 +3638,17 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * Creates a copy of the current Sheet object.
-     * This method creates a new Sheet object and initializes it with the same row keys, column keys, and values as the current Sheet.
-     * Changes to the copy will not affect the current Sheet, and vice versa.
+     * Creates a shallow copy of this Sheet.
+     * <p>
+     * The returned Sheet has the same row keys, column keys, and cell values as this Sheet.
+     * The copy is independent: changes to one Sheet do not affect the other.
+     * The copy is always mutable, regardless of whether this Sheet is frozen.
+     * </p>
      *
-     * @return a new Sheet object that is a copy of the current Sheet.
+     * @return a new mutable Sheet with the same keys and values as this Sheet
+     * @see #copy(Collection, Collection)
+     * @see #clone()
+     * @see #transpose()
      */
     public Sheet<R, C, V> copy() {
         final Sheet<R, C, V> copy = new Sheet<>(_rowKeySet, _columnKeySet);
@@ -3663,14 +3669,19 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * Creates a copy of the current Sheet object with the specified row keys and column keys.
-     * This method creates a new Sheet object and initializes it with the same values as the current Sheet for the specified row keys and column keys.
-     * Changes to the copy will not affect the current Sheet, and vice versa.
+     * Creates a shallow copy of this Sheet containing only the specified row and column keys.
+     * <p>
+     * The returned Sheet has the same values as this Sheet for the cells at the intersection of the
+     * specified row keys and column keys. The copy is independent: changes to one Sheet do not affect
+     * the other. The copy is always mutable, regardless of whether this Sheet is frozen.
+     * </p>
      *
-     * @param rowKeySet the collection of row keys to be included in the copied Sheet.
-     * @param columnKeySet the collection of column keys to be included in the copied Sheet.
-     * @return a new Sheet object that is a copy of the current Sheet with the specified row keys and column keys.
-     * @throws IllegalArgumentException if any of the specified row keys or column keys are not present in the current Sheet.
+     * @param rowKeySet the row keys to include in the copy; must all exist in this Sheet
+     * @param columnKeySet the column keys to include in the copy; must all exist in this Sheet
+     * @return a new mutable Sheet containing the values at the intersection of the specified keys
+     * @throws IllegalArgumentException if any of the specified row keys or column keys are not present in this Sheet
+     * @see #copy()
+     * @see #clone()
      */
     public Sheet<R, C, V> copy(final Collection<R> rowKeySet, final Collection<C> columnKeySet) {
         if (!_rowKeySet.containsAll(rowKeySet)) {
@@ -3714,12 +3725,14 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * Creates a deep copy of the current Sheet object using Kryo serialization.
-     * This method creates a new Sheet object and initializes it with the same row keys, column keys, and values as the current Sheet.
-     * Changes to the copy will not affect the current Sheet, and vice versa.
-     * The copy will maintain the same frozen state as the current Sheet.
+     * Creates a deep copy of this Sheet using Kryo serialization.
+     * <p>
+     * All row keys, column keys, and cell values are deeply copied. Changes to the returned copy do
+     * not affect this Sheet, and vice versa. The frozen state of this Sheet is preserved in the copy:
+     * if this Sheet is frozen, the copy will also be frozen.
+     * </p>
      *
-     * @return a new Sheet object that is a deep copy of the current Sheet.
+     * @return a deep copy of this Sheet with the same frozen state
      * @throws UnsupportedOperationException if the Kryo library is not available on the classpath
      * @see #clone(boolean)
      * @see #copy()
@@ -3732,12 +3745,15 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * Creates a deep copy of the current Sheet object using Kryo serialization.
-     * This method creates a new Sheet object and initializes it with the same row keys, column keys, and values as the current Sheet.
-     * Changes to the copy will not affect the current Sheet, and vice versa.
+     * Creates a deep copy of this Sheet using Kryo serialization, with the specified frozen state.
+     * <p>
+     * All row keys, column keys, and cell values are deeply copied. Changes to the returned copy do
+     * not affect this Sheet, and vice versa. The frozen state of the copy is set to the value of the
+     * {@code freeze} parameter, regardless of whether this Sheet is frozen.
+     * </p>
      *
-     * @param freeze a boolean value that determines whether the copied Sheet should be frozen (read-only).
-     * @return a new Sheet object that is a deep copy of the current Sheet.
+     * @param freeze {@code true} to make the returned copy frozen (read-only); {@code false} for a mutable copy
+     * @return a deep copy of this Sheet with the specified frozen state
      * @throws UnsupportedOperationException if the Kryo library is not available on the classpath
      * @see #clone()
      * @see #freeze()
@@ -4003,10 +4019,10 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * Optimizes the memory usage by trimming internal storage capacity.
+     * Optimizes memory usage by trimming internal storage capacity.
      * <p>
-     * Reduces the capacity of internal lists to match their current size,
-     * potentially freeing unused memory. This is useful after removing many rows.
+     * Reduces the capacity of internal column lists to match their current size,
+     * potentially freeing unused memory. This is useful after bulk removal of rows.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -6455,10 +6471,10 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * Prints the entire Sheet to standard output with a prefix on each line.
+     * Prints the entire Sheet to standard output with the specified prefix on each line.
      * <p>
-     * Outputs a formatted ASCII table with the specified prefix prepended to every line.
-     * Useful for logging or when integrating Sheet output into larger formatted output.
+     * Outputs a formatted ASCII table to {@link System#out} with the specified prefix prepended
+     * to every line. Useful for logging or when integrating Sheet output into larger formatted output.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>

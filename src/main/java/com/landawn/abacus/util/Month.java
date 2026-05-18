@@ -94,6 +94,11 @@ public enum Month {
 
     private final int intValue;
 
+    /**
+     * Constructs a {@code Month} constant with the specified numeric value.
+     *
+     * @param intValue the numeric value of this month (1–12)
+     */
     Month(final int intValue) {
         this.intValue = intValue;
     }
@@ -115,11 +120,14 @@ public enum Month {
     }
 
     /**
-     * Returns the Month enum constant corresponding to the specified numeric value.
+     * Returns the {@code Month} enum constant corresponding to the specified numeric value.
      *
-     * <p>This method provides a way to convert from numeric month values (1-12) to
-     * the corresponding Month enum constant. This is useful when working with
-     * legacy code or external systems that use numeric month representations.</p>
+     * <p>This method converts numeric month values (1–12) to the corresponding
+     * {@code Month} enum constant. This is useful when working with legacy code or
+     * external systems that represent months as integers.</p>
+     *
+     * <p>Note: this overload accepts an {@code int} and is distinct from the inherited
+     * {@code valueOf(String)} method, which looks up a constant by its name.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -128,8 +136,8 @@ public enum Month {
      * }</pre>
      *
      * @param intValue the numeric value of the month (must be between 1 and 12 inclusive)
-     * @return the Month enum constant corresponding to the specified value
-     * @throws IllegalArgumentException if the intValue is not between 1 and 12 inclusive
+     * @return the corresponding {@code Month} enum constant; never {@code null}
+     * @throws IllegalArgumentException if {@code intValue} is not between 1 and 12 inclusive
      */
     public static Month valueOf(final int intValue) {
         switch (intValue) {

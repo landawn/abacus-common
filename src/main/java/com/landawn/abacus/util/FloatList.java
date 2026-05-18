@@ -786,6 +786,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      *
      * @param p the predicate which returns {@code true} for elements to be removed. Must not be {@code null}.
      * @return {@code true} if any elements were removed
+     * @throws NullPointerException if the specified predicate is {@code null}
      */
     public boolean removeIf(final FloatPredicate p) {
         final FloatList tmp = new FloatList(size());
@@ -1038,8 +1039,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      *
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
-     *      must be between 0 and size() - lengthOfRange, inclusive.
+     * @param newPositionAfterMove the zero-based index where the first element of the range will be placed after the move;
+     *      must be between 0 and {@code size() - (toIndex - fromIndex)}, inclusive.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the list
      */
@@ -1174,6 +1175,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * The operator is applied to each element in order from index 0 to size-1.
      *
      * @param operator the operator to apply to each element. Must not be {@code null}.
+     * @throws NullPointerException if the specified operator is {@code null}
      */
     public void replaceAll(final FloatUnaryOperator operator) {
         for (int i = 0, len = size(); i < len; i++) {
@@ -1188,6 +1190,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @param predicate the predicate to test each element. Must not be {@code null}.
      * @param newValue the value to replace matching elements with
      * @return {@code true} if any elements were replaced, {@code false} otherwise
+     * @throws NullPointerException if the specified predicate is {@code null}
      */
     public boolean replaceIf(final FloatPredicate predicate, final float newValue) {
         boolean result = false;
@@ -1706,12 +1709,12 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
     /**
      * Returns the index of the last occurrence of the specified element in this list,
-     * or -1 if this list does not contain the element. The comparison is done using
-     * Float.compare() to handle NaN values correctly.
+     * or {@code N.INDEX_NOT_FOUND} (-1) if this list does not contain the element.
+     * The comparison is done using Float.compare() to handle NaN values correctly.
      *
      * @param valueToFind the element to search for
      * @return the index of the last occurrence of the specified element in this list,
-     *         or -1 if this list does not contain the element
+     *         or {@code N.INDEX_NOT_FOUND} (-1) if this list does not contain the element
      */
     public int lastIndexOf(final float valueToFind) {
         return lastIndexOf(valueToFind, size - 1);
@@ -1719,14 +1722,14 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
     /**
      * Returns the index of the last occurrence of the specified element in this list,
-     * searching backwards from the specified index, or -1 if the element is not found.
+     * searching backwards from the specified index, or {@code N.INDEX_NOT_FOUND} (-1) if the element is not found.
      * The comparison is done using Float.compare() to handle NaN values correctly.
      *
      * @param valueToFind the element to search for
      * @param startIndexFromBack the index to start searching backwards from (inclusive).
      *                          If &gt;= size, the search starts from the last element.
      * @return the index of the last occurrence of the element at position &lt;= startIndexFromBack,
-     *         or -1 if the element is not found or startIndexFromBack is negative
+     *         or {@code N.INDEX_NOT_FOUND} (-1) if the element is not found or startIndexFromBack is negative
      */
     public int lastIndexOf(final float valueToFind, final int startIndexFromBack) {
         if (startIndexFromBack < 0 || size == 0) {
@@ -1826,7 +1829,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Performs the given action for each element in this list in sequential order.
      *
-     * @param action the action to be performed for each element
+     * @param action the action to be performed for each element. Must not be {@code null}.
+     * @throws NullPointerException if the specified action is {@code null}
      */
     public void forEach(final FloatConsumer action) {
         forEach(0, size, action);
@@ -1853,8 +1857,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      *
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive), or -1 for backward iteration to the start
-     * @param action the action to be performed for each element
+     * @param action the action to be performed for each element. Must not be {@code null}.
      * @throws IndexOutOfBoundsException if the indices are out of range
+     * @throws NullPointerException if the specified action is {@code null}
      */
     public void forEach(final int fromIndex, final int toIndex, final FloatConsumer action) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
@@ -2073,7 +2078,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * All permutations occur with equal likelihood assuming that the source of randomness is fair.
      * This method modifies the list in place.
      *
-     * @param rnd the source of randomness to use to shuffle the list
+     * @param rnd the source of randomness to use to shuffle the list. Must not be {@code null}.
+     * @throws NullPointerException if the specified random source is {@code null}
      */
     @Override
     public void shuffle(final Random rnd) {
@@ -2101,8 +2107,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * Returns a shallow copy of this FloatList instance.
-     * The elements themselves are copied.
+     * Returns a copy of this FloatList instance containing the same primitive float elements.
      *
      * @return a new FloatList containing the same elements as this list
      */
@@ -2310,7 +2315,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * Returns a Multiset containing all elements from specified range converted to their boxed type.
+     * Returns a Multiset containing all elements from the specified range converted to their boxed type.
      * The type of Multiset returned is determined by the provided supplier function.
      * A Multiset is a collection that allows duplicate elements and provides occurrence counting.
      *

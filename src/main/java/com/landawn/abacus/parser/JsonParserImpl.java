@@ -4555,7 +4555,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * JsonDeserConfig config = new JsonDeserConfig();
      *
      * // Stream will close the input stream when closed
-     * try (Stream<User> users = parser.stream(is, config, true, Type.of(User.class))) {
+     * try (Stream<User> users = parser.stream(is, true, config, Type.of(User.class))) {
      *     users.limit(10)
      *          .forEach(System.out::println);
      * }
@@ -4594,7 +4594,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * JsonDeserConfig config = new JsonDeserConfig();
      *
      * // Stream will close the reader when closed
-     * try (Stream<User> users = parser.stream(reader, config, true, Type.of(User.class))) {
+     * try (Stream<User> users = parser.stream(reader, true, config, Type.of(User.class))) {
      *     List<User> topUsers = users.sorted(Comparator.comparing(User::getAge).reversed())
      *                                .limit(5)
      *                                .collect(Collectors.toList());

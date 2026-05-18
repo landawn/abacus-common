@@ -54,7 +54,7 @@ import java.util.NoSuchElementException;
 public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements ListIterator<T> {
 
     /**
-     * Constructs a new ImmutableListIterator.
+     * Constructs a new {@code ImmutableListIterator}.
      * This constructor is protected to allow subclassing.
      */
     protected ImmutableListIterator() {
@@ -108,7 +108,7 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
      * }</pre>
      *
      * @param <T> the type of elements (not) returned by this iterator
-     * @return an empty ImmutableListIterator instance
+     * @return a shared singleton empty {@code ImmutableListIterator} instance
      */
     public static <T> ImmutableListIterator<T> empty() {
         return EMPTY;
@@ -139,8 +139,9 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
      * }</pre>
      *
      * @param <T> the type of elements returned by the iterator
-     * @param iter the ListIterator to wrap, may be null
-     * @return an ImmutableListIterator wrapping the provided iterator, or empty if iter is null
+     * @param iter the {@link ListIterator} to wrap; may be {@code null}
+     * @return an {@code ImmutableListIterator} wrapping the provided iterator; the same instance
+     *         if {@code iter} is already an {@code ImmutableListIterator}; or {@link #empty()} if {@code iter} is {@code null}
      * @see #empty()
      */
     public static <T> ImmutableListIterator<T> of(final ListIterator<? extends T> iter) {
@@ -184,14 +185,14 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
     }
 
     /**
-     * This operation is not supported by ImmutableListIterator.
-     * Attempting to call this method will always throw an UnsupportedOperationException.
+     * This operation is not supported by {@code ImmutableListIterator}.
+     * Attempting to call this method will always throw {@link UnsupportedOperationException}.
      *
-     * <p>Use a mutable ListIterator if you need to modify elements during iteration.
+     * <p>Use a mutable {@link ListIterator} if you need to modify elements during iteration.
      *
-     * @param e the element with which to replace the last element returned by next or previous
+     * @param e the element with which to replace the last element returned by {@link #next()} or {@link #previous()}
      * @throws UnsupportedOperationException always, as this is an immutable iterator
-     * @deprecated ImmutableListIterator does not support modification operations
+     * @deprecated {@code ImmutableListIterator} does not support modification operations
      */
     @Deprecated
     @Override
@@ -200,14 +201,14 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
     }
 
     /**
-     * This operation is not supported by ImmutableListIterator.
-     * Attempting to call this method will always throw an UnsupportedOperationException.
+     * This operation is not supported by {@code ImmutableListIterator}.
+     * Attempting to call this method will always throw {@link UnsupportedOperationException}.
      *
-     * <p>Use a mutable ListIterator if you need to add elements during iteration.
+     * <p>Use a mutable {@link ListIterator} if you need to add elements during iteration.
      *
      * @param e the element to insert
      * @throws UnsupportedOperationException always, as this is an immutable iterator
-     * @deprecated ImmutableListIterator does not support modification operations
+     * @deprecated {@code ImmutableListIterator} does not support modification operations
      */
     @Deprecated
     @Override

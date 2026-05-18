@@ -27,9 +27,8 @@ import com.landawn.abacus.util.function.Consumer;
  * reduction target for a stream of BigDecimal values. It maintains precision
  * by using BigDecimal for all calculations.</p>
  *
- * <p>This implementation is not thread-safe. However, it is safe to use
- * a BigDecimalSummaryStatistics instance concurrently from multiple threads
- * if it is not being modified.</p>
+ * <p>This implementation is not thread-safe. External synchronization is required
+ * if instances are accessed from multiple threads.</p>
  *
  * <p><b>Usage Examples with streams:</b></p>
  * <pre>{@code
@@ -219,7 +218,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
     }
 
     /**
-     * Returns the sum of values recorded, or zero if no values have been recorded.
+     * Returns the sum of values recorded, or {@link BigDecimal#ZERO} if no values have been recorded.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -229,17 +228,18 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * BigDecimal sum = stats.getSum();   // Returns 31.00
      * }</pre>
      *
-     * @return the sum of values, or zero if none
+     * @return the sum of values, or {@link BigDecimal#ZERO} if none
      */
     public final BigDecimal getSum() {
         return sum;
     }
 
     /**
-     * Returns the arithmetic mean of values recorded, or zero if no values have been recorded.
+     * Returns the arithmetic mean of values recorded, or {@link BigDecimal#ZERO}
+     * if no values have been recorded.
      *
-     * <p>The average is calculated using MathContext.DECIMAL128 for precision.
-     * If no values have been recorded, this method returns BigDecimal.ZERO.</p>
+     * <p>The average is computed by dividing the sum by the count using
+     * {@link java.math.MathContext#DECIMAL128} for 34-digit decimal precision.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -250,7 +250,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * BigDecimal avg = stats.getAverage();   // Returns 20.00
      * }</pre>
      *
-     * @return the arithmetic mean of values, or zero if none
+     * @return the arithmetic mean of values as a {@link BigDecimal}, or {@link BigDecimal#ZERO} if none
      */
     public final BigDecimal getAverage() {
         return count == 0L ? BigDecimal.ZERO : getSum().divide(BigDecimal.valueOf(count), MathContext.DECIMAL128);
@@ -261,11 +261,12 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
     /**
      * Returns a string representation of this summary statistics object.
      *
-     * <p>The string representation includes min, max, count, sum, and average
-     * values formatted with appropriate decimal places. Values are formatted
-     * using a DecimalFormat with pattern "#,###.000000".</p>
+     * <p>The representation includes min, max, count, sum, and average formatted
+     * using the {@code DecimalFormat} pattern {@code "#,###.000000"}, which applies
+     * grouping separators for thousands and six decimal places. If min or max is
+     * {@code null} (no values recorded), it is shown as {@code null}.</p>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Example output:</p>
      * <pre>{@code
      * {min=5.250000, max=25.750000, count=3, sum=46.500000, average=15.500000}
      * }</pre>

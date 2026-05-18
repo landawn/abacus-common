@@ -568,7 +568,7 @@ public final class RegExUtil {
      * <ul>
      *   <li>{@code "123 456 7890"}</li>
      *   <li>{@code "+1 234 567 8900"}</li>
-     *   <li>{@code "555-1234"} (note: hyphens not matched, only digits and spaces)</li>
+     *   <li>{@code "123 456"} (digits and spaces only; hyphens are not matched)</li>
      * </ul>
      *
      * @see java.util.regex.Pattern
@@ -1122,8 +1122,9 @@ public final class RegExUtil {
     public static final Pattern ALPHANUMERIC_SPACE_MATCHER = Pattern.compile("^" + ALPHANUMERIC_SPACE_FINDER.pattern() + "$");
 
     /**
-     * Pattern that matches an entire string if it contains duplicate words.
-     * This is the anchored version of {@link #DUPLICATES_FINDER} that requires the entire string to match.
+     * Pattern that matches an entire string consisting of a single word that also appears later in the string.
+     * This is the anchored version of {@link #DUPLICATES_FINDER} that requires the entire string to match the
+     * duplicate-word pattern from start to end.
      *
      * @see #DUPLICATES_FINDER
      */
@@ -1600,7 +1601,7 @@ public final class RegExUtil {
      *
      * @param source source string to remove from, which may be null
      * @param regex the regular expression to which this string is to be matched
-     * @return the source string with the first replacement processed,  or an empty String {@code ""} if the input source string is {@code null}.
+     * @return the source string with the first match removed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
      * @see #replaceFirst(String, String, String)
      * @see String#replaceFirst(String, String)
@@ -1621,8 +1622,8 @@ public final class RegExUtil {
      * }</pre>
      *
      * @param source source string to remove from, which may be null
-     * @param pattern the regular expression pattern to which this string is to be matched
-     * @return the source string with the first replacement processed, or an empty String {@code ""} if the input source string is {@code null}.
+     * @param pattern the compiled regular expression pattern to match against; must not be {@code null}
+     * @return the source string with the first match removed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the pattern is {@code null}
      * @see #replaceFirst(String, Pattern, String)
      * @see java.util.regex.Matcher#replaceFirst(String)
@@ -1644,9 +1645,9 @@ public final class RegExUtil {
      *
      * @param source source string to remove from, which may be null
      * @param regex the regular expression to which this string is to be matched
-     * @return the source string with the last replacement processed,  or an empty String {@code ""} if the input source string is {@code null}.
+     * @return the source string with the last match removed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
-     * @see #replaceFirst(String, String, String)
+     * @see #replaceLast(String, String, String)
      * @see java.util.regex.Pattern
      */
     @Beta
@@ -1665,8 +1666,8 @@ public final class RegExUtil {
      * }</pre>
      *
      * @param source source string to remove from, which may be null
-     * @param pattern the regular expression pattern to which this string is to be matched
-     * @return the source string with the last replacement processed, or an empty String {@code ""} if the input source string is {@code null}.
+     * @param pattern the compiled regular expression pattern to match against; must not be {@code null}
+     * @return the source string with the last match removed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the pattern is {@code null}
      * @see #replaceLast(String, Pattern, String)
      * @see java.util.regex.Pattern
@@ -1688,7 +1689,7 @@ public final class RegExUtil {
      *
      * @param source source string to remove from, which may be null
      * @param regex the regular expression to which this string is to be matched
-     * @return the source string with any removes processed,  or an empty String {@code ""} if the input source string is {@code null}.
+     * @return the source string with any matching substrings removed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
      * @see #replaceAll(String, String, String)
      * @see String#replaceAll(String, String)
@@ -1708,8 +1709,8 @@ public final class RegExUtil {
      * }</pre>
      *
      * @param source source string to remove from, which may be null
-     * @param pattern the regular expression to which this string is to be matched
-     * @return the source string with any removes processed, or an empty String {@code ""} if the input source string is {@code null}.
+     * @param pattern the compiled regular expression pattern to match against; must not be {@code null}
+     * @return the source string with any matching substrings removed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the pattern is {@code null}
      * @see #replaceAll(String, Pattern, String)
      * @see java.util.regex.Matcher#replaceAll(String)
@@ -1756,10 +1757,10 @@ public final class RegExUtil {
      *
      * @param source source string to search and replace in, which may be null
      * @param regex the regular expression to which this string is to be matched
-     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @param replacer the function to be applied to the matched substring that returns a replacement string
      * @return the source string with the first replacement processed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
-     * @see String#replaceFirst(String, String)
+     * @see #replaceFirst(String, Pattern, Function)
      */
     public static String replaceFirst(final String source, final String regex, final Function<String, String> replacer) throws IllegalArgumentException {
         N.checkArgNotEmpty(regex, cs.regex);
@@ -1779,10 +1780,10 @@ public final class RegExUtil {
      *
      * @param source source string to search and replace in, which may be null
      * @param regex the regular expression to which this string is to be matched
-     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @param replacer the function to be applied to the start and end indices of the match that returns a replacement string
      * @return the source string with the first replacement processed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
-     * @see String#replaceFirst(String, String)
+     * @see #replaceFirst(String, Pattern, IntBiFunction)
      */
     public static String replaceFirst(final String source, final String regex, final IntBiFunction<String> replacer) throws IllegalArgumentException {
         N.checkArgNotEmpty(regex, cs.regex);
@@ -1831,11 +1832,11 @@ public final class RegExUtil {
      * }</pre>
      *
      * @param source source string to search and replace in, which may be null
-     * @param pattern the regular expression pattern to which this string is to be matched
-     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @param pattern the compiled regular expression pattern to match against; must not be {@code null}
+     * @param replacer the function to be applied to the matched substring that returns a replacement string
      * @return the source string with the first replacement processed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the pattern is {@code null}
-     * @see java.util.regex.Matcher#replaceFirst(String)
+     * @see java.util.regex.Matcher#replaceFirst(java.util.function.Function)
      */
     public static String replaceFirst(final String source, final Pattern pattern, final Function<String, String> replacer) throws IllegalArgumentException {
         N.checkArgNotNull(pattern, cs.pattern);
@@ -1862,11 +1863,11 @@ public final class RegExUtil {
      * }</pre>
      *
      * @param source source string to search and replace in, which may be null
-     * @param pattern the regular expression pattern to which this string is to be matched
-     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @param pattern the compiled regular expression pattern to match against; must not be {@code null}
+     * @param replacer the function to be applied to the start and end indices of the match that returns a replacement string
      * @return the source string with the first replacement processed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the pattern is {@code null}
-     * @see java.util.regex.Matcher#replaceFirst(String)
+     * @see #replaceFirst(String, String, IntBiFunction)
      */
     public static String replaceFirst(final String source, final Pattern pattern, final IntBiFunction<String> replacer) throws IllegalArgumentException {
         N.checkArgNotNull(pattern, cs.pattern);
@@ -1888,15 +1889,15 @@ public final class RegExUtil {
      * // Returns: "Hello123WorldXXX"
      * }</pre>
      *
-     * @param source the source string to search in
-     * @param regex the regular expression pattern to search for
+     * @param source the source string to search in, which may be null
+     * @param regex the regular expression pattern to search for; must not be {@code null} or empty
      * @param replacement the replacement string
      * @return the source string with the last replacement processed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
-     * @see Matcher#replaceFirst(String)
+     * @see #replaceLast(String, Pattern, String)
+     * @see #replaceFirst(String, String, String)
      */
     @Beta
-    @MayReturnNull
     public static String replaceLast(final String source, final String regex, final String replacement) throws IllegalArgumentException {
         N.checkArgNotEmpty(regex, cs.regex);
 
@@ -1913,12 +1914,13 @@ public final class RegExUtil {
      * // Returns: "hello world HELLO"
      * }</pre>
      *
-     * @param source the source string to search in
-     * @param regex the regular expression pattern to search for
-     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @param source the source string to search in, which may be null
+     * @param regex the regular expression pattern to search for; must not be {@code null} or empty
+     * @param replacer the function to be applied to the matched substring that returns a replacement string
      * @return the source string with the last replacement processed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
-     * @see Matcher#replaceFirst(Function)
+     * @see #replaceLast(String, Pattern, Function)
+     * @see #replaceFirst(String, String, Function)
      */
     @Beta
     public static String replaceLast(final String source, final String regex, final Function<String, String> replacer) throws IllegalArgumentException {
@@ -1937,12 +1939,13 @@ public final class RegExUtil {
      * // Returns: "abc123def[9-12]"
      * }</pre>
      *
-     * @param source the source string to search in
-     * @param regex the regular expression pattern to search for
-     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @param source the source string to search in, which may be null
+     * @param regex the regular expression pattern to search for; must not be {@code null} or empty
+     * @param replacer the function to be applied to the start and end indices of the match that returns a replacement string
      * @return the source string with the last replacement processed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
-     * @see Matcher#replaceFirst(Function)
+     * @see #replaceLast(String, Pattern, IntBiFunction)
+     * @see #replaceFirst(String, String, IntBiFunction)
      */
     @Beta
     public static String replaceLast(final String source, final String regex, final IntBiFunction<String> replacer) throws IllegalArgumentException {
@@ -1965,12 +1968,13 @@ public final class RegExUtil {
      * // Returns: "Hello123WorldXXX"
      * }</pre>
      *
-     * @param source the source string to search in
-     * @param pattern the pre-compiled regular expression pattern to search for
+     * @param source the source string to search in, which may be null
+     * @param pattern the pre-compiled regular expression pattern to search for; must not be {@code null}
      * @param replacement the replacement string
      * @return the source string with the last replacement processed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the pattern is {@code null}
-     * @see Matcher#replaceFirst(String)
+     * @see #replaceLast(String, String, String)
+     * @see #replaceFirst(String, Pattern, String)
      */
     @Beta
     public static String replaceLast(final String source, final Pattern pattern, final String replacement) throws IllegalArgumentException {
@@ -2016,12 +2020,13 @@ public final class RegExUtil {
      * // Returns: "hello world HELLO"
      * }</pre>
      *
-     * @param source the source string to search in
-     * @param pattern the pre-compiled regular expression pattern to search for
-     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @param source the source string to search in, which may be null
+     * @param pattern the pre-compiled regular expression pattern to search for; must not be {@code null}
+     * @param replacer the function to be applied to the matched substring that returns a replacement string
      * @return the source string with the last replacement processed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the pattern is {@code null}
-     * @see Matcher#replaceFirst(Function)
+     * @see #replaceLast(String, String, Function)
+     * @see #replaceFirst(String, Pattern, Function)
      */
     @Beta
     public static String replaceLast(final String source, final Pattern pattern, final Function<String, String> replacer) throws IllegalArgumentException {
@@ -2065,12 +2070,13 @@ public final class RegExUtil {
      * // Returns: "abc123def[9-12]"
      * }</pre>
      *
-     * @param source the source string to search in
-     * @param pattern the pre-compiled regular expression pattern to search for
-     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @param source the source string to search in, which may be null
+     * @param pattern the pre-compiled regular expression pattern to search for; must not be {@code null}
+     * @param replacer the function to be applied to the start and end indices of the match that returns a replacement string
      * @return the source string with the last replacement processed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the pattern is {@code null}
-     * @see Matcher#replaceFirst(Function)
+     * @see #replaceLast(String, String, IntBiFunction)
+     * @see #replaceFirst(String, Pattern, IntBiFunction)
      */
     @Beta
     public static String replaceLast(final String source, final Pattern pattern, final IntBiFunction<String> replacer) throws IllegalArgumentException {
@@ -2145,10 +2151,10 @@ public final class RegExUtil {
      *
      * @param source source string to search and replace in, which may be null
      * @param regex the regular expression to which this string is to be matched
-     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @param replacer the function to be applied to each matched substring that returns a replacement string
      * @return the source string with any replacements processed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
-     * @see String#replaceAll(String, String)
+     * @see #replaceAll(String, Pattern, Function)
      */
     public static String replaceAll(final String source, final String regex, final Function<String, String> replacer) throws IllegalArgumentException {
         N.checkArgNotEmpty(regex, cs.regex);
@@ -2168,10 +2174,10 @@ public final class RegExUtil {
      *
      * @param source source string to search and replace in, which may be null
      * @param regex the regular expression to which this string is to be matched
-     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @param replacer the function to be applied to the start and end indices of each match that returns a replacement string
      * @return the source string with any replacements processed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
-     * @see String#replaceAll(String, String)
+     * @see #replaceAll(String, Pattern, IntBiFunction)
      */
     public static String replaceAll(final String source, final String regex, final IntBiFunction<String> replacer) throws IllegalArgumentException {
         N.checkArgNotEmpty(regex, cs.regex);
@@ -2220,11 +2226,12 @@ public final class RegExUtil {
      * }</pre>
      *
      * @param source source string to search and replace in, which may be null
-     * @param pattern the regular expression to which this string is to be matched
-     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @param pattern the compiled regular expression pattern to match against; must not be {@code null}
+     * @param replacer the function to be applied to each matched substring that returns a replacement string
      * @return the source string with any replacements processed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the pattern is {@code null}
-     * @see String#replaceAll(String, String)
+     * @see #replaceAll(String, String, Function)
+     * @see java.util.regex.Matcher#replaceAll(java.util.function.Function)
      */
     public static String replaceAll(final String source, final Pattern pattern, final Function<String, String> replacer) throws IllegalArgumentException {
         N.checkArgNotNull(pattern, cs.pattern);
@@ -2249,11 +2256,11 @@ public final class RegExUtil {
      * }</pre>
      *
      * @param source source string to search and replace in, which may be null
-     * @param pattern the regular expression to which this string is to be matched
-     * @param replacer The function to be applied to the match result of this matcher that returns a replacement string.
+     * @param pattern the compiled regular expression pattern to match against; must not be {@code null}
+     * @param replacer the function to be applied to the start and end indices of each match that returns a replacement string
      * @return the source string with any replacements processed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the pattern is {@code null}
-     * @see String#replaceAll(String, String)
+     * @see #replaceAll(String, String, IntBiFunction)
      */
     public static String replaceAll(final String source, final Pattern pattern, final IntBiFunction<String> replacer) throws IllegalArgumentException {
         N.checkArgNotNull(pattern, cs.pattern);
@@ -2339,7 +2346,7 @@ public final class RegExUtil {
      * }</pre>
      *
      * @param source the string to be checked, may be {@code null} or empty
-     * @param regex the regular expression pattern to be counted
+     * @param regex the regular expression to match against; must not be {@code null} or empty
      * @return a stream of match results for each subsequence of the input sequence that matches the pattern.
      * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
      * @see Matcher#results()
@@ -2367,7 +2374,7 @@ public final class RegExUtil {
      * }</pre>
      *
      * @param source the string to be checked, may be {@code null} or empty
-     * @param pattern the regular expression pattern to be counted
+     * @param pattern the compiled regular expression pattern to match against; must not be {@code null}
      * @return a stream of match results for each subsequence of the input sequence that matches the pattern.
      * @throws IllegalArgumentException if the pattern is {@code null}
      * @see Matcher#results()
@@ -2393,7 +2400,7 @@ public final class RegExUtil {
      * }</pre>
      *
      * @param source the string to be checked, may be {@code null} or empty
-     * @param regex the regular expression pattern to be counted
+     * @param regex the regular expression to match against; must not be {@code null} or empty
      * @return a stream of start indices for each subsequence of the input sequence that matches the pattern
      * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
      * @see Matcher#results()
@@ -2422,7 +2429,7 @@ public final class RegExUtil {
      * }</pre>
      *
      * @param source the string to be checked, may be {@code null} or empty
-     * @param pattern the regular expression pattern to be counted
+     * @param pattern the compiled regular expression pattern to match against; must not be {@code null}
      * @return a stream of start indices for each subsequence of the input sequence that matches the pattern
      * @throws IllegalArgumentException if the pattern is {@code null}
      * @see Matcher#results()

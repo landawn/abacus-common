@@ -29,18 +29,20 @@ import com.landawn.abacus.util.MoreExecutors;
 
 /**
  * Abstract base class for implementing object pools with eviction, balancing, and memory management capabilities.
- * This class provides the core functionality for thread-safe object pooling including statistics tracking,
- * automatic eviction of idle objects, and memory-based constraints.
+ * This class provides the shared infrastructure for thread-safe object pooling, including statistics
+ * tracking, common configuration (capacity, eviction delay/policy, balance factor, memory limit), the
+ * shared scheduled executor, and a JVM shutdown hook. Concrete subclasses implement the actual storage,
+ * eviction loop, and memory accounting.
  *
  * <p>The pool maintains various statistics such as hit/miss counts, eviction counts, and memory usage.
- * It uses a ReentrantLock for thread synchronization and condition variables for coordinating
+ * It uses a {@link ReentrantLock} for thread synchronization and condition variables for coordinating
  * producer-consumer interactions.
  *
  * <p>Key features:
  * <ul>
- *   <li>Thread-safe operations with ReentrantLock</li>
- *   <li>Automatic eviction of expired objects based on configurable policies</li>
- *   <li>Memory-based capacity constraints</li>
+ *   <li>Thread-safe operations with {@link ReentrantLock}</li>
+ *   <li>Configuration and scheduling support for eviction of expired objects based on configurable policies</li>
+ *   <li>Support for memory-based capacity constraints</li>
  *   <li>Statistical tracking of pool operations</li>
  *   <li>Automatic shutdown hook for cleanup</li>
  * </ul>

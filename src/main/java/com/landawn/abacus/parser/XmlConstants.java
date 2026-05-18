@@ -19,7 +19,7 @@ package com.landawn.abacus.parser;
  * This class contains predefined XML element names, attributes, and tags used throughout
  * the XML processing framework.
  *
- * <p>The constants are organized into categories:
+ * <p>The constants are organized into categories:</p>
  * <ul>
  *   <li>Basic XML attributes and values (IS_NULL, TRUE, FALSE, etc.)</li>
  *   <li>Collection-related elements (ARRAY, LIST, SET, etc.)</li>
@@ -35,7 +35,6 @@ package com.landawn.abacus.parser;
  * // ... write array elements
  * writer.write(XmlConstants.ARRAY_ELE_END);
  * }</pre>
- *
  */
 public class XmlConstants {
 

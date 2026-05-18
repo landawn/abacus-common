@@ -267,8 +267,8 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * }</pre>
      *
      * @param <T> the type of the elements
-     * @param elements the array to be wrapped
-     * @return an ImmutableArray backed by the specified array
+     * @param elements the array to be wrapped; if {@code null}, an empty {@code ImmutableArray} is returned
+     * @return an {@code ImmutableArray} backed by the specified array, or an empty instance if {@code elements} is {@code null}
      * @deprecated the ImmutableArray may be modified through the specified {@code elements};
      *             use {@link #copyOf(Object[])} instead for {@code true} immutability.
      */

@@ -122,9 +122,10 @@ final class ReflectASM<T> {
      * }</pre>
      *
      * @param <T> the type of the class
-     * @param clsName the fully qualified name of the class
+     * @param clsName the fully qualified name of the class; must not be {@code null}
      * @return a ReflectASM instance for the specified class
      * @throws IllegalArgumentException if the class with the given name cannot be located
+     * @throws NullPointerException if {@code clsName} is {@code null}
      * @see ClassUtil#forName(String)
      */
     public static <T> ReflectASM<T> on(final String clsName) {
@@ -152,9 +153,9 @@ final class ReflectASM<T> {
      * }</pre>
      *
      * @param <T> the type of the class
-     * @param cls the Class object representing the type
+     * @param cls the {@code Class} object representing the type; must not be {@code null}
      * @return a ReflectASM instance for the specified class
-     * @throws IllegalArgumentException if cls is null
+     * @throws IllegalArgumentException if {@code cls} is {@code null}
      */
     public static <T> ReflectASM<T> on(final Class<T> cls) {
         N.checkArgNotNull(cls, "cls");
@@ -188,7 +189,7 @@ final class ReflectASM<T> {
      * }</pre>
      *
      * @param <T> the type of the target object
-     * @param instance the object instance to perform reflection on
+     * @param instance the object instance to perform reflection on; must not be {@code null}
      * @return a ReflectASM instance for the specified object
      * @throws IllegalArgumentException if {@code instance} is {@code null}
      */
@@ -225,7 +226,8 @@ final class ReflectASM<T> {
      * }</pre>
      *
      * @return a new ReflectASM instance wrapping the newly created object
-     * @throws RuntimeException if the class cannot be instantiated (e.g., no public no-arg constructor)
+     * @throws RuntimeException if the class cannot be instantiated (e.g., it has no public
+     *         no-argument constructor, or is abstract or an interface)
      */
     public ReflectASM<T> newInstance() { //NOSONAR
         return new ReflectASM<>(cls, getConstructorAccess(cls).newInstance());
@@ -278,10 +280,13 @@ final class ReflectASM<T> {
      * }</pre>
      *
      * @param <V> the expected type of the field value
-     * @param fieldName the name of the field to access
-     * @return the value of the field, cast to type V
-     * @throws RuntimeException if the field doesn't exist or cannot be accessed
-     * @throws ClassCastException if the actual field type cannot be cast to V
+     * @param fieldName the name of the field to access; must not be {@code null}
+     * @return the value of the field, cast to type {@code V}
+     * @throws IllegalStateException if this {@code ReflectASM} was created from a class (not an
+     *         instance) and {@link #newInstance()} has not been called
+     * @throws RuntimeException if the field does not exist or cannot be accessed (e.g., it is
+     *         private or static)
+     * @throws ClassCastException if the actual field type cannot be cast to {@code V}
      */
     public <V> V get(final String fieldName) {
         final FieldAccess fieldAccess = getFieldAccess();
@@ -322,10 +327,13 @@ final class ReflectASM<T> {
      *     .instance();
      * }</pre>
      *
-     * @param fieldName the name of the field to set
-     * @param value the value to assign to the field
-     * @return this ReflectASM instance for method chaining
-     * @throws RuntimeException if the field doesn't exist, is final, or cannot be accessed
+     * @param fieldName the name of the field to set; must not be {@code null}
+     * @param value the value to assign to the field; may be {@code null} for reference-type fields
+     * @return this {@code ReflectASM} instance for method chaining
+     * @throws IllegalStateException if this {@code ReflectASM} was created from a class (not an
+     *         instance) and {@link #newInstance()} has not been called
+     * @throws RuntimeException if the field does not exist, is final, is static, or cannot
+     *         otherwise be accessed
      */
     public ReflectASM<T> set(final String fieldName, final Object value) {
         final FieldAccess fieldAccess = getFieldAccess();
@@ -371,11 +379,14 @@ final class ReflectASM<T> {
      * }</pre>
      *
      * @param <V> the expected return type of the method
-     * @param methodName the name of the method to invoke
-     * @param args the arguments to pass to the method (can be empty for no-arg methods)
-     * @return the return value of the method, cast to type V (null for void methods)
-     * @throws RuntimeException if the method doesn't exist or cannot be invoked
-     * @throws ClassCastException if the return type cannot be cast to V
+     * @param methodName the name of the method to invoke; must not be {@code null}
+     * @param args the arguments to pass to the method; may be omitted for no-argument methods
+     * @return the return value of the method cast to {@code V}, or {@code null} for {@code void} methods
+     * @throws IllegalStateException if this {@code ReflectASM} was created from a class (not an
+     *         instance) and {@link #newInstance()} has not been called
+     * @throws RuntimeException if the method does not exist, is not public, or throws an exception
+     *         during invocation
+     * @throws ClassCastException if the actual return type cannot be cast to {@code V}
      */
     public <V> V invoke(final String methodName, final Object... args) {
         final MethodAccess methodAccess = getMethodAccess(cls);
@@ -418,10 +429,13 @@ final class ReflectASM<T> {
      * ReflectASM.on(service).call("process", jsonData);
      * }</pre>
      *
-     * @param methodName the name of the method to invoke
-     * @param args the arguments to pass to the method (can be empty for no-arg methods)
-     * @return this ReflectASM instance for method chaining
-     * @throws RuntimeException if the method doesn't exist or cannot be invoked
+     * @param methodName the name of the method to invoke; must not be {@code null}
+     * @param args the arguments to pass to the method; may be omitted for no-argument methods
+     * @return this {@code ReflectASM} instance for method chaining
+     * @throws IllegalStateException if this {@code ReflectASM} was created from a class (not an
+     *         instance) and {@link #newInstance()} has not been called
+     * @throws RuntimeException if the method does not exist, is not public, or throws an exception
+     *         during invocation
      */
     public ReflectASM<T> call(final String methodName, final Object... args) {
         invoke(methodName, args);

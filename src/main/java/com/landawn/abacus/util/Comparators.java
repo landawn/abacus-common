@@ -667,6 +667,10 @@ public final class Comparators {
      * The extracted keys are compared using natural ordering with {@code null} keys considered less than {@code non-null} keys.
      * This is a convenience method that combines key extraction with null-safe natural ordering comparison.
      *
+     * <p><b>Note:</b> The key extractor is applied to both objects regardless of whether those objects are
+     * {@code null}. If the objects themselves may be {@code null}, use
+     * {@link #comparingByIfNotNullOrElseNullsFirst(Function)} instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class Person {
@@ -679,9 +683,9 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract the comparable key from objects
+     * @param keyExtractor the function to extract the comparable key from objects; must not be {@code null}
      * @return a comparator that compares by extracted keys with nulls first
-     * @throws IllegalArgumentException if keyExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      * @see #comparingByIfNotNullOrElseNullsFirst(Function)
      * @see #comparingByIfNotNullOrElseNullsLast(Function)
      */
@@ -769,6 +773,10 @@ public final class Comparators {
      * The extracted keys are compared using natural ordering with {@code null} keys considered greater than {@code non-null} keys.
      * This is a convenience method that combines key extraction with null-safe natural ordering comparison.
      *
+     * <p><b>Note:</b> The key extractor is applied to both objects regardless of whether those objects are
+     * {@code null}. If the objects themselves may be {@code null}, use
+     * {@link #comparingByIfNotNullOrElseNullsLast(Function)} instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class Product {
@@ -781,9 +789,9 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract the comparable key from objects
+     * @param keyExtractor the function to extract the comparable key from objects; must not be {@code null}
      * @return a comparator that compares by extracted keys with nulls last
-     * @throws IllegalArgumentException if keyExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      * @see #comparingByIfNotNullOrElseNullsFirst(Function)
      * @see #comparingByIfNotNullOrElseNullsLast(Function)
      */
@@ -935,9 +943,9 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract the comparable key from objects
+     * @param keyExtractor the function to extract the comparable key from objects; must not be {@code null}
      * @return a comparator that compares by extracted keys using natural ordering
-     * @throws IllegalArgumentException if keyExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      * @see #nullsFirstBy(Function)
      * @see #nullsLastBy(Function)
      * @see #comparingByIfNotNullOrElseNullsFirst(Function)
@@ -971,9 +979,9 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract the comparable key from objects
+     * @param keyExtractor the function to extract the comparable key from objects; must not be {@code null}
      * @return a comparator that handles {@code null} objects and {@code null} keys appropriately
-     * @throws IllegalArgumentException if keyExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      * @see #comparingBy(Function)
      * @see #comparingByIfNotNullOrElseNullsLast(Function)
      */
@@ -1009,9 +1017,9 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract the comparable key from objects
+     * @param keyExtractor the function to extract the comparable key from objects; must not be {@code null}
      * @return a comparator that handles {@code null} objects and {@code null} keys appropriately
-     * @throws IllegalArgumentException if keyExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      * @see #comparingBy(Function)
      * @see #comparingByIfNotNullOrElseNullsFirst(Function)
      */
@@ -1048,10 +1056,10 @@ public final class Comparators {
      *
      * @param <T> the type of the objects being compared
      * @param <U> the type of the keys extracted for comparison
-     * @param keyExtractor the function to extract keys from objects
-     * @param keyComparator the comparator to use for comparing extracted keys
+     * @param keyExtractor the function to extract keys from objects; must not be {@code null}
+     * @param keyComparator the comparator to use for comparing extracted keys; must not be {@code null}
      * @return a comparator that compares objects by their extracted keys
-     * @throws IllegalArgumentException if keyExtractor or keyComparator is null
+     * @throws IllegalArgumentException if {@code keyExtractor} or {@code keyComparator} is {@code null}
      * @see #comparingByIfNotNullOrElseNullsFirst(Function, Comparator)
      * @see #comparingByIfNotNullOrElseNullsLast(Function, Comparator)
      */
@@ -1083,10 +1091,10 @@ public final class Comparators {
      *
      * @param <T> the type of the objects being compared
      * @param <U> the type of the keys extracted for comparison
-     * @param keyExtractor the function to extract keys from objects
-     * @param keyComparator the comparator to use for comparing extracted keys
+     * @param keyExtractor the function to extract keys from objects; must not be {@code null}
+     * @param keyComparator the comparator to use for comparing extracted keys; must not be {@code null}
      * @return a comparator that handles {@code null} objects appropriately
-     * @throws IllegalArgumentException if keyExtractor or keyComparator is null
+     * @throws IllegalArgumentException if {@code keyExtractor} or {@code keyComparator} is {@code null}
      */
     public static <T, U> Comparator<T> comparingByIfNotNullOrElseNullsFirst(final Function<? super T, ? extends U> keyExtractor,
             final Comparator<? super U> keyComparator) throws IllegalArgumentException {
@@ -1116,10 +1124,10 @@ public final class Comparators {
      *
      * @param <T> the type of the objects being compared
      * @param <U> the type of the keys extracted for comparison
-     * @param keyExtractor the function to extract keys from objects
-     * @param keyComparator the comparator to use for comparing extracted keys
+     * @param keyExtractor the function to extract keys from objects; must not be {@code null}
+     * @param keyComparator the comparator to use for comparing extracted keys; must not be {@code null}
      * @return a comparator that handles {@code null} objects appropriately
-     * @throws IllegalArgumentException if keyExtractor or keyComparator is null
+     * @throws IllegalArgumentException if {@code keyExtractor} or {@code keyComparator} is {@code null}
      */
     public static <T, U> Comparator<T> comparingByIfNotNullOrElseNullsLast(final Function<? super T, ? extends U> keyExtractor,
             final Comparator<? super U> keyComparator) throws IllegalArgumentException {
@@ -1145,9 +1153,9 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract boolean values from objects
+     * @param keyExtractor the function to extract boolean values from objects; must not be {@code null}
      * @return a comparator that compares by extracted boolean values
-     * @throws IllegalArgumentException if keyExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      */
     public static <T> Comparator<T> comparingBoolean(final ToBooleanFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor);
@@ -1172,9 +1180,9 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract char values from objects
+     * @param keyExtractor the function to extract char values from objects; must not be {@code null}
      * @return a comparator that compares by extracted char values
-     * @throws IllegalArgumentException if keyExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      */
     public static <T> Comparator<T> comparingChar(final ToCharFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor);
@@ -1199,9 +1207,9 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract byte values from objects
+     * @param keyExtractor the function to extract byte values from objects; must not be {@code null}
      * @return a comparator that compares by extracted byte values
-     * @throws IllegalArgumentException if keyExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      */
     public static <T> Comparator<T> comparingByte(final ToByteFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor);
@@ -1226,9 +1234,9 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract short values from objects
+     * @param keyExtractor the function to extract short values from objects; must not be {@code null}
      * @return a comparator that compares by extracted short values
-     * @throws IllegalArgumentException if keyExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      */
     public static <T> Comparator<T> comparingShort(final ToShortFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor);
@@ -1253,9 +1261,9 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract int values from objects
+     * @param keyExtractor the function to extract int values from objects; must not be {@code null}
      * @return a comparator that compares by extracted int values
-     * @throws IllegalArgumentException if keyExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      */
     public static <T> Comparator<T> comparingInt(final ToIntFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor);
@@ -1280,9 +1288,9 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract long values from objects
+     * @param keyExtractor the function to extract long values from objects; must not be {@code null}
      * @return a comparator that compares by extracted long values
-     * @throws IllegalArgumentException if keyExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      */
     public static <T> Comparator<T> comparingLong(final ToLongFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor);
@@ -1306,9 +1314,9 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract float values from objects
+     * @param keyExtractor the function to extract float values from objects; must not be {@code null}
      * @return a comparator that compares by extracted float values
-     * @throws IllegalArgumentException if keyExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      */
     public static <T> Comparator<T> comparingFloat(final ToFloatFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor);
@@ -1333,9 +1341,9 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract double values from objects
+     * @param keyExtractor the function to extract double values from objects; must not be {@code null}
      * @return a comparator that compares by extracted double values
-     * @throws IllegalArgumentException if keyExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      */
     public static <T> Comparator<T> comparingDouble(final ToDoubleFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor);
@@ -1377,9 +1385,9 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract String values from objects
+     * @param keyExtractor the function to extract String values from objects; must not be {@code null}
      * @return a comparator that performs case-insensitive comparison on extracted strings
-     * @throws IllegalArgumentException if keyExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      */
     public static <T> Comparator<T> comparingIgnoreCase(final Function<? super T, String> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor);
@@ -1590,9 +1598,9 @@ public final class Comparators {
      * int result = cmp.compare(arr1, arr2);   // returns negative (banana < cherry)
      * }</pre>
      *
-     * @param cmp the comparator to use for comparing array elements
+     * @param cmp the comparator to use for comparing array elements; must not be {@code null}
      * @return a comparator that performs lexicographic comparison of Object arrays
-     * @throws IllegalArgumentException if cmp is null
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}
      */
     @SuppressWarnings("rawtypes")
     public static Comparator<Object[]> comparingObjArray(final Comparator<?> cmp) {
@@ -2104,7 +2112,7 @@ public final class Comparators {
      * @param <T> the type of beans to compare
      * @param propNamesToCompare collection of property names to compare in order
      * @return a comparator that compares beans by the specified properties
-     * @throws IllegalArgumentException if propNamesToCompare is {@code null} or contains invalid property names
+     * @throws IllegalArgumentException if {@code propNamesToCompare} is {@code null}
      * @deprecated calling {@code getPropValue} by reflection APIs during comparison or sorting may have a huge impact on performance. Use {@link ComparisonBuilder} instead.
      * @see Builder#compare(Object, Object, Comparator)
      * @see ComparisonBuilder
@@ -2200,9 +2208,9 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of objects to compare
-     * @param keyExtractor function to extract boolean keys from objects
+     * @param keyExtractor function to extract boolean keys from objects; must not be {@code null}
      * @return a comparator that compares by extracted boolean values in reverse order
-     * @throws IllegalArgumentException if keyExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      */
     public static <T> Comparator<T> reversedComparingBoolean(final ToBooleanFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor);
@@ -2225,9 +2233,9 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of objects to compare
-     * @param keyExtractor function to extract char keys from objects
+     * @param keyExtractor function to extract char keys from objects; must not be {@code null}
      * @return a comparator that compares by extracted char values in reverse order
-     * @throws IllegalArgumentException if keyExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      */
     public static <T> Comparator<T> reversedComparingChar(final ToCharFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor);
@@ -2250,9 +2258,9 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of objects to compare
-     * @param keyExtractor function to extract byte keys from objects
+     * @param keyExtractor function to extract byte keys from objects; must not be {@code null}
      * @return a comparator that compares by extracted byte values in reverse order
-     * @throws IllegalArgumentException if keyExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      */
     public static <T> Comparator<T> reversedComparingByte(final ToByteFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor);
@@ -2275,9 +2283,9 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of objects to compare
-     * @param keyExtractor function to extract short keys from objects
+     * @param keyExtractor function to extract short keys from objects; must not be {@code null}
      * @return a comparator that compares by extracted short values in reverse order
-     * @throws IllegalArgumentException if keyExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      */
     public static <T> Comparator<T> reversedComparingShort(final ToShortFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor);
@@ -2303,9 +2311,9 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of objects to compare
-     * @param keyExtractor function to extract int keys from objects
+     * @param keyExtractor function to extract int keys from objects; must not be {@code null}
      * @return a comparator that compares by extracted int values in reverse order
-     * @throws IllegalArgumentException if keyExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      */
     public static <T> Comparator<T> reversedComparingInt(final ToIntFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor);
@@ -2331,9 +2339,9 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of objects to compare
-     * @param keyExtractor function to extract long keys from objects
+     * @param keyExtractor function to extract long keys from objects; must not be {@code null}
      * @return a comparator that compares by extracted long values in reverse order
-     * @throws IllegalArgumentException if keyExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      */
     public static <T> Comparator<T> reversedComparingLong(final ToLongFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor);
@@ -2357,9 +2365,9 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of objects to compare
-     * @param keyExtractor function to extract float keys from objects
+     * @param keyExtractor function to extract float keys from objects; must not be {@code null}
      * @return a comparator that compares by extracted float values in reverse order
-     * @throws IllegalArgumentException if keyExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      */
     public static <T> Comparator<T> reversedComparingFloat(final ToFloatFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor);
@@ -2383,9 +2391,9 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of objects to compare
-     * @param keyExtractor function to extract double keys from objects
+     * @param keyExtractor function to extract double keys from objects; must not be {@code null}
      * @return a comparator that compares by extracted double values in reverse order
-     * @throws IllegalArgumentException if keyExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      */
     public static <T> Comparator<T> reversedComparingDouble(final ToDoubleFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor);
@@ -2395,8 +2403,9 @@ public final class Comparators {
 
     /**
      * Returns a comparator that compares objects by extracting a {@link Comparable} key
-     * and comparing in reverse order. The extracted keys must implement Comparable and
-     * are compared using their natural ordering in reverse.
+     * and comparing in reverse order. The extracted keys must implement {@link Comparable} and
+     * are compared using their natural ordering in reverse. {@code null} keys are treated as
+     * greater than any {@code non-null} key (nulls last in the reversed ordering).
      *
      * <p>This is a general-purpose method for reversing any Comparable key extraction.</p>
      *
@@ -2411,9 +2420,9 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of objects to compare
-     * @param keyExtractor function to extract Comparable keys from objects
+     * @param keyExtractor function to extract Comparable keys from objects; must not be {@code null}
      * @return a comparator that compares by extracted Comparable values in reverse order
-     * @throws IllegalArgumentException if keyExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      * @see #reversedComparingByIfNotNullOrElseNullsFirst(Function)
      * @see #reversedComparingByIfNotNullOrElseNullsLast(Function)
      */
@@ -2443,9 +2452,9 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of objects to compare
-     * @param keyExtractor function to extract Comparable keys from objects
+     * @param keyExtractor function to extract Comparable keys from objects; must not be {@code null}
      * @return a comparator with reverse ordering and nulls-first behavior
-     * @throws IllegalArgumentException if keyExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      */
     @Beta
     public static <T> Comparator<T> reversedComparingByIfNotNullOrElseNullsFirst(
@@ -2477,9 +2486,9 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of objects to compare
-     * @param keyExtractor function to extract Comparable keys from objects
+     * @param keyExtractor function to extract Comparable keys from objects; must not be {@code null}
      * @return a comparator with reverse ordering and nulls-last behavior
-     * @throws IllegalArgumentException if keyExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      */
     @Beta
     public static <T> Comparator<T> reversedComparingByIfNotNullOrElseNullsLast(

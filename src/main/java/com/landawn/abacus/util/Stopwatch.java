@@ -210,7 +210,8 @@ public final class Stopwatch {
 
     /**
      * Stops the stopwatch. Future reads will return the fixed duration that had elapsed up to this
-     * point. Calling {@code elapsed()} after stopping will always return the same duration.
+     * point. Calling {@code elapsed()} after stopping will return the same duration until
+     * {@link #start()} or {@link #reset()} is called again.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -278,8 +279,9 @@ public final class Stopwatch {
      * long seconds = stopwatch.elapsed(TimeUnit.SECONDS);
      * }</pre>
      *
-     * @param desiredUnit the unit of time to express the elapsed time in
+     * @param desiredUnit the unit of time to express the elapsed time in; must not be {@code null}
      * @return the elapsed time in the specified unit, rounded down
+     * @throws NullPointerException if {@code desiredUnit} is {@code null}
      * @see #elapsed()
      */
     public long elapsed(final TimeUnit desiredUnit) {
@@ -344,16 +346,15 @@ public final class Stopwatch {
     }
 
     /**
-     * Formats a double value to 4 significant figures using scientific notation when appropriate.
-     * This method uses {@code "%.4g"} format which automatically chooses between fixed-point
-     * and exponential notation.
+     * Formats a double value to 4 significant figures using the {@code "%.4g"} format,
+     * which automatically chooses between fixed-point and exponential notation.
      *
      * <p>Example outputs:</p>
      * <ul>
-     *   <li>{@code "1.234"} for 1.234</li>
-     *   <li>{@code "1234"} for 1234.0</li>
-     *   <li>{@code "1.234e+06"} for 1234000.0</li>
-     *   <li>{@code "0.001234"} for 0.001234</li>
+     *   <li>{@code "1.234"} for {@code 1.234}</li>
+     *   <li>{@code "1234"} for {@code 1234.0}</li>
+     *   <li>{@code "1.234e+06"} for {@code 1234000.0}</li>
+     *   <li>{@code "0.001234"} for {@code 0.001234}</li>
      * </ul>
      *
      * @param value the value to format

@@ -503,10 +503,10 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * int result = a.compareTo(b);   // returns negative value
      * }</pre>
      *
-     * @param other the MutableByte to compare to, must not be null
+     * @param other the MutableByte to compare to, not {@code null}
      * @return a negative integer, zero, or a positive integer as this object's value
      *         is less than, equal to, or greater than the specified object's value
-     * @throws NullPointerException if other is null
+     * @throws NullPointerException if {@code other} is {@code null}
      */
     @Override
     public int compareTo(final MutableByte other) {

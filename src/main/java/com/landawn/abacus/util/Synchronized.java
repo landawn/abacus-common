@@ -53,6 +53,12 @@ public final class Synchronized<T> {
 
     private final T mutex;
 
+    /**
+     * Constructs a new {@code Synchronized} instance wrapping the given mutex.
+     *
+     * @param mutex the object to synchronize on; must not be {@code null}
+     * @throws IllegalArgumentException if {@code mutex} is {@code null}
+     */
     Synchronized(final T mutex) {
         N.checkArgNotNull(mutex);
 

@@ -97,15 +97,15 @@ public class CsvParser {
     public static final boolean DEFAULT_STRICT_QUOTES = false;
 
     /**
-     * The default leading whitespace behavior.
-     * When {@code true}, whitespace surrounding unquoted fields is trimmed and any
-     * whitespace immediately following a separator is skipped.
+     * The default leading whitespace behavior ({@code true}).
+     * When {@code true}, whitespace surrounding unquoted fields is stripped (leading and trailing)
+     * and any whitespace characters immediately following a separator are skipped before the next field.
      */
     public static final boolean DEFAULT_IGNORE_LEADING_WHITESPACE = true;
 
     /**
-     * The default behavior for quotation handling.
-     * When {@code false}, quote characters are processed normally.
+     * The default quotation-handling behavior ({@code false}).
+     * When {@code false}, quote characters are processed normally as field delimiters.
      */
     public static final boolean DEFAULT_IGNORE_QUOTATIONS = false;
 
@@ -241,7 +241,8 @@ public class CsvParser {
      * @param quoteChar the character to use for quoted elements
      * @param escape the character to use for escaping a separator or quote
      * @param strictQuotes if {@code true}, characters outside the quotes are ignored
-     * @param ignoreLeadingWhiteSpace if {@code true}, white space in front of a quote in a field is ignored
+     * @param ignoreLeadingWhiteSpace if {@code true}, surrounding whitespace is stripped from unquoted
+     *        fields and whitespace immediately after a separator is skipped
      */
     public CsvParser(final char separator, final char quoteChar, final char escape, final boolean strictQuotes, final boolean ignoreLeadingWhiteSpace) {
         this(separator, quoteChar, escape, strictQuotes, ignoreLeadingWhiteSpace, DEFAULT_IGNORE_QUOTATIONS);
@@ -264,10 +265,11 @@ public class CsvParser {
      * @param quoteChar the character to use for quoted elements
      * @param escape the character to use for escaping a separator or quote
      * @param strictQuotes if {@code true}, characters outside the quotes are ignored
-     * @param ignoreLeadingWhiteSpace if {@code true}, white space in front of a quote in a field is ignored
-     * @param ignoreQuotations if {@code true}, treat quotations like any other character
-     * @throws UnsupportedOperationException if separator, quote, and escape are not all different,
-     *         or if separator is NULL_CHARACTER
+     * @param ignoreLeadingWhiteSpace if {@code true}, surrounding whitespace is stripped from unquoted
+     *        fields and whitespace immediately after a separator is skipped
+     * @param ignoreQuotations if {@code true}, treat quotation characters like any other character
+     * @throws UnsupportedOperationException if any two of separator, quoteChar, and escape are the same
+     *         non-{@link #NULL_CHARACTER} characters, or if separator is {@link #NULL_CHARACTER}
      */
     public CsvParser(final char separator, final char quoteChar, final char escape, final boolean strictQuotes, final boolean ignoreLeadingWhiteSpace,
             final boolean ignoreQuotations) {
@@ -350,9 +352,10 @@ public class CsvParser {
 
     /**
      * Returns whether this parser ignores leading whitespace.
-     * When {@code true}, whitespace before a quote character is ignored.
+     * When {@code true}, surrounding whitespace is stripped from unquoted fields and whitespace
+     * immediately after a separator is skipped.
      *
-     * @return {@code true} if leading whitespace is ignored
+     * @return {@code true} if leading (and trailing) whitespace around unquoted fields is ignored
      */
     public boolean isIgnoreLeadingWhiteSpace() {
         return ignoreLeadingWhiteSpace;
@@ -380,8 +383,8 @@ public class CsvParser {
      * // Result: ["John", "Doe, Jr.", "30", "New York"]
      * }</pre>
      *
-     * @param nextLine the line to be parsed
-     * @return a List of String values, or an empty list if nextLine is {@code null}
+     * @param nextLine the CSV line to be parsed; may be {@code null}
+     * @return a {@code List} of parsed field values; an empty list if {@code nextLine} is {@code null}
      * @throws ParsingException if the line contains an unterminated quoted field
      */
     public List<String> parseLine(final String nextLine) throws ParsingException {
@@ -390,7 +393,8 @@ public class CsvParser {
 
     /**
      * Parses a CSV line into an array of fields.
-     * This is a convenience method that returns an array instead of a List.
+     * This is a convenience method equivalent to {@link #parseLine(String)} that returns an array
+     * instead of a {@code List}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -399,8 +403,8 @@ public class CsvParser {
      * // Result: ["a", "b", "c"]
      * }</pre>
      *
-     * @param nextLine the line to be parsed
-     * @return an array of String values, or an empty array if nextLine is {@code null}
+     * @param nextLine the CSV line to be parsed; may be {@code null}
+     * @return an array of parsed field values; an empty array if {@code nextLine} is {@code null}
      * @throws ParsingException if the line contains an unterminated quoted field
      */
     public String[] parseLineToArray(final String nextLine) throws ParsingException {
@@ -411,8 +415,9 @@ public class CsvParser {
 
     /**
      * Parses a CSV line into a pre-allocated array.
-     * This method is useful for performance when parsing many lines with the same
-     * number of fields, as it avoids array allocation.
+     * Parsed field values are written into {@code output} starting at index 0.
+     * This variant avoids array allocation and is useful when parsing many lines
+     * that have the same, known number of fields.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -422,10 +427,10 @@ public class CsvParser {
      * // output now contains: ["a", "b", "c", "d"]
      * }</pre>
      *
-     * @param nextLine the line to be parsed
-     * @param output the pre-allocated array to fill with parsed values
+     * @param nextLine the CSV line to be parsed; may be {@code null} (no values are written to {@code output})
+     * @param output the pre-allocated array to receive parsed field values; must not be {@code null}
+     * @throws IllegalArgumentException if {@code output} is {@code null}
      * @throws ParsingException if the line contains an unterminated quoted field
-     * @throws IllegalArgumentException if output is {@code null}
      */
     public void parseLineToArray(final String nextLine, final String[] output) throws ParsingException {
         N.checkArgNotNull(output, "output");
@@ -434,15 +439,17 @@ public class CsvParser {
     }
 
     /**
-     * Parses an incoming String and returns a list of the parsed elements.
+     * Parses a CSV line and returns the parsed fields, optionally writing them into a pre-allocated array.
      *
-     * <p>If {@code output} is provided, parsed values are written into it instead and
-     * {@code null} is returned. If {@code nextLine} is {@code null}, an empty list is returned.</p>
+     * <p>If {@code output} is {@code null}, the parsed values are collected into a new {@code List} which
+     * is returned. If {@code output} is not {@code null}, parsed values are written into it starting at
+     * index 0 and {@code null} is returned. If {@code nextLine} is {@code null}, an empty list is returned
+     * (and {@code output} is not written to).</p>
      *
-     * @param nextLine the string to parse
+     * @param nextLine the CSV line to parse; may be {@code null}
      * @param output an optional pre-allocated array to receive parsed values; may be {@code null}
-     * @return the tokenized list of elements when {@code output} is {@code null}; otherwise {@code null}.
-     *         If {@code nextLine} is {@code null}, returns an empty list.
+     * @return the {@code List} of parsed field values when {@code output} is {@code null};
+     *         {@code null} when {@code output} is provided; an empty list if {@code nextLine} is {@code null}
      * @throws ParsingException if the line contains an unterminated quoted field
      */
     protected List<String> parseLine(final String nextLine, final String[] output) throws ParsingException {

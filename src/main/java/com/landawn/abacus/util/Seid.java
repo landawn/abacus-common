@@ -79,6 +79,10 @@ public class Seid implements EntityId {
 
     private String strValue;
 
+    /**
+     * No-argument constructor required by Kryo serialization.
+     * Not intended for direct use.
+     */
     // for Kryo.
     protected Seid() {
         entityName = Strings.EMPTY;
@@ -287,8 +291,8 @@ public class Seid implements EntityId {
      * }</pre>
      *
      * @param entity the entity object to extract values from
-     * @param idPropNames the names of properties to use as ID
-     * @return a new Seid containing the specified properties
+     * @param idPropNames the simple names of properties to use as ID; must not be {@code null} or empty
+     * @return a new Seid containing the specified properties and their values from the entity
      * @throws IllegalArgumentException if idPropNames is {@code null} or empty
      */
     public static Seid create(final Object entity, final Collection<String> idPropNames) {
@@ -443,9 +447,11 @@ public class Seid implements EntityId {
 
     /**
      * Sets multiple property values in this Seid.
+     * Both simple and canonical property names are accepted; canonical names are
+     * automatically converted to their simple form before storage.
      * This method is deprecated and for internal use only.
      *
-     * @param nameValues a map of property names to their values
+     * @param nameValues a map of property names (simple or canonical) to their values; ignored if {@code null} or empty
      * @deprecated for internal use only
      */
     @Deprecated
@@ -526,8 +532,12 @@ public class Seid implements EntityId {
     }
 
     /**
-     * Returns a set view of the property entries in this Seid.
-     * Each entry contains a property name and its corresponding value.
+     * Returns a set view of the property entries in this Seid as of the time of this call.
+     * Each entry contains a simple property name and its corresponding value.
+     *
+     * <p>As with {@link #keySet()}, the returned set reflects the underlying map at the
+     * moment this method is invoked. Subsequent mutations that swap the internal map may
+     * not be visible through a previously returned entry set.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -611,7 +621,8 @@ public class Seid implements EntityId {
 
     /**
      * Checks if this Seid is equal to another object.
-     * Two Seids are equal if they have the same string representation.
+     * Two Seids are equal if they are both {@link EntityId} instances and have the same
+     * string representation (i.e. the same entity name and identical property-value pairs).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -621,7 +632,8 @@ public class Seid implements EntityId {
      * }</pre>
      *
      * @param obj the object to compare with
-     * @return {@code true} if the objects are equal, {@code false} otherwise
+     * @return {@code true} if {@code obj} is an {@link EntityId} with the same string representation as this Seid,
+     *         {@code false} otherwise
      */
     @Override
     public boolean equals(final Object obj) {
@@ -732,12 +744,12 @@ public class Seid implements EntityId {
     }
 
     /**
-     * Gets the ID field names for the specified class.
-     * Returns field names that are annotated as ID fields in the class.
+     * Returns the ID field names declared on the specified class.
+     * The names are derived from properties annotated as ID fields in the class's bean metadata.
      * This method is for internal use only.
      *
-     * @param targetClass the class to inspect
-     * @return an immutable list of ID field names
+     * @param targetClass the class whose ID field names are to be retrieved; must not be {@code null}
+     * @return an immutable list of ID field names; empty if no ID properties are defined
      * @deprecated for internal use only
      */
     @Deprecated

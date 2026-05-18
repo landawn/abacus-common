@@ -40,6 +40,7 @@ package com.landawn.abacus.util;
  */
 public final class IndexedShort extends AbstractIndexed {
 
+    /** The short value associated with the index. */
     private final short value;
 
     /**
@@ -114,11 +115,11 @@ public final class IndexedShort extends AbstractIndexed {
     }
 
     /**
-     * Returns the hash code of this IndexedShort instance.
+     * Returns the hash code of this {@code IndexedShort} instance.
      *
-     * <p>The hash code is computed based on both the index and the value.</p>
+     * <p>The hash code is computed from both the index and the value.</p>
      *
-     * @return the hash code
+     * @return the hash code value for this object
      */
     @Override
     public int hashCode() {

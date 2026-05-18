@@ -255,8 +255,9 @@ final class FileSystemUtil {
      *  is zero or less
      * @return the amount of free disk space in bytes or kilobytes depending on the kb parameter
      * @throws IOException if an error occurs when finding the free space
-     * @throws IllegalArgumentException if the path is invalid
-     * @throws IllegalStateException if an error occurred in initialisation
+     * @throws IllegalArgumentException if {@code path} is {@code null}
+     * @throws IllegalStateException if the operating system is unsupported, or if an error
+     *         occurred during initialization of the OS detection
      */
     long freeSpaceOS(final String path, final int os, final boolean kb, final long timeout) throws IOException {
         if (path == null) {
@@ -428,6 +429,15 @@ final class FileSystemUtil {
 
     //-----------------------------------------------------------------------
 
+    /**
+     * Parses a string representing a number of bytes and returns its {@code long} value.
+     *
+     * @param freeSpace the string to parse, expected to contain a non-negative integer
+     * @param path the file system path associated with the query, used in error messages
+     * @return the parsed number of bytes as a non-negative {@code long}
+     * @throws IOException if {@code freeSpace} is not a valid non-negative integer,
+     *         or if the parsed value is negative
+     */
     long parseBytes(final String freeSpace, final String path) throws IOException {
         try {
             final long bytes = Long.parseLong(freeSpace);

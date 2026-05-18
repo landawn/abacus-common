@@ -283,7 +283,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * } // Automatically closed
      * }</pre>
      *
-     * @throws java.io.IOException if an I/O error occurs while flushing or closing
+     * @throws IOException if an I/O error occurs while flushing or closing
      */
     @Override
     public void close() throws IOException {

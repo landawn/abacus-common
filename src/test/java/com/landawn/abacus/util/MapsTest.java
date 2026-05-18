@@ -3534,7 +3534,7 @@ public class MapsTest extends AbstractTest {
     @Test
     public void test_beanToMap() {
 
-        Account account1 = Beans.newRandom(Account.class);
+        Account account1 = Beans.newRandomBean(Account.class);
         Map<String, Object> map1 = Beans.beanToMap(account1);
         N.println(map1);
 
@@ -3546,8 +3546,8 @@ public class MapsTest extends AbstractTest {
 
     @Test
     public void test_MapDifference() {
-        Account account1 = Beans.newRandom(Account.class);
-        Account account2 = Beans.newRandom(Account.class);
+        Account account1 = Beans.newRandomBean(Account.class);
+        Account account2 = Beans.newRandomBean(Account.class);
         account2.setFirstName(account1.getFirstName());
 
         var mapDiff = BeanDifference.of(account1, account2);

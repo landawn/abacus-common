@@ -40,6 +40,7 @@ package com.landawn.abacus.util;
  */
 public final class IndexedBoolean extends AbstractIndexed {
 
+    /** The boolean value associated with the index. */
     private final boolean value;
 
     /**
@@ -114,11 +115,10 @@ public final class IndexedBoolean extends AbstractIndexed {
     }
 
     /**
-     * Returns the hash code of this IndexedBoolean instance.
+     * Returns the hash code of this {@code IndexedBoolean} instance.
      *
-     * <p>The hash code is computed based on both the index and the value.
-     * The formula ensures that {@code true} and {@code false} values at the same index
-     * produce different hash codes.</p>
+     * <p>The hash code is computed from both the index and the boolean value,
+     * so instances that differ only by value will produce different hash codes.</p>
      *
      * @return the hash code value for this object
      */

@@ -1723,11 +1723,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <br />
      * The length of returned sequence may be less than the specified {@code maxChunkCount} if the input {@code totalSize} is less than {@code maxChunkCount}.
      *
-     * @param <T> the type of the elements in the resulting stream
+     * @param <T> the type of the elements in the resulting sequence
      * @param <E> the type of the exception that might be thrown
      * @param totalSize the total size to be split. It could be the size of an array, list, etc.
      * @param maxChunkCount the maximum number of chunks to split into
-     * @param mapper a function to map the chunk from and to index to an element in the resulting stream
+     * @param mapper a function to map the chunk from and to index to an element in the resulting sequence
      * @return a sequence of the mapped chunk values
      * @throws IllegalArgumentException if {@code totalSize} is negative or {@code maxChunkCount} is not positive.
      * @see #splitByChunkCount(int, int, boolean, Throwables.IntBiFunction)
@@ -1751,12 +1751,12 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * splitByChunkCount(7, 5, false, (fromIndex, toIndex) ->  copyOfRange(a, fromIndex, toIndex));   // [[1, 2], [3, 4], [5], [6], [7]]
      * }</pre>
      *
-     * @param <T> the type of the elements in the resulting stream
+     * @param <T> the type of the elements in the resulting sequence
      * @param <E> the type of the exception that might be thrown
      * @param totalSize the total size to be split. It could be the size of an array, list, etc.
      * @param maxChunkCount the maximum number of chunks to split into
      * @param sizeSmallerFirst if {@code true}, smaller chunks will be created first; otherwise, larger chunks will be created first
-     * @param mapper a function to map the chunk from and to index to an element in the resulting stream
+     * @param mapper a function to map the chunk from and to index to an element in the resulting sequence
      * @return a sequence of the mapped chunk values
      * @throws IllegalArgumentException if {@code totalSize} is negative or {@code maxChunkCount} is not positive.
      * @see Stream#splitByChunkCount(int, int, boolean, IntBiFunction)
@@ -2034,7 +2034,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param parentPath the parent directory to list files from. Must not be {@code null}.
      * @return a {@code Seq<File, IOException>} containing all files in the directory.
      *         Returns an empty sequence if the directory doesn't exist or is not a directory.
-     * @throws IllegalArgumentException if parentPath is {@code null}
+     * @throws NullPointerException if parentPath is {@code null}
      * @see #listFiles(File, boolean)
      * @see File#listFiles()
      */
@@ -2073,7 +2073,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @return a sequence containing File objects representing the files in the parent directory.
      *         Returns an empty sequence if the parent directory doesn't exist or is not a directory.
      *         When recursive, the sequence includes both files and directories.
-     * @throws IllegalArgumentException if parentPath is {@code null}
+     * @throws NullPointerException if parentPath is {@code null}
      * @see #listFiles(File)
      * @see File#listFiles()
      */
@@ -2430,7 +2430,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *                    and returns the combined result
      * @return a sequence of combined elements. The length equals the shorter array's length.
      *         Returns an empty sequence if either array is {@code null} or empty
-     * @throws IllegalArgumentException if zipFunction is {@code null}
+     * @throws NullPointerException if zipFunction is {@code null}
      * @see #zip(Object[], Object[], Object, Object, Throwables.BiFunction)
      * @see N#zip(Object[], Object[], java.util.function.BiFunction)
      */
@@ -2483,7 +2483,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *                    Takes an element from each array and returns the combined result
      * @return a sequence of combined elements. The length equals the shortest array's length.
      *         Returns an empty sequence if any array is {@code null} or empty
-     * @throws IllegalArgumentException if zipFunction is {@code null}
+     * @throws NullPointerException if zipFunction is {@code null}
      * @see #zip(Object[], Object[], Throwables.BiFunction)
      * @see N#zip(Object[], Object[], Object[], TriFunction)
      */
@@ -2534,7 +2534,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *                    and returns the combined result
      * @return a sequence of combined elements. The length equals the shorter iterable's length.
      *         Returns an empty sequence if either iterable is {@code null} or empty
-     * @throws IllegalArgumentException if zipFunction is {@code null}
+     * @throws NullPointerException if zipFunction is {@code null}
      * @see #zip(Iterator, Iterator, Throwables.BiFunction)
      * @see N#zip(Iterable, Iterable, java.util.function.BiFunction)
      */
@@ -2561,7 +2561,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *                    Takes an element from each iterable and returns the combined result
      * @return a sequence of combined elements. The length equals the shortest iterable's length.
      *         Returns an empty sequence if any iterable is {@code null} or empty
-     * @throws IllegalArgumentException if zipFunction is {@code null}
+     * @throws NullPointerException if zipFunction is {@code null}
      * @see #zip(Iterable, Iterable, Throwables.BiFunction)
      * @see N#zip(Iterable, Iterable, Iterable, TriFunction)
      */
@@ -2588,7 +2588,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *                    and returns the combined result
      * @return a sequence of combined elements. The length equals the shorter iterator's length.
      *         Returns an empty sequence if either iterator is {@code null} or empty
-     * @throws IllegalArgumentException if zipFunction is {@code null}
+     * @throws NullPointerException if zipFunction is {@code null}
      * @see #zip(Iterable, Iterable, Throwables.BiFunction)
      * @see Iterators#zip(Iterable, Iterable, BiFunction)
      */
@@ -2629,7 +2629,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *                    Takes an element from each iterator and returns the combined result
      * @return a sequence of combined elements. The length equals the shortest iterator's length.
      *         Returns an empty sequence if any iterator is {@code null} or empty
-     * @throws IllegalArgumentException if zipFunction is {@code null}
+     * @throws NullPointerException if zipFunction is {@code null}
      * @see #zip(Iterator, Iterator, Throwables.BiFunction)
      * @see Iterators#zip(Iterator, Iterator, Iterator, TriFunction)
      */
@@ -2671,7 +2671,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @return a sequence of combined elements. The length equals the shorter sequence's length.
      *         Returns an empty sequence if either sequence is {@code null} or empty.
      *         The returned sequence will close both input sequences when it is closed.
-     * @throws IllegalArgumentException if zipFunction is {@code null}
+     * @throws NullPointerException if zipFunction is {@code null}
      * @see #zip(Seq, Seq, Object, Object, Throwables.BiFunction)
      * @see N#zip(Iterable, Iterable, java.util.function.BiFunction)
      */
@@ -2713,7 +2713,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @return a sequence of combined elements. The length equals the shortest sequence's length.
      *         Returns an empty sequence if any sequence is {@code null} or empty.
      *         The returned sequence will close all input sequences when it is closed.
-     * @throws IllegalArgumentException if zipFunction is {@code null}
+     * @throws NullPointerException if zipFunction is {@code null}
      * @see #zip(Seq, Seq, Throwables.BiFunction)
      * @see N#zip(Iterable, Iterable, Iterable, TriFunction)
      */
@@ -2761,7 +2761,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param zipFunction a function that combines elements from the two arrays. Must not be {@code null}.
      *                    Takes an element (or default value) from each array and returns the combined result
      * @return a sequence of combined elements. The length equals the longer array's length
-     * @throws IllegalArgumentException if zipFunction is {@code null}
+     * @throws NullPointerException if zipFunction is {@code null}
      * @see #zip(Object[], Object[], Throwables.BiFunction)
      * @see N#zip(Object[], Object[], Object, Object, java.util.function.BiFunction)
      */
@@ -2822,7 +2822,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param zipFunction a function that combines elements from the three arrays. Must not be {@code null}.
      *                    Takes an element (or default value) from each array and returns the combined result
      * @return a sequence of combined elements. The length equals the longest array's length
-     * @throws IllegalArgumentException if zipFunction is {@code null}
+     * @throws NullPointerException if zipFunction is {@code null}
      * @see #zip(Object[], Object[], Object[], Throwables.TriFunction)
      * @see N#zip(Object[], Object[], Object[], Object, Object, Object, TriFunction)
      */
@@ -2873,7 +2873,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param zipFunction a function that combines elements from the two iterables. Must not be {@code null}.
      *                    Takes an element (or default value) from each iterable and returns the combined result
      * @return a sequence of combined elements. The length equals the longer iterable's length
-     * @throws IllegalArgumentException if zipFunction is {@code null}
+     * @throws NullPointerException if zipFunction is {@code null}
      * @see #zip(Iterable, Iterable, Throwables.BiFunction)
      * @see N#zip(Iterable, Iterable, Object, Object, java.util.function.BiFunction)
      */
@@ -2902,7 +2902,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param zipFunction a function that combines elements from the three iterables. Must not be {@code null}.
      *                    Takes an element (or default value) from each iterable and returns the combined result
      * @return a sequence of combined elements. The length equals the longest iterable's length
-     * @throws IllegalArgumentException if zipFunction is {@code null}
+     * @throws NullPointerException if zipFunction is {@code null}
      * @see #zip(Iterable, Iterable, Iterable, Throwables.TriFunction)
      * @see N#zip(Iterable, Iterable, Iterable, Object, Object, Object, TriFunction)
      */
@@ -2930,7 +2930,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param zipFunction a function that combines elements from the two iterators. Must not be {@code null}.
      *                    Takes an element (or default value) from each iterator and returns the combined result
      * @return a sequence of combined elements. The length equals the longer iterator's length
-     * @throws IllegalArgumentException if zipFunction is {@code null}
+     * @throws NullPointerException if zipFunction is {@code null}
      * @see #zip(Iterator, Iterator, Throwables.BiFunction)
      * @see N#zip(Iterable, Iterable, Object, Object, BiFunction)
      */
@@ -2977,7 +2977,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param zipFunction a function that combines elements from the three iterators. Must not be {@code null}.
      *                    Takes an element (or default value) from each iterator and returns the combined result
      * @return a sequence of combined elements. The length equals the longest iterator's length
-     * @throws IllegalArgumentException if zipFunction is {@code null}
+     * @throws NullPointerException if zipFunction is {@code null}
      * @see #zip(Iterator, Iterator, Iterator, Throwables.TriFunction)
      * @see N#zip(Iterable, Iterable, Iterable, Object, Object, Object, TriFunction)
      */
@@ -3025,7 +3025,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *                    Takes an element (or default value) from each sequence and returns the combined result
      * @return a sequence of combined elements. The length equals the longer sequence's length.
      *         The returned sequence will close both input sequences when it is closed.
-     * @throws IllegalArgumentException if zipFunction is {@code null}
+     * @throws NullPointerException if zipFunction is {@code null}
      * @see #zip(Seq, Seq, Throwables.BiFunction)
      * @see N#zip(Iterable, Iterable, Object, Object, java.util.function.BiFunction)
      */
@@ -3073,7 +3073,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *                    Takes an element (or default value) from each sequence and returns the combined result
      * @return a sequence of combined elements. The length equals the longest sequence's length.
      *         The returned sequence will close all input sequences when it is closed.
-     * @throws IllegalArgumentException if zipFunction is {@code null}
+     * @throws NullPointerException if zipFunction is {@code null}
      * @see #zip(Seq, Seq, Seq, Throwables.TriFunction)
      * @see N#zip(Iterable, Iterable, Iterable, Object, Object, Object, TriFunction)
      */
@@ -4615,7 +4615,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * seq.slidingMap((a, b) -> String.valueOf(a) + "," + String.valueOf(b));   // Results: ["1,null"]
      * }</pre>
      *
-     * @param <R> the element type of the new stream
+     * @param <R> the element type of the new sequence
      * @param mapper a non-interfering, stateless function to apply to each adjacent pair of this sequence's elements
      * @return a new sequence consisting of the results of applying the mapper function to each adjacent pair of elements
      * @throws IllegalStateException if the sequence is already closed
@@ -9220,9 +9220,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Zips this stream with the given collection using the provided zip function.
-     * The zip function takes elements from this stream and the given collection until either the current stream or the given collection runs out of elements.
-     * The resulting stream will have the length of the shorter of the current stream and the given collection.
+     * Zips this sequence with the given collection using the provided zip function.
+     * The zip function takes elements from this sequence and the given collection until either the current sequence or the given collection runs out of elements.
+     * The resulting sequence will have the length of the shorter of the current sequence and the given collection.
      * This is an intermediate operation.
      *
      * <p><b>Usage Examples:</b></p>
@@ -9251,10 +9251,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Zips this stream with the given collection using the provided zip function.
-     * The zip function combines elements from this stream and the given collection until both the current stream or the given collection runs out of elements.
-     * The resulting stream will have the length of the longer of the current stream and the given collection.
-     * If the current stream or the given collection runs out of elements before the other, the provided default values are used.
+     * Zips this sequence with the given collection using the provided zip function.
+     * The zip function combines elements from this sequence and the given collection until both the current sequence or the given collection runs out of elements.
+     * The resulting sequence will have the length of the longer of the current sequence and the given collection.
+     * If the current sequence or the given collection runs out of elements before the other, the provided default values are used.
      * This is an intermediate operation.
      *
      * <p><b>Usage Examples:</b></p>
@@ -9285,9 +9285,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Zips this stream with the given collections using the provided zip function.
-     * The zip function takes elements from this stream and the given collections until either the current stream or one of the given collections runs out of elements.
-     * The resulting stream will have the length of the shortest of the current stream and the given collections.
+     * Zips this sequence with the given collections using the provided zip function.
+     * The zip function takes elements from this sequence and the given collections until either the current sequence or one of the given collections runs out of elements.
+     * The resulting sequence will have the length of the shortest of the current sequence and the given collections.
      * This is an intermediate operation.
      *
      * <p><b>Usage Examples:</b></p>
@@ -9319,10 +9319,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Zips this stream with the given collections using the provided zip function.
-     * The zip function combines elements from this stream and the given collections until both the current stream or the given collections runs out of elements.
-     * The resulting stream will have the length of the longest of the current stream and the given collections.
-     * If the current stream or one of the given collections runs out of elements before the other, the provided default values are used.
+     * Zips this sequence with the given collections using the provided zip function.
+     * The zip function combines elements from this sequence and the given collections until both the current sequence or the given collections runs out of elements.
+     * The resulting sequence will have the length of the longest of the current sequence and the given collections.
+     * If the current sequence or one of the given collections runs out of elements before the other, the provided default values are used.
      * This is an intermediate operation.
      *
      * <p><b>Usage Examples:</b></p>
@@ -9357,9 +9357,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Zips this stream with the given stream using the provided zip function.
-     * The zip function takes elements from this stream and the given stream until either the current stream or the given stream runs out of elements.
-     * The resulting stream will have the length of the shorter of the current stream and the given stream.
+     * Zips this sequence with the given sequence using the provided zip function.
+     * The zip function takes elements from this sequence and the given sequence until either the current sequence or the given sequence runs out of elements.
+     * The resulting sequence will have the length of the shorter of the current sequence and the given sequence.
      * This is an intermediate operation.
      *
      * <p><b>Usage Examples:</b></p>
@@ -9388,11 +9388,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Zips this stream with the given stream using the provided zip function, with default values for missing elements.
-     * This is an intermediate operation that combines elements from two streams pairwise.
+     * Zips this sequence with the given sequence using the provided zip function, with default values for missing elements.
+     * This is an intermediate operation that combines elements from two sequences pairwise.
      *
-     * <p>The resulting stream will have the length of the longer of the two streams.
-     * Default values are used when one stream runs out of elements before the other.
+     * <p>The resulting sequence will have the length of the longer of the two sequences.
+     * Default values are used when one sequence runs out of elements before the other.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9420,11 +9420,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Zips this stream with two other streams using the provided zip function.
-     * This is an intermediate operation that combines elements from three streams.
+     * Zips this sequence with two other sequences using the provided zip function.
+     * This is an intermediate operation that combines elements from three sequences.
      *
-     * <p>The resulting stream will have the length of the shortest of the three streams.
-     * If any stream is longer, its remaining elements are ignored.
+     * <p>The resulting sequence will have the length of the shortest of the three sequences.
+     * If any sequence is longer, its remaining elements are ignored.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9454,11 +9454,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Zips this stream with two other streams using the provided zip function, with default values for missing elements.
-     * This is an intermediate operation that combines elements from three streams.
+     * Zips this sequence with two other sequences using the provided zip function, with default values for missing elements.
+     * This is an intermediate operation that combines elements from three sequences.
      *
-     * <p>The resulting stream will have the length of the longest of the three streams.
-     * Default values are used when any stream runs out of elements before the others.
+     * <p>The resulting sequence will have the length of the longest of the three sequences.
+     * Default values are used when any sequence runs out of elements before the others.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -10384,7 +10384,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *         and {@code atMost} (inclusive), otherwise {@code false}
      * @throws IllegalArgumentException if {@code atLeast} or {@code atMost} is negative, or if {@code atMost} is less than {@code atLeast}
      * @throws IllegalStateException if the sequence has already been operated upon or closed
-     * @throws E if an exception occurs while processing the stream
+     * @throws E if an exception occurs while processing the sequence
      * @throws E2 if the predicate throws an exception
      */
     @TerminalOp
@@ -12255,7 +12255,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param <E2> the type of exception that may be thrown by the predicate
      * @param predicate the predicate to test elements. Must not be {@code null}.
      * @param downstream the collector to apply to each partition. Must not be {@code null}.
-     * @return a Map with two entries: {@code true} for collected result that match the predicate, and {@code false} for collected result that do not
+     * @return a Map with two entries: {@code true} for the collected result that matches the predicate, and {@code false} for the collected result that does not
      * @throws IllegalStateException if the sequence is already closed
      * @throws E if an exception occurs during iteration
      * @throws E2 if an exception occurs during predicate evaluation
@@ -12561,10 +12561,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param <E2> the type of exception that the function may throw
-     * @param func the function to extract integer values from the elements. Must not be {@code null}.
+     * @param func the function to extract integer values from the elements
      * @return the sum of the integer values as a long
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the function is {@code null}
      * @throws E if an exception occurs during the operation
      * @throws E2 if the provided function throws an exception
      */
@@ -12598,10 +12597,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param <E2> the type of exception that the function may throw
-     * @param func the function to extract long values from the elements. Must not be {@code null}.
+     * @param func the function to extract long values from the elements
      * @return the sum of the long values
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the function is {@code null}
      * @throws E if an exception occurs during the operation
      * @throws E2 if the provided function throws an exception
      */
@@ -12635,10 +12633,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param <E2> the type of exception that the function may throw
-     * @param func the function to extract double values from the elements. Must not be {@code null}.
+     * @param func the function to extract double values from the elements
      * @return the sum of the double values
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the function is {@code null}
      * @throws E if an exception occurs during the operation
      * @throws E2 if the provided function throws an exception
      */
@@ -12676,10 +12673,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param <E2> the type of exception that the function may throw
-     * @param func the function to extract integer values from the elements. Must not be {@code null}.
+     * @param func the function to extract integer values from the elements
      * @return an OptionalDouble containing the average, or empty if the sequence is empty
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the function is {@code null}
      * @throws E if an exception occurs during the operation
      * @throws E2 if the provided function throws an exception
      */
@@ -12720,10 +12716,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param <E2> the type of exception that the function may throw
-     * @param func the function to extract long values from the elements. Must not be {@code null}.
+     * @param func the function to extract long values from the elements
      * @return an OptionalDouble containing the average, or empty if the sequence is empty
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the function is {@code null}
      * @throws E if an exception occurs during the operation
      * @throws E2 if the provided function throws an exception
      */
@@ -12764,10 +12759,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param <E2> the type of exception that the function may throw
-     * @param func the function to extract double values from the elements. Must not be {@code null}.
+     * @param func the function to extract double values from the elements
      * @return an OptionalDouble containing the average, or empty if the sequence is empty
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the function is {@code null}
      * @throws E if an exception occurs during the operation
      * @throws E2 if the provided function throws an exception
      */
@@ -13761,8 +13755,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param func the function to be applied to this sequence if it's not empty. The function
      *             receives the entire sequence as its parameter and can return null
      * @return an Optional containing the result of the function application if this sequence
-     *         is not empty, or an empty Optional if the sequence is empty. If the function
-     *         returns {@code null}, the Optional will contain null
+     *         is not empty, or an empty Optional if the sequence is empty or the function returns {@code null}
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if the specified function is null
      * @throws E if the underlying sequence operations throw an exception

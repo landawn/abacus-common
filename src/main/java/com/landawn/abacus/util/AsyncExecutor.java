@@ -490,8 +490,6 @@ public class AsyncExecutor {
      * <p>This method uses double-checked locking to ensure thread-safe lazy initialization
      * of the executor.</p>
      *
-     * <p>This method is marked as @Internal and is primarily for framework use.</p>
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AsyncExecutor asyncExecutor = new AsyncExecutor();
@@ -501,8 +499,7 @@ public class AsyncExecutor {
      * }</pre>
      *
      * @return the {@link Executor} instance used by this {@code AsyncExecutor} for executing tasks
-     * @throws IllegalStateException if this {@code AsyncExecutor} has already been shut down and the
-     *         executor has not yet been (re)initialized
+     * @throws IllegalStateException if this {@code AsyncExecutor} has already been shut down
      */
     @Internal
     public Executor getExecutor() {
@@ -545,8 +542,8 @@ public class AsyncExecutor {
      * wait for previously submitted tasks to complete execution. Use
      * {@link #shutdown(long, TimeUnit)} to wait for task completion.</p>
      *
-     * <p>If the executor is not an ExecutorService or has not been initialized,
-     * this method does nothing.</p>
+     * <p>If the executor is not an {@code ExecutorService} or has not been initialized,
+     * this method still marks the executor as shut down to prevent future initialization.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -568,8 +565,8 @@ public class AsyncExecutor {
      * still running after the timeout, the method returns without forcing termination (no
      * shutdownNow is called).</p>
      *
-     * <p>If the executor is not an ExecutorService or has not been initialized, this method
-     * does nothing.</p>
+     * <p>If the executor is not an {@code ExecutorService} or has not been initialized, this
+     * method still marks the executor as shut down to prevent future initialization.</p>
      *
      * <p>If the calling thread is interrupted while waiting, the executor will still be shut
      * down, but the method will return early and log a warning.</p>
@@ -583,7 +580,8 @@ public class AsyncExecutor {
      *
      * @param terminationTimeout the maximum time to wait for executor termination; if 0 or negative,
      *                           does not wait for termination
-     * @param timeUnit the time unit of the terminationTimeout argument
+     * @param timeUnit the time unit of the {@code terminationTimeout} argument; must not be
+     *                 {@code null} when {@code terminationTimeout} is greater than 0
      */
     public synchronized void shutdown(final long terminationTimeout, final TimeUnit timeUnit) {
         if (executor == null || !(executor instanceof ExecutorService executorService)) {

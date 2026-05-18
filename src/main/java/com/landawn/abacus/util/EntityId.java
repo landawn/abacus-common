@@ -97,7 +97,7 @@ public interface EntityId {
      *
      * @param propName1 property name with entity name, for example {@code Account.id}
      * @param propValue1 the first property value
-     * @param propName2 the second property name
+     * @param propName2 the second property name, optionally including the entity name prefix
      * @param propValue2 the second property value
      * @return a new EntityId instance
      */
@@ -140,9 +140,9 @@ public interface EntityId {
      *
      * @param propName1 property name with entity name, for example {@code Account.id}
      * @param propValue1 the first property value
-     * @param propName2 the second property name
+     * @param propName2 the second property name, optionally including the entity name prefix
      * @param propValue2 the second property value
-     * @param propName3 the third property name
+     * @param propName3 the third property name, optionally including the entity name prefix
      * @param propValue3 the third property value
      * @return a new EntityId instance
      */
@@ -294,7 +294,10 @@ public interface EntityId {
     <T> T get(String propName);
 
     /**
-     * Gets the value of a property as an int.
+     * Gets the value of a property as an {@code int}.
+     * If the stored value is a {@link Number}, its {@code intValue()} is returned;
+     * otherwise the value is converted via type-conversion. Returns {@code 0} if
+     * the property is absent or its value is {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -303,12 +306,15 @@ public interface EntityId {
      * }</pre>
      *
      * @param propName the property name
-     * @return the property value as an int; the value is converted if it is not a {@code Number}, returning {@code 0} if the property is absent or its value is {@code null}
+     * @return the property value as an {@code int}, or {@code 0} if the property is absent or {@code null}
      */
     int getInt(String propName);
 
     /**
-     * Gets the value of a property as a long.
+     * Gets the value of a property as a {@code long}.
+     * If the stored value is a {@link Number}, its {@code longValue()} is returned;
+     * otherwise the value is converted via type-conversion. Returns {@code 0L} if
+     * the property is absent or its value is {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -317,12 +323,16 @@ public interface EntityId {
      * }</pre>
      *
      * @param propName the property name
-     * @return the property value as a long; the value is converted if it is not a {@code Number}, returning {@code 0} if the property is absent or its value is {@code null}
+     * @return the property value as a {@code long}, or {@code 0L} if the property is absent or {@code null}
      */
     long getLong(String propName);
 
     /**
      * Gets the value of a property and converts it to the specified type.
+     * If the property is absent or its value is {@code null}, the target type's
+     * default value is returned: {@code 0} for primitive types such as {@code int.class},
+     * {@code false} for {@code boolean.class}, and {@code null} for reference types
+     * including wrapper types such as {@code Integer.class}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -333,7 +343,9 @@ public interface EntityId {
      * @param <T> the target type
      * @param propName the property name
      * @param targetType the class to convert the value to
-     * @return the property value converted to the target type, or {@code null} if not found
+     * @return the property value converted to the target type, or the target type's
+     *         default value (which is {@code null} for reference types) if the property
+     *         is absent or its value is {@code null}
      */
     @MayReturnNull
     <T> T get(String propName, Class<? extends T> targetType);
@@ -472,6 +484,9 @@ public interface EntityId {
 
         /**
          * Adds a property to the EntityId being built.
+         * If this is the first call on a builder created without an entity name,
+         * the entity name is derived from {@code idPropName} (the parent portion of
+         * a canonical name such as {@code "User.id"}, or an empty string for simple names).
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -480,8 +495,9 @@ public interface EntityId {
          *     .put("warehouseId", 5);
          * }</pre>
          *
-         * @param idPropName the property name
-         * @param idPropVal the property value
+         * @param idPropName the property name (may be a simple name or a canonical
+         *        name such as {@code "Entity.property"})
+         * @param idPropVal the value to associate with the property
          * @return this builder for method chaining
          */
         @SuppressWarnings("deprecation")

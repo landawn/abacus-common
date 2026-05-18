@@ -1,9 +1,9 @@
 package com.landawn.abacus.util;
 
 /**
- * Defines strategies for representing enum values during type conversion.
- * The choice between NAME, ORDINAL, and CODE affects data portability, storage size,
- * and resilience to code changes.
+ * Defines strategies for representing enum values during type conversion or persistence.
+ * The choice between {@link #NAME}, {@link #ORDINAL}, and {@link #CODE} affects data
+ * portability, storage size, and resilience to code changes.
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -17,8 +17,6 @@ package com.landawn.abacus.util;
  * @Type(enumerated = EnumType.ORDINAL)
  * private Status orderStatus;
  * }</pre>
- *
- * @see UnifiedStatus
  */
 public enum EnumType {
 
@@ -64,9 +62,13 @@ public enum EnumType {
     ORDINAL,
 
     /**
-     * Persist enumerated type property or field as an int using a predefined code,
-     * typically supplied by a public {@code int code()} method.
-     * @see UnifiedStatus#code()
+     * Persist enumerated type property or field as an integer using a predefined code value,
+     * typically supplied by a public {@code int code()} method on the enum constant.
+     *
+     * <p>Unlike {@link #ORDINAL}, the code value is explicitly assigned by the enum author
+     * and is stable across reordering, making it safer for long-lived persisted data.
+     * The enum must expose an accessible {@code int code()} (or equivalent) method for
+     * the framework to read and write the code value.</p>
      */
     CODE
 }

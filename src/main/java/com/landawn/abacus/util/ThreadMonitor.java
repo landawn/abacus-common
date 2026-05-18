@@ -21,8 +21,8 @@ package com.landawn.abacus.util;
  * <p>
  * This works by sleeping until the specified timeout amount and then
  * interrupting the thread being monitored. If the thread being monitored
- * completes its work before being interrupted, it should {@code interrupt()}
- * the <i>monitor</i> thread.
+ * completes its work before being interrupted, it should call {@link Thread#interrupt() interrupt()}
+ * on the <i>monitor</i> thread (or use {@link #stop(Thread)}).
  * </p>
  *
  * <p><b>Usage Examples:</b></p>
@@ -33,7 +33,7 @@ package com.landawn.abacus.util;
  *           // do some work here
  *           ThreadMonitor.stop(monitor);
  *       } catch (InterruptedException e) {
- *           // timed amount was reached
+ *           // timeout was reached
  *       }
  * }</pre>
  *
@@ -67,10 +67,8 @@ final class ThreadMonitor implements Runnable {
      * }
      * }</pre>
      *
-     * @param timeout The timeout amount in milliseconds
-     * or no timeout if the value is zero or less
-     * @return The monitor thread or {@code null}
-     * if the timeout amount is not greater than zero
+     * @param timeout the timeout amount in milliseconds; no monitor thread is started if the value is zero or less
+     * @return the monitor thread, or {@code null} if {@code timeout} is not greater than zero
      */
     public static Thread start(final long timeout) {
         return start(Thread.currentThread(), timeout);
@@ -99,11 +97,9 @@ final class ThreadMonitor implements Runnable {
      * workerThread.start();
      * }</pre>
      *
-     * @param thread The thread to monitor, must not be {@code null}
-     * @param timeout The timeout amount in milliseconds
-     * or no timeout if the value is zero or less
-     * @return The monitor thread or {@code null}
-     * if the timeout amount is not greater than zero
+     * @param thread the thread to monitor; must not be {@code null}
+     * @param timeout the timeout amount in milliseconds; no monitor thread is started if the value is zero or less
+     * @return the monitor thread, or {@code null} if {@code timeout} is not greater than zero
      * @throws IllegalArgumentException if {@code thread} is {@code null}
      */
     public static Thread start(final Thread thread, final long timeout) {
@@ -143,7 +139,7 @@ final class ThreadMonitor implements Runnable {
      * }
      * }</pre>
      *
-     * @param thread The monitor thread to stop, may be {@code null}
+     * @param thread the monitor thread to stop; may be {@code null}, in which case this method does nothing
      */
     public static void stop(final Thread thread) {
         if (thread != null) {
@@ -151,14 +147,23 @@ final class ThreadMonitor implements Runnable {
         }
     }
 
+    /**
+     * Constructs a new {@code ThreadMonitor} that will interrupt {@code thread}
+     * after {@code timeout} milliseconds.
+     *
+     * @param thread the thread to monitor
+     * @param timeout the timeout in milliseconds
+     */
     private ThreadMonitor(final Thread thread, final long timeout) {
         this.thread = thread;
         this.timeout = timeout;
     }
 
     /**
-     * Sleep until the specified timeout amount and then
-     * interrupt the thread being monitored.
+     * Sleeps for the configured timeout duration and then interrupts the monitored thread.
+     * If this monitor thread is itself interrupted before the timeout elapses (i.e., the
+     * monitored operation completed in time via a call to {@link #stop(Thread)}), the
+     * {@link InterruptedException} is caught and the monitored thread is left undisturbed.
      *
      * @see Runnable#run()
      */

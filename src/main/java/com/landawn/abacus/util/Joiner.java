@@ -1663,7 +1663,7 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").appendAll(list).toString();   // Returns: "1.5, 2.5, 3.5"
      * }</pre>
      *
-     * @param c the FloatList to append
+     * @param c the FloatList to append; may be {@code null} or empty
      * @return this Joiner instance for method chaining
      */
     @SuppressWarnings("deprecation")
@@ -1714,7 +1714,7 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").appendAll(list).toString();   // Returns: "1.5, 2.5, 3.5"
      * }</pre>
      *
-     * @param c the DoubleList to append
+     * @param c the DoubleList to append; may be {@code null} or empty
      * @return this Joiner instance for method chaining
      */
     @SuppressWarnings("deprecation")
@@ -2789,10 +2789,10 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").repeat("Hello", 3).toString();   // Returns: "Hello, Hello, Hello"
      * }</pre>
      *
-     * @param str the string to repeat
-     * @param n the number of times to repeat (must be non-negative)
+     * @param str the string to repeat; {@code null} is rendered as the configured null text
+     * @param n the number of times to repeat; must be non-negative
      * @return this Joiner instance for method chaining
-     * @throws IllegalArgumentException if n is negative
+     * @throws IllegalArgumentException if {@code n} is negative
      */
     public Joiner repeat(final String str, final int n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -2814,7 +2814,7 @@ public final class Joiner implements Closeable {
 
     /**
      * Repeats the specified object n times and appends to the joiner.
-     * The object is converted to string using toString method.
+     * The object is converted to string using its {@link Object#toString()} method.
      * Each repetition is separated by the configured separator.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2823,10 +2823,10 @@ public final class Joiner implements Closeable {
      * Joiner.with("-").repeat(num, 3).toString();   // Returns: "42-42-42"
      * }</pre>
      *
-     * @param obj the object to repeat
-     * @param n the number of times to repeat (must be non-negative)
+     * @param obj the object to repeat; {@code null} is rendered as the configured null text
+     * @param n the number of times to repeat; must be non-negative
      * @return this Joiner instance for method chaining
-     * @throws IllegalArgumentException if n is negative
+     * @throws IllegalArgumentException if {@code n} is negative
      */
     public Joiner repeat(final Object obj, final int n) {
         return repeat(toString(obj), n);
@@ -2865,7 +2865,9 @@ public final class Joiner implements Closeable {
     /**
      * Returns the current length of the joined content.
      * The length includes prefix, all appended elements with separators, and suffix.
-     * If no elements have been appended, returns the length of prefix + suffix.
+     * If no elements have been appended, returns the length of the empty value
+     * (which is {@code prefix + suffix} by default, or the value set via
+     * {@link #setEmptyValue(CharSequence)}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2885,11 +2887,11 @@ public final class Joiner implements Closeable {
 
     /**
      * Returns the current value, consisting of the {@code prefix}, the values
-     * added so far separated by the {@code delimiter}, and the {@code suffix},
+     * added so far separated by the {@code separator}, and the {@code suffix},
      * unless no elements have been added in which case, the
      * {@code prefix + suffix} or the {@code emptyValue} characters are returned.
      *
-     * The underlying {@code StringBuilder} will be recycled after this method is called
+     * <p>The underlying {@code StringBuilder} will be recycled after this method is called
      * if {@code reuseBuffer} is set to {@code true}, and should not continue
      * to be used with this instance.
      *

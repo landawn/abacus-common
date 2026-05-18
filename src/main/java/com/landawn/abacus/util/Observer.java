@@ -39,9 +39,9 @@ import java.util.function.Predicate;
  * similar to RxJava's Observable. This class supports various stream operations including
  * filtering, mapping, throttling, and time-based operations.
  *
- * <p>The Observer pattern implementation allows for asynchronous data streams with backpressure
- * handling and thread-safe operations. It provides a fluent API for composing complex data
- * processing pipelines.</p>
+ * <p>The Observer pattern implementation allows for asynchronous data streams with cooperative
+ * cancellation (via {@link #limit(long)}) and thread-safe operations. It provides a fluent API
+ * for composing complex data processing pipelines.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -51,9 +51,9 @@ import java.util.function.Predicate;
  *     .observe(System.out::println);
  * }</pre>
  *
- * <p>This class is immutable in the sense of the {@link Immutable} marker; however, the
- * intermediate operator methods mutate and return {@code this} for fluent chaining rather
- * than producing new instances.</p>
+ * <p>This class implements the {@link Immutable} marker interface. Note that the intermediate
+ * operator methods append to an internal dispatcher chain and return {@code this} for fluent
+ * chaining rather than producing new instances.</p>
  *
  * @param <T> the type of elements emitted by this Observer
  * @see Timed
@@ -65,16 +65,32 @@ public abstract class Observer<T> implements Immutable {
 
     private static final Object COMPLETE_FLAG = ClassUtil.newNullSentinel();
 
+    /**
+     * Multiplier applied to the configured interval duration when deciding whether to schedule
+     * a new debounce/throttle task. A new task is scheduled only if no task has been scheduled
+     * within the last {@code interval * INTERVAL_FACTOR} milliseconds, preventing runaway
+     * task accumulation under high event rates.
+     */
     protected static final double INTERVAL_FACTOR = 3;
 
+    /** A no-op {@code Runnable} used as the default completion handler when none is specified. */
     protected static final Runnable EMPTY_ACTION = () -> {
         // Do nothing;
     };
 
+    /**
+     * Default error handler used when no {@code onError} consumer is supplied by the caller.
+     * Rethrows the received {@code Exception} wrapped in a {@code RuntimeException}.
+     */
     protected static final Consumer<Exception> ON_ERROR_MISSING = t -> {
         throw new RuntimeException(t);
     };
 
+    /**
+     * Shared thread pool used to execute the asynchronous emission loop for
+     * {@link BlockingQueueObserver} and {@link IteratorObserver} subscriptions.
+     * On Android, delegates to {@link AndroidUtil#getThreadPoolExecutor()}.
+     */
     protected static final Executor asyncExecutor;
 
     static {
@@ -92,9 +108,17 @@ public abstract class Observer<T> implements Immutable {
         }
     }
 
+    /**
+     * Scheduled executor used by intermediate operators (debounce, throttle, delay, buffer)
+     * to schedule deferred or periodic tasks within the processing pipeline.
+     */
     protected static final ScheduledThreadPoolExecutor schedulerForIntermediateOp = new ScheduledThreadPoolExecutor(
             IOUtil.IS_PLATFORM_ANDROID ? Math.max(8, IOUtil.CPU_CORES) : N.max(64, IOUtil.CPU_CORES * 8));
 
+    /**
+     * Scheduled executor used by terminal observe operations ({@link TimerObserver},
+     * {@link IntervalObserver}) to emit items on a scheduled basis.
+     */
     protected static final ScheduledThreadPoolExecutor schedulerForObserveOp = new ScheduledThreadPoolExecutor(
             IOUtil.IS_PLATFORM_ANDROID ? Math.max(8, IOUtil.CPU_CORES) : N.max(64, IOUtil.CPU_CORES * 8));
 
@@ -106,16 +130,33 @@ public abstract class Observer<T> implements Immutable {
         MoreExecutors.addDelayedShutdownHook(schedulerForObserveOp, 120, TimeUnit.SECONDS);
     }
 
+    /**
+     * Map of scheduled futures to their associated delay (in milliseconds), maintained so that
+     * {@link #cancelScheduledFutures()} can wait for each scheduled task to complete before
+     * cancelling it, ensuring clean shutdown of buffer and sliding-window operators.
+     */
     protected final Map<ScheduledFuture<?>, Long> scheduledFutures = new LinkedHashMap<>();
 
+    /** The head of the dispatcher chain that receives items from the upstream source. */
     protected final Dispatcher<Object> dispatcher;
 
+    /**
+     * Flag that indicates whether the upstream source should continue producing items.
+     * Set to {@code false} by the {@link #limit(long)} operator once the configured maximum
+     * number of items has been emitted, causing the emission loop to exit.
+     */
     protected volatile boolean hasMore = true;
 
+    /** Creates a new Observer with a fresh, empty {@link Dispatcher} chain. */
     protected Observer() {
         this(new Dispatcher<>());
     }
 
+    /**
+     * Creates a new Observer that uses the given dispatcher as the head of its chain.
+     *
+     * @param dispatcher the head dispatcher for this Observer's pipeline; must not be {@code null}
+     */
     protected Observer(final Dispatcher<Object> dispatcher) {
         this.dispatcher = dispatcher;
     }
@@ -896,7 +937,7 @@ public abstract class Observer<T> implements Immutable {
      * }</pre>
      *
      * @param keyExtractor function to extract the key used to determine uniqueness; key
-     *        equality is based on {@code hashCode()} and {@code equals()}
+     *        equality is based on {@code hashCode()} and {@code equals()}; must not be {@code null}
      * @return this Observer instance for method chaining
      * @see #distinct()
      */
@@ -925,7 +966,8 @@ public abstract class Observer<T> implements Immutable {
      *     .observe(System.out::println);   // Prints: 2, 4
      * }</pre>
      *
-     * @param filter the predicate to test items
+     * @param filter the predicate used to test each item; items for which the predicate returns
+     *               {@code true} are forwarded downstream; must not be {@code null}
      * @return this Observer instance for method chaining
      */
     public Observer<T> filter(final Predicate<? super T> filter) {
@@ -952,7 +994,7 @@ public abstract class Observer<T> implements Immutable {
      * }</pre>
      *
      * @param <R> the type of items emitted after transformation
-     * @param mapper the function to transform each item
+     * @param mapper the function to transform each item; must not be {@code null}
      * @return this Observer instance, re-typed as {@code Observer<R>}, emitting the
      *         transformed items
      * @see #flatMap(Function)
@@ -983,7 +1025,8 @@ public abstract class Observer<T> implements Immutable {
      *
      * @param <R> the type of items in the flattened sequence
      * @param mapper function that transforms each item into a collection; if it returns
-     *        {@code null} or an empty collection, no items are emitted for that input
+     *        {@code null} or an empty collection, no items are emitted for that input;
+     *        must not be {@code null}
      * @return this Observer instance, re-typed as {@code Observer<R>}, emitting the
      *         flattened items
      * @see #map(Function)
@@ -1280,10 +1323,10 @@ public abstract class Observer<T> implements Immutable {
      */
     protected static class Dispatcher<T> {
 
-        /** The holder. */
+        /** Holds the most-recently-received item for debounce/throttle operators; initialised to the sentinel {@code NONE}. */
         protected final Holder<Object> holder = Holder.of(NONE);
 
-        /** The down dispatcher. */
+        /** The next dispatcher in the chain, or {@code null} if this is the last dispatcher. */
         protected Dispatcher<T> downDispatcher;
 
         /**
@@ -1300,7 +1343,7 @@ public abstract class Observer<T> implements Immutable {
         /**
          * Signals an exception to the next dispatcher in the chain.
          *
-         * @param error the Exception to signal, not null
+         * @param error the exception to signal; must not be {@code null}
          */
         public void onError(final Exception error) {
             if (downDispatcher != null) {
@@ -1318,9 +1361,10 @@ public abstract class Observer<T> implements Immutable {
         }
 
         /**
-         * Appends a dispatcher to the end of the dispatcher chain.
+         * Appends the given dispatcher to the tail of this dispatcher chain,
+         * making it the new last element.
          *
-         * @param downDispatcher the dispatcher to append
+         * @param downDispatcher the dispatcher to append; must not be {@code null}
          */
         public void append(final Dispatcher<T> downDispatcher) {
             Dispatcher<T> tmp = this;
@@ -1341,12 +1385,18 @@ public abstract class Observer<T> implements Immutable {
      */
     protected abstract static class DispatcherBase<T> extends Dispatcher<T> {
 
-        /** The on error. */
+        /** The consumer invoked when an error is signalled. */
         private final Consumer<? super Exception> onError;
 
-        /** The on complete. */
+        /** The runnable invoked when the stream completes normally. */
         private final Runnable onComplete;
 
+        /**
+         * Constructs a terminal dispatcher with the given error and completion handlers.
+         *
+         * @param onError the consumer to invoke when an error is signalled; must not be {@code null}
+         * @param onComplete the runnable to invoke when the stream completes; must not be {@code null}
+         */
         protected DispatcherBase(final Consumer<? super Exception> onError, final Runnable onComplete) {
             this.onError = onError;
             this.onComplete = onComplete;
@@ -1371,6 +1421,7 @@ public abstract class Observer<T> implements Immutable {
      */
     protected abstract static class ObserverBase<T> extends Observer<T> {
 
+        /** Creates a new {@code ObserverBase} instance with a default empty dispatcher chain. */
         protected ObserverBase() {
 
         }
@@ -1385,7 +1436,7 @@ public abstract class Observer<T> implements Immutable {
      */
     static final class BlockingQueueObserver<T> extends ObserverBase<T> {
 
-        /** The queue. */
+        /** The blocking queue from which items are pulled during subscription. */
         private final BlockingQueue<T> queue;
 
         BlockingQueueObserver(final BlockingQueue<T> queue) {
@@ -1394,12 +1445,13 @@ public abstract class Observer<T> implements Immutable {
 
         /**
          * Subscribes to the BlockingQueue with the specified handlers.
-         * Items are pulled from the queue asynchronously on a background thread.
+         * Items are polled from the queue on a background thread until {@link Observer#complete(BlockingQueue)}
+         * has been called or {@link #hasMore} is set to {@code false}.
          *
-         * @param action the action to perform on each item
-         * @param onError the error handler
-         * @param onComplete the completion handler
-         * @throws IllegalArgumentException if action is null
+         * @param action the action to perform on each item; must not be {@code null}
+         * @param onError the consumer invoked if an exception occurs during emission
+         * @param onComplete the runnable invoked when the queue signals completion
+         * @throws IllegalArgumentException if {@code action} is {@code null}
          */
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete)
@@ -1450,7 +1502,7 @@ public abstract class Observer<T> implements Immutable {
      */
     static final class IteratorObserver<T> extends ObserverBase<T> {
 
-        /** The iter. */
+        /** The iterator from which items are pulled during subscription. */
         private final Iterator<? extends T> iter;
 
         IteratorObserver(final Iterator<? extends T> iter) {
@@ -1459,12 +1511,13 @@ public abstract class Observer<T> implements Immutable {
 
         /**
          * Subscribes to the Iterator with the specified handlers.
-         * Items are pulled from the iterator asynchronously on a background thread.
+         * Items are pulled from the iterator on a background thread until
+         * {@code iter.hasNext()} returns {@code false} or {@link #hasMore} is set to {@code false}.
          *
-         * @param action the action to perform on each item
-         * @param onError the error handler
-         * @param onComplete the completion handler
-         * @throws IllegalArgumentException if action is null
+         * @param action the action to perform on each item; must not be {@code null}
+         * @param onError the consumer invoked if an exception occurs during emission
+         * @param onComplete the runnable invoked when the iterator is exhausted
+         * @throws IllegalArgumentException if {@code action} is {@code null}
          */
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete)
@@ -1515,10 +1568,10 @@ public abstract class Observer<T> implements Immutable {
      */
     static final class TimerObserver<T> extends ObserverBase<T> {
 
-        /** The delay. */
+        /** The delay before the single emission, expressed in {@link #unit}. */
         private final long delay;
 
-        /** The unit. */
+        /** The time unit for {@link #delay}. */
         private final TimeUnit unit;
 
         TimerObserver(final long delay, final TimeUnit unit) {
@@ -1528,12 +1581,13 @@ public abstract class Observer<T> implements Immutable {
 
         /**
          * Subscribes to the timer with the specified handlers.
-         * Emits 0L after the specified delay on a scheduled executor.
+         * Schedules a single emission of {@code 0L} after the configured delay on
+         * {@link Observer#schedulerForObserveOp}, then signals completion.
          *
-         * @param action the action to perform when the timer fires
-         * @param onError the error handler
-         * @param onComplete the completion handler
-         * @throws IllegalArgumentException if action is null
+         * @param action the action to perform when the timer fires; must not be {@code null}
+         * @param onError the consumer invoked if an exception occurs during the scheduled emission
+         * @param onComplete the runnable invoked immediately after the single emission
+         * @throws IllegalArgumentException if {@code action} is {@code null}
          */
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete)
@@ -1568,16 +1622,16 @@ public abstract class Observer<T> implements Immutable {
      */
     static final class IntervalObserver<T> extends ObserverBase<T> {
 
-        /** The initial delay. */
+        /** The delay before the first emission, expressed in {@link #unit}. */
         private final long initialDelay;
 
-        /** The period. */
+        /** The period between successive emissions, expressed in {@link #unit}. */
         private final long period;
 
-        /** The unit. */
+        /** The time unit for {@link #initialDelay} and {@link #period}. */
         private final TimeUnit unit;
 
-        /** The future. */
+        /** The scheduled future for the fixed-rate task; cancelled when {@link #hasMore} becomes {@code false}. */
         private volatile ScheduledFuture<?> future = null;
 
         IntervalObserver(final long initialDelay, final long period, final TimeUnit unit) {
@@ -1588,12 +1642,14 @@ public abstract class Observer<T> implements Immutable {
 
         /**
          * Subscribes to the interval with the specified handlers.
-         * Emits sequential numbers starting from 0 at fixed intervals.
+         * Schedules a fixed-rate task on {@link Observer#schedulerForObserveOp} that emits
+         * sequential {@code Long} values starting from {@code 0} after {@code initialDelay},
+         * then every {@code period}. Cancels the task when {@link #hasMore} becomes {@code false}.
          *
-         * @param action the action to perform on each emission
-         * @param onError the error handler
-         * @param onComplete the completion handler
-         * @throws IllegalArgumentException if action is null
+         * @param action the action to perform on each emission; must not be {@code null}
+         * @param onError the consumer invoked if an exception occurs during an emission
+         * @param onComplete the runnable invoked when the interval is cancelled
+         * @throws IllegalArgumentException if {@code action} is {@code null}
          */
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete)

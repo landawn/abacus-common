@@ -551,8 +551,8 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
 
     /**
      * Returns an immutable list iterator over the elements in this list in proper sequence.
-     * The returned iterator does not support the remove() operation and will throw
-     * UnsupportedOperationException if remove() is called.
+     * The returned iterator does not support {@code remove()}, {@code set()}, or {@code add()}
+     * and will throw {@link UnsupportedOperationException} if any of those operations are called.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -599,9 +599,9 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
 
     /**
      * Returns an immutable view of the portion of this list between the specified
-     * fromIndex (inclusive) and toIndex (exclusive). The returned sublist is backed
-     * by this list, so it reflects the current state of this list. However, the
-     * returned sublist is immutable and does not support any modification operations.
+     * {@code fromIndex} (inclusive) and {@code toIndex} (exclusive). The returned sublist is backed
+     * by this list. Since this list is immutable, the returned sublist is also immutable
+     * and does not support any modification operations.
      *
      * <p>The semantics of the sublist are consistent with List.subList(), including
      * the behavior when fromIndex equals toIndex (returns an empty list).
@@ -741,27 +741,60 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
         return (size() <= 1) ? this : new ReverseImmutableList<>(this);
     }
 
+    /**
+     * An immutable list that presents the elements of a backing {@link ImmutableList} in reverse order.
+     * Instances are created by {@link ImmutableList#reversed()} and are themselves immutable.
+     * All mutating operations throw {@link UnsupportedOperationException}.
+     *
+     * @param <E> the type of elements in this list
+     */
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     static final class ReverseImmutableList<E> extends ImmutableList<E> {
         private final ImmutableList<E> forwardList;
         private final int size;
 
+        /**
+         * Constructs a reversed view of the given immutable list.
+         *
+         * @param backingList the list whose elements this view presents in reverse order
+         */
         ReverseImmutableList(final ImmutableList<E> backingList) {
             super(backingList.list, true);
             forwardList = backingList;
             size = forwardList.size();
         }
 
+        /**
+         * Returns the forward (non-reversed) list that this reversed view is backed by.
+         *
+         * @return the original forward {@code ImmutableList}
+         */
         @Override
         public ImmutableList<E> reversed() {
             return forwardList;
         }
 
+        /**
+         * Returns {@code true} if this list contains the specified element,
+         * delegating the check to the forward list.
+         *
+         * @param object the element whose presence is to be tested, may be {@code null}
+         * @return {@code true} if this list contains the specified element
+         */
         @Override
         public boolean contains(final Object object) {
             return forwardList.contains(object);
         }
 
+        /**
+         * Returns the index of the first occurrence of the specified element in this reversed list,
+         * or {@code -1} if the element is not present.
+         * Because the iteration order is reversed, this corresponds to the last occurrence
+         * in the forward list.
+         *
+         * @param object the element to search for, may be {@code null}
+         * @return the index of the first occurrence in this reversed list, or {@code -1} if not found
+         */
         @Override
         public int indexOf(final Object object) {
             @SuppressWarnings("SuspiciousMethodCalls")
@@ -770,6 +803,15 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
             return (index >= 0) ? reverseIndex(index) : -1;
         }
 
+        /**
+         * Returns the index of the last occurrence of the specified element in this reversed list,
+         * or {@code -1} if the element is not present.
+         * Because the iteration order is reversed, this corresponds to the first occurrence
+         * in the forward list.
+         *
+         * @param object the element to search for, may be {@code null}
+         * @return the index of the last occurrence in this reversed list, or {@code -1} if not found
+         */
         @Override
         public int lastIndexOf(final Object object) {
             @SuppressWarnings("SuspiciousMethodCalls")
@@ -778,6 +820,15 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
             return (index >= 0) ? reverseIndex(index) : -1;
         }
 
+        /**
+         * Returns an immutable reversed view of the specified range of this list.
+         * The returned sublist reflects the reversed ordering of elements in this list.
+         *
+         * @param fromIndex low endpoint (inclusive) of the sublist
+         * @param toIndex high endpoint (exclusive) of the sublist
+         * @return an immutable reversed view of the specified range
+         * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > size() || fromIndex > toIndex}
+         */
         @Override
         public ImmutableList<E> subList(final int fromIndex, final int toIndex) {
             N.checkFromToIndex(fromIndex, toIndex, size());
@@ -785,16 +836,35 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
             return forwardList.subList(reversePosition(toIndex), reversePosition(fromIndex)).reversed();
         }
 
+        /**
+         * Returns the element at the specified position in this reversed list.
+         * Index {@code 0} corresponds to the last element of the forward list.
+         *
+         * @param index the position of the element to return (0-based)
+         * @return the element at the specified position
+         * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
+         */
         @Override
         public E get(final int index) {
             return forwardList.get(reverseIndex(index));
         }
 
+        /**
+         * Returns the number of elements in this list.
+         *
+         * @return the number of elements
+         */
         @Override
         public int size() {
             return size;
         }
 
+        /**
+         * Returns an iterator over the elements of this reversed list in reverse order
+         * (i.e., from the last element of the forward list to the first).
+         *
+         * @return an {@link ObjIterator} over the elements in reverse order
+         */
         @Override
         public ObjIterator<E> iterator() {
             return new ObjIterator<>() {
@@ -815,11 +885,24 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
             };
         }
 
+        /**
+         * Returns an immutable list iterator over the elements in this reversed list, starting at position 0.
+         *
+         * @return an immutable list iterator positioned at the start of this reversed list
+         */
         @Override
         public ImmutableListIterator<E> listIterator() {
             return listIterator(0);
         }
 
+        /**
+         * Returns an immutable list iterator over the elements in this reversed list,
+         * starting at the specified position.
+         *
+         * @param index the index of the first element to be returned by the iterator's {@code next()} call
+         * @return an immutable list iterator starting at the given position
+         * @throws IndexOutOfBoundsException if {@code index < 0 || index > size()}
+         */
         @Override
         public ImmutableListIterator<E> listIterator(final int index) {
             N.checkFromIndexSize(index, 0, size);
@@ -880,6 +963,11 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
             });
         }
 
+        /**
+         * Returns an array containing all elements of this reversed list in proper sequence.
+         *
+         * @return an {@code Object[]} containing all elements in reversed order
+         */
         @Override
         public Object[] toArray() {
             final Object[] result = new Object[size];
@@ -889,6 +977,20 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
             return result;
         }
 
+        /**
+         * Returns an array containing all elements of this reversed list in proper sequence.
+         * The runtime type of the returned array is that of the specified array.
+         * If the list fits in the specified array, it is returned therein; otherwise
+         * a new array of the same runtime type is allocated.
+         *
+         * @param <T> the component type of the array to contain the collection
+         * @param a the array into which the elements are stored, if large enough; otherwise
+         *        a new array of the same runtime type is allocated for this purpose
+         * @return an array containing all elements of this reversed list
+         * @throws ArrayStoreException if the runtime type of {@code a} is not a supertype of the
+         *         runtime type of every element in this list
+         * @throws NullPointerException if {@code a} is {@code null}
+         */
         @SuppressWarnings("unchecked")
         @Override
         public <T> T[] toArray(final T[] a) {
@@ -902,6 +1004,14 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
             return result;
         }
 
+        /**
+         * Compares the specified object with this reversed list for equality.
+         * Returns {@code true} if the given object is also a {@link java.util.List} of the same size
+         * and contains the same elements in the same (reversed) order.
+         *
+         * @param obj the object to be compared for equality with this list
+         * @return {@code true} if the specified object is equal to this list
+         */
         @Override
         public boolean equals(final Object obj) {
             if (this == obj) {
@@ -927,6 +1037,12 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
             return true;
         }
 
+        /**
+         * Returns the hash code value for this reversed list, computed over its elements
+         * in reversed order as specified by {@link java.util.List#hashCode()}.
+         *
+         * @return the hash code value for this list
+         */
         @Override
         public int hashCode() {
             int hashCode = 1;
@@ -1012,6 +1128,11 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
     public static final class Builder<E> {
         private final List<E> list;
 
+        /**
+         * Constructs a {@code Builder} that uses the given list as its backing storage.
+         *
+         * @param holder the list to accumulate elements into
+         */
         Builder(final List<E> holder) {
             list = holder;
         }

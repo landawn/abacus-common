@@ -1452,7 +1452,6 @@ public final class HttpUtil {
          *
          * @param value The date to format
          * @return The formatted date string
-         *
          */
         public static String format(final Date value) {
             return STANDARD_DATE_FORMAT.get().format(value);

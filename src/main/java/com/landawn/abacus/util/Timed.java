@@ -46,10 +46,10 @@ public final class Timed<T> implements Immutable {
     private final T value;
 
     /**
-     * Private constructor. Use static factory methods {@link #of(Object)} or
+     * Package-private constructor. Use the static factory methods {@link #of(Object)} or
      * {@link #of(Object, long)} to create instances.
      *
-     * @param value the value to associate with a timestamp.
+     * @param value the value to associate with a timestamp; can be {@code null}.
      * @param timeInMillis the timestamp in milliseconds since epoch.
      */
     Timed(final T value, final long timeInMillis) {

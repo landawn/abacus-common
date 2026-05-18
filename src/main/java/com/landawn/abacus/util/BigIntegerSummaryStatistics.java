@@ -27,9 +27,8 @@ import com.landawn.abacus.util.function.Consumer;
  * reduction target for a stream of BigInteger values. It maintains arbitrary
  * precision for all calculations by using BigInteger for sum, min, and max values.</p>
  *
- * <p>This implementation is not thread-safe. However, it is safe to use
- * a BigIntegerSummaryStatistics instance concurrently from multiple threads
- * if it is not being modified.</p>
+ * <p>This implementation is not thread-safe. External synchronization is required
+ * if instances are accessed from multiple threads.</p>
  *
  * <p><b>Usage Examples with streams:</b></p>
  * <pre>{@code
@@ -221,7 +220,7 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
     }
 
     /**
-     * Returns the sum of values recorded, or zero if no values have been recorded.
+     * Returns the sum of values recorded, or {@link BigInteger#ZERO} if no values have been recorded.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -231,17 +230,19 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
      * BigInteger sum = stats.getSum();   // Returns 3000
      * }</pre>
      *
-     * @return the sum of values, or zero if none
+     * @return the sum of values, or {@link BigInteger#ZERO} if none
      */
     public final BigInteger getSum() {
         return sum;
     }
 
     /**
-     * Returns the arithmetic mean of values recorded, or zero if no values have been recorded.
+     * Returns the arithmetic mean of values recorded as a {@link BigDecimal},
+     * or {@link BigDecimal#ZERO} if no values have been recorded.
      *
-     * <p>The average is calculated as a BigDecimal using MathContext.DECIMAL128 for precision.
-     * This ensures accurate decimal representation of the average value.</p>
+     * <p>The average is calculated by converting the {@link BigInteger} sum to a
+     * {@link BigDecimal} and dividing by the count using {@link java.math.MathContext#DECIMAL128}
+     * for 34-digit decimal precision.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -249,10 +250,11 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
      * stats.accept(new BigInteger("10"));
      * stats.accept(new BigInteger("20"));
      * stats.accept(new BigInteger("30"));
-     * BigDecimal avg = stats.getAverage();   // Returns 20
+     * BigDecimal avg = stats.getAverage();   // Returns 2E+1 (i.e., 20 with DECIMAL128 precision)
      * }</pre>
      *
-     * @return the arithmetic mean of values as a BigDecimal, or zero if none
+     * @return the arithmetic mean of values as a {@link BigDecimal} with {@link java.math.MathContext#DECIMAL128} precision,
+     *         or {@link BigDecimal#ZERO} if no values have been recorded
      */
     public final BigDecimal getAverage() {
         return count == 0L ? BigDecimal.ZERO : new BigDecimal(getSum()).divide(BigDecimal.valueOf(count), MathContext.DECIMAL128);
@@ -261,12 +263,15 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
     /**
      * Returns a string representation of this summary statistics object.
      *
-     * <p>The string representation includes min, max, count, sum, and average
-     * values in a readable format.</p>
+     * <p>The representation uses the format
+     * {@code {min=<min>, max=<max>, count=<count>, sum=<sum>, average=<average>}},
+     * where each field is formatted via its {@code toString()} method.
+     * The average is a {@link BigDecimal} computed with {@link java.math.MathContext#DECIMAL128}
+     * precision and may therefore contain many decimal digits.</p>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Example output:</p>
      * <pre>{@code
-     * {min=10, max=30, count=3, sum=60, average=20}
+     * {min=10, max=30, count=3, sum=60, average=20.00000000000000000000000000000000}
      * }</pre>
      *
      * @return a string representation of this summary statistics

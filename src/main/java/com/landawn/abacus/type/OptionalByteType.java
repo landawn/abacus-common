@@ -25,6 +25,7 @@ import com.landawn.abacus.util.u.OptionalByte;
  */
 public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
 
+    /** The type name constant for OptionalByte type identification, equal to {@code "OptionalByte"}. */
     public static final String OPTIONAL_BYTE = OptionalByte.class.getSimpleName();
 
     /**

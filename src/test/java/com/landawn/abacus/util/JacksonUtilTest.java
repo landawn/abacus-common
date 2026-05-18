@@ -12,7 +12,7 @@ public class JacksonUtilTest extends AbstractTest {
     @Test
     public void test_pretty_format() {
 
-        Account account = Beans.newRandom(Account.class);
+        Account account = Beans.newRandomBean(Account.class);
         String json = JsonMappers.toJson(account);
         N.println(json);
 
@@ -27,7 +27,7 @@ public class JacksonUtilTest extends AbstractTest {
     @Test
     public void test_pretty_format_xml() {
 
-        Account account = Beans.newRandom(Account.class);
+        Account account = Beans.newRandomBean(Account.class);
         String json = XmlMappers.toXml(account);
         N.println(json);
 

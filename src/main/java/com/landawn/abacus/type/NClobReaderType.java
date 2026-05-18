@@ -28,6 +28,7 @@ import java.sql.SQLException;
  */
 public class NClobReaderType extends ReaderType {
 
+    /** The type name constant for NClobReader type identification, equal to {@code "NClobReader"}. */
     public static final String NCLOB_READER = "NClobReader";
 
     /**

@@ -52,8 +52,8 @@ import com.landawn.abacus.util.function.TriPredicate;
  *
  * <p><b>IMPORTANT - Sealed Class:</b>
  * <ul>
- *   <li>This is a <b>sealed class</b> that only permits {@link KeyValueDifference} subclasses</li>
- *   <li>Specialized implementations include {@link MapDifference} and {@link BeanDifference}</li>
+ *   <li>This is a <b>sealed class</b> that only permits {@link KeyValueDifference} as a direct subclass</li>
+ *   <li>Specialized implementations include {@link MapDifference} and {@link BeanDifference} (both extend {@link KeyValueDifference})</li>
  *   <li>Cannot be extended by classes outside this hierarchy for API stability</li>
  *   <li>Provides controlled inheritance for type safety and specialized comparison logic</li>
  * </ul>
@@ -1294,8 +1294,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * }</pre>
          *
          * @return a non-{@code null} map containing entries/properties with different values; for the
-         *         single-map and single-bean comparisons the keys are the shared keys/property names and
-         *         the values are {@link Pair} instances holding the left and right values respectively
+         *         single-map and single-bean comparisons the keys are the keys/property names that are
+         *         present in both structures but whose values are not equivalent, and the values are
+         *         {@link Pair} instances holding the left and right values respectively
          *         (collection-based comparisons instead map each matched identifier to a nested
          *         {@code Difference} describing the per-entry/per-property changes). May be empty but never {@code null}.
          * @see #areEqual()
@@ -2262,10 +2263,11 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // Note: lastModified is ignored due to @DiffIgnore
          * }</pre>
          *
-         * @param bean1 the first bean to compare. Can be {@code null}.
-         * @param bean2 the second bean to compare. Can be {@code null}.
+         * @param bean1 the first bean to compare. May be {@code null}, in which case all properties of {@code bean2} are reported as right-only.
+         * @param bean2 the second bean to compare. May be {@code null}, in which case all properties of {@code bean1} are reported as left-only.
          * @return a {@code BeanDifference} object containing the comparison results
-         * @throws IllegalArgumentException if either bean is not a valid bean class (i.e., is a primitive, array, collection, map, etc.)
+         * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class
+         *         (e.g., a primitive wrapper, array, {@link Collection}, or {@link Map})
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object, Collection)
          * @see Maps#difference(Map, Map)
@@ -2323,11 +2325,11 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // Note: salary and department differences are ignored
          * }</pre>
          *
-         * @param bean1 the first bean to compare. Can be {@code null}.
-         * @param bean2 the second bean to compare. Can be {@code null}.
+         * @param bean1 the first bean to compare. May be {@code null}, in which case properties from {@code bean2} are reported as right-only.
+         * @param bean2 the second bean to compare. May be {@code null}, in which case properties from {@code bean1} are reported as left-only.
          * @param propNamesToCompare the property names to compare. If {@code null} or empty, all properties are compared.
          * @return a {@code BeanDifference} object containing the comparison results for the specified properties
-         * @throws IllegalArgumentException if either bean is not a valid bean class
+         * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object)
          * @see Maps#difference(Map, Map)
@@ -2389,11 +2391,12 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // All properties are considered equal due to custom comparison
          * }</pre>
          *
-         * @param bean1 the first bean to compare. Can be {@code null}.
-         * @param bean2 the second bean to compare. Can be {@code null}.
+         * @param bean1 the first bean to compare. May be {@code null}.
+         * @param bean2 the second bean to compare. May be {@code null}.
          * @param valueEquivalence the predicate to determine if two property values are equivalent. Must not be {@code null}.
          * @return a {@code BeanDifference} object containing the comparison results
-         * @throws IllegalArgumentException if either bean is not a valid bean class, or if {@code valueEquivalence} is {@code null}
+         * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class,
+         *         or if {@code valueEquivalence} is {@code null}
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object, Collection)
          * @see Maps#difference(Map, Map)
@@ -2465,12 +2468,13 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // Results may show all properties as common if they meet the criteria
          * }</pre>
          *
-         * @param bean1 the first bean to compare. Can be {@code null}.
-         * @param bean2 the second bean to compare. Can be {@code null}.
-         * @param valueEquivalence the predicate to determine if values are equivalent for a given property.
-         *                         Receives (propertyName, value1, value2). Must not be {@code null}.
+         * @param bean1 the first bean to compare. May be {@code null}.
+         * @param bean2 the second bean to compare. May be {@code null}.
+         * @param valueEquivalence the predicate to determine if values are equivalent for a given property;
+         *                         receives {@code (propertyName, value1, value2)}. Must not be {@code null}.
          * @return a {@code BeanDifference} object containing the comparison results
-         * @throws IllegalArgumentException if either bean is not a valid bean class, or if {@code valueEquivalence} is {@code null}
+         * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class,
+         *         or if {@code valueEquivalence} is {@code null}
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object, Collection)
          * @see Maps#difference(Map, Map)
@@ -2540,12 +2544,13 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // Note: id and notes are not compared
          * }</pre>
          *
-         * @param bean1 the first bean to compare. Can be {@code null}.
-         * @param bean2 the second bean to compare. Can be {@code null}.
+         * @param bean1 the first bean to compare. May be {@code null}.
+         * @param bean2 the second bean to compare. May be {@code null}.
          * @param propNamesToCompare the property names to compare. If {@code null} or empty, all properties are compared.
          * @param valueEquivalence the predicate to determine if values are equivalent for a given property. Must not be {@code null}.
          * @return a {@code BeanDifference} object containing the comparison results
-         * @throws IllegalArgumentException if either bean is not a valid bean class, or if {@code valueEquivalence} is {@code null}
+         * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class,
+         *         or if {@code valueEquivalence} is {@code null}
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object, Collection)
          * @see Maps#difference(Map, Map)

@@ -15,20 +15,17 @@
 package com.landawn.abacus.util;
 
 /**
- * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
+ * Constants for all ASCII characters (those in the range of values {@code 0x00} through
+ * {@code 0x7F}), covering all control characters as defined in RFC 20.
  *
- * Static methods pertaining to ASCII characters (those in the range of values {@code 0x00} through
- * {@code 0x7F}), and to strings containing such characters.
+ * <p>Note: Copied from Google Guava under Apache License 2.0 and may be modified.</p>
  *
  * <p>ASCII utilities also exist in other classes of this package:</p>
  * <ul>
  * <li>{@link Charsets#US_ASCII} specifies the {@code Charset} of ASCII characters.</li>
- * <li>Google Guava's {@code CharMatcher.ascii()} matches ASCII characters and provides text processing methods which
- * operate only on the ASCII characters of a string.</li>
+ * <li>Google Guava's {@code CharMatcher.ascii()} matches ASCII characters and provides text
+ * processing methods which operate only on the ASCII characters of a string.</li>
  * </ul>
- *
- * <p>This class provides constants for all ASCII control characters as defined in RFC 20,
- * making it easy to work with low-level ASCII protocols and data formats.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -38,7 +35,7 @@ package com.landawn.abacus.util;
  * }
  *
  * // Use ASCII control characters
- * String csvLine = "field1" + Ascii.HT + "field2" + Ascii.HT + "field3";
+ * String tsvLine = "field1" + Ascii.HT + "field2" + Ascii.HT + "field3";
  * }</pre>
  *
  * @author Craig Berry
@@ -187,9 +184,10 @@ public final class Ascii {
     public static final byte DC1 = 17; // aka XON
 
     /**
-     * Transmission On: Although originally defined as {@link #DC1}, this ASCII control character is now better
-     * known as the XON code used for software flow control in serial communications. The main use is
-     * restarting the transmission after the communication has been stopped by the {@link #XOFF} control code.
+     * Transmission On: Although originally assigned as {@link #DC1}, this ASCII control character is
+     * now better known as the XON code used for software flow control in serial communications.
+     * Its main use is restarting transmission after it has been stopped by the {@link #XOFF}
+     * control code.
      *
      * @see #DC1
      * @see #XOFF
@@ -213,7 +211,11 @@ public final class Ascii {
     public static final byte DC3 = 19; // aka XOFF
 
     /**
-     * Transmission off. See {@link #XON} for explanation.
+     * Transmission Off: Alternate name for {@link #DC3}. Used for software flow control in serial
+     * communications to pause transmission until an {@link #XON} character is received.
+     *
+     * @see #DC3
+     * @see #XON
      */
     public static final byte XOFF = 19; // aka DC3
 
@@ -323,12 +325,12 @@ public final class Ascii {
     public static final byte DEL = 127;
 
     /**
-     * The minimum value of an ASCII character.
+     * The minimum value of an ASCII character, {@code '\0'} (0x00).
      */
     public static final char MIN = 0;
 
     /**
-     * The maximum value of an ASCII character.
+     * The maximum value of an ASCII character, 127 (0x7F, {@link #DEL}).
      */
     public static final char MAX = 127;
 }

@@ -679,8 +679,7 @@ public final class IOUtil {
     public static final String LINE_SEPARATOR = System.lineSeparator();
 
     /**
-     * The Unix line separator string ("\n").
-     * @see System#lineSeparator()
+     * The Unix line separator string ({@code "\n"}).
      */
     public static final String LINE_SEPARATOR_UNIX = "\n";
 
@@ -694,7 +693,7 @@ public final class IOUtil {
     public static final String LINE_SEPARATOR_WINDOWS = "\r\n";
 
     /**
-     * current path retrieved by {@code new File("./").getAbsolutePath()}
+     * Current path retrieved by {@code new File("./").getAbsolutePath()}.
      */
     public static final String CURRENT_DIR;
 
@@ -3230,6 +3229,7 @@ public final class IOUtil {
     /**
      * Writes the string representation of an Object to a file as a single line using the default charset.
      * The string representation of the object is obtained by calling {@code N.toString(obj)}.
+     * The line is always terminated with the Unix line separator ({@code "\n"}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3258,8 +3258,9 @@ public final class IOUtil {
     }
 
     /**
-     * Writes the string representation of an Object to a Writer as a single line using the default charset.
+     * Writes the string representation of an Object to a Writer as a single line.
      * The string representation of the object is obtained by calling {@code N.toString(obj)}.
+     * The line is always terminated with the Unix line separator ({@code "\n"}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3281,6 +3282,7 @@ public final class IOUtil {
     /**
      * Writes the string representation of an Object to a Writer as a single line.
      * The string representation of the object is obtained by calling {@code N.toString(obj)}.
+     * The line is always terminated with the Unix line separator ({@code "\n"}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3313,6 +3315,7 @@ public final class IOUtil {
     /**
      * Writes the string representation of each object in an Iterator to a file. Each object is written as a single line using the default charset.
      * The string representation of each object is obtained by calling {@code N.toString(obj)}.
+     * Each line is terminated with the Unix line separator ({@code "\n"}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3422,6 +3425,7 @@ public final class IOUtil {
     /**
      * Writes the string representation of each object in an Iterable to a file. Each object is written as a single line using the default charset.
      * The string representation of each object is obtained by calling {@code N.toString(obj)}.
+     * Each line is terminated with the Unix line separator ({@code "\n"}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7561,9 +7565,8 @@ public final class IOUtil {
      *
      * @param srcFile an existing file to copy, must not be {@code null}.
      * @param destFile the new file, must not be {@code null}.
-     * @throws IOException if source or destination is invalid.
-     * @throws IOException if an error occurs or setting the last-modified time didn't succeed.
-     * @throws IOException if the output file length is not the same as the input file length after the copy completes.
+     * @throws IOException if source or destination is invalid, if an error occurs during copying, if setting the
+     *         last-modified time didn't succeed, or if the output file length differs from the input after copying.
      * @see #copyToDirectory(File, File)
      * @see #copyFile(File, File, boolean)
      */
@@ -7595,9 +7598,8 @@ public final class IOUtil {
      * @param srcFile an existing file to copy, must not be {@code null}.
      * @param destFile the new file, must not be {@code null}.
      * @param preserveFileDate {@code true} if the file date of the copy should be the same as the original.
-     * @throws IOException if source or destination is invalid.
-     * @throws IOException if an error occurs or setting the last-modified time didn't succeed.
-     * @throws IOException if the output file length is not the same as the input file length after the copy completes.
+     * @throws IOException if source or destination is invalid, if an error occurs during copying, if setting the
+     *         last-modified time didn't succeed, or if the output file length differs from the input after copying.
      * @see #copyFile(File, File, boolean, CopyOption...)
      */
     public static void copyFile(final File srcFile, final File destFile, final boolean preserveFileDate) throws IOException {
@@ -7844,8 +7846,8 @@ public final class IOUtil {
      *
      * @param srcFile the source file or directory to be moved.
      * @param destDir the destination directory where the file or directory will be moved to.
-     * @throws IOException if an I/O error occurs during the move operation, such as if the source doesn't exist.
-     *         or the destination cannot be written to
+     * @throws IOException if an I/O error occurs during the move operation, such as if the source doesn't exist
+     *         or the destination cannot be written to.
      * @see #move(File, File, CopyOption...)
      * @see java.nio.file.Files#move(Path, Path, CopyOption...)
      */
@@ -8683,6 +8685,7 @@ public final class IOUtil {
      *
      * @param directory the directory whose size is to be calculated, must not be {@code null}.
      * @return the total size as a BigInteger of all files within the directory and its subdirectories.
+     * @throws IllegalArgumentException if {@code directory} is {@code null}.
      * @see #sizeOfDirectory(File)
      * @see #sizeOfAsBigInteger(File)
      */
@@ -8780,8 +8783,8 @@ public final class IOUtil {
      * IOUtil.zip(sourceDir, zipFile);
      * }</pre>
      *
-     * @param sourceFile the file to be compressed. This must be a valid file.
-     * @param targetFile the file to which the compressed data will be written. This must be a valid file.
+     * @param sourceFile the file or directory to be compressed.
+     * @param targetFile the file to which the compressed data will be written.
      * @throws UncheckedIOException if an I/O error occurs.
      */
     public static void zip(final File sourceFile, final File targetFile) throws UncheckedIOException {
@@ -9133,8 +9136,8 @@ public final class IOUtil {
      * }</pre>
      *
      * @param file the source file to split; must exist and be readable.
-     * @param sizeOfPart the maximum size in bytes for each part (except possibly the last part).
-     * @throws IllegalArgumentException if {@code file} is {@code null}.
+     * @param sizeOfPart the maximum size in bytes for each part (except possibly the last part); must be positive.
+     * @throws IllegalArgumentException if {@code file} is {@code null} or {@code sizeOfPart} is not positive.
      * @throws FileNotFoundException if the source file does not exist.
      * @throws IOException if there are issues with file validation.
      * @see #splitBySize(File, long, File)
@@ -9181,9 +9184,9 @@ public final class IOUtil {
      * }</pre>
      *
      * @param file the source file to split; must exist and be readable.
-     * @param sizeOfPart the maximum size in bytes for each part (except possibly the last part).
+     * @param sizeOfPart the maximum size in bytes for each part (except possibly the last part); must be positive.
      * @param destDir the destination directory where split parts will be saved; must exist and be writable.
-     * @throws IllegalArgumentException if {@code file} or {@code destDir} is {@code null}.
+     * @throws IllegalArgumentException if {@code file} or {@code destDir} is {@code null}, or {@code sizeOfPart} is not positive.
      * @throws FileNotFoundException if the source file does not exist or the destination directory is invalid.
      * @throws IOException if there are issues with file validation or directory access.
      * @see #splitBySize(File, long)
@@ -9710,16 +9713,16 @@ public final class IOUtil {
     /**
      * Convert from a {@code URL} to a {@code File}.
      * <p>
-     * From version 1.1 this method will decode the URL.
+     * This method will decode the URL.
      * Syntax such as {@code file:///my%20docs/file.txt} will be
-     * correctly decoded to {@code /my docs/file.txt}. Starting with version
-     * 1.5, this method uses UTF-8 to decode percent-encoded octets to characters.
+     * correctly decoded to {@code /my docs/file.txt}. This method uses UTF-8 to decode
+     * percent-encoded octets to characters.
      * Additionally, malformed percent-encoded octets are handled leniently by
      * passing them through literally.
      *
-     * @param url the file URL to convert, {@code null} returns {@code null}.
+     * @param url the file URL to convert, must not be {@code null}.
      * @return a File object corresponding to the input URL.
-     * @throws IllegalArgumentException if the parameter is {@code null} or the URL is not a file URL.
+     * @throws IllegalArgumentException if {@code url} is {@code null} or the URL is not a file URL.
      */
     public static File toFile(final URL url) {
         N.checkArgNotNull(url, cs.url);
@@ -9786,18 +9789,15 @@ public final class IOUtil {
      * Converts each {@code URL} in the specified array to a {@code File}.
      * <p>
      * Returns an array of the same size as the input.
-     * if the input is {@code null}, an empty array is returned.
-     * if the input contains {@code null}, the output array contains {@code null} at the same
-     * index.
+     * If the input is {@code null} or empty, an empty array is returned.
      * <p>
      * This method will decode the URL.
      * Syntax such as {@code file:///my%20docs/file.txt} will be
      * correctly decoded to {@code /my docs/file.txt}.
      *
-     * @param urls the file URLs to convert, {@code null} returns empty array.
-     * @return a non-{@code null} array of Files matching the input, with a {@code null} item
-     *         if there was a {@code null} at that index in the input array.
-     * @throws UncheckedIOException if an I/O error occurs.
+     * @param urls the file URLs to convert; {@code null} or empty returns an empty array.
+     * @return a non-{@code null} array of Files matching the input.
+     * @throws IllegalArgumentException if any URL is {@code null} or is not a file URL.
      */
     public static File[] toFiles(final URL[] urls) throws UncheckedIOException {
         if (N.isEmpty(urls)) {
@@ -9816,9 +9816,9 @@ public final class IOUtil {
     /**
      * Converts a collection of URLs into a list of corresponding File objects.
      *
-     * @param urls the collection of URLs to be converted.
+     * @param urls the collection of URLs to be converted, must not be {@code null}.
      * @return a list of File objects corresponding to the input URLs.
-     * @throws UncheckedIOException if an I/O error occurs during the conversion.
+     * @throws IllegalArgumentException if any URL in the collection is {@code null} or is not a file URL.
      */
     public static List<File> toFiles(final Collection<URL> urls) throws UncheckedIOException {
         Objects.requireNonNull(urls, "urls");
@@ -9930,15 +9930,16 @@ public final class IOUtil {
     }
 
     /**
-     * Update the last modified time of the file to the system current time if the specified file exists.
+     * Updates the last modified time of the file to the current system time if the specified file exists.
+     * If the file does not exist or {@code source} is {@code null}, returns {@code false}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File file = new File("marker.txt");
-     * IOUtil.touch(file);  // Creates file or updates timestamp
+     * IOUtil.touch(file);  // Updates the file's last-modified timestamp
      * }</pre>
      *
-     * @param source the File to touch.
+     * @param source the File whose last-modified timestamp is to be updated.
      * @return {@code true} if the file exists and last modified time is updated successfully, {@code false} otherwise.
      */
     public static boolean touch(final File source) {
@@ -10058,17 +10059,15 @@ public final class IOUtil {
     }
 
     /**
-     * Compares the contents of two Streams to determine if they are equal or
-     * not.
+     * Compares the contents of two InputStreams to determine if they are equal or not.
      * <p>
-     * This method buffers the input internally using
-     * {@link BufferedInputStream} if they are not already buffered.
+     * If both inputs are the same reference or both are {@code null}, returns {@code true}.
+     * If only one is {@code null}, returns {@code false}.
      * </p>
      *
      * @param input1 the first stream.
      * @param input2 the second stream.
-     * @return {@code true} if the content of the streams are equal or they both don't
-     *         exist, {@code false} otherwise.
+     * @return {@code true} if the content of the streams are equal (or both are {@code null}), {@code false} otherwise.
      * @throws IOException if an I/O error occurs.
      */
     public static boolean contentEquals(final InputStream input1, final InputStream input2) throws IOException {
@@ -10133,11 +10132,13 @@ public final class IOUtil {
      * Compares the contents of two Readers to determine if they are equal or not.
      * <p>
      * This method buffers the input internally using {@link BufferedReader} if they are not already buffered.
+     * If both inputs are the same reference or both are {@code null}, returns {@code true}.
+     * If only one is {@code null}, returns {@code false}.
      * </p>
      *
      * @param input1 the first reader.
      * @param input2 the second reader.
-     * @return {@code true} if the content of the readers are equal, or they both don't exist, {@code false} otherwise.
+     * @return {@code true} if the content of the readers are equal (or both are {@code null}), {@code false} otherwise.
      * @throws IOException if an I/O error occurs.
      */
     public static boolean contentEquals(final Reader input1, final Reader input2) throws IOException {
@@ -10359,8 +10360,8 @@ public final class IOUtil {
      * @param <E>              the type of exception that the lineAction can throw.
      * @param <E2>             the type of exception that the onComplete can throw.
      * @param source           the source file/directory to be parsed.
-     * @param lineOffset       the line number from where to start parsing.
-     * @param count            the number of lines to be parsed.
+     * @param lineOffset       the number of lines to skip from the beginning.
+     * @param count            the maximum number of lines to process after the offset.
      * @param processThreadNum the number of threads to be used for parsing.
      * @param queueSize        the size of the queue for holding lines to be parsed.
      * @param lineAction       a Consumer that takes a line of the file as a String and performs the desired operation.
@@ -10475,15 +10476,15 @@ public final class IOUtil {
     /**
      * Parses the given collection of file line by line using the provided lineAction.
      *
-     * @param <E>        the type of exception that the lineAction can throw.
-     * @param <E2>       the type of exception that the onComplete can throw.
-     * @param files      the collection of files to be parsed.
-     * @param lineOffset the line number from where to start parsing.
-     * @param count      the number of lines to be parsed.
+     * @param <E>              the type of exception that the lineAction can throw.
+     * @param <E2>             the type of exception that the onComplete can throw.
+     * @param files            the collection of files to be parsed.
+     * @param lineOffset       the number of lines to skip from the beginning.
+     * @param count            the maximum number of lines to process after the offset.
      * @param processThreadNum the number of threads to use for parallel processing.
-     * @param queueSize  the size of the queue for buffering lines during parallel processing.
-     * @param lineAction a Consumer that takes a line of the file as a String and performs the desired operation.
-     * @param onComplete a Runnable that is executed after the parsing is complete.
+     * @param queueSize        the size of the queue for buffering lines during parallel processing.
+     * @param lineAction       a Consumer that takes a line of the file as a String and performs the desired operation.
+     * @param onComplete       a Runnable that is executed after the parsing is complete.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if the lineAction throws an exception.
      * @throws E2                   if the onComplete throws an exception.

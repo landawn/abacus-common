@@ -283,20 +283,20 @@ public final class PropertiesUtil {
     }
 
     /**
-     * Formats a file path by replacing URL-encoded spaces (%20) with actual spaces.
-     * If the original file doesn't exist but a file with decoded spaces does exist,
-     * returns the decoded file. This method helps handle file paths that may have
-     * been URL-encoded.
+     * Formats a file path by replacing URL-encoded spaces ({@code %20}) with actual spaces.
+     * If the original file does not exist but a file at the decoded path does exist,
+     * the decoded {@link File} is returned; otherwise the original {@code file} is returned unchanged.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File file = new File("/path/with%20spaces/file.xml");
      * File formatted = PropertiesUtil.formatPath(file);
-     * // Returns File with path "/path/with spaces/file.xml"
+     * // Returns File with path "/path/with spaces/file.xml" if that path exists
      * }</pre>
      *
-     * @param file the file whose path should be formatted
-     * @return a File object with properly formatted path
+     * @param file the file whose path should be decoded
+     * @return a {@code File} with {@code %20} replaced by spaces if the decoded path exists;
+     *         the original {@code file} otherwise
      */
     public static File formatPath(File file) {
         if (!file.exists()) {
@@ -458,6 +458,7 @@ public final class PropertiesUtil {
      * @param srcFile the source file whose directory will be used as the starting point
      * @param targetFileName the name of the file to find
      * @return the found file, or {@code null} if not found
+     * @throws RuntimeException if {@code targetFileName} is {@code null} or empty
      */
     @MayReturnNull
     public static File findFileRelativeTo(final File srcFile, final String targetFileName) {
@@ -1397,7 +1398,7 @@ public final class PropertiesUtil {
     }
 
     /**
-     * Generate Java code from the specified XML string.
+     * Generates Java code from the specified XML string.
      * This method analyzes the XML structure and generates a corresponding Java class hierarchy that mirrors it,
      * with typed getters and setters for each property. The generated class extends Properties&lt;String, Object&gt;.
      *
@@ -1428,7 +1429,7 @@ public final class PropertiesUtil {
     }
 
     /**
-     * Generate Java code from the specified XML file.
+     * Generates Java code from the specified XML file.
      * This method analyzes the XML structure and generates a corresponding Java class hierarchy that mirrors it,
      * with typed getters and setters for each property. The generated class extends Properties&lt;String, Object&gt;.
      *
@@ -1902,7 +1903,9 @@ public final class PropertiesUtil {
     }
 
     /**
-     * The Class ConfigBean.
+     * Internal value object used to represent a configuration bean with common metadata fields
+     * such as id, name, content, server inclusion/exclusion lists, status, and timestamps.
+     * This class is used internally for configuration management and is not part of the public API.
      */
     static final class ConfigBean { // NOSONAR
 
@@ -2095,11 +2098,23 @@ public final class PropertiesUtil {
             this.createdTime = createdTime;
         }
 
+        /**
+         * Returns the hash code for this ConfigBean, computed from all fields.
+         *
+         * @return the hash code value for this object
+         */
         @Override
         public int hashCode() {
             return Objects.hash(id, name, content, includedServers, excludedServers, unifiedStatus, description, lastUpdateTime, createdTime);
         }
 
+        /**
+         * Compares this ConfigBean to the specified object for equality.
+         * Two ConfigBean instances are equal if all their fields are equal.
+         *
+         * @param obj the object to compare with
+         * @return {@code true} if the specified object is a ConfigBean with equal field values
+         */
         @SuppressFBWarnings
         @Override
         public boolean equals(final Object obj) {
@@ -2118,6 +2133,11 @@ public final class PropertiesUtil {
             return false;
         }
 
+        /**
+         * Returns a string representation of this ConfigBean containing all field values.
+         *
+         * @return a string representation of this object
+         */
         @Override
         public String toString() {
             return "{id=" + id + ", name=" + name + ", content=" + content + ", includedServers=" + includedServers + ", excludedServers=" + excludedServers
@@ -2127,12 +2147,20 @@ public final class PropertiesUtil {
 
     }
 
+    /**
+     * Enumerates the supported source formats for properties that can be loaded and auto-refreshed.
+     */
     enum ResourceType {
-        PROPERTIES, XML
+        /** Standard Java {@code .properties} format (key=value lines). */
+        PROPERTIES,
+        /** XML format, loaded via {@link PropertiesUtil#loadFromXml}. */
+        XML
     }
 
     /**
-     * The Class Resource.
+     * Internal descriptor for a registered auto-refresh resource, tracking the source file,
+     * the target Properties class, and the timestamp of the last successful load.
+     * Two Resource instances are considered equal when their target class, file path, and resource type all match.
      */
     static class Resource {
 
@@ -2201,6 +2229,11 @@ public final class PropertiesUtil {
             return resourceType;
         }
 
+        /**
+         * Returns the hash code for this Resource, based on target class, file path, and resource type.
+         *
+         * @return the hash code value for this object
+         */
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -2210,6 +2243,13 @@ public final class PropertiesUtil {
             return prime * result + N.hashCode(resourceType);
         }
 
+        /**
+         * Compares this Resource to the specified object for equality.
+         * Two Resource instances are equal when their target class, file path, and resource type all match.
+         *
+         * @param obj the object to compare with
+         * @return {@code true} if the specified object is a Resource with equal target class, file path, and type
+         */
         @SuppressFBWarnings
         @Override
         public boolean equals(final Object obj) {
@@ -2225,6 +2265,11 @@ public final class PropertiesUtil {
             return false;
         }
 
+        /**
+         * Returns a string representation of this Resource showing the associated file.
+         *
+         * @return a string representation of this object
+         */
         @Override
         public String toString() {
             return "{file=" + file + "}";

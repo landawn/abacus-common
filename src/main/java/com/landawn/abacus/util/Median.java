@@ -34,8 +34,8 @@ import com.landawn.abacus.util.u.OptionalShort;
 /**
  * A high-performance utility class providing efficient median calculation methods for arrays and collections
  * without requiring full sorting operations. This class implements optimized algorithms using priority queues
- * to find median values in O(n) time complexity, making it significantly faster than traditional sorting-based
- * approaches for median-only calculations.
+ * to find median values in O(n log n) time complexity while using O(n/2) space, making it more memory-efficient
+ * than sorting-based approaches for median-only calculations.
  *
  * <p>The median is the middle value in a dataset when arranged in sorted order. For datasets with an odd number
  * of elements, there is exactly one median value. For datasets with an even number of elements, there are two
@@ -44,11 +44,11 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * <p><b>Key Features:</b>
  * <ul>
- *   <li><b>High Performance:</b> O(n) time complexity using bounded priority queues instead of O(n log n) sorting</li>
+ *   <li><b>High Performance:</b> O(n log n) time complexity using a bounded priority queue of size n/2+1, avoiding full-array sorting overhead</li>
  *   <li><b>Type Safety:</b> Specialized methods for all primitive types with corresponding Optional return types</li>
  *   <li><b>Flexible Input:</b> Support for arrays, collections, and custom comparators</li>
  *   <li><b>Range Support:</b> Ability to calculate median for subarrays and subcollections</li>
- *   <li><b>Null Safety:</b> Graceful handling of null inputs and elements</li>
+ *   <li><b>Null Safety:</b> Null or empty inputs are rejected with {@link IllegalArgumentException}; null element handling depends on the comparator used</li>
  *   <li><b>Memory Efficient:</b> Minimal memory overhead with bounded heap data structures</li>
  *   <li><b>Thread Safe:</b> Stateless design ensuring safe concurrent access</li>
  *   <li><b>Zero Dependencies:</b> Self-contained implementation without external algorithm libraries</li>
@@ -140,9 +140,9 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * <p><b>Performance Characteristics:</b>
  * <ul>
- *   <li><b>Time Complexity:</b> O(n) where n is the number of elements</li>
- *   <li><b>Space Complexity:</b> O(k) where k = (n/2 + 1), typically much less than n</li>
- *   <li><b>Comparison Count:</b> Exactly n comparisons for array traversal plus heap operations</li>
+ *   <li><b>Time Complexity:</b> O(n log n) where n is the number of elements (each of the n elements may trigger a heap operation costing O(log k) where k = n/2 + 1)</li>
+ *   <li><b>Space Complexity:</b> O(k) where k = (n/2 + 1), typically about half of n</li>
+ *   <li><b>Comparison Count:</b> At most n heap operations, each costing O(log k) comparisons</li>
  *   <li><b>Memory Allocation:</b> Single priority queue allocation, no additional arrays</li>
  *   <li><b>Cache Efficiency:</b> Sequential access pattern for optimal cache performance</li>
  * </ul>
@@ -173,7 +173,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * <p><b>Comparison with Alternative Approaches:</b>
  * <ul>
- *   <li><b>vs. Full Sorting:</b> 3-5x faster for median-only calculations, O(n) vs O(n log n)</li>
+ *   <li><b>vs. Full Sorting:</b> Same asymptotic O(n log n) complexity but with a smaller heap constant (n/2+1 vs n elements), and avoids producing a fully sorted result</li>
  *   <li><b>vs. Quickselect:</b> More predictable performance, better for small to medium datasets</li>
  *   <li><b>vs. Stream.sorted():</b> Avoids intermediate collection creation and full sorting overhead</li>
  *   <li><b>vs. Manual Implementation:</b> Optimized algorithm with comprehensive type support</li>
@@ -286,7 +286,7 @@ public final class Median {
      *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method uses an efficient priority queue-based
-     * algorithm that processes the array in O(n) time complexity by maintaining a bounded heap of size (length/2 + 1).</p>
+     * algorithm that processes the array in O(n log n) time by maintaining a bounded min-heap of size (length/2 + 1).</p>
      *
      * <p>For arrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -336,7 +336,7 @@ public final class Median {
      * // Considers only 'a' and 'm', returns ['a', OptionalChar.of('m')]
      * }</pre>
      *
-     * @param source the array of characters to find the median from. Must not be {@code null}.
+     * @param source the array of characters to find the median from. Must not be {@code null} or empty.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
      *                  Must be non-negative and less than or equal to toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
@@ -344,7 +344,8 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty.
+     * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if
+     *                                  {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(char...)
@@ -397,7 +398,7 @@ public final class Median {
      *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method uses an efficient priority queue-based
-     * algorithm that processes the array in O(n) time complexity by maintaining a bounded heap of size (length/2 + 1).</p>
+     * algorithm that processes the array in O(n log n) time by maintaining a bounded min-heap of size (length/2 + 1).</p>
      *
      * <p>For arrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -447,7 +448,7 @@ public final class Median {
      * // Considers only bytes[1] and bytes[2]: 10, 20. Returns [10, OptionalByte.of(20)]
      * }</pre>
      *
-     * @param source the array of bytes to find the median from. Must not be {@code null}.
+     * @param source the array of bytes to find the median from. Must not be {@code null} or empty.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
      *                  Must be non-negative and less than or equal to toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
@@ -455,7 +456,8 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty.
+     * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if
+     *                                  {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(byte...)
@@ -507,7 +509,7 @@ public final class Median {
      *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method uses an efficient priority queue-based
-     * algorithm that processes the array in O(n) time complexity by maintaining a bounded heap of size (length/2 + 1).</p>
+     * algorithm that processes the array in O(n log n) time by maintaining a bounded min-heap of size (length/2 + 1).</p>
      *
      * <p>For arrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -557,7 +559,7 @@ public final class Median {
      * // Considers only values[1] and values[2]: 100, 200. Returns [100, OptionalShort.of(200)]
      * }</pre>
      *
-     * @param source the array of short integers to find the median from. Must not be {@code null}.
+     * @param source the array of short integers to find the median from. Must not be {@code null} or empty.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
      *                  Must be non-negative and less than or equal to toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
@@ -565,7 +567,8 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty.
+     * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if
+     *                                  {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(short...)
@@ -617,7 +620,7 @@ public final class Median {
      *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method uses an efficient priority queue-based
-     * algorithm that processes the array in O(n) time complexity by maintaining a bounded heap of size (length/2 + 1).</p>
+     * algorithm that processes the array in O(n log n) time by maintaining a bounded min-heap of size (length/2 + 1).</p>
      *
      * <p>For arrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -668,7 +671,7 @@ public final class Median {
      * // Considers only numbers[1], numbers[2], numbers[3]: 50, 75, 25. Returns [50, OptionalInt.empty()]
      * }</pre>
      *
-     * @param source the array of integers to find the median from. Must not be {@code null}.
+     * @param source the array of integers to find the median from. Must not be {@code null} or empty.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
      *                  Must be non-negative and less than or equal to toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
@@ -676,7 +679,8 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty.
+     * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if
+     *                                  {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(int...)
@@ -728,7 +732,7 @@ public final class Median {
      *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method uses an efficient priority queue-based
-     * algorithm that processes the array in O(n) time complexity by maintaining a bounded heap of size (length/2 + 1).</p>
+     * algorithm that processes the array in O(n log n) time by maintaining a bounded min-heap of size (length/2 + 1).</p>
      *
      * <p>For arrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -779,7 +783,7 @@ public final class Median {
      * // Considers values[1], values[2], values[3]: 1000, 2000, 4000. Returns [2000, OptionalLong.empty()]
      * }</pre>
      *
-     * @param source the array of long integers to find the median from. Must not be {@code null}.
+     * @param source the array of long integers to find the median from. Must not be {@code null} or empty.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
      *                  Must be non-negative and less than or equal to toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
@@ -787,7 +791,8 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty.
+     * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if
+     *                                  {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(long...)
@@ -839,7 +844,7 @@ public final class Median {
      *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method uses an efficient priority queue-based
-     * algorithm that processes the array in O(n) time complexity by maintaining a bounded heap of size (length/2 + 1).
+     * algorithm that processes the array in O(n log n) time by maintaining a bounded min-heap of size (length/2 + 1).
      * This implementation handles floating-point values correctly, including proper handling of NaN values
      * according to IEEE 754 floating-point standards.</p>
      *
@@ -892,7 +897,7 @@ public final class Median {
      * // Considers values[1] and values[2]: 10.2f, 20.8f. Returns [10.2f, OptionalFloat.of(20.8f)]
      * }</pre>
      *
-     * @param source the array of float values to find the median from. Must not be {@code null}.
+     * @param source the array of float values to find the median from. Must not be {@code null} or empty.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
      *                  Must be non-negative and less than or equal to toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
@@ -900,7 +905,8 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty.
+     * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if
+     *                                  {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(float...)
@@ -952,7 +958,7 @@ public final class Median {
      *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method uses an efficient priority queue-based
-     * algorithm that processes the array in O(n) time complexity by maintaining a bounded heap of size (length/2 + 1).
+     * algorithm that processes the array in O(n log n) time by maintaining a bounded min-heap of size (length/2 + 1).
      * This implementation handles double-precision floating-point values with full IEEE 754 compliance,
      * including proper treatment of special values like NaN and infinity.</p>
      *
@@ -1006,7 +1012,7 @@ public final class Median {
      * // Considers values[1], values[2], values[3]: 10.2, 20.8, 40.1. Returns [20.8, OptionalDouble.empty()]
      * }</pre>
      *
-     * @param source the array of double values to find the median from. Must not be {@code null}.
+     * @param source the array of double values to find the median from. Must not be {@code null} or empty.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
      *                  Must be non-negative and less than or equal to toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
@@ -1014,7 +1020,8 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty.
+     * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if
+     *                                  {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(double...)
@@ -1119,7 +1126,7 @@ public final class Median {
      * }</pre>
      *
      * @param <T> the type of elements in the array, which must implement {@code Comparable}.
-     * @param source the array of Comparable objects to find the median from. Must not be {@code null}.
+     * @param source the array of Comparable objects to find the median from. Must not be {@code null} or empty.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
      *                  Must be non-negative and less than or equal to toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
@@ -1127,7 +1134,8 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty.
+     * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if
+     *                                  {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(Comparable[])
@@ -1209,7 +1217,7 @@ public final class Median {
      * }</pre>
      *
      * @param <T> the type of elements in the array.
-     * @param source the array of objects to find the median from. Must not be {@code null}.
+     * @param source the array of objects to find the median from. Must not be {@code null} or empty.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
      *                  Must be non-negative and less than or equal to toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
@@ -1219,7 +1227,8 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or the range is empty.
+     * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if
+     *                                  {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(Object[], Comparator)
@@ -1411,7 +1420,7 @@ public final class Median {
      * }</pre>
      *
      * @param <T> the type of elements in the collection, which must implement Comparable.
-     * @param source the collection of Comparable objects to find the median from. Must not be {@code null}.
+     * @param source the collection of Comparable objects to find the median from. Must not be {@code null} or empty.
      * @param fromIndex the starting index (inclusive) of the range within the collection to consider.
      *                  Must be non-negative and less than or equal to toIndex.
      * @param toIndex the ending index (exclusive) of the range within the collection to consider.
@@ -1419,7 +1428,8 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-size subcollections, the {@code left}
      *         contains the median and {@code right} is empty. For even-size subcollections, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified collection is {@code null} or the range is empty.
+     * @throws IllegalArgumentException if the specified collection is {@code null} or empty, or if
+     *                                  {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the size of the collection, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(Collection)
@@ -1459,7 +1469,7 @@ public final class Median {
      * }</pre>
      *
      * @param <T> the type of elements in the collection.
-     * @param source the collection of objects to find the median from. Must not be {@code null}.
+     * @param source the collection of objects to find the median from. Must not be {@code null} or empty.
      * @param fromIndex the starting index (inclusive) of the range within the collection to consider.
      *                  Must be non-negative and less than or equal to toIndex.
      * @param toIndex the ending index (exclusive) of the range within the collection to consider.
@@ -1469,7 +1479,8 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-size subcollections, the {@code left}
      *         contains the median and {@code right} is empty. For even-size subcollections, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified collection is {@code null} or the range is empty.
+     * @throws IllegalArgumentException if the specified collection is {@code null} or empty, or if
+     *                                  {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the size of the collection, or {@code fromIndex} is greater than {@code toIndex}
      * @see #of(Collection, Comparator)

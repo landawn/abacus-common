@@ -24,15 +24,15 @@ import com.landawn.abacus.annotation.Beta;
 
 /**
  * An abstract base class for immutable iterators that do not support element removal.
- * This class implements the Iterator interface but throws UnsupportedOperationException
- * for the remove() operation, ensuring {@code true} immutability.
+ * This class implements the Iterator interface but throws {@link UnsupportedOperationException}
+ * for the {@link #remove()} operation, ensuring genuine immutability.
  *
  * <p>ImmutableIterator provides additional utility methods for converting the remaining
  * elements to various collection types, including immutable collections. It serves as
  * the base class for iterators returned by immutable collection implementations.</p>
  *
- * <p>Subclasses must implement the hasNext() and next() methods to provide iteration
- * functionality. The remove() method always throws an exception.</p>
+ * <p>Subclasses must implement the {@link #hasNext()} and {@link #next()} methods to provide iteration
+ * functionality. The {@link #remove()} method always throws {@link UnsupportedOperationException}.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -60,11 +60,11 @@ import com.landawn.abacus.annotation.Beta;
 abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable {
 
     /**
-     * This operation is not supported by ImmutableIterator.
-     * Attempting to call this method will always throw an UnsupportedOperationException.
+     * This operation is not supported by {@code ImmutableIterator}.
+     * Attempting to call this method will always throw {@link UnsupportedOperationException}.
      *
      * @throws UnsupportedOperationException always
-     * @deprecated ImmutableIterator does not support element removal
+     * @deprecated {@code ImmutableIterator} does not support element removal
      */
     @Deprecated
     @Override
@@ -78,7 +78,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * to the end of the iteration, with duplicates removed.
      *
      * <p>This method consumes the iterator. After calling this method,
-     * the iterator will be exhausted and hasNext() will return {@code false}.</p>
+     * the iterator will be exhausted and {@link #hasNext()} will return {@code false}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -87,7 +87,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * System.out.println(set);   // [a, b, c] (order may vary)
      * }</pre>
      *
-     * @return a Set containing all remaining elements from this iterator
+     * @return a {@link Set} containing all remaining elements from this iterator, with duplicates removed
      */
     public Set<T> toSet() {
         return toCollection(Suppliers.ofSet());
@@ -98,7 +98,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * created by the provided supplier.
      *
      * <p>This method consumes the iterator. After calling this method,
-     * the iterator will be exhausted and hasNext() will return {@code false}.</p>
+     * the iterator will be exhausted and {@link #hasNext()} will return {@code false}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -108,9 +108,9 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * }</pre>
      *
      * @param <C> the type of the collection to create
-     * @param supplier a supplier that creates a new empty collection instance
+     * @param supplier a {@link Supplier} that provides a new empty collection instance; must not be {@code null}
      * @return a collection containing all remaining elements from this iterator
-     * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
+     * @throws NullPointerException if {@code supplier} is {@code null} or if {@code supplier.get()} returns {@code null}
      */
     public <C extends Collection<T>> C toCollection(final Supplier<? extends C> supplier) {
         final C c = supplier.get();
@@ -126,7 +126,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * Collects all remaining elements from this iterator into an ImmutableList.
      *
      * <p>This method consumes the iterator. After calling this method,
-     * the iterator will be exhausted and hasNext() will return {@code false}.</p>
+     * the iterator will be exhausted and {@link #hasNext()} will return {@code false}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -135,7 +135,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * System.out.println(list);   // [1, 2, 3] (order depends on source)
      * }</pre>
      *
-     * @return an ImmutableList containing all remaining elements from this iterator
+     * @return an {@link ImmutableList} containing all remaining elements from this iterator
      */
     public ImmutableList<T> toImmutableList() {
         return ImmutableList.wrap(toCollection(Suppliers.ofList()));
@@ -143,10 +143,10 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
 
     /**
      * Collects all remaining elements from this iterator into an ImmutableSet.
-     * Duplicate elements will be removed according to their equals() method.
+     * Duplicate elements are removed according to their {@link Object#equals(Object)} method.
      *
      * <p>This method consumes the iterator. After calling this method,
-     * the iterator will be exhausted and hasNext() will return {@code false}.</p>
+     * the iterator will be exhausted and {@link #hasNext()} will return {@code false}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -155,7 +155,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * System.out.println(set.size());   // 3 (duplicates removed)
      * }</pre>
      *
-     * @return an ImmutableSet containing all remaining unique elements from this iterator
+     * @return an {@link ImmutableSet} containing all remaining unique elements from this iterator
      */
     public ImmutableSet<T> toImmutableSet() {
         return ImmutableSet.wrap(toSet());
@@ -166,7 +166,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * This method consumes all remaining elements to count them.
      *
      * <p><b>Warning:</b> This method consumes the iterator. After calling this method,
-     * the iterator will be exhausted and hasNext() will return {@code false}. If you need
+     * the iterator will be exhausted and {@link #hasNext()} will return {@code false}. If you need
      * both the count and the elements, consider collecting to a list first.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -178,7 +178,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * System.out.println(iter.hasNext());   // false (iterator exhausted)
      * }</pre>
      *
-     * @return the number of remaining elements
+     * @return the number of remaining elements; {@code 0} if the iterator is already exhausted
      */
     @Beta
     public long count() {

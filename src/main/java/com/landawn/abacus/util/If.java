@@ -294,6 +294,7 @@ public final class If {
 
     private static final If FALSE = new If(false);
 
+    /** The evaluated condition result. Package-private to allow access from test code. */
     final boolean b; // change to package-private for testing purposes
 
     private If(final boolean b) {
@@ -309,8 +310,8 @@ public final class If {
      *   .then(() -> System.out.println("It's hot!"));
      * }</pre>
      *
-     * @param b the boolean condition to evaluate.
-     * @return an If instance representing the condition.
+     * @param b the boolean condition to evaluate
+     * @return an If instance representing the condition
      */
     public static If is(final boolean b) {
         return b ? TRUE : FALSE;
@@ -327,8 +328,8 @@ public final class If {
      *   .then(() -> processList(list));
      * }</pre>
      *
-     * @param b the boolean condition to negate.
-     * @return an If instance representing the negated condition.
+     * @param b the boolean condition to negate
+     * @return an If instance representing the negated condition
      */
     public static If not(final boolean b) {
         return b ? FALSE : TRUE;
@@ -347,8 +348,8 @@ public final class If {
      *   .orElse(() -> System.out.println("Element not found"));
      * }</pre>
      *
-     * @param index the index value to check.
-     * @return an If instance that is {@code true} if the index is non-negative.
+     * @param index the index value to check
+     * @return an If instance that is {@code true} if the index is non-negative
      */
     public static If exists(final int index) {
         return index >= 0 ? TRUE : FALSE;
@@ -364,8 +365,8 @@ public final class If {
      *   .orElse(() -> processResult(result));
      * }</pre>
      *
-     * @param obj the object to check for null.
-     * @return an If instance that is {@code true} if the object is null.
+     * @param obj the object to check for null
+     * @return an If instance that is {@code true} if the object is null
      */
     public static If isNull(final Object obj) {
         return is(obj == null);
@@ -382,8 +383,8 @@ public final class If {
      *   .then(() -> System.out.println("Username is required"));
      * }</pre>
      *
-     * @param s the CharSequence to check.
-     * @return an If instance that is {@code true} if the CharSequence is {@code null} or empty.
+     * @param s the CharSequence to check
+     * @return an If instance that is {@code true} if the CharSequence is {@code null} or empty
      */
     public static If isEmpty(final CharSequence s) {
         return is(Strings.isEmpty(s));
@@ -399,8 +400,8 @@ public final class If {
      * If.isEmpty(null).then(() -> System.out.println("Empty"));    // prints "Empty"
      * }</pre>
      *
-     * @param a the boolean array to check.
-     * @return an If instance that is {@code true} if the array is {@code null} or has zero length.
+     * @param a the boolean array to check
+     * @return an If instance that is {@code true} if the array is {@code null} or has zero length
      */
     public static If isEmpty(final boolean[] a) {
         return is(N.isEmpty(a));
@@ -416,8 +417,8 @@ public final class If {
      * If.isEmpty(null).then(() -> System.out.println("Empty"));    // prints "Empty"
      * }</pre>
      *
-     * @param a the char array to check.
-     * @return an If instance that is {@code true} if the array is {@code null} or has zero length.
+     * @param a the char array to check
+     * @return an If instance that is {@code true} if the array is {@code null} or has zero length
      */
     public static If isEmpty(final char[] a) {
         return is(N.isEmpty(a));
@@ -980,7 +981,7 @@ public final class If {
      *   .then(() -> cache.load(key));
      *
      * // Example 3: Explicit no-op with fallback
-     * If.isNull(config)
+     * If.notNull(config)
      *   .thenDoNothing()
      *   .orElse(() -> loadDefaultConfig());
      * }</pre>
@@ -1016,11 +1017,11 @@ public final class If {
      *   .then(() -> cache.put(key, value));
      * }</pre>
      *
-     * @param <E> the type of exception that the runnable may throw.
-     * @param cmd the runnable to execute if the condition is true (must not be {@code null}).
-     * @return an OrElse instance for optional chaining of an else clause.
-     * @throws IllegalArgumentException if cmd is null.
-     * @throws E if the runnable throws an exception during execution.
+     * @param <E> the type of exception that the runnable may throw
+     * @param cmd the runnable to execute if the condition is true (must not be {@code null})
+     * @return an OrElse instance for optional chaining of an else clause
+     * @throws IllegalArgumentException if cmd is null
+     * @throws E if the runnable throws an exception during execution
      */
     public <E extends Throwable> OrElse then(final Throwables.Runnable<E> cmd) throws IllegalArgumentException, E {
         N.checkArgNotNull(cmd);
@@ -1059,13 +1060,13 @@ public final class If {
      *   .orElse(() -> handleEmptyData());
      * }</pre>
      *
-     * @param <T> the type of the input to the consumer.
-     * @param <E> the type of exception that the consumer may throw.
-     * @param init the input value to pass to the consumer (can be {@code null}).
-     * @param action the consumer to execute if the condition is true (must not be {@code null}).
-     * @return an OrElse instance for optional chaining of an else clause.
-     * @throws IllegalArgumentException if action is null.
-     * @throws E if the consumer throws an exception during execution.
+     * @param <T> the type of the input to the consumer
+     * @param <E> the type of exception that the consumer may throw
+     * @param init the input value to pass to the consumer (can be {@code null})
+     * @param action the consumer to execute if the condition is true (must not be {@code null})
+     * @return an OrElse instance for optional chaining of an else clause
+     * @throws IllegalArgumentException if action is null
+     * @throws E if the consumer throws an exception during execution
      */
     @Beta
     public <T, E extends Throwable> OrElse then(final T init, final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
@@ -1113,11 +1114,11 @@ public final class If {
      *   .orElse(() -> processData(data));
      * }</pre>
      *
-     * @param <E> the type of exception to throw.
-     * @param exceptionSupplier the supplier that provides the exception to throw (must not be {@code null}).
-     * @return an OrElse instance (though it will never be reached if the condition is true and exception is thrown).
-     * @throws IllegalArgumentException if exceptionSupplier is null.
-     * @throws E if the condition is true.
+     * @param <E> the type of exception to throw
+     * @param exceptionSupplier the supplier that provides the exception to throw (must not be {@code null})
+     * @return an OrElse instance for optional chaining of an else clause (unreachable if the condition is true)
+     * @throws IllegalArgumentException if exceptionSupplier is null
+     * @throws E if the condition is true
      */
     public <E extends Throwable> OrElse thenThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
         N.checkArgNotNull(exceptionSupplier);
@@ -1154,12 +1155,14 @@ public final class If {
      */
     public static final class OrElse {
         /**
-         * For internal only
+         * Cached {@code OrElse} instance representing a {@code true} condition (the {@code then} branch was taken).
+         * Intended for internal use only.
          */
         public static final OrElse TRUE = new OrElse(true);
 
         /**
-         * For internal only
+         * Cached {@code OrElse} instance representing a {@code false} condition (the {@code then} branch was not taken).
+         * Intended for internal use only.
          */
         public static final OrElse FALSE = new OrElse(false);
 
@@ -1175,7 +1178,7 @@ public final class If {
          * <p>This constructor is package-private and used internally by the If class
          * to create OrElse instances representing the state of the conditional chain.</p>
          *
-         * @param b the boolean state indicating whether the initial If condition was true.
+         * @param b the boolean state indicating whether the initial If condition was true
          */
         OrElse(final boolean b) {
             isIfTrue = b;
@@ -1187,8 +1190,8 @@ public final class If {
          * <p>This method uses cached instances (TRUE or FALSE) for performance optimization,
          * avoiding object creation for repeated conditional evaluations.</p>
          *
-         * @param b the boolean state indicating whether the initial If condition was true.
-         * @return an OrElse instance representing the given state (cached instance).
+         * @param b the boolean state indicating whether the initial If condition was true
+         * @return an OrElse instance representing the given state (cached instance)
          */
         static OrElse of(final boolean b) {
             return b ? TRUE : FALSE;
@@ -1234,10 +1237,10 @@ public final class If {
          *   .orElse(() -> setting = DEFAULT_VALUE);
          * }</pre>
          *
-         * @param <E> the type of exception that the runnable may throw.
-         * @param cmd the runnable to execute if the initial condition was false (must not be {@code null}).
-         * @throws IllegalArgumentException if cmd is null.
-         * @throws E if the runnable throws an exception during execution.
+         * @param <E> the type of exception that the runnable may throw
+         * @param cmd the runnable to execute if the initial condition was false (must not be {@code null})
+         * @throws IllegalArgumentException if cmd is null
+         * @throws E if the runnable throws an exception during execution
          */
         public <E extends Throwable> void orElse(final Throwables.Runnable<E> cmd) throws IllegalArgumentException, E {
             N.checkArgNotNull(cmd);
@@ -1270,12 +1273,12 @@ public final class If {
          *   .orElse(context, ctx -> setDefaultProcessingMode(ctx));
          * }</pre>
          *
-         * @param <T> the type of the input to the consumer.
-         * @param <E> the type of exception that the consumer may throw.
-         * @param init the input value to pass to the consumer (can be {@code null}).
-         * @param action the consumer to execute if the initial condition was false (must not be {@code null}).
-         * @throws IllegalArgumentException if action is null.
-         * @throws E if the consumer throws an exception during execution.
+         * @param <T> the type of the input to the consumer
+         * @param <E> the type of exception that the consumer may throw
+         * @param init the input value to pass to the consumer (can be {@code null})
+         * @param action the consumer to execute if the initial condition was false (must not be {@code null})
+         * @throws IllegalArgumentException if action is null
+         * @throws E if the consumer throws an exception during execution
          */
         @Beta
         public <T, E extends Throwable> void orElse(final T init, final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
@@ -1320,10 +1323,10 @@ public final class If {
          *   .orElseThrow(() -> new ValidationException("Email address is required"));
          * }</pre>
          *
-         * @param <E> the type of exception to throw.
-         * @param exceptionSupplier the supplier that provides the exception to throw (must not be {@code null}).
-         * @throws IllegalArgumentException if exceptionSupplier is null.
-         * @throws E if the initial condition was false.
+         * @param <E> the type of exception to throw
+         * @param exceptionSupplier the supplier that provides the exception to throw (must not be {@code null})
+         * @throws IllegalArgumentException if exceptionSupplier is null
+         * @throws E if the initial condition was false
          */
         public <E extends Throwable> void orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
             N.checkArgNotNull(exceptionSupplier);

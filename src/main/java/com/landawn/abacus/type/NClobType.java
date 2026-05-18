@@ -30,6 +30,7 @@ import com.landawn.abacus.exception.UncheckedSQLException;
  */
 public class NClobType extends AbstractType<NClob> {
 
+    /** The type name constant for NClob type identification, equal to {@code "NClob"}. */
     public static final String NCLOB = NClob.class.getSimpleName();
 
     private final Class<NClob> clazz;

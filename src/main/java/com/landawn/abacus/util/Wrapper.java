@@ -77,13 +77,17 @@ public abstract class Wrapper<T> implements Immutable {
     }
 
     /**
-     * Creates a new Wrapper instance for the given array with deep equality semantics.
-     * This method automatically detects arrays and applies appropriate deep hash code
-     * and deep equals implementations. Zero-length arrays are cached for efficiency.
+     * Creates a new {@code Wrapper} instance for the given value using deep equality semantics
+     * (via {@link N#deepHashCode(Object)} and {@link N#deepEquals(Object, Object)}).
+     * When {@code array} is an actual array type, this yields content-based hash/equals behaviour
+     * suitable for using arrays as {@code Map} keys or {@code Set} elements.
+     * Non-array values are also accepted; they will be compared with the same deep-equality functions.
      *
-     * <p>This factory method is specifically designed for arrays and uses deep comparison
-     * semantics, making it ideal for using arrays as keys in HashMaps or elements in HashSets.
-     * The wrapped array should not be modified after wrapping to ensure consistent hash codes.</p>
+     * <p>Zero-length arrays of the same component type share a single cached {@code Wrapper}
+     * instance to reduce memory allocation. {@code null} is also cached as a single instance.</p>
+     *
+     * <p>The wrapped value should not be mutated after wrapping; doing so may change its hash code
+     * and break collection invariants.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -98,16 +102,16 @@ public abstract class Wrapper<T> implements Immutable {
      * String[][] matrix = {{"a", "b"}, {"c", "d"}};
      * Wrapper<String[][]> matrixWrapper = Wrapper.of(matrix);
      *
-     * // Zero-length arrays are cached
+     * // Zero-length arrays share a cached instance
      * Wrapper<int[]> empty1 = Wrapper.of(new int[0]);
      * Wrapper<int[]> empty2 = Wrapper.of(new int[0]);
-     * // Both wrappers share the same cached instance
+     * // empty1 == empty2
      * }</pre>
      *
-     * @param <T> the type of the array to be wrapped.
-     * @param array the array to be wrapped; can be any array type (primitive or object arrays),
-     *              or {@code null}.
-     * @return a Wrapper instance for the given array with deep equality semantics.
+     * @param <T> the type of the value to be wrapped.
+     * @param array the value to be wrapped; may be any array type (primitive or object arrays),
+     *              any non-array object, or {@code null}.
+     * @return a {@code Wrapper} instance for the given value with deep equality semantics.
      */
     public static <T> Wrapper<T> of(final T array) {
         if (array == null) {
@@ -237,10 +241,9 @@ public abstract class Wrapper<T> implements Immutable {
     /**
      * Returns the wrapped value.
      *
-     * <p>This method provides access to the underlying object that was wrapped. The returned
-     * value is the same instance that was passed to the {@code of()} factory method, not a copy.
-     * Modifications to the returned value (if mutable) will affect the wrapper's behavior in
-     * collections if the modifications change the hash code or equality semantics.</p>
+     * <p>The returned value is the same instance that was passed to the {@code of()} factory
+     * method — no copy is made. If the returned value is mutable, mutating it after the wrapper
+     * has been placed into a hash-based collection may corrupt the collection's invariants.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -260,7 +263,7 @@ public abstract class Wrapper<T> implements Immutable {
      * }
      * }</pre>
      *
-     * @return the wrapped value, which may be {@code null} if a {@code null} value was wrapped.
+     * @return the wrapped value, which may be {@code null} if {@code null} was wrapped.
      */
     public T value() {
         return value;
@@ -268,15 +271,16 @@ public abstract class Wrapper<T> implements Immutable {
 
     /**
      * Returns the hash code of the wrapped value.
-     * The implementation depends on how the wrapper was created:
-     * <ul>
-     *   <li>For arrays: uses deep hash code computation via {@link N#deepHashCode(Object)}</li>
-     *   <li>For custom wrappers: uses the provided hash function</li>
-     * </ul>
      *
-     * <p>This method ensures consistent hash codes for wrapped objects, making them
-     * suitable for use in hash-based collections. For arrays, the hash code is computed
-     * based on the contents rather than the array reference.</p>
+     * <p>The computation depends on how this wrapper was created:</p>
+     * <ul>
+     *   <li>For wrappers created by {@link #of(Object)}: uses deep hash code computation
+     *       via {@link N#deepHashCode(Object)}, so two arrays with equal contents produce
+     *       the same hash code.</li>
+     *   <li>For wrappers created by {@link #of(Object, ToIntFunction, BiPredicate)} or
+     *       {@link #of(Object, ToIntFunction, BiPredicate, Function)}: delegates to the
+     *       caller-supplied hash function.</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -284,7 +288,7 @@ public abstract class Wrapper<T> implements Immutable {
      * int[] arr2 = {1, 2, 3};
      * Wrapper<int[]> w1 = Wrapper.of(arr1);
      * Wrapper<int[]> w2 = Wrapper.of(arr2);
-     * // Both wrappers will have the same hash code
+     * // Both wrappers have the same hash code despite different array references
      * assert w1.hashCode() == w2.hashCode();
      * }</pre>
      *
@@ -295,15 +299,19 @@ public abstract class Wrapper<T> implements Immutable {
 
     /**
      * Compares this wrapper with another object for equality.
-     * Two wrappers are equal if they wrap equal values according to:
+     *
+     * <p>The comparison depends on how this wrapper was created:</p>
      * <ul>
-     *   <li>For arrays: deep equality comparison via {@link N#deepEquals(Object, Object)}</li>
-     *   <li>For custom wrappers: the provided equals function</li>
+     *   <li>For wrappers created by {@link #of(Object)}: uses deep equality via
+     *       {@link N#deepEquals(Object, Object)}, so two array wrappers whose arrays have
+     *       equal contents (including nested arrays) are considered equal.</li>
+     *   <li>For wrappers created by {@link #of(Object, ToIntFunction, BiPredicate)} or
+     *       {@link #of(Object, ToIntFunction, BiPredicate, Function)}: delegates to the
+     *       caller-supplied equals function. A {@link ClassCastException} during comparison
+     *       is silently treated as {@code false}.</li>
      * </ul>
      *
-     * <p>This method provides value-based equality instead of reference equality,
-     * making wrapped objects behave correctly in collections. For arrays, the comparison
-     * is performed element-by-element, including nested arrays.</p>
+     * <p>Returns {@code false} if {@code obj} is not a {@code Wrapper} instance.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -315,8 +323,10 @@ public abstract class Wrapper<T> implements Immutable {
      * assert w1.equals(w2);
      * }</pre>
      *
-     * @param obj the object to compare with.
-     * @return {@code true} if the objects are equal, {@code false} otherwise.
+     * @param obj the object to compare with this wrapper.
+     * @return {@code true} if {@code obj} is a {@code Wrapper} whose wrapped value is equal
+     *         to this wrapper's value according to the applicable equality semantics;
+     *         {@code false} otherwise.
      */
     @Override
     public abstract boolean equals(final Object obj);

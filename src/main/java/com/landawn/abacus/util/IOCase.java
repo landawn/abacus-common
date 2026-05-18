@@ -36,7 +36,6 @@ package com.landawn.abacus.util;
  * }</pre>
  *
  * @version $Id: IOCase.java 1483915 2013-05-17 17:02:35Z sebb $
- * @see IOUtil
  * @see java.io.File#separatorChar
  */
 public enum IOCase {
@@ -254,7 +253,8 @@ public enum IOCase {
      * using the case-sensitivity rule of this IOCase.
      *
      * <p>This method mimics parts of {@link String#indexOf(String, int)}
-     * but takes case-sensitivity into account based on this IOCase setting.</p>
+     * but takes case-sensitivity into account based on this IOCase setting.
+     * If {@code strStartIndex} is negative, the search starts from index 0.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -263,9 +263,10 @@ public enum IOCase {
      * }</pre>
      *
      * @param str the string to search in, not null
-     * @param strStartIndex the index to start searching from
+     * @param strStartIndex the index to start searching from; negative values are treated as 0
      * @param search the string to search for, not null
-     * @return the index of the first occurrence of search in str, or -1 if not found
+     * @return the index of the first occurrence of {@code search} in {@code str} at or after
+     *         {@code strStartIndex}, or {@code -1} if not found
      * @throws IllegalArgumentException if either string is null
      */
     public int checkIndexOf(final String str, final int strStartIndex, final String search) {
@@ -315,6 +316,11 @@ public enum IOCase {
 
     //-----------------------------------------------------------------------
 
+    /**
+     * Returns the name of this IOCase constant.
+     *
+     * @return the name of the constant ("Sensitive", "Insensitive", or "System")
+     */
     @Override
     public String toString() {
         return name;

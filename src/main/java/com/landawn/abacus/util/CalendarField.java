@@ -177,14 +177,14 @@ public enum CalendarField {
      *
      * <p>Supported field values include:
      * <ul>
-     *   <li>{@link Calendar#MILLISECOND} (14) - maps to {@link #MILLISECOND}</li>
-     *   <li>{@link Calendar#SECOND} (13) - maps to {@link #SECOND}</li>
-     *   <li>{@link Calendar#MINUTE} (12) - maps to {@link #MINUTE}</li>
-     *   <li>{@link Calendar#HOUR_OF_DAY} (11) - maps to {@link #HOUR_OF_DAY}</li>
-     *   <li>{@link Calendar#DAY_OF_MONTH} (5) - maps to {@link #DAY_OF_MONTH}</li>
-     *   <li>{@link Calendar#WEEK_OF_YEAR} (3) - maps to {@link #WEEK_OF_YEAR}</li>
-     *   <li>{@link Calendar#MONTH} (2) - maps to {@link #MONTH}</li>
-     *   <li>{@link Calendar#YEAR} (1) - maps to {@link #YEAR}</li>
+     *   <li>{@link Calendar#MILLISECOND} - maps to {@link #MILLISECOND}</li>
+     *   <li>{@link Calendar#SECOND} - maps to {@link #SECOND}</li>
+     *   <li>{@link Calendar#MINUTE} - maps to {@link #MINUTE}</li>
+     *   <li>{@link Calendar#HOUR_OF_DAY} - maps to {@link #HOUR_OF_DAY}</li>
+     *   <li>{@link Calendar#DAY_OF_MONTH} - maps to {@link #DAY_OF_MONTH}</li>
+     *   <li>{@link Calendar#WEEK_OF_YEAR} - maps to {@link #WEEK_OF_YEAR}</li>
+     *   <li>{@link Calendar#MONTH} - maps to {@link #MONTH}</li>
+     *   <li>{@link Calendar#YEAR} - maps to {@link #YEAR}</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -256,17 +256,9 @@ public enum CalendarField {
      * expect field constants, such as {@link Calendar#get(int)}, {@link Calendar#set(int, int)},
      * {@link Calendar#add(int, int)}, and {@link Calendar#roll(int, int)}.</p>
      *
-     * <p>Each CalendarField enum constant maps to exactly one Calendar field constant:
-     * <ul>
-     *   <li>{@link #MILLISECOND}.value() returns {@link Calendar#MILLISECOND} (14)</li>
-     *   <li>{@link #SECOND}.value() returns {@link Calendar#SECOND} (13)</li>
-     *   <li>{@link #MINUTE}.value() returns {@link Calendar#MINUTE} (12)</li>
-     *   <li>{@link #HOUR_OF_DAY}.value() returns {@link Calendar#HOUR_OF_DAY} (11)</li>
-     *   <li>{@link #DAY_OF_MONTH}.value() returns {@link Calendar#DAY_OF_MONTH} (5)</li>
-     *   <li>{@link #WEEK_OF_YEAR}.value() returns {@link Calendar#WEEK_OF_YEAR} (3)</li>
-     *   <li>{@link #MONTH}.value() returns {@link Calendar#MONTH} (2)</li>
-     *   <li>{@link #YEAR}.value() returns {@link Calendar#YEAR} (1)</li>
-     * </ul>
+     * <p>Each {@code CalendarField} constant's {@code value()} returns the integer of
+     * the corresponding {@link Calendar} field constant (e.g., {@link #MONTH}.value()
+     * returns {@link Calendar#MONTH}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -287,7 +279,7 @@ public enum CalendarField {
      * cal.roll(CalendarField.HOUR_OF_DAY.value(), 3);   // Add 3 hours (wraps at 24)
      * }</pre>
      *
-     * @return the Calendar field constant value (an integer between 1 and 14)
+     * @return the {@link Calendar} field constant integer corresponding to this enum constant
      * @see Calendar#get(int)
      * @see Calendar#set(int, int)
      * @see Calendar#add(int, int)

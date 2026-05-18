@@ -67,7 +67,8 @@ public class DigestUtil {
     /**
      * Computes the digest of the given byte array using the specified MessageDigest.
      * This is a convenience method that directly computes and returns the final digest hash.
-     * The MessageDigest is reset after this operation.
+     * The MessageDigest is automatically reset to its initial state as a side effect of calling
+     * {@link MessageDigest#digest(byte[])}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -76,9 +77,9 @@ public class DigestUtil {
      * // hash contains the 16-byte MD5 digest
      * }</pre>
      *
-     * @param messageDigest The MessageDigest algorithm to use (must not be {@code null})
-     * @param data The byte array to digest (must not be {@code null})
-     * @return The computed digest as a byte array, length depends on the algorithm used
+     * @param messageDigest the MessageDigest algorithm to use (must not be {@code null})
+     * @param data the byte array to digest (must not be {@code null})
+     * @return The computed digest as a byte array; length depends on the algorithm used
      * @throws NullPointerException if {@code messageDigest} or {@code data} is {@code null}
      * @see MessageDigest#digest(byte[])
      */
@@ -98,10 +99,9 @@ public class DigestUtil {
      * // buffer.position() is now equal to buffer.limit()
      * }</pre>
      *
-     * @param messageDigest The MessageDigest algorithm to use (must not be {@code null})
-     * @param data The ByteBuffer containing data to digest (must not be {@code null})
-     * @return The computed digest as a byte array, length depends on the algorithm used
-     *
+     * @param messageDigest the MessageDigest algorithm to use (must not be {@code null})
+     * @param data the ByteBuffer containing data to digest; position is advanced to the limit
+     * @return The computed digest as a byte array; length depends on the algorithm used
      */
     public static byte[] digest(final MessageDigest messageDigest, final ByteBuffer data) {
         messageDigest.update(data);
@@ -120,12 +120,11 @@ public class DigestUtil {
      * // Produces a 32-byte SHA-256 hash of the file contents
      * }</pre>
      *
-     * @param messageDigest The MessageDigest algorithm to use (must not be {@code null})
-     * @param data The File to read and digest (must exist and be readable)
-     * @return The computed digest as a byte array, length depends on the algorithm used
-     * @throws IOException If an I/O error occurs while reading the file
+     * @param messageDigest the MessageDigest algorithm to use (must not be {@code null})
+     * @param data the File to read and digest (must exist and be readable)
+     * @return The computed digest as a byte array; length depends on the algorithm used
+     * @throws IOException if an I/O error occurs while reading the file
      * @throws java.io.FileNotFoundException if the file does not exist or cannot be opened
-     *
      */
     public static byte[] digest(final MessageDigest messageDigest, final File data) throws IOException {
         return updateDigest(messageDigest, data).digest();
@@ -144,11 +143,10 @@ public class DigestUtil {
      * }
      * }</pre>
      *
-     * @param messageDigest The MessageDigest algorithm to use (must not be {@code null})
-     * @param data The InputStream to read and digest (must not be {@code null})
-     * @return The computed digest as a byte array, length depends on the algorithm used
-     * @throws IOException If an I/O error occurs while reading from the stream
-     *
+     * @param messageDigest the MessageDigest algorithm to use (must not be {@code null})
+     * @param data the InputStream to read and digest (not closed by this method)
+     * @return The computed digest as a byte array; length depends on the algorithm used
+     * @throws IOException if an I/O error occurs while reading from the stream
      */
     public static byte[] digest(final MessageDigest messageDigest, final InputStream data) throws IOException {
         return updateDigest(messageDigest, data).digest();
@@ -167,23 +165,22 @@ public class DigestUtil {
      * // Or simply: DigestUtil.digest(DigestUtil.getSha512Digest(), path)
      * }</pre>
      *
-     * @param messageDigest The MessageDigest algorithm to use (must not be {@code null})
-     * @param data The Path to the file to digest (must not be {@code null})
-     * @param options Optional open options for the file (e.g., StandardOpenOption.READ).
-     *                If not specified, default options are used.
-     * @return The computed digest as a byte array, length depends on the algorithm used
-     * @throws IOException If an I/O error occurs while reading the file
-     *
+     * @param messageDigest the MessageDigest algorithm to use (must not be {@code null})
+     * @param data the Path to the file to digest (must not be {@code null})
+     * @param options optional open options for the file (e.g., {@code StandardOpenOption.READ});
+     *                if not specified, default options are used
+     * @return The computed digest as a byte array; length depends on the algorithm used
+     * @throws IOException if an I/O error occurs while reading the file
      */
     public static byte[] digest(final MessageDigest messageDigest, final Path data, final OpenOption... options) throws IOException {
         return updateDigest(messageDigest, data, options).digest();
     }
 
     /**
-     * Reads through a RandomAccessFile using non-blocking I/O (NIO) and computes the digest.
-     * This method uses FileChannel for efficient reading with a 1024-byte buffer.
-     * The RandomAccessFile is read from its current position to the end.
-     * The file position is modified during reading.
+     * Reads through a RandomAccessFile using NIO (FileChannel) and computes the digest.
+     * This method uses a 1024-byte buffer for efficient reading.
+     * The RandomAccessFile is read from its current position to the end,
+     * and the file position is advanced as a side effect.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -192,11 +189,10 @@ public class DigestUtil {
      * }
      * }</pre>
      *
-     * @param messageDigest The MessageDigest algorithm to use (must not be {@code null})
-     * @param data The RandomAccessFile to read and digest (must not be {@code null})
-     * @return The computed digest as a byte array, length depends on the algorithm used
-     * @throws IOException If an I/O error occurs while reading the file
-     *
+     * @param messageDigest the MessageDigest algorithm to use (must not be {@code null})
+     * @param data the RandomAccessFile to read and digest (must not be {@code null})
+     * @return The computed digest as a byte array; length depends on the algorithm used
+     * @throws IOException if an I/O error occurs while reading the file
      */
     public static byte[] digest(final MessageDigest messageDigest, final RandomAccessFile data) throws IOException {
         return updateDigest(messageDigest, data).digest();
@@ -204,8 +200,9 @@ public class DigestUtil {
 
     /**
      * Returns a MessageDigest instance for the specified algorithm.
-     * This method wraps the checked NoSuchAlgorithmException in an unchecked IllegalArgumentException,
-     * making it more convenient to use when you know the algorithm is available.
+     * This method wraps the checked {@link java.security.NoSuchAlgorithmException} in an unchecked
+     * {@link IllegalArgumentException}, making it more convenient to use when the algorithm is known
+     * to be available.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -213,12 +210,10 @@ public class DigestUtil {
      * byte[] hash = md.digest("data".getBytes());
      * }</pre>
      *
-     * @param algorithm The name of the algorithm (e.g., "MD5", "SHA-256", "SHA-512").
-     *                  See Java Cryptography Architecture documentation for standard algorithm names.
-     *                  Must not be {@code null}.
+     * @param algorithm the name of the algorithm (e.g., {@code "MD5"}, {@code "SHA-256"}, {@code "SHA-512"});
+     *                  see the Java Cryptography Architecture documentation for standard names
      * @return A new MessageDigest instance for the specified algorithm
-     * @throws IllegalArgumentException If the algorithm is not available in the current JVM
-     *
+     * @throws IllegalArgumentException if the algorithm is not available in the current JVM
      * @see MessageDigest#getInstance(String)
      * @see MessageDigestAlgorithms
      */
@@ -242,11 +237,11 @@ public class DigestUtil {
      * // Returns SHA3-256 if available (Java 9+), otherwise SHA-256
      * }</pre>
      *
-     * @param algorithm The name of the algorithm to attempt (e.g., "SHA3-512", "BLAKE2b").
-     *                  Can be {@code null}, in which case the default is returned.
-     * @param defaultMessageDigest The MessageDigest to return if the algorithm is not available.
-     *                            Can be {@code null}.
-     * @return A MessageDigest instance for the algorithm if available, otherwise returns
+     * @param algorithm the name of the algorithm to attempt (e.g., {@code "SHA3-512"});
+     *                  if {@code null} or unavailable, {@code defaultMessageDigest} is returned
+     * @param defaultMessageDigest the MessageDigest to return if the algorithm is not available;
+     *                             may be {@code null}
+     * @return A MessageDigest instance for the algorithm if available, otherwise
      *         {@code defaultMessageDigest} (which may be {@code null})
      * @see #getDigest(String)
      * @see #isAvailable(String)
@@ -579,10 +574,9 @@ public class DigestUtil {
      * }
      * }</pre>
      *
-     * @param messageDigestAlgorithm The algorithm name to test (e.g., "SHA-256", "SHA3-512", "BLAKE2b").
-     *                               Can be {@code null}, which will return {@code false}.
-     * @return {@code true} if the algorithm is available and can be used, {@code false} otherwise
-     *
+     * @param messageDigestAlgorithm the algorithm name to test (e.g., {@code "SHA-256"}, {@code "SHA3-512"});
+     *                               if {@code null}, {@code false} is returned
+     * @return {@code true} if the algorithm is available and can be used; {@code false} otherwise
      */
     public static boolean isAvailable(final String messageDigestAlgorithm) {
         return getDigest(messageDigestAlgorithm, null) != null;
@@ -598,9 +592,8 @@ public class DigestUtil {
      * byte[] hash = DigestUtil.md2("Hello".getBytes());
      * }</pre>
      *
-     * @param data The data to digest (must not be {@code null})
+     * @param data the data to digest (must not be {@code null})
      * @return MD2 digest as a 16-byte array
-     *
      */
     public static byte[] md2(final byte[] data) {
         return getMd2Digest().digest(data);
@@ -2021,9 +2014,9 @@ public class DigestUtil {
      * byte[] finalHash = md.digest();
      * }</pre>
      *
-     * @param messageDigest The MessageDigest to update.
-     * @param valueToDigest The byte array to add to the digest.
-     * @return The updated MessageDigest (same instance as input).
+     * @param messageDigest the MessageDigest to update (must not be {@code null})
+     * @param valueToDigest the byte array to add to the digest (must not be {@code null})
+     * @return The updated MessageDigest (the same instance as the input)
      */
     public static MessageDigest updateDigest(final MessageDigest messageDigest, final byte[] valueToDigest) {
         messageDigest.update(valueToDigest);
@@ -2042,10 +2035,9 @@ public class DigestUtil {
      * byte[] hash = md.digest();
      * }</pre>
      *
-     * @param messageDigest The MessageDigest to update (must not be {@code null})
-     * @param valueToDigest The ByteBuffer containing data to add to the digest (must not be {@code null})
-     * @return The updated MessageDigest (same instance as input)
-     *
+     * @param messageDigest the MessageDigest to update (must not be {@code null})
+     * @param valueToDigest the ByteBuffer containing data to add; position is advanced to the limit
+     * @return The updated MessageDigest (the same instance as the input)
      */
     public static MessageDigest updateDigest(final MessageDigest messageDigest, final ByteBuffer valueToDigest) {
         messageDigest.update(valueToDigest);
@@ -2054,7 +2046,7 @@ public class DigestUtil {
 
     /**
      * Reads through a File and updates the MessageDigest with its contents.
-     * The file is read using a buffered stream for efficiency.
+     * The file is read using a buffered stream for efficiency (1024-byte buffer).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2063,11 +2055,10 @@ public class DigestUtil {
      * byte[] hash = md.digest();
      * }</pre>
      *
-     * @param digest The MessageDigest to update (must not be {@code null})
-     * @param data The File to read (must exist and be readable)
-     * @return The updated MessageDigest (same instance as input)
-     * @throws IOException If an I/O error occurs while reading the file
-     *
+     * @param digest the MessageDigest to update (must not be {@code null})
+     * @param data the File to read (must exist and be readable)
+     * @return The updated MessageDigest (the same instance as the input)
+     * @throws IOException if an I/O error occurs while reading the file
      */
     public static MessageDigest updateDigest(final MessageDigest digest, final File data) throws IOException {
         try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(data))) {
@@ -2096,7 +2087,7 @@ public class DigestUtil {
 
     /**
      * Reads through an InputStream and updates the MessageDigest with the data.
-     * The stream is read completely but not closed. This method uses a buffer
+     * The stream is read completely but NOT closed. This method uses a 1024-byte buffer
      * for efficient reading of large streams.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2108,10 +2099,10 @@ public class DigestUtil {
      * byte[] hash = md.digest();
      * }</pre>
      *
-     * @param digest The MessageDigest to update.
-     * @param inputStream The InputStream to read.
-     * @return The updated MessageDigest (same instance as input).
-     * @throws IOException If an error occurs while reading the stream.
+     * @param digest the MessageDigest to update (must not be {@code null})
+     * @param inputStream the InputStream to read (not closed by this method)
+     * @return The updated MessageDigest (the same instance as the input)
+     * @throws IOException if an error occurs while reading the stream
      */
     public static MessageDigest updateDigest(final MessageDigest digest, final InputStream inputStream) throws IOException {
         final byte[] buffer = new byte[BUFFER_SIZE];
@@ -2127,6 +2118,7 @@ public class DigestUtil {
 
     /**
      * Reads through a file at the specified Path and updates the MessageDigest.
+     * The file stream is automatically closed after reading.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2135,13 +2127,12 @@ public class DigestUtil {
      * byte[] hash = md.digest();
      * }</pre>
      *
-     * @param digest The MessageDigest to update (must not be {@code null})
-     * @param path The Path to the file to read (must not be {@code null})
-     * @param options Optional open options for the file (e.g., StandardOpenOption.READ).
-     *                If not specified, default options are used.
-     * @return The updated MessageDigest (same instance as input)
-     * @throws IOException If an I/O error occurs while reading the file
-     *
+     * @param digest the MessageDigest to update (must not be {@code null})
+     * @param path the Path to the file to read (must not be {@code null})
+     * @param options optional open options for the file (e.g., {@code StandardOpenOption.READ});
+     *                if not specified, default options are used
+     * @return The updated MessageDigest (the same instance as the input)
+     * @throws IOException if an I/O error occurs while reading the file
      */
     public static MessageDigest updateDigest(final MessageDigest digest, final Path path, final OpenOption... options) throws IOException {
         try (BufferedInputStream inputStream = new BufferedInputStream(Files.newInputStream(path, options))) {
@@ -2150,9 +2141,9 @@ public class DigestUtil {
     }
 
     /**
-     * Reads through a RandomAccessFile using NIO and updates the MessageDigest.
-     * This method is efficient for large files as it uses FileChannel.
-     * The RandomAccessFile is read from its current position to the end.
+     * Reads through a RandomAccessFile using NIO (FileChannel) and updates the MessageDigest.
+     * The RandomAccessFile is read from its current position to the end,
+     * and the file position is advanced as a side effect.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2163,19 +2154,18 @@ public class DigestUtil {
      * byte[] hash = md.digest();
      * }</pre>
      *
-     * @param digest The MessageDigest to update (must not be {@code null})
-     * @param data The RandomAccessFile to read (must not be {@code null})
-     * @return The updated MessageDigest (same instance as input)
-     * @throws IOException If an I/O error occurs while reading
-     *
+     * @param digest the MessageDigest to update (must not be {@code null})
+     * @param data the RandomAccessFile to read (must not be {@code null})
+     * @return The updated MessageDigest (the same instance as the input)
+     * @throws IOException if an I/O error occurs while reading
      */
     public static MessageDigest updateDigest(final MessageDigest digest, final RandomAccessFile data) throws IOException {
         return updateDigest(digest, data.getChannel());
     }
 
     /**
-     * Updates the given MessageDigest with a string value (converted to UTF-8 bytes).
-     * This is a convenience method for updating a digest with text data.
+     * Updates the given MessageDigest with a string value converted to UTF-8 bytes.
+     * This is a convenience method for updating a digest incrementally with text data.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2185,9 +2175,9 @@ public class DigestUtil {
      * String hash = Hex.encodeToString(md.digest());
      * }</pre>
      *
-     * @param messageDigest The MessageDigest to update.
-     * @param valueToDigest The string value to add to the digest.
-     * @return The updated MessageDigest (same instance as input).
+     * @param messageDigest the MessageDigest to update (must not be {@code null})
+     * @param valueToDigest the string value to add to the digest, encoded as UTF-8
+     * @return The updated MessageDigest (the same instance as the input)
      */
     public static MessageDigest updateDigest(final MessageDigest messageDigest, final String valueToDigest) {
         messageDigest.update(Strings.getBytesUtf8(valueToDigest));
@@ -2195,14 +2185,14 @@ public class DigestUtil {
     }
 
     /**
-     * Contains standard algorithm names for MessageDigest that can be used with the
+     * Contains standard algorithm names for {@link MessageDigest} that can be used with the
      * {@link DigestUtil#getDigest(String)} method and other methods requiring algorithm names.
      *
      * <p>These constants represent the standard names as defined in the Java Cryptography
      * Architecture Standard Algorithm Name Documentation.</p>
      *
-     * @see <a href="http://docs.oracle.com/javase/6/docs/technotes/guides/security/StandardNames.html">
-     *      Java Cryptography Architecture Standard Algorithm Name Documentation</a>
+     * @see <a href="https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html">
+     *      Java Security Standard Algorithm Names</a>
      */
     static class MessageDigestAlgorithms {
 
@@ -2292,8 +2282,9 @@ public class DigestUtil {
         public static final String SHA3_512 = "SHA3-512";
 
         /**
-         * Returns an array containing all MessageDigest algorithm constants defined in this class.
-         * This can be useful for testing algorithm availability or iterating through algorithms.
+         * Returns an array containing all MessageDigest algorithm name constants defined in this class.
+         * A new array is returned on each call to prevent external mutation.
+         * This is useful for testing algorithm availability or iterating through algorithms.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2304,9 +2295,7 @@ public class DigestUtil {
          * }
          * }</pre>
          *
-         * @return An array of all algorithm name constants.
-         *
-         *
+         * @return A new array containing all algorithm name constants defined in this class
          */
         public static String[] values() {
             // Do not use a constant array here as that can be changed externally by accident or design

@@ -1080,7 +1080,7 @@ public class ParserUtilTest extends AbstractTest {
 
     @Test
     public void test_setPropValue() {
-        final Account account = Beans.newRandom(Account.class);
+        final Account account = Beans.newRandomBean(Account.class);
         N.println(account);
         Beans.setPropValue(account, Beans.getPropSetter(Account.class, "id"), 1);
         assertEquals(1, account.getId());
@@ -1763,7 +1763,7 @@ public class ParserUtilTest extends AbstractTest {
 
     @Test
     public void test_setGetNullBeanProperty() {
-        final Account account = Beans.newRandom(Account.class);
+        final Account account = Beans.newRandomBean(Account.class);
         N.println(account);
         account.setContact(null);
 

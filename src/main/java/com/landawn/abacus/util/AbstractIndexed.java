@@ -24,12 +24,11 @@ package com.landawn.abacus.util;
  * {@link ArithmeticException} on overflow) or as a {@code long} (via {@link #longIndex()}).</p>
  *
  * @see Indexed
- * @see Immutable
  */
 @com.landawn.abacus.annotation.Immutable
 abstract class AbstractIndexed implements Immutable {
 
-    /** The index value associated with this object. */
+    /** The non-negative index position associated with this object, stored as a {@code long}. */
     protected final long index;
 
     /**
@@ -42,28 +41,15 @@ abstract class AbstractIndexed implements Immutable {
     }
 
     /**
-     * Returns the index value as an int.
+     * Returns the index value as an {@code int}.
      *
-     * <p>This method converts the internal long index value to an int representation.
-     * If the long value is outside the range of int values (Integer.MIN_VALUE to
-     * Integer.MAX_VALUE), an ArithmeticException is thrown to prevent data loss.</p>
+     * <p>This method converts the internal {@code long} index to an {@code int}.
+     * If the index exceeds {@link Integer#MAX_VALUE}, an {@link ArithmeticException}
+     * is thrown to prevent silent data loss. Use {@link #longIndex()} when the index
+     * may exceed the {@code int} range.</p>
      *
-     * <p>For accessing the full range of index values without conversion, use
-     * {@link #longIndex()} instead.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Indexed<String> indexed = Indexed.of("val", 42L);
-     * int idx = indexed.index();  // Returns 42
-     * System.out.println("Index: " + idx);
-     *
-     * // This would throw ArithmeticException:
-     * Indexed<String> largeIndex = Indexed.of("val", Long.MAX_VALUE);
-     * int overflow = largeIndex.index();  // Throws ArithmeticException
-     * }</pre>
-     *
-     * @return the index value as an int
-     * @throws ArithmeticException if the long index value overflows an int
+     * @return the index value as an {@code int}
+     * @throws ArithmeticException if the index value overflows an {@code int}
      * @see #longIndex()
      * @see Math#toIntExact(long)
      */
@@ -72,28 +58,12 @@ abstract class AbstractIndexed implements Immutable {
     }
 
     /**
-     * Returns the index value as a long.
+     * Returns the index value as a {@code long}.
      *
-     * <p>This method returns the full precision index value without any
-     * conversion or potential loss of data. Unlike {@link #index()}, this method
-     * never throws an exception and can handle the full range of long values.</p>
+     * <p>Unlike {@link #index()}, this method never throws an exception and
+     * safely represents any index value within the full {@code long} range.</p>
      *
-     * <p>Use this method when you need to work with large index values that might
-     * exceed the range of int values, or when you want to avoid the overhead of
-     * range checking performed by {@link #index()}.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Indexed<String> indexed = Indexed.of("value", Long.MAX_VALUE);
-     * long idx = indexed.longIndex();   // Returns Long.MAX_VALUE safely
-     * System.out.println("Long index: " + idx);
-     *
-     * // Safe for any long value:
-     * Indexed<String> largeIndex = Indexed.of("value", 9_223_372_036_854_775_807L);
-     * long safeIndex = largeIndex.longIndex();   // No exceptions thrown
-     * }</pre>
-     *
-     * @return the index value as a long
+     * @return the index value as a {@code long}
      * @see #index()
      */
     public long longIndex() {

@@ -24012,7 +24012,7 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_001() {
-        final Account account = Beans.newRandom(Account.class);
+        final Account account = Beans.newRandomBean(Account.class);
         N.println(account);
     }
 

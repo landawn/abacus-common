@@ -53,14 +53,15 @@ import com.landawn.abacus.util.stream.FloatStream;
 public abstract class FloatIterator extends ImmutableIterator<Float> {
 
     /**
-     * Protected constructor for subclasses.
+     * Constructor for subclasses.
      */
     protected FloatIterator() {
     }
 
     /**
-     * A singleton empty FloatIterator that has no elements.
-     * This instance is immutable and can be safely shared.
+     * A singleton empty {@code FloatIterator} that has no elements.
+     * {@code hasNext()} always returns {@code false}; {@code nextFloat()} always throws
+     * {@link NoSuchElementException}. This instance is immutable and can be safely shared.
      *
      * @see #empty()
      */
@@ -180,9 +181,9 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
-     * Returns a FloatIterator instance created lazily using the provided Supplier.
-     * The Supplier is invoked only when the first method is called on the returned iterator.
-     * This allows for deferred initialization of the iterator.
+     * Returns a {@code FloatIterator} whose underlying iterator is created lazily using the provided supplier.
+     * The supplier is invoked at most once, on the first call to any method of the returned iterator.
+     * This allows for deferred and potentially expensive initialization of the iterator.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -197,9 +198,9 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * }
      * }</pre>
      *
-     * @param iteratorSupplier A Supplier that provides the FloatIterator when needed
-     * @return A FloatIterator that is initialized on first use
-     * @throws IllegalArgumentException if iteratorSupplier is null
+     * @param iteratorSupplier a supplier that provides the {@code FloatIterator} when first needed; must not be {@code null}
+     * @return a {@code FloatIterator} that is initialized on first use
+     * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}
      */
     public static FloatIterator defer(final Supplier<? extends FloatIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
@@ -236,8 +237,10 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
-     * Returns an infinite FloatIterator that generates values using the provided supplier.
-     * The supplier is called each time a new value is needed.
+     * Returns an infinite {@code FloatIterator} that generates values using the provided supplier.
+     * The supplier is called each time {@link #nextFloat()} is invoked.
+     * The returned iterator's {@link #hasNext()} always returns {@code true}.
+     * Use {@link #limit(long)} to bound the number of elements consumed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -248,9 +251,9 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * float[] fiveRandoms = randomFloats.limit(5).toArray();
      * }</pre>
      *
-     * @param supplier the supplier function to generate float values
-     * @return an infinite FloatIterator
-     * @throws IllegalArgumentException if supplier is null
+     * @param supplier the supplier function to generate float values; must not be {@code null}
+     * @return an infinite {@code FloatIterator} backed by the given supplier
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      */
     public static FloatIterator generate(final FloatSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier);
@@ -269,8 +272,10 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
-     * Returns a FloatIterator that generates values while the hasNext condition is {@code true}.
-     * This allows for creating finite iterators with dynamic termination conditions.
+     * Returns a {@code FloatIterator} that generates values while the {@code hasNext} condition
+     * returns {@code true}. This allows for creating finite iterators with dynamic termination
+     * conditions. {@link #nextFloat()} throws {@link NoSuchElementException} when {@code hasNext}
+     * returns {@code false}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -282,10 +287,10 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * // Generates: 0.0, 1.5, 3.0, 4.5, 6.0, 7.5, 9.0, 10.5, 12.0, 13.5
      * }</pre>
      *
-     * @param hasNext a BooleanSupplier that determines if more elements are available
-     * @param supplier the supplier function to generate float values
-     * @return a FloatIterator that terminates when hasNext returns false
-     * @throws IllegalArgumentException if hasNext or supplier is null
+     * @param hasNext a {@code BooleanSupplier} that determines if more elements are available; must not be {@code null}
+     * @param supplier the supplier function to generate float values; must not be {@code null}
+     * @return a {@code FloatIterator} that terminates when {@code hasNext} returns {@code false}
+     * @throws IllegalArgumentException if {@code hasNext} or {@code supplier} is {@code null}
      */
     public static FloatIterator generate(final BooleanSupplier hasNext, final FloatSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(hasNext);
@@ -309,9 +314,9 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
-     * Returns the next element as a boxed Float.
-     * This method provides compatibility with the Iterator&lt;Float&gt; interface but involves boxing overhead.
-     * For better performance, use {@link #nextFloat()} instead which returns the primitive float value directly.
+     * Returns the next element as a boxed {@link Float}.
+     * This method provides compatibility with the {@code Iterator<Float>} interface but involves
+     * autoboxing overhead. Prefer {@link #nextFloat()} which returns the primitive {@code float} directly.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -319,8 +324,8 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * Float boxed = iter.next();   // 1.0f (boxed)
      * }</pre>
      *
-     * @return the next element as a Float object
-     * @throws NoSuchElementException if no more elements are available
+     * @return the next element as a {@link Float} object
+     * @throws NoSuchElementException if the iteration has no more elements
      * @deprecated use {@link #nextFloat()} instead to avoid boxing overhead
      */
     @Deprecated
@@ -345,9 +350,10 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     public abstract float nextFloat();
 
     /**
-     * Returns a new FloatIterator that skips the first n elements.
-     * If n is greater than the number of remaining elements, an empty iterator is returned.
+     * Returns a new {@code FloatIterator} that skips the first {@code n} elements of this iterator.
+     * If {@code n} is greater than the number of remaining elements, an empty iterator is returned.
      * The skipping is performed lazily when the returned iterator is first accessed.
+     * If {@code n} is zero, this iterator is returned unchanged.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -356,9 +362,10 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * // skipped will iterate over: 3.0f, 4.0f, 5.0f
      * }</pre>
      *
-     * @param n the number of elements to skip
-     * @return a new FloatIterator with the first n elements skipped
-     * @throws IllegalArgumentException if n is negative
+     * @param n the number of elements to skip; must be non-negative
+     * @return a new {@code FloatIterator} with the first {@code n} elements skipped,
+     *         or this iterator if {@code n} is zero
+     * @throws IllegalArgumentException if {@code n} is negative
      */
     public FloatIterator skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -403,8 +410,9 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
-     * Returns a new FloatIterator that contains at most the specified number of elements.
-     * If the iterator contains fewer elements than the limit, all elements are included.
+     * Returns a new {@code FloatIterator} that yields at most {@code count} elements from this iterator.
+     * If the iterator contains fewer elements than {@code count}, all elements are included.
+     * If {@code count} is zero, an empty iterator is returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -413,9 +421,9 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * // limited will iterate over: 1.0f, 2.0f, 3.0f
      * }</pre>
      *
-     * @param count the maximum number of elements to iterate
-     * @return a new FloatIterator limited to the specified count
-     * @throws IllegalArgumentException if count is negative
+     * @param count the maximum number of elements to iterate; must be non-negative
+     * @return a new {@code FloatIterator} limited to at most {@code count} elements
+     * @throws IllegalArgumentException if {@code count} is negative
      */
     public FloatIterator limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, cs.count);
@@ -447,8 +455,8 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
-     * Returns a new FloatIterator that only includes elements matching the given predicate.
-     * The filtering is performed lazily as elements are requested.
+     * Returns a new {@code FloatIterator} that only yields elements for which the given predicate
+     * returns {@code true}. The filtering is performed lazily as elements are requested.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -457,9 +465,9 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * // filtered will iterate over: 3.0f, 4.5f, 5.0f
      * }</pre>
      *
-     * @param predicate the predicate to test elements
-     * @return a new FloatIterator containing only matching elements
-     * @throws IllegalArgumentException if predicate is null
+     * @param predicate the predicate used to test elements; must not be {@code null}
+     * @return a new {@code FloatIterator} containing only elements that match the predicate
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     public FloatIterator filter(final FloatPredicate predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate);
@@ -551,8 +559,9 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
-     * Converts this iterator to a FloatStream for use with the Stream API.
+     * Converts this iterator to a {@link FloatStream} for use with the Stream API.
      * The stream is lazily populated from this iterator as elements are consumed.
+     * The iterator must not be used directly after calling this method.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -562,15 +571,15 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      *     .sum();
      * }</pre>
      *
-     * @return a new FloatStream backed by this iterator
+     * @return a new {@link FloatStream} backed by this iterator
      */
     public FloatStream stream() {
         return FloatStream.of(this);
     }
 
     /**
-     * Returns an ObjIterator that yields IndexedFloat objects pairing each element with its index.
-     * Indexing starts from 0.
+     * Returns an {@code ObjIterator} that pairs each remaining element with its zero-based index.
+     * Equivalent to {@link #indexed(long) indexed(0)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -580,7 +589,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * );
      * }</pre>
      *
-     * @return an ObjIterator of IndexedFloat objects
+     * @return an {@code ObjIterator} of {@link IndexedFloat} objects with indices starting at 0
      */
     @Beta
     public ObjIterator<IndexedFloat> indexed() {
@@ -588,8 +597,8 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
-     * Returns an ObjIterator that yields IndexedFloat objects pairing each element with its index.
-     * Indexing starts from the specified startIndex.
+     * Returns an {@code ObjIterator} that pairs each remaining element with its index,
+     * starting from the specified {@code startIndex}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -600,8 +609,8 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * // Prints indices starting from 10, 11, 12...
      * }</pre>
      *
-     * @param startIndex the starting index value, must be non-negative
-     * @return an ObjIterator of IndexedFloat objects
+     * @param startIndex the starting index value; must be non-negative
+     * @return an {@code ObjIterator} of {@link IndexedFloat} objects with indices beginning at {@code startIndex}
      * @throws IllegalArgumentException if {@code startIndex} is negative
      */
     @Beta
@@ -673,10 +682,9 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
-     * Performs the given action for each remaining element along with its index.
-     * The index starts from 0 and increments for each element processed.
-     * This method is useful when you need to track the position of elements during iteration.
-     * The action receives both the current index (as int) and the float value.
+     * Performs the given action for each remaining element along with its zero-based index.
+     * The index starts at 0 and increments by 1 for each element processed.
+     * The action receives both the current index (as {@code int}) and the float value.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -690,9 +698,10 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
-     * @param action the action to be performed for each element with its index, must not be null
-     * @throws IllegalArgumentException if action is null
-     * @throws IllegalStateException if the iterator yields more than {@code Integer.MAX_VALUE} elements (index overflow)
+     * @param action the action to be performed for each element with its index; must not be {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalStateException if the iterator yields more than {@link Integer#MAX_VALUE} elements,
+     *         causing the index counter to overflow
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntFloatConsumer<E> action) throws IllegalArgumentException, E {

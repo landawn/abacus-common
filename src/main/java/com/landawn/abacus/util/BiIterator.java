@@ -839,9 +839,10 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @param <T> the type of elements in the iterable
      * @param <A> the first type of elements in the resulting pairs
      * @param <B> the second type of elements in the resulting pairs
-     * @param iter the iterable to unzip, may be {@code null}
-     * @param unzipFunction a BiConsumer that splits each element into a pair by populating the provided Pair object
-     * @return a BiIterator of pairs produced by the unzip function, or empty if iter is {@code null}
+     * @param iter the iterable to unzip, may be {@code null}; returns an empty {@code BiIterator} when {@code null}
+     * @param unzipFunction a {@code BiConsumer} that splits each element into a pair by populating the provided {@code Pair} object, must not be {@code null}
+     * @return a {@code BiIterator} of pairs produced by the unzip function, or an empty {@code BiIterator} if {@code iter} is {@code null}
+     * @throws IllegalArgumentException if {@code unzipFunction} is {@code null}
      */
     public static <T, A, B> BiIterator<A, B> unzip(final Iterable<? extends T> iter, final BiConsumer<? super T, Pair<A, B>> unzipFunction) {
         if (iter == null) {
@@ -872,9 +873,10 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @param <T> the type of elements in the iterator
      * @param <A> the first type of elements in the resulting pairs
      * @param <B> the second type of elements in the resulting pairs
-     * @param iter the iterator to unzip, may be {@code null}
-     * @param unzipFunction a BiConsumer that splits each element into a pair by populating the provided Pair object
-     * @return a BiIterator of pairs produced by the unzip function, or empty if iter is {@code null}
+     * @param iter the iterator to unzip, may be {@code null}; returns an empty {@code BiIterator} when {@code null}
+     * @param unzipFunction a {@code BiConsumer} that splits each element into a pair by populating the provided {@code Pair} object, must not be {@code null}
+     * @return a {@code BiIterator} of pairs produced by the unzip function, or an empty {@code BiIterator} if {@code iter} is {@code null}
+     * @throws IllegalArgumentException if {@code unzipFunction} is {@code null}
      */
     public static <T, A, B> BiIterator<A, B> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Pair<A, B>> unzipFunction) {
         N.checkArgNotNull(unzipFunction, cs.function);
@@ -902,10 +904,15 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     protected abstract <E extends Exception> void next(final Throwables.BiConsumer<? super A, ? super B, E> action) throws NoSuchElementException, E;
 
     /**
-     * Performs the given action for each remaining element in the iterator until all elements have been processed or the action throws an exception.
+     * Performs the given action for each remaining element in the iterator until all elements
+     * have been processed or the action throws an exception.
      *
-     * @param action the action to be performed for each element
-     * @deprecated use {@code forEachRemaining(BiConsumer)} to avoid creating the unnecessary {@code Pair} Objects.
+     * <p>This overload wraps each pair in a {@link Pair} object before passing it to the action.
+     * Prefer {@link #forEachRemaining(BiConsumer)} to avoid creating the unnecessary {@code Pair} objects.</p>
+     *
+     * @param action the action to be performed for each {@code Pair} element, must not be {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @deprecated use {@link #forEachRemaining(BiConsumer)} to avoid creating unnecessary {@code Pair} objects.
      * @see #forEachRemaining(BiConsumer)
      */
     @Deprecated
@@ -1289,9 +1296,11 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * Stream<String> stream = iter.stream((k, v) -> k + "=" + v);
      * }</pre>
      *
-     * @param <R> the type of elements in the resulting Stream
-     * @param mapper the function to apply to each pair, must not be {@code null}
-     * @return a {@code Stream} containing the elements produced by the mapper function
+     * @param <R> the type of elements in the resulting {@code Stream}
+     * @param mapper the function to apply to each pair of elements, must not be {@code null}
+     * @return a {@code Stream} containing the elements produced by applying {@code mapper} to each pair
+     * @see #stream()
+     * @see #map(BiFunction)
      */
     public <R> Stream<R> stream(final BiFunction<? super A, ? super B, ? extends R> mapper) {
         return Stream.of(map(mapper));
@@ -1359,8 +1368,9 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * // lists.left() = ["a", "b"], lists.right() = [1, 2]
      * }</pre>
      *
-     * @param supplier a Supplier that provides new List instances, must not be {@code null}
-     * @return a Pair containing two Lists: the first with all first elements, the second with all second elements
+     * @param supplier a {@code Supplier} that creates new {@code List} instances used to collect the first and second elements, must not be {@code null}
+     * @return a {@code Pair} containing two {@code List}s: the left list holds all first elements and the right list holds all second elements
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      */
     public Pair<List<A>, List<B>> toMultiList(@SuppressWarnings("rawtypes") final Supplier<? extends List> supplier) {
         final List<A> listA = supplier.get();
@@ -1385,8 +1395,9 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * Pair<Set<String>, Set<Integer>> sets = iter.toMultiSet(HashSet::new);
      * }</pre>
      *
-     * @param supplier a Supplier that provides new Set instances, must not be {@code null}
-     * @return a Pair containing two Sets: the first with all unique first elements, the second with all unique second elements
+     * @param supplier a {@code Supplier} that creates new {@code Set} instances used to collect the first and second elements, must not be {@code null}
+     * @return a {@code Pair} containing two {@code Set}s: the left set holds all unique first elements and the right set holds all unique second elements
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      */
     public Pair<Set<A>, Set<B>> toMultiSet(@SuppressWarnings("rawtypes") final Supplier<? extends Set> supplier) {
         final Set<A> setA = supplier.get();

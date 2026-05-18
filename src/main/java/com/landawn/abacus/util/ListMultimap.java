@@ -560,7 +560,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param c the collection of elements to be added to the ListMultimap, may be {@code null} or empty
      * @param keyExtractor the function to generate keys for the ListMultimap
      * @return a new instance of ListMultimap with keys and values from the specified collection
-     * @throws IllegalArgumentException if the keyExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      * @see #fromCollection(Collection, Function, Function)
      * @see #fromMap(Map)
      */
@@ -608,7 +608,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param keyExtractor the function to generate keys for the ListMultimap
      * @param valueExtractor the function to extract values for the ListMultimap
      * @return a new instance of ListMultimap with keys and values from the specified collection
-     * @throws IllegalArgumentException if the keyExtractor is {@code null} or if the valueExtractor is {@code null}
+     * @throws IllegalArgumentException if {@code keyExtractor} or {@code valueExtractor} is {@code null}
      * @see #fromCollection(Collection, Function)
      * @see #fromMap(Map)
      */
@@ -727,8 +727,10 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      *
      * @param <K> the type of the keys
      * @param <E> the type of the values
-     * @param c the collection of maps containing the key-value pairs to be added to the new ListMultimap
-     * @return a new instance of ListMultimap with the key-value pairs from the specified collection of maps, or an empty ListMultimap if the collection is {@code null} or empty
+     * @param c the collection of maps whose key-value pairs are to be merged; may be {@code null} or empty.
+     *          The first map in the collection is used as the base; subsequent maps are merged into it via {@code putAll}.
+     * @return a new instance of ListMultimap with the key-value pairs from all maps in the collection,
+     *         or an empty ListMultimap if the collection is {@code null} or empty
      * @see #merge(Map, Map)
      * @see #merge(Map, Map, Map)
      */
@@ -769,7 +771,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param <V> the type of the list
      * @param map The map to be wrapped into a ListMultimap, must not be {@code null}
      * @return a new instance of ListMultimap backed by the provided map
-     * @throws IllegalArgumentException if the provided map is {@code null} or contains {@code null} or empty list values
+     * @throws IllegalArgumentException if {@code map} is {@code null}, or if any value in the map is {@code null} or an empty list
      * @see #wrap(Map, Supplier)
      */
     @SuppressWarnings("rawtypes")
@@ -1092,7 +1094,8 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      *     multimap.toImmutableMap(size -> new HashMap<>(size * 2));
      * }</pre>
      *
-     * @param mapSupplier The supplier function that provides a Map instance. The function takes an integer argument which is the initial size of the map
+     * @param mapSupplier the supplier function that provides a {@link Map} instance; the integer argument passed to it is
+     *                    the number of keys in this multimap (i.e., {@code backingMap.size()})
      * @return an ImmutableMap where each key is associated with an ImmutableList of values from the original ListMultimap
      * @see #toImmutableMap()
      */

@@ -74,6 +74,11 @@ public enum WeekDay {
 
     private final int intValue;
 
+    /**
+     * Constructs a WeekDay enum constant with the specified integer value.
+     *
+     * @param intValue the integer representation of this weekday (0 for SUNDAY through 6 for SATURDAY)
+     */
     WeekDay(final int intValue) {
         this.intValue = intValue;
     }

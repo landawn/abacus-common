@@ -112,7 +112,12 @@ public final class CodeGenerationUtil {
     /** Default inner interface name ({@code "x"}) for single-entity property constants. */
     public static final String X = "x";
 
-    /** Conventional top-level interface name ({@code "s"}) for standalone property-name tables. */
+    /**
+     * Suggested top-level interface name ({@code "s"}) for standalone property-name tables.
+     *
+     * <p>Note: the default value used by {@link #generatePropNameTableClasses(Collection)} is
+     * {@link #X}, not {@code S}. Pass {@code S} explicitly when a distinct name is desired.
+     */
     public static final String S = "s";
 
     /** Default nested interface name for snake_case property constants. */
@@ -179,7 +184,7 @@ public final class CodeGenerationUtil {
      * System.out.println(source);
      * }</pre>
      *
-     * @param entityClass the entity class that contributes bean property names
+     * @param entityClass the entity class that contributes bean property names; must not be {@code null}
      * @return generated Java source that declares the inner interface and constants
      * @throws IllegalArgumentException if {@code entityClass} is {@code null}
      * @see #generatePropNameTableClass(Class, String)
@@ -198,10 +203,12 @@ public final class CodeGenerationUtil {
      * System.out.println(source);
      * }</pre>
      *
-     * @param entityClass the entity class that contributes bean property names
-     * @param propNameTableClassName interface name for generated constants
+     * @param entityClass the entity class that contributes bean property names; must not be {@code null}
+     * @param propNameTableClassName interface name for generated constants; must not be {@code null} or empty
      * @return generated Java source that declares the inner interface and constants
      * @throws IllegalArgumentException if {@code entityClass} is {@code null}
+     * @throws NullPointerException if {@code propNameTableClassName} is {@code null}
+     * @throws StringIndexOutOfBoundsException if {@code propNameTableClassName} is empty
      * @see #generatePropNameTableClass(Class, String, String)
      */
     @Beta
@@ -222,11 +229,13 @@ public final class CodeGenerationUtil {
      * System.out.println(source);
      * }</pre>
      *
-     * @param entityClass the entity class that contributes bean property names
-     * @param propNameTableClassName interface name for generated constants
+     * @param entityClass the entity class that contributes bean property names; must not be {@code null}
+     * @param propNameTableClassName interface name for generated constants; must not be {@code null} or empty
      * @param srcDir source root directory; if {@code null} or empty, source is not written
      * @return generated Java source that declares the inner interface and constants
      * @throws IllegalArgumentException if {@code entityClass} is {@code null}
+     * @throws NullPointerException if {@code propNameTableClassName} is {@code null}
+     * @throws StringIndexOutOfBoundsException if {@code propNameTableClassName} is empty
      * @throws RuntimeException if writing the modified source file fails
      */
     @Beta

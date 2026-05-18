@@ -318,7 +318,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns an empty {@code OptionalBoolean} instance. No value is present for this OptionalBoolean.
+         * Returns an empty {@code OptionalBoolean} instance. No value is present for this {@code OptionalBoolean}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -678,7 +678,7 @@ public class u { // NOSONAR
          * the {@code OptionalBoolean} produced by the supplying function.
          *
          * @param supplier the supplying function that produces the alternative
-         *        {@code OptionalBoolean}
+         *        {@code OptionalBoolean}; must not be {@code null} and must not return {@code null}
          * @return this {@code OptionalBoolean} if a value is present; otherwise the
          *         supplied {@code OptionalBoolean}
          * @throws NullPointerException if no value is present and {@code supplier} is
@@ -872,11 +872,9 @@ public class u { // NOSONAR
          * produced by the exception supplying function.
          *
          * @param <E> the type of the exception to be thrown
-         * @param exceptionSupplier the supplying function that produces an
-         *        exception to be thrown
-         * @return the value, if present
-         * @throws IllegalArgumentException if no value is present and the exception
-         *         supplying function is null
+         * @param exceptionSupplier the supplying function that produces an exception to be thrown
+         * @return the value if present
+         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}
          * @throws E if no value is present
          */
         public <E extends Throwable> boolean orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
@@ -1022,10 +1020,9 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns the hash code of the value, if present, otherwise {@code 0}
-         * (zero) if no value is present.
+         * Returns the hash code of the value if present, otherwise returns {@code 0} (zero).
          *
-         * @return hash code value of the present value or {@code 0} if no value is present
+         * @return the hash code of the value if present, otherwise {@code 0}
          */
         @Override
         public int hashCode() {
@@ -1033,10 +1030,10 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns a non-empty string representation of this {@code OptionalBoolean}
-         * suitable for debugging.
-         *
-         * <p>The exact format is unspecified and may vary between versions.
+         * Returns a non-empty string representation of this {@code OptionalBoolean} suitable for debugging.
+         * If a value is present, the result is {@code "OptionalBoolean["} followed by the value and {@code "]"}.
+         * If no value is present, the result is {@code "OptionalBoolean.empty"}.
+         * The exact format is unspecified and may vary between versions.
          *
          * @return the string representation of this instance
          */
@@ -1092,7 +1089,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns an empty {@code OptionalChar} instance. No value is present for this OptionalChar.
+         * Returns an empty {@code OptionalChar} instance. No value is present for this {@code OptionalChar}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -1418,7 +1415,7 @@ public class u { // NOSONAR
          *        to be returned
          * @return this {@code OptionalChar}, if a value is present, otherwise the
          *         {@code OptionalChar} produced by the supplying function
-         * @throws NullPointerException if the supplier or the supplier's result is null
+         * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
          */
         public OptionalChar or(final Supplier<OptionalChar> supplier) {
             if (isPresent()) {
@@ -1429,12 +1426,11 @@ public class u { // NOSONAR
         }
 
         /**
-         * If a value is present, returns the value, otherwise returns zero.
+         * If a value is present, returns the value, otherwise returns the null character ({@code '\u0000'}).
          *
-         * <p>This is a convenience method equivalent to {@code orElse((char) 0)},
-         * providing a concise way to retrieve a value with a default of the null character ('\u0000').
+         * <p>This is a convenience method equivalent to {@code orElse((char) 0)}.
          *
-         * @return the value, if present, otherwise zero
+         * @return the value if present, otherwise the null character ({@code '\u0000'})
          */
         @Beta
         public char orElseZero() {
@@ -1461,12 +1457,9 @@ public class u { // NOSONAR
          * If a value is present, returns the value, otherwise returns the result
          * produced by the supplying function.
          *
-         * @param supplier a {@code CharSupplier} whose result is returned if no value
-         *        is present
-         * @return the value, if present, otherwise the result produced by the
-         *         supplying function
-         * @throws IllegalArgumentException if no value is present and the supplying
-         *         function is null
+         * @param supplier a {@code CharSupplier} whose result is returned if no value is present
+         * @return the value if present, otherwise the result produced by the supplying function
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}
          */
         public char orElseGet(final CharSupplier supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.other);
@@ -1590,11 +1583,9 @@ public class u { // NOSONAR
          * produced by the exception supplying function.
          *
          * @param <E> the type of the exception to be thrown
-         * @param exceptionSupplier the supplying function that produces an
-         *        exception to be thrown
-         * @return the value, if present
-         * @throws IllegalArgumentException if no value is present and the exception
-         *         supplying function is null
+         * @param exceptionSupplier the supplying function that produces an exception to be thrown
+         * @return the value if present
+         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}
          * @throws E if no value is present
          */
         public <E extends Throwable> char orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
@@ -1689,13 +1680,12 @@ public class u { // NOSONAR
         }
 
         /**
-         * If a value is present, returns an {@code Optional} containing the value,
-         * otherwise returns an empty {@code Optional}.
+         * Returns an {@code Optional} containing the boxed {@code Character} value if present, otherwise returns an empty {@code Optional}.
          *
-         * <p>This method converts the primitive {@code OptionalChar} to an object-based {@code Optional<Character>},
+         * <p>This method converts the primitive {@code OptionalChar} to an object-based {@code Optional},
          * which may be useful when interfacing with APIs that expect the standard Java {@code Optional} type.
          *
-         * @return an {@code Optional} containing the value if present, otherwise an empty {@code Optional}
+         * @return an {@code Optional} containing the boxed {@code Character} value if present, otherwise an empty {@code Optional}
          */
         public Optional<Character> boxed() {
             if (isPresent()) {
@@ -1710,8 +1700,9 @@ public class u { // NOSONAR
          * The comparison is first based on presence of values. An empty {@code OptionalChar}
          * is considered less than a non-empty one. If both are non-empty, the contained
          * values are compared using {@link Character#compare}.
+         * A {@code null} argument is treated as an empty {@code OptionalChar}.
          *
-         * @param optional the {@code OptionalChar} to compare to
+         * @param optional the {@code OptionalChar} to compare to, or {@code null}
          * @return a negative integer, zero, or a positive integer as this
          *         {@code OptionalChar} is less than, equal to, or greater than the
          *         specified {@code OptionalChar}
@@ -1733,14 +1724,13 @@ public class u { // NOSONAR
          * Indicates whether some other object is "equal to" this {@code OptionalChar}.
          * The other object is considered equal if:
          * <ul>
-         *  <li>it is also an {@code OptionalChar} and;
-         *  <li>both instances have no value present or;
-         *  <li>the present values are equal via {@code ==}
+         *  <li>it is also an {@code OptionalChar} and;</li>
+         *  <li>both instances have no value present or;</li>
+         *  <li>the present values are equal via {@code ==}.</li>
          * </ul>
          *
          * @param obj an object to be tested for equality
-         * @return {@code true} if the other object is "equal to" this object
-         *         otherwise {@code false}
+         * @return {@code true} if the other object is "equal to" this object, otherwise {@code false}
          */
         @SuppressFBWarnings
         @Override
@@ -1757,10 +1747,9 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns the hash code of the value, if present, otherwise {@code 0}
-         * (zero) if no value is present.
+         * Returns the hash code of the value if present, otherwise returns {@code 0} (zero).
          *
-         * @return hash code value of the present value or {@code 0} if no value is present
+         * @return the hash code of the value if present, otherwise {@code 0}
          */
         @Override
         public int hashCode() {
@@ -1768,13 +1757,10 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns a non-empty string representation of this {@code OptionalChar}
-         * suitable for debugging.
-         *
-         * <p>If a value is present, the result is {@code "OptionalChar["} followed by
-         * the value and {@code "]"}; if no value is present, the result is
-         * {@code "OptionalChar.empty"}. The exact presentation format is unspecified
-         * and may vary between versions.
+         * Returns a non-empty string representation of this {@code OptionalChar} suitable for debugging.
+         * If a value is present, the result is {@code "OptionalChar["} followed by the value and {@code "]"}.
+         * If no value is present, the result is {@code "OptionalChar.empty"}.
+         * The exact format is unspecified and may vary between versions.
          *
          * @return the string representation of this instance
          */
@@ -1945,7 +1931,7 @@ public class u { // NOSONAR
          * @param <E> the type of exception the action may throw
          * @param action the action to be performed if a value is present
          * @return this {@code OptionalByte}
-         * @throws IllegalArgumentException if {@code action} is null
+         * @throws IllegalArgumentException if {@code action} is {@code null}
          * @throws E if the action throws an exception
          */
         public <E extends Exception> OptionalByte ifPresent(final Throwables.ByteConsumer<E> action) throws IllegalArgumentException, E {
@@ -1967,7 +1953,7 @@ public class u { // NOSONAR
          * @param action the action to be performed if a value is present
          * @param emptyAction the empty-based action to be performed if no value is present
          * @return this {@code OptionalByte}
-         * @throws IllegalArgumentException if {@code action} or {@code emptyAction} is null
+         * @throws IllegalArgumentException if {@code action} or {@code emptyAction} is {@code null}
          * @throws E if the action throws an exception
          * @throws E2 if the empty action throws an exception
          */
@@ -1995,7 +1981,7 @@ public class u { // NOSONAR
          * @return an {@code OptionalByte} describing the value of this
          *         {@code OptionalByte} if a value is present and the value matches the
          *         given predicate, otherwise an empty {@code OptionalByte}
-         * @throws IllegalArgumentException if {@code predicate} is null
+         * @throws IllegalArgumentException if {@code predicate} is {@code null}
          * @throws E if the predicate evaluation throws an exception
          */
         public <E extends Exception> OptionalByte filter(final Throwables.BytePredicate<E> predicate) throws IllegalArgumentException, E {
@@ -2018,7 +2004,7 @@ public class u { // NOSONAR
          * @return an {@code OptionalByte} describing the result of applying the mapping
          *         function to the value of this {@code OptionalByte}, if a value is
          *         present, otherwise an empty {@code OptionalByte}
-         * @throws IllegalArgumentException if {@code mapper} is null
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalByte map(final Throwables.ByteUnaryOperator<E> mapper) throws IllegalArgumentException, E {
@@ -2041,7 +2027,7 @@ public class u { // NOSONAR
          * @return an {@code OptionalInt} describing the result of applying the mapping
          *         function to the value of this {@code OptionalByte}, if a value is
          *         present, otherwise an empty {@code OptionalInt}
-         * @throws IllegalArgumentException if {@code mapper} is null
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Byte, E> mapper) throws IllegalArgumentException, E {
@@ -2090,7 +2076,7 @@ public class u { // NOSONAR
          * @return the result of applying an {@code OptionalByte}-bearing mapping
          *         function to the value of this {@code OptionalByte}, if a value is
          *         present, otherwise an empty {@code OptionalByte}
-         * @throws IllegalArgumentException if {@code mapper} is null
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalByte flatMap(final Throwables.ByteFunction<OptionalByte, E> mapper) throws IllegalArgumentException, E {
@@ -2111,8 +2097,7 @@ public class u { // NOSONAR
          *        to be returned
          * @return this {@code OptionalByte} if a value is present, otherwise an
          *         {@code OptionalByte} produced by the supplying function
-         * @throws NullPointerException if no value is present and the supplying function is {@code null}
-         *         or returns {@code null}
+         * @throws NullPointerException if no value is present and {@code supplier} is {@code null} or returns {@code null}
          */
         public OptionalByte or(final Supplier<OptionalByte> supplier) {
             if (isPresent) {
@@ -2148,7 +2133,7 @@ public class u { // NOSONAR
          *
          * @param supplier a supplying function to be invoked to produce a value to be returned
          * @return the value if present, otherwise the result produced by the supplying function
-         * @throws IllegalArgumentException if {@code supplier} is null
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}
          */
         public byte orElseGet(final ByteSupplier supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.other);
@@ -2163,7 +2148,7 @@ public class u { // NOSONAR
         /**
          * Returns the value if present, otherwise throws {@code NoSuchElementException}.
          *
-         * @return the value held by this {@code OptionalByte}
+         * @return the value if present
          * @throws NoSuchElementException if no value is present
          */
         public byte orElseThrow() throws NoSuchElementException {
@@ -2179,7 +2164,7 @@ public class u { // NOSONAR
          * with the specified error message.
          *
          * @param errorMessage the error message to use if no value is present
-         * @return the value held by this {@code OptionalByte}
+         * @return the value if present
          * @throws NoSuchElementException if no value is present
          */
         @Beta
@@ -2197,7 +2182,7 @@ public class u { // NOSONAR
          *
          * @param errorMessage the error message format string
          * @param param the parameter to be substituted into the error message
-         * @return the value held by this {@code OptionalByte}
+         * @return the value if present
          * @throws NoSuchElementException if no value is present
          */
         @Beta
@@ -2216,7 +2201,7 @@ public class u { // NOSONAR
          * @param errorMessage the error message format string
          * @param param1 the first parameter to be substituted into the error message
          * @param param2 the second parameter to be substituted into the error message
-         * @return the value held by this {@code OptionalByte}
+         * @return the value if present
          * @throws NoSuchElementException if no value is present
          */
         @Beta
@@ -2236,7 +2221,7 @@ public class u { // NOSONAR
          * @param param1 the first parameter to be substituted into the error message
          * @param param2 the second parameter to be substituted into the error message
          * @param param3 the third parameter to be substituted into the error message
-         * @return the value held by this {@code OptionalByte}
+         * @return the value if present
          * @throws NoSuchElementException if no value is present
          */
         @Beta
@@ -2254,7 +2239,7 @@ public class u { // NOSONAR
          *
          * @param errorMessage the error message format string
          * @param params the parameters to be substituted into the error message
-         * @return the value held by this {@code OptionalByte}
+         * @return the value if present
          * @throws NoSuchElementException if no value is present
          */
         @Beta
@@ -2272,8 +2257,8 @@ public class u { // NOSONAR
          *
          * @param <E> the type of the exception to be thrown
          * @param exceptionSupplier the supplying function that produces an exception to be thrown
-         * @return the value held by this {@code OptionalByte}
-         * @throws IllegalArgumentException if {@code exceptionSupplier} is null
+         * @return the value if present
+         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}
          * @throws E if no value is present
          */
         public <E extends Throwable> byte orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
@@ -2399,10 +2384,9 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns an {@code Optional} containing the value if present,
-         * otherwise returns an empty {@code Optional}.
+         * Returns an {@code Optional} containing the boxed {@code Byte} value if present, otherwise returns an empty {@code Optional}.
          *
-         * @return an {@code Optional} containing the optional value if present, otherwise an empty {@code Optional}
+         * @return an {@code Optional} containing the boxed {@code Byte} value if present, otherwise an empty {@code Optional}
          */
         public Optional<Byte> boxed() {
             if (isPresent) {
@@ -2417,8 +2401,9 @@ public class u { // NOSONAR
          * The comparison is first based on the presence of a value; an {@code OptionalByte}
          * with a value is considered greater than an empty {@code OptionalByte}.
          * If both are present, the comparison is based on the contained values.
+         * A {@code null} argument is treated as an empty {@code OptionalByte}.
          *
-         * @param optional the {@code OptionalByte} to be compared
+         * @param optional the {@code OptionalByte} to be compared, or {@code null}
          * @return a negative integer, zero, or a positive integer as this
          *         {@code OptionalByte} is less than, equal to, or greater than the
          *         specified {@code OptionalByte}
@@ -2440,13 +2425,13 @@ public class u { // NOSONAR
          * Indicates whether some other object is "equal to" this {@code OptionalByte}.
          * The other object is considered equal if:
          * <ul>
-         * <li>it is also an {@code OptionalByte} and;
-         * <li>both instances have no value present or;
-         * <li>the present values are equal
+         * <li>it is also an {@code OptionalByte} and;</li>
+         * <li>both instances have no value present or;</li>
+         * <li>the present values are equal via {@code ==}.</li>
          * </ul>
          *
          * @param obj an object to be tested for equality
-         * @return {@code true} if the other object is "equal to" this object otherwise {@code false}
+         * @return {@code true} if the other object is "equal to" this object, otherwise {@code false}
          */
         @SuppressFBWarnings
         @Override
@@ -2463,10 +2448,9 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns the hash code of the value if present, otherwise returns {@code 0}
-         * (zero) if no value is present.
+         * Returns the hash code of the value if present, otherwise returns {@code 0} (zero).
          *
-         * @return hash code value of the present value or {@code 0} if no value is present
+         * @return the hash code of the value if present, otherwise {@code 0}
          */
         @Override
         public int hashCode() {
@@ -2474,9 +2458,10 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns a non-empty string representation of this {@code OptionalByte}
-         * suitable for debugging. The exact presentation format is unspecified and
-         * may vary between implementations and versions.
+         * Returns a non-empty string representation of this {@code OptionalByte} suitable for debugging.
+         * If a value is present, the result is {@code "OptionalByte["} followed by the value and {@code "]"}.
+         * If no value is present, the result is {@code "OptionalByte.empty"}.
+         * The exact format is unspecified and may vary between versions.
          *
          * @return the string representation of this instance
          */
@@ -2614,7 +2599,7 @@ public class u { // NOSONAR
          * @param <E> the type of exception the action may throw
          * @param action the action to be performed if a value is present
          * @return this {@code OptionalShort}
-         * @throws IllegalArgumentException if {@code action} is null
+         * @throws IllegalArgumentException if {@code action} is {@code null}
          * @throws E if the action throws an exception
          */
         public <E extends Exception> OptionalShort ifPresent(final Throwables.ShortConsumer<E> action) throws IllegalArgumentException, E {
@@ -2636,7 +2621,7 @@ public class u { // NOSONAR
          * @param action the action to be performed if a value is present
          * @param emptyAction the empty-based action to be performed if no value is present
          * @return this {@code OptionalShort}
-         * @throws IllegalArgumentException if {@code action} or {@code emptyAction} is null
+         * @throws IllegalArgumentException if {@code action} or {@code emptyAction} is {@code null}
          * @throws E if the action throws an exception
          * @throws E2 if the empty action throws an exception
          */
@@ -2664,7 +2649,7 @@ public class u { // NOSONAR
          * @return an {@code OptionalShort} describing the value of this
          *         {@code OptionalShort} if a value is present and the value matches the
          *         given predicate, otherwise an empty {@code OptionalShort}
-         * @throws IllegalArgumentException if {@code predicate} is null
+         * @throws IllegalArgumentException if {@code predicate} is {@code null}
          * @throws E if the predicate evaluation throws an exception
          */
         public <E extends Exception> OptionalShort filter(final Throwables.ShortPredicate<E> predicate) throws IllegalArgumentException, E {
@@ -2687,7 +2672,7 @@ public class u { // NOSONAR
          * @return an {@code OptionalShort} describing the result of applying the mapping
          *         function to the value of this {@code OptionalShort}, if a value is
          *         present, otherwise an empty {@code OptionalShort}
-         * @throws IllegalArgumentException if {@code mapper} is null
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalShort map(final Throwables.ShortUnaryOperator<E> mapper) throws IllegalArgumentException, E {
@@ -2710,7 +2695,7 @@ public class u { // NOSONAR
          * @return an {@code OptionalInt} describing the result of applying the mapping
          *         function to the value of this {@code OptionalShort}, if a value is
          *         present, otherwise an empty {@code OptionalInt}
-         * @throws IllegalArgumentException if {@code mapper} is null
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Short, E> mapper) throws IllegalArgumentException, E {
@@ -2759,7 +2744,7 @@ public class u { // NOSONAR
          * @return the result of applying an {@code OptionalShort}-bearing mapping
          *         function to the value of this {@code OptionalShort}, if a value is
          *         present, otherwise an empty {@code OptionalShort}
-         * @throws IllegalArgumentException if {@code mapper} is null
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalShort flatMap(final Throwables.ShortFunction<OptionalShort, E> mapper) throws IllegalArgumentException, E {
@@ -2780,8 +2765,7 @@ public class u { // NOSONAR
          *        to be returned
          * @return this {@code OptionalShort} if a value is present, otherwise an
          *         {@code OptionalShort} produced by the supplying function
-         * @throws NullPointerException if no value is present and the supplying function is {@code null}
-         *         or returns {@code null}
+         * @throws NullPointerException if no value is present and {@code supplier} is {@code null} or returns {@code null}
          */
         public OptionalShort or(final Supplier<OptionalShort> supplier) {
             if (isPresent) {
@@ -2817,7 +2801,7 @@ public class u { // NOSONAR
          *
          * @param supplier a supplying function to be invoked to produce a value to be returned
          * @return the value if present, otherwise the result produced by the supplying function
-         * @throws IllegalArgumentException if {@code supplier} is null
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}
          */
         public short orElseGet(final ShortSupplier supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.other);
@@ -2832,7 +2816,7 @@ public class u { // NOSONAR
         /**
          * Returns the value if present, otherwise throws {@code NoSuchElementException}.
          *
-         * @return the value held by this {@code OptionalShort}
+         * @return the value if present
          * @throws NoSuchElementException if no value is present
          */
         public short orElseThrow() throws NoSuchElementException {
@@ -2848,7 +2832,7 @@ public class u { // NOSONAR
          * with the specified error message.
          *
          * @param errorMessage the error message to use if no value is present
-         * @return the value held by this {@code OptionalShort}
+         * @return the value if present
          * @throws NoSuchElementException if no value is present
          */
         @Beta
@@ -2866,7 +2850,7 @@ public class u { // NOSONAR
          *
          * @param errorMessage the error message format string
          * @param param the parameter to be substituted into the error message
-         * @return the value held by this {@code OptionalShort}
+         * @return the value if present
          * @throws NoSuchElementException if no value is present
          */
         @Beta
@@ -2885,7 +2869,7 @@ public class u { // NOSONAR
          * @param errorMessage the error message format string
          * @param param1 the first parameter to be substituted into the error message
          * @param param2 the second parameter to be substituted into the error message
-         * @return the value held by this {@code OptionalShort}
+         * @return the value if present
          * @throws NoSuchElementException if no value is present
          */
         @Beta
@@ -2905,7 +2889,7 @@ public class u { // NOSONAR
          * @param param1 the first parameter to be substituted into the error message
          * @param param2 the second parameter to be substituted into the error message
          * @param param3 the third parameter to be substituted into the error message
-         * @return the value held by this {@code OptionalShort}
+         * @return the value if present
          * @throws NoSuchElementException if no value is present
          */
         @Beta
@@ -2923,7 +2907,7 @@ public class u { // NOSONAR
          *
          * @param errorMessage the error message format string
          * @param params the parameters to be substituted into the error message
-         * @return the value held by this {@code OptionalShort}
+         * @return the value if present
          * @throws NoSuchElementException if no value is present
          */
         @Beta
@@ -2941,8 +2925,8 @@ public class u { // NOSONAR
          *
          * @param <E> the type of the exception to be thrown
          * @param exceptionSupplier the supplying function that produces an exception to be thrown
-         * @return the value held by this {@code OptionalShort}
-         * @throws IllegalArgumentException if {@code exceptionSupplier} is null
+         * @return the value if present
+         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}
          * @throws E if no value is present
          */
         public <E extends Throwable> short orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
@@ -3026,10 +3010,9 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns an {@code Optional} containing the value if present,
-         * otherwise returns an empty {@code Optional}.
+         * Returns an {@code Optional} containing the boxed {@code Short} value if present, otherwise returns an empty {@code Optional}.
          *
-         * @return an {@code Optional} containing the optional value if present, otherwise an empty {@code Optional}
+         * @return an {@code Optional} containing the boxed {@code Short} value if present, otherwise an empty {@code Optional}
          */
         public Optional<Short> boxed() {
             if (isPresent) {
@@ -3044,8 +3027,9 @@ public class u { // NOSONAR
          * The comparison is first based on the presence of a value; an {@code OptionalShort}
          * with a value is considered greater than an empty {@code OptionalShort}.
          * If both are present, the comparison is based on the contained values.
+         * A {@code null} argument is treated as an empty {@code OptionalShort}.
          *
-         * @param optional the {@code OptionalShort} to be compared
+         * @param optional the {@code OptionalShort} to be compared, or {@code null}
          * @return a negative integer, zero, or a positive integer as this
          *         {@code OptionalShort} is less than, equal to, or greater than the
          *         specified {@code OptionalShort}
@@ -3067,13 +3051,13 @@ public class u { // NOSONAR
          * Indicates whether some other object is "equal to" this {@code OptionalShort}.
          * The other object is considered equal if:
          * <ul>
-         * <li>it is also an {@code OptionalShort} and;
-         * <li>both instances have no value present or;
-         * <li>the present values are equal
+         * <li>it is also an {@code OptionalShort} and;</li>
+         * <li>both instances have no value present or;</li>
+         * <li>the present values are equal via {@code ==}.</li>
          * </ul>
          *
          * @param obj an object to be tested for equality
-         * @return {@code true} if the other object is "equal to" this object otherwise {@code false}
+         * @return {@code true} if the other object is "equal to" this object, otherwise {@code false}
          */
         @SuppressFBWarnings
         @Override
@@ -3090,10 +3074,9 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns the hash code of the value if present, otherwise returns {@code 0}
-         * (zero) if no value is present.
+         * Returns the hash code of the value if present, otherwise returns {@code 0} (zero).
          *
-         * @return hash code value of the present value or {@code 0} if no value is present
+         * @return the hash code of the value if present, otherwise {@code 0}
          */
         @Override
         public int hashCode() {
@@ -3101,9 +3084,10 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns a non-empty string representation of this {@code OptionalShort}
-         * suitable for debugging. The exact presentation format is unspecified and
-         * may vary between implementations and versions.
+         * Returns a non-empty string representation of this {@code OptionalShort} suitable for debugging.
+         * If a value is present, the result is {@code "OptionalShort["} followed by the value and {@code "]"}.
+         * If no value is present, the result is {@code "OptionalShort.empty"}.
+         * The exact format is unspecified and may vary between versions.
          *
          * @return the string representation of this instance
          */
@@ -3275,7 +3259,7 @@ public class u { // NOSONAR
          * @param <E> the type of exception the action may throw
          * @param action the action to be performed if a value is present
          * @return this {@code OptionalInt}
-         * @throws IllegalArgumentException if {@code action} is null
+         * @throws IllegalArgumentException if {@code action} is {@code null}
          * @throws E if the action throws an exception
          */
         public <E extends Exception> OptionalInt ifPresent(final Throwables.IntConsumer<E> action) throws IllegalArgumentException, E {
@@ -3297,7 +3281,7 @@ public class u { // NOSONAR
          * @param action the action to be performed if a value is present
          * @param emptyAction the empty-based action to be performed if no value is present
          * @return this {@code OptionalInt}
-         * @throws IllegalArgumentException if {@code action} or {@code emptyAction} is null
+         * @throws IllegalArgumentException if {@code action} or {@code emptyAction} is {@code null}
          * @throws E if the action throws an exception
          * @throws E2 if the empty action throws an exception
          */
@@ -3325,7 +3309,7 @@ public class u { // NOSONAR
          * @return an {@code OptionalInt} describing the value of this
          *         {@code OptionalInt} if a value is present and the value matches the
          *         given predicate, otherwise an empty {@code OptionalInt}
-         * @throws IllegalArgumentException if {@code predicate} is null
+         * @throws IllegalArgumentException if {@code predicate} is {@code null}
          * @throws E if the predicate evaluation throws an exception
          */
         public <E extends Exception> OptionalInt filter(final Throwables.IntPredicate<E> predicate) throws IllegalArgumentException, E {
@@ -3339,15 +3323,15 @@ public class u { // NOSONAR
         }
 
         /**
-         * Applies the given mapper function to the value if present, returning an OptionalInt containing the result.
-         * If this OptionalInt is empty, returns an empty OptionalInt.
+         * If a value is present, applies the given mapping function to it and returns an {@code OptionalInt} describing the result,
+         * otherwise returns an empty {@code OptionalInt}.
          *
          * @param <E> the type of exception that the mapper may throw
-         * @param mapper the mapper function to apply to the value if present
-         * @return an OptionalInt containing the result of applying the mapper to the value if present,
-         *         otherwise an empty OptionalInt
-         * @throws IllegalArgumentException if mapper is null
-         * @throws E if the mapper function throws an exception
+         * @param mapper the mapping function to apply to the value if present
+         * @return an {@code OptionalInt} describing the result of applying the mapping function to the value if present,
+         *         otherwise an empty {@code OptionalInt}
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
+         * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalInt map(final Throwables.IntUnaryOperator<E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
@@ -3360,15 +3344,15 @@ public class u { // NOSONAR
         }
 
         /**
-         * Applies the given mapper function to the value if present, returning an OptionalBoolean containing the result.
-         * If this OptionalInt is empty, returns an empty OptionalBoolean.
+         * If a value is present, applies the given mapping function to it and returns an {@code OptionalBoolean} describing the result,
+         * otherwise returns an empty {@code OptionalBoolean}.
          *
          * @param <E> the type of exception that the mapper may throw
-         * @param mapper the mapper function to apply to the value if present
-         * @return an OptionalBoolean containing the result of applying the mapper to the value if present,
-         *         otherwise an empty OptionalBoolean
-         * @throws IllegalArgumentException if mapper is null
-         * @throws E if the mapper function throws an exception
+         * @param mapper the mapping function to apply to the value if present
+         * @return an {@code OptionalBoolean} describing the result of applying the mapping function to the value if present,
+         *         otherwise an empty {@code OptionalBoolean}
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
+         * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalBoolean mapToBoolean(final Throwables.ToBooleanFunction<Integer, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
@@ -3381,15 +3365,15 @@ public class u { // NOSONAR
         }
 
         /**
-         * Applies the given mapper function to the value if present, returning an OptionalChar containing the result.
-         * If this OptionalInt is empty, returns an empty OptionalChar.
+         * If a value is present, applies the given mapping function to it and returns an {@code OptionalChar} describing the result,
+         * otherwise returns an empty {@code OptionalChar}.
          *
          * @param <E> the type of exception that the mapper may throw
-         * @param mapper the mapper function to apply to the value if present
-         * @return an OptionalChar containing the result of applying the mapper to the value if present,
-         *         otherwise an empty OptionalChar
-         * @throws IllegalArgumentException if mapper is null
-         * @throws E if the mapper function throws an exception
+         * @param mapper the mapping function to apply to the value if present
+         * @return an {@code OptionalChar} describing the result of applying the mapping function to the value if present,
+         *         otherwise an empty {@code OptionalChar}
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
+         * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalChar mapToChar(final Throwables.ToCharFunction<Integer, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
@@ -3402,15 +3386,15 @@ public class u { // NOSONAR
         }
 
         /**
-         * Applies the given mapper function to the value if present, returning an OptionalLong containing the result.
-         * If this OptionalInt is empty, returns an empty OptionalLong.
+         * If a value is present, applies the given mapping function to it and returns an {@code OptionalLong} describing the result,
+         * otherwise returns an empty {@code OptionalLong}.
          *
          * @param <E> the type of exception that the mapper may throw
-         * @param mapper the mapper function to apply to the value if present
-         * @return an OptionalLong containing the result of applying the mapper to the value if present,
-         *         otherwise an empty OptionalLong
-         * @throws IllegalArgumentException if mapper is null
-         * @throws E if the mapper function throws an exception
+         * @param mapper the mapping function to apply to the value if present
+         * @return an {@code OptionalLong} describing the result of applying the mapping function to the value if present,
+         *         otherwise an empty {@code OptionalLong}
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
+         * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalLong mapToLong(final Throwables.ToLongFunction<Integer, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
@@ -3423,15 +3407,15 @@ public class u { // NOSONAR
         }
 
         /**
-         * Applies the given mapper function to the value if present, returning an OptionalFloat containing the result.
-         * If this OptionalInt is empty, returns an empty OptionalFloat.
+         * If a value is present, applies the given mapping function to it and returns an {@code OptionalFloat} describing the result,
+         * otherwise returns an empty {@code OptionalFloat}.
          *
          * @param <E> the type of exception that the mapper may throw
-         * @param mapper the mapper function to apply to the value if present
-         * @return an OptionalFloat containing the result of applying the mapper to the value if present,
-         *         otherwise an empty OptionalFloat
-         * @throws IllegalArgumentException if mapper is null
-         * @throws E if the mapper function throws an exception
+         * @param mapper the mapping function to apply to the value if present
+         * @return an {@code OptionalFloat} describing the result of applying the mapping function to the value if present,
+         *         otherwise an empty {@code OptionalFloat}
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
+         * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalFloat mapToFloat(final Throwables.ToFloatFunction<Integer, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
@@ -3444,15 +3428,15 @@ public class u { // NOSONAR
         }
 
         /**
-         * Applies the given mapper function to the value if present, returning an OptionalDouble containing the result.
-         * If this OptionalInt is empty, returns an empty OptionalDouble.
+         * If a value is present, applies the given mapping function to it and returns an {@code OptionalDouble} describing the result,
+         * otherwise returns an empty {@code OptionalDouble}.
          *
          * @param <E> the type of exception that the mapper may throw
-         * @param mapper the mapper function to apply to the value if present
-         * @return an OptionalDouble containing the result of applying the mapper to the value if present,
-         *         otherwise an empty OptionalDouble
-         * @throws IllegalArgumentException if mapper is null
-         * @throws E if the mapper function throws an exception
+         * @param mapper the mapping function to apply to the value if present
+         * @return an {@code OptionalDouble} describing the result of applying the mapping function to the value if present,
+         *         otherwise an empty {@code OptionalDouble}
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
+         * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<Integer, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
@@ -3491,17 +3475,19 @@ public class u { // NOSONAR
         }
 
         /**
-         * Applies the given mapper function to the value if present, returning the resulting OptionalInt.
-         * If this OptionalInt is empty, returns an empty OptionalInt.
-         * This method is similar to {@code map}, but the mapping function returns an OptionalInt, and if invoked,
-         * flatMap does not wrap it within an additional OptionalInt.
+         * If a value is present, returns the result of applying the given {@code OptionalInt}-bearing mapping function
+         * to the value, otherwise returns an empty {@code OptionalInt}.
+         *
+         * <p>This method is similar to {@link #map(Throwables.IntUnaryOperator)}, but the mapping
+         * function is one whose result is already an {@code OptionalInt}, and if invoked,
+         * {@code flatMap} does not wrap it within an additional {@code OptionalInt}.
          *
          * @param <E> the type of exception that the mapper may throw
-         * @param mapper the mapper function to apply to the value if present
-         * @return the result of applying an OptionalInt-bearing mapping function to the value of this OptionalInt,
-         *         if a value is present, otherwise an empty OptionalInt
-         * @throws IllegalArgumentException if mapper is null
-         * @throws E if the mapper function throws an exception
+         * @param mapper the mapping function to apply to the value if present
+         * @return the result of applying an {@code OptionalInt}-bearing mapping function to the value of this {@code OptionalInt},
+         *         if a value is present, otherwise an empty {@code OptionalInt}
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
+         * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalInt flatMap(final Throwables.IntFunction<OptionalInt, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
@@ -3518,8 +3504,7 @@ public class u { // NOSONAR
          *
          * @param supplier the supplying function that produces an {@code OptionalInt} to be returned
          * @return this {@code OptionalInt} if a value is present, otherwise the result of the supplying function
-         * @throws NullPointerException if no value is present and the supplying function is {@code null}
-         *         or returns {@code null}
+         * @throws NullPointerException if no value is present and {@code supplier} is {@code null} or returns {@code null}
          */
         public OptionalInt or(final Supplier<OptionalInt> supplier) {
             if (isPresent) {
@@ -3530,9 +3515,9 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns the value if present, otherwise returns 0.
+         * Returns the value if present, otherwise returns {@code 0}.
          *
-         * @return the value if present, otherwise 0
+         * @return the value if present, otherwise {@code 0}
          */
         @Beta
         public int orElseZero() {
@@ -3554,7 +3539,7 @@ public class u { // NOSONAR
          *
          * @param supplier the supplying function that produces a value to be returned
          * @return the value if present, otherwise the result of the supplying function
-         * @throws IllegalArgumentException if {@code supplier} is null
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}
          */
         public int orElseGet(final IntSupplier supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.other);
@@ -3673,7 +3658,7 @@ public class u { // NOSONAR
          * @param <E> the type of the exception to be thrown
          * @param exceptionSupplier the supplying function that produces an exception to be thrown
          * @return the value if present
-         * @throws IllegalArgumentException if exceptionSupplier is null
+         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}
          * @throws E if no value is present
          */
         public <E extends Throwable> int orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
@@ -3752,9 +3737,9 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns an Optional containing the boxed Integer value if present, otherwise returns an empty Optional.
+         * Returns an {@code Optional} containing the boxed {@code Integer} value if present, otherwise returns an empty {@code Optional}.
          *
-         * @return an Optional containing the boxed Integer value if present, otherwise an empty Optional
+         * @return an {@code Optional} containing the boxed {@code Integer} value if present, otherwise an empty {@code Optional}
          */
         public Optional<Integer> boxed() {
             if (isPresent) {
@@ -3765,9 +3750,9 @@ public class u { // NOSONAR
         }
 
         /**
-         * Converts this OptionalInt to a java.util.OptionalInt.
+         * Converts this {@code OptionalInt} to a {@code java.util.OptionalInt}.
          *
-         * @return a java.util.OptionalInt containing the value if present, otherwise an empty java.util.OptionalInt
+         * @return a {@code java.util.OptionalInt} containing the value if present, otherwise an empty {@code java.util.OptionalInt}
          */
         public java.util.OptionalInt toJdkOptional() {
             if (isPresent) {
@@ -3789,14 +3774,15 @@ public class u { // NOSONAR
         //    }
 
         /**
-         * Compares this OptionalInt with another OptionalInt for ordering.
-         * Empty OptionalInt instances are considered less than non-empty ones.
-         * Two empty OptionalInt instances are considered equal.
-         * Two non-empty OptionalInt instances are compared by their values.
+         * Compares this {@code OptionalInt} with another {@code OptionalInt} for ordering.
+         * Empty instances are considered less than non-empty ones.
+         * Two empty instances are considered equal.
+         * Two non-empty instances are compared by their contained values.
+         * A {@code null} argument is treated as an empty {@code OptionalInt}.
          *
-         * @param optional the OptionalInt to be compared
-         * @return a negative integer, zero, or a positive integer as this OptionalInt is less than, equal to,
-         *         or greater than the specified OptionalInt
+         * @param optional the {@code OptionalInt} to be compared, or {@code null}
+         * @return a negative integer, zero, or a positive integer as this {@code OptionalInt} is less than, equal to,
+         *         or greater than the specified {@code OptionalInt}
          */
         @Override
         public int compareTo(final OptionalInt optional) {
@@ -3812,12 +3798,12 @@ public class u { // NOSONAR
         }
 
         /**
-         * Indicates whether some other object is "equal to" this OptionalInt.
+         * Indicates whether some other object is "equal to" this {@code OptionalInt}.
          * The other object is considered equal if:
          * <ul>
-         * <li>it is also an OptionalInt and;
-         * <li>both instances have no value present or;
-         * <li>the present values are equal via {@code ==}.
+         * <li>it is also an {@code OptionalInt} and;</li>
+         * <li>both instances have no value present or;</li>
+         * <li>the present values are equal via {@code ==}.</li>
          * </ul>
          *
          * @param obj an object to be tested for equality
@@ -3838,9 +3824,9 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns the hash code of the value if present, otherwise returns {@code 0} (zero) if no value is present.
+         * Returns the hash code of the value if present, otherwise returns {@code 0} (zero).
          *
-         * @return hash code value of the present value or {@code 0} if no value is present
+         * @return the hash code of the value if present, otherwise {@code 0}
          */
         @Override
         public int hashCode() {
@@ -3848,11 +3834,12 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns a string representation of this OptionalInt.
-         * If a value is present, the result is "OptionalInt[" + value + "]".
-         * If no value is present, the result is "OptionalInt.empty".
+         * Returns a non-empty string representation of this {@code OptionalInt} suitable for debugging.
+         * If a value is present, the result is {@code "OptionalInt["} followed by the value and {@code "]"}.
+         * If no value is present, the result is {@code "OptionalInt.empty"}.
+         * The exact format is unspecified and may vary between versions.
          *
-         * @return a string representation of this OptionalInt
+         * @return the string representation of this instance
          */
         @Override
         public String toString() {
@@ -3905,30 +3892,30 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns an empty OptionalLong instance. No value is present for this OptionalLong.
+         * Returns an empty {@code OptionalLong} instance. No value is present for this {@code OptionalLong}.
          *
-         * @return an empty OptionalLong
+         * @return an empty {@code OptionalLong}
          */
         public static OptionalLong empty() {
             return EMPTY;
         }
 
         /**
-         * Returns an OptionalLong with the specified value present.
-         * For values between -256 and 1024 inclusive, cached instances are returned.
+         * Returns an {@code OptionalLong} with the specified value present.
+         * For values between {@code -256} and {@code 1024} inclusive, cached instances are returned.
          *
          * @param value the value to be present
-         * @return an OptionalLong with the value present
+         * @return an {@code OptionalLong} with the value present
          */
         public static OptionalLong of(final long value) {
             return value >= MIN_CACHED_VALUE && value <= MAX_CACHED_VALUE ? cached[(int) (value - MIN_CACHED_VALUE)] : new OptionalLong(value);
         }
 
         /**
-         * Returns an OptionalLong describing the given value, if {@code non-null}, otherwise returns an empty OptionalLong.
+         * Returns an {@code OptionalLong} describing the given value, if {@code non-null}, otherwise returns an empty {@code OptionalLong}.
          *
          * @param value the possibly-null value
-         * @return an OptionalLong with a present value if the specified value is {@code non-null}, otherwise an empty OptionalLong
+         * @return an {@code OptionalLong} with a present value if the specified value is {@code non-null}, otherwise an empty {@code OptionalLong}
          */
         public static OptionalLong ofNullable(final Long value) {
             if (value == null) {
@@ -3939,11 +3926,11 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns an OptionalLong with the value from the specified java.util.OptionalLong if present,
-         * otherwise returns an empty OptionalLong.
+         * Returns an {@code OptionalLong} with the value from the specified {@code java.util.OptionalLong} if present,
+         * otherwise returns an empty {@code OptionalLong}.
          *
-         * @param optional the java.util.OptionalLong to convert
-         * @return an OptionalLong with the value if present, otherwise an empty OptionalLong
+         * @param optional the {@code java.util.OptionalLong} to convert
+         * @return an {@code OptionalLong} with the value if present, otherwise an empty {@code OptionalLong}
          */
         public static OptionalLong from(final java.util.OptionalLong optional) {
             if (optional.isPresent()) {
@@ -3999,8 +3986,8 @@ public class u { // NOSONAR
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed if a value is present
-         * @return this OptionalLong
-         * @throws IllegalArgumentException if action is null
+         * @return this {@code OptionalLong}
+         * @throws IllegalArgumentException if {@code action} is {@code null}
          * @throws E if the action throws an exception
          */
         public <E extends Exception> OptionalLong ifPresent(final Throwables.LongConsumer<E> action) throws IllegalArgumentException, E {
@@ -4017,13 +4004,13 @@ public class u { // NOSONAR
          * If a value is present, performs the given action with the value, otherwise performs the given empty-based action.
          *
          * @param <E> the type of exception that the action may throw
-         * @param <E2> the type of exception that the emptyAction may throw
+         * @param <E2> the type of exception that the empty action may throw
          * @param action the action to be performed if a value is present
          * @param emptyAction the empty-based action to be performed if no value is present
-         * @return this OptionalLong
-         * @throws IllegalArgumentException if action or emptyAction is null
+         * @return this {@code OptionalLong}
+         * @throws IllegalArgumentException if {@code action} or {@code emptyAction} is {@code null}
          * @throws E if the action throws an exception
-         * @throws E2 if the emptyAction throws an exception
+         * @throws E2 if the empty action throws an exception
          */
         public <E extends Exception, E2 extends Exception> OptionalLong ifPresentOrElse(final Throwables.LongConsumer<E> action,
                 final Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
@@ -4040,14 +4027,14 @@ public class u { // NOSONAR
         }
 
         /**
-         * If a value is present, and the value matches the given predicate, returns an OptionalLong describing the value,
-         * otherwise returns an empty OptionalLong.
+         * If a value is present, and the value matches the given predicate, returns an {@code OptionalLong} describing the value,
+         * otherwise returns an empty {@code OptionalLong}.
          *
          * @param <E> the type of exception that the predicate may throw
          * @param predicate the predicate to apply to the value if present
-         * @return an OptionalLong describing the value of this OptionalLong if a value is present and matches the predicate,
-         *         otherwise an empty OptionalLong
-         * @throws IllegalArgumentException if predicate is null
+         * @return an {@code OptionalLong} describing the value if a value is present and matches the predicate,
+         *         otherwise an empty {@code OptionalLong}
+         * @throws IllegalArgumentException if {@code predicate} is {@code null}
          * @throws E if the predicate throws an exception
          */
         public <E extends Exception> OptionalLong filter(final Throwables.LongPredicate<E> predicate) throws IllegalArgumentException, E {
@@ -4061,15 +4048,15 @@ public class u { // NOSONAR
         }
 
         /**
-         * Applies the given mapper function to the value if present, returning an OptionalLong containing the result.
-         * If this OptionalLong is empty, returns an empty OptionalLong.
+         * If a value is present, applies the given mapping function to it and returns an {@code OptionalLong} describing the result,
+         * otherwise returns an empty {@code OptionalLong}.
          *
          * @param <E> the type of exception that the mapper may throw
-         * @param mapper the mapper function to apply to the value if present
-         * @return an OptionalLong containing the result of applying the mapper to the value if present,
-         *         otherwise an empty OptionalLong
-         * @throws IllegalArgumentException if mapper is null
-         * @throws E if the mapper function throws an exception
+         * @param mapper the mapping function to apply to the value if present
+         * @return an {@code OptionalLong} describing the result of applying the mapping function to the value if present,
+         *         otherwise an empty {@code OptionalLong}
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
+         * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalLong map(final Throwables.LongUnaryOperator<E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
@@ -4082,15 +4069,15 @@ public class u { // NOSONAR
         }
 
         /**
-         * Applies the given mapper function to the value if present, returning an OptionalInt containing the result.
-         * If this OptionalLong is empty, returns an empty OptionalInt.
+         * If a value is present, applies the given mapping function to it and returns an {@code OptionalInt} describing the result,
+         * otherwise returns an empty {@code OptionalInt}.
          *
          * @param <E> the type of exception that the mapper may throw
-         * @param mapper the mapper function to apply to the value if present
-         * @return an OptionalInt containing the result of applying the mapper to the value if present,
-         *         otherwise an empty OptionalInt
-         * @throws IllegalArgumentException if mapper is null
-         * @throws E if the mapper function throws an exception
+         * @param mapper the mapping function to apply to the value if present
+         * @return an {@code OptionalInt} describing the result of applying the mapping function to the value if present,
+         *         otherwise an empty {@code OptionalInt}
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
+         * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Long, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
@@ -4103,15 +4090,15 @@ public class u { // NOSONAR
         }
 
         /**
-         * Applies the given mapper function to the value if present, returning an OptionalDouble containing the result.
-         * If this OptionalLong is empty, returns an empty OptionalDouble.
+         * If a value is present, applies the given mapping function to it and returns an {@code OptionalDouble} describing the result,
+         * otherwise returns an empty {@code OptionalDouble}.
          *
          * @param <E> the type of exception that the mapper may throw
-         * @param mapper the mapper function to apply to the value if present
-         * @return an OptionalDouble containing the result of applying the mapper to the value if present,
-         *         otherwise an empty OptionalDouble
-         * @throws IllegalArgumentException if mapper is null
-         * @throws E if the mapper function throws an exception
+         * @param mapper the mapping function to apply to the value if present
+         * @return an {@code OptionalDouble} describing the result of applying the mapping function to the value if present,
+         *         otherwise an empty {@code OptionalDouble}
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
+         * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<Long, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
@@ -4150,17 +4137,19 @@ public class u { // NOSONAR
         }
 
         /**
-         * Applies the given mapper function to the value if present, returning the resulting OptionalLong.
-         * If this OptionalLong is empty, returns an empty OptionalLong.
-         * This method is similar to {@code map}, but the mapping function returns an OptionalLong, and if invoked,
-         * flatMap does not wrap it within an additional OptionalLong.
+         * If a value is present, returns the result of applying the given {@code OptionalLong}-bearing mapping function
+         * to the value, otherwise returns an empty {@code OptionalLong}.
+         *
+         * <p>This method is similar to {@link #map(Throwables.LongUnaryOperator)}, but the mapping
+         * function is one whose result is already an {@code OptionalLong}, and if invoked,
+         * {@code flatMap} does not wrap it within an additional {@code OptionalLong}.
          *
          * @param <E> the type of exception that the mapper may throw
-         * @param mapper the mapper function to apply to the value if present
-         * @return the result of applying an OptionalLong-bearing mapping function to the value of this OptionalLong,
-         *         if a value is present, otherwise an empty OptionalLong
-         * @throws IllegalArgumentException if mapper is null
-         * @throws E if the mapper function throws an exception
+         * @param mapper the mapping function to apply to the value if present
+         * @return the result of applying an {@code OptionalLong}-bearing mapping function to the value of this {@code OptionalLong},
+         *         if a value is present, otherwise an empty {@code OptionalLong}
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
+         * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalLong flatMap(final Throwables.LongFunction<OptionalLong, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
@@ -4177,8 +4166,7 @@ public class u { // NOSONAR
          *
          * @param supplier the supplying function that produces an {@code OptionalLong} to be returned
          * @return this {@code OptionalLong} if a value is present, otherwise the result of the supplying function
-         * @throws NullPointerException if no value is present and the supplying function is {@code null}
-         *         or returns {@code null}
+         * @throws NullPointerException if no value is present and {@code supplier} is {@code null} or returns {@code null}
          */
         public OptionalLong or(final Supplier<OptionalLong> supplier) {
             if (isPresent) {
@@ -4189,9 +4177,9 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns the value if present, otherwise returns 0.
+         * Returns the value if present, otherwise returns {@code 0}.
          *
-         * @return the value if present, otherwise 0
+         * @return the value if present, otherwise {@code 0}
          */
         @Beta
         public long orElseZero() {
@@ -4213,7 +4201,7 @@ public class u { // NOSONAR
          *
          * @param supplier the supplying function that produces a value to be returned
          * @return the value if present, otherwise the result of the supplying function
-         * @throws IllegalArgumentException if {@code supplier} is null
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}
          */
         public long orElseGet(final LongSupplier supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.other);
@@ -4332,7 +4320,7 @@ public class u { // NOSONAR
          * @param <E> the type of the exception to be thrown
          * @param exceptionSupplier the supplying function that produces an exception to be thrown
          * @return the value if present
-         * @throws IllegalArgumentException if exceptionSupplier is null
+         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}
          * @throws E if no value is present
          */
         public <E extends Throwable> long orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
@@ -4411,9 +4399,9 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns an Optional containing the boxed Long value if present, otherwise returns an empty Optional.
+         * Returns an {@code Optional} containing the boxed {@code Long} value if present, otherwise returns an empty {@code Optional}.
          *
-         * @return an Optional containing the boxed Long value if present, otherwise an empty Optional
+         * @return an {@code Optional} containing the boxed {@code Long} value if present, otherwise an empty {@code Optional}
          */
         public Optional<Long> boxed() {
             if (isPresent) {
@@ -4424,9 +4412,9 @@ public class u { // NOSONAR
         }
 
         /**
-         * Converts this OptionalLong to a java.util.OptionalLong.
+         * Converts this {@code OptionalLong} to a {@code java.util.OptionalLong}.
          *
-         * @return a java.util.OptionalLong containing the value if present, otherwise an empty java.util.OptionalLong
+         * @return a {@code java.util.OptionalLong} containing the value if present, otherwise an empty {@code java.util.OptionalLong}
          */
         public java.util.OptionalLong toJdkOptional() {
             if (isPresent) {
@@ -4448,14 +4436,15 @@ public class u { // NOSONAR
         //    }
 
         /**
-         * Compares this OptionalLong with another OptionalLong for ordering.
-         * Empty OptionalLong instances are considered less than non-empty ones.
-         * Two empty OptionalLong instances are considered equal.
-         * Two non-empty OptionalLong instances are compared by their values.
+         * Compares this {@code OptionalLong} with another {@code OptionalLong} for ordering.
+         * Empty instances are considered less than non-empty ones.
+         * Two empty instances are considered equal.
+         * Two non-empty instances are compared by their contained values.
+         * A {@code null} argument is treated as an empty {@code OptionalLong}.
          *
-         * @param optional the OptionalLong to be compared
-         * @return a negative integer, zero, or a positive integer as this OptionalLong is less than, equal to,
-         *         or greater than the specified OptionalLong
+         * @param optional the {@code OptionalLong} to be compared, or {@code null}
+         * @return a negative integer, zero, or a positive integer as this {@code OptionalLong} is less than, equal to,
+         *         or greater than the specified {@code OptionalLong}
          */
         @Override
         public int compareTo(final OptionalLong optional) {
@@ -4471,12 +4460,12 @@ public class u { // NOSONAR
         }
 
         /**
-         * Indicates whether some other object is "equal to" this OptionalLong.
+         * Indicates whether some other object is "equal to" this {@code OptionalLong}.
          * The other object is considered equal if:
          * <ul>
-         * <li>it is also an OptionalLong and;
-         * <li>both instances have no value present or;
-         * <li>the present values are equal via {@code ==}.
+         * <li>it is also an {@code OptionalLong} and;</li>
+         * <li>both instances have no value present or;</li>
+         * <li>the present values are equal via {@code ==}.</li>
          * </ul>
          *
          * @param obj an object to be tested for equality
@@ -4497,9 +4486,9 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns the hash code of the value if present, otherwise returns {@code 0} (zero) if no value is present.
+         * Returns the hash code of the value if present, otherwise returns {@code 0} (zero).
          *
-         * @return hash code value of the present value or {@code 0} if no value is present
+         * @return the hash code of the value if present, otherwise {@code 0}
          */
         @Override
         public int hashCode() {
@@ -4507,11 +4496,12 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns a string representation of this OptionalLong.
-         * If a value is present, the result is "OptionalLong[" + value + "]".
-         * If no value is present, the result is "OptionalLong.empty".
+         * Returns a non-empty string representation of this {@code OptionalLong} suitable for debugging.
+         * If a value is present, the result is {@code "OptionalLong["} followed by the value and {@code "]"}.
+         * If no value is present, the result is {@code "OptionalLong.empty"}.
+         * The exact format is unspecified and may vary between versions.
          *
-         * @return a string representation of this OptionalLong
+         * @return the string representation of this instance
          */
         @Override
         public String toString() {
@@ -4552,30 +4542,30 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns an empty OptionalFloat instance. No value is present for this OptionalFloat.
+         * Returns an empty {@code OptionalFloat} instance. No value is present for this {@code OptionalFloat}.
          *
-         * @return an empty OptionalFloat
+         * @return an empty {@code OptionalFloat}
          */
         public static OptionalFloat empty() {
             return EMPTY;
         }
 
         /**
-         * Returns an OptionalFloat with the specified value present.
-         * For value 0.0f, a cached instance is returned.
+         * Returns an {@code OptionalFloat} with the specified value present.
+         * For value {@code 0.0f}, a cached instance is returned.
          *
          * @param value the value to be present
-         * @return an OptionalFloat with the value present
+         * @return an {@code OptionalFloat} with the value present
          */
         public static OptionalFloat of(final float value) {
             return Float.compare(value, 0f) == 0 ? ZERO : new OptionalFloat(value);
         }
 
         /**
-         * Returns an OptionalFloat describing the given value, if {@code non-null}, otherwise returns an empty OptionalFloat.
+         * Returns an {@code OptionalFloat} describing the given value, if {@code non-null}, otherwise returns an empty {@code OptionalFloat}.
          *
          * @param value the possibly-null value
-         * @return an OptionalFloat with a present value if the specified value is {@code non-null}, otherwise an empty OptionalFloat
+         * @return an {@code OptionalFloat} with a present value if the specified value is {@code non-null}, otherwise an empty {@code OptionalFloat}
          */
         public static OptionalFloat ofNullable(final Float value) {
             if (value == null) {
@@ -4780,17 +4770,19 @@ public class u { // NOSONAR
         }
 
         /**
-         * Applies the given mapper function to the value if present, returning the resulting {@code OptionalFloat}.
-         * If this {@code OptionalFloat} is empty, returns an empty {@code OptionalFloat}.
-         * This method is similar to {@code map}, but the mapping function returns an {@code OptionalFloat}, and if invoked,
-         * flatMap does not wrap it within an additional {@code OptionalFloat}.
+         * If a value is present, returns the result of applying the given {@code OptionalFloat}-bearing mapping function
+         * to the value, otherwise returns an empty {@code OptionalFloat}.
+         *
+         * <p>This method is similar to {@link #map(Throwables.FloatUnaryOperator)}, but the mapping
+         * function is one whose result is already an {@code OptionalFloat}, and if invoked,
+         * {@code flatMap} does not wrap it within an additional {@code OptionalFloat}.
          *
          * @param <E> the type of exception that the mapper may throw
-         * @param mapper the mapper function to apply to the value if present
+         * @param mapper the mapping function to apply to the value if present
          * @return the result of applying an {@code OptionalFloat}-bearing mapping function to the value of this {@code OptionalFloat},
          *         if a value is present, otherwise an empty {@code OptionalFloat}
          * @throws IllegalArgumentException if {@code mapper} is {@code null}
-         * @throws E if the mapper function throws an exception
+         * @throws E if the mapping function throws an exception
          */
         public <E extends Exception> OptionalFloat flatMap(final Throwables.FloatFunction<OptionalFloat, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
@@ -4807,8 +4799,7 @@ public class u { // NOSONAR
          *
          * @param supplier the supplying function that produces an {@code OptionalFloat} to be returned
          * @return this {@code OptionalFloat} if a value is present, otherwise the result of the supplying function
-         * @throws NullPointerException if no value is present and the supplying function is {@code null}
-         *         or returns {@code null}
+         * @throws NullPointerException if no value is present and {@code supplier} is {@code null} or returns {@code null}
          */
         public OptionalFloat or(final Supplier<OptionalFloat> supplier) {
             if (isPresent) {
@@ -4819,9 +4810,9 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns the value if present, otherwise returns 0.
+         * Returns the value if present, otherwise returns {@code 0.0f}.
          *
-         * @return the value if present, otherwise 0
+         * @return the value if present, otherwise {@code 0.0f}
          */
         @Beta
         public float orElseZero() {
@@ -5041,9 +5032,9 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns an {@code Optional<Float>} containing the boxed value if present, otherwise returns an empty {@code Optional}.
+         * Returns an {@code Optional} containing the boxed {@code Float} value if present, otherwise returns an empty {@code Optional}.
          *
-         * @return an {@code Optional<Float>} containing the boxed value if present, otherwise an empty {@code Optional}
+         * @return an {@code Optional} containing the boxed {@code Float} value if present, otherwise an empty {@code Optional}
          */
         public Optional<Float> boxed() {
             if (isPresent) {
@@ -5056,9 +5047,10 @@ public class u { // NOSONAR
         /**
          * Compares this {@code OptionalFloat} with the specified {@code OptionalFloat} for order.
          * Empty {@code OptionalFloat}s are considered less than non-empty ones.
-         * If both are non-empty, their values are compared using {@code Float.compare}.
+         * If both are non-empty, their values are compared using {@link Float#compare(float, float)}.
+         * A {@code null} argument is treated as an empty {@code OptionalFloat}.
          *
-         * @param optional the {@code OptionalFloat} to be compared
+         * @param optional the {@code OptionalFloat} to be compared, or {@code null}
          * @return a negative integer, zero, or a positive integer as this {@code OptionalFloat}
          *         is less than, equal to, or greater than the specified {@code OptionalFloat}
          */
@@ -5079,9 +5071,9 @@ public class u { // NOSONAR
          * Indicates whether some other object is "equal to" this {@code OptionalFloat}.
          * The other object is considered equal if:
          * <ul>
-         *   <li>it is also an {@code OptionalFloat} and;
-         *   <li>both instances have no value present or;
-         *   <li>the present values are "equal to" each other via {@code N.equals()}.
+         *   <li>it is also an {@code OptionalFloat} and;</li>
+         *   <li>both instances have no value present or;</li>
+         *   <li>the present values are "equal to" each other via {@code N.equals()}.</li>
          * </ul>
          *
          * @param obj an object to be tested for equality
@@ -5112,11 +5104,12 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns a string representation of this {@code OptionalFloat}.
-         * If a value is present, the string representation is "OptionalFloat[" followed by the value and "]".
-         * If no value is present, the string representation is "OptionalFloat.empty".
+         * Returns a non-empty string representation of this {@code OptionalFloat} suitable for debugging.
+         * If a value is present, the result is {@code "OptionalFloat["} followed by the value and {@code "]"}.
+         * If no value is present, the result is {@code "OptionalFloat.empty"}.
+         * The exact format is unspecified and may vary between versions.
          *
-         * @return a string representation of this {@code OptionalFloat}
+         * @return the string representation of this instance
          */
         @Override
         public String toString() {
@@ -5704,9 +5697,9 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns an {@code Optional<Double>} containing the boxed value if present, otherwise returns an empty {@code Optional}.
+         * Returns an {@code Optional} containing the boxed {@code Double} value if present, otherwise returns an empty {@code Optional}.
          *
-         * @return an {@code Optional<Double>} containing the boxed value if present, otherwise an empty {@code Optional}
+         * @return an {@code Optional} containing the boxed {@code Double} value if present, otherwise an empty {@code Optional}
          */
         public Optional<Double> boxed() {
             if (isPresent) {
@@ -5746,9 +5739,10 @@ public class u { // NOSONAR
         /**
          * Compares this {@code OptionalDouble} with the specified {@code OptionalDouble} for order.
          * Empty {@code OptionalDouble}s are considered less than non-empty ones.
-         * If both are non-empty, their values are compared using {@code Double.compare}.
+         * If both are non-empty, their values are compared using {@link Double#compare(double, double)}.
+         * A {@code null} argument is treated as an empty {@code OptionalDouble}.
          *
-         * @param optional the {@code OptionalDouble} to be compared
+         * @param optional the {@code OptionalDouble} to be compared, or {@code null}
          * @return a negative integer, zero, or a positive integer as this {@code OptionalDouble}
          *         is less than, equal to, or greater than the specified {@code OptionalDouble}
          */
@@ -5769,9 +5763,9 @@ public class u { // NOSONAR
          * Indicates whether some other object is "equal to" this {@code OptionalDouble}.
          * The other object is considered equal if:
          * <ul>
-         *   <li>it is also an {@code OptionalDouble} and;
-         *   <li>both instances have no value present or;
-         *   <li>the present values are "equal to" each other via {@code N.equals()}.
+         *   <li>it is also an {@code OptionalDouble} and;</li>
+         *   <li>both instances have no value present or;</li>
+         *   <li>the present values are "equal to" each other via {@code N.equals()}.</li>
          * </ul>
          *
          * @param obj an object to be tested for equality
@@ -5802,11 +5796,12 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns a string representation of this {@code OptionalDouble}.
-         * If a value is present, the string representation is "OptionalDouble[" followed by the value and "]".
-         * If no value is present, the string representation is "OptionalDouble.empty".
+         * Returns a non-empty string representation of this {@code OptionalDouble} suitable for debugging.
+         * If a value is present, the result is {@code "OptionalDouble["} followed by the value and {@code "]"}.
+         * If no value is present, the result is {@code "OptionalDouble.empty"}.
+         * The exact format is unspecified and may vary between versions.
          *
-         * @return a string representation of this {@code OptionalDouble}
+         * @return the string representation of this instance
          */
         @Override
         public String toString() {
@@ -5889,7 +5884,7 @@ public class u { // NOSONAR
          *
          * @param value the {@code non-null} value to store
          * @return an {@code Optional} containing the specified value
-         * @throws NullPointerException if value is null
+         * @throws NullPointerException if {@code value} is {@code null}
          */
         @Beta
         public static Optional<String> of(final String value) throws NullPointerException {
@@ -5914,7 +5909,7 @@ public class u { // NOSONAR
          * @param <T> the type of the value
          * @param value the {@code non-null} value to store
          * @return an {@code Optional} containing the specified value
-         * @throws NullPointerException if value is null
+         * @throws NullPointerException if {@code value} is {@code null}
          */
         public static <T> Optional<T> of(final T value) throws NullPointerException {
             return new Optional<>(value);
@@ -6547,7 +6542,7 @@ public class u { // NOSONAR
          * </ul>
          *
          * @param obj an object to be tested for equality
-         * @return {@code true} if the other object is "equal to" this object otherwise {@code false}
+         * @return {@code true} if the other object is "equal to" this object, otherwise {@code false}
          */
         @Override
         public boolean equals(final Object obj) {
@@ -6563,9 +6558,9 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns the hash code of the value, if present, otherwise 0 (zero) if no value is present.
+         * Returns the hash code of the value if present, otherwise returns {@code 0} (zero).
          *
-         * @return hash code value of the present value or 0 if no value is present
+         * @return the hash code of the value if present, otherwise {@code 0}
          */
         @Override
         public int hashCode() {
@@ -6574,7 +6569,9 @@ public class u { // NOSONAR
 
         /**
          * Returns a non-empty string representation of this {@code Optional} suitable for debugging.
-         * The exact presentation format is unspecified and may vary between implementations and versions.
+         * If a value is present, the result is {@code "Optional["} followed by the string representation of the value and {@code "]"}.
+         * If no value is present, the result is {@code "Optional.empty"}.
+         * The exact format is unspecified and may vary between versions.
          *
          * @return the string representation of this instance
          */
@@ -6729,10 +6726,10 @@ public class u { // NOSONAR
 
         /**
          * Returns a {@code Nullable} containing the value from the specified {@code Optional} if present,
-         * otherwise returns an empty {@code Nullable}.
+         * otherwise returns an empty {@code Nullable}. A {@code null} argument is treated as an empty {@code Optional}.
          *
          * @param <T> the type of the value
-         * @param optional the {@code Optional} to convert
+         * @param optional the {@code Optional} to convert, or {@code null}
          * @return a {@code Nullable} containing the value if present in the {@code Optional}, otherwise an empty {@code Nullable}
          */
         public static <T> Nullable<T> from(final Optional<T> optional) {
@@ -7420,10 +7417,10 @@ public class u { // NOSONAR
         /**
          * Returns this {@code Nullable} if a value is present, otherwise returns the {@code Nullable} produced by the supplying function.
          *
-         * @param supplier the supplying function that produces a {@code Nullable} to be returned
+         * @param supplier the supplying function that produces a {@code Nullable} to be returned;
+         *        must not be {@code null} and must not return {@code null}
          * @return this {@code Nullable} if a value is present, otherwise the {@code Nullable} produced by the supplying function
-         * @throws IllegalArgumentException if the supplying function rejects arguments while creating a fallback {@code Nullable}
-         * @throws NullPointerException if {@code supplier} is {@code null} or the supplying function returns {@code null}
+         * @throws NullPointerException if no value is present and {@code supplier} is {@code null} or returns {@code null}
          */
         public Nullable<T> or(final Supplier<? extends Nullable<? extends T>> supplier) throws IllegalArgumentException {
             if (isPresent()) {
@@ -7440,6 +7437,7 @@ public class u { // NOSONAR
          * @param supplier the supplying function that produces a {@code Nullable} to be returned
          * @return this {@code Nullable} if the value is not {@code null}, otherwise the {@code Nullable} produced by the supplying function
          * @throws IllegalArgumentException if {@code supplier} is {@code null}
+         * @throws NullPointerException if the value is {@code null} or not present and the supplying function returns {@code null}
          */
         public Nullable<T> orIfNull(final Supplier<? extends Nullable<? extends T>> supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.Supplier);

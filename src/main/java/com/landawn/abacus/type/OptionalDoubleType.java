@@ -26,6 +26,7 @@ import com.landawn.abacus.util.u.OptionalDouble;
  */
 public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
 
+    /** The type name constant for OptionalDouble type identification, equal to {@code "OptionalDouble"}. */
     public static final String OPTIONAL_DOUBLE = OptionalDouble.class.getSimpleName();
 
     /**

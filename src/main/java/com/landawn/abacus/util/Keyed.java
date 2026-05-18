@@ -59,9 +59,7 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
 
     /**
      * Constructs a new {@code Keyed} instance with the specified key and value.
-     *
-     * <p>This constructor is package-private and used internally by the factory method
-     * {@link #of(Object, Object)} and subclasses.</p>
+     * Used internally by the factory method {@link #of(Object, Object)} and permitted subclasses.
      *
      * @param key the key used for hashing and equality comparisons (can be {@code null}).
      * @param val the value associated with the key (can be {@code null}).
@@ -173,7 +171,7 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      * <ul>
      *   <li>Returns {@code true} if {@code obj} is the same instance as this object</li>
      *   <li>Returns {@code false} if {@code obj} is {@code null}</li>
-     *   <li>Returns {@code false} if {@code obj} is not of the exact same class (subclasses are not considered equal)</li>
+     *   <li>Returns {@code false} if {@code obj} is not of the exact same runtime class as this instance</li>
      *   <li>Otherwise, compares keys using {@link N#equals(Object, Object)}, which handles {@code null} keys properly</li>
      * </ul>
      *

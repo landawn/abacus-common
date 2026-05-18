@@ -72,11 +72,11 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * // Creates statistics for 5 values ranging from 10 to 50 with sum of 150
      * }</pre>
      *
-     * @param count the count of values
-     * @param min the minimum value
-     * @param max the maximum value
-     * @param sum the sum of all values
-     * @throws IllegalArgumentException if count is negative or minimum is greater than maximum
+     * @param count the count of values; must be non-negative
+     * @param min the minimum {@code byte} value
+     * @param max the maximum {@code byte} value
+     * @param sum the sum of all values as a {@code long}
+     * @throws IllegalArgumentException if {@code count} is negative or {@code min} is greater than {@code max}
      */
     public ByteSummaryStatistics(final long count, final byte min, final byte max, final long sum) {
         if (count < 0) {
@@ -241,7 +241,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * System.out.println(stats.getAverage());   // 20.0
      * }</pre>
      *
-     * @return the arithmetic mean of values, or zero if none
+     * @return the arithmetic mean of values as a {@code double}, or {@code 0.0} if none
      */
     public final double getAverage() {
         return getCount() > 0 ? (double) getSum() / getCount() : 0.0d;

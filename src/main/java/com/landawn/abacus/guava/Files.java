@@ -246,10 +246,9 @@ import com.landawn.abacus.util.ImmutableList;
  *
  * <p><b>MoreFiles Nested Class:</b>
  * <ul>
- *   <li><b>Extended Functionality:</b> Additional file operations beyond standard Guava Files</li>
- *   <li><b>Path-Centric:</b> Focused on modern Path-based operations</li>
- *   <li><b>Advanced Features:</b> Recursive operations, directory streaming, and enhanced predicates</li>
- *   <li><b>NIO.2 Optimization:</b> Leverages advanced NIO.2 features for better performance</li>
+ *   <li><b>Alias Class:</b> A nested subclass that inherits all static methods from {@link Files}</li>
+ *   <li><b>Interchangeable Use:</b> {@code Files.MoreFiles.xxx(...)} is equivalent to {@code Files.xxx(...)}</li>
+ *   <li><b>Naming Convenience:</b> Provided so callers familiar with Guava's {@code MoreFiles} can use a similarly named type</li>
  * </ul>
  *
  * <p><b>Related Utility Classes:</b>
@@ -873,8 +872,9 @@ public abstract class Files { //NOSONAR
      * different directory. In either case {@code to} must be the target path for the file itself; not
      * just the new name for the file or the path to the new parent directory.
      *
-     * <p>This method attempts to move the file atomically, but falls back to a copy-and-delete
-     * operation if an atomic move is not supported by the file system.
+     * <p>The implementation first attempts to rename the file using {@link File#renameTo(File)}.
+     * If that fails, it falls back to copying the contents of {@code from} to {@code to} and then
+     * deleting {@code from}. This operation is not atomic.
      *
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link java.nio.file.Files#move}.
      *

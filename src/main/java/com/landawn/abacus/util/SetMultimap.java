@@ -27,163 +27,58 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
 
 /**
- * A specialized {@link Multimap} implementation that uses {@link Set} collections to store unique values
- * for each key, ensuring that duplicate values are automatically eliminated. This final class extends the base
- * Multimap to provide set-specific functionality optimized for scenarios where value uniqueness per key
- * is essential and ordering may not be important.
+ * A {@link Multimap} implementation that uses {@link Set} as the value collection type, ensuring
+ * that duplicate values for the same key are automatically eliminated.
  *
- * <p>SetMultimap is ideal for use cases where you need to associate multiple unique values with each key
- * without worrying about duplicates. The underlying set structure provides efficient membership testing
- * and automatic deduplication while maintaining the multimap's key-to-many-values semantics.</p>
+ * <p>The default backing map is {@link HashMap} and the default value collection is {@link HashSet},
+ * giving O(1) average-time key lookup and value membership tests with no guaranteed ordering.
+ * Alternative backing implementations (e.g., {@link java.util.TreeMap}/{@link java.util.TreeSet}
+ * for sorted order, {@link java.util.LinkedHashMap}/{@link java.util.LinkedHashSet} for
+ * insertion order) can be specified via the appropriate constructor or factory method.
  *
- * <p><b>Key Characteristics:</b>
+ * <p>This class is <b>not thread-safe</b>. For concurrent access, supply a thread-safe backing
+ * map and set via {@link N#newSetMultimap(Supplier, Supplier)}, or apply external synchronization.
+ *
+ * <p><b>Typical use cases:</b>
  * <ul>
- *   <li><b>Unique Values:</b> Automatically prevents duplicate values for the same key using Set semantics</li>
- *   <li><b>No Guaranteed Order:</b> Value ordering depends on the Set implementation (HashSet vs TreeSet)</li>
- *   <li><b>Set Semantics:</b> Each key maps to a {@link Set} of values with efficient contains() operations</li>
- *   <li><b>Efficient Membership:</b> O(1) average time for checking if a key-value pair exists</li>
- *   <li><b>Memory Efficient:</b> Only creates sets when values are actually added to keys</li>
+ *   <li>Many-to-many relationships where duplicate associations are meaningless</li>
+ *   <li>Tag/permission systems associating entities with unique sets of labels</li>
+ *   <li>Graph adjacency lists with unique neighbor sets</li>
  * </ul>
  *
- * <p><b>IMPORTANT - Design Decisions:</b>
- * <ul>
- *   <li>This is a <b>final class</b> that cannot be extended for API stability</li>
- *   <li>Extends {@link Multimap} to inherit common multimap operations</li>
- *   <li>Uses {@link HashSet} as the default set implementation for optimal performance</li>
- *   <li>Thread safety depends on the backing Map and Set implementations chosen</li>
- * </ul>
- *
- * <p><b>Common Use Cases:</b>
- * <ul>
- *   <li><b>Relationship Modeling:</b> Many-to-many relationships where duplicates are meaningless</li>
- *   <li><b>Tag Systems:</b> Associating unique tags or categories with entities</li>
- *   <li><b>Permission Management:</b> Mapping users to unique sets of permissions or roles</li>
- *   <li><b>Data Deduplication:</b> Automatically eliminating duplicate associations</li>
- *   <li><b>Graph Adjacency:</b> Representing graph adjacency lists with unique neighbors</li>
- *   <li><b>Index Structures:</b> Building indexes where uniqueness is required</li>
- * </ul>
- *
- * <p><b>Usage Examples:</b></p>
+ * <p><b>Usage example:</b>
  * <pre>{@code
- * // Basic operations with automatic deduplication
  * SetMultimap<String, String> userRoles = N.newSetMultimap();
  * userRoles.put("alice", "admin");
  * userRoles.put("alice", "user");
  * userRoles.put("alice", "admin");   // duplicate ignored
- * Set<String> aliceRoles = userRoles.get("alice");   // ["admin", "user"]
+ * Set<String> roles = userRoles.get("alice");   // {"admin", "user"}
  *
- * // Creating from collections with grouping
- * List<String> words = Arrays.asList("apple", "apricot", "banana", "blueberry");
- * SetMultimap<Integer, String> byLength =
- *     SetMultimap.fromCollection(words, String::length);
- * // Result: {5: ["apple"], 7: ["apricot"], 6: ["banana"], 9: ["blueberry"]}
+ * // Build from a collection
+ * List<String> words = Arrays.asList("apple", "apricot", "banana");
+ * SetMultimap<Character, String> byFirstChar =
+ *     SetMultimap.fromCollection(words, s -> s.charAt(0));
+ * // {'a' -> {"apple", "apricot"}, 'b' -> {"banana"}}
  *
- * // Tag system example
- * SetMultimap<String, String> articleTags = N.newSetMultimap();
- * articleTags.put("article1", "java");
- * articleTags.put("article1", "programming");
- * articleTags.put("article1", "tutorial");
- * articleTags.put("article2", "java");
- * articleTags.put("article2", "advanced");
- *
- * // Finding articles with specific tags
- * SetMultimap<String, String> inverted = articleTags.invert();
- * Set<String> javaArticles = inverted.get("java");   // ["article1", "article2"]
- *
- * // Filtering and transformations (stream-based)
- * SetMultimap<String, String> filtered = N.newSetMultimap();
- * articleTags.stream()
- *     .filter(e -> e.getValue().size() > 2)
- *     .forEach(e -> filtered.putValues(e.getKey(), e.getValue()));
- *
- * SetMultimap<String, String> javaOnly = N.newSetMultimap();
- * articleTags.stream()
- *     .filter(e -> e.getValue().contains("java"))
- *     .forEach(e -> javaOnly.putValues(e.getKey(), e.getValue()));
- *
- * // Conversion to immutable structures
- * ImmutableMap<String, ImmutableSet<String>> immutable = articleTags.toImmutableMap();
+ * // Invert mapping
+ * SetMultimap<String, String> inverted = userRoles.invert();
  * }</pre>
  *
- * <p><b>Factory Methods:</b>
+ * <p><b>Factory methods:</b>
  * <ul>
- *   <li>{@link #of(Object, Object)} - Single key-value pair</li>
- *   <li>{@link #fromMap(Map)} - From existing Map</li>
- *   <li>{@link #fromCollection(Collection, Function)} - Grouping by key extractor</li>
- *   <li>{@link #fromCollection(Collection, Function, Function)} - Key and value extractors</li>
- *   <li>{@link #merge(Map, Map)} - Merging multiple maps</li>
- *   <li>{@link #wrap(Map)} - Wrapping existing Map&lt;K, Set&lt;E&gt;&gt;</li>
- *   <li>{@link N#newSetMultimap()} - Empty instance with default backing</li>
+ *   <li>{@link #of(Object, Object)} - single key-value pair</li>
+ *   <li>{@link #fromMap(Map)} - from an existing {@link Map}</li>
+ *   <li>{@link #fromCollection(Collection, Function)} - group by key extractor</li>
+ *   <li>{@link #fromCollection(Collection, Function, Function)} - key and value extractors</li>
+ *   <li>{@link #merge(Map, Map)} / {@link #merge(Map, Map, Map)} - merge maps</li>
+ *   <li>{@link #wrap(Map)} - wrap an existing {@code Map<K, Set<E>>} without copying</li>
+ *   <li>{@link N#newSetMultimap()} - empty instance with default backing</li>
  * </ul>
  *
- * <p><b>Set-Specific Operations:</b>
- * <ul>
- *   <li>{@link #invert()} - Invert keys and values while maintaining uniqueness</li>
- *   <li>{@link #toImmutableMap()} - Convert to immutable representation</li>
- *   <li>{@link #copy()} - Create a deep copy of the SetMultimap</li>
- * </ul>
- *
- * <p><b>Performance Characteristics:</b>
- * <ul>
- *   <li>Key lookup: O(1) average time with HashMap backing</li>
- *   <li>Value membership test: O(1) average time with HashSet</li>
- *   <li>Value addition: O(1) average time, with automatic deduplication</li>
- *   <li>Iteration: O(n) where n is total number of unique values</li>
- *   <li>Memory usage: O(k + v) where k is keys and v is total unique values</li>
- * </ul>
- *
- * <p><b>Thread Safety:</b>
- * SetMultimap is <b>not thread-safe</b> by default. For concurrent access:
- * <ul>
- *   <li>Use {@code N.newSetMultimap(ConcurrentHashMap::new, ConcurrentHashMap::newKeySet)} for concurrent maps</li>
- *   <li>Wrap individual sets with {@code Collections.synchronizedSet()}</li>
- *   <li>Use external synchronization for write operations</li>
- *   <li>Consider using concurrent set implementations for value collections</li>
- * </ul>
- *
- * <p><b>Comparison with Alternatives:</b>
- * <ul>
- *   <li><b>vs {@link ListMultimap}:</b> Unique values and no ordering vs. duplicates and insertion order</li>
- *   <li><b>vs {@code Map<K, Set<E>>}:</b> Automatic set creation and multimap-specific operations</li>
- *   <li><b>vs Google Guava SetMultimap:</b> Similar API with additional utility methods</li>
- *   <li><b>vs {@link Multiset}:</b> Key-value structure vs. counting structure</li>
- * </ul>
- *
- * <p><b>Set Implementation Choices:</b>
- * <ul>
- *   <li><b>HashSet (default):</b> Fast operations, no ordering guarantees</li>
- *   <li><b>TreeSet:</b> Sorted values, O(log n) operations</li>
- *   <li><b>LinkedHashSet:</b> Insertion-order preservation with fast operations</li>
- *   <li><b>ConcurrentHashMap.newKeySet():</b> Thread-safe set implementation</li>
- * </ul>
- *
- * <p><b>Best Practices:</b>
- * <ul>
- *   <li>Use appropriate backing implementations based on ordering and concurrency needs</li>
- *   <li>Consider using {@link #toImmutableMap()} for read-only snapshots</li>
- *   <li>Stream-based filtering creates new instances - chain operations efficiently</li>
- *   <li>Use {@link #wrap(Map)} when you already have a suitable Map structure</li>
- *   <li>Choose TreeSet backing for naturally ordered values</li>
- * </ul>
- *
- * <p><b>Memory Considerations:</b>
- * <ul>
- *   <li>Empty keys don't consume memory for value collections</li>
- *   <li>HashSet backing provides good performance for most use cases</li>
- *   <li>Use TreeSet only when ordering is required, as it has higher memory overhead</li>
- *   <li>Consider using primitive collections for numeric values to reduce boxing overhead</li>
- * </ul>
- *
- * <p><b>Uniqueness Guarantees:</b>
- * <ul>
- *   <li>Duplicate values for the same key are automatically ignored</li>
- *   <li>Equality is determined by the value's {@code equals()} method</li>
- *   <li>Null values are supported if the underlying Set implementation allows them</li>
- *   <li>Uniqueness is maintained across all multimap operations</li>
- * </ul>
- *
- * @param <K> the type of keys maintained by this SetMultimap
- * @param <E> the type of values maintained in the sets associated with each key
+ * @param <K> the type of keys maintained by this multimap
+ * @param <E> the type of values held in the sets associated with each key
+ * @see Multimap
+ * @see ListMultimap
  * @see N#newSetMultimap()
  * @see N#newSetMultimap(Class, Class)
  * @see N#newSetMultimap(Supplier, Supplier)
@@ -1027,7 +922,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * }</pre>
      *
      * @param mapSupplier a function that creates a new map instance given an initial capacity;
-     *                    the function receives the size of this multimap as its argument; must not be {@code null}
+     *                    the function receives the number of keys in this multimap as its argument; must not be {@code null}
      * @return an {@link ImmutableMap} where each key from this multimap is associated with an
      *         {@link ImmutableSet} containing all values that were associated with that key
      * @throws NullPointerException if {@code mapSupplier} is {@code null}

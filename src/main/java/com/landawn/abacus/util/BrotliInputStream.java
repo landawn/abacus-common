@@ -217,14 +217,6 @@ public final class BrotliInputStream extends InputStream {
      * The underlying Brotli decoder does not support mark/reset, so this method always
      * throws an {@link IOException}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * brotliStream.mark(100);
-     * byte[] preview = new byte[50];
-     * brotliStream.read(preview);
-     * brotliStream.reset();   // Go back to marked position
-     * }</pre>
-     *
      * @throws IOException always, because the underlying Brotli decoder does not support mark/reset
      */
     @Override

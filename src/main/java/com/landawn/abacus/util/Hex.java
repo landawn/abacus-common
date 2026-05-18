@@ -40,7 +40,7 @@ package com.landawn.abacus.util;
  *
  * <p><b>Attribution:</b>
  * This class includes code adapted from Apache Commons Lang under the Apache License 2.0.
- * Methods from these libraries may have been modified for consistency, performance optimization, and null-safety enhancement.
+ * Methods from these libraries may have been modified for consistency, performance optimization, and null-safety enhancement.</p>
  *
  * @version $Id: Hex.java 1619948 2014-08-22 22:53:55Z ggregory $
  */
@@ -165,9 +165,9 @@ public final class Hex {
      * The returned array will be double the length of the passed array, as it takes two characters to represent any
      * given byte.
      *
-     * @param data a byte[] to convert to Hex characters.
-     * @param toDigits the output alphabet (either DIGITS_LOWER or DIGITS_UPPER).
-     * @return a char[] containing hexadecimal characters.
+     * @param data a byte array to convert to hexadecimal characters; must not be {@code null}.
+     * @param toDigits the output digit alphabet to use; typically {@code DIGITS_LOWER} or {@code DIGITS_UPPER}.
+     * @return a char array containing hexadecimal characters; exactly twice the length of {@code data}.
      */
     static char[] encode(final byte[] data, final char[] toDigits) {
         final int l = data.length;
@@ -263,19 +263,22 @@ public final class Hex {
      * Converts a hexadecimal character to its integer value (0-15).
      *
      * <p>This method validates that the character is a valid hexadecimal digit and converts it
-     * to its corresponding integer value. Valid characters are {@code '0'}-{@code '9'}, {@code 'A'}-{@code 'F'}, and {@code 'a'}-{@code 'f'}.</p>
+     * to its corresponding integer value. Valid characters are {@code '0'}-{@code '9'},
+     * {@code 'A'}-{@code 'F'}, and {@code 'a'}-{@code 'f'}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int value1 = toDigit('5', 0);   // returns 5
-     * int value2 = toDigit('A', 1);   // returns 10
-     * int value3 = toDigit('f', 2);   // returns 15
+     * int value1 = Hex.toDigit('5', 0);   // returns 5
+     * int value2 = Hex.toDigit('A', 1);   // returns 10
+     * int value3 = Hex.toDigit('f', 2);   // returns 15
      * }</pre>
      *
-     * @param ch the hexadecimal character to convert (0-9, A-F, a-f).
-     * @param index the position of the character in the source string (used for error reporting).
-     * @return the integer value (0-15) represented by the hexadecimal character.
-     * @throws IllegalArgumentException if the character is not a valid hexadecimal digit.
+     * @param ch the hexadecimal character to convert; must be one of {@code '0'}-{@code '9'},
+     *           {@code 'A'}-{@code 'F'}, or {@code 'a'}-{@code 'f'}.
+     * @param index the zero-based position of the character in the source array or string,
+     *              used solely for constructing the error message if the character is invalid.
+     * @return the integer value ({@code 0} to {@code 15}) represented by the hexadecimal character.
+     * @throws IllegalArgumentException if {@code ch} is not a valid hexadecimal digit.
      */
     static int toDigit(final char ch, final int index) throws IllegalArgumentException {
         final int digit = Character.digit(ch, 16);

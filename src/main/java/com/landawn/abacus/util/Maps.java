@@ -361,9 +361,10 @@ public final class Maps {
      *
      * @param <K> the type of keys in the resulting Map.
      * @param <V> the type of values in the resulting Map.
-     * @param keys an Iterable of keys for the resulting Map.
-     * @param values an Iterable of values for the resulting Map.
-     * @return a Map where each key from the keys Iterable is associated with the corresponding value from the values Iterable.
+     * @param keys an Iterable of keys for the resulting Map; may be {@code null} or empty.
+     * @param values an Iterable of values for the resulting Map; may be {@code null} or empty.
+     * @return a new {@code HashMap} where each key from {@code keys} is associated with the
+     *         corresponding value from {@code values}; an empty map if either input is {@code null} or empty.
      */
     public static <K, V> Map<K, V> zip(final Iterable<? extends K> keys, final Iterable<? extends V> values) {
         if (N.isEmpty(keys) || N.isEmpty(values)) {
@@ -602,10 +603,12 @@ public final class Maps {
      * @param <K> the type of keys in the resulting Map.
      * @param <V> the type of values in the resulting Map.
      * @param <M> the type of the resulting Map.
-     * @param keys an Iterable of keys for the resulting Map.
-     * @param values an Iterable of values for the resulting Map.
-     * @param mapSupplier a function that generates a new Map instance based on expected size.
-     * @return a Map where each key from the keys Iterable is associated with the corresponding value from the values Iterable.
+     * @param keys an Iterable of keys for the resulting Map; may be {@code null} or empty.
+     * @param values an Iterable of values for the resulting Map; may be {@code null} or empty.
+     * @param mapSupplier a function that creates a new Map instance given an expected size; must not be {@code null}.
+     * @return a Map where each key from {@code keys} is associated with the corresponding value from {@code values};
+     *         an empty map (from {@code mapSupplier.apply(0)}) if either input is {@code null} or empty.
+     * @throws NullPointerException if {@code mapSupplier} is {@code null}.
      */
     public static <K, V, M extends Map<K, V>> M zip(final Iterable<? extends K> keys, final Iterable<? extends V> values,
             final IntFunction<? extends M> mapSupplier) {
@@ -645,11 +648,13 @@ public final class Maps {
      * @param <K> the type of keys in the resulting Map.
      * @param <V> the type of values in the resulting Map.
      * @param <M> the type of the resulting Map.
-     * @param keys an Iterable of keys for the resulting Map.
-     * @param values an Iterable of values for the resulting Map.
-     * @param mergeFunction a function used to resolve conflicts when duplicate keys are encountered.
-     * @param mapSupplier a function that generates a new Map instance based on expected size.
-     * @return a Map where each key from the keys Iterable is associated with the corresponding value from the values Iterable.
+     * @param keys an Iterable of keys for the resulting Map; may be {@code null} or empty.
+     * @param values an Iterable of values for the resulting Map; may be {@code null} or empty.
+     * @param mergeFunction a function used to resolve conflicts when duplicate keys are encountered; must not be {@code null}.
+     * @param mapSupplier a function that creates a new Map instance given an expected size; must not be {@code null}.
+     * @return a Map where each key from {@code keys} is associated with the corresponding value from {@code values};
+     *         an empty map (from {@code mapSupplier.apply(0)}) if either input is {@code null} or empty.
+     * @throws NullPointerException if {@code mergeFunction} or {@code mapSupplier} is {@code null}.
      */
     public static <K, V, M extends Map<K, V>> M zip(final Iterable<? extends K> keys, final Iterable<? extends V> values,
             final BiFunction<? super V, ? super V, ? extends V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
@@ -695,11 +700,12 @@ public final class Maps {
      *
      * @param <K> the type of keys in the resulting Map.
      * @param <V> the type of values in the resulting Map.
-     * @param keys an Iterable of keys for the resulting Map.
-     * @param values an Iterable of values for the resulting Map.
-     * @param defaultForKey the default key to use when keys Iterable is shorter than values.
-     * @param defaultForValue the default value to use when values Iterable is shorter than keys.
-     * @return a Map where each key is associated with the corresponding value, using defaults for missing elements.
+     * @param keys an Iterable of keys for the resulting Map; may be {@code null} or empty.
+     * @param values an Iterable of values for the resulting Map; may be {@code null} or empty.
+     * @param defaultForKey the default key to use when {@code keys} is shorter than {@code values}.
+     * @param defaultForValue the default value to use when {@code values} is shorter than {@code keys}.
+     * @return a new {@code HashMap} covering all elements from both iterables, using defaults for
+     *         missing elements; an empty map if both inputs are {@code null} or empty.
      */
     public static <K, V> Map<K, V> zip(final Iterable<? extends K> keys, final Iterable<? extends V> values, final K defaultForKey, final V defaultForValue) {
         return zip(keys, values, defaultForKey, defaultForValue, Fn.selectFirst(), IntFunctions.ofMap());
@@ -723,13 +729,15 @@ public final class Maps {
      * @param <K> the type of keys in the resulting Map.
      * @param <V> the type of values in the resulting Map.
      * @param <M> the type of the resulting Map.
-     * @param keys an Iterable of keys for the resulting Map.
-     * @param values an Iterable of values for the resulting Map.
-     * @param defaultForKey the default key to use when keys Iterable is shorter than values.
-     * @param defaultForValue the default value to use when values Iterable is shorter than keys.
-     * @param mergeFunction a function used to resolve conflicts when duplicate keys are encountered.
-     * @param mapSupplier a function that generates a new Map instance.
-     * @return a Map where each key is associated with the corresponding value.
+     * @param keys an Iterable of keys for the resulting Map; may be {@code null} or empty.
+     * @param values an Iterable of values for the resulting Map; may be {@code null} or empty.
+     * @param defaultForKey the default key to use when {@code keys} is shorter than {@code values}.
+     * @param defaultForValue the default value to use when {@code values} is shorter than {@code keys}.
+     * @param mergeFunction a function used to resolve conflicts when duplicate keys are encountered; must not be {@code null}.
+     * @param mapSupplier a function that creates a new Map instance given an expected size; must not be {@code null}.
+     * @return a Map covering all elements from both iterables, using defaults for missing elements;
+     *         an empty map (from {@code mapSupplier.apply(0)}) if both inputs are {@code null} or empty.
+     * @throws NullPointerException if {@code mergeFunction} or {@code mapSupplier} is {@code null}.
      */
     public static <K, V, M extends Map<K, V>> M zip(final Iterable<? extends K> keys, final Iterable<? extends V> values, final K defaultForKey,
             final V defaultForValue, final BiFunction<? super V, ? super V, ? extends V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
@@ -1021,8 +1029,9 @@ public final class Maps {
      * @param <T> the type of the value to be returned
      * @param map the map to query, may be {@code null}
      * @param path the dot-separated path to the value
-     * @param defaultValue the default value to return if the path cannot be resolved
+     * @param defaultValue the default value to return if the path cannot be resolved; must not be {@code null}
      * @return the value at the specified path, or {@code defaultValue} if the path cannot be resolved
+     * @throws IllegalArgumentException if {@code defaultValue} is {@code null}.
      * @see #getByPath(Map, String)
      */
     public static <T> T getByPathOrDefault(final Map<String, ?> map, final String path, final T defaultValue) {
@@ -1066,9 +1075,10 @@ public final class Maps {
      * @param <T>        the target type
      * @param map        the root map to traverse, may be {@code null}
      * @param path       the dot-separated path with optional {@code [index]} segments
-     * @param targetType the target type to convert the value to
+     * @param targetType the target type to convert the value to; must not be {@code null}
      * @return the resolved and possibly converted value, or {@code null} if the path cannot
      *         be resolved
+     * @throws NullPointerException if {@code targetType} is {@code null}.
      * @see #getByPath(Map, String)
      */
     @MayReturnNull
@@ -1172,9 +1182,10 @@ public final class Maps {
      * @param <T>        the target type
      * @param map        the root map to traverse, may be {@code null}
      * @param path       the dot-separated path with optional {@code [index]} segments
-     * @param targetType the target type to convert the value to
+     * @param targetType the target type to convert the value to; must not be {@code null}
      * @return a {@code Nullable<T>} containing the resolved (and possibly converted) value
      *         if the path exists; otherwise {@code Nullable.empty()}
+     * @throws NullPointerException if {@code targetType} is {@code null}.
      * @see #getByPath(Map, String)
      */
     public static <T> Nullable<T> getByPathAsIfExists(final Map<String, ?> map, final String path, final Class<? extends T> targetType) {
@@ -1330,7 +1341,7 @@ public final class Maps {
      * @param key the key whose associated value is to be returned
      * @param defaultValue the value to return if the key is absent; must not be {@code null}
      * @return the value mapped to {@code key}, or {@code defaultValue} if the key is absent
-     * @throws IllegalArgumentException if {@code defaultValue} is {@code null}
+     * @throws IllegalArgumentException if {@code defaultValue} is {@code null}.
      * @see #getIfExists(Map, Object)
      * @see #getAsOrDefault(Map, Object, Object)
      */
@@ -1388,7 +1399,7 @@ public final class Maps {
      * @param k2 the key used to retrieve the value from the inner map
      * @param defaultValue the value to return if the lookup result is absent; must not be {@code null}
      * @return the resolved value, or {@code defaultValue} if absent
-     * @throws IllegalArgumentException if {@code defaultValue} is {@code null}
+     * @throws IllegalArgumentException if {@code defaultValue} is {@code null}.
      * @see #getIfExists(Map, Object, Object)
      */
     public static <K, K2, V2> V2 getOrDefaultIfAbsent(final Map<K, ? extends Map<K2, V2>> map, final K key, final K2 k2, final V2 defaultValue) {
@@ -1434,7 +1445,7 @@ public final class Maps {
      * @param key the key whose associated value is to be returned
      * @param defaultValueSupplier supplies the value to return if the key is absent
      * @return the mapped value, or the value supplied by {@code defaultValueSupplier} if absent
-     * @throws NullPointerException if {@code defaultValueSupplier} is {@code null} or returns {@code null}
+     * @throws NullPointerException if {@code defaultValueSupplier} is {@code null} or returns {@code null}.
      */
     public static <K, V> V getOrDefaultIfAbsent(final Map<K, ? extends V> map, final K key, final Supplier<? extends V> defaultValueSupplier) {
         if (N.isEmpty(map)) {
@@ -1605,10 +1616,11 @@ public final class Maps {
      *
      * @param <K> the key type.
      * @param <V> the value type.
-     * @param map the map to check and possibly update.
+     * @param map the map to check and possibly update; must not be {@code null}.
      * @param key the key to check for, may be {@code null}.
      * @param defaultValueSupplier the supplier to provide a default value if the key is absent; must not be {@code null}.
      * @return the value associated with the specified key, or a new value from {@code defaultValueSupplier} if the key is absent.
+     * @throws NullPointerException if {@code map} or {@code defaultValueSupplier} is {@code null}.
      */
     // @ai-ignore getOrPut*IfAbsent variants - get-or-create pattern that inserts a new collection (List/Set/LinkedHashSet/Map/LinkedHashMap) when key is absent. Do not suggest consolidation.
     public static <K, V> V getOrPutIfAbsent(final Map<K, V> map, final K key, final Supplier<? extends V> defaultValueSupplier) {
@@ -1645,9 +1657,10 @@ public final class Maps {
      *
      * @param <K> the key type.
      * @param <E> the element type of the list.
-     * @param map the map to check and possibly update.
+     * @param map the map to check and possibly update; must not be {@code null}.
      * @param key the key to check for, may be {@code null}.
-     * @return the value associated with the specified key, or a new {@code List} if the key is absent.
+     * @return the value associated with the specified key, or a new {@code ArrayList} if the key is absent.
+     * @throws NullPointerException if {@code map} is {@code null}.
      */
     public static <K, E> List<E> getOrPutListIfAbsent(final Map<K, List<E>> map, final K key) {
         List<E> v = map.get(key);
@@ -1681,9 +1694,10 @@ public final class Maps {
      *
      * @param <K> the key type.
      * @param <E> the element type of the set.
-     * @param map the map to check and possibly update.
+     * @param map the map to check and possibly update; must not be {@code null}.
      * @param key the key to check for, may be {@code null}.
-     * @return the value associated with the specified key, or a new {@code Set} if the key is absent.
+     * @return the value associated with the specified key, or a new {@code HashSet} if the key is absent.
+     * @throws NullPointerException if {@code map} is {@code null}.
      */
     public static <K, E> Set<E> getOrPutSetIfAbsent(final Map<K, Set<E>> map, final K key) {
         Set<E> v = map.get(key);
@@ -1715,9 +1729,10 @@ public final class Maps {
      *
      * @param <K> the key type.
      * @param <E> the element type of the set.
-     * @param map the map to check and possibly update.
+     * @param map the map to check and possibly update; must not be {@code null}.
      * @param key the key to check for, may be {@code null}.
      * @return the value associated with the specified key, or a new {@code LinkedHashSet} if the key is absent.
+     * @throws NullPointerException if {@code map} is {@code null}.
      */
     public static <K, E> Set<E> getOrPutLinkedHashSetIfAbsent(final Map<K, Set<E>> map, final K key) {
         Set<E> v = map.get(key);
@@ -1752,9 +1767,10 @@ public final class Maps {
      * @param <K> the key type.
      * @param <KK> the key type of the value map.
      * @param <VV> the value type of the value map.
-     * @param map the map to check and possibly update.
+     * @param map the map to check and possibly update; must not be {@code null}.
      * @param key the key to check for, may be {@code null}.
-     * @return the value associated with the specified key, or a new {@code Map} if the key is absent.
+     * @return the value associated with the specified key, or a new {@code HashMap} if the key is absent.
+     * @throws NullPointerException if {@code map} is {@code null}.
      */
     public static <K, KK, VV> Map<KK, VV> getOrPutMapIfAbsent(final Map<K, Map<KK, VV>> map, final K key) {
         Map<KK, VV> v = map.get(key);
@@ -1787,9 +1803,10 @@ public final class Maps {
      * @param <K> the key type.
      * @param <KK> the key type of the value map.
      * @param <VV> the value type of the value map.
-     * @param map the map to check and possibly update.
+     * @param map the map to check and possibly update; must not be {@code null}.
      * @param key the key to check for, may be {@code null}.
      * @return the value associated with the specified key, or a new {@code LinkedHashMap} if the key is absent.
+     * @throws NullPointerException if {@code map} is {@code null}.
      */
     public static <K, KK, VV> Map<KK, VV> getOrPutLinkedHashMapIfAbsent(final Map<K, Map<KK, VV>> map, final K key) {
         Map<KK, VV> v = map.get(key);
@@ -1823,7 +1840,7 @@ public final class Maps {
      * @param <K> the type of keys in the map.
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
-     * @return an OptionalBoolean containing the boolean value, or empty if not found.
+     * @return an {@code OptionalBoolean} containing the boolean value, or empty if not found.
      */
     // @ai-ignore getAs* type-conversion variants - retrieve map values with automatic type conversion for each primitive type (boolean/char/byte/short/int/long/float/double/String) plus generic typed access. Each pair provides Optional and OrDefault forms. Do not suggest consolidation.
     public static <K> OptionalBoolean getAsBoolean(final Map<? super K, ?> map, final K key) {
@@ -1862,7 +1879,7 @@ public final class Maps {
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
      * @param defaultValue the default value to return if the key is not found or value is null.
-     * @return the boolean value mapped to the key, or defaultValue if not found.
+     * @return the boolean value mapped to the key, or {@code defaultValue} if not found.
      */
     public static <K> boolean getAsBooleanOrDefault(final Map<? super K, ?> map, final K key, final boolean defaultValue) {
         if (N.isEmpty(map)) {
@@ -1901,7 +1918,7 @@ public final class Maps {
      * @param <K> the type of keys in the map.
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
-     * @return an OptionalChar containing the character value, or empty if not found.
+     * @return an {@code OptionalChar} containing the character value, or empty if not found.
      */
     public static <K> OptionalChar getAsChar(final Map<? super K, ?> map, final K key) {
         if (N.isEmpty(map)) {
@@ -1939,7 +1956,7 @@ public final class Maps {
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
      * @param defaultValue the default value to return if the key is not found or value is null.
-     * @return the character value mapped to the key, or defaultValue if not found.
+     * @return the character value mapped to the key, or {@code defaultValue} if not found.
      */
     public static <K> char getAsCharOrDefault(final Map<? super K, ?> map, final K key, final char defaultValue) {
         if (N.isEmpty(map)) {
@@ -1978,7 +1995,7 @@ public final class Maps {
      * @param <K> the type of keys in the map.
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
-     * @return an OptionalByte containing the byte value, or empty if not found.
+     * @return an {@code OptionalByte} containing the byte value, or empty if not found.
      */
     public static <K> OptionalByte getAsByte(final Map<? super K, ?> map, final K key) {
         if (N.isEmpty(map)) {
@@ -2016,7 +2033,7 @@ public final class Maps {
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
      * @param defaultValue the default value to return if the key is not found or value is null.
-     * @return the byte value mapped to the key, or defaultValue if not found.
+     * @return the byte value mapped to the key, or {@code defaultValue} if not found.
      */
     public static <K> byte getAsByteOrDefault(final Map<? super K, ?> map, final K key, final byte defaultValue) {
         if (N.isEmpty(map)) {
@@ -2055,7 +2072,7 @@ public final class Maps {
      * @param <K> the type of keys in the map.
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
-     * @return an OptionalShort containing the short value, or empty if not found.
+     * @return an {@code OptionalShort} containing the short value, or empty if not found.
      */
     public static <K> OptionalShort getAsShort(final Map<? super K, ?> map, final K key) {
         if (N.isEmpty(map)) {
@@ -2093,7 +2110,7 @@ public final class Maps {
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
      * @param defaultValue the default value to return if the key is not found or value is null.
-     * @return the short value mapped to the key, or defaultValue if not found.
+     * @return the short value mapped to the key, or {@code defaultValue} if not found.
      */
     public static <K> short getAsShortOrDefault(final Map<? super K, ?> map, final K key, final short defaultValue) {
         if (N.isEmpty(map)) {
@@ -2132,7 +2149,7 @@ public final class Maps {
      * @param <K> the type of keys in the map.
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
-     * @return an OptionalInt containing the integer value, or empty if not found.
+     * @return an {@code OptionalInt} containing the integer value, or empty if not found.
      */
     public static <K> OptionalInt getAsInt(final Map<? super K, ?> map, final K key) {
         if (N.isEmpty(map)) {
@@ -2170,7 +2187,7 @@ public final class Maps {
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
      * @param defaultValue the default value to return if the key is not found or value is null.
-     * @return the integer value mapped to the key, or defaultValue if not found.
+     * @return the integer value mapped to the key, or {@code defaultValue} if not found.
      */
     public static <K> int getAsIntOrDefault(final Map<? super K, ?> map, final K key, final int defaultValue) {
         if (N.isEmpty(map)) {
@@ -2255,7 +2272,7 @@ public final class Maps {
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
      * @param defaultValue the default value to return if the value is {@code null} or not found.
-     * @return the long value associated with the key, or defaultValue if not found.
+     * @return the long value associated with the key, or {@code defaultValue} if not found.
      */
     public static <K> long getAsLongOrDefault(final Map<? super K, ?> map, final K key, final long defaultValue) {
         if (N.isEmpty(map)) {
@@ -2338,7 +2355,7 @@ public final class Maps {
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
      * @param defaultValue the default value to return if the value is {@code null} or not found.
-     * @return the float value associated with the key, or defaultValue if not found.
+     * @return the float value associated with the key, or {@code defaultValue} if not found.
      */
     public static <K> float getAsFloatOrDefault(final Map<? super K, ?> map, final K key, final float defaultValue) {
         if (N.isEmpty(map)) {
@@ -2419,7 +2436,7 @@ public final class Maps {
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
      * @param defaultValue the default value to return if the value is {@code null} or not found.
-     * @return the double value associated with the key, or defaultValue if not found.
+     * @return the double value associated with the key, or {@code defaultValue} if not found.
      */
     public static <K> double getAsDoubleOrDefault(final Map<? super K, ?> map, final K key, final double defaultValue) {
         if (N.isEmpty(map)) {
@@ -2459,7 +2476,8 @@ public final class Maps {
      * @param <K> the type of keys maintained by the map.
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
-     * @return an {@code Optional<String>} with the value mapped by the specified key, or an empty {@code Optional<String>} if the map is empty, contains no value for the key, or the value is null.
+     * @return an {@code Optional<String>} with the value mapped by the specified key, converted to {@code String} if necessary;
+     *         or an empty {@code Optional<String>} if the map is empty, the key is absent, or the value is {@code null}.
      */
     public static <K> Optional<String> getAsString(final Map<? super K, ?> map, final K key) {
         if (N.isEmpty(map)) {
@@ -2501,9 +2519,11 @@ public final class Maps {
      * @param <K> the type of keys maintained by the map.
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
-     * @param defaultValue the default value to return if the map is empty, contains no value for the key, or the value is {@code null}, must not be null.
-     * @return the value mapped by the specified key, or {@code defaultValue} if the map is empty, contains no value for the key, or the value is null.
-     * @throws IllegalArgumentException if the specified {@code defaultValue} is {@code null}.
+     * @param defaultValue the default value to return if the map is empty, the key is absent, or the value
+     *        is {@code null}; must not be {@code null}.
+     * @return the value mapped by the specified key (converted to {@code String} via {@code N.stringOf} if
+     *         necessary), or {@code defaultValue} if the map is empty, the key is absent, or the value is {@code null}.
+     * @throws IllegalArgumentException if {@code defaultValue} is {@code null}.
      */
     public static <K> String getAsStringOrDefault(final Map<? super K, ?> map, final K key, final String defaultValue) throws IllegalArgumentException {
         N.checkArgNotNull(defaultValue, cs.defaultValue); // NOSONAR
@@ -2548,8 +2568,10 @@ public final class Maps {
      * @param <T> the type of the value.
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
-     * @param targetType the target type to which the value should be converted.
-     * @return an {@code Optional<T>} with the value mapped by the specified key, or an empty {@code Optional<T>} if the map is empty, contains no value for the key, or the value is null.
+     * @param targetType the target type to which the value should be converted; must not be {@code null}.
+     * @return an {@code Optional<T>} with the value mapped by the specified key (converted to {@code targetType}
+     *         if necessary), or an empty {@code Optional<T>} if the map is empty, the key is absent, or the value is {@code null}.
+     * @throws NullPointerException if {@code targetType} is {@code null}.
      * @see #getOrDefaultIfAbsent(Map, Object, Object)
      * @see N#convert(Object, Class)
      * @see N#convert(Object, Type)
@@ -2591,8 +2613,10 @@ public final class Maps {
      * @param <T> the type of the value.
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
-     * @param targetType the target type to which the value should be converted.
-     * @return an {@code Optional<T>} with the value mapped by the specified key, or an empty {@code Optional<T>} if the map is empty, contains no value for the key, or the value is null.
+     * @param targetType the target type to which the value should be converted; must not be {@code null}.
+     * @return an {@code Optional<T>} with the value mapped by the specified key (converted to {@code targetType}
+     *         if necessary), or an empty {@code Optional<T>} if the map is empty, the key is absent, or the value is {@code null}.
+     * @throws NullPointerException if {@code targetType} is {@code null}.
      * @see #getOrDefaultIfAbsent(Map, Object, Object)
      * @see N#convert(Object, Class)
      * @see N#convert(Object, Type)
@@ -2638,9 +2662,11 @@ public final class Maps {
      * @param <T> the type of the value.
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
-     * @param defaultValue the default value to return if the map is empty, contains no value for the key, or the value is {@code null}, must not be null.
-     * @return the value to which the specified key is mapped, or {@code defaultValue} if the map is empty, contains no value for the key, or the value is null.
-     * @throws IllegalArgumentException if {@code defaultValue} is null.
+     * @param defaultValue the default value to return if the map is empty, the key is absent, or the value
+     *        is {@code null}; also used to determine the conversion target type — must not be {@code null}.
+     * @return the value to which the specified key is mapped (converted to the type of {@code defaultValue}
+     *         if necessary), or {@code defaultValue} if the map is empty, the key is absent, or the value is {@code null}.
+     * @throws IllegalArgumentException if {@code defaultValue} is {@code null}.
      * @see #getOrDefaultIfAbsent(Map, Object, Object)
      * @see N#convert(Object, Class)
      * @see N#convert(Object, Type)
@@ -3066,10 +3092,11 @@ public final class Maps {
      *
      * @param <K> the key type.
      * @param <V> the value type.
-     * @param map the map to put the value in.
+     * @param map the map to put the value in; must not be {@code null}.
      * @param key the key to associate the value with.
      * @param value the value to put if the key is absent.
      * @return the existing non-null value associated with the specified key, or {@code null} if the key was absent or mapped to {@code null} (in which case the new value is put).
+     * @throws NullPointerException if {@code map} is {@code null}.
      * @see Map#putIfAbsent(Object, Object)
      */
     public static <K, V> V putIfAbsent(final Map<K, V> map, final K key, final V value) {
@@ -3109,13 +3136,14 @@ public final class Maps {
      *
      * @param <K> the key type.
      * @param <V> the value type.
-     * @param map the map to put the value in.
+     * @param map the map to put the value in; must not be {@code null}.
      * @param key the key to associate the value with.
-     * @param supplier the supplier to get the value from if the key is absent.
+     * @param supplier the supplier to get the value from if the key is absent; must not be {@code null}.
      * @return for a plain map: the existing non-null value associated with the specified key, or
      *         {@code null} if the key was absent or mapped to {@code null} (in which case the
      *         supplier's value is put); for a {@link java.util.concurrent.ConcurrentMap}: the
      *         current (existing or newly computed) value associated with the key.
+     * @throws NullPointerException if {@code map} or {@code supplier} is {@code null}.
      * @see Map#putIfAbsent(Object, Object)
      */
     public static <K, V> V putIfAbsent(final Map<K, V> map, final K key, final Supplier<V> supplier) {
@@ -3156,10 +3184,11 @@ public final class Maps {
      *
      * @param <K> the key type.
      * @param <V> the value type.
-     * @param targetMap the target map to which entries will be added.
+     * @param targetMap the target map to which entries will be added; must not be {@code null}.
      * @param sourceMap the source map from which entries will be taken.
-     * @param keyFilter a predicate that filters keys to be added to the target map.
+     * @param keyFilter a predicate that filters keys to be added to the target map; must not be {@code null}.
      * @return {@code true} if any entries were added, {@code false} otherwise.
+     * @throws NullPointerException if {@code targetMap} or {@code keyFilter} is {@code null}.
      */
     @Beta
     public static <K, V> boolean putAllIf(final Map<K, V> targetMap, final Map<? extends K, ? extends V> sourceMap, Predicate<? super K> keyFilter) {
@@ -3201,10 +3230,11 @@ public final class Maps {
      *
      * @param <K> the key type.
      * @param <V> the value type.
-     * @param targetMap the target map to which entries will be added.
+     * @param targetMap the target map to which entries will be added; must not be {@code null}.
      * @param sourceMap the source map from which entries will be taken.
-     * @param entryFilter a predicate that filters keys and values to be added to the target map.
+     * @param entryFilter a predicate that filters keys and values to be added to the target map; must not be {@code null}.
      * @return {@code true} if any entries were added, {@code false} otherwise.
+     * @throws NullPointerException if {@code targetMap} or {@code entryFilter} is {@code null}.
      */
     @Beta
     public static <K, V> boolean putAllIf(final Map<K, V> targetMap, final Map<? extends K, ? extends V> sourceMap,
@@ -3392,7 +3422,7 @@ public final class Maps {
      * @param map the map from which entries are to be removed.
      * @param filter the predicate used to determine which entries to remove.
      * @return {@code true} if one or more entries were removed, {@code false} otherwise.
-     * @throws IllegalArgumentException if the filter is null.
+     * @throws IllegalArgumentException if {@code filter} is {@code null}.
      */
     public static <K, V> boolean removeIf(final Map<K, V> map, final Predicate<? super Map.Entry<K, V>> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, cs.filter); // NOSONAR
@@ -3446,7 +3476,7 @@ public final class Maps {
      * @param map the map from which entries are to be removed.
      * @param filter the predicate used to determine which entries to remove.
      * @return {@code true} if one or more entries were removed, {@code false} otherwise.
-     * @throws IllegalArgumentException if the filter is null.
+     * @throws IllegalArgumentException if {@code filter} is {@code null}.
      */
     public static <K, V> boolean removeIf(final Map<K, V> map, final BiPredicate<? super K, ? super V> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, cs.filter); // NOSONAR
@@ -3500,7 +3530,7 @@ public final class Maps {
      * @param map the map from which entries are to be removed.
      * @param filter the predicate used to determine which keys to remove.
      * @return {@code true} if one or more entries were removed, {@code false} otherwise.
-     * @throws IllegalArgumentException if the filter is null.
+     * @throws IllegalArgumentException if {@code filter} is {@code null}.
      */
     public static <K, V> boolean removeIfKey(final Map<K, V> map, final Predicate<? super K> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, cs.filter); // NOSONAR
@@ -3555,7 +3585,7 @@ public final class Maps {
      * @param map the map from which entries are to be removed.
      * @param filter the predicate used to determine which values to remove.
      * @return {@code true} if one or more entries were removed, {@code false} otherwise.
-     * @throws IllegalArgumentException if the filter is null.
+     * @throws IllegalArgumentException if {@code filter} is {@code null}.
      */
     public static <K, V> boolean removeIfValue(final Map<K, V> map, final Predicate<? super V> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, cs.filter); // NOSONAR
@@ -3685,7 +3715,9 @@ public final class Maps {
      * @param <V> the type of mapped values.
      * @param map the map in which the entries are to be replaced.
      * @param function the function to apply to each entry to compute a new value.
-     * @throws IllegalArgumentException if the function is null.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
+     * @throws ConcurrentModificationException if an entry is removed from the map during iteration
+     *         (detected when {@link Map.Entry#setValue} throws {@link IllegalStateException}).
      */
     public static <K, V> void replaceAll(final Map<K, V> map, final BiFunction<? super K, ? super V, ? extends V> function) throws IllegalArgumentException {
         N.checkArgNotNull(function);
@@ -3732,7 +3764,7 @@ public final class Maps {
      * @param map the map to be filtered.
      * @param predicate the predicate used to filter the entries.
      * @return a new map containing only the entries that match the predicate.
-     * @throws IllegalArgumentException if the predicate is null.
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     public static <K, V> Map<K, V> filter(final Map<K, V> map, final Predicate<? super Map.Entry<K, V>> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate); // NOSONAR
@@ -3774,7 +3806,7 @@ public final class Maps {
      * @param map the map to be filtered.
      * @param predicate the predicate used to filter the entries.
      * @return a new map containing only the entries that match the predicate.
-     * @throws IllegalArgumentException if the predicate is null.
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     public static <K, V> Map<K, V> filter(final Map<K, V> map, final BiPredicate<? super K, ? super V> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate); // NOSONAR
@@ -3815,7 +3847,7 @@ public final class Maps {
      * @param map the map to be filtered.
      * @param predicate the predicate used to filter the keys.
      * @return a new map containing only the entries with keys that match the predicate.
-     * @throws IllegalArgumentException if the predicate is null.
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     public static <K, V> Map<K, V> filterByKey(final Map<K, V> map, final Predicate<? super K> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate); // NOSONAR
@@ -3856,7 +3888,7 @@ public final class Maps {
      * @param map the map to be filtered.
      * @param predicate the predicate used to filter the values.
      * @return a new map containing only the entries with values that match the predicate.
-     * @throws IllegalArgumentException if the predicate is null.
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     public static <K, V> Map<K, V> filterByValue(final Map<K, V> map, final Predicate<? super V> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate); // NOSONAR
@@ -3950,7 +3982,7 @@ public final class Maps {
      * @param map the map to be inverted.
      * @param mergeOp the merging operation to be applied if there are duplicate values in the input map.
      * @return a new map which is the inverted version of the input map.
-     * @throws IllegalArgumentException if mergeOp is {@code null}.
+     * @throws IllegalArgumentException if {@code mergeOp} is {@code null}.
      */
     public static <K, V> Map<V, K> invert(final Map<K, V> map, final BiFunction<? super K, ? super K, ? extends K> mergeOp) throws IllegalArgumentException {
         N.checkArgNotNull(mergeOp, cs.mergeOp);
@@ -4348,7 +4380,7 @@ public final class Maps {
      * @param keyConverter the function applied to each existing key to produce the new key; must not be {@code null}
      * @throws IllegalStateException if the converted keys contain duplicates (including multiple {@code null} values)
      * @throws NullPointerException if {@code keyConverter} is {@code null}, or if the map implementation does not
-     *         support {@code null} keys and {@code keyConverter} returns {@code null}
+     *         support {@code null} keys and {@code keyConverter} returns {@code null}.
      */
     public static <K> void replaceKeys(final Map<K, ?> map, final Function<? super K, ? extends K> keyConverter) throws IllegalStateException {
         if (N.isEmpty(map)) {
@@ -4457,7 +4489,7 @@ public final class Maps {
      *        {@code (existingValue, incomingValue)} and returns the merged value. If it returns {@code null},
      *        the entry is removed. Must not be {@code null}.
      * @throws NullPointerException if {@code keyConverter} or {@code merger} is {@code null}, or if the map
-     *         implementation does not support {@code null} keys and {@code keyConverter} returns {@code null}
+     *         implementation does not support {@code null} keys and {@code keyConverter} returns {@code null}.
      * @see #replaceKeys(Map, Function) for a version that throws on duplicate keys instead of merging
      */
     public static <K, V> void replaceKeys(final Map<K, V> map, final Function<? super K, ? extends K> keyConverter,

@@ -748,7 +748,7 @@ public final class FilenameUtil {
      * FilenameUtil.getFullPathNoEndSeparator("~/a/b/c.txt");       // Returns "~/a/b"
      * FilenameUtil.getFullPathNoEndSeparator("a.txt");             // Returns ""
      * FilenameUtil.getFullPathNoEndSeparator("a/b/c/");            // Returns "a/b/c"
-     * FilenameUtil.getFullPathNoEndSeparator("C:\\");              // Returns "C:\"
+     * FilenameUtil.getFullPathNoEndSeparator("C:\\");              // Returns "C:\\"
      * }</pre>
      *
      * @param filename the filename to query, {@code null} returns {@code null}
@@ -944,7 +944,7 @@ public final class FilenameUtil {
      *
      * @param filename1 the first filename to query, {@code null} is allowed
      * @param filename2 the second filename to query, {@code null} is allowed
-     * @return {@code true} if the filenames are equal, {@code null} equals {@code null}
+     * @return {@code true} if the filenames are equal; two {@code null} values are considered equal
      * @see IOCase#SENSITIVE
      */
     public static boolean equals(final String filename1, final String filename2) {
@@ -967,7 +967,7 @@ public final class FilenameUtil {
      *
      * @param filename1 the first filename to query, {@code null} is allowed
      * @param filename2 the second filename to query, {@code null} is allowed
-     * @return {@code true} if the filenames are equal, {@code null} equals {@code null}
+     * @return {@code true} if the filenames are equal; two {@code null} values are considered equal
      * @see IOCase#SYSTEM
      */
     public static boolean equalsOnSystem(final String filename1, final String filename2) {
@@ -990,7 +990,7 @@ public final class FilenameUtil {
      *
      * @param filename1 the first filename to query, {@code null} is allowed
      * @param filename2 the second filename to query, {@code null} is allowed
-     * @return {@code true} if the filenames are equal, {@code null} equals {@code null}
+     * @return {@code true} if the filenames are equal after normalization; two {@code null} values are considered equal
      * @see IOCase#SENSITIVE
      */
     public static boolean equalsNormalized(final String filename1, final String filename2) {
@@ -1013,7 +1013,7 @@ public final class FilenameUtil {
      *
      * @param filename1 the first filename to query, {@code null} is allowed
      * @param filename2 the second filename to query, {@code null} is allowed
-     * @return {@code true} if the filenames are equal, {@code null} equals {@code null}
+     * @return {@code true} if the filenames are equal after normalization; two {@code null} values are considered equal
      * @see IOCase#SYSTEM
      */
     public static boolean equalsNormalizedOnSystem(final String filename1, final String filename2) {
@@ -1040,8 +1040,8 @@ public final class FilenameUtil {
      * @param filename2 the second filename to query, {@code null} is allowed
      * @param normalized whether to normalize the filenames before comparison
      * @param caseSensitivity what case sensitivity rule to use, {@code null} means case-sensitive
-     * @return {@code true} if the filenames are equal, {@code null} equals {@code null}
-     * @throws IllegalArgumentException if normalizing fails (when {@code normalized} is {@code true})
+     * @return {@code true} if the filenames are equal; two {@code null} values are considered equal
+     * @throws IllegalArgumentException if normalization produces an invalid result (when {@code normalized} is {@code true})
      */
     public static boolean equals(String filename1, String filename2, final boolean normalized, IOCase caseSensitivity) {
         if (filename1 == null || filename2 == null) {
@@ -1108,7 +1108,7 @@ public final class FilenameUtil {
      *
      * @param filename the filename to query, {@code null} returns {@code false}
      * @param extensions the extensions to check for, {@code null} or empty array checks for no extension
-     * @return {@code true} if the filename is one of the extensions
+     * @return {@code true} if the filename has one of the specified extensions
      * @throws IllegalArgumentException if the supplied filename contains {@code null} bytes
      */
     public static boolean isExtension(final String filename, final String[] extensions) {
@@ -1143,7 +1143,7 @@ public final class FilenameUtil {
      *
      * @param filename the filename to query, {@code null} returns {@code false}
      * @param extensions the extensions to check for, {@code null} or empty collection checks for no extension
-     * @return {@code true} if the filename is one of the extensions
+     * @return {@code true} if the filename has one of the specified extensions
      * @throws IllegalArgumentException if the supplied filename contains {@code null} bytes
      */
     public static boolean isExtension(final String filename, final Collection<String> extensions) {

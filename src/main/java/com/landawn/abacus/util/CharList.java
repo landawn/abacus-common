@@ -470,9 +470,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @param startInclusive the starting value (inclusive)
      * @param endExclusive the ending value (exclusive)
-     * @param by the step size (must be positive)
+     * @param by the step value for incrementing. Must not be zero.
      * @return a new CharList containing the range of values
-     * @throws IllegalArgumentException if {@code by} is zero or negative
+     * @throws IllegalArgumentException if {@code by} is zero
      */
     public static CharList range(final char startInclusive, final char endExclusive, final int by) {
         return of(Array.range(startInclusive, endExclusive, by));
@@ -499,9 +499,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @param startInclusive the starting value (inclusive)
      * @param endInclusive the ending value (inclusive)
-     * @param by the step size (must be positive)
+     * @param by the step value for incrementing. Must not be zero.
      * @return a new CharList containing the range of values
-     * @throws IllegalArgumentException if {@code by} is zero or negative
+     * @throws IllegalArgumentException if {@code by} is zero
      */
     public static CharList rangeClosed(final char startInclusive, final char endInclusive, final int by) {
         return of(Array.rangeClosed(startInclusive, endInclusive, by));
@@ -567,12 +567,14 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      * Creates a CharList of the specified length by randomly selecting from the provided candidate chars.
-     * Each element in the returned list is randomly chosen from the candidates array.
+     * Each element in the returned list is randomly chosen from the candidates array with uniform distribution.
      *
-     * @param candidates the array of candidate chars to choose from
+     * @param candidates the array of candidate chars to choose from; must not be {@code null}, empty,
+     *                   or of length {@code Integer.MAX_VALUE}
      * @param len the length of the list to create
      * @return a new CharList containing randomly selected chars from the candidates
-     * @throws IllegalArgumentException if {@code candidates} is empty or has {@code Integer.MAX_VALUE} elements
+     * @throws IllegalArgumentException if {@code candidates} is {@code null}, empty,
+     *         or has exactly {@code Integer.MAX_VALUE} elements
      * @throws NegativeArraySizeException if {@code len} is negative
      */
     public static CharList random(final char[] candidates, final int len) {
@@ -692,10 +694,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      * Appends all of the elements in the specified CharList to the end of this list,
-     * in the order that they are returned by the specified collection's iterator.
+     * in the order they appear in the specified list.
      *
-     * @param c the CharList containing elements to be added to this list
-     * @return {@code true} if this list changed as a result of the call
+     * @param c the CharList containing elements to be added to this list. If {@code null} or empty, this list remains unchanged.
+     * @return {@code true} if this list changed as a result of the call (i.e., if {@code c} was not empty)
      */
     @Override
     public boolean addAll(final CharList c) {
@@ -719,10 +721,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * starting at the specified position. Shifts the element currently at that
      * position (if any) and any subsequent elements to the right (increases their indices).
      *
-     * @param index the index at which to insert the first element from the specified collection
-     * @param c the CharList containing elements to be added to this list
-     * @return {@code true} if this list changed as a result of the call
-     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; size())
+     * @param index the index at which to insert the first element from the specified list
+     * @param c the CharList containing elements to be inserted into this list. If {@code null} or empty, this list remains unchanged.
+     * @return {@code true} if this list changed as a result of the call (i.e., if {@code c} was not empty)
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index > size()})
      */
     @Override
     public boolean addAll(final int index, final CharList c) {
@@ -750,10 +752,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
-     * Appends all of the elements in the specified array to the end of this list.
+     * Appends all of the elements in the specified array to the end of this list,
+     * in the order they appear in the array.
      *
-     * @param a the array containing elements to be added to this list
-     * @return {@code true} if this list changed as a result of the call
+     * @param a the array containing elements to be added to this list. If {@code null} or empty, this list remains unchanged.
+     * @return {@code true} if this list changed as a result of the call (i.e., if the array was not empty)
      */
     @Override
     public boolean addAll(final char[] a) {
@@ -763,12 +766,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Inserts all of the elements in the specified array into this list,
      * starting at the specified position. Shifts the element currently at that
-     * position (if any) and any subsequent elements to the right.
+     * position (if any) and any subsequent elements to the right (increases their indices).
      *
      * @param index the index at which to insert the first element from the specified array
-     * @param a the array containing elements to be added to this list
-     * @return {@code true} if this list changed as a result of the call
-     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; size())
+     * @param a the array containing elements to be inserted into this list. If {@code null} or empty, this list remains unchanged.
+     * @return {@code true} if this list changed as a result of the call (i.e., if the array was not empty)
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index > size()})
      */
     @Override
     public boolean addAll(final int index, final char[] a) {
@@ -869,9 +872,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      * Removes from this list all of its elements that are contained in the specified CharList.
+     * This method compares elements by value, removing all occurrences found in the specified list.
      *
-     * @param c the CharList containing elements to be removed from this list
-     * @return {@code true} if this list changed as a result of the call
+     * @param c the CharList containing elements to be removed from this list. If {@code null} or empty, this list remains unchanged.
+     * @return {@code true} if this list was modified as a result of the call
      */
     @Override
     public boolean removeAll(final CharList c) {
@@ -884,9 +888,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      * Removes from this list all of its elements that are contained in the specified array.
+     * This method compares elements by value, removing all occurrences found in the array.
      *
-     * @param a the array containing elements to be removed from this list
-     * @return {@code true} if this list changed as a result of the call
+     * @param a the array containing elements to be removed from this list. If {@code null} or empty, this list remains unchanged.
+     * @return {@code true} if this list was modified as a result of the call
      */
     @Override
     public boolean removeAll(final char[] a) {
@@ -898,12 +903,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
-     * Removes all of the elements of this list that satisfy the given predicate.
+     * Removes all elements of this list that satisfy the given predicate.
      * Errors or runtime exceptions thrown during iteration or by the predicate
      * are relayed to the caller.
      *
      * @param p a predicate which returns {@code true} for elements to be removed; must not be {@code null}
-     * @return {@code true} if any elements were removed
+     * @return {@code true} if any elements were removed; {@code false} if the list was unchanged
+     * @throws NullPointerException if {@code p} is {@code null}
      */
     public boolean removeIf(final CharPredicate p) {
         final CharList tmp = new CharList(size());
@@ -973,8 +979,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * In other words, removes from this list all of its elements that are not contained
      * in the specified CharList.
      *
+     * <p>If the specified list is {@code null} or empty, all elements are removed from this list.</p>
+     *
      * @param c the CharList containing elements to be retained in this list
-     * @return {@code true} if this list changed as a result of the call
+     * @return {@code true} if this list was modified as a result of the call
      */
     @Override
     public boolean retainAll(final CharList c) {
@@ -992,8 +1000,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * In other words, removes from this list all of its elements that are not contained
      * in the specified array.
      *
+     * <p>If the specified array is {@code null} or empty, all elements are removed from this list.</p>
+     *
      * @param a the array containing elements to be retained in this list
-     * @return {@code true} if this list changed as a result of the call
+     * @return {@code true} if this list was modified as a result of the call
      */
     @Override
     public boolean retainAll(final char[] a) {
@@ -1147,10 +1157,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
-     *      must be between 0 and size() - lengthOfRange, inclusive.
+     * @param newPositionAfterMove the zero-based index where the first element of the range will be placed after the move;
+     *        must be between {@code 0} and {@code size() - (toIndex - fromIndex)}, inclusive
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
-     *         newPositionAfterMove would cause elements to be moved outside the list
+     *         {@code newPositionAfterMove} would cause elements to be moved outside the list
      */
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
@@ -1161,12 +1171,15 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Replaces each element in the specified range of this list with elements
      * from the replacement CharList. The range extends from {@code fromIndex} (inclusive)
-     * to {@code toIndex} (exclusive).
+     * to {@code toIndex} (exclusive). If the replacement has a different size than the
+     * range being replaced, the list will grow or shrink accordingly.
      *
-     * @param fromIndex the index of the first element to be replaced
-     * @param toIndex the index after the last element to be replaced
-     * @param replacement the CharList whose elements will replace the specified range
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @param fromIndex the starting index (inclusive) of the range to replace
+     * @param toIndex the ending index (exclusive) of the range to replace
+     * @param replacement the CharList whose elements will replace the specified range. If {@code null} or empty,
+     *        the range is simply removed (no elements are inserted)
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
+     * @throws OutOfMemoryError if the resulting size would exceed the maximum supported array size
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final CharList replacement) throws IndexOutOfBoundsException {
@@ -1207,12 +1220,15 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Replaces each element in the specified range of this list with elements
      * from the replacement array. The range extends from {@code fromIndex} (inclusive)
-     * to {@code toIndex} (exclusive).
+     * to {@code toIndex} (exclusive). If the replacement has a different length than the
+     * range being replaced, the list will grow or shrink accordingly.
      *
-     * @param fromIndex the index of the first element to be replaced
-     * @param toIndex the index after the last element to be replaced
-     * @param replacement the array whose elements will replace the specified range
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @param fromIndex the starting index (inclusive) of the range to replace
+     * @param toIndex the ending index (exclusive) of the range to replace
+     * @param replacement the array whose elements will replace the specified range. If {@code null} or empty,
+     *        the range is simply removed (no elements are inserted)
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
+     * @throws OutOfMemoryError if the resulting size would exceed the maximum supported array size
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final char[] replacement) throws IndexOutOfBoundsException {
@@ -1644,8 +1660,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * }</pre>
      *
      * @param b the CharList to find the symmetric difference with
-     * @return a new CharList containing elements that are in either list but not in both
-     * @see IntList#symmetricDifference(IntList)
+     * @return a new CharList containing elements that are in either list but not in both,
+     *         considering the number of occurrences
+     * @see #symmetricDifference(char[])
+     * @see #difference(CharList)
+     * @see #intersection(CharList)
      */
     @Override
     public CharList symmetricDifference(final CharList b) {
@@ -1683,8 +1702,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * but not in both. Occurrences are considered.
      *
      * @param b the array to find the symmetric difference with
-     * @return a new CharList containing elements that are in either the list or array but not in both
-     * @see IntList#symmetricDifference(IntList)
+     * @return a new CharList containing elements that are in either the list or array but not in both,
+     *         considering the number of occurrences
+     * @see #symmetricDifference(CharList)
+     * @see #difference(char[])
+     * @see #intersection(char[])
      */
     @Override
     public CharList symmetricDifference(final char[] b) {
@@ -1869,24 +1891,30 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
-     * Performs the given action for each element of this list.
+     * Performs the given action for each element of this list in sequential order.
      *
-     * @param action the action to be performed for each element
+     * @param action the action to be performed for each element; must not be {@code null}
+     * @throws NullPointerException if {@code action} is {@code null}
      */
     public void forEach(final CharConsumer action) {
         forEach(0, size, action);
     }
 
     /**
-     * Performs the given action for each element in the specified range of this list.
-     * The range extends from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
-     * If {@code fromIndex > toIndex}, the elements are processed in reverse order.
+     * Performs the given action for each element within the specified range of this list.
      *
-     * @param fromIndex the index of the first element (inclusive) to process
-     * @param toIndex the index after the last element (exclusive) to process,
-     *                or -1 to process in reverse from {@code fromIndex} to the beginning
-     * @param action the action to be performed for each element
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * <p>This method supports both forward and backward iteration based on the relative values of
+     * {@code fromIndex} and {@code toIndex}:</p>
+     * <ul>
+     *   <li>If {@code fromIndex <= toIndex}: iterates forward from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive)</li>
+     *   <li>If {@code fromIndex > toIndex}: iterates backward from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive)</li>
+     *   <li>If {@code toIndex == -1}: treated as backward iteration from {@code fromIndex} to the beginning of the list</li>
+     * </ul>
+     *
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive), or {@code -1} for backward iteration to the start
+     * @param action the action to be performed for each element; must not be {@code null}
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public void forEach(final int fromIndex, final int toIndex, final CharConsumer action) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
@@ -1944,14 +1972,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      * Checks whether this list contains any duplicate elements.
+     * An element is considered a duplicate if it appears more than once in the list.
      *
-     * <p>This method iterates through all elements in the list and determines if any char value
-     * appears more than once. The comparison is done using char equality (==).</p>
-     *
-     * <p>Performance: O(n²) in the worst case for unsorted lists, where n is the size of the list.</p>
-     *
-     * @return {@code true} if the list contains at least one duplicate element, {@code false} otherwise.
-     *         Returns {@code false} for empty lists.
+     * @return {@code true} if the list contains at least one duplicate element, {@code false} otherwise
      */
     @Override
     public boolean containsDuplicates() {
@@ -1959,16 +1982,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
-     * Checks whether the elements in this list are sorted in ascending order.
+     * Checks whether the elements in this list are sorted in ascending order
+     * according to their Unicode values.
+     * An empty list or a list with a single element is considered sorted.
      *
-     * <p>This method verifies if each element is less than or equal to the next element
-     * in the list. For char values, this means checking if they are in ascending order
-     * according to their Unicode values.</p>
-     *
-     * <p>Performance: O(n) where n is the size of the list.</p>
-     *
-     * @return {@code true} if the list is sorted in ascending order, {@code false} otherwise.
-     *         Returns {@code true} for empty lists and lists with a single element.
+     * @return {@code true} if all elements are in ascending order (allowing equal consecutive values),
+     *         {@code false} otherwise
      */
     @Override
     public boolean isSorted() {
@@ -1976,15 +1995,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
-     * Sorts the elements of this list in ascending order.
-     *
-     * <p>This method modifies the list in-place, arranging all char elements from lowest
-     * to highest based on their Unicode values. The sorting algorithm used provides
-     * O(n log n) performance on average.</p>
-     *
-     * <p>After this operation, {@code isSorted()} will return {@code true}.</p>
-     *
-     * <p>Note: This method does nothing if the list has fewer than 2 elements.</p>
+     * Sorts all elements in this list in ascending order (by Unicode value).
+     * This method modifies the list in place using an efficient sorting algorithm.
      */
     @Override
     public void sort() {
@@ -1994,17 +2006,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
-     * Sorts the elements of this list in ascending order using a parallel sorting algorithm.
-     *
-     * <p>This method leverages multiple threads to sort the list more efficiently on multi-core
-     * systems. It's particularly beneficial for large lists where the overhead of parallelization
-     * is offset by the performance gains. The elements are sorted based on their Unicode values.</p>
-     *
-     * <p>For small lists, this may be slower than {@link #sort()} due to thread overhead.</p>
-     *
-     * <p>After this operation, {@code isSorted()} will return {@code true}.</p>
-     *
-     * <p>Note: This method does nothing if the list has fewer than 2 elements.</p>
+     * Sorts all elements in this list in ascending order using a parallel sorting algorithm.
+     * This method modifies the list in place and may offer better performance than {@link #sort()}
+     * for large lists on multi-core systems. For small lists it may be slower due to thread overhead.
      */
     public void parallelSort() {
         if (size > 1) {
@@ -2013,15 +2017,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
-     * Sorts the elements of this list in descending order.
-     *
-     * <p>This method first sorts the list in ascending order, then reverses it to achieve
-     * descending order. All char elements are arranged from highest to lowest based on
-     * their Unicode values.</p>
-     *
-     * <p>Performance: O(n log n) for sorting plus O(n) for reversing.</p>
-     *
-     * <p>Note: This method does nothing if the list has fewer than 2 elements.</p>
+     * Sorts all elements in this list in descending order (by Unicode value).
+     * This method first sorts the list in ascending order, then reverses it.
+     * The list is modified in place.
      */
     @Override
     public void reverseSort() {
@@ -2032,41 +2030,37 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
-     * Searches for the specified char value in this sorted list using binary search algorithm.
+     * Searches for the specified value in this list using binary search algorithm.
+     * The list must be sorted in ascending order prior to making this call.
+     * If the list is not sorted, the results are undefined.
      *
-     * <p><b>Important:</b> This list must be sorted in ascending order before calling this method.
-     * If the list is not sorted, the results are undefined and may be incorrect.</p>
+     * <p>If the list contains multiple elements equal to the specified value,
+     * there is no guarantee which one will be found.</p>
      *
-     * <p>Performance: O(log n) where n is the size of the list.</p>
-     *
-     * @param valueToFind the char value to search for
+     * @param valueToFind the value to search for
      * @return the index of the search key if it is contained in the list;
-     *         otherwise, {@code (-(insertion point) - 1)}. The insertion point is defined as
-     *         the point at which the key would be inserted into the list: the index of the
-     *         first element greater than the key, or {@code size()} if all elements in the
-     *         list are less than the specified key.
+     *         otherwise, {@code (-(insertion point) - 1)}. The insertion point is defined
+     *         as the point at which the key would be inserted into the list
      */
     public int binarySearch(final char valueToFind) {
         return N.binarySearch(elementData, 0, size(), valueToFind);
     }
 
     /**
-     * Searches for the specified char value within a range of this sorted list using binary search.
+     * Searches for the specified value in the specified range of this list using binary search algorithm.
+     * The range must be sorted in ascending order prior to making this call.
+     * If the range is not sorted, the results are undefined.
      *
-     * <p><b>Important:</b> The specified range must be sorted in ascending order before calling
-     * this method. If the range is not sorted, the results are undefined and may be incorrect.</p>
+     * <p>If the range contains multiple elements equal to the specified value,
+     * there is no guarantee which one will be found.</p>
      *
-     * <p>Performance: O(log(toIndex - fromIndex))</p>
-     *
-     * @param fromIndex the index of the first element (inclusive) to be searched
-     * @param toIndex the index of the last element (exclusive) to be searched
-     * @param valueToFind the char value to search for
+     * @param fromIndex the starting index (inclusive) of the range to search
+     * @param toIndex the ending index (exclusive) of the range to search
+     * @param valueToFind the value to search for
      * @return the index of the search key if it is contained in the specified range;
-     *         otherwise, {@code (-(insertion point) - 1)}. The insertion point is defined as
-     *         the point at which the key would be inserted into the range: the index of the
-     *         first element in the range greater than the key, or {@code toIndex} if all
-     *         elements in the range are less than the specified key.
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
+     *         otherwise, {@code (-(insertion point) - 1)}. The insertion point is defined
+     *         as the point at which the key would be inserted into the range
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > size()},
      *         or {@code fromIndex > toIndex}
      */
     public int binarySearch(final int fromIndex, final int toIndex, final char valueToFind) throws IndexOutOfBoundsException {
@@ -2077,14 +2071,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      * Reverses the order of all elements in this list.
-     *
-     * <p>This method modifies the list in-place, so the first element becomes the last,
-     * the second element becomes the second-to-last, and so on. This operation is
-     * performed in linear time.</p>
-     *
-     * <p>Performance: O(n/2) where n is the size of the list.</p>
-     *
-     * <p>Note: This method does nothing if the list has fewer than 2 elements.</p>
+     * After this method returns, the first element becomes the last,
+     * the second element becomes the second to last, and so on.
+     * This method modifies the list in place.
      */
     @Override
     public void reverse() {
@@ -2094,19 +2083,14 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
-     * Reverses the order of elements in the specified range within this list.
+     * Reverses the order of elements in the specified range of this list.
+     * After this method returns, the element at {@code fromIndex} becomes the element
+     * at {@code toIndex - 1}, and vice versa. Elements outside the specified range
+     * are not affected. This method modifies the list in place.
      *
-     * <p>This method modifies the list in-place, reversing only the elements between
-     * {@code fromIndex} (inclusive) and {@code toIndex} (exclusive). Elements outside
-     * this range remain unchanged.</p>
-     *
-     * <p>Performance: O((toIndex - fromIndex)/2)</p>
-     *
-     * <p>Note: This method does nothing if the range contains fewer than 2 elements.</p>
-     *
-     * @param fromIndex the index of the first element (inclusive) to be reversed
-     * @param toIndex the index after the last element (exclusive) to be reversed
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
+     * @param fromIndex the starting index (inclusive) of the range to reverse
+     * @param toIndex the ending index (exclusive) of the range to reverse
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > size()},
      *         or {@code fromIndex > toIndex}
      */
     @Override
@@ -2139,15 +2123,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
-     * Randomly shuffles the elements in this list.
-     *
-     * <p>This method uses a default random number generator to randomly permute the list
-     * elements. Each possible permutation has equal likelihood. After this operation,
-     * the elements will be in a random order.</p>
-     *
-     * <p>This implementation uses the Fisher-Yates shuffle algorithm, which runs in O(n) time.</p>
-     *
-     * <p>Note: This method does nothing if the list has fewer than 2 elements.</p>
+     * Randomly shuffles all elements in this list.
+     * After this method returns, the elements will be in a random order.
+     * This method uses a default source of randomness and modifies the list in place.
      */
     @Override
     public void shuffle() {
@@ -2157,17 +2135,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
-     * Randomly shuffles the elements in this list using the specified random number generator.
+     * Randomly shuffles all elements in this list using the specified source of randomness.
+     * After this method returns, the elements will be in a random order determined by
+     * the given Random object. This method modifies the list in place.
      *
-     * <p>This method uses the provided Random object to randomly permute the list elements.
-     * This is useful when you need reproducible shuffling (by using a Random with a specific
-     * seed) or when you need a cryptographically strong random number generator.</p>
-     *
-     * <p>This implementation uses the Fisher-Yates shuffle algorithm, which runs in O(n) time.</p>
-     *
-     * <p>Note: This method does nothing if the list has fewer than 2 elements.</p>
-     *
-     * @param rnd the random number generator to use for shuffling
+     * @param rnd the source of randomness to use for shuffling
      */
     @Override
     public void shuffle(final Random rnd) {
@@ -2178,16 +2150,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      * Swaps the elements at the specified positions in this list.
-     *
-     * <p>This method exchanges the elements at indices {@code i} and {@code j}. If {@code i}
-     * and {@code j} are equal, invoking this method leaves the list unchanged.</p>
-     *
-     * <p>Performance: O(1)</p>
+     * If {@code i} and {@code j} are equal, this method leaves the list unchanged.
      *
      * @param i the index of the first element to swap
      * @param j the index of the second element to swap
      * @throws IndexOutOfBoundsException if either {@code i} or {@code j} is out of range
-     *         (i.e., {@code i < 0 || i >= size()} or {@code j < 0 || j >= size()})
+     *         ({@code i < 0 || i >= size()} or {@code j < 0 || j >= size()})
      */
     @Override
     public void swap(final int i, final int j) {
@@ -2198,13 +2166,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
-     * Returns a copy of this list.
-     *
-     * <p>This method creates a new CharList instance containing all elements from this list
-     * in the same order. The returned list is independent of this list; changes to either
-     * list will not affect the other.</p>
-     *
-     * <p>Performance: O(n) where n is the size of the list.</p>
+     * Returns a new CharList containing a copy of all elements in this list.
+     * The returned list is independent of this list, so changes to the
+     * returned list will not affect this list and vice versa.
      *
      * @return a new CharList containing all elements from this list
      */
@@ -2214,18 +2178,14 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
-     * Returns a copy of the specified range of this list.
+     * Returns a new CharList containing a copy of elements in the specified range of this list.
+     * The returned list is independent of this list, so changes to the
+     * returned list will not affect this list and vice versa.
      *
-     * <p>This method creates a new CharList containing the elements from index {@code fromIndex}
-     * (inclusive) to index {@code toIndex} (exclusive). The returned list is independent of
-     * this list; changes to either list will not affect the other.</p>
-     *
-     * <p>Performance: O(toIndex - fromIndex)</p>
-     *
-     * @param fromIndex the index of the first element (inclusive) to be copied
-     * @param toIndex the index after the last element (exclusive) to be copied
-     * @return a new CharList containing the specified range of elements
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
+     * @param fromIndex the starting index (inclusive) of the range to copy
+     * @param toIndex the ending index (exclusive) of the range to copy
+     * @return a new CharList containing the elements in the specified range
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > size()},
      *         or {@code fromIndex > toIndex}
      */
     @Override
@@ -2306,16 +2266,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
-     * Trims the capacity of this list to be the list's current size.
+     * Trims the capacity of this CharList instance to be the list's current size.
+     * This method can be used to minimize the storage of a CharList instance.
+     * If the capacity is already equal to the size, this method does nothing.
      *
-     * <p>This method minimizes the storage of a CharList instance. If the internal array
-     * has excess capacity (i.e., more space than needed for the current elements), this
-     * method creates a new array with the exact size needed and copies the elements to it.</p>
-     *
-     * <p>This operation can be useful to minimize memory usage after removing many elements
-     * from a list or when a list's size has stabilized.</p>
-     *
-     * <p>Performance: O(n) if trimming is needed, O(1) if the capacity already matches the size.</p>
+     * <p>After this call, the capacity of the list will be equal to its size,
+     * eliminating any unused capacity.</p>
      *
      * @return this CharList instance (for method chaining)
      */
@@ -2362,14 +2318,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
-     * Returns a List containing all elements in this list boxed as Character objects.
+     * Returns a List containing all elements in this list converted to Character objects.
+     * The returned list is a new ArrayList and is independent of this list.
      *
-     * <p>This method creates a new ArrayList and boxes each primitive char value into
-     * a Character object. This is useful when you need to work with Java Collections
-     * Framework or other APIs that require object types.</p>
-     *
-     * <p>Performance: O(n) where n is the size of the list. Note that boxing operations
-     * add overhead compared to working with primitive values.</p>
+     * <p>This method is useful when you need to work with APIs that require
+     * {@code List<Character>} rather than primitive char arrays.</p>
      *
      * @return a new List&lt;Character&gt; containing all elements from this list
      */
@@ -2379,19 +2332,17 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
-     * Returns a List containing elements in the specified range boxed as Character objects.
+     * Returns a List containing elements from the specified range of this list
+     * converted to Character objects. The returned list is a new ArrayList and
+     * is independent of this list.
      *
-     * <p>This method creates a new ArrayList and boxes each primitive char value in the
-     * specified range into a Character object. The range is defined from {@code fromIndex}
-     * (inclusive) to {@code toIndex} (exclusive).</p>
+     * <p>This method is useful when you need to work with APIs that require
+     * {@code List<Character>} rather than primitive char arrays.</p>
      *
-     * <p>Performance: O(toIndex - fromIndex). Note that boxing operations add overhead
-     * compared to working with primitive values.</p>
-     *
-     * @param fromIndex the index of the first element (inclusive) to be boxed
-     * @param toIndex the index after the last element (exclusive) to be boxed
-     * @return a new List&lt;Character&gt; containing the specified range of elements
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
+     * @param fromIndex the starting index (inclusive) of the range to box
+     * @param toIndex the ending index (exclusive) of the range to box
+     * @return a new List&lt;Character&gt; containing elements from the specified range
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > size()},
      *         or {@code fromIndex > toIndex}
      */
     @Override
@@ -2419,14 +2370,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      * Converts this CharList to an IntList.
+     * Each char value is widened to an int value, preserving its Unicode code point.
+     * The returned IntList is independent of this list.
      *
-     * <p>This method creates a new IntList where each char element is widened to an int value.
-     * The conversion preserves the numeric value of each character (its Unicode code point).
-     * This is useful when you need to perform integer arithmetic on character values.</p>
-     *
-     * <p>Performance: O(n) where n is the size of the list.</p>
-     *
-     * @return a new IntList containing the widened values of all elements in this list
+     * @return a new IntList containing the Unicode code point values of all elements in this list
      */
     public IntList toIntList() {
         final int[] a = new int[size];
@@ -2645,14 +2592,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
-     * Returns a hash code value for this list.
-     *
-     * <p>The hash code is computed based on the elements in the list and their order.
-     * Two CharList objects with the same elements in the same order will have the same
-     * hash code. This method is consistent with {@link #equals(Object)}.</p>
-     *
-     * <p>The hash code is computed using an algorithm similar to that used by List.hashCode(),
-     * adapted for primitive char values.</p>
+     * Returns the hash code value for this list.
+     * The hash code is computed based on the elements in the list and their order.
+     * This method is consistent with {@link #equals(Object)}.
      *
      * @return the hash code value for this list
      */
@@ -2663,15 +2605,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      * Compares the specified object with this list for equality.
-     *
-     * <p>Returns {@code true} if and only if the specified object is also a CharList,
-     * both lists have the same size, and all corresponding pairs of elements in the two
-     * lists are equal. In other words, two lists are defined to be equal if they contain
-     * the same elements in the same order.</p>
-     *
-     * <p>This implementation first checks if the specified object is this list. If so,
-     * it returns {@code true}. Then, it checks if the specified object is a CharList.
-     * If not, it returns {@code false}. Finally, it compares the elements of both lists.</p>
+     * Returns {@code true} if and only if the specified object is also a CharList,
+     * both lists have the same size, and all corresponding pairs of elements
+     * in the two lists are equal.
      *
      * @param obj the object to be compared for equality with this list
      * @return {@code true} if the specified object is equal to this list, {@code false} otherwise

@@ -395,8 +395,18 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     // shortValue and byteValue rely on Number implementation
 
     /**
-     * Returns the value of this MutableDouble as an int by casting.
-     * This may involve rounding or truncation. The fractional part is discarded.
+     * Returns the value of this MutableDouble as an int by truncating the fractional part
+     * (narrowing primitive conversion from {@code double} to {@code int}).
+     *
+     * <p>Conversion rules:</p>
+     * <ul>
+     * <li>The fractional part is discarded (truncated towards zero)</li>
+     * <li>NaN is converted to {@code 0}</li>
+     * <li>Values larger than {@code Integer.MAX_VALUE} are converted to {@code Integer.MAX_VALUE}</li>
+     * <li>Values smaller than {@code Integer.MIN_VALUE} are converted to {@code Integer.MIN_VALUE}</li>
+     * <li>Positive infinity is converted to {@code Integer.MAX_VALUE}</li>
+     * <li>Negative infinity is converted to {@code Integer.MIN_VALUE}</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -412,8 +422,18 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     }
 
     /**
-     * Returns the value of this MutableDouble as a long by casting.
-     * This may involve rounding or truncation. The fractional part is discarded.
+     * Returns the value of this MutableDouble as a long by truncating the fractional part
+     * (narrowing primitive conversion from {@code double} to {@code long}).
+     *
+     * <p>Conversion rules:</p>
+     * <ul>
+     * <li>The fractional part is discarded (truncated towards zero)</li>
+     * <li>NaN is converted to {@code 0}</li>
+     * <li>Values larger than {@code Long.MAX_VALUE} are converted to {@code Long.MAX_VALUE}</li>
+     * <li>Values smaller than {@code Long.MIN_VALUE} are converted to {@code Long.MIN_VALUE}</li>
+     * <li>Positive infinity is converted to {@code Long.MAX_VALUE}</li>
+     * <li>Negative infinity is converted to {@code Long.MIN_VALUE}</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -479,9 +499,10 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * int result = num1.compareTo(num2);   // returns negative value
      * }</pre>
      *
-     * @param other the other MutableDouble to compare to, not null
+     * @param other the other MutableDouble to compare to, not {@code null}
      * @return a negative value if this is less than other, zero if equal,
      *         or a positive value if greater
+     * @throws NullPointerException if {@code other} is {@code null}
      */
     @Override
     public int compareTo(final MutableDouble other) {

@@ -242,6 +242,12 @@ public class Builder<T> {
 
     final T val;
 
+    /**
+     * Constructs a new Builder wrapping the given value.
+     *
+     * @param val the value to wrap; must not be {@code null}
+     * @throws IllegalArgumentException if {@code val} is {@code null}
+     */
     Builder(final T val) {
         N.checkArgNotNull(val);
 
@@ -2994,10 +3000,8 @@ public class Builder<T> {
         }
 
         /**
-         * Updates all the values in the Dataset.
-         *
-         * <p>The update is performed by applying a function to each value in the Dataset.
-         * The function takes the row index, column name, and current value, and returns the new value.</p>
+         * Updates all values in the entire dataset by applying a function that receives the row index,
+         * column name, and current value for each cell, and returns the replacement value.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -3009,7 +3013,8 @@ public class Builder<T> {
          * });
          * }</pre>
          *
-         * @param func the function to be applied to each value in the Dataset. It takes the row index, column name, and current value, and returns the new value.
+         * @param func the function applied to each cell; receives the row index, column name, and
+         *             current value, and returns the new value
          * @return this builder instance for method chaining
          * @see Dataset#updateAll(IntBiObjFunction)
          */
@@ -3038,17 +3043,19 @@ public class Builder<T> {
         }
 
         /**
-         * Replaces values in the Dataset that satisfy a specified condition with a new value.
-         * <br />
-         * The predicate takes the row index, column name, and each value in the Dataset as input, and returns a boolean indicating whether the value should be replaced.
+         * Replaces all values in the dataset that satisfy the specified predicate with a new value.
+         * The predicate receives the row index, column name, and current value for each cell,
+         * and returns {@code true} if that cell's value should be replaced.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         *  datasetBuilder.replaceIf((rowIndex, colName, value) -> "status".equals(colName) && "inactive".equals(value), "N/A");
+         * datasetBuilder.replaceIf((rowIndex, colName, value) -> "status".equals(colName) && "inactive".equals(value), "N/A");
          * }</pre>
          *
-         * @param predicate the predicate to test each value in the sheet. It takes the row index, column name, and a value from the Dataset as input, and returns a boolean indicating whether the value should be replaced.
-         * @param newValue the new value to replace the values that satisfy the condition.
+         * @param predicate the predicate to test each cell; receives the row index,
+         *                  column name, and the current value, and returns {@code true} if the value
+         *                  should be replaced
+         * @param newValue the replacement value for cells satisfying the predicate
          * @return this builder instance for method chaining
          * @see Dataset#replaceIf(IntBiObjPredicate, Object)
          */
@@ -3817,7 +3824,7 @@ public class Builder<T> {
         private int result = 0;
 
         private ComparisonBuilder() {
-            // Utility class - prevent instantiation
+            // Use Builder.compare(...) factory methods to obtain an instance
         }
 
         /**
@@ -3871,6 +3878,7 @@ public class Builder<T> {
          * @return this ComparisonBuilder instance for method chaining
          * @throws ClassCastException if {@code comparator} is {@code null} and the compared
          *         objects are not mutually {@link Comparable}
+         * @throws IllegalArgumentException if the comparator itself throws this exception
          */
         public <T> ComparisonBuilder compare(final T left, final T right, final Comparator<T> comparator) throws IllegalArgumentException {
             if (result == 0) {
@@ -4310,7 +4318,7 @@ public class Builder<T> {
         private boolean result = true;
 
         private EquivalenceBuilder() {
-            // Utility class - prevent instantiation
+            // Use Builder.equals(...) factory methods to obtain an instance
         }
 
         /**
@@ -4684,7 +4692,7 @@ public class Builder<T> {
         private int result = 0;
 
         private HashCodeBuilder() {
-            // Utility class - prevent instantiation
+            // Use Builder.hash(...) factory methods to obtain an instance
         }
 
         /**

@@ -680,7 +680,7 @@ public final class EscapeUtil {
             // Protected constructor for subclasses
         }
 
-        /** The Constant HEX_DIGITS. */
+        /** Upper-case hexadecimal digit characters used for producing Unicode escape sequences. */
         static final char[] HEX_DIGITS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
         /**
@@ -725,11 +725,15 @@ public final class EscapeUtil {
         }
 
         /**
-         * Translate an input onto a Writer. This is intentionally final as its algorithm is
+         * Translates an input onto a Writer. This is intentionally final as its algorithm is
          * tightly coupled with the abstract method of this class.
          *
-         * @param input CharSequence that is being translated
-         * @param out Writer to translate the text to
+         * <p>If {@code input} is {@code null}, this method returns immediately without writing
+         * anything. If {@code out} is {@code null}, an {@link IllegalArgumentException} is thrown.</p>
+         *
+         * @param input the CharSequence to be translated; may be {@code null}, in which case nothing is written
+         * @param out the Writer to translate the text to; must not be {@code null}
+         * @throws IllegalArgumentException if {@code out} is {@code null}
          * @throws IOException if and only if the Writer produces an IOException
          */
         public final void translate(final CharSequence input, final Writer out) throws IOException {
@@ -797,7 +801,7 @@ public final class EscapeUtil {
      */
     static class AggregateTranslator extends CharSequenceTranslator {
 
-        /** The translators. */
+        /** The ordered array of translators to try in sequence. */
         private final CharSequenceTranslator[] translators;
 
         /**
@@ -866,8 +870,8 @@ public final class EscapeUtil {
          * Constructs a {@code JavaUnicodeEscaper} between the specified values (inclusive).
          * </p>
          *
-         * @param codepointLow above which to escape
-         * @param codepointHigh below which to escape
+         * @param codepointLow the lower boundary (inclusive) of the codepoint range to escape
+         * @param codepointHigh the upper boundary (inclusive) of the codepoint range to escape
          * @return a {@code JavaUnicodeEscaper} that escapes all codepoints between the specified values (inclusive)
          */
         public static JavaUnicodeEscaper between(final int codepointLow, final int codepointHigh) {
@@ -920,13 +924,13 @@ public final class EscapeUtil {
      */
     static class NumericBeanEscaper extends CodePointTranslator {
 
-        /** The below. */
+        /** Lower boundary of the codepoint range (inclusive when {@code between} is {@code true}). */
         private final int below;
 
-        /** The above. */
+        /** Upper boundary of the codepoint range (inclusive when {@code between} is {@code true}). */
         private final int above;
 
-        /** The between. */
+        /** If {@code true}, escape codepoints within [below, above]; if {@code false}, escape outside that range. */
         private final boolean between;
 
         /**
@@ -975,8 +979,8 @@ public final class EscapeUtil {
         /**
          * <p>Constructs a {@code NumericBeanEscaper} between the specified values (inclusive). </p>
          *
-         * @param codepointLow above which to escape
-         * @param codepointHigh below which to escape
+         * @param codepointLow the lower boundary (inclusive) of the codepoint range to escape
+         * @param codepointHigh the upper boundary (inclusive) of the codepoint range to escape
          * @return a {@code NumericBeanEscaper} that escapes all codepoints between the specified values (inclusive)
          */
         public static NumericBeanEscaper between(final int codepointLow, final int codepointHigh) {
@@ -1053,6 +1057,8 @@ public final class EscapeUtil {
          * @param index the current index in the input sequence
          * @param out the destination writer for translated output
          * @return the number of consumed characters for a recognized unicode escape, or {@code 0} if no escape is found
+         * @throws IllegalArgumentException if a {@code \\u} prefix is found but is not followed by
+         *         four valid hex digits, or if the sequence ends prematurely
          * @throws IOException if writing translated output fails
          */
         @Override
@@ -1092,13 +1098,13 @@ public final class EscapeUtil {
      */
     static class UnicodeEscaper extends CodePointTranslator {
 
-        /** The below. */
+        /** Lower boundary of the codepoint range (inclusive when {@code between} is {@code true}). */
         private final int below;
 
-        /** The above. */
+        /** Upper boundary of the codepoint range (inclusive when {@code between} is {@code true}). */
         private final int above;
 
-        /** The between. */
+        /** If {@code true}, escape codepoints within [below, above]; if {@code false}, escape outside that range. */
         private final boolean between;
 
         /**
@@ -1158,8 +1164,8 @@ public final class EscapeUtil {
         /**
          * <p>Constructs a {@code UnicodeEscaper} between the specified values (inclusive). </p>
          *
-         * @param codepointLow above which to escape
-         * @param codepointHigh below which to escape
+         * @param codepointLow the lower boundary (inclusive) of the codepoint range to escape
+         * @param codepointHigh the upper boundary (inclusive) of the codepoint range to escape
          * @return a {@code UnicodeEscaper} that escapes all codepoints between the specified values (inclusive)
          */
         public static UnicodeEscaper between(final int codepointLow, final int codepointHigh) {
@@ -1200,7 +1206,10 @@ public final class EscapeUtil {
         }
 
         /**
-         * Converts the given codepoint to a hex string of the form {@code "\\uXXXX"}.
+         * Converts the given codepoint to a Unicode escape string. For BMP codepoints
+         * ({@code <= 0xFFFF}) this returns a string of the form {@code "\\uXXXX"};
+         * for supplementary codepoints ({@code > 0xFFFF}) this returns two surrogate-pair
+         * escape sequences of the form {@code "\\uXXXX\\uXXXX"}.
          *
          * @param codepoint a Unicode code point
          * @return the Unicode escape string representation of the codepoint
@@ -1279,47 +1288,52 @@ public final class EscapeUtil {
     }
 
     /**
-     * Translates XML numeric entities of the form &amp;#[xX]?\d+;? to
-     * the specific codepoint.
-     *
-     * Note that the semicolon is optional.
+     * Translates XML numeric character references of the form {@code &#[xX]?\d+;?} back to
+     * their corresponding codepoints. Whether the trailing semicolon is required, optional,
+     * or causes an error is controlled by the {@link NumericBeanUnescaper.OPTION} passed to
+     * the constructor; the default is {@link NumericBeanUnescaper.OPTION#semiColonRequired}.
      */
     static class NumericBeanUnescaper extends CharSequenceTranslator {
 
         /**
-         * The Enum OPTION.
+         * Options controlling how a trailing semicolon on a numeric character entity is handled
+         * during unescaping.
          */
         public enum OPTION {
 
-            /** The semicolon required. */
+            /** Numeric entities must be terminated with {@code ;}; those without are left untranslated. */
             semiColonRequired,
-            /** The semicolon optional. */
+            /** Numeric entities without a trailing {@code ;} are still translated. */
             semiColonOptional,
-            /** The error if no semicolon. */
+            /** Numeric entities without a trailing {@code ;} cause an {@link IllegalArgumentException} to be thrown. */
             errorIfNoSemiColon
         }
 
-        /** The options. */
+        /** The active set of options controlling semicolon handling during unescaping. */
         // TODO?: Create an OptionsSet class to hide some of the conditional logic below
         private final EnumSet<OPTION> options;
 
         /**
-         * Create a NumericBeanUnescaper.
+         * Creates a {@code NumericBeanUnescaper} with the specified options.
          *
-         * The constructor takes a list of options, only one type of which is currently
-         * available (whether to allow, error or ignore the semicolon on the end of a
-         * numeric bean being missing).
+         * <p>The constructor takes a list of options controlling how the trailing semicolon
+         * of a numeric entity is handled:</p>
+         * <ul>
+         *   <li>{@link OPTION#semiColonRequired} (default) — entities without {@code ;} are left untranslated</li>
+         *   <li>{@link OPTION#semiColonOptional} — entities without {@code ;} are still translated</li>
+         *   <li>{@link OPTION#errorIfNoSemiColon} — entities without {@code ;} throw {@link IllegalArgumentException}</li>
+         * </ul>
          *
-         * For example, to support numeric entities without a ';':
-         *    new NumericBeanUnescaper(NumericBeanUnescaper.OPTION.semiColonOptional)
-         * and to throw an IllegalArgumentException when they're missing:
-         *    new NumericBeanUnescaper(NumericBeanUnescaper.OPTION.errorIfNoSemiColon)
+         * <p>Example usage:</p>
+         * <pre>{@code
+         * // Support numeric entities without trailing ';'
+         * new NumericBeanUnescaper(NumericBeanUnescaper.OPTION.semiColonOptional)
+         * // Throw an exception when ';' is missing
+         * new NumericBeanUnescaper(NumericBeanUnescaper.OPTION.errorIfNoSemiColon)
+         * }</pre>
          *
-         * Note that when no option is supplied the default behaviour is
-         * {@code semiColonRequired}: a numeric entity without a trailing ';' is
-         * left untranslated.
-         *
-         * @param options to apply to this unescaper
+         * @param options the options to apply to this unescaper; if none are supplied,
+         *                {@link OPTION#semiColonRequired} is used by default
          */
         public NumericBeanUnescaper(final OPTION... options) {
             if (options.length > 0) {
@@ -1330,10 +1344,10 @@ public final class EscapeUtil {
         }
 
         /**
-         * Whether the passed in option is currently set.
+         * Returns whether the specified option is currently set on this unescaper.
          *
-         * @param option to check the state of
-         * @return whether the option is set
+         * @param option the option to check
+         * @return {@code true} if the option is set; {@code false} otherwise
          */
         public boolean isSet(final OPTION option) {
             return options != null && options.contains(option);
@@ -1346,6 +1360,8 @@ public final class EscapeUtil {
          * @param index the current index in the input sequence
          * @param out the destination writer for translated output
          * @return the number of consumed characters for a recognized numeric entity, or {@code 0} if no entity is found
+         * @throws IllegalArgumentException if a numeric entity is missing its trailing {@code ;} and
+         *         this unescaper was constructed with {@link OPTION#errorIfNoSemiColon}
          * @throws IOException if writing translated output fails
          */
         @Override
@@ -1414,25 +1430,28 @@ public final class EscapeUtil {
      */
     static class LookupTranslator extends CharSequenceTranslator {
 
-        /** The lookup map. */
+        /** Map from source sequence string to its replacement string. */
         private final Map<String, String> lookupMap;
 
-        /** The prefix set. */
+        /** Set of first characters of all registered source sequences, used for fast pre-filtering. */
         private final Set<Character> prefixSet;
 
-        /** The shortest. */
+        /** Length of the shortest source sequence in the lookup table. */
         private final int shortest;
 
-        /** The longest. */
+        /** Length of the longest source sequence in the lookup table. */
         private final int longest;
 
         /**
-         * Define the lookup table to be used in translation
+         * Defines the lookup table to be used in translation.
          *
-         * Note that, as of Lang 3.1, the key to the lookup table is converted to a java.lang.String.
-         * This is because we need the key to support hashCode and equals(Object), allowing it to be the key for a HashMap. See LANG-882.
+         * <p>Each entry in {@code lookup} must be a two-element array where the first element
+         * is the sequence to match and the second is its replacement. Keys are internally
+         * converted to {@link String} to support {@code hashCode} and {@code equals}, allowing
+         * them to be used as keys in a {@link java.util.HashMap}.</p>
          *
-         * @param lookup CharSequence[][] table of size [*][2]
+         * @param lookup a two-dimensional array of {@code CharSequence} pairs of the form
+         *               {@code [n][2]}, where index 0 is the key and index 1 is the replacement value
          */
         public LookupTranslator(final CharSequence[]... lookup) {
             lookupMap = new HashMap<>();
@@ -1551,11 +1570,16 @@ public final class EscapeUtil {
         private static final char[] CSV_SEARCH_CHARS = { CSV_DELIMITER, CSV_QUOTE, CR, LF };
 
         /**
+         * Translates the entire input as a single CSV field, enclosing it in double quotes
+         * and escaping embedded double quotes if the input contains any CSV special characters
+         * (comma, double quote, CR, or LF). This translator always processes the full input
+         * in one pass; {@code index} must be {@code 0}.
          *
          * @param input the CharSequence being translated
-         * @param index the index of the current character in the sequence
+         * @param index the index of the current character in the sequence; must be {@code 0}
          * @param out the Writer to write the escaped output to
-         * @return the number of codepoints consumed
+         * @return the number of codepoints consumed (always the full length of {@code input})
+         * @throws IllegalStateException if {@code index} is not {@code 0}
          * @throws IOException if an I/O error occurs while writing to the output
          */
         @Override
@@ -1594,11 +1618,17 @@ public final class EscapeUtil {
         private static final char[] CSV_SEARCH_CHARS = { CSV_DELIMITER, CSV_QUOTE, CR, LF };
 
         /**
+         * Translates the entire input as a single CSV field, stripping surrounding double quotes
+         * and unescaping doubled double quotes ({@code ""} to {@code "}) if the input is
+         * enclosed in double quotes and contains any CSV special characters. If the input is
+         * not quoted, it is written to {@code out} unchanged. This translator always processes
+         * the full input in one pass; {@code index} must be {@code 0}.
          *
          * @param input the CharSequence being translated
-         * @param index the index of the current character in the sequence
+         * @param index the index of the current character in the sequence; must be {@code 0}
          * @param out the Writer to write the unescaped output to
-         * @return the number of codepoints consumed
+         * @return the number of codepoints consumed (always the full length of {@code input})
+         * @throws IllegalStateException if {@code index} is not {@code 0}
          * @throws IOException if an I/O error occurs while writing to the output
          */
         @Override
@@ -2050,10 +2080,11 @@ public final class EscapeUtil {
         private static final String[][] JAVA_CTRL_CHARS_UNESCAPE = invert(JAVA_CTRL_CHARS_ESCAPE);
 
         /**
-         * Used to invert an escape array into an unescaped array.
+         * Inverts an escape mapping array by swapping the source and replacement in each entry,
+         * effectively turning an escape table into an unescape table.
          *
-         * @param array String[][] to be inverted
-         * @return String[][] inverted array
+         * @param array the two-dimensional {@code String} array to invert; must not be {@code null}
+         * @return a new {@code String[][]} where each entry has its key and value swapped
          */
         public static String[][] invert(final String[][] array) {
             final String[][] newarray = new String[array.length][2];

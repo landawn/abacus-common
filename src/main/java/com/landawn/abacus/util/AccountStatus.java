@@ -77,6 +77,11 @@ public enum AccountStatus {
 
     private final int code;
 
+    /**
+     * Constructs an {@code AccountStatus} constant with the specified integer code.
+     *
+     * @param code the integer code associated with this status
+     */
     AccountStatus(final int code) {
         this.code = code;
     }
@@ -108,9 +113,9 @@ public enum AccountStatus {
      * AccountStatus suspended = AccountStatus.fromCode(2);   // Returns SUSPENDED
      * }</pre>
      *
-     * @param code the integer value to convert
-     * @return the corresponding AccountStatus
-     * @throws IllegalArgumentException if no AccountStatus exists with the specified integer value
+     * @param code the integer value to convert (0–5)
+     * @return the corresponding {@code AccountStatus}; never {@code null}
+     * @throws IllegalArgumentException if no {@code AccountStatus} exists for the specified integer value
      */
     public static AccountStatus fromCode(final int code) {
         switch (code) {

@@ -43,6 +43,7 @@ package com.landawn.abacus.util;
  */
 public final class IndexedByte extends AbstractIndexed {
 
+    /** The byte value associated with the index. */
     private final byte value;
 
     /**

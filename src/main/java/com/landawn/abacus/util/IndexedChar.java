@@ -43,6 +43,7 @@ package com.landawn.abacus.util;
  */
 public final class IndexedChar extends AbstractIndexed {
 
+    /** The char value associated with the index. */
     private final char value;
 
     /**

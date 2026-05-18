@@ -26,6 +26,7 @@ package com.landawn.abacus.type;
  */
 public final class ObjectType<T> extends SingleValueType<T> {
 
+    /** The type name constant for Object type identification, equal to {@code "Object"}. */
     public static final String OBJECT = Object.class.getSimpleName();
 
     /**

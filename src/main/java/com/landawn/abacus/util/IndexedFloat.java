@@ -43,6 +43,7 @@ package com.landawn.abacus.util;
  */
 public final class IndexedFloat extends AbstractIndexed {
 
+    /** The float value associated with the index. */
     private final float value;
 
     /**
@@ -112,11 +113,10 @@ public final class IndexedFloat extends AbstractIndexed {
 
     /**
      * Returns a hash code value for this object. The hash code is computed
-     * using both the index and the value to ensure proper distribution in
-     * hash-based collections.
+     * using both the index and the value.
      *
-     * <p>Note: The float value is cast to int for hash calculation, which may
-     * result in hash collisions for values that differ only in their fractional parts.</p>
+     * <p>Note: The float value is multiplied by 31 and then truncated to {@code int},
+     * so values that differ only in their fractional parts may produce the same hash code.</p>
      *
      * @return a hash code value for this object
      */
@@ -130,11 +130,10 @@ public final class IndexedFloat extends AbstractIndexed {
      * Two {@code IndexedFloat} objects are considered equal if they have
      * the same index and the same value.
      *
-     * <p>Float comparison is performed using the {@code N.equals} method,
-     * which handles special float values (NaN, positive/negative infinity) correctly.</p>
+     * <p>Float comparison is delegated to {@link N#equals(float, float)}.</p>
      *
      * @param obj the reference object with which to compare
-     * @return {@code true} if this object is equal to the obj argument;
+     * @return {@code true} if this object is equal to the {@code obj} argument;
      *         {@code false} otherwise
      */
     @Override
