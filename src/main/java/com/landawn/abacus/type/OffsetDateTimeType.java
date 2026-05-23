@@ -232,9 +232,12 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      * The format depends on the serialization configuration:
      * <ul>
      *   <li>{@code LONG}: epoch milliseconds written as a numeric value</li>
-     *   <li>{@code ISO_8601_DATE_TIME}: ISO offset date-time format (e.g., {@code "2011-12-03T10:15:30+01:00"})</li>
-     *   <li>{@code ISO_8601_TIMESTAMP}: ISO offset timestamp format (e.g., {@code "2011-12-03T10:15:30.000+01:00"})</li>
-     *   <li>Default ({@code null} config or {@code null} format): same as {@code ISO_8601_TIMESTAMP}</li>
+     *   <li>{@code ISO_8601_DATE_TIME}: ISO offset date-time format via
+     *       {@link java.time.format.DateTimeFormatter#ISO_OFFSET_DATE_TIME}</li>
+     *   <li>{@code ISO_8601_TIMESTAMP}: ISO offset date-time format via
+     *       {@link java.time.format.DateTimeFormatter#ISO_OFFSET_DATE_TIME}
+     *       (currently backed by the same formatter as {@code ISO_8601_DATE_TIME})</li>
+     *   <li>Default ({@code null} config or {@code null} format): same as {@link #stringOf(OffsetDateTime)}</li>
      * </ul>
      * When the format is not {@code LONG} and the config specifies a string quotation character,
      * the formatted value is wrapped in that quotation character.

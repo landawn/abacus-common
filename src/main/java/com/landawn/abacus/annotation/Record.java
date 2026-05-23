@@ -30,9 +30,10 @@ import java.lang.annotation.Target;
  * such as {@code Beans}, enabling record-specific introspection and mapping behavior even when
  * the class does not extend {@link java.lang.Record}.</p>
  *
- * <p><b>Note:</b> This annotation is itself meta-annotated with {@link Test}, indicating it is
- * primarily intended to support testing scenarios where a record-like surface is needed without
- * requiring a real {@link java.lang.Record}.</p>
+ * <p><b>Note:</b> This annotation is itself meta-annotated with {@link Test}, indicating that
+ * the annotation API is at an experimental stage and may change. Despite this, it is consumed
+ * by production framework code (for example, {@code Beans.isRecordClass(Class)}) to recognize
+ * record-like classes that do not extend {@link java.lang.Record}.</p>
  *
  * <p><b>Primary use cases:</b></p>
  * <ul>

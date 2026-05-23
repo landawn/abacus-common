@@ -57,9 +57,9 @@ public class Base64EncodedType extends AbstractType<byte[]> {
      * Encodes a byte array as a standard Base64 string.
      * Uses {@link com.landawn.abacus.util.Strings#base64Encode(byte[])} internally.
      *
-     * <p>If {@code x} is {@code null}, the behavior is governed by
-     * {@code Strings.base64Encode} (typically returns an empty string).
-     * If {@code x} is an empty array, an empty string is returned.</p>
+     * <p>Unlike most {@code stringOf} implementations in this package, a {@code null} or empty input
+     * yields an empty string (never {@code null}), because {@code Strings.base64Encode} short-circuits
+     * to {@link com.landawn.abacus.util.Strings#EMPTY} for both cases.</p>
      *
      * @param x the byte array to encode; may be {@code null}
      * @return the Base64-encoded string representation of the byte array;

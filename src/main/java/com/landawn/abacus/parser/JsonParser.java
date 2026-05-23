@@ -189,9 +189,9 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * // numbers array is now filled with values [1, 2, 3, 4, 5]
      * }</pre>
      *
-     * @param source the JSON string to parse (must not be {@code null}); must contain a JSON array
+     * @param source the JSON string to parse (may be {@code null}, in which case the method returns without
+     *               modifying {@code output}); must contain a JSON array when non-empty
      * @param output the pre-allocated array to populate with parsed values (must not be {@code null})
-     * @throws IllegalArgumentException if {@code source} or {@code output} is {@code null}
      * @throws com.landawn.abacus.exception.ParsingException if the source contains invalid JSON
      * @throws IndexOutOfBoundsException if the JSON array contains more elements than the output array can hold
      */
@@ -211,10 +211,10 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * parser.parse(json, config, numbers);
      * }</pre>
      *
-     * @param source the JSON string to parse (must not be {@code null}); must contain a JSON array
+     * @param source the JSON string to parse (may be {@code null}, in which case the method returns without
+     *               modifying {@code output}); must contain a JSON array when non-empty
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param output the pre-allocated array to populate with parsed values (must not be {@code null})
-     * @throws IllegalArgumentException if {@code source} or {@code output} is {@code null}
      * @throws com.landawn.abacus.exception.ParsingException if the source contains invalid JSON
      * @throws IndexOutOfBoundsException if the JSON array contains more elements than the output array can hold
      */
@@ -232,9 +232,9 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * // fruits now contains the parsed values added to any existing elements
      * }</pre>
      *
-     * @param source the JSON string to parse, must contain a JSON array
+     * @param source the JSON string to parse (may be {@code null}, in which case the method returns without
+     *               modifying {@code output}); must contain a JSON array when non-empty
      * @param output the Collection to populate with parsed values, must not be {@code null}; existing elements are preserved
-     * @throws IllegalArgumentException if {@code source} or {@code output} is {@code null}
      * @throws com.landawn.abacus.exception.ParsingException if the source contains invalid JSON
      * @throws UnsupportedOperationException if the collection is unmodifiable
      */
@@ -253,10 +253,10 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * parser.parse(json, config, items);
      * }</pre>
      *
-     * @param source the JSON string to parse, must contain a JSON array
+     * @param source the JSON string to parse (may be {@code null}, in which case the method returns without
+     *               modifying {@code output}); must contain a JSON array when non-empty
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param output the Collection to populate with parsed values, must not be {@code null}; existing elements are preserved
-     * @throws IllegalArgumentException if {@code source} or {@code output} is {@code null}
      * @throws com.landawn.abacus.exception.ParsingException if the source contains invalid JSON
      * @throws UnsupportedOperationException if the collection is unmodifiable
      */
@@ -274,9 +274,9 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * // map now contains the parsed entries added to any existing entries
      * }</pre>
      *
-     * @param source the JSON string to parse, must contain a JSON object
+     * @param source the JSON string to parse (may be {@code null} or empty, in which case the method returns
+     *               without modifying {@code output}); must contain a JSON object when non-empty
      * @param output the Map to populate with parsed key-value pairs, must not be {@code null}; existing entries are preserved
-     * @throws IllegalArgumentException if {@code source} or {@code output} is {@code null}
      * @throws com.landawn.abacus.exception.ParsingException if the source contains invalid JSON
      * @throws UnsupportedOperationException if the map is unmodifiable
      */
@@ -295,10 +295,10 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * parser.parse(json, config, map);
      * }</pre>
      *
-     * @param source the JSON string to parse, must contain a JSON object
+     * @param source the JSON string to parse (may be {@code null} or empty, in which case the method returns
+     *               without modifying {@code output}); must contain a JSON object when non-empty
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param output the Map to populate with parsed key-value pairs, must not be {@code null}; existing entries are preserved
-     * @throws IllegalArgumentException if {@code source} or {@code output} is {@code null}
      * @throws com.landawn.abacus.exception.ParsingException if the source contains invalid JSON
      * @throws UnsupportedOperationException if the map is unmodifiable
      */

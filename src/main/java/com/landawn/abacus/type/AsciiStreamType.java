@@ -35,9 +35,10 @@ import com.landawn.abacus.util.Objectory;
  * provides conversion between {@link java.io.InputStream} and various output formats using
  * US-ASCII character encoding ({@link com.landawn.abacus.util.Charsets#US_ASCII}).
  *
- * <p>The JDBC type used for ASCII stream parameters is {@link java.sql.Types#LONGVARCHAR}.
- * Retrieval uses {@link java.sql.ResultSet#getAsciiStream} and storage uses
- * {@link java.sql.PreparedStatement#setAsciiStream}.</p>
+ * <p>JDBC operations use the dedicated ASCII-stream APIs:
+ * retrieval via {@link java.sql.ResultSet#getAsciiStream} and storage via
+ * {@link java.sql.PreparedStatement#setAsciiStream}. No explicit {@link java.sql.Types} code is bound;
+ * the driver chooses the column mapping (typically {@code LONGVARCHAR}/{@code CLOB}).</p>
  *
  * @see InputStreamType
  * @see java.sql.ResultSet#getAsciiStream(int)

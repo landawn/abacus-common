@@ -23,17 +23,19 @@ import com.landawn.abacus.util.Mutable;
  * after creation).
  *
  * <p>The generic parameter {@code T} is bounded by {@link Mutable}, giving a compile-time
- * guarantee that all concrete implementations work exclusively with mutable types.
+ * guarantee that any subclass works exclusively with mutable types.
  *
  * <p><b>Note on mutability:</b> unlike immutable types, objects handled by this class can be
  * modified in place. Callers must take care when caching or sharing instances across threads.
  *
+ * <p><b>Note on usage:</b> the {@code MutableXxxType} type handlers shipped in this package
+ * (e.g. {@code MutableIntType}, {@code MutableBooleanType}) do <i>not</i> currently extend
+ * this class; most extend {@link NumberType} or {@link AbstractType} directly. This class
+ * is provided as an optional base for custom handlers of {@link Mutable} types.
+ *
  * @param <T> the specific mutable type handled by this type handler; must implement {@link Mutable}
  * @see AbstractType
  * @see Mutable
- * @see com.landawn.abacus.util.MutableInt
- * @see com.landawn.abacus.util.MutableLong
- * @see com.landawn.abacus.util.MutableDouble
  */
 public abstract class MutableType<T extends Mutable> extends AbstractType<T> {
 

@@ -280,7 +280,7 @@ final class FileSystemUtil {
     //-----------------------------------------------------------------------
 
     /**
-     * Find free space on the Windows platform using the <i>dir</i> command.
+     * Finds free space on the Windows platform using the <i>dir</i> command.
      *
      * @param path the path to get free space for, including the colon
      * @param timeout the timeout amount in milliseconds or no timeout if the value
@@ -374,7 +374,7 @@ final class FileSystemUtil {
     //-----------------------------------------------------------------------
 
     /**
-     * Find free space on the *nix platform using the <i>df</i> command.
+     * Finds free space on the *nix platform using the <i>df</i> command.
      *
      * @param path the path to get free space for
      * @param kb whether to normalize to kilobytes

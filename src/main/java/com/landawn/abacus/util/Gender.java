@@ -48,16 +48,16 @@ package com.landawn.abacus.util;
  */
 public enum Gender {
 
-    /** Represents unknown or unspecified gender (integer value: 0) */
+    /** Represents unknown or unspecified gender (integer value: 0). */
     BLANK(0),
 
-    /** Represents female gender (integer value: 1) */
+    /** Represents female gender (integer value: 1). */
     FEMALE(1),
 
-    /** Represents male gender (integer value: 2) */
+    /** Represents male gender (integer value: 2). */
     MALE(2),
 
-    /** Represents X gender (integer value: 3) */
+    /** Represents X gender (integer value: 3). */
     X(3);
 
     private final int intValue;

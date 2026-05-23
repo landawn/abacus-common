@@ -6483,6 +6483,60 @@ public class NumbersTest extends TestBase {
         });
     }
 
+    /**
+     * Regression test for bug: round(float, 0) used Math.round((double)x) which saturates at
+     * Long.MAX_VALUE / Long.MIN_VALUE for floats whose magnitude exceeds 2^63.
+     * Such floats are already exact integers and must be returned unchanged.
+     */
+    @Test
+    public void testRoundFloat_LargeValueBeyondLongRange() {
+        // 1e20f > 2^63: the old code returned 9.223372E18f (Long.MAX_VALUE narrowed to float)
+        float large = 1e20f;
+        Assertions.assertEquals(large, Numbers.round(large, 0), 0.0f,
+                "round(1e20f, 0) must return 1e20f, not the saturated long value");
+
+        float negLarge = -1e20f;
+        Assertions.assertEquals(negLarge, Numbers.round(negLarge, 0), 0.0f,
+                "round(-1e20f, 0) must return -1e20f, not the saturated long value");
+
+        // Boundary: largest float exactly equal to 2^63 (Float.MAX_VALUE > 2^63)
+        float twoTo63 = 0x1p63f; // = 9.223372E18f, exactly 2^63 as a float
+        Assertions.assertEquals(twoTo63, Numbers.round(twoTo63, 0), 0.0f,
+                "round(2^63 as float, 0) must return the value unchanged");
+
+        // Normal values well within long range must still round correctly
+        Assertions.assertEquals(3.0f, Numbers.round(3.4f, 0), 0.0f);
+        Assertions.assertEquals(4.0f, Numbers.round(3.5f, 0), 0.0f);
+        Assertions.assertEquals(-3.0f, Numbers.round(-3.4f, 0), 0.0f);
+    }
+
+    /**
+     * Regression test for bug: round(double, 0) used Math.round(x) which saturates at
+     * Long.MAX_VALUE / Long.MIN_VALUE for doubles whose magnitude exceeds 2^63.
+     * Such doubles are already exact integers and must be returned unchanged.
+     */
+    @Test
+    public void testRoundDouble_LargeValueBeyondLongRange() {
+        // 1e20 > 2^63: the old code returned 9.223372036854776E18 (Long.MAX_VALUE as double)
+        double large = 1e20;
+        Assertions.assertEquals(large, Numbers.round(large, 0), 0.0,
+                "round(1e20, 0) must return 1e20, not the saturated long value");
+
+        double negLarge = -1e20;
+        Assertions.assertEquals(negLarge, Numbers.round(negLarge, 0), 0.0,
+                "round(-1e20, 0) must return -1e20, not the saturated long value");
+
+        // Boundary: value exactly at 2^63
+        double twoTo63 = 0x1p63; // = 9.223372036854776E18, exactly 2^63
+        Assertions.assertEquals(twoTo63, Numbers.round(twoTo63, 0), 0.0,
+                "round(2^63 as double, 0) must return the value unchanged");
+
+        // Normal values well within long range must still round correctly
+        Assertions.assertEquals(3.0, Numbers.round(3.4, 0), 0.0);
+        Assertions.assertEquals(4.0, Numbers.round(3.5, 0), 0.0);
+        Assertions.assertEquals(-3.0, Numbers.round(-3.4, 0), 0.0);
+    }
+
     @Test
     public void testRoundFloatWithStringFormat() {
         float result = Numbers.round(1.234f, "#.#");

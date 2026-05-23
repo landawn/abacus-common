@@ -7808,6 +7808,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     @IntermediateOp
     public Seq<T, E> limit(final long offset, final long maxSize) throws IllegalStateException, IllegalArgumentException {
+        assertNotClosed();
+
         if (offset == 0) {
             return maxSize == Long.MAX_VALUE ? this : limit(maxSize);
         } else if (maxSize == Long.MAX_VALUE) {
@@ -9252,7 +9254,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Zips this sequence with the given collection using the provided zip function.
-     * The zip function combines elements from this sequence and the given collection until both the current sequence or the given collection runs out of elements.
+     * The zip function combines elements from this sequence and the given collection until both the current sequence and the given collection run out of elements.
      * The resulting sequence will have the length of the longer of the current sequence and the given collection.
      * If the current sequence or the given collection runs out of elements before the other, the provided default values are used.
      * This is an intermediate operation.
@@ -9320,7 +9322,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Zips this sequence with the given collections using the provided zip function.
-     * The zip function combines elements from this sequence and the given collections until both the current sequence or the given collections runs out of elements.
+     * The zip function combines elements from this sequence and the given collections until the current sequence and all the given collections run out of elements.
      * The resulting sequence will have the length of the longest of the current sequence and the given collections.
      * If the current sequence or one of the given collections runs out of elements before the other, the provided default values are used.
      * This is an intermediate operation.
@@ -13798,15 +13800,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * );
      *
      * // Another example: saving to database if not empty
-     * boolean wasProcessed = seq.acceptIfNotEmpty(s -> {
+     * seq.acceptIfNotEmpty(s -> {
      *     List<Item> items = s.toList();
      *     database.saveAll(items);
      *     logger.info("Saved " + items.size() + " items");
-     * }).isTrue();
-     *
-     * if (!wasProcessed) {
-     *     logger.info("No items to save");
-     * }
+     * }).orElse(() -> logger.info("No items to save"));
      * }</pre>
      *
      * @param <E2> the type of the exception the action may throw

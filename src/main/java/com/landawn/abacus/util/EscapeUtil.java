@@ -684,7 +684,7 @@ public final class EscapeUtil {
         static final char[] HEX_DIGITS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
         /**
-         * Translate a set of codepoints, represented by an int index into a CharSequence,
+         * Translates a set of codepoints, represented by an int index into a CharSequence,
          * into another set of codepoints. The number of codepoints consumed must be returned,
          * and the only IOExceptions thrown must be from interacting with the Writer so that
          * the top level API may reliably ignore StringWriter IOExceptions.
@@ -805,7 +805,7 @@ public final class EscapeUtil {
         private final CharSequenceTranslator[] translators;
 
         /**
-         * Specify the translators to be used at creation time.
+         * Constructs an {@code AggregateTranslator} with the specified translators applied in order.
          *
          * @param translators CharSequenceTranslator array to aggregate
          */
@@ -999,7 +999,7 @@ public final class EscapeUtil {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @param codepoint the Unicode code point to evaluate and optionally escape
          * @param out the destination writer for escaped output
@@ -1051,7 +1051,7 @@ public final class EscapeUtil {
     static class UnicodeUnescaper extends CharSequenceTranslator {
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @param input the character sequence to translate
          * @param index the current index in the input sequence
@@ -1173,7 +1173,7 @@ public final class EscapeUtil {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @param codepoint the Unicode code point to evaluate and optionally escape
          * @param out the destination writer for escaped output
@@ -1225,17 +1225,17 @@ public final class EscapeUtil {
     }
 
     /**
-     * Translate escaped octal Strings back to their octal values.
+     * Translates escaped octal Strings back to their octal values.
      *
-     * For example, "\45" should go back to being the specific value (a %).
+     * <p>For example, {@code "\45"} should go back to being the specific value (a {@code %}).</p>
      *
-     * Note that this currently only supports the viable range of octal for Java; namely
-     * 1 to 377. This is because parsing Java is the main use case.
+     * <p>Note that this currently only supports the viable range of octal for Java; namely
+     * 1 to 377. This is because parsing Java is the main use case.</p>
      */
     static class OctalUnescaper extends CharSequenceTranslator {
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @param input the character sequence to translate
          * @param index the current index in the input sequence
@@ -1278,7 +1278,7 @@ public final class EscapeUtil {
         }
 
         /**
-         * Checks if the given char is the character representation of one of the digit from 0 to 3.
+         * Checks if the given char is the character representation of one of the digits from 0 to 3.
          * @param ch the char to check
          * @return {@code true} if the given char is the character representation of one of the digits from 0 to 3
          */
@@ -1354,7 +1354,7 @@ public final class EscapeUtil {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @param input the character sequence to translate
          * @param index the current index in the input sequence
@@ -1476,7 +1476,7 @@ public final class EscapeUtil {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @param input the character sequence to translate
          * @param index the current index in the input sequence
@@ -1537,7 +1537,7 @@ public final class EscapeUtil {
         }
 
         /**
-         * Translate the specified codepoint into another.
+         * Translates the specified codepoint into another.
          *
          * @param codepoint int character input to translate
          * @param out Writer to optionally push the translated output to
@@ -2007,7 +2007,7 @@ public final class EscapeUtil {
         /**
          * Mapping to escape the basic XML and HTML character entities.
          *
-         * Namely: {@code " & < >}
+         * Namely: {@code " & < >}.
          * @return the mapping array for basic XML and HTML character escape sequences
          */
         public static String[][] BASIC_ESCAPE() {
@@ -2058,7 +2058,7 @@ public final class EscapeUtil {
         /**
          * Mapping to escape the Java control characters.
          *
-         * Namely: {@code \b \n \t \f \r}
+         * Namely: {@code \b \n \t \f \r}.
          * @return the mapping array for Java control character escape sequences
          */
         public static String[][] JAVA_CTRL_CHARS_ESCAPE() {

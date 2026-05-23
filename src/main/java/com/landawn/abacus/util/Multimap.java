@@ -3263,7 +3263,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * <ul>
      *   <li>Each key from the Multimap becomes an element in the Multiset</li>
      *   <li>The count for each key equals the number of values associated with that key</li>
-     *   <li>If a key has an empty collection, it won't appear in the Multiset (count = 0)</li>
+     *   <li>Because keys with empty collections are automatically removed, every key in the Multiset has a count of at least 1</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>

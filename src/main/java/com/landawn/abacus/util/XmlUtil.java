@@ -1249,7 +1249,8 @@ public final class XmlUtil {
 
     /**
      * Gets the first node with the specified name from the given node or its descendants.
-     * This method performs a depth-first search and returns the first matching node found.
+     * The given node itself is checked first, then its direct children, and finally its
+     * deeper descendants; the first matching node found is returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

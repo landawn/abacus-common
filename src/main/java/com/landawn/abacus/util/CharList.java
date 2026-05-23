@@ -1791,9 +1791,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Returns the index of the last occurrence of the specified element in this list,
      * searching backwards from the specified index, or -1 if the element is not found.
+     * If {@code startIndexFromBack} is negative or the list is empty, -1 is returned.
      *
      * @param valueToFind the element to search for
-     * @param startIndexFromBack the index to start the backward search from (inclusive)
+     * @param startIndexFromBack the index to start the backward search from (inclusive);
+     *        if greater than or equal to the list size, the search starts from the last element
      * @return the index of the last occurrence of the element at position &lt;= startIndexFromBack,
      *         or -1 if the element is not found
      */

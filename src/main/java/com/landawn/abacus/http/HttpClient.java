@@ -105,14 +105,14 @@ import com.landawn.abacus.util.URLEncodedUtil;
  *   <tr>
  *     <td>JSON</td>
  *     <td>application/json</td>
- *     <td>Jackson/JSON-B integration</td>
- *     <td>GZIP, Brotli</td>
+ *     <td>abacus internal JSON parser ({@link com.landawn.abacus.parser.ParserFactory#createJsonParser})</td>
+ *     <td>GZIP, Brotli, LZ4, Snappy</td>
  *   </tr>
  *   <tr>
  *     <td>XML</td>
- *     <td>application/xml, text/xml</td>
- *     <td>JAXB/DOM parsing</td>
- *     <td>GZIP, Brotli</td>
+ *     <td>application/xml</td>
+ *     <td>abacus internal XML parser ({@link com.landawn.abacus.parser.ParserFactory#createXmlParser}, when available)</td>
+ *     <td>GZIP, Brotli, LZ4, Snappy</td>
  *   </tr>
  *   <tr>
  *     <td>Form URL-encoded</td>

@@ -5463,4 +5463,24 @@ public class BeansTest extends TestBase {
         assertNotNull(flatMap);
         assertTrue(flatMap.isEmpty());
     }
+
+    /**
+     * Regression test for: getPropNames(Class, Set) with an exclusion set that is larger
+     * than the number of properties in the class must NOT throw IllegalArgumentException
+     * from ArrayList(negative-capacity). SimpleBean has 3 props; we exclude 7 names.
+     */
+    @Test
+    public void testGetPropNames_ExclusionSetLargerThanPropList_doesNotThrow() {
+        // SimpleBean has exactly 3 properties: name, age, active.
+        // Passing a set with 7 entries (more than 3) previously computed a negative
+        // initial capacity for ArrayList (3 - 7 == -4), causing IllegalArgumentException.
+        Set<String> oversizedExclude = new HashSet<>(
+                Arrays.asList("name", "age", "active", "x1", "x2", "x3", "x4"));
+
+        List<String> result = assertDoesNotThrow(
+                () -> Beans.getPropNames(SimpleBean.class, oversizedExclude));
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty(), "All props are excluded so result should be empty");
+    }
 }

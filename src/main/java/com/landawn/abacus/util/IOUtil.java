@@ -5661,7 +5661,7 @@ public final class IOUtil {
      *
      * <p>Files are mapped from offset 0 to its length.
      *
-     * <p>This only works for files {@code <= {@link Integer#MAX_VALUE}} bytes.
+     * <p>This only works for files no larger than {@link Integer#MAX_VALUE} bytes.
      *
      * <p><b>JVM Requirements:</b></p>
      * <ul>
@@ -5707,7 +5707,7 @@ public final class IOUtil {
      * it will be created with the requested {@code size}.
      * Thus, this method is useful for creating memory mapped files which do not yet exist.
      *
-     * <p>This only works for files {@code <= {@link Integer#MAX_VALUE}} bytes.
+     * <p>This only works for files no larger than {@link Integer#MAX_VALUE} bytes.
      *
      * <p><b>JVM Requirements:</b></p>
      * <ul>
@@ -7484,7 +7484,8 @@ public final class IOUtil {
     }
 
     /**
-     * Sets file lastModifiedTime, lastAccessTime and creationTime to match the source file
+     * Sets the {@code lastModifiedTime}, {@code lastAccessTime} and {@code creationTime} of the target file
+     * to match those of the source file.
      *
      * @param sourceFile the source file to query.
      * @param targetFile the target file or directory to set.
@@ -8376,7 +8377,7 @@ public final class IOUtil {
      * @param file      the {@code File} of which the modification date must be compared.
      * @param reference the {@code File} of which the modification date is used.
      * @return {@code true} if the {@code File} exists and has been modified more recently than the reference {@code File}.
-     * @throws IllegalArgumentException if the file or reference file is {@code null} or the reference file doesn't exist.
+     * @throws IllegalArgumentException if the file or reference file is {@code null}.
      */
     public static boolean isFileNewer(final File file, final File reference) throws IllegalArgumentException {
         N.checkArgNotNull(file, cs.file);
@@ -8420,7 +8421,7 @@ public final class IOUtil {
      * @param file      the {@code File} of which the modification date must be compared.
      * @param reference the {@code File} of which the modification date is used.
      * @return {@code true} if the {@code File} exists and has been modified before the reference {@code File}.
-     * @throws IllegalArgumentException if the file or reference file is {@code null} or the reference file doesn't exist.
+     * @throws IllegalArgumentException if the file or reference file is {@code null}.
      */
     public static boolean isFileOlder(final File file, final File reference) throws IllegalArgumentException {
         N.checkArgNotNull(file, cs.file);
@@ -9349,7 +9350,7 @@ public final class IOUtil {
     }
 
     /**
-     * Estimate the total line count of the file by reading the specified line count ahead.
+     * Estimates the total line count of the file by reading the specified line count ahead.
      *
      * @param file the file whose line count is to be estimated, must not be {@code null}.
      * @param byReadingLineNum the number of lines to read for estimating the total count.
@@ -9711,7 +9712,7 @@ public final class IOUtil {
     //-----------------------------------------------------------------------
 
     /**
-     * Convert from a {@code URL} to a {@code File}.
+     * Converts from a {@code URL} to a {@code File}.
      * <p>
      * This method will decode the URL.
      * Syntax such as {@code file:///my%20docs/file.txt} will be
@@ -10008,7 +10009,7 @@ public final class IOUtil {
     }
 
     /**
-     * Compares the contents of two files to determine if they are equal or not.
+     * Compares the contents of two files to determine if they are equal, ignoring end-of-line differences.
      * <p>
      * This method checks to see if the two files point to the same file,
      * before resorting to line-by-line comparison of the contents.
@@ -10245,7 +10246,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parse the specified file/directory line by line.
+     * Parses the specified file/directory line by line.
      *
      * @param <E>        the type of exception that the lineAction can throw.
      * @param source     the source file to be parsed.
@@ -10261,7 +10262,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parse the specified file/directory line by line.
+     * Parses the specified file/directory line by line.
      *
      * @param <E> the type of exception that the lineAction may throw during line processing.
      * @param <E2> the type of exception that the onComplete callback may throw after all lines are processed.
@@ -10280,7 +10281,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parse the specified file/directory line by line.
+     * Parses the specified file/directory line by line.
      *
      * @param <E> the type of exception that the lineAction may throw during line processing.
      * @param source the file or directory to process. If a directory, all files within it are processed recursively.
@@ -10298,7 +10299,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parse the specified file/directory line by line.
+     * Parses the specified file/directory line by line.
      *
      * @param <E> the type of exception that the lineAction may throw during line processing.
      * @param <E2> the type of exception that the onComplete callback may throw after all lines are processed.
@@ -10319,7 +10320,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parse the specified file/directory line by line with optional parallel processing.
+     * Parses the specified file/directory line by line with optional parallel processing.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -10355,7 +10356,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parse the specified file/directory line by line.
+     * Parses the specified file/directory line by line.
      *
      * @param <E>              the type of exception that the lineAction can throw.
      * @param <E2>             the type of exception that the onComplete can throw.
@@ -10526,7 +10527,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parse the specified file/directory line by line.
+     * Parses the specified file/directory line by line.
      *
      * @param <E>              the type of exception that the lineAction may throw during line processing.
      * @param source           the file or directory to process. Directories are processed recursively.
@@ -10545,7 +10546,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parse the specified file/directory line by line.
+     * Parses the specified file/directory line by line.
      *
      * @param <E>              the type of exception that the lineAction may throw during line processing.
      * @param <E2>             the type of exception that the onComplete callback may throw after all lines are processed.
@@ -10568,7 +10569,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parse the specified file/directory line by line.
+     * Parses the specified file/directory line by line.
      *
      * @param <E>              the type of exception that the lineAction may throw during line processing.
      * @param source           the file or directory to process. Directories are processed recursively.
@@ -10589,7 +10590,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parse the specified file/directory line by line.
+     * Parses the specified file/directory line by line.
      *
      * @param <E>              the type of exception that the lineAction may throw during line processing.
      * @param <E2>             the type of exception that the onComplete callback may throw after all lines are processed.
@@ -10731,7 +10732,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parse the specified InputStream line by line.
+     * Parses the specified InputStream line by line.
      *
      * @param <E>        the type of exception that the lineAction may throw during line processing.
      * @param source     the InputStream to read lines from.
@@ -10747,7 +10748,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parse the specified InputStream line by line.
+     * Parses the specified InputStream line by line.
      *
      * @param <E>        the type of exception that the lineAction may throw during line processing.
      * @param <E2>       the type of exception that the onComplete callback may throw after all lines are processed.
@@ -10766,7 +10767,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parse the specified InputStream line by line.
+     * Parses the specified InputStream line by line.
      *
      * @param <E>        the type of exception that the lineAction may throw during line processing.
      * @param source     the InputStream to read lines from.
@@ -10784,7 +10785,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parse the specified InputStream line by line.
+     * Parses the specified InputStream line by line.
      *
      * @param <E>        the type of exception that the lineAction may throw during line processing.
      * @param <E2>       the type of exception that the onComplete callback may throw after all lines are processed.
@@ -10805,7 +10806,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parse the specified InputStream line by line.
+     * Parses the specified InputStream line by line.
      *
      * @param <E>              the type of exception that the lineAction may throw during line processing.
      * @param source           the InputStream to read lines from.
@@ -10825,7 +10826,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parse the specified InputStream line by line.
+     * Parses the specified InputStream line by line.
      *
      * @param <E>              the type of exception that the lineAction may throw during line processing.
      * @param <E2>             the type of exception that the onComplete callback may throw after all lines are processed.
@@ -10855,7 +10856,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parse the specified Reader line by line.
+     * Parses the specified Reader line by line.
      *
      * @param <E>        the type of exception that the lineAction may throw during line processing.
      * @param source     the Reader to read lines from.
@@ -10871,7 +10872,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parse the specified Reader line by line.
+     * Parses the specified Reader line by line.
      *
      * @param <E>        the type of exception that the lineAction may throw during line processing.
      * @param <E2>       the type of exception that the onComplete callback may throw after all lines are processed.
@@ -10890,7 +10891,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parse the specified Reader line by line.
+     * Parses the specified Reader line by line.
      *
      * @param <E>        the type of exception that the lineAction may throw during line processing.
      * @param source     the Reader to read lines from.
@@ -10908,7 +10909,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parse the specified Reader line by line.
+     * Parses the specified Reader line by line.
      *
      * @param <E>        the type of exception that the lineAction may throw during line processing.
      * @param <E2>       the type of exception that the onComplete callback may throw after all lines are processed.
@@ -10929,7 +10930,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parse the specified Reader line by line.
+     * Parses the specified Reader line by line.
      *
      * @param <E>              the type of exception that the lineAction may throw during line processing.
      * @param source           the Reader to read lines from.
@@ -10949,7 +10950,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parse the specified Reader line by line.
+     * Parses the specified Reader line by line.
      *
      * @param <E>              the type of exception that the lineAction may throw during line processing.
      * @param <E2>             the type of exception that the onComplete callback may throw after all lines are processed.

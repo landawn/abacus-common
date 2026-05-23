@@ -9153,7 +9153,7 @@ public final class Fn {
          * Returns a Function that calculates the sum of all elements in a byte array.
          * The sum is returned as an Integer to avoid overflow.
          *
-         * @return a Function that returns the sum of byte array elements
+         * @return a Function that returns the sum of byte array elements, or 0 if the array is {@code null} or empty
          */
         public static Function<byte[], Integer> sum() {
             return SUM;
@@ -9164,7 +9164,7 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the average of all elements in a byte array.
-         * Returns Double.NaN for empty or {@code null} arrays.
+         * Returns {@code 0d} for empty or {@code null} arrays.
          *
          * @return a Function that returns the average of byte array elements
          */
@@ -9392,7 +9392,7 @@ public final class Fn {
          * Returns a Function that calculates the sum of all elements in a short array.
          * The sum is returned as an Integer to avoid overflow.
          *
-         * @return a Function that returns the sum of short array elements
+         * @return a Function that returns the sum of short array elements, or 0 if the array is {@code null} or empty
          */
         public static Function<short[], Integer> sum() {
             return SUM;
@@ -9403,7 +9403,7 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the average of all elements in a short array.
-         * Returns Double.NaN for empty or {@code null} arrays.
+         * Returns {@code 0d} for empty or {@code null} arrays.
          *
          * @return a Function that returns the average of short array elements
          */
@@ -9642,7 +9642,7 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the average of all elements in an int array.
-         * Returns Double.NaN for empty or {@code null} arrays.
+         * Returns {@code 0d} for empty or {@code null} arrays.
          *
          * @return a Function that returns the average of int array elements
          */
@@ -9881,7 +9881,7 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the average of all elements in a long array.
-         * Returns Double.NaN for empty or {@code null} arrays.
+         * Returns {@code 0d} for empty or {@code null} arrays.
          *
          * @return a Function that returns the average of long array elements
          */
@@ -10126,7 +10126,7 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the average of all elements in a float array.
-         * Returns Double.NaN for empty or {@code null} arrays.
+         * Returns {@code 0d} for empty or {@code null} arrays.
          *
          * @return a Function that returns the average of float array elements as a Double
          */
@@ -10371,7 +10371,7 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the average of all elements in a double array.
-         * Returns Double.NaN for empty or {@code null} arrays.
+         * Returns {@code 0d} for empty or {@code null} arrays.
          *
          * @return a Function that returns the average of double array elements
          */

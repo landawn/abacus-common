@@ -6815,7 +6815,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     * Returns the length of the specified {@code boolean} array, or {@code 0} if it's empty or {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6832,7 +6832,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     * Returns the length of the specified {@code char} array, or {@code 0} if it's empty or {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6849,7 +6849,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     * Returns the length of the specified {@code byte} array, or {@code 0} if it's empty or {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6866,7 +6866,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     * Returns the length of the specified {@code short} array, or {@code 0} if it's empty or {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6883,7 +6883,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     * Returns the length of the specified {@code int} array, or {@code 0} if it's empty or {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6900,7 +6900,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     * Returns the length of the specified {@code long} array, or {@code 0} if it's empty or {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6917,7 +6917,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     * Returns the length of the specified {@code float} array, or {@code 0} if it's empty or {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6934,7 +6934,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     * Returns the length of the specified {@code double} array, or {@code 0} if it's empty or {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6951,7 +6951,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     * Returns the length of the specified array, or {@code 0} if it's empty or {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7431,7 +7431,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns {@code true} if the specified {@code boolean} is {@code Boolean.TRUE}, not {@code null} or {@code Boolean.FALSE}.
+     * Returns {@code true} if the specified {@code Boolean} is {@code Boolean.TRUE}, not {@code null} or {@code Boolean.FALSE}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7452,7 +7452,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns {@code true} if the specified {@code boolean} is {@code null} or {@code Boolean.FALSE}.
+     * Returns {@code true} if the specified {@code Boolean} is {@code null} or {@code Boolean.FALSE}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7474,7 +7474,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns {@code true} if the specified {@code boolean} is {@code Boolean.FALSE}, not {@code null} or {@code Boolean.TRUE}.
+     * Returns {@code true} if the specified {@code Boolean} is {@code Boolean.FALSE}, not {@code null} or {@code Boolean.TRUE}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7495,7 +7495,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns {@code true} if the specified {@code boolean} is {@code null} or {@code Boolean.TRUE}.
+     * Returns {@code true} if the specified {@code Boolean} is {@code null} or {@code Boolean.TRUE}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14870,7 +14870,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts the specified range of the array to a modifiable List, which is NOT backed with the input array
+     * Converts the specified range of the array to a modifiable List, which is NOT backed with the input array.
      *
      * @param a the boolean array to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -14895,7 +14895,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts a char array to a modifiable List, which is NOT backed with the input array
+     * Converts a char array to a modifiable List, which is NOT backed with the input array.
      *
      * @param a the char array to be converted
      * @return a modifiable List of Character objects containing the values from the char array
@@ -14905,7 +14905,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts the specified range of the array to a modifiable List, which is NOT backed with the input array
+     * Converts the specified range of the array to a modifiable List, which is NOT backed with the input array.
      *
      * @param a the char array to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -14930,7 +14930,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts a byte array to a modifiable List, which is NOT backed with the input array
+     * Converts a byte array to a modifiable List, which is NOT backed with the input array.
      *
      * @param a the byte array to be converted
      * @return a modifiable List of Byte objects containing the values from the byte array
@@ -14940,7 +14940,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts the specified range of the byte array to a modifiable List, which is NOT backed with the input array
+     * Converts the specified range of the byte array to a modifiable List, which is NOT backed with the input array.
      *
      * @param a the byte array to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -14965,7 +14965,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts a short array to a modifiable List, which is NOT backed with the input array
+     * Converts a short array to a modifiable List, which is NOT backed with the input array.
      *
      * @param a the short array to be converted
      * @return a modifiable List of Short objects containing the values from the short array
@@ -14975,7 +14975,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts the specified range of the short array to a modifiable List, which is NOT backed with the input array
+     * Converts the specified range of the short array to a modifiable List, which is NOT backed with the input array.
      *
      * @param a the short array to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -15000,7 +15000,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts an int array to a modifiable List, which is NOT backed with the input array
+     * Converts an int array to a modifiable List, which is NOT backed with the input array.
      *
      * @param a the int array to be converted
      * @return a modifiable List of Integer objects containing the values from the int array
@@ -15010,7 +15010,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts the specified range of the int array to a modifiable List, which is NOT backed with the input array
+     * Converts the specified range of the int array to a modifiable List, which is NOT backed with the input array.
      *
      * @param a the int array to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -15035,7 +15035,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts a long array to a modifiable List, which is NOT backed with the input array
+     * Converts a long array to a modifiable List, which is NOT backed with the input array.
      *
      * @param a the long array to be converted
      * @return a modifiable List of Long objects containing the values from the long array
@@ -15045,7 +15045,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts the specified range of the long array to a modifiable List, which is NOT backed with the input array
+     * Converts the specified range of the long array to a modifiable List, which is NOT backed with the input array.
      *
      * @param a the long array to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -15070,7 +15070,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts a float array to a modifiable List, which is NOT backed with the input array
+     * Converts a float array to a modifiable List, which is NOT backed with the input array.
      *
      * @param a the float array to be converted
      * @return a modifiable List of Float objects containing the values from the float array
@@ -15080,7 +15080,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts the specified range of the float array to a modifiable List, which is NOT backed with the input array
+     * Converts the specified range of the float array to a modifiable List, which is NOT backed with the input array.
      *
      * @param a the float array to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -15105,7 +15105,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts a double array to a modifiable List, which is NOT backed with the input array
+     * Converts a double array to a modifiable List, which is NOT backed with the input array.
      *
      * @param a the double array to be converted
      * @return a modifiable List of Double objects containing the values from the double array
@@ -15115,7 +15115,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts the specified range of the double array to a modifiable List, which is NOT backed with the input array
+     * Converts the specified range of the double array to a modifiable List, which is NOT backed with the input array.
      *
      * @param a the double array to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -15225,7 +15225,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a modifiable {@code LinkedList} with specified elements. And it's not backed by the specified array.
-     * If the specified array is {@code null} or empty, an empty {@code List} is returned
+     * If the specified array is {@code null} or empty, an empty {@code List} is returned.
      *
      * <p>This method creates a new {@code LinkedList} and populates it with all elements from the
      * provided array. Unlike {@link Arrays#asList(Object...)}, this method returns a fully
@@ -20107,7 +20107,7 @@ sealed class CommonUtil permits N {
      * @param propNamesToCompare the collection of property names to compare, which may be null
      * @return a negative integer, zero, or a positive integer as the first bean is less than, equal to, or greater than the second bean
      * @throws IllegalArgumentException if any of the arguments are null
-     * @deprecated Use {@link Beans#compareByProps(Object,Object,Collection<String>)} instead
+     * @deprecated Use {@link Beans#compareByProps(Object, Object, Collection)} instead
      * @see Builder#compare(Object, Object, Comparator)
      * @see ComparisonBuilder
      */
@@ -20468,7 +20468,7 @@ sealed class CommonUtil permits N {
      * @param value the value to check, must not be null
      * @param min the minimum value, must not be null
      * @param max the maximum value, must not be null
-     * @param cmp the comparator to compare the values, must not be null
+     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
      * @return {@code true} if the value is between the minimum and maximum values, inclusive; {@code false} otherwise
      * @deprecated Use {@link #geAndLe(Object, Object, Object, Comparator)} instead.
      */
@@ -30914,7 +30914,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified range of the array of objects in reverse order. (where {@code null} is maximum)
+     * Sorts the specified range of the array of objects in reverse order (where {@code null} is maximum).
      *
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
@@ -30932,7 +30932,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified list in reverse order. (where {@code null} is maximum)
+     * Sorts the specified list in reverse order (where {@code null} is maximum).
      *
      * @param <T> the type of elements in the list
      * @param list the list to be sorted
@@ -30942,7 +30942,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified range of the list in reverse order. (where {@code null} is maximum)
+     * Sorts the specified range of the list in reverse order (where {@code null} is maximum).
      *
      * @param <T> the type of elements in the list
      * @param list the list to be sorted

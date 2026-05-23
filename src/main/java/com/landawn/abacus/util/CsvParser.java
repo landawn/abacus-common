@@ -132,11 +132,11 @@ public class CsvParser {
      */
     private final boolean strictQuotes;
     /**
-     * Ignore any leading white space at the start of the field.
+     * Whether to ignore any leading white space at the start of the field.
      */
     private final boolean ignoreLeadingWhiteSpace;
     /**
-     * Skip over quotation characters when parsing.
+     * Whether to skip over quotation characters when parsing.
      */
     private final boolean ignoreQuotations;
 

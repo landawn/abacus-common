@@ -412,6 +412,18 @@ public class StreamBaseTest extends TestBase {
     }
 
     @Test
+    public void testSpsRejectsNegativeMaxThreadNum() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> createStream(1, 2, 3).sps(-1, s -> s).toList());
+
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        try {
+            Assertions.assertThrows(IllegalArgumentException.class, () -> createStream(1, 2, 3).sps(-1, executor, s -> s).toList());
+        } finally {
+            executor.shutdown();
+        }
+    }
+
+    @Test
     public void testSpsWithMaxThreadNum() {
         Stream<Integer> stream = createStream(1, 2, 3);
         Stream<Integer> result = stream.sps(4, s -> s.map(x -> x * 2));

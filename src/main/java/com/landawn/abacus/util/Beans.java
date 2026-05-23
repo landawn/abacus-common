@@ -1067,7 +1067,7 @@ public final class Beans {
             return new ArrayList<>(propNameList);
         }
 
-        final List<String> result = new ArrayList<>(propNameList.size() - propNameToExclude.size());
+        final List<String> result = new ArrayList<>(N.max(0, propNameList.size() - propNameToExclude.size()));
 
         for (final String propName : propNameList) {
             if (!propNameToExclude.contains(propName)) {
@@ -1332,7 +1332,7 @@ public final class Beans {
     }
 
     /**
-     * Load prop get set method list.
+     * Loads the property getter and setter method list for the specified class.
      *
      * @param cls the class to load property getter and setter methods for
      */
@@ -6364,11 +6364,12 @@ public final class Beans {
      * // Returns true because name and email are equal, age is not compared
      * }</pre>
      *
-     * @param bean1 the first bean to compare; may be {@code null} (treated as less than any non-null bean).
-     * @param bean2 the second bean to compare; may be {@code null}.
+     * @param bean1 the first bean to compare; must not be {@code null}.
+     * @param bean2 the second bean to compare; must not be {@code null}.
      * @param propNamesToCompare the property names to compare; must not be {@code null} or empty.
      * @return {@code true} if all the specified properties of the two beans are equal, {@code false} otherwise.
-     * @throws IllegalArgumentException if {@code propNamesToCompare} is {@code null} or empty.
+     * @throws IllegalArgumentException if {@code propNamesToCompare} is {@code null} or empty, if either bean
+     *         is {@code null}, if either bean is not a valid bean class, or if a specified property is not found in either bean.
      */
     public static boolean equalsByProps(final Object bean1, final Object bean2, final Collection<String> propNamesToCompare) throws IllegalArgumentException {
         N.checkArgNotEmpty(propNamesToCompare, cs.propNamesToCompare);

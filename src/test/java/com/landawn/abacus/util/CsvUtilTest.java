@@ -3030,6 +3030,10 @@ public class CsvUtilTest extends TestBase {
         assertFalse(reader.closed);
     }
 
+    // -------------------------------------------------------------------------
+    // Backslash round-trip tests (regression for REPLACEMENT_CHARS['\\'] = null bug)
+    // -------------------------------------------------------------------------
+
     // --- Helpers ---
 
     /**

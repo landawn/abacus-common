@@ -40,8 +40,8 @@ import com.landawn.abacus.util.Strings;
 /**
  * Type handler for Enum types.
  * This class provides serialization, deserialization, and database operations for Java Enum types.
- * It supports both ordinal (numeric) and name (string) representations of enums,
- * and handles custom JSON/XML field names through annotations.
+ * It supports name (string), ordinal (numeric), and code (numeric, via a public {@code int code()} method)
+ * representations of enums, and handles custom JSON/XML field names through annotations.
  *
  * <p>EnumType instances are typically obtained through the TypeFactory and support conversion
  * between enum values and their string/numeric representations. The type handler can be configured

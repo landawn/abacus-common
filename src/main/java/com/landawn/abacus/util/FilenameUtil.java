@@ -816,7 +816,7 @@ public final class FilenameUtil {
     }
 
     /**
-     * Check the input for {@code null} bytes, a sign of unsanitized data being passed to file level functions.
+     * Checks the input for {@code null} bytes, a sign of unsanitized data being passed to file level functions.
      *
      * This may be used for poison byte attacks.
      * @param path the path to check

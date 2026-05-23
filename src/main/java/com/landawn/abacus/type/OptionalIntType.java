@@ -25,6 +25,7 @@ import com.landawn.abacus.util.u.OptionalInt;
  */
 public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
 
+    /** The type name constant for OptionalInt type identification, equal to {@code "OptionalInt"}. */
     public static final String OPTIONAL_INT = OptionalInt.class.getSimpleName();
 
     /**

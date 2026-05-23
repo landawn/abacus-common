@@ -4320,6 +4320,7 @@ public final class Iterators {
      * @param processThreadNum the number of threads to be used for processing. Use {@code 0} for single-threaded (caller-thread) processing.
      * @param queueSize the size of the queue for holding elements before processing. Use {@code 0} for a default calculated size.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterator.
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      * @throws E if the {@code elementConsumer} encounters an exception.
      */
     public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final long offset, final long count, final int processThreadNum,
@@ -4352,6 +4353,7 @@ public final class Iterators {
      * @param queueSize the size of the queue to hold the processing records. Use {@code 0} for a default calculated size.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterator.
      * @param onComplete a {@code Runnable} action to be performed once all elements have been processed.
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      * @throws E if the {@code elementConsumer} encounters an exception.
      * @throws E2 if the {@code onComplete} action encounters an exception.
      */

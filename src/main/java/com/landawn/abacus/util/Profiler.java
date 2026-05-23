@@ -563,7 +563,7 @@ public final class Profiler {
     }
 
     /**
-     * Run performance test for the specified {@code method} with the specified {@code threadNum} and {@code loopNum} for each thread.
+     * Runs a performance test for the specified {@code method} with the specified {@code threadNum} and {@code loopNum} for each thread.
      * The performance test will be repeatedly executed times specified by {@code roundNum}.
      *
      * @param instance the instance on which to invoke the method, may be {@code null} for static methods
@@ -588,7 +588,7 @@ public final class Profiler {
     }
 
     /**
-     * Run performance test for the specified {@code methodList} with the specified {@code threadNum} and {@code loopNum} for each thread.
+     * Runs a performance test for the specified {@code methodList} with the specified {@code threadNum} and {@code loopNum} for each thread.
      * The performance test will be repeatedly executed times specified by {@code roundNum}.
      *
      * @param instance it can be {@code null} if methods in the specified {@code methodList} are static methods
@@ -1060,7 +1060,7 @@ public final class Profiler {
          * Gets the maximum elapsed time among all executions of the specified method.
          *
          * @param methodName the name of the method
-         * @return the maximum elapsed time in milliseconds
+         * @return the maximum elapsed time in milliseconds, or {@code 0} if the method was never executed
          */
         double getMethodMaxElapsedTimeInMillis(String methodName);
 
@@ -1068,7 +1068,7 @@ public final class Profiler {
          * Gets the minimum elapsed time among all executions of the specified method.
          *
          * @param methodName the name of the method
-         * @return the minimum elapsed time in milliseconds
+         * @return the minimum elapsed time in milliseconds, or {@code 0} if the method was never executed
          */
         double getMethodMinElapsedTimeInMillis(String methodName);
 
@@ -1487,7 +1487,7 @@ public final class Profiler {
          * Gets the method max elapsed time in millis.
          *
          * @param methodName the name of the method
-         * @return the maximum elapsed time in milliseconds
+         * @return the maximum elapsed time in milliseconds, or {@code 0} if the method was never executed
          */
         @Override
         public double getMethodMaxElapsedTimeInMillis(final String methodName) {
@@ -1506,7 +1506,7 @@ public final class Profiler {
          * Gets the method min elapsed time in millis.
          *
          * @param methodName the name of the method
-         * @return the minimum elapsed time in milliseconds
+         * @return the minimum elapsed time in milliseconds, or {@code 0} if the method was never executed
          */
         @Override
         public double getMethodMinElapsedTimeInMillis(final String methodName) {
@@ -1767,7 +1767,7 @@ public final class Profiler {
          * Gets the method max elapsed time in millis.
          *
          * @param methodName the name of the method
-         * @return the maximum elapsed time in milliseconds
+         * @return the maximum elapsed time in milliseconds, or {@code 0} if the method was never executed
          */
         @Override
         public double getMethodMaxElapsedTimeInMillis(final String methodName) {
@@ -1787,7 +1787,7 @@ public final class Profiler {
          * Gets the method min elapsed time in millis.
          *
          * @param methodName the name of the method
-         * @return the minimum elapsed time in milliseconds
+         * @return the minimum elapsed time in milliseconds, or {@code 0} if the method was never executed
          */
         @Override
         public double getMethodMinElapsedTimeInMillis(final String methodName) {
@@ -1882,9 +1882,10 @@ public final class Profiler {
         }
 
         /**
-         * Gets the total number of method calls across all loops.
+         * Gets the total number of distinct method names summed across all loops
+         * (i.e., the sum of {@code getMethodNameList().size()} for every loop).
          *
-         * @return the total number of method calls
+         * @return the total count of method-name entries across all loops
          */
         private int getTotalCall() {
             int res = 0;

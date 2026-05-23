@@ -72,7 +72,8 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      *   <li>{@code Boolean} — returned as-is.</li>
      *   <li>{@code Number} — returns {@code true} if {@code longValue() > 0}, {@code false} otherwise.</li>
      *   <li>{@code CharSequence} — single character {@code 'Y'}, {@code 'y'}, or {@code '1'} returns
-     *       {@code true}; other values are parsed using {@link Boolean#valueOf(String)}.</li>
+     *       {@code true}; any other single character returns {@code false}; multi-character values are
+     *       parsed using {@link Boolean#valueOf(String)} (case-insensitive {@code "true"} yields {@code true}).</li>
      *   <li>Other objects — converted via {@code Boolean.valueOf(obj.toString())}.</li>
      * </ul>
      *

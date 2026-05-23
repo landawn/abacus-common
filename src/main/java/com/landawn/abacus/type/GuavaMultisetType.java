@@ -75,8 +75,10 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
     }
 
     /**
-     * Returns the declaring name of this multiset type, using canonical class names for type parameters
-     * (e.g., {@code "com.google.common.collect.Multiset<java.lang.String>"}).
+     * Returns the declaring name of this multiset type, using the canonical class name for the
+     * multiset class and each element type's declaring name for the type parameter
+     * (e.g., {@code "com.google.common.collect.HashMultiset<String>"} when the element type is
+     * {@code String}).
      *
      * @return the declaring name of this type
      */

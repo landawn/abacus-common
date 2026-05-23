@@ -2766,7 +2766,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param downstream a collector which will accept filtered values
      * @return a collector which applies the predicate to the input elements and provides
      *         the elements for which predicate returned {@code true} to the downstream collector
-     * @see MoreCollectors#combine(Collector, Collector, BiFunction)
+     * @see #filteringToList(Predicate)
      */
     public static <T, A, R> Collector<T, ?, R> filtering(final Predicate<? super T> predicate, final Collector<? super T, A, R> downstream) {
         final BiConsumer<A, ? super T> downstreamAccumulator = downstream.accumulator();

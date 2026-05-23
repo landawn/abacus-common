@@ -124,11 +124,13 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
 
     /**
      * Converts a {@link Nullable} object to its string representation.
-     * If the {@code Nullable} is {@code null} or contains {@code null}, returns {@code null}. Otherwise,
-     * delegates to the element type's string conversion.
+     * If the {@code Nullable} is {@code null} or holds a {@code null}/empty value
+     * (as reported by {@link Nullable#isNull()}), returns {@code null}. Otherwise,
+     * delegates to {@link com.landawn.abacus.util.N#stringOf(Object)}, which selects
+     * a converter based on the runtime class of the contained value.
      *
      * @param x the {@code Nullable} object to convert
-     * @return the string representation of the contained value, or {@code null} if empty
+     * @return the string representation of the contained value, or {@code null} if empty or null-valued
      */
     @Override
     public String stringOf(final Nullable<T> x) {

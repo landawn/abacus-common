@@ -354,6 +354,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * The list will have the same length as the array. Modifications to the list will affect the original array.
      *
      * @param a the array to be used as the backing array for this list. Must not be {@code null}.
+     * @throws NullPointerException if the specified array is {@code null}
      */
     public ShortList(final short[] a) {
         this(N.requireNonNull(a), a.length);
@@ -511,7 +512,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param len the number of random elements to generate. Must be non-negative.
      * @return a new ShortList containing len random short values
-     * @throws IllegalArgumentException if len is negative
+     * @throws NegativeArraySizeException if len is negative
      */
     public static ShortList random(final int len) {
         final short[] a = new short[len];

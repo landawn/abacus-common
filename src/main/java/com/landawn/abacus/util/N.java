@@ -2464,14 +2464,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * int[] array = {1, 2, 3, 4, 5, 6, 7};
      * List<int[]> chunks = N.splitByChunkCount(7, 3, (from, to) -> N.copyOfRange(array, from, to));
-     * // Returns [[1, 2, 3], [4, 5, 6], [7]]
+     * // Returns [[1, 2, 3], [4, 5], [6, 7]]
      * }</pre>
      *
-     * @param <T> the type of the elements in the resulting stream
+     * @param <T> the type of the elements in the resulting list
      * @param totalSize the total size to be split. It could be the size of an array, list, etc.
      * @param maxChunkCount the maximum number of chunks to split into
      * @param func the function to apply to each chunk's start and end indices to produce a result
-     * @return a Stream of the mapped chunk values
+     * @return a list of the mapped chunk values
      * @throws IllegalArgumentException if {@code totalSize} is negative or {@code maxChunkCount} is not positive.
      * @see #splitByChunkCount(int, int, boolean, IntBiFunction)
      */
@@ -2493,12 +2493,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * splitByChunkCount(7, 5, false, (fromIndex, toIndex) ->  copyOfRange(a, fromIndex, toIndex));   // [[1, 2], [3, 4], [5], [6], [7]]
      * }</pre>
      *
-     * @param <T> the type of the elements in the resulting stream
+     * @param <T> the type of the elements in the resulting list
      * @param totalSize the total size to be split. It could be the size of an array, list, etc.
      * @param maxChunkCount the maximum number of chunks to split into
      * @param sizeSmallerFirst if {@code true}, smaller chunks will be created first; otherwise, larger chunks will be created first
-     * @param func a function to map the chunk from and to index to an element in the resulting stream
-     * @return a Stream of the mapped chunk values
+     * @param func a function to map the chunk's from and to index to an element in the resulting list
+     * @return a list of the mapped chunk values
      * @throws IllegalArgumentException if {@code totalSize} is negative or {@code maxChunkCount} is not positive.
      * @see #splitByChunkCount(Collection, int, boolean)
      * @see Stream#splitByChunkCount(int, int, boolean, IntBiFunction)
@@ -2524,7 +2524,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6, 7);
      * List<List<Integer>> chunks = N.splitByChunkCount(numbers, 3);
-     * // Returns [[1, 2, 3], [4, 5, 6], [7]]
+     * // Returns [[1, 2, 3], [4, 5], [6, 7]]
      * }</pre>
      *
      * @param <T> the type of elements in the input collection
@@ -4005,7 +4005,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the two-dimensional array to be flattened, may be {@code null} or empty
      * @param componentType the class object representing the component type of the new array, must not be {@code null}
      * @return a one-dimensional array containing all elements in the input array.
-     *         Returns an empty array if the input array is {@code null}
+     *         Returns an empty array if the input array is {@code null}.
      * @see #flatten(Object[][])
      */
     public static <T> T[] flatten(final T[][] a, final Class<T> componentType) {
@@ -6296,7 +6296,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns a new {@code List} containing all the elements from the specified collection except all occurrences of elements in the specified <i>objsToExclude</i>.
-     * That's to say no more value from <i>objsToExclude</i> will present in the returned {@code Set}.
+     * That's to say no more value from <i>objsToExclude</i> will present in the returned {@code List}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14294,8 +14294,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"A", "B", "C", "D", "E"};
-     * N.moveRange(arr, 1, 3, 3);   // Move "B","C" to position 3
-     * // Result: ["A", "D", "B", "C", "E"]
+     * N.moveRange(arr, 1, 3, 3);   // Move "B","C" so that "B" ends up at index 3
+     * // Result: ["A", "D", "E", "B", "C"]
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -15552,7 +15552,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the sum of all elements in the array.
      * Returns 0 if the array is {@code null} or empty.
-     * The result may overflow; for larger sums, use {@link #sumToLong(int...)}.
+     * Throws an {@link ArithmeticException} if the result overflows an {@code int};
+     * for larger sums, use {@link #sumToLong(int...)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15562,6 +15563,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param a the array of int values
      * @return the sum of all elements, or 0 if the array is {@code null} or empty
+     * @throws ArithmeticException if the result overflows an {@code int}
      * @see #sum(int[], int, int)
      * @see #sumToLong(int...)
      * @see #average(int...)
@@ -15577,7 +15579,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the sum of elements within the specified range of the int array.
      * Returns 0 if the array is {@code null} or empty.
-     * The result may overflow; for larger sums, use {@link #sumToLong(int[], int, int)}.
+     * Throws an {@link ArithmeticException} if the result overflows an {@code int};
+     * for larger sums, use {@link #sumToLong(int[], int, int)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15590,6 +15593,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the ending index (exclusive) of the range
      * @return the sum of elements within the specified range, or 0 if the array is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws ArithmeticException if the result overflows an {@code int}
      * @see #sum(int...)
      * @see #sumToLong(int[], int, int)
      * @see #average(int[], int, int)
@@ -21728,7 +21732,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String median = N.median("hi", "hello", "hey", Comparator.comparing(String::length));   // Returns "hey" or "hi"
+     * String median = N.median("hi", "hello", "hey", Comparator.comparing(String::length));   // Returns "hey"
      * }</pre>
      *
      * @param <T> the type of values
@@ -21772,7 +21776,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * char median1 = N.median('a', 'm', 'z', 'b');   // Returns 'b' or 'm'
+     * char median1 = N.median('a', 'm', 'z', 'b');   // Returns 'b' (the lower of the two middle values)
      *
      * char[] chars = {'x', 'a', 'p', 'z', 'm'};
      * char median2 = N.median(chars);   // Returns 'p'
@@ -25051,9 +25055,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Map<Percentage, Integer> percentiles = N.percentilesOfSorted(scores);
      *
      * // Analyze test score distribution
-     * int median = percentiles.get(Percentage.P50);      // 80 (median score)
-     * int p90 = percentiles.get(Percentage.P90);         // 95 (90th percentile)
-     * int p10 = percentiles.get(Percentage.P10);         // 70 (10th percentile)
+     * int median = percentiles.get(Percentage.P50);      // 85 (median score)
+     * int p90 = percentiles.get(Percentage.P90);         // 100 (90th percentile)
+     * int p10 = percentiles.get(Percentage.P10);         // 65 (10th percentile)
      *
      * // Useful for SLA calculations
      * List<Double> latencies = getResponseLatencies();   // Pre-sorted

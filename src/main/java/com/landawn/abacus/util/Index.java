@@ -1060,8 +1060,8 @@ public final class Index {
      * <pre>{@code
      * char[] source = {'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'};
      * char[] sub = {'o', 'r'};
-     * Index.ofSubArray(source, 0, sub).get();         // returns 8
-     * Index.ofSubArray(source, 5, sub).get();         // returns 8
+     * Index.ofSubArray(source, 0, sub).get();         // returns 7
+     * Index.ofSubArray(source, 5, sub).get();         // returns 7
      * Index.ofSubArray(source, 9, sub).isPresent();   // returns false
      * }</pre>
      *

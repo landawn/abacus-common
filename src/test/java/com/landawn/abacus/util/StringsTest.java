@@ -12008,4 +12008,38 @@ public class StringsTest extends AbstractTest {
         assertArrayEquals(new String[] { "a", "b" }, Strings.split("a::b::", "::"));
     }
 
+    /**
+     * Regression test for bug in {@code splitWorker(String, String, int, boolean, boolean)}:
+     * when a multi-character delimiter is used with {@code max > 1} and
+     * {@code preserveAllTokens = true}, hitting the {@code max} limit caused the
+     * post-loop code to add a spurious extra empty token because the deliberately
+     * reset {@code idx = -1} sentinel triggered the wrong branch.
+     *
+     * <p>E.g. {@code splitPreserveAllTokens("a..b..c", "..", 2)} wrongly returned
+     * {@code ["a", "b..c", ""]} instead of {@code ["a", "b..c"]}.</p>
+     */
+    @Test
+    public void testSplitPreserveAllTokens_MultiCharDelimiter_MaxNoSpuriousTrailingEmpty() {
+        // Basic case: max=2 should stop after first token and capture the rest — no trailing "".
+        assertArrayEquals(new String[] { "a", "b..c" }, Strings.splitPreserveAllTokens("a..b..c", "..", 2));
+
+        // Multiple delimiters, max=2.
+        assertArrayEquals(new String[] { "a", "b::c::d" }, Strings.splitPreserveAllTokens("a::b::c::d", "::", 2));
+
+        // Empty token at the start, max=2.
+        assertArrayEquals(new String[] { "", "b..c" }, Strings.splitPreserveAllTokens("..b..c", "..", 2));
+
+        // Exactly max tokens in string (no remainder after last delimiter seen under max).
+        assertArrayEquals(new String[] { "a", "b" }, Strings.splitPreserveAllTokens("a..b", "..", 2));
+
+        // max=3 — two splits happen, rest captured without a trailing "".
+        assertArrayEquals(new String[] { "a", "b", "c..d" }, Strings.splitPreserveAllTokens("a..b..c..d", "..", 3));
+
+        // Single-char delimiter with max — must still behave correctly (uses char-based path).
+        assertArrayEquals(new String[] { "a", "b:c" }, Strings.splitPreserveAllTokens("a:b:c", ":", 2));
+
+        // Trim variant: spurious empty should not appear after trimming either.
+        assertArrayEquals(new String[] { "a", "b..c" }, Strings.splitPreserveAllTokens(" a .. b..c ", "..", 2, true));
+    }
+
 }

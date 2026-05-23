@@ -9168,7 +9168,7 @@ public sealed interface Dataset permits RowDataset {
      * @param other the other Dataset to intersect with
      * @param keyColumnNames the collection of column names to be used as keys for intersection
      * @return a new Dataset that is the result of the intersection operation
-     * @throws IllegalArgumentException if the other Dataset is {@code null} or if the keyColumnNames is {@code null} or empty
+     * @throws IllegalArgumentException if the other Dataset is {@code null}, or if the keyColumnNames is {@code null} or empty, or if any of the specified key column names do not exist in either Dataset
      * @see #intersect(Dataset)
      * @see #union(Dataset, Collection)
      * @see #except(Dataset, Collection)
@@ -9604,8 +9604,7 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param other the other Dataset to compare with
      * @return a new Dataset that is the result of the difference operation with duplicates preserved
-     * @throws IllegalArgumentException if the other Dataset is {@code null},
-     *                                  or if the Datasets do not have the same column structure
+     * @throws IllegalArgumentException if the other Dataset is {@code null}, or if the Datasets do not have the same column structure
      * @see #except(Dataset)
      * @see #exceptAll(Dataset, boolean)
      * @see #exceptAll(Dataset, Collection)
@@ -9695,8 +9694,7 @@ public sealed interface Dataset permits RowDataset {
      * @return a new Dataset that is the result of the difference operation with duplicates preserved
      * @throws IllegalArgumentException if the other Dataset is {@code null},
      *                                  or if the keyColumnNames is {@code null} or empty,
-     *                                  or if any of the specified key column names do not exist in either Dataset,
-     *                                  or if the Datasets do not have the same column structure
+     *                                  or if any of the specified key column names do not exist in either Dataset
      * @see #except(Dataset, Collection)
      * @see #exceptAll(Dataset)
      * @see #exceptAll(Dataset, boolean)

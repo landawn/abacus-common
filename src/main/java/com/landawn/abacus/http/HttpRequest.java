@@ -1426,7 +1426,7 @@ public final class HttpRequest {
      * ExecutorService executor = Executors.newFixedThreadPool(4);
      * HttpRequest.url("http://localhost:18080/file")
      *     .asyncHead(executor)
-     *     .getThenAccept(response -> System.out.println("Size: " + response.getContentLength()));
+     *     .getThenAccept(response -> System.out.println("Content-Length: " + response.headers().get("Content-Length")));
      * }</pre>
      *
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.

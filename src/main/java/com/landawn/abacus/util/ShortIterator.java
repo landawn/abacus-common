@@ -58,8 +58,11 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * An empty ShortIterator instance that has no elements.
-     * This constant can be used to represent an empty iteration without creating new objects.
+     * A singleton empty {@code ShortIterator} instance that contains no elements.
+     * This iterator's {@code hasNext()} always returns {@code false}, and {@code nextShort()}
+     * always throws {@link NoSuchElementException}.
+     *
+     * @see #empty()
      */
     public static final ShortIterator EMPTY = new ShortIterator() {
         @Override

@@ -566,7 +566,7 @@ public final class JsonMappers {
      * @param <T> the type of the object to deserialize to
      * @param json the JSON content as a UTF-8 encoded byte array
      * @param targetType the class of the object to deserialize to
-     * @return the deserialized object; never {@code null} unless JSON contains "null"
+     * @return the deserialized object; {@code null} if JSON contains "null"
      * @throws RuntimeException if deserialization fails due to invalid JSON or type mismatch
      * @see #fromJson(byte[], int, int, Class)
      * @see #fromJson(byte[], TypeReference)

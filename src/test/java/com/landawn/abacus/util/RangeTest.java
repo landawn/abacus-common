@@ -1210,13 +1210,15 @@ public class RangeTest extends AbstractTest {
     @Test
     public void test_isEmpty_openClosedSameValue() {
         Range<Integer> range = Range.openClosed(5, 5);
-        assertFalse(range.isEmpty());
+        assertTrue(range.isEmpty());
+        assertFalse(range.contains(5));
     }
 
     @Test
     public void test_isEmpty_closedOpenSameValue() {
         Range<Integer> range = Range.closedOpen(5, 5);
-        assertFalse(range.isEmpty());
+        assertTrue(range.isEmpty());
+        assertFalse(range.contains(5));
     }
 
     @Test

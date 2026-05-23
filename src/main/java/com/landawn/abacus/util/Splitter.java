@@ -1173,8 +1173,9 @@ public final class Splitter {
      *
      * @param <T> the target type for conversion.
      * @param source the CharSequence to split; may be {@code null}.
-     * @param targetType the Class representing the type to convert each substring to.
+     * @param targetType the Class representing the type to convert each substring to, not {@code null}.
      * @return an ImmutableList containing the converted results.
+     * @throws IllegalArgumentException if targetType is {@code null}.
      */
     public <T> ImmutableList<T> splitToImmutableList(final CharSequence source, final Class<? extends T> targetType) {
         return ImmutableList.wrap(split(source, targetType));
@@ -2144,9 +2145,10 @@ public final class Splitter {
          * @param <K> the key type
          * @param <V> the value type
          * @param source the CharSequence to split into a map; may be {@code null}
-         * @param keyType the Class representing the type to convert keys to
-         * @param valueType the Class representing the type to convert values to
+         * @param keyType the Class representing the type to convert keys to, not {@code null}
+         * @param valueType the Class representing the type to convert values to, not {@code null}
          * @return an ImmutableMap containing the parsed and converted key-value pairs
+         * @throws IllegalArgumentException if keyType or valueType is {@code null}
          */
         public <K, V> ImmutableMap<K, V> splitToImmutableMap(final CharSequence source, final Class<K> keyType, final Class<V> valueType) {
             return ImmutableMap.wrap(split(source, keyType, valueType));

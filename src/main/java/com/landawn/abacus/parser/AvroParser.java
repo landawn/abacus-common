@@ -56,10 +56,11 @@ import com.landawn.abacus.util.Strings;
  *
  * <p>This parser handles Avro data serialization with special encoding rules:</p>
  * <ul>
- *   <li>Content is Base64 encoded when output is String or Writer</li>
- *   <li>Content is NOT Base64 encoded when output is File or OutputStream</li>
- *   <li>Input must be Base64 encoded when source is String or Reader</li>
+ *   <li>Content is Base64 encoded when output is a String (via {@link #serialize(Object, AvroSerConfig)})</li>
+ *   <li>Content is NOT Base64 encoded when output is File or OutputStream (raw binary, for performance)</li>
+ *   <li>Input must be Base64 encoded when source is a String</li>
  *   <li>Input must NOT be Base64 encoded when source is File or InputStream</li>
+ *   <li>Writer output and Reader input are not supported and throw {@link UnsupportedOperationException}</li>
  * </ul>
  *
  * <p>The reason for not encoding content with Base64 for File/OutputStream is to provide

@@ -119,13 +119,12 @@ public @interface JsonXmlField {
      * @JsonXmlField(dateFormat = "yyyy-MM-dd HH:mm:ss")
      * private Date created;  // Serialized as "2023-12-25 10:30:45"
      *
-     * @JsonXmlField(dateFormat = "ISO_INSTANT")
+     * @JsonXmlField(dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
      * private Instant timestamp;  // Serialized as "2023-12-25T10:30:45.123Z"
      * }</pre>
      *
      * @return the date format pattern, or an empty string for the default format
      * @see java.text.SimpleDateFormat
-     * @see java.time.format.DateTimeFormatter
      */
     String dateFormat() default "";
 

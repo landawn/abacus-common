@@ -214,12 +214,12 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * Adds an object to the pool.
      * The object is added to the head of the internal deque for LIFO ordering.
      *
-     * <p>The add operation will fail if:</p>
+     * <p>The add operation returns {@code false} (does not insert) when:</p>
      * <ul>
-     *   <li>The object is null</li>
      *   <li>The object has already expired</li>
-     *   <li>The pool is at capacity and auto-balancing is disabled</li>
-     *   <li>The object would exceed memory constraints (when memory measure is configured)</li>
+     *   <li>The pool is at capacity and either auto-balancing is disabled, or balancing did not free a slot</li>
+     *   <li>The object would exceed memory constraints (when memory measure is configured) and balancing did not free enough memory</li>
+     *   <li>The memory measure returns a negative size or throws an exception</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -361,8 +361,11 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @param element the object to add, must not be {@code null}
      * @param timeout the maximum time to wait
      * @param unit the time unit of the timeout argument
-     * @return {@code true} if successful, {@code false} if the timeout elapsed before space was available
-     *         or if the maxSpins safety limit (10,000 iterations) is reached
+     * @return {@code true} if successful; {@code false} if the timeout elapsed before space was
+     *         available, the maxSpins safety limit (10,000 iterations) was reached, the element
+     *         was already (or became) expired, the memory measure rejected the element (returned
+     *         a negative size, threw, or the element would exceed {@code maxMemorySize} and
+     *         balancing did not free enough memory)
      * @throws IllegalArgumentException if the element is null
      * @throws IllegalStateException if the pool has been closed
      * @throws InterruptedException if interrupted while waiting

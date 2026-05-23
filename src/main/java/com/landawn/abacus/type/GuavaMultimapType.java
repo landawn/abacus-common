@@ -87,8 +87,9 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
     }
 
     /**
-     * Returns the declaring name of this multimap type, using canonical class names for type parameters
-     * (e.g., {@code "com.google.common.collect.Multimap<java.lang.String, java.lang.Integer>"}).
+     * Returns the declaring name of this multimap type. The multimap class is rendered with its
+     * canonical class name, while each type parameter uses its own declaring name
+     * (e.g., {@code "com.google.common.collect.Multimap<String, Integer>"}).
      *
      * @return the declaring name of this type
      */
@@ -206,9 +207,11 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      * @param typeClass the multimap class
      * @param keyTypeName the name of the key type
      * @param valueTypeName the name of the value type
-     * @param isDeclaringName {@code true} to use canonical class names (declaring name),
-     *        {@code false} to use simple type names
-     * @return the formatted type name (e.g., {@code "Multimap<String, Integer>"})
+     * @param isDeclaringName {@code true} to build the declaring name using each type parameter's
+     *        declaring name; {@code false} to build the registered name using each type parameter's
+     *        full name. In both cases the multimap class itself is rendered with its canonical class name.
+     * @return the formatted type name
+     *         (e.g., {@code "com.google.common.collect.Multimap<java.lang.String, java.lang.Integer>"})
      */
     protected static String getTypeName(final Class<?> typeClass, final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {

@@ -2713,7 +2713,7 @@ public final class Numbers {
     }
 
     /**
-     * Convert a {@code BigDecimal} to a {@code BigDecimal} with a scale of
+     * Converts a {@code BigDecimal} to a {@code BigDecimal} with a scale of
      * two that has been rounded using {@code RoundingMode.HALF_EVEN}. If the supplied
      * {@code value} is {@code null}, then {@code BigDecimal.ZERO} is returned.
      *
@@ -2735,7 +2735,7 @@ public final class Numbers {
     }
 
     /**
-     * Convert a {@code BigDecimal} to a {@code BigDecimal} whose scale is the
+     * Converts a {@code BigDecimal} to a {@code BigDecimal} whose scale is the
      * specified value with a {@code RoundingMode} applied. If the input {@code value}
      * is {@code null}, we simply return {@code BigDecimal.ZERO}.
      *
@@ -2761,7 +2761,7 @@ public final class Numbers {
     }
 
     /**
-     * Convert a {@code Float} to a {@code BigDecimal} with a scale of
+     * Converts a {@code Float} to a {@code BigDecimal} with a scale of
      * two that has been rounded using {@code RoundingMode.HALF_EVEN}. If the supplied
      * {@code value} is {@code null}, then {@code BigDecimal.ZERO} is returned.
      *
@@ -2783,7 +2783,7 @@ public final class Numbers {
     }
 
     /**
-     * Convert a {@code Float} to a {@code BigDecimal} whose scale is the
+     * Converts a {@code Float} to a {@code BigDecimal} whose scale is the
      * specified value with a {@code RoundingMode} applied. If the input {@code value}
      * is {@code null}, we simply return {@code BigDecimal.ZERO}.
      *
@@ -2808,7 +2808,7 @@ public final class Numbers {
     }
 
     /**
-     * Convert a {@code Double} to a {@code BigDecimal} with a scale of
+     * Converts a {@code Double} to a {@code BigDecimal} with a scale of
      * two that has been rounded using {@code RoundingMode.HALF_EVEN}. If the supplied
      * {@code value} is {@code null}, then {@code BigDecimal.ZERO} is returned.
      *
@@ -2830,7 +2830,7 @@ public final class Numbers {
     }
 
     /**
-     * Convert a {@code Double} to a {@code BigDecimal} whose scale is the
+     * Converts a {@code Double} to a {@code BigDecimal} whose scale is the
      * specified value with a {@code RoundingMode} applied. If the input {@code value}
      * is {@code null}, we simply return {@code BigDecimal.ZERO}.
      *
@@ -2855,7 +2855,7 @@ public final class Numbers {
     }
 
     /**
-     * Convert a {@code String} to a {@code BigDecimal} with a scale of
+     * Converts a {@code String} to a {@code BigDecimal} with a scale of
      * two that has been rounded using {@code RoundingMode.HALF_EVEN}. If the supplied
      * {@code value} is {@code null}, then {@code BigDecimal.ZERO} is returned.
      *
@@ -2877,7 +2877,7 @@ public final class Numbers {
     }
 
     /**
-     * Convert a {@code String} to a {@code BigDecimal} whose scale is the
+     * Converts a {@code String} to a {@code BigDecimal} whose scale is the
      * specified value with a {@code RoundingMode} applied. If the input {@code value}
      * is {@code null}, we simply return {@code BigDecimal.ZERO}.
      *
@@ -7182,6 +7182,11 @@ public final class Numbers {
         N.checkArgNotNegative(scale, cs.scale);
 
         if (scale == 0) {
+            // For |x| >= 2^63 the value is already an exact integer and Math.round(double)->long
+            // would saturate at Long.MAX_VALUE / Long.MIN_VALUE, narrowing back to the wrong float.
+            if (Math.abs(x) >= 0x1p63f) {
+                return x;
+            }
             // Math.round(float)->int silently clamps at Integer.MAX_VALUE for values >= ~2.147e9.
             // Widen the same float to double so Math.round returns long and avoids that clamp.
             return Math.round((double) x);
@@ -7222,6 +7227,11 @@ public final class Numbers {
         N.checkArgNotNegative(scale, cs.scale);
 
         if (scale == 0) {
+            // For |x| >= 2^63 the value is already an exact integer and Math.round would
+            // saturate at Long.MAX_VALUE / Long.MIN_VALUE.
+            if (Math.abs(x) >= 0x1p63) {
+                return x;
+            }
             return Math.round(x);
         } else if (scale <= 6) {
             final long factor = pow(10, scale);

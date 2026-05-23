@@ -391,11 +391,11 @@ public abstract class Tuple<TP> implements Immutable {
      *
      * @param <A> the component type of the array to contain the tuple elements.
      * @param a the array into which the elements of this tuple are to be stored, if it is big enough;
-     *          otherwise, a new array of the same runtime type is allocated for this purpose
+     *          otherwise, a new array of the same runtime type is allocated for this purpose.
      * @return an array containing all elements of this tuple.
      * @throws ArrayStoreException if the runtime type of the specified array is not a supertype
-     *         of the runtime type of every element in this tuple
-     * @throws NullPointerException if the specified array is {@code null}
+     *         of the runtime type of every element in this tuple.
+     * @throws NullPointerException if the specified array is {@code null}.
      * @see #toArray()
      */
     public abstract <A> A[] toArray(A[] a);
@@ -1303,7 +1303,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @param <A> the component type of the array.
          * @param a the array to return; if its length is greater than 0, {@code a[0]} is set to {@code null}.
          * @return the same array {@code a}, with {@code a[0]} set to {@code null} if {@code a.length > 0}.
-         * @throws NullPointerException if the specified array is {@code null}
+         * @throws NullPointerException if the specified array is {@code null}.
          */
         @Override
         public <A> A[] toArray(final A[] a) {
@@ -1918,7 +1918,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @return 3, the number of elements in this tuple.
          */
@@ -1928,7 +1928,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @return {@code true} if any of the three elements is null.
          */
@@ -1938,7 +1938,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @return {@code true} if all three elements are null.
          */
@@ -1948,7 +1948,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @param valueToFind the value to search for.
          * @return {@code true} if any element equals the specified value.
@@ -1959,7 +1959,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @return an array containing [_1, _2, _3].
          */
@@ -1969,7 +1969,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @param <A> the component type of the array.
          * @param a the array to fill.
@@ -2210,7 +2210,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @return 4, the number of elements in this tuple.
          */
@@ -2220,7 +2220,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @return {@code true} if any of the four elements is null.
          */
@@ -2230,7 +2230,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @return {@code true} if all four elements are null.
          */
@@ -2240,7 +2240,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @param valueToFind the value to search for.
          * @return {@code true} if any element equals the specified value.
@@ -2251,7 +2251,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @return an array containing [_1, _2, _3, _4].
          */
@@ -2261,7 +2261,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @param <A> the component type of the array.
          * @param a the array to fill.
@@ -2428,7 +2428,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @return 5, the number of elements in this tuple.
          */
@@ -2438,7 +2438,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @return {@code true} if any of the five elements is null.
          */
@@ -2448,7 +2448,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @return {@code true} if all five elements are null.
          */
@@ -2458,7 +2458,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @param valueToFind the value to search for.
          * @return {@code true} if any element equals the specified value.
@@ -2470,7 +2470,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @return an array containing [_1, _2, _3, _4, _5].
          */
@@ -2480,7 +2480,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @param <A> the component type of the array.
          * @param a the array to fill.
@@ -2656,7 +2656,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @return 6, the number of elements in this tuple.
          */
@@ -2666,7 +2666,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @return {@code true} if any of the six elements is null.
          */
@@ -2676,7 +2676,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @return {@code true} if all six elements are null.
          */
@@ -2686,7 +2686,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @param valueToFind the value to search for.
          * @return {@code true} if any element equals the specified value.
@@ -2698,7 +2698,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @return an array containing [_1, _2, _3, _4, _5, _6].
          */
@@ -2708,7 +2708,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @param <A> the component type of the array.
          * @param a the array to fill.
@@ -2893,7 +2893,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @return 7, the number of elements in this tuple.
          */
@@ -2903,7 +2903,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @return {@code true} if any of the seven elements is null.
          */
@@ -2913,7 +2913,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @return {@code true} if all seven elements are null.
          */
@@ -2923,7 +2923,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @param valueToFind the value to search for.
          * @return {@code true} if any element equals the specified value.
@@ -2935,7 +2935,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @return an array containing [_1, _2, _3, _4, _5, _6, _7].
          */
@@ -2945,7 +2945,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @param <A> the component type of the array.
          * @param a the array to fill.
@@ -3138,7 +3138,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @return 8, the number of elements in this tuple.
          */
@@ -3148,7 +3148,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @return {@code true} if any of the eight elements is null.
          */
@@ -3158,7 +3158,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @return {@code true} if all eight elements are null.
          */
@@ -3168,7 +3168,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @param valueToFind the value to search for.
          * @return {@code true} if any element equals the specified value.
@@ -3180,7 +3180,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @return an array containing [_1, _2, _3, _4, _5, _6, _7, _8].
          */
@@ -3190,7 +3190,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * {@inheritDoc}
+         * {@inheritDoc}.
          *
          * @param <A> the component type of the array.
          * @param a the array to fill.
@@ -3547,6 +3547,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @param a the array to fill, or whose runtime type to use for creating a new array.
          * @return an array containing all 9 elements of this tuple.
          * @throws ArrayStoreException if any tuple element cannot be stored in the array due to type mismatch.
+         * @throws NullPointerException if the specified array is {@code null}.
          */
         @Override
         public <A> A[] toArray(A[] a) {

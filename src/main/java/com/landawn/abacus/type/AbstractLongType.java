@@ -274,8 +274,9 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * Writes a {@code long} value to a {@code CharacterWriter} with optional configuration.
      * <p>
      * If the configuration specifies {@code writeNullNumberAsZero} and the value is {@code null},
-     * writes {@code 0L} instead of {@code null}. If the configuration specifies {@code writeLongAsString},
-     * the long value is wrapped in quotation marks.
+     * writes {@code 0L} instead of {@code null}. If the configuration specifies {@code writeLongAsString}
+     * <strong>and</strong> {@code getStringQuotation()} is non-zero, the long value is wrapped in the
+     * configured quotation character; otherwise the long is written unquoted.
      * </p>
      *
      * @param writer the {@code CharacterWriter} to write to

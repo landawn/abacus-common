@@ -25,6 +25,7 @@ import com.landawn.abacus.util.u.OptionalLong;
  */
 public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
 
+    /** The type name constant for OptionalLong type identification, equal to {@code "OptionalLong"}. */
     public static final String OPTIONAL_LONG = OptionalLong.class.getSimpleName();
 
     /**

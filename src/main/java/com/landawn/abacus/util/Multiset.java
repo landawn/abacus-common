@@ -796,7 +796,7 @@ public final class Multiset<E> implements Collection<E> {
      * Adds the specified number of occurrences of an element to this multiset.
      *
      * <p>This method is functionally equivalent (except for overflow checking) to calling
-     * {@code addAll(Collections.nCopies(element, occurrencesToAdd))}, but performs much better.</p>
+     * {@code addAll(Collections.nCopies(occurrencesToAdd, element))}, but performs much better.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1549,9 +1549,10 @@ public final class Multiset<E> implements Collection<E> {
     // Refined Collection Methods
 
     /**
-     * Returns an unmodifiable view of the distinct elements contained in this multiset.
+     * Returns a view of the distinct elements contained in this multiset.
      * The element set is backed by the multiset, so changes to the multiset are reflected
-     * in the element set.
+     * in the element set, and removing an element from the returned set removes all of its
+     * occurrences from the multiset.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

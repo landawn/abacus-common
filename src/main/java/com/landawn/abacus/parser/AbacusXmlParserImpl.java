@@ -167,20 +167,13 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
     /**
      * {@inheritDoc}
      *
-     * <p>This abacus-specific implementation provides optimized XML serialization supporting SAX, DOM, and StAX
-     * parsing modes. The parser type determines the serialization strategy for optimal performance based on
-     * the use case.</p>
-     *
-     * <p><b>Parser Type Selection:</b></p>
-     * <ul>
-     *   <li><b>SAX</b>: Memory-efficient event-driven parsing, best for large documents (read-only)</li>
-     *   <li><b>DOM</b>: Tree-based parsing allowing random access, suitable for small to medium documents</li>
-     *   <li><b>StAX</b>: Streaming pull parser, balanced performance, recommended for most use cases</li>
-     * </ul>
+     * <p>This abacus-specific implementation writes the XML output via a buffered character writer.
+     * Serialization always uses the same writer-based output regardless of the configured
+     * {@link XmlParserType}; the parser type only affects which parsing strategy is used during
+     * deserialization (SAX, DOM, or StAX).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // StAX for balanced performance (recommended)
      * XmlParser parser = new AbacusXmlParserImpl(XmlParserType.StAX);
      * User user = new User("John", "Doe");
      * String xml = parser.serialize(user, null);
@@ -221,8 +214,10 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
     /**
      * {@inheritDoc}
      *
-     * <p>This implementation writes XML output to a file using the configured parser type (SAX, DOM, or StAX).
-     * The file is created if it doesn't exist, and the contents are flushed and properly closed after serialization.</p>
+     * <p>This implementation writes XML output to a file. Serialization always uses the same writer-based
+     * XML output regardless of the configured {@link XmlParserType} (the parser type only affects
+     * deserialization). The file is created if it doesn't exist, and the contents are flushed and properly
+     * closed after serialization.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -264,9 +259,10 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
     /**
      * {@inheritDoc}
      *
-     * <p>This implementation writes XML output to an output stream using the configured parser type.
-     * The stream is flushed after serialization but is not closed, allowing the caller to manage
-     * the stream lifecycle.</p>
+     * <p>This implementation writes XML output to an output stream. Serialization always uses the same
+     * writer-based XML output regardless of the configured {@link XmlParserType} (the parser type only
+     * affects deserialization). The stream is flushed after serialization but is not closed, allowing
+     * the caller to manage the stream lifecycle.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -303,9 +299,11 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
     /**
      * {@inheritDoc}
      *
-     * <p>This implementation writes XML output to a writer using the configured parser type. The writer
-     * is flushed after serialization but is not closed, allowing the caller to manage the writer lifecycle.
-     * If the provided writer is already a {@link BufferedXmlWriter}, it is used directly for optimal performance.</p>
+     * <p>This implementation writes XML output to a writer. Serialization always uses the same writer-based
+     * XML output regardless of the configured {@link XmlParserType} (the parser type only affects
+     * deserialization). The writer is flushed after serialization but is not closed, allowing the caller
+     * to manage the writer lifecycle. If the provided writer is already a {@link BufferedXmlWriter}, it
+     * is used directly for optimal performance.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

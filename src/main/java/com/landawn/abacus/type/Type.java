@@ -1075,7 +1075,9 @@ public interface Type<T> {
     /**
      * Checks if values of this type can be serialized to a simple string representation.
      * Primitive types, wrappers, dates, and other scalar types are typically serializable.
-     * Object arrays, collections, maps, and beans are not serializable in this sense.
+     * Object arrays, beans, maps, and similar structured types typically report {@code false}
+     * here. Collection/array container types may return {@code true} only when their element
+     * type is itself serializable.
      *
      * <p>Note: the default interface implementation returns {@code false}; however,
      * {@link AbstractType} overrides this to return {@code true} as the base-class default,

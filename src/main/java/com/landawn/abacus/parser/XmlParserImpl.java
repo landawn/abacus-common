@@ -2602,6 +2602,25 @@ final class XmlParserImpl extends AbstractXmlParser {
         }
     }
 
+    /**
+     * Performs the actual DOM-based deserialization for {@link #readByDOMParser}.
+     *
+     * <p>This method contains the recursive parsing body and is invoked by {@code readByDOMParser}
+     * within its nesting-depth guard. The parameters mirror those of {@code readByDOMParser}.</p>
+     *
+     * @param <T> the type of the target object
+     * @param node the XML DOM node to deserialize
+     * @param config the XML deserialization configuration; may be {@code null} for default settings
+     * @param propType the expected property type for this node
+     * @param checkedAttr whether the node's type attribute has already been resolved by the caller
+     * @param isTagByPropertyName whether elements are named after bean property names
+     * @param ignoreTypeInfo whether to ignore any type attribute present on the node
+     * @param isFirstCall whether this is the top-level (root) deserialization call
+     * @param inputType the type of the object to create
+     * @return the deserialized object of type {@code T}
+     * @throws ParsingException if the XML structure doesn't match the target type
+     * @see #readByDOMParser(Node, XmlDeserConfig, Type, boolean, boolean, boolean, boolean, Type)
+     */
     @SuppressWarnings({ "deprecation", "null" })
     protected <T> T readByDOMParserBody(final Node node, final XmlDeserConfig config, Type<?> propType, boolean checkedAttr, boolean isTagByPropertyName,
             boolean ignoreTypeInfo, final boolean isFirstCall, Type<? extends T> inputType) {

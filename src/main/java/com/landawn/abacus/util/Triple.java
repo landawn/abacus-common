@@ -470,6 +470,7 @@ public final class Triple<L, M, R> implements Mutable {
     *                may be {@code null}
     * @return {@code true} if the left element was updated, {@code false} otherwise
     * @throws E if the predicate throws an exception
+    * @throws NullPointerException if {@code predicate} is {@code null}
     */
     public <E extends Exception> boolean setLeftIf(final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate, final L newLeft) throws E {
         if (predicate.test(left, middle, right)) {
@@ -510,6 +511,7 @@ public final class Triple<L, M, R> implements Mutable {
     *                  may be {@code null}
     * @return {@code true} if the middle element was updated, {@code false} otherwise
     * @throws E if the predicate throws an exception
+    * @throws NullPointerException if {@code predicate} is {@code null}
     */
     public <E extends Exception> boolean setMiddleIf(final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate, final M newMiddle) throws E {
         if (predicate.test(left, middle, right)) {
@@ -550,6 +552,7 @@ public final class Triple<L, M, R> implements Mutable {
     *                 may be {@code null}
     * @return {@code true} if the right element was updated, {@code false} otherwise
     * @throws E if the predicate throws an exception
+    * @throws NullPointerException if {@code predicate} is {@code null}
     */
     public <E extends Exception> boolean setRightIf(final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate, final R newRight) throws E {
         if (predicate.test(left, middle, right)) {
@@ -600,6 +603,7 @@ public final class Triple<L, M, R> implements Mutable {
     *                  may be {@code null}
     * @return {@code true} if all three elements were updated, {@code false} otherwise
     * @throws E if the predicate throws an exception
+    * @throws NullPointerException if {@code predicate} is {@code null}
     */
     public <E extends Exception> boolean setIf(final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate, final L newLeft, final M newMiddle,
             final R newRight) throws E {

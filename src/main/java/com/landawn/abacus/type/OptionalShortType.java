@@ -26,6 +26,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  */
 public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
 
+    /** The type name constant for OptionalShort type identification, equal to {@code "OptionalShort"}. */
     public static final String OPTIONAL_SHORT = OptionalShort.class.getSimpleName();
 
     /**

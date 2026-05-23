@@ -196,8 +196,8 @@ public final class RowDataset implements Dataset, Cloneable {
      * @throws IllegalArgumentException if {@code columnNameList} or {@code columnList} is
      *         {@code null}; if any column name is {@code null} or empty; if column names
      *         contain duplicates; if the sizes of {@code columnNameList} and {@code columnList}
-     *         differ; if any column element is {@code null}; or if the column lists have
-     *         different sizes.
+     *         differ; if any column (element of {@code columnList}) is {@code null}; or if the
+     *         columns do not all have the same size.
      * @see #RowDataset(List, List, Map)
      */
     public RowDataset(final List<String> columnNameList, final List<List<Object>> columnList) {
@@ -238,8 +238,8 @@ public final class RowDataset implements Dataset, Cloneable {
      * @throws IllegalArgumentException if {@code columnNameList} or {@code columnList} is
      *         {@code null}; if any column name is {@code null} or empty; if column names
      *         contain duplicates; if the sizes of {@code columnNameList} and {@code columnList}
-     *         differ; if any column element is {@code null}; or if the column lists have
-     *         different sizes.
+     *         differ; if any column (element of {@code columnList}) is {@code null}; or if the
+     *         columns do not all have the same size.
      * @see #RowDataset(List, List)
      */
     public RowDataset(final List<String> columnNameList, final List<List<Object>> columnList, final Map<String, Object> properties)
@@ -9571,7 +9571,8 @@ public final class RowDataset implements Dataset, Cloneable {
      *
      * @param fromRowIndex the inclusive start row index
      * @param toRowIndex the exclusive end row index
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex},
+     *         or {@code toRowIndex > size()}
      */
     void checkRowIndex(final int fromRowIndex, final int toRowIndex) throws IndexOutOfBoundsException {
         checkRowIndex(fromRowIndex, toRowIndex, size());

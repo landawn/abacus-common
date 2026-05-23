@@ -409,13 +409,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Creates a ByteList containing a sequence of byte values from startInclusive to endExclusive.
-     * The sequence increases by 1 for each element. If startInclusive equals endExclusive,
-     * an empty list is returned. If startInclusive is greater than endExclusive,
-     * the sequence decreases by 1 for each element.
+     * The sequence increases by 1 for each element. If startInclusive is greater than or equal to
+     * endExclusive, an empty list is returned.
      *
      * @param startInclusive the starting value (inclusive) of the sequence
      * @param endExclusive the ending value (exclusive) of the sequence
-     * @return a new ByteList containing the sequential values
+     * @return a new ByteList containing the sequential values, or an empty list if {@code startInclusive >= endExclusive}
      */
     public static ByteList range(final byte startInclusive, final byte endExclusive) {
         return of(Array.range(startInclusive, endExclusive));
@@ -441,11 +440,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * Creates a ByteList containing a sequence of byte values from startInclusive to endInclusive.
      * Both endpoints are included in the sequence. The sequence increases by 1 for each element.
      * If startInclusive equals endInclusive, a list with a single element is returned.
-     * If startInclusive is greater than endInclusive, the sequence decreases by 1 for each element.
+     * If startInclusive is greater than endInclusive, an empty list is returned.
      *
      * @param startInclusive the starting value (inclusive) of the sequence
      * @param endInclusive the ending value (inclusive) of the sequence
-     * @return a new ByteList containing the sequential values including both endpoints
+     * @return a new ByteList containing the sequential values including both endpoints, or an empty list if {@code startInclusive > endInclusive}
      */
     public static ByteList rangeClosed(final byte startInclusive, final byte endInclusive) {
         return of(Array.rangeClosed(startInclusive, endInclusive));

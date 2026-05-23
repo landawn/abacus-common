@@ -6639,6 +6639,15 @@ public class SeqTest extends AbstractTest {
     }
 
     @Test
+    public void testLimit_offsetZero_maxSizeMax_onClosedSeq_throwsIllegalStateException() throws Exception {
+        // limit(0, MAX_VALUE) is a special shortcut path that previously bypassed assertNotClosed().
+        // After the fix it must throw immediately, just like limit(0,3) and limit(2, MAX_VALUE) do.
+        Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
+        drainWithException(seq); // closes the sequence
+        assertThrows(IllegalStateException.class, () -> seq.limit(0, Long.MAX_VALUE));
+    }
+
+    @Test
     public void testLimit_offsetZero_withMaxSize() throws Exception {
         List<Integer> result = Seq.of(1, 2, 3, 4, 5).limit(0, 3).toList();
         assertEquals(3, result.size());

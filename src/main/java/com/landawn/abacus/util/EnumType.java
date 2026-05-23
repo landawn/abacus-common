@@ -21,7 +21,7 @@ package com.landawn.abacus.util;
 public enum EnumType {
 
     /**
-     * Persist enumerated type property or field as a string using its constant name.
+     * Persists an enumerated type property or field as a string using its constant name.
      *
      * <p>This is the recommended approach as it's readable, maintainable, and resilient
      * to enum reordering. The only concern is renaming enum constants, which would
@@ -42,7 +42,7 @@ public enum EnumType {
     NAME,
 
     /**
-     * Persist enumerated type property or field as an integer using its ordinal position.
+     * Persists an enumerated type property or field as an integer using its ordinal position.
      *
      * <p><b>Warning:</b> This representation is fragile as it depends on the declaration order
      * of enum constants. Adding, removing, or reordering enum values will break
@@ -62,7 +62,7 @@ public enum EnumType {
     ORDINAL,
 
     /**
-     * Persist enumerated type property or field as an integer using a predefined code value,
+     * Persists an enumerated type property or field as an integer using a predefined code value,
      * typically supplied by a public {@code int code()} method on the enum constant.
      *
      * <p>Unlike {@link #ORDINAL}, the code value is explicitly assigned by the enum author

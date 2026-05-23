@@ -1077,14 +1077,17 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
     }
 
     /**
-     * Checks if this range is empty. A range is empty if and only if it has the form
-     * (a, a) where both endpoints are the same value and both are exclusive (open).
-     * All other ranges contain at least one value.
+     * Checks if this range is empty. A range is empty if both endpoints are the same
+     * value and at least one endpoint is open. Only a closed range with equal endpoints
+     * contains that single endpoint value.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Range<Integer> emptyRange = Range.open(5, 5);
      * emptyRange.isEmpty();   // returns true
+     *
+     * Range<Integer> halfOpenEmptyRange = Range.closedOpen(5, 5);
+     * halfOpenEmptyRange.isEmpty();   // returns true
      *
      * Range<Integer> pointRange = Range.closed(5, 5);
      * pointRange.isEmpty();   // returns false (contains the value 5)
@@ -1097,7 +1100,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      */
     public boolean isEmpty() {
         //NOSONAR
-        return !lowerEndpoint.isClosed && !upperEndpoint.isClosed && lowerEndpoint.compareTo(upperEndpoint.value) == 0;
+        return (!lowerEndpoint.isClosed || !upperEndpoint.isClosed) && lowerEndpoint.compareTo(upperEndpoint.value) == 0;
     }
 
     // Basics

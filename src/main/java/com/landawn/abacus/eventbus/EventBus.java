@@ -409,7 +409,14 @@ public class EventBus {
     /**
      * Registers a subscriber with both event ID and thread mode specifications.
      * This is the most comprehensive registration method that allows full control over event filtering and delivery.
-     * If the subscriber has sticky event handling enabled, it will immediately receive any matching sticky events.
+     * If the subscriber has sticky event handling enabled, it will immediately receive any matching sticky events;
+     * delivery of those sticky events respects each method's {@link ThreadMode}, so a {@code THREAD_POOL_EXECUTOR}
+     * sticky delivery happens on a background thread rather than synchronously inside {@code register}.
+     *
+     * <p>Subscriber identity is tracked by reference (an {@link IdentityHashMap}). Re-registering the
+     * <em>same</em> subscriber instance <em>replaces</em> its previous registration: the old set of
+     * subscriber methods is removed from the event-id index and the new {@code eventId}/{@code threadMode}
+     * take effect.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

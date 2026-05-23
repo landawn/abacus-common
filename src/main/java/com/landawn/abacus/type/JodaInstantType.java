@@ -64,8 +64,8 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
 
     /**
      * Serializes a Joda {@link Instant} to its ISO-8601 timestamp string representation.
-     * Uses millisecond precision in the format {@code "yyyy-MM-dd'T'HH:mm:ss.SSS"}
-     * (e.g., {@code "2021-01-01T10:30:00.123"}).
+     * Uses millisecond precision in the format {@code "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"}
+     * (e.g., {@code "2021-01-01T10:30:00.123Z"}).
      *
      * @param x the {@link Instant} to serialize; may be {@code null}
      * @return the ISO-8601 timestamp string, or {@code null} if {@code x} is {@code null}
@@ -81,8 +81,8 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      *   <li>{@code null} or null-datetime strings: returns {@code null}</li>
      *   <li>{@code "sysTime"} (case-insensitive): returns {@link Instant#now()}</li>
      *   <li>Numeric strings: parsed as milliseconds since the epoch</li>
-     *   <li>20-character strings: parsed as ISO-8601 date-time ({@code "yyyy-MM-dd'T'HH:mm:ss"})</li>
-     *   <li>24-character strings: parsed as ISO-8601 timestamp ({@code "yyyy-MM-dd'T'HH:mm:ss.SSS"})</li>
+     *   <li>20-character strings: parsed as ISO-8601 date-time ({@code "yyyy-MM-dd'T'HH:mm:ss'Z'"})</li>
+     *   <li>24-character strings: parsed as ISO-8601 timestamp ({@code "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"})</li>
      *   <li>All other values: parsed as a timestamp via the default timestamp parser</li>
      * </ul>
      *
@@ -207,7 +207,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
 
     /**
      * Appends the string representation of a Joda {@link Instant} to an {@link Appendable}.
-     * Uses the ISO-8601 timestamp format (e.g., {@code "2021-01-01T10:30:00.123"}).
+     * Uses the ISO-8601 timestamp format (e.g., {@code "2021-01-01T10:30:00.123Z"}).
      * If {@code x} is {@code null}, the literal {@code null} is appended.
      *
      * @param appendable the {@link Appendable} to write to
@@ -228,8 +228,8 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * The output format depends on the serialization configuration:
      * <ul>
      *   <li>{@code LONG}: writes epoch milliseconds as an unquoted number</li>
-     *   <li>{@code ISO_8601_DATE_TIME}: writes in {@code "yyyy-MM-dd'T'HH:mm:ss"} format</li>
-     *   <li>{@code ISO_8601_TIMESTAMP}: writes in {@code "yyyy-MM-dd'T'HH:mm:ss.SSS"} format</li>
+     *   <li>{@code ISO_8601_DATE_TIME}: writes in {@code "yyyy-MM-dd'T'HH:mm:ss'Z'"} format</li>
+     *   <li>{@code ISO_8601_TIMESTAMP}: writes in {@code "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"} format</li>
      *   <li>No config / {@code null} format: uses {@link #stringOf(Instant)}</li>
      * </ul>
      * Non-{@code LONG} formats are quoted when {@code config} specifies a string quotation character.

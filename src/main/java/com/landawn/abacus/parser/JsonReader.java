@@ -109,20 +109,21 @@ interface JsonReader {
     // > 32 = ' ' (Space)
 
     /**
-     * Returns the identifier of the most recently read token from the JSON input.
-     * This method does <i>not</i> advance the reader or re-read the token; it simply
-     * returns the cached identifier of the token most recently produced by
-     * {@link #nextToken()} or {@link #nextToken(Type)}. It is useful for re-inspecting
-     * the previous token after a state transition.
+     * Returns the identifier of the token that was current immediately before the most recent
+     * {@link #nextToken()} / {@link #nextToken(Type)} call (i.e. one token before the current one).
+     * This method does <i>not</i> advance the reader; it returns the cached identifier from the
+     * previous step in the token stream, which is useful for inspecting context after a state
+     * transition.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int token = reader.nextToken();
-     * // ... later ...
-     * int previous = reader.lastToken(); // returns the same token without re-reading
+     * int t1 = reader.nextToken();
+     * int t2 = reader.nextToken();
+     * int prev = reader.lastToken(); // returns t1, not t2
      * }</pre>
      *
-     * @return the identifier of the previous token, or {@code -1} ({@link #EOF}) if no token has been read yet
+     * @return the identifier of the prior token (one before the current one), or {@code -1}
+     *         ({@link #EOF}) if no prior token has been read
      */
     int lastToken();
 

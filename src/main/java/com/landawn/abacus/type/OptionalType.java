@@ -39,6 +39,7 @@ import com.landawn.abacus.util.u.Optional;
 @SuppressWarnings("java:S2160")
 public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
 
+    /** The type name constant for Optional type identification, equal to {@code "Optional"}. */
     public static final String OPTIONAL = Optional.class.getSimpleName();
 
     private final String declaringName;
@@ -147,7 +148,8 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
     /**
      * Converts an {@link Optional} object to its string representation.
      * If the Optional is {@code null} or empty, returns {@code null}. Otherwise,
-     * delegates to the element type's string conversion.
+     * delegates to {@link com.landawn.abacus.util.N#stringOf(Object)}, which selects
+     * a converter based on the runtime class of the contained value.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -170,9 +172,10 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
     /**
      * Converts a string representation to an {@link Optional} object.
      * If the string is {@code null}, returns an empty Optional. Otherwise,
-     * delegates to the element type's valueOf method and wraps the result.
-     * The result may be an Optional containing {@code null} if the element type's
-     * valueOf returns {@code null}.
+     * delegates to the element type's {@code valueOf} method and wraps the result
+     * via {@link Optional#ofNullable(Object)} &mdash; so a {@code null} return value
+     * from the element type yields {@link Optional#empty()} rather than a present
+     * {@code Optional} containing {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

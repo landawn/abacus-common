@@ -209,11 +209,10 @@ class JsonStringReader extends AbstractJsonReader {
     }
 
     /**
-     * Returns the last token read from the JSON input.
-     * This method is used to retrieve the last structural token or value
-     * that was parsed by the reader.
+     * Returns the token identifier from one step before the most recent {@code nextToken} call
+     * (i.e. one token earlier in the stream than the current one).
      *
-     * @return the last token identifier, or -1 if no tokens have been read yet
+     * @return the prior token identifier, or {@code -1} if no prior token has been read
      */
     @Override
     public int lastToken() {

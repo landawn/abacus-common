@@ -99,8 +99,8 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      *   <li>{@code null} or null-datetime strings: returns {@code null}</li>
      *   <li>{@code "sysTime"} (case-insensitive): returns the current system time</li>
      *   <li>Numeric strings: parsed as milliseconds since the epoch</li>
-     *   <li>20-character strings: parsed as ISO-8601 date-time ({@code "yyyy-MM-dd'T'HH:mm:ss"})</li>
-     *   <li>24-character strings: parsed as ISO-8601 timestamp ({@code "yyyy-MM-dd'T'HH:mm:ss.SSS"})</li>
+     *   <li>20-character strings: parsed as ISO-8601 date-time ({@code "yyyy-MM-dd'T'HH:mm:ss'Z'"})</li>
+     *   <li>24-character strings: parsed as ISO-8601 timestamp ({@code "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"})</li>
      *   <li>All other values: parsed as a timestamp via the default timestamp parser</li>
      * </ul>
      *

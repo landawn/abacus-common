@@ -1909,7 +1909,7 @@ public final class Strings {
 
     /**
      * Converts each {@code null} String element in the specified String array to an empty String {@code ""}.
-     * Do nothing if the input array is {@code null} or empty.
+     * Does nothing if the input array is {@code null} or empty.
      *
      * <p>This method modifies the array in-place, replacing all {@code null} elements with empty strings.
      * Non-null elements remain unchanged.</p>
@@ -1963,7 +1963,7 @@ public final class Strings {
 
     /**
      * Converts each empty String element in the specified String array to {@code null}.
-     * Do nothing if the input array is {@code null} or empty.
+     * Does nothing if the input array is {@code null} or empty.
      *
      * <p>This method modifies the array in-place, replacing all empty string elements with {@code null}.
      * Non-empty elements and {@code null} elements remain unchanged.</p>
@@ -2017,7 +2017,7 @@ public final class Strings {
 
     /**
      * Converts each blank String element in the specified String array to an empty String {@code ""}.
-     * Do nothing if the input array is {@code null} or empty.
+     * Does nothing if the input array is {@code null} or empty.
      *
      * <p>This method modifies the array in-place, replacing all blank string elements with empty strings.
      * A string is considered blank if it is {@code null}, empty, or contains only whitespace characters.
@@ -2072,7 +2072,7 @@ public final class Strings {
 
     /**
      * Converts each blank String element in the specified String array to {@code null}.
-     * Do nothing if the input array is {@code null} or empty.
+     * Does nothing if the input array is {@code null} or empty.
      *
      * <p>This method modifies the array in-place, replacing all blank string elements with {@code null}.
      * A string is considered blank if it is {@code null}, empty, or contains only whitespace characters.
@@ -4600,15 +4600,15 @@ public final class Strings {
      * Strings.replaceFirstIgnoreCase("Hello HELLO hello", 6, "hello", "Hi");    // returns "Hello Hi hello"
      * Strings.replaceFirstIgnoreCase("Hello HELLO hello", 12, "hello", "Hi");   // returns "Hello HELLO Hi"
      * Strings.replaceFirstIgnoreCase("Test String", 5, "test", "Best");         // returns "Test String"
-     * Strings.replaceFirstIgnoreCase("Test", 10, "test", "Best");               // returns "Test"
      * }</pre>
      *
      * @param str the input string where the replacement should occur, may be {@code null} or empty
-     * @param fromIndex the index from which to start the search for the target string. It should be a non-negative integer.
+     * @param fromIndex the index from which to start the search for the target string. It must be a non-negative integer no greater than the string length.
      * @param target the string to be replaced, may be {@code null} or empty
      * @param replacement the string to replace the target string, may be {@code null}
      * @return a new string with the first occurrence of the target string replaced with the replacement string, ignoring case considerations, starting from the specified index.
      *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the target string is not found, the input string is returned unchanged.
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative or greater than the length of {@code str}.
      */
     public static String replaceFirstIgnoreCase(final String str, final int fromIndex, final String target, final String replacement) {
         return replaceIgnoreCase(str, fromIndex, target, replacement, 1);
@@ -5517,7 +5517,7 @@ public final class Strings {
      * If more than {@code max} delimited substrings are found, the last returned string includes all characters after the first {@code max - 1}
      * returned strings (including separator characters).</p>
      *
-     * <p>A {@code null} input String returns {@code null}. A {@code null} separatorChars splits on whitespace.</p>
+     * <p>A {@code null} separatorChars splits on whitespace.</p>
      *
      * <p>An empty String array {@code []} will be returned if the input string {@code null}.
      * A String array with single empty String: {@code [""]} will be returned if the input string is empty.</p>
@@ -5564,7 +5564,7 @@ public final class Strings {
      * If more than {@code max} delimited substrings are found, the last returned string includes all characters after the first {@code max - 1}
      * returned strings (including separator characters). If the trim parameter is {@code true}, leading and trailing whitespace is removed from each substring.</p>
      *
-     * <p>A {@code null} input String returns {@code null}. A {@code null} separatorChars splits on whitespace.</p>
+     * <p>A {@code null} separatorChars splits on whitespace.</p>
      *
      * <p>An empty String array {@code []} will be returned if the input string {@code null}.
      * A String array with single empty String: {@code [""]} will be returned if the input string is empty.</p>
@@ -5718,6 +5718,7 @@ public final class Strings {
         } else {
             // standard case
             int idx = -1;
+            boolean maxReached = false;
 
             while (i <= len - delimiterLength) {
                 if ((idx = str.indexOf(delimiter, i)) < 0) {
@@ -5735,26 +5736,26 @@ public final class Strings {
                         substrs.add(str.substring(idx + delimiterLength));
                     }
 
-                    i = len; // end the loop
-                    idx = -1; // reset idx to avoid adding another substring
-
+                    maxReached = true;
                     break;
                 }
 
                 i = idx + delimiterLength;
             }
 
-            if (idx < 0 || i < len) {
-                if (i < len) {
-                    substrs.add(str.substring(i, len));
-                } else if (preserveAllTokens) {
+            if (!maxReached) {
+                if (idx < 0 || i < len) {
+                    if (i < len) {
+                        substrs.add(str.substring(i, len));
+                    } else if (preserveAllTokens) {
+                        substrs.add(EMPTY);
+                    }
+                } else if (preserveAllTokens && idx >= 0 && i == len) {
+                    // The loop terminated because i advanced to the end of the string right after consuming
+                    // a trailing delimiter (idx points at that final delimiter). The empty token following the
+                    // final delimiter must still be preserved, mirroring the single-char splitWorker behavior.
                     substrs.add(EMPTY);
                 }
-            } else if (preserveAllTokens && idx >= 0 && i == len) {
-                // The loop terminated because i advanced to the end of the string right after consuming
-                // a trailing delimiter (idx points at that final delimiter). The empty token following the
-                // final delimiter must still be preserved, mirroring the single-char splitWorker behavior.
-                substrs.add(EMPTY);
             }
         }
 
@@ -6603,7 +6604,7 @@ public final class Strings {
     // -----------------------------------------------------------------------
 
     /**
-     * Remove the last character from a String.
+     * Removes the last character from a String.
      *
      * <p>If the String ends in "\r\n", then both characters are removed. Otherwise, only the last
      * character is removed. This differs from {@link #chomp(String)} which only removes newline sequences.</p>
@@ -6885,7 +6886,7 @@ public final class Strings {
     }
 
     /**
-     * Deletes all whitespace from a String as defined by {@link Character#isWhitespace(char)}.
+     * Removes all whitespace from a String as defined by {@link Character#isWhitespace(char)}.
      *
      * <p>This method removes all characters for which {@link Character#isWhitespace(char)} returns {@code true}.
      * This includes spaces, tabs, newlines, and other Unicode whitespace characters. The method returns
@@ -6893,15 +6894,15 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.deleteWhitespace(null)           = null
-     * Strings.deleteWhitespace("")             = ""
-     * Strings.deleteWhitespace("abc")          = "abc"
-     * Strings.deleteWhitespace("   ab  c  ")   = "abc"
-     * Strings.deleteWhitespace("a\tb\nc")      = "abc"
-     * Strings.deleteWhitespace("a b\tc\r\n")   = "abc"
+     * Strings.removeWhitespace(null)           = null
+     * Strings.removeWhitespace("")             = ""
+     * Strings.removeWhitespace("abc")          = "abc"
+     * Strings.removeWhitespace("   ab  c  ")   = "abc"
+     * Strings.removeWhitespace("a\tb\nc")      = "abc"
+     * Strings.removeWhitespace("a b\tc\r\n")   = "abc"
      * }</pre>
      *
-     * @param str the String to delete whitespace from, may be {@code null}
+     * @param str the String to remove whitespace from, may be {@code null}
      * @return the String without whitespaces, {@code null} if {@code null} String input
      * @see #removeWhitespace(String[])
      */
@@ -6927,7 +6928,7 @@ public final class Strings {
     }
 
     /**
-     * Deletes all whitespace from each string in the provided array.
+     * Removes all whitespace from each string in the provided array, updating the array in-place.
      *
      * <p>Whitespace is determined by {@link Character#isWhitespace(char)}. This includes spaces,
      * tabs, newlines, and other Unicode whitespace characters. Each string in the array is processed
@@ -6938,7 +6939,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] strs = {"  hello  ", "world\t123", " h i "};
-     * Strings.deleteWhitespace(strs);
+     * Strings.removeWhitespace(strs);
      * // strs is now {"hello", "world123", "hi"}
      * }</pre>
      *
@@ -7510,7 +7511,7 @@ public final class Strings {
      * }</pre>
      *
      * @param cs the CharSequence to check, may be {@code null}
-     * @return {@code true} if all characters are uppercase or the CharSequence is empty; {@code false} otherwise
+     * @return {@code true} if all characters are uppercase or the CharSequence is empty or {@code null}; {@code false} otherwise
      * @see #isUpperCase(char)
      * @see #isAllLowerCase(CharSequence)
      * @see #isMixedCase(CharSequence)
@@ -8531,10 +8532,10 @@ public final class Strings {
 
     /**
      * Note: It's copied from NumberUtils in Apache Commons Lang under Apache
-     * License 2.0
+     * License 2.0.
      *
      * <p>
-     * Checks whether the String a valid Java number. {@code true} is
+     * Checks whether the String is a valid Java number. {@code true} is
      * returned if there is a number which can be initialized by
      * {@code createNumber} with specified String.
      * </p>
@@ -10938,7 +10939,7 @@ public final class Strings {
      * performing a case-insensitive comparison. If either the input string or the substring is {@code null},
      * the method returns {@code false}.</p>
      *
-     * <p>The method converts both strings to lowercase internally for comparison.</p>
+     * <p>The method performs the comparison case-insensitively without regard to locale-specific case mappings.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -11324,7 +11325,7 @@ public final class Strings {
      *
      * @param str the string to be checked, may be {@code null} or empty
      * @param valuesToFind the array of substrings to be checked
-     * @return {@code true} if none of the substrings are found in the given string or if the given string is {@code null} or empty, or if the specified {@code valuesToFind} char array is {@code null} or empty, {@code false} otherwise
+     * @return {@code true} if none of the substrings are found in the given string or if the given string is {@code null} or empty, or if the specified {@code valuesToFind} array is {@code null} or empty, {@code false} otherwise
      * @see #containsAny(String, String[])
      */
     public static boolean containsNone(final String str, final String... valuesToFind) {
@@ -11356,7 +11357,7 @@ public final class Strings {
      *
      * @param str the string to be checked, may be {@code null} or empty
      * @param valuesToFind the array of substrings to be checked
-     * @return {@code true} if none of the substrings are found in the given string or if the given string is {@code null} or empty, or if the specified {@code valuesToFind} char array is {@code null} or empty, ignoring case considerations, {@code false} otherwise
+     * @return {@code true} if none of the substrings are found in the given string or if the given string is {@code null} or empty, or if the specified {@code valuesToFind} array is {@code null} or empty, ignoring case considerations, {@code false} otherwise
      * @see #containsAnyIgnoreCase(String, String[])
      */
     public static boolean containsNoneIgnoreCase(final String str, final String... valuesToFind) {
@@ -13983,11 +13984,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.substringBetween("user@example", '@', 11);   // returns "example"
+     * Strings.substringBetween("user@example", '@', 12);   // returns "example"
      * Strings.substringBetween("a,b,c", ',', 3);           // returns "b"
      * Strings.substringBetween("test", 't', 4);            // returns "es"
      * Strings.substringBetween("test", 'x', 4);            // returns null (delimiter not found)
-     * Strings.substringBetween("test", 't', 1);            // returns null (delimiter at or after endIndex)
+     * Strings.substringBetween("test", 's', 2);            // returns null (delimiter at or after endIndex)
      * Strings.substringBetween(null, '@', 5);              // returns null
      * Strings.substringBetween("test", '@', 0);            // returns null (endIndex <= 0)
      * }</pre>
@@ -15496,7 +15497,7 @@ public final class Strings {
      * Strings.removeRange("Test", 0, 2);           // returns "st" (removes "Te")
      *
      * // Edge cases
-     * Strings.removeRange(null, 0, 1);             // returns ""
+     * Strings.removeRange(null, 0, 0);             // returns "" (valid range for null/empty input)
      * Strings.removeRange("", 0, 0);               // returns "" (OK - valid range for empty string)
      * Strings.removeRange("ABC", 1, 1);            // returns "ABC" (no deletion when fromIndex == toIndex)
      * Strings.removeRange("ABC", 3, 3);            // returns "ABC" (no deletion when fromIndex == length)
@@ -16913,7 +16914,7 @@ public final class Strings {
      * Joins the elements of the provided array into a single String.
      *
      * <p>This method concatenates all elements in the array using the default element separator.
-     * Each element is converted to a string representation using its {@code Strings.toString()} method.
+     * Each element is converted to a string representation using {@code Strings.toString()}.
      * Null elements are handled as "null" strings.</p>
      *
      * <p>The method returns an empty string if the specified array is {@code null} or empty.</p>
@@ -16942,7 +16943,7 @@ public final class Strings {
      * Joins the elements of the provided array into a single String with the specified delimiter.
      *
      * <p>This method concatenates all elements in the array, separating each element with the specified delimiter string.
-     * Each element is converted to a string representation using its {@code Strings.toString()} method.
+     * Each element is converted to a string representation using {@code Strings.toString()}.
      * The delimiter can be empty, in which case the elements are concatenated without any separator.</p>
      *
      * <p>The method returns an empty string if the specified array is {@code null} or empty.</p>
@@ -16979,7 +16980,7 @@ public final class Strings {
      *
      * <p>This method concatenates all elements in the array, separating each element with the specified delimiter.
      * The resulting string is prefixed and suffixed with the specified strings.
-     * Each element is converted to a string representation using its {@code Strings.toString()} method.</p>
+     * Each element is converted to a string representation using {@code Strings.toString()}.</p>
      *
      * <p>The method returns an empty string if the specified array is {@code null} or empty and both prefix and suffix are empty.</p>
      *
@@ -17009,7 +17010,7 @@ public final class Strings {
      *
      * <p>This method concatenates all elements in the array, separating each element with the specified delimiter.
      * The resulting string is prefixed and suffixed with the specified strings.
-     * Each element is converted to a string representation using its {@code Strings.toString()} method.
+     * Each element is converted to a string representation using {@code Strings.toString()}.
      * If trim is {@code true}, leading and trailing whitespace is removed from each element's string representation.</p>
      *
      * <p>The method returns an empty string if the specified array is {@code null} or empty and both prefix and suffix are empty.</p>
@@ -17040,7 +17041,7 @@ public final class Strings {
      *
      * <p>This method concatenates elements in the array from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive),
      * separating each element with the specified delimiter string.
-     * Each element is converted to a string representation using its {@code Strings.toString()} method.
+     * Each element is converted to a string representation using {@code Strings.toString()}.
      * The delimiter can be empty, in which case the elements are concatenated without any separator.</p>
      *
      * <p>The method returns an empty string if the specified array is {@code null} or empty, or if {@code fromIndex == toIndex}.</p>
@@ -17070,7 +17071,7 @@ public final class Strings {
      *
      * <p>This method concatenates elements in the array from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive),
      * separating each element with the specified delimiter string.
-     * Each element is converted to a string representation using its {@code Strings.toString()} method.
+     * Each element is converted to a string representation using {@code Strings.toString()}.
      * If trim is {@code true}, leading and trailing whitespace is removed from each element's string representation.</p>
      *
      * <p>The method returns an empty string if the specified array is {@code null} or empty, or if {@code fromIndex == toIndex}.</p>
@@ -17102,7 +17103,7 @@ public final class Strings {
      * <p>This method concatenates elements in the array from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive),
      * separating each element with the specified delimiter string.
      * The resulting string is prefixed and suffixed with the specified strings.
-     * Each element is converted to a string representation using its {@code Strings.toString()} method.</p>
+     * Each element is converted to a string representation using {@code Strings.toString()}.</p>
      *
      * <p>The method returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex} and both prefix and suffix are empty.</p>
      *
@@ -17133,7 +17134,7 @@ public final class Strings {
      * <p>This method concatenates elements in the array from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive),
      * separating each element with the specified delimiter string.
      * The resulting string is prefixed and suffixed with the specified strings.
-     * Each element is converted to a string representation using its {@code Strings.toString()} method.
+     * Each element is converted to a string representation using {@code Strings.toString()}.
      * If trim is {@code true}, leading and trailing whitespace is removed from each element's string representation.</p>
      *
      * <p>The method handles edge cases gracefully: if the array is {@code null} or empty, or if {@code fromIndex == toIndex},
@@ -17196,7 +17197,7 @@ public final class Strings {
      * Joins the elements of the provided Iterable into a single String.
      *
      * <p>This method concatenates all elements in the iterable using the default element separator.
-     * Each element is converted to a string representation using its {@code Strings.toString()} method.
+     * Each element is converted to a string representation using {@code Strings.toString()}.
      * Null elements are handled as "null" strings.</p>
      *
      * <p>The method returns an empty string if the specified Iterable is {@code null} or empty.</p>
@@ -17225,7 +17226,7 @@ public final class Strings {
      * Joins the elements of the provided Iterable into a single String with the specified delimiter.
      *
      * <p>This method concatenates all elements in the iterable, separating each element with the specified delimiter string.
-     * Each element is converted to a string representation using its {@code Strings.toString()} method.
+     * Each element is converted to a string representation using {@code Strings.toString()}.
      * The delimiter can be empty, in which case the elements are concatenated without any separator.</p>
      *
      * <p>The method returns an empty string if the specified Iterable is {@code null} or empty.</p>
@@ -17258,7 +17259,7 @@ public final class Strings {
      *
      * <p>This method concatenates all elements in the iterable, separating each element with the specified delimiter.
      * The resulting string is prefixed and suffixed with the specified strings.
-     * Each element is converted to a string representation using its {@code Strings.toString()} method.</p>
+     * Each element is converted to a string representation using {@code Strings.toString()}.</p>
      *
      * <p>The method returns just the concatenation of prefix and suffix if the Iterable is {@code null} or empty.</p>
      *
@@ -17288,7 +17289,7 @@ public final class Strings {
      *
      * <p>This method concatenates all elements in the iterable, separating each element with the specified delimiter.
      * The resulting string is prefixed and suffixed with the specified strings.
-     * Each element is converted to a string representation using its {@code Strings.toString()} method.
+     * Each element is converted to a string representation using {@code Strings.toString()}.
      * If trim is {@code true}, leading and trailing whitespace is removed from each element's string representation.</p>
      *
      * <p>For Collection types, this method delegates to the more efficient range-based join method.
@@ -17324,7 +17325,7 @@ public final class Strings {
      *
      * <p>This method concatenates elements in the collection from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive),
      * separating each element with the specified delimiter string.
-     * Each element is converted to a string representation using its {@code Strings.toString()} method.
+     * Each element is converted to a string representation using {@code Strings.toString()}.
      * The delimiter can be empty, in which case the elements are concatenated without any separator.</p>
      *
      * <p>The method returns an empty string if the specified Collection is {@code null} or empty, or if {@code fromIndex == toIndex}.</p>
@@ -17354,7 +17355,7 @@ public final class Strings {
      *
      * <p>This method concatenates elements in the collection from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive),
      * separating each element with the specified delimiter string.
-     * Each element is converted to a string representation using its {@code Strings.toString()} method.
+     * Each element is converted to a string representation using {@code Strings.toString()}.
      * If trim is {@code true}, leading and trailing whitespace is removed from each element's string representation.</p>
      *
      * <p>The method returns an empty string if the specified Collection is {@code null} or empty, or if {@code fromIndex == toIndex}.</p>
@@ -17386,7 +17387,7 @@ public final class Strings {
      * <p>This method concatenates elements in the collection from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive),
      * separating each element with the specified delimiter string.
      * The resulting string is prefixed and suffixed with the specified strings.
-     * Each element is converted to a string representation using its {@code Strings.toString()} method.</p>
+     * Each element is converted to a string representation using {@code Strings.toString()}.</p>
      *
      * <p>The method returns just the concatenation of prefix and suffix if the collection is {@code null} or empty or {@code fromIndex == toIndex}.</p>
      *
@@ -17417,7 +17418,7 @@ public final class Strings {
      * <p>This method concatenates elements in the collection from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive),
      * separating each element with the specified delimiter string.
      * The resulting string is prefixed and suffixed with the specified strings.
-     * Each element is converted to a string representation using its {@code Strings.toString()} method.
+     * Each element is converted to a string representation using {@code Strings.toString()}.
      * If trim is {@code true}, leading and trailing whitespace is removed from each element's string representation.</p>
      *
      * <p>The method efficiently handles List types with RandomAccess for better performance.
@@ -17493,7 +17494,7 @@ public final class Strings {
      * Joins the elements of the provided Iterator into a single String.
      *
      * <p>This method concatenates all elements from the iterator using the default element separator.
-     * Each element is converted to a string representation using its {@code Strings.toString()} method.
+     * Each element is converted to a string representation using {@code Strings.toString()}.
      * The iterator is consumed during this operation.</p>
      *
      * <p>The method returns an empty string if the specified Iterator is {@code null} or has no elements.</p>
@@ -17522,7 +17523,7 @@ public final class Strings {
      * Joins the elements of the provided Iterator into a single String with the specified delimiter.
      *
      * <p>This method concatenates all elements from the iterator, separating each element with the specified delimiter string.
-     * Each element is converted to a string representation using its {@code Strings.toString()} method.
+     * Each element is converted to a string representation using {@code Strings.toString()}.
      * The delimiter can be empty, in which case the elements are concatenated without any separator.
      * The iterator is consumed during this operation.</p>
      *
@@ -17556,7 +17557,7 @@ public final class Strings {
      *
      * <p>This method concatenates all elements from the iterator, separating each element with the specified delimiter.
      * The resulting string is prefixed and suffixed with the specified strings.
-     * Each element is converted to a string representation using its {@code Strings.toString()} method.
+     * Each element is converted to a string representation using {@code Strings.toString()}.
      * The iterator is consumed during this operation.</p>
      *
      * <p>The method returns just the concatenation of prefix and suffix if the Iterator is {@code null} or has no elements.</p>
@@ -17587,7 +17588,7 @@ public final class Strings {
      *
      * <p>This method concatenates all elements from the iterator, separating each element with the specified delimiter.
      * The resulting string is prefixed and suffixed with the specified strings.
-     * Each element is converted to a string representation using its {@code Strings.toString()} method.
+     * Each element is converted to a string representation using {@code Strings.toString()}.
      * If trim is {@code true}, leading and trailing whitespace is removed from each element's string representation.
      * The iterator is consumed during this operation.</p>
      *
@@ -18593,7 +18594,7 @@ public final class Strings {
      * Strings.concat("A", "B", "C", "D");               // returns "ABCD"
      * Strings.concat(1, "+", 2, "=3");                  // returns "1+2=3"
      * Strings.concat("Result: ", 10, " out of ", 20);   // returns "Result: 10 out of 20"
-     * Strings.concat(null, null, null, null);           // returns ""
+     * Strings.concat(null, null, null, null);           // returns "nullnullnullnull"
      * }</pre>
      *
      * @param a the first object to concatenate, may be {@code null}
@@ -18621,7 +18622,7 @@ public final class Strings {
      * Strings.concat("A", "B", "C", "D", "E");        // returns "ABCDE"
      * Strings.concat(1, " ", 2, " ", 3);              // returns "1 2 3"
      * Strings.concat("Sum of ", 1, "+", 2, "=3");     // returns "Sum of 1+2=3"
-     * Strings.concat(null, null, null, null, null);   // returns ""
+     * Strings.concat(null, null, null, null, null);   // returns "nullnullnullnullnull"
      * }</pre>
      *
      * @param a the first object to concatenate, may be {@code null}
@@ -22109,25 +22110,26 @@ public final class Strings {
         }
 
         /**
-         * Returns the substring before the last occurrence of the specified delimiter up to
-         * the exclusive end index if it exists, otherwise returns the original string itself.
+         * Returns the substring from the given begin index up to the last occurrence of the
+         * specified delimiter if it exists, otherwise returns the original string itself.
          *
-         * <p>This method searches for the last occurrence of the delimiter before the specified
-         * end index and returns the substring from the beginning up to (but not including) that
-         * delimiter. If the delimiter is not found or the input is {@code null}, the original string is returned.</p>
+         * <p>This method searches for the last occurrence of the delimiter and, if it is found at
+         * or after {@code exclusiveEndIndex}, returns the substring from that index up to (but not
+         * including) the delimiter. If the delimiter is not found at or after that index, or the
+         * input is {@code null}, the original string is returned.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * StrUtil.substringBeforeLastOrElseItself("hello.world.java", 16, ".");   // returns "hello.world"
-         * StrUtil.substringBeforeLastOrElseItself("hello.world.java", 11, ".");   // returns "hello"
+         * StrUtil.substringBeforeLastOrElseItself("hello.world.java", 0, ".");    // returns "hello.world"
+         * StrUtil.substringBeforeLastOrElseItself("hello.world.java", 6, ".");    // returns "world"
          * StrUtil.substringBeforeLastOrElseItself("hello", 5, ".");               // returns "hello"
          * StrUtil.substringBeforeLastOrElseItself(null, 10, ".");                 // returns null
          * }</pre>
          *
          * @param str the string to search in, can be {@code null}.
-         * @param exclusiveEndIndex the index marking the end boundary for searching (exclusive).
+         * @param exclusiveEndIndex the index from which to start the substring (inclusive); passed to the underlying method as its begin index.
          * @param delimiterOfExclusiveEndIndex the delimiter marking the end of the substring (exclusive).
-         * @return the substring before the last delimiter if found, otherwise {@code str} itself.
+         * @return the substring from the given index up to the last delimiter if found, otherwise {@code str} itself.
          * @see Strings#substringBeforeLast(String, int, String)
          */
         @Beta
@@ -22143,7 +22145,7 @@ public final class Strings {
          *
          * <p>This method extracts the substring starting after the exclusive begin index and
          * ending before the exclusive end index. If the indices are invalid (negative, out of bounds,
-         * or begin index >= end index), an empty {@code Optional} is returned.</p>
+         * or begin index &gt;= end index), an empty {@code Optional} is returned.</p>
          *
          * <p>The method returns an empty {@code Optional} for {@code null} input string.</p>
          *

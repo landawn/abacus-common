@@ -219,6 +219,10 @@ public class HttpUtilTest extends TestBase {
         headers.put("content-type", "text/html");
         assertEquals("text/html", HttpUtil.getContentType(headers));
 
+        headers.clear();
+        headers.put("CONTENT-TYPE", "text/plain");
+        assertEquals("text/plain", HttpUtil.getContentType(headers));
+
         assertNull(HttpUtil.getContentType((Map<String, Object>) null));
         assertNull(HttpUtil.getContentType(new HashMap<>()));
     }
@@ -228,6 +232,10 @@ public class HttpUtilTest extends TestBase {
         HttpHeaders headers = HttpHeaders.create();
         headers.set(HttpHeaders.Names.CONTENT_TYPE, "application/json");
         assertEquals("application/json", HttpUtil.getContentType(headers));
+
+        headers.clear();
+        headers.set("CONTENT-TYPE", "text/plain");
+        assertEquals("text/plain", HttpUtil.getContentType(headers));
 
         assertNull(HttpUtil.getContentType((HttpHeaders) null));
         assertNull(HttpUtil.getContentType(HttpHeaders.create()));
@@ -287,6 +295,10 @@ public class HttpUtilTest extends TestBase {
         headers.put("content-encoding", "deflate");
         assertEquals("deflate", HttpUtil.getContentEncoding(headers));
 
+        headers.clear();
+        headers.put("CONTENT-ENCODING", "br");
+        assertEquals("br", HttpUtil.getContentEncoding(headers));
+
         assertNull(HttpUtil.getContentEncoding((Map<String, Object>) null));
         assertNull(HttpUtil.getContentEncoding(new HashMap<>()));
     }
@@ -296,6 +308,10 @@ public class HttpUtilTest extends TestBase {
         HttpHeaders headers = HttpHeaders.create();
         headers.set(HttpHeaders.Names.CONTENT_ENCODING, "gzip");
         assertEquals("gzip", HttpUtil.getContentEncoding(headers));
+
+        headers.clear();
+        headers.set("CONTENT-ENCODING", "br");
+        assertEquals("br", HttpUtil.getContentEncoding(headers));
 
         assertNull(HttpUtil.getContentEncoding((HttpHeaders) null));
         assertNull(HttpUtil.getContentEncoding(HttpHeaders.create()));

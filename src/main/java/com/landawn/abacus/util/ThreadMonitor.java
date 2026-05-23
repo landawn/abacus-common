@@ -46,7 +46,7 @@ final class ThreadMonitor implements Runnable {
     private final long timeout;
 
     /**
-     * Start monitoring the current thread with the specified timeout.
+     * Starts monitoring the current thread with the specified timeout.
      *
      * <p>If the current thread does not complete its work within the specified timeout,
      * it will be interrupted by the monitor thread. The monitored thread should handle
@@ -75,7 +75,7 @@ final class ThreadMonitor implements Runnable {
     }
 
     /**
-     * Start monitoring the specified thread with the given timeout.
+     * Starts monitoring the specified thread with the given timeout.
      *
      * <p>Creates a daemon monitor thread that will sleep for the specified timeout duration
      * and then interrupt the target thread if it's still running. If the target thread completes
@@ -116,7 +116,7 @@ final class ThreadMonitor implements Runnable {
     }
 
     /**
-     * Stop monitoring the specified thread by interrupting the monitor thread.
+     * Stops monitoring the specified thread by interrupting the monitor thread.
      *
      * <p>This method should be called when the monitored operation completes successfully
      * before the timeout. It interrupts the monitor thread, causing it to exit its sleep

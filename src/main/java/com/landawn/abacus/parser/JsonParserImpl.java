@@ -2199,12 +2199,14 @@ final class JsonParserImpl extends AbstractJsonParser {
      * }</pre>
      *
      * @param <T> the type of the target object
-     * @param source the JSON string containing the data to parse; must not be {@code null}
+     * @param source the JSON string containing the data to parse; may be {@code null} or empty
      * @param fromIndex the starting index (inclusive) of the JSON content
      * @param toIndex the ending index (exclusive) of the JSON content
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
-     * @return the deserialized object of type {@code T}
+     * @return the deserialized object of type {@code T}; if the source is {@code null} the target type's
+     *         default value is returned, and if the selected range is empty an empty value (or the default
+     *         value) is returned depending on the target type and the {@code readNullToEmpty} configuration
      * @throws IndexOutOfBoundsException if the indices are out of bounds or fromIndex &gt; toIndex
      * @throws UncheckedIOException if an I/O error occurs during deserialization
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
@@ -2249,12 +2251,14 @@ final class JsonParserImpl extends AbstractJsonParser {
      * }</pre>
      *
      * @param <T> the type of the target class
-     * @param source the JSON string containing the data to parse; must not be {@code null}
+     * @param source the JSON string containing the data to parse; may be {@code null} or empty
      * @param fromIndex the starting index (inclusive) of the JSON content
      * @param toIndex the ending index (exclusive) of the JSON content
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetClass the class of the target object to deserialize into; must not be {@code null}
-     * @return the deserialized object of type {@code T}
+     * @return the deserialized object of type {@code T}; if the source is {@code null} the target type's
+     *         default value is returned, and if the selected range is empty an empty value (or the default
+     *         value) is returned depending on the target type and the {@code readNullToEmpty} configuration
      * @throws IndexOutOfBoundsException if the indices are out of bounds or fromIndex &gt; toIndex
      * @throws UncheckedIOException if an I/O error occurs during deserialization
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target class

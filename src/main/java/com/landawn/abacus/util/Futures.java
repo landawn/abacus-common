@@ -1435,6 +1435,8 @@ public final class Futures {
      *         {@link ExecutionException}; if {@code action} throws, the exception is propagated
      *         (wrapped in a {@link RuntimeException} if it is a checked exception).
      * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty.
+     * @see #combine(Future, Future, Throwables.BiFunction)
+     * @see #combine(Future, Future, Future, Throwables.TriFunction)
      */
     public static <T, R> ContinuableFuture<R> combine(final Collection<? extends Future<? extends T>> cfs,
             final Throwables.Function<List<T>, ? extends R, ? extends Exception> action) {

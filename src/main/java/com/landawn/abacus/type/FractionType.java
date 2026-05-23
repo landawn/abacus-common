@@ -100,8 +100,7 @@ public class FractionType extends AbstractType<Fraction> {
     /**
      * Converts a {@link Fraction} to its string representation.
      * Uses {@link Fraction#toString()}, which produces a string in the form
-     * {@code "numerator/denominator"} (e.g., {@code "3/4"}) or a plain integer if the
-     * denominator is 1.
+     * {@code "numerator/denominator"} (e.g., {@code "3/4"}).
      *
      * @param x the {@link Fraction} to convert; may be {@code null}
      * @return the string representation of the fraction, or {@code null} if {@code x} is {@code null}

@@ -562,7 +562,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * @param len the number of random elements to generate. Must be non-negative.
      * @return a new LongList containing random long values
-     * @throws IllegalArgumentException if len is negative
+     * @throws NegativeArraySizeException if {@code len} is negative
      */
     public static LongList random(final int len) {
         final long[] a = new long[len];

@@ -206,14 +206,17 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
     /**
      * Associates the specified element with the specified key in this pool.
-     * If the pool previously contained a mapping for the key, the old element is replaced and destroyed.
+     * If the pool previously contained a mapping for the key, the old element is removed and
+     * destroyed with {@link Caller#REMOVE_REPLACE_CLEAR} <em>before</em> the new value is
+     * inserted; this happens even when the subsequent insertion fails (so a failing {@code put}
+     * can still evict the previous mapping for {@code key}).
      *
      * <p>The put operation will fail if:</p>
      * <ul>
-     *   <li>Either key or element is null</li>
      *   <li>The element has already expired</li>
-     *   <li>The pool is at capacity and auto-balancing is disabled</li>
+     *   <li>The pool is at capacity and auto-balancing is disabled (or balancing did not free a slot)</li>
      *   <li>The element would exceed memory constraints (when memory measure is configured)</li>
+     *   <li>The memory measure returns a negative size or throws an exception</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -443,7 +446,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      *     try {
      *         // use the element exclusively
      *     } finally {
-     *         element.destroy(Caller.REMOVE_REPLACE_CLEAR);
+     *         // The caller owns the removed element; remove() does not destroy it.
+     *         element.destroy(Caller.OTHER_EXTERNAL);
      *     }
      * }
      * }</pre>

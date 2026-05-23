@@ -50,10 +50,10 @@ import com.landawn.abacus.util.Strings;
  *
  * // Serialize
  * List<String> names = N.asList("Alice", "Bob", "Charlie");
- * String json = listType.stringOf(names);  // ["Alice","Bob","Charlie"]
+ * String json = listType.stringOf(names);  // ["Alice", "Bob", "Charlie"]
  *
  * // Deserialize
- * List<String> parsed = listType.valueOf("[\"Alice\",\"Bob\",\"Charlie\"]");
+ * List<String> parsed = listType.valueOf("[\"Alice\", \"Bob\", \"Charlie\"]");
  * }</pre>
  *
  * @param <E> the element type of the collection

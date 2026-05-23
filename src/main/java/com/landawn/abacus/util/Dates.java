@@ -334,7 +334,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     public static final ZoneId GMT_ZONE_ID = GMT_TIME_ZONE.toZoneId();
 
     /**
-     * Date/Time format: {@code yyyy}
+     * Date/Time format: {@code yyyy}.
      *
      * <p>Year-only format. Useful for grouping or filtering by year.</p>
      *
@@ -355,7 +355,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     public static final String LOCAL_YEAR_FORMAT = "yyyy";
 
     /**
-     * Date/Time format: {@code MM-dd}
+     * Date/Time format: {@code MM-dd}.
      *
      * <p>Month and day format without year. Useful for recurring dates, anniversaries, and seasonal data.</p>
      *
@@ -379,7 +379,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     // static final String LOCAL_MONTH_DAY_FORMAT_SLASH = "MM/dd";
 
     /**
-     * Date/Time format: {@code yyyy-MM-dd}
+     * Date/Time format: {@code yyyy-MM-dd}.
      *
      * <p>ISO 8601 date format without time. Standard format for representing dates in data exchange and databases.</p>
      *
@@ -404,7 +404,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     // static final String LOCAL_DATE_FORMAT_SLASH = "yyyy/MM/dd";
 
     /**
-     * Date/Time format: {@code HH:mm:ss}
+     * Date/Time format: {@code HH:mm:ss}.
      *
      * <p>Time-only format in 24-hour notation. Useful for representing times without date context.</p>
      *
@@ -427,7 +427,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     public static final String LOCAL_TIME_FORMAT = "HH:mm:ss";
 
     /**
-     * Date/Time format: {@code yyyy-MM-dd HH:mm:ss}
+     * Date/Time format: {@code yyyy-MM-dd HH:mm:ss}.
      *
      * <p>Local date and time format without timezone. Useful for database timestamps and local system times.</p>
      *
@@ -450,7 +450,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     public static final String LOCAL_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     /**
-     * Date/Time format: {@code yyyy-MM-dd HH:mm:ss.SSS}
+     * Date/Time format: {@code yyyy-MM-dd HH:mm:ss.SSS}.
      *
      * <p>Local date and time format with milliseconds. Provides high precision for local timestamps,
      * commonly used in application logging and database records.</p>
@@ -486,7 +486,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     // static final String LOCAL_TIMESTAMP_FORMAT_SLASH = "yyyy/MM/dd HH:mm:ss.SSS";
 
     /**
-     * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ss}
+     * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ss}.
      *
      * <p>ISO 8601 local date and time format without timezone. Standard format for data interchange
      * where the timezone is implicit or handled separately.</p>
@@ -512,7 +512,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     public static final String ISO_LOCAL_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
 
     /**
-     * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ssXXX}
+     * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ssXXX}.
      *
      * <p>ISO 8601 date and time with UTC offset. Useful for APIs and services that need to represent
      * a moment in time with explicit offset but without timezone identification.</p>
@@ -1916,7 +1916,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * {@link java.sql.Time} contract) while the time-of-day is preserved. Raw epoch-millisecond
      * input (a purely numeric string parsed without a format) is used as-is without normalization.</p>
      *
-     * @param time the string representation of the time to be parsed.
+     * @param date the string representation of the time to be parsed.
      * @return the parsed {@code java.sql.Time} instance, or {@code null} if the input is {@code null}, empty, or the string "null".
      * @see #parseTime(String, String)
      * @see #parseTime(String, String, TimeZone)
@@ -1936,7 +1936,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Time time = Dates.parseTime("02:30:45 PM", "hh:mm:ss a");
      * }</pre>
      *
-     * @param time the string representation of the time to be parsed.
+     * @param date the string representation of the time to be parsed.
      * @param format the time format pattern; if {@code null}, common formats are attempted automatically.
      * @return the parsed {@code java.sql.Time} instance, or {@code null} if the input is {@code null}, empty, or the string "null".
      * @throws IllegalArgumentException if the time string cannot be parsed using the specified format.
@@ -1960,7 +1960,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Time time = Dates.parseTime("14:30:45", "HH:mm:ss", utc);
      * }</pre>
      *
-     * @param time the string representation of the time to be parsed.
+     * @param date the string representation of the time to be parsed.
      * @param format the time format pattern; if {@code null}, common formats are attempted automatically.
      * @param timeZone the time zone for parsing; if {@code null}, the default time zone is used.
      * @return the parsed {@code java.sql.Time} instance, or {@code null} if the input is {@code null}, empty, or the string "null".
@@ -6040,7 +6040,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     public static final class DTF {
 
         /**
-         * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ssXXX'['VV']'}
+         * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ssXXX'['VV']'}.
          *
          * <p>ISO 8601 format with complete timezone information including offset and timezone ID.
          * Most comprehensive format for representing a moment in time with full context.</p>
@@ -6063,7 +6063,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
         static final String ISO_ZONED_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssXXX'['VV']'";
 
         /**
-         * Date/Time format: {@code yyyy-MM-dd}
+         * Date/Time format: {@code yyyy-MM-dd}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -6084,7 +6084,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
         public static final DTF LOCAL_DATE = new DTF(Dates.LOCAL_DATE_FORMAT);
 
         /**
-         * Date/Time format: {@code HH:mm:ss}
+         * Date/Time format: {@code HH:mm:ss}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -6105,7 +6105,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
         public static final DTF LOCAL_TIME = new DTF(Dates.LOCAL_TIME_FORMAT);
 
         /**
-         * Date/Time format: {@code yyyy-MM-dd HH:mm:ss}
+         * Date/Time format: {@code yyyy-MM-dd HH:mm:ss}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -6126,7 +6126,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
         public static final DTF LOCAL_DATE_TIME = new DTF(Dates.LOCAL_DATE_TIME_FORMAT);
 
         /**
-         * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ss}
+         * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ss}.
          *
          * <p>ISO 8601 format without timezone information. Useful for standard date-time representation
          * in APIs and data exchange where local time (without offset) is sufficient.</p>
@@ -6147,7 +6147,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
         public static final DTF ISO_LOCAL_DATE_TIME = new DTF(Dates.ISO_LOCAL_DATE_TIME_FORMAT);
 
         /**
-         * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ssXXX}
+         * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ssXXX}.
          *
          * <p>ISO 8601 format with UTC offset. Useful for representing moment in time with offset
          * information, but without timezone ID. Format includes offset like +05:30, -08:00, or Z for UTC.</p>
@@ -6169,7 +6169,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
         public static final DTF ISO_OFFSET_DATE_TIME = new DTF(Dates.ISO_OFFSET_DATE_TIME_FORMAT);
 
         /**
-         * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ssXXX'['VV']'}
+         * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ssXXX'['VV']'}.
          *
          * <p>ISO 8601 format with timezone ID. Provides complete information including offset and
          * timezone identifier. Most comprehensive format for full datetime representation.</p>

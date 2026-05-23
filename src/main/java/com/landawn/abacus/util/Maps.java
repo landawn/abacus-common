@@ -342,7 +342,7 @@ public final class Maps {
     /**
      * Creates a Map by zipping together two Iterables, one containing keys and the other containing values.
      * The Iterables should be of the same length. If they are not, the resulting Map will have the size of the smaller Iterable.
-     * The keys and values are associated in the order in which they are provided (i.e., the first key is associated with the first value, and so on)
+     * The keys and values are associated in the order in which they are provided (i.e., the first key is associated with the first value, and so on).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

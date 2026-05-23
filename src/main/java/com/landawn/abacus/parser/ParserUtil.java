@@ -1686,10 +1686,10 @@ public final class ParserUtil {
 
             return inputPropName.equalsIgnoreCase(propNameByMethod) || inputPropName.replace(SK.UNDERSCORE, Strings.EMPTY).equalsIgnoreCase(propNameByMethod)
                     || inputPropName.equalsIgnoreCase(ClassUtil.getSimpleClassName(cls) + SK._PERIOD + propNameByMethod)
-                    || (inputPropName.startsWith(GET) && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
-                    || (inputPropName.startsWith(SET) && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
-                    || (inputPropName.startsWith(IS) && inputPropName.substring(2).equalsIgnoreCase(propNameByMethod))
-                    || (inputPropName.startsWith(HAS) && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod));
+                    || (inputPropName.startsWith(GET) && inputPropName.length() > 3 && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
+                    || (inputPropName.startsWith(SET) && inputPropName.length() > 3 && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
+                    || (inputPropName.startsWith(IS) && inputPropName.length() > 2 && inputPropName.substring(2).equalsIgnoreCase(propNameByMethod))
+                    || (inputPropName.startsWith(HAS) && inputPropName.length() > 3 && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod));
         }
 
         /**
@@ -3504,6 +3504,12 @@ public final class ParserUtil {
                     : fieldAccess.getIndex(field.getName());
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * <p>This override uses reflectasm ({@code FieldAccess}/{@code MethodAccess}) for faster
+         * property access than standard reflection.</p>
+         */
         @SuppressWarnings("unchecked")
         @Override
         public <T> T getPropValue(final Object obj) {
@@ -3514,6 +3520,12 @@ public final class ParserUtil {
             return (T) ((fieldAccessIndex > -1) ? fieldAccess.get(obj, fieldAccessIndex) : getMethodAccess.invoke(obj, getMethodAccessIndex));
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * <p>This override uses reflectasm ({@code FieldAccess}/{@code MethodAccess}) for faster
+         * property access than standard reflection.</p>
+         */
         @SuppressFBWarnings
         @Override
         public void setPropValue(final Object obj, Object propValue) {

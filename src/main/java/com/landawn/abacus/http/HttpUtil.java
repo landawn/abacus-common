@@ -359,45 +359,8 @@ public final class HttpUtil {
     }
 
     /**
-     * Performs a case-insensitive lookup against a header map. First tries the two
-     * conventional spellings (preserved-case, then all-lower) so the common case is O(1);
-     * falls back to scanning the entry set with {@link String#equalsIgnoreCase} only when
-     * neither direct lookup hits. This is necessary because {@code HttpURLConnection.getHeaderFields()}
-     * preserves server-supplied casing (e.g. some servers emit {@code CONTENT-TYPE}).
-     *
-     * @param httpHeaders the headers map (must not be {@code null})
-     * @param canonical the canonical (mixed-case) header name to try first
-     * @param lower the lowercase header name to try next
-     * @return the header value found, or {@code null} if no entry matches case-insensitively
-     */
-    private static Object findHeaderValueCaseInsensitive(final Map<String, ?> httpHeaders, final String canonical, final String lower) {
-        Object value = httpHeaders.get(canonical);
-
-        if (value != null) {
-            return value;
-        }
-
-        value = httpHeaders.get(lower);
-
-        if (value != null) {
-            return value;
-        }
-
-        // Fall back to a scan for arbitrary casing (e.g. server emits CONTENT-TYPE).
-        for (final Map.Entry<String, ?> entry : httpHeaders.entrySet()) {
-            final String name = entry.getKey();
-
-            if (name != null && name.equalsIgnoreCase(canonical)) {
-                return entry.getValue();
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * Gets the Content-Type header value from HttpHeaders.
-     * Looks for both "Content-Type" and "content-type" keys.
+     * Performs a case-insensitive lookup of the "Content-Type" header name.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -414,13 +377,7 @@ public final class HttpUtil {
             return null;
         }
 
-        Object value = httpHeaders.get(HttpHeaders.Names.CONTENT_TYPE);
-
-        if (value == null) {
-            value = httpHeaders.get(HttpHeaders.Names.L_CONTENT_TYPE);
-        }
-
-        return readHttpHeaderValue(value);
+        return readHttpHeaderValue(findHeaderValueCaseInsensitive(httpHeaders.map, HttpHeaders.Names.CONTENT_TYPE, HttpHeaders.Names.L_CONTENT_TYPE));
     }
 
     /**
@@ -491,7 +448,7 @@ public final class HttpUtil {
 
     /**
      * Gets the Content-Encoding header value from HttpHeaders.
-     * Looks for both "Content-Encoding" and "content-encoding" keys.
+     * Performs a case-insensitive lookup of the "Content-Encoding" header name.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -508,13 +465,7 @@ public final class HttpUtil {
             return null;
         }
 
-        Object value = httpHeaders.get(HttpHeaders.Names.CONTENT_ENCODING);
-
-        if (value == null) {
-            value = httpHeaders.get(HttpHeaders.Names.L_CONTENT_ENCODING);
-        }
-
-        return readHttpHeaderValue(value);
+        return readHttpHeaderValue(findHeaderValueCaseInsensitive(httpHeaders.map, HttpHeaders.Names.CONTENT_ENCODING, HttpHeaders.Names.L_CONTENT_ENCODING));
     }
 
     /**
@@ -1267,6 +1218,43 @@ public final class HttpUtil {
      */
     private static boolean isContentTypeTokenChar(final char c) {
         return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '-' || c == '_' || c == '.';
+    }
+
+    /**
+     * Performs a case-insensitive lookup against a header map. First tries the two
+     * conventional spellings (preserved-case, then all-lower) so the common case is O(1);
+     * falls back to scanning the entry set with {@link String#equalsIgnoreCase} only when
+     * neither direct lookup hits. This is necessary because {@code HttpURLConnection.getHeaderFields()}
+     * preserves server-supplied casing (e.g. some servers emit {@code CONTENT-TYPE}).
+     *
+     * @param httpHeaders the headers map (must not be {@code null})
+     * @param canonical the canonical (mixed-case) header name to try first
+     * @param lower the lowercase header name to try next
+     * @return the header value found, or {@code null} if no entry matches case-insensitively
+     */
+    private static Object findHeaderValueCaseInsensitive(final Map<String, ?> httpHeaders, final String canonical, final String lower) {
+        Object value = httpHeaders.get(canonical);
+
+        if (value != null) {
+            return value;
+        }
+
+        value = httpHeaders.get(lower);
+
+        if (value != null) {
+            return value;
+        }
+
+        // Fall back to a scan for arbitrary casing (e.g. server emits CONTENT-TYPE).
+        for (final Map.Entry<String, ?> entry : httpHeaders.entrySet()) {
+            final String name = entry.getKey();
+
+            if (name != null && name.equalsIgnoreCase(canonical)) {
+                return entry.getValue();
+            }
+        }
+
+        return null;
     }
 
     /**

@@ -806,7 +806,7 @@ public final class Throwables {
          * @param <T> the type of the elements in the Iterator.
          * @param <E> the type of the exception that may be thrown.
          * @param iteratorSupplier a Supplier that provides the Throwables.Iterator when needed.
-         * @return a Throwables.Iterator that is initialized on the first call to hasNext() or next().
+         * @return a Throwables.Iterator that is initialized on the first call to {@code hasNext()}, {@code next()}, {@code advance()}, or {@code count()}.
          * @throws IllegalArgumentException if iteratorSupplier is null
          */
         public static <T, E extends Exception> Throwables.Iterator<T, E> defer(final java.util.function.Supplier<Throwables.Iterator<T, E>> iteratorSupplier) {

@@ -39,13 +39,13 @@ package com.landawn.abacus.util;
  */
 public enum LockMode {
     /**
-     * Read lock mode. When this lock is held, others cannot read by bean ID,
+     * The read lock mode. When this lock is held, others cannot read by bean ID,
      * though queries by condition are still permitted.
      */
     R(1),
 
     /**
-     * Add lock mode. When this lock is held, others cannot insert new records.
+     * The add lock mode. When this lock is held, others cannot insert new records.
      *
      * @deprecated not supported at present
      */
@@ -53,12 +53,12 @@ public enum LockMode {
     A(2),
 
     /**
-     * Update lock mode. When this lock is held, others cannot modify existing records.
+     * The update lock mode. When this lock is held, others cannot modify existing records.
      */
     U(4),
 
     /**
-     * Delete lock mode. When this lock is held, others cannot delete records.
+     * The delete lock mode. When this lock is held, others cannot delete records.
      */
     D(8),
 

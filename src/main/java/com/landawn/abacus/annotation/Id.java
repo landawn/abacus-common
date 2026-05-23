@@ -77,28 +77,31 @@ import java.lang.annotation.Target;
 public @interface Id {
 
     /**
-     * Specifies the column names that form the primary key.
+     * Specifies the property names that form the primary key when {@code @Id} is applied to a type
+     * (class) to declare a composite or explicit primary key.
      *
      * <p>Usage patterns:</p>
      * <ul>
-     *   <li>Empty array (default): For single primary keys, the annotated field name is used</li>
-     *   <li>Single element array: Explicitly names the primary key column</li>
-     *   <li>Multiple elements: Defines a composite primary key with multiple columns</li>
+     *   <li>For type-level usage: list one or more property names that form the primary key
+     *       (the array must be non-empty at the type level).</li>
+     *   <li>For field-level usage: this element is typically left at its default (empty array);
+     *       the annotated field itself identifies the primary key, and any column-name mapping
+     *       should be supplied via {@link Column}.</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * @Id  // Uses field name as column name
+     * // Field-level: the annotated field is the primary key.
+     * @Id
      * private Long id;
      *
-     * @Id({"user_id"})  // Maps to 'user_id' column
-     * private Long id;
-     *
-     * @Id({"dept_id", "emp_id"})  // Composite key
+     * // Type-level composite primary key.
+     * @Id({"dept_id", "emp_id"})
      * public class Employee { }
      * }</pre>
      *
-     * @return an array of column names forming the primary key; empty array uses the field name for field-level usage
+     * @return the property names forming the primary key at the type level; an empty array (the
+     *         default) is the conventional value for field-level usage
      */
     String[] value() default {};
 }

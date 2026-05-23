@@ -1368,7 +1368,7 @@ public final class Suppliers {
      *
      * @return never returns normally
      * @throws UnsupportedOperationException always
-     * @deprecated unsupported operation.
+     * @deprecated unsupported operation. An {@link ImmutableList} is immutable and cannot be populated through a no-arg supplier; there is no replacement.
      */
     @Deprecated
     public static Supplier<ImmutableList<?>> ofImmutableList() {
@@ -1380,7 +1380,7 @@ public final class Suppliers {
      *
      * @return never returns normally
      * @throws UnsupportedOperationException always
-     * @deprecated unsupported operation.
+     * @deprecated unsupported operation. An {@link ImmutableSet} is immutable and cannot be populated through a no-arg supplier; there is no replacement.
      */
     @Deprecated
     public static Supplier<ImmutableSet<?>> ofImmutableSet() {
@@ -1392,7 +1392,7 @@ public final class Suppliers {
      *
      * @return never returns normally
      * @throws UnsupportedOperationException always
-     * @deprecated unsupported operation.
+     * @deprecated unsupported operation. An {@link ImmutableMap} is immutable and cannot be populated through a no-arg supplier; there is no replacement.
      */
     @Deprecated
     public static Supplier<ImmutableMap<?, ?>> ofImmutableMap() {

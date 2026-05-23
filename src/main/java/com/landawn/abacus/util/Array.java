@@ -3945,7 +3945,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Boolean[] empty = Array.box(primitives, 2, 2);     // returns empty Boolean array
      * }</pre>
      *
-     * @param a the array of primitive booleans to be converted.
+     * @param a the array of primitive booleans to be converted. May be {@code null}.
      * @param fromIndex the start index of the portion to be converted (inclusive).
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Boolean objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
@@ -4005,7 +4005,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Character[] empty = Array.box(primitives, 2, 2);     // returns empty Character array
      * }</pre>
      *
-     * @param a the array of primitive chars to be converted.
+     * @param a the array of primitive chars to be converted. May be {@code null}.
      * @param fromIndex the start index of the portion to be converted (inclusive).
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Character objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
@@ -4065,7 +4065,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Byte[] empty = Array.box(primitives, 2, 2);     // returns empty Byte array
      * }</pre>
      *
-     * @param a the array of primitive bytes to be converted.
+     * @param a the array of primitive bytes to be converted. May be {@code null}.
      * @param fromIndex the start index of the portion to be converted (inclusive).
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Byte objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
@@ -4125,7 +4125,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Short[] empty = Array.box(primitives, 2, 2);     // returns empty Short array
      * }</pre>
      *
-     * @param a the array of primitive shorts to be converted.
+     * @param a the array of primitive shorts to be converted. May be {@code null}.
      * @param fromIndex the start index of the portion to be converted (inclusive).
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Short objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
@@ -4185,7 +4185,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Integer[] empty = Array.box(primitives, 2, 2);     // returns empty Integer array
      * }</pre>
      *
-     * @param a the array of primitive integers to be converted.
+     * @param a the array of primitive integers to be converted. May be {@code null}.
      * @param fromIndex the start index of the portion to be converted (inclusive).
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Integer objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
@@ -4245,7 +4245,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Long[] empty = Array.box(primitives, 2, 2);     // returns empty Long array
      * }</pre>
      *
-     * @param a the array of primitive longs to be converted.
+     * @param a the array of primitive longs to be converted. May be {@code null}.
      * @param fromIndex the start index of the portion to be converted (inclusive).
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Long objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
@@ -4305,7 +4305,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Float[] empty = Array.box(primitives, 2, 2);     // returns empty Float array
      * }</pre>
      *
-     * @param a the array of primitive floats to be converted.
+     * @param a the array of primitive floats to be converted. May be {@code null}.
      * @param fromIndex the start index of the portion to be converted (inclusive).
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Float objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
@@ -4365,7 +4365,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Double[] empty = Array.box(primitives, 2, 2);     // returns empty Double array
      * }</pre>
      *
-     * @param a the array of primitive doubles to be converted.
+     * @param a the array of primitive doubles to be converted. May be {@code null}.
      * @param fromIndex the start index of the portion to be converted (inclusive).
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Double objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
@@ -4812,7 +4812,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * boolean[] withTrue = Array.unbox(objects, 0, 3, true);   // returns {true, true, false}
      * }</pre>
      *
-     * @param a the array of Boolean objects to be converted.
+     * @param a the array of Boolean objects to be converted. May be {@code null}.
      * @param fromIndex the starting index (inclusive) in the array to be converted.
      * @param toIndex the ending index (exclusive) in the array to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -4878,7 +4878,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a portion of an array of Character objects into an array of primitive chars.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the array of Character objects to be converted.
+     * @param a the array of Character objects to be converted. May be {@code null}.
      * @param fromIndex the starting index (inclusive) in the array to be converted.
      * @param toIndex the ending index (exclusive) in the array to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -4945,7 +4945,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a portion of an array of Byte objects into an array of primitive bytes.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the array of Byte objects to be converted.
+     * @param a the array of Byte objects to be converted. May be {@code null}.
      * @param fromIndex the starting index (inclusive) in the array to be converted.
      * @param toIndex the ending index (exclusive) in the array to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -5012,7 +5012,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a portion of an array of Short objects into an array of primitive shorts.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the array of Short objects to be converted.
+     * @param a the array of Short objects to be converted. May be {@code null}.
      * @param fromIndex the starting index (inclusive) in the array to be converted.
      * @param toIndex the ending index (exclusive) in the array to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
