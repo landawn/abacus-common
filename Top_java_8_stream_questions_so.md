@@ -219,7 +219,7 @@ Map<String, Integer> y = Stream.of(x).toMap(e -> e.getKey(), e -> Integer.parseI
 * By abacus-common
 
 Yes, with the most beautiful design: 
-[Pair](https://static.javadoc.io/com.landawn/abacus-common-all/1.0.6/com/landawn/abacus/util/Pair.html), [Triple](https://static.javadoc.io/com.landawn/abacus-common-all/1.0.6/com/landawn/abacus/util/Triple.html), [Tuple](https://static.javadoc.io/com.landawn/abacus-common-all/1.0.6/com/landawn/abacus/util/Tuple.html)
+[Pair](https://static.javadoc.io/com.landawn.abacus/abacus-common-all/1.0.6/com/landawn/abacus/util/Pair.html), [Triple](https://static.javadoc.io/com.landawn.abacus/abacus-common-all/1.0.6/com/landawn/abacus/util/Triple.html), [Tuple](https://static.javadoc.io/com.landawn.abacus/abacus-common-all/1.0.6/com/landawn/abacus/util/Tuple.html)
 
 
 ---
