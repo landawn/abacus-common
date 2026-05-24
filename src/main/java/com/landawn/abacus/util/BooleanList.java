@@ -1260,6 +1260,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param operator the operator to apply to each element; must not be {@code null}
      */
     public void replaceAll(final BooleanUnaryOperator operator) {
+        N.requireNonNull(operator, "operator");
+
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsBoolean(elementData[i]);
         }

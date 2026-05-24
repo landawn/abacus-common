@@ -1400,6 +1400,15 @@ public class DoubleListTest extends TestBase {
     }
 
     @Test
+    public void test_replaceAll_operator_null() {
+        DoubleList nonEmpty = DoubleList.of(1.0, 2.0, 3.0);
+        assertThrows(NullPointerException.class, () -> nonEmpty.replaceAll((com.landawn.abacus.util.function.DoubleUnaryOperator) null));
+
+        DoubleList empty = new DoubleList();
+        assertThrows(NullPointerException.class, () -> empty.replaceAll((com.landawn.abacus.util.function.DoubleUnaryOperator) null));
+    }
+
+    @Test
     public void testReplaceAllValuesNoneFound() {
         list.addAll(new double[] { 1.1, 2.2, 3.3 });
         int count = list.replaceAll(4.4, 9.9);

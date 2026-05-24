@@ -5818,8 +5818,68 @@ public class u { // NOSONAR
      * If a value is present, {@code isPresent()} returns {@code true}.
      * If no value is present, the object is considered empty and {@code isPresent()} returns {@code false}.
      *
+     * <p>A present value is, by construction, never {@code null}: {@link #of(Object) of(null)} throws
+     * {@code NullPointerException}, and {@link #ofNullable(Object) ofNullable(null)} returns {@link #empty()}.
+     * This mirrors the contract of {@link java.util.Optional}.
+     *
+     * <p><b>Comparison with related containers</b></p>
+     * <p>This library exposes two "may-be-missing" containers — {@code Optional} and {@link Nullable} —
+     * and also interoperates with {@link java.util.Optional}. The three differ in whether {@code null}
+     * is a representable <i>present</i> value:</p>
+     *
+     * <table border="1" summary="Optional vs Nullable vs java.util.Optional">
+     *   <tr>
+     *     <th>Aspect</th>
+     *     <th>{@code u.Optional<T>}</th>
+     *     <th>{@link Nullable u.Nullable<T>}</th>
+     *     <th>{@link java.util.Optional}</th>
+     *   </tr>
+     *   <tr>
+     *     <td>Allows a present {@code null}</td>
+     *     <td>No — {@code of(null)} throws NPE</td>
+     *     <td><b>Yes</b> — {@code of(null)} is valid; the {@code null} is "present"</td>
+     *     <td>No — {@code of(null)} throws NPE</td>
+     *   </tr>
+     *   <tr>
+     *     <td>States</td>
+     *     <td>{@code empty} | {@code present(non-null)}</td>
+     *     <td>{@code empty} | {@code present(null)} | {@code present(non-null)}</td>
+     *     <td>{@code empty} | {@code present(non-null)}</td>
+     *   </tr>
+     *   <tr>
+     *     <td>{@code isPresent()} when value is {@code null}</td>
+     *     <td>n/a (cannot hold {@code null})</td>
+     *     <td>{@code true} — use {@link Nullable#isNull()}/{@link Nullable#isNotNull()} to discriminate</td>
+     *     <td>n/a (cannot hold {@code null})</td>
+     *   </tr>
+     *   <tr>
+     *     <td>{@code orElse(other)} when value is {@code null}</td>
+     *     <td>Returns {@code other} (value is never {@code null})</td>
+     *     <td>Returns the held {@code null}, <b>not</b> {@code other}</td>
+     *     <td>Returns {@code other} (value is never {@code null})</td>
+     *     </tr>
+     *   <tr>
+     *     <td>Use when</td>
+     *     <td>Result is either absent or a meaningful non-null value (most cases)</td>
+     *     <td>{@code null} itself is a meaningful value — e.g. a SQL column that exists but is NULL,
+     *         a {@code Map} key that maps to {@code null}</td>
+     *     <td>Interop with the JDK / external APIs</td>
+     *   </tr>
+     * </table>
+     *
+     * <p>Conversion helpers are provided in both directions: {@link #from(java.util.Optional)},
+     * {@link #toJdkOptional()}, {@link Nullable#from(Optional)}, and {@link Nullable#toOptional()}.
+     *
+     * <p><b>Usage Example</b></p>
+     * <pre>{@code
+     * Optional<User> user = repo.findById(id);          // empty if not found
+     * String displayName = user.map(User::getName)
+     *                          .orElse("(anonymous)");
+     * }</pre>
+     *
      * @param <T> the type of value
      * @see com.landawn.abacus.util.u.Nullable
+     * @see java.util.Optional
      * @see com.landawn.abacus.util.Holder
      * @see com.landawn.abacus.util.Result
      * @see com.landawn.abacus.util.Pair
@@ -6593,10 +6653,15 @@ public class u { // NOSONAR
      * If no value has been set, the object is considered empty, {@link #isPresent()} returns {@code false} and {@link #isEmpty()} returns {@code true}.
      * </p>
      *
+     * <p>A {@code Nullable} therefore has <b>three</b> distinguishable states rather than two:
+     * <i>absent</i>, <i>present-and-null</i>, and <i>present-and-non-null</i>. Use
+     * {@link #isPresent()} to discriminate absent from present, and {@link #isNull()} /
+     * {@link #isNotNull()} to discriminate {@code null} from {@code non-null} within the present case.
+     *
      * <p><b>Why {@code Nullable}?</b></p>
      *
      * <p><b>Logical Meaning of {@code null}</b></p>
-     * {@code null} does not always represent “nonexistent.”
+     * {@code null} does not always represent "nonexistent."
      * For example, a collection may contain {@code null} elements, which does not mean the collection itself is empty.
      * Similarly, when retrieving a column value from a database record, the value may be {@code null}
      * even though the record itself exists.
@@ -6614,8 +6679,70 @@ public class u { // NOSONAR
      * Outside of this library, whether to use {@code @Nullable} is entirely up to you — the API is flexible enough to support both preferences.
      * </p>
      *
+     * <p><b>Comparison with {@link Optional} and {@link java.util.Optional}</b></p>
+     * <table border="1" summary="Nullable vs Optional vs java.util.Optional">
+     *   <tr>
+     *     <th>Aspect</th>
+     *     <th>{@code u.Nullable<T>}</th>
+     *     <th>{@link Optional u.Optional<T>}</th>
+     *     <th>{@link java.util.Optional}</th>
+     *   </tr>
+     *   <tr>
+     *     <td>Allows a present {@code null}</td>
+     *     <td><b>Yes</b> — {@code of(null)} produces a present-but-null instance</td>
+     *     <td>No — {@code of(null)} throws NPE</td>
+     *     <td>No — {@code of(null)} throws NPE</td>
+     *   </tr>
+     *   <tr>
+     *     <td>States</td>
+     *     <td>{@code empty} | {@code present(null)} | {@code present(non-null)}</td>
+     *     <td>{@code empty} | {@code present(non-null)}</td>
+     *     <td>{@code empty} | {@code present(non-null)}</td>
+     *   </tr>
+     *   <tr>
+     *     <td>{@code orElse(other)} semantics</td>
+     *     <td>Returns the held value when present — <b>even if that value is {@code null}</b>;
+     *         returns {@code other} only when absent</td>
+     *     <td>Returns the held value when present; otherwise {@code other}</td>
+     *     <td>Returns the held value when present; otherwise {@code other}</td>
+     *   </tr>
+     *   <tr>
+     *     <td>Discriminate {@code null} from absent</td>
+     *     <td>{@link #isPresent()} + {@link #isNull()} / {@link #isNotNull()}</td>
+     *     <td>Not needed — {@code present} implies {@code non-null}</td>
+     *     <td>Not needed — {@code present} implies {@code non-null}</td>
+     *   </tr>
+     *   <tr>
+     *     <td>Use when</td>
+     *     <td>{@code null} is a meaningful, distinct outcome — e.g. a SQL column that exists but is NULL,
+     *         a {@code Map} key that is mapped to {@code null}, "found but value unknown"</td>
+     *     <td>Result is either absent or a meaningful non-null value (most cases)</td>
+     *     <td>Interop with the JDK / external APIs</td>
+     *   </tr>
+     * </table>
+     *
+     * <p>Conversion helpers are provided in both directions: {@link #from(Optional)},
+     * {@link #from(java.util.Optional)}, {@link #toOptional()}, and {@link #toJdkOptional()}.
+     *
+     * <p><b>Usage Example</b></p>
+     * <pre>{@code
+     * // Map lookup where the key may map to null OR be absent
+     * Map<String, String> map = new HashMap<>();
+     * map.put("key1", null);
+     *
+     * Nullable<String> v1 = N.findFirstNonNull(...);    // present(non-null) | absent
+     * Nullable<String> v2 = Nullable.of(map.get("key1")); // present(null)
+     * Nullable<String> v3 = Nullable.empty();             // absent
+     *
+     * v2.isPresent();  // true
+     * v2.isNull();     // true
+     * v2.orElse("x");  // returns null (NOT "x") — the null IS the value
+     * v3.orElse("x");  // returns "x"
+     * }</pre>
+     *
      * @param <T> the type of value
      * @see com.landawn.abacus.util.u.Optional
+     * @see java.util.Optional
      * @see com.landawn.abacus.util.Holder
      * @see com.landawn.abacus.util.Result
      * @see com.landawn.abacus.util.Pair

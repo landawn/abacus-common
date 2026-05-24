@@ -1297,6 +1297,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param operator the operator to apply to each element; must not be {@code null}
      */
     public void replaceAll(final CharUnaryOperator operator) {
+        N.requireNonNull(operator, "operator");
+
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsChar(elementData[i]);
         }

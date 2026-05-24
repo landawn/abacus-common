@@ -37,6 +37,56 @@ import com.landawn.abacus.util.u.Optional;
  * Boolean right = triple.right();   // true
  * }</pre>
  *
+ * <h2>{@code Triple} vs {@link Tuple3}</h2>
+ *
+ * <p>{@code Triple} and {@code Tuple3} both hold three heterogeneous values. The choice
+ * mirrors the {@link Pair} vs {@link com.landawn.abacus.util.Tuple.Tuple2 Tuple2} trade-off:
+ * pick {@code Triple} for a mutable, named-accessor container; pick {@code Tuple3} for an
+ * immutable, value-style tuple with a richer functional API.</p>
+ *
+ * <table border="1">
+ *   <caption>Triple vs Tuple3</caption>
+ *   <tr>
+ *     <th></th>
+ *     <th>{@code Triple<L, M, R>}</th>
+ *     <th>{@code Tuple3<T1, T2, T3>}</th>
+ *   </tr>
+ *   <tr>
+ *     <td>Mutability</td>
+ *     <td><b>Mutable</b> — implements {@link Mutable}; values can be reassigned via
+ *         {@link #setLeft(Object)}, {@link #setMiddle(Object)}, {@link #setRight(Object)}</td>
+ *     <td><b>Effectively immutable</b> — {@code _1}, {@code _2}, {@code _3} are {@code public final}</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Field access</td>
+ *     <td>Named getters/setters: {@link #left()}, {@link #middle()}, {@link #right()}</td>
+ *     <td>Direct field access: {@code t._1}, {@code t._2}, {@code t._3}</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Functional/tuple API</td>
+ *     <td>Minimal: {@code map}, {@code filter}, {@code accept} on the triple as a whole</td>
+ *     <td>Rich: {@code accept(TriConsumer)}, {@code map(TriFunction)}, {@code filter(TriPredicate)},
+ *         {@code reverse()}, {@code toList()}, {@code toArray()}, plus integration with the
+ *         {@link Tuple} hierarchy ({@code Tuple1}..{@code Tuple9})</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Hash/equals stability</td>
+ *     <td>Hash code changes when elements are mutated — <b>do not use as a {@code HashMap} key
+ *         or {@code HashSet} element while mutating</b></td>
+ *     <td>Stable — safe to use as a {@code Map} key or {@code Set} element</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Use when</td>
+ *     <td>You need to mutate elements after construction, or prefer self-documenting
+ *         left/middle/right accessors over positional indexing</td>
+ *     <td>You want immutable, value-style semantics, a richer functional API, or a tuple that
+ *         composes with the rest of the {@link Tuple} family</td>
+ *   </tr>
+ * </table>
+ *
+ * <p>Conversion: use {@link #toTuple()} to obtain an immutable snapshot as a {@code Tuple3},
+ * and {@link Tuple3#toTriple()} to obtain a fresh mutable {@code Triple}.</p>
+ *
  * @param <L> the type of the left element.
  * @param <M> the type of the middle element.
  * @param <R> the type of the right element.
@@ -46,6 +96,7 @@ import com.landawn.abacus.util.u.Optional;
  * @see com.landawn.abacus.util.Result
  * @see com.landawn.abacus.util.Pair
  * @see com.landawn.abacus.util.Tuple
+ * @see com.landawn.abacus.util.Tuple.Tuple3
  */
 @SuppressFBWarnings("PA_PUBLIC_PRIMITIVE_ATTRIBUTE")
 public final class Triple<L, M, R> implements Mutable {

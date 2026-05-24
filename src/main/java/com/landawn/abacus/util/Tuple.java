@@ -1554,8 +1554,61 @@ public abstract class Tuple<TP> implements Immutable {
      * Tuple2<Integer, String> reversed = score.reverse();   // (95, "Alice")
      * }</pre>
      *
+     * <h2>{@code Tuple2} vs {@link Pair}</h2>
+     *
+     * <p>{@code Tuple2} and {@code Pair} both hold two heterogeneous values, but make
+     * opposite trade-offs on mutability and API style. Prefer {@code Tuple2} as the default
+     * two-value container; reach for {@link Pair} when you need mutation or {@link java.util.Map.Entry}
+     * interop.</p>
+     *
+     * <table border="1">
+     *   <caption>Tuple2 vs Pair</caption>
+     *   <tr>
+     *     <th></th>
+     *     <th>{@code Tuple2<T1, T2>}</th>
+     *     <th>{@code Pair<L, R>}</th>
+     *   </tr>
+     *   <tr>
+     *     <td>Mutability</td>
+     *     <td><b>Effectively immutable</b> — {@link #_1} and {@link #_2} are {@code public final}</td>
+     *     <td><b>Mutable</b> — implements {@link Mutable}; supports {@code setLeft} / {@code setRight}</td>
+     *   </tr>
+     *   <tr>
+     *     <td>Field access</td>
+     *     <td>Direct field access: {@code t._1}, {@code t._2}</td>
+     *     <td>Named getters/setters: {@code left()}, {@code right()}, {@code getKey()}, {@code getValue()}</td>
+     *   </tr>
+     *   <tr>
+     *     <td>Map.Entry interop</td>
+     *     <td>No — convert via {@link #toImmutableEntry()} or {@link #toPair()}</td>
+     *     <td><b>Yes</b> — implements {@link java.util.Map.Entry} directly</td>
+     *   </tr>
+     *   <tr>
+     *     <td>Functional/tuple API</td>
+     *     <td>Rich: {@link #accept accept(BiConsumer)}, {@link #map map(BiFunction)},
+     *         {@link #filter filter(BiPredicate)}, {@link #reverse()},
+     *         {@link #toArray()}, {@code Tuple.toList(t)}, plus the shared {@link Tuple} hierarchy</td>
+     *     <td>Minimal: {@code map}, {@code filter}, {@code accept} on the pair as a whole</td>
+     *   </tr>
+     *   <tr>
+     *     <td>Hash/equals stability</td>
+     *     <td>Stable — safe to use as a {@code Map} key or {@code Set} element</td>
+     *     <td>Hash code changes when elements are mutated — unsafe as a hash-table key while mutating</td>
+     *   </tr>
+     *   <tr>
+     *     <td>Use when</td>
+     *     <td>You want immutable, value-style semantics, a richer functional API, or a tuple that
+     *         composes with {@link Tuple3}, {@link Tuple4}, etc.</td>
+     *     <td>You need to mutate elements after construction, or you need a {@link java.util.Map.Entry}</td>
+     *   </tr>
+     * </table>
+     *
+     * <p>Conversion: use {@link #toPair()} for a fresh mutable {@code Pair}, or
+     * {@link Pair#toTuple()} to convert a {@code Pair} back into an immutable {@code Tuple2}.</p>
+     *
      * @param <T1> the type of the first element.
      * @param <T2> the type of the second element.
+     * @see Pair
      */
     public static final class Tuple2<T1, T2> extends Tuple<Tuple2<T1, T2>> {
 
@@ -1887,9 +1940,57 @@ public abstract class Tuple<TP> implements Immutable {
      *     Tuple.of("data", 42, true).toTriple();
      * }</pre>
      *
+     * <h2>{@code Tuple3} vs {@link Triple}</h2>
+     *
+     * <p>{@code Tuple3} and {@code Triple} both hold three heterogeneous values. The trade-off
+     * mirrors {@link Tuple2} vs {@link Pair}: {@code Tuple3} is the immutable, value-style,
+     * functionally-oriented option; {@link Triple} is the mutable container with named accessors.</p>
+     *
+     * <table border="1">
+     *   <caption>Tuple3 vs Triple</caption>
+     *   <tr>
+     *     <th></th>
+     *     <th>{@code Tuple3<T1, T2, T3>}</th>
+     *     <th>{@code Triple<L, M, R>}</th>
+     *   </tr>
+     *   <tr>
+     *     <td>Mutability</td>
+     *     <td><b>Effectively immutable</b> — {@link #_1}, {@link #_2}, {@link #_3} are {@code public final}</td>
+     *     <td><b>Mutable</b> — implements {@link Mutable}; supports {@code setLeft} / {@code setMiddle} / {@code setRight}</td>
+     *   </tr>
+     *   <tr>
+     *     <td>Field access</td>
+     *     <td>Direct field access: {@code t._1}, {@code t._2}, {@code t._3}</td>
+     *     <td>Named getters/setters: {@code left()}, {@code middle()}, {@code right()}</td>
+     *   </tr>
+     *   <tr>
+     *     <td>Functional/tuple API</td>
+     *     <td>Rich: {@link #accept accept(TriConsumer)}, {@link #map map(TriFunction)},
+     *         {@link #filter filter(TriPredicate)}, {@link #reverse()},
+     *         {@link #toArray()}, {@code Tuple.toList(t)}, plus the shared {@link Tuple} hierarchy</td>
+     *     <td>Minimal: {@code map}, {@code filter}, {@code accept} on the triple as a whole</td>
+     *   </tr>
+     *   <tr>
+     *     <td>Hash/equals stability</td>
+     *     <td>Stable — safe to use as a {@code Map} key or {@code Set} element</td>
+     *     <td>Hash code changes when elements are mutated — unsafe as a hash-table key while mutating</td>
+     *   </tr>
+     *   <tr>
+     *     <td>Use when</td>
+     *     <td>You want immutable, value-style semantics, a richer functional API, or a tuple that
+     *         composes with the rest of the {@link Tuple} family</td>
+     *     <td>You need to mutate elements after construction, or prefer self-documenting
+     *         left/middle/right accessors over positional indexing</td>
+     *   </tr>
+     * </table>
+     *
+     * <p>Conversion: use {@link #toTriple()} for a fresh mutable {@code Triple}, or
+     * {@link Triple#toTuple()} to convert a {@code Triple} back into an immutable {@code Tuple3}.</p>
+     *
      * @param <T1> the type of the first element.
      * @param <T2> the type of the second element.
      * @param <T3> the type of the third element.
+     * @see Triple
      */
     public static final class Tuple3<T1, T2, T3> extends Tuple<Tuple3<T1, T2, T3>> {
 

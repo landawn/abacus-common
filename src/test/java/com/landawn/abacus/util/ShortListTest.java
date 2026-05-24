@@ -1347,6 +1347,15 @@ public class ShortListTest extends TestBase {
     }
 
     @Test
+    public void test_replaceAll_operator_null() {
+        ShortList nonEmpty = ShortList.of((short) 1, (short) 2, (short) 3);
+        assertThrows(NullPointerException.class, () -> nonEmpty.replaceAll((com.landawn.abacus.util.function.ShortUnaryOperator) null));
+
+        ShortList empty = new ShortList();
+        assertThrows(NullPointerException.class, () -> empty.replaceAll((com.landawn.abacus.util.function.ShortUnaryOperator) null));
+    }
+
+    @Test
     public void testReplaceAll() {
         list.add((short) 1);
         list.add((short) 2);

@@ -37,6 +37,72 @@ import com.landawn.abacus.util.u.Optional;
  * concurrently and at least one performs a compound update, external synchronization (or a different
  * primitive such as {@link java.util.concurrent.atomic.AtomicReference}) is required.</p>
  *
+ * <h2>{@code Holder} vs {@link Nullable}</h2>
+ *
+ * <p>Both types wrap a single value of {@code T}, but they answer different questions.
+ * {@code Holder} is a <b>mutable single-slot box</b> — a place to stash and reassign a value,
+ * useful inside lambdas, as an out-parameter, or as a single-value accumulator. {@link Nullable}
+ * is an <b>immutable, tri-state Optional</b> — it distinguishes <em>absent</em> from
+ * <em>present-with-{@code null}</em> from <em>present-with-non-null</em>, and exposes a
+ * functional API for safe, non-mutating access.</p>
+ *
+ * <table border="1">
+ *   <caption>Holder vs Nullable</caption>
+ *   <tr>
+ *     <th></th>
+ *     <th>{@code Holder<T>}</th>
+ *     <th>{@code Nullable<T>}</th>
+ *   </tr>
+ *   <tr>
+ *     <td>Mutability</td>
+ *     <td><b>Mutable</b> — implements {@link Mutable}; the held value can be reassigned</td>
+ *     <td><b>Immutable</b> — implements {@link Immutable}; both the value and the present/absent
+ *         state are fixed at construction</td>
+ *   </tr>
+ *   <tr>
+ *     <td>State model</td>
+ *     <td>Single slot: always "present" (it may contain {@code null} or a non-null value, but
+ *         the holder itself always exists). No notion of "absent."</td>
+ *     <td>Tri-state: {@code absent} | {@code present(null)} | {@code present(non-null)} —
+ *         use {@link Nullable#isPresent()} together with {@link Nullable#isNull()} /
+ *         {@link Nullable#isNotNull()} to distinguish.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Thread visibility</td>
+ *     <td>{@code volatile} field — single reads/writes are visible across threads, but
+ *         compound operations are <em>not</em> atomic. Use {@link java.util.concurrent.atomic.AtomicReference}
+ *         for true CAS semantics.</td>
+ *     <td>Not applicable — instances are immutable and freely shareable.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Hash/equals stability</td>
+ *     <td>Hash code changes when the value is mutated — unsafe as a hash-table key while mutating</td>
+ *     <td>Stable — safe to use as a {@code Map} key or {@code Set} element</td>
+ *   </tr>
+ *   <tr>
+ *     <td>API style</td>
+ *     <td>Read/write: {@link #value()}, {@link #setValue(Object)}, {@link #getAndSet(Object)},
+ *         {@link #updateAndGet(Throwables.UnaryOperator)}, {@link #setIf(Throwables.Predicate, Object)}.
+ *         Also offers {@link #ifNotNull(Throwables.Consumer)} for side-effects.</td>
+ *     <td>Functional, Optional-like: {@code orElse}, {@code orElseGet}, {@code orElseThrow},
+ *         {@code map}, {@code filter}, {@code ifPresent}, {@code ifPresentOrElse}, plus the tri-state
+ *         predicates {@code isPresent}, {@code isNull}, {@code isNotNull}.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Use when</td>
+ *     <td>You need a mutable single-value box — e.g. capturing a value from inside a lambda,
+ *         passing a value back from a callback, building up state across iterations, or an
+ *         "out parameter" idiom.</td>
+ *     <td>You are returning or modeling a query result and {@code null} is a meaningful, distinct
+ *         outcome (e.g. "key exists but value is {@code null}" vs "key absent"), or you want
+ *         {@link java.util.Optional}-style chaining without losing the ability to represent {@code null}.</td>
+ *   </tr>
+ * </table>
+ *
+ * <p><b>Quick rule of thumb:</b> if you are about to <em>write</em> to it, you want
+ * {@code Holder}. If you are about to <em>read</em> from it and may need to express "no result"
+ * separately from "result was {@code null}", you want {@code Nullable}.</p>
+ *
  * @param <T> The type of the value this Holder can hold.
  * @see com.landawn.abacus.util.u.Optional
  * @see com.landawn.abacus.util.u.Nullable
@@ -44,6 +110,7 @@ import com.landawn.abacus.util.u.Optional;
  * @see com.landawn.abacus.util.Pair
  * @see com.landawn.abacus.util.Triple
  * @see com.landawn.abacus.util.Tuple
+ * @see java.util.concurrent.atomic.AtomicReference
  */
 public final class Holder<T> implements Mutable {
 

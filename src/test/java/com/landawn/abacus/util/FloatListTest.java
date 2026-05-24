@@ -1093,6 +1093,15 @@ public class FloatListTest extends TestBase {
     }
 
     @Test
+    public void test_replaceAll_operator_null() {
+        FloatList nonEmpty = FloatList.of(1.0f, 2.0f, 3.0f);
+        assertThrows(NullPointerException.class, () -> nonEmpty.replaceAll((com.landawn.abacus.util.function.FloatUnaryOperator) null));
+
+        FloatList empty = new FloatList();
+        assertThrows(NullPointerException.class, () -> empty.replaceAll((com.landawn.abacus.util.function.FloatUnaryOperator) null));
+    }
+
+    @Test
     public void testReplaceAllNoMatch() {
         list.addAll(new float[] { 1.1f, 2.2f, 3.3f });
         int count = list.replaceAll(5.5f, 10.0f);

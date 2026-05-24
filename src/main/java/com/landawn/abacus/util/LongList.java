@@ -1327,6 +1327,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @throws NullPointerException if the specified operator is {@code null}
      */
     public void replaceAll(final LongUnaryOperator operator) {
+        N.requireNonNull(operator, "operator");
+
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsLong(elementData[i]);
         }

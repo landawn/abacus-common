@@ -43,6 +43,62 @@ import com.landawn.abacus.util.u.Optional;
  * nameAge.setRight(30);
  * }</pre>
  *
+ * <h2>{@code Pair} vs {@link Tuple2}</h2>
+ *
+ * <p>{@code Pair} and {@code Tuple2} both hold two heterogeneous values, but they target
+ * different use cases. Choose based on whether you need mutability and {@link Map.Entry}
+ * interop, or immutability and a functional/tuple-style API.</p>
+ *
+ * <table border="1">
+ *   <caption>Pair vs Tuple2</caption>
+ *   <tr>
+ *     <th></th>
+ *     <th>{@code Pair<L, R>}</th>
+ *     <th>{@code Tuple2<T1, T2>}</th>
+ *   </tr>
+ *   <tr>
+ *     <td>Mutability</td>
+ *     <td><b>Mutable</b> — implements {@link Mutable}; values can be reassigned via
+ *         {@link #setLeft(Object)} / {@link #setRight(Object)}</td>
+ *     <td><b>Effectively immutable</b> — {@code _1} and {@code _2} are {@code public final}</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Field access</td>
+ *     <td>Named getters/setters: {@link #left()}, {@link #right()},
+ *         {@link #getKey()}, {@link #getValue()}</td>
+ *     <td>Direct field access: {@code t._1}, {@code t._2}</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Map.Entry interop</td>
+ *     <td><b>Yes</b> — implements {@link Map.Entry}, so it can be used directly with
+ *         {@code Map} APIs and {@link #setValue(Object)} mutates the right element</td>
+ *     <td>No — convert via {@link Tuple2#toImmutableEntry()} or {@link Tuple2#toPair()}</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Functional/tuple API</td>
+ *     <td>Minimal: {@code map}, {@code filter}, {@code accept} on the pair as a whole</td>
+ *     <td>Rich: {@code accept(BiConsumer)}, {@code map(BiFunction)}, {@code filter(BiPredicate)},
+ *         {@code reverse()}, {@code toArray()}, plus integration with the
+ *         {@link Tuple} hierarchy</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Hash/equals stability</td>
+ *     <td>Hash code changes when elements are mutated — <b>do not use as a {@code HashMap} key
+ *         or {@code HashSet} element while mutating</b></td>
+ *     <td>Stable — safe to use as a {@code Map} key or {@code Set} element</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Use when</td>
+ *     <td>You need to mutate the contents after construction, or you need a {@link Map.Entry}
+ *         (e.g. building entries, iterating maps, two-value accumulator in a loop)</td>
+ *     <td>You want immutable, value-style semantics, a richer functional API, or a tuple that
+ *         composes with {@code Tuple3}, {@code Tuple4}, etc.</td>
+ *   </tr>
+ * </table>
+ *
+ * <p>Conversion: use {@link #toTuple()} to obtain an immutable snapshot as a {@code Tuple2},
+ * and {@link Tuple2#toPair()} to obtain a fresh mutable {@code Pair}.</p>
+ *
  * @param <L> the type of the left element.
  * @param <R> the type of the right element.
  * @see com.landawn.abacus.util.u.Optional
@@ -51,6 +107,7 @@ import com.landawn.abacus.util.u.Optional;
  * @see com.landawn.abacus.util.Result
  * @see com.landawn.abacus.util.Triple
  * @see com.landawn.abacus.util.Tuple
+ * @see com.landawn.abacus.util.Tuple.Tuple2
  */
 @SuppressFBWarnings("PA_PUBLIC_PRIMITIVE_ATTRIBUTE")
 public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {

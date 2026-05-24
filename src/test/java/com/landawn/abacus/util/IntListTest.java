@@ -1597,6 +1597,9 @@ public class IntListTest extends TestBase {
     public void test_replaceAll_operator_null() {
         IntList list = IntList.of(1, 2, 3);
         assertThrows(NullPointerException.class, () -> list.replaceAll((java.util.function.IntUnaryOperator) null));
+
+        IntList empty = new IntList();
+        assertThrows(NullPointerException.class, () -> empty.replaceAll((java.util.function.IntUnaryOperator) null));
     }
 
     @Test

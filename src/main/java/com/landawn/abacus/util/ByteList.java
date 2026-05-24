@@ -1274,6 +1274,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @throws NullPointerException if {@code operator} is {@code null}
      */
     public void replaceAll(final ByteUnaryOperator operator) {
+        N.requireNonNull(operator, "operator");
+
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsByte(elementData[i]);
         }

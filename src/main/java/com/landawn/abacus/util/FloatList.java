@@ -1178,6 +1178,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @throws NullPointerException if the specified operator is {@code null}
      */
     public void replaceAll(final FloatUnaryOperator operator) {
+        N.requireNonNull(operator, "operator");
+
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsFloat(elementData[i]);
         }

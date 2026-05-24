@@ -1201,6 +1201,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @throws NullPointerException if the specified operator is {@code null}
      */
     public void replaceAll(final DoubleUnaryOperator operator) {
+        N.requireNonNull(operator, "operator");
+
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsDouble(elementData[i]);
         }

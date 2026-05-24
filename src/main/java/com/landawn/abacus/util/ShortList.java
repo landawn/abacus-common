@@ -1246,6 +1246,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @see #replaceIf(ShortPredicate, short)
      */
     public void replaceAll(final ShortUnaryOperator operator) {
+        N.requireNonNull(operator, "operator");
+
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsShort(elementData[i]);
         }

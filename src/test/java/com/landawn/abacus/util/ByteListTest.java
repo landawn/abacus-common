@@ -1410,6 +1410,15 @@ public class ByteListTest extends TestBase {
     }
 
     @Test
+    public void test_replaceAll_operator_null() {
+        ByteList nonEmpty = ByteList.of((byte) 1, (byte) 2, (byte) 3);
+        assertThrows(NullPointerException.class, () -> nonEmpty.replaceAll((com.landawn.abacus.util.function.ByteUnaryOperator) null));
+
+        ByteList empty = new ByteList();
+        assertThrows(NullPointerException.class, () -> empty.replaceAll((com.landawn.abacus.util.function.ByteUnaryOperator) null));
+    }
+
+    @Test
     public void test_replaceIf() {
         ByteList list = ByteList.of((byte) 1, (byte) -2, (byte) 3, (byte) -4, (byte) 5);
         assertTrue(list.replaceIf(b -> b < 0, (byte) 0));

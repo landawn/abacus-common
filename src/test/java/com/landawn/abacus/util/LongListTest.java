@@ -1018,6 +1018,15 @@ public class LongListTest extends TestBase {
     }
 
     @Test
+    public void test_replaceAll_operator_null() {
+        LongList nonEmpty = LongList.of(1L, 2L, 3L);
+        assertThrows(NullPointerException.class, () -> nonEmpty.replaceAll((com.landawn.abacus.util.function.LongUnaryOperator) null));
+
+        LongList empty = new LongList();
+        assertThrows(NullPointerException.class, () -> empty.replaceAll((com.landawn.abacus.util.function.LongUnaryOperator) null));
+    }
+
+    @Test
     public void testLongOverflow() {
         list.add(Long.MAX_VALUE);
         list.add(Long.MAX_VALUE);

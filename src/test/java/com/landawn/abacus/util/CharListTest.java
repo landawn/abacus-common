@@ -1396,6 +1396,15 @@ public class CharListTest extends TestBase {
     }
 
     @Test
+    public void test_replaceAll_operator_null() {
+        CharList nonEmpty = CharList.of('a', 'b', 'c');
+        assertThrows(NullPointerException.class, () -> nonEmpty.replaceAll((com.landawn.abacus.util.function.CharUnaryOperator) null));
+
+        CharList empty = new CharList();
+        assertThrows(NullPointerException.class, () -> empty.replaceAll((com.landawn.abacus.util.function.CharUnaryOperator) null));
+    }
+
+    @Test
     public void testReplaceAll_charChar_found() {
         CharList a = CharList.of('a', 'b', 'a', 'c');
         assertEquals(2, a.replaceAll('a', 'z'));

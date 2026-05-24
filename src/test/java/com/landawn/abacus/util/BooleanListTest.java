@@ -1301,6 +1301,15 @@ public class BooleanListTest extends TestBase {
     }
 
     @Test
+    public void test_replaceAll_operator_null() {
+        BooleanList nonEmpty = BooleanList.of(true, false);
+        assertThrows(NullPointerException.class, () -> nonEmpty.replaceAll((com.landawn.abacus.util.function.BooleanUnaryOperator) null));
+
+        BooleanList empty = new BooleanList();
+        assertThrows(NullPointerException.class, () -> empty.replaceAll((com.landawn.abacus.util.function.BooleanUnaryOperator) null));
+    }
+
+    @Test
     public void test_replaceAll_oldNew_empty() {
         BooleanList list = new BooleanList();
         int count = list.replaceAll(true, false);
