@@ -1,5 +1,5 @@
 # abacus-common
-[![Maven Central](https://img.shields.io/maven-central/v/com.landawn.abacus/abacus-common.svg)](https://maven-badges.herokuapp.com/maven-central/com.landawn.abacus/abacus-common/)
+[![Maven Central](https://img.shields.io/maven-central/v/com.landawn.abacus/abacus-common.svg)](https://central.sonatype.com/artifact/com.landawn.abacus/abacus-common/7.7.2)
 [![Javadocs](https://img.shields.io/badge/javadoc-7.7.2-brightgreen.svg)](https://www.javadoc.io/doc/com.landawn.abacus/abacus-common/7.7.2/index.html)
 
 
@@ -209,7 +209,7 @@ and [More](https://www.javadoc.io/static/com.landawn.abacus/abacus-common/7.7.2/
 
 ## Download/Installation & [Changes](https://github.com/landawn/abacus-common/blob/master/CHANGES.md):
 
-* [Maven](https://central.sonatype.com/artifact/com.landawn.abacus/abacus-common)
+* [Maven](https://central.sonatype.com/artifact/com.landawn.abacus/abacus-common/7.7.2)
 
 ```xml
 <dependency>
