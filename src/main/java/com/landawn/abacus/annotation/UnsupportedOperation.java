@@ -34,7 +34,9 @@ import java.lang.annotation.Target;
  * </ul>
  *
  * <p>This annotation serves as documentation for API users, making it clear at the call site
- * which operations are not supported, rather than discovering it at runtime.</p>
+ * which operations are not supported, rather than discovering it at runtime. Retention is
+ * {@link java.lang.annotation.RetentionPolicy#RUNTIME} so the marker is also visible via reflection, allowing IDEs
+ * and code generators to render an inline warning or filter the method out of completion lists.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code

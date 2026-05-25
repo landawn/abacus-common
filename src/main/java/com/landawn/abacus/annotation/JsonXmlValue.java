@@ -21,43 +21,68 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that the annotated method or field represents the value of an object
- * for JSON/XML serialization and deserialization purposes.
+ * Marks the single property whose value represents the entire object when serialized. This is the
+ * abacus counterpart of Jackson's {@code @JsonValue}.
  *
- * <p>This annotation designates a single property that contains the essential value of the
- * object. When an object has this annotation on one of its properties, that property's value
- * will be used as the serialized representation of the entire object. During deserialization,
- * the value will be used to reconstruct the object.</p>
+ * <p>When the framework sees {@code @JsonXmlValue} on a field or no-arg method, the
+ * {@code com.landawn.abacus.type.SingleValueType} machinery treats the host class as a "wrapper"
+ * around that single value: serialization writes only the wrapped value (not a JSON object with a
+ * named property), and deserialization rebuilds the instance by feeding the wrapped value back
+ * through the paired {@link JsonXmlCreator}.</p>
  *
- * <p>This annotation is particularly useful for:</p>
+ * <p><b>Placement rules:</b></p>
  * <ul>
- *   <li>Wrapper objects that contain a single meaningful value</li>
- *   <li>Value objects where one field represents the primary content</li>
- *   <li>Custom types that need simplified JSON/XML representation</li>
+ *   <li>Exactly one {@code @JsonXmlValue} should appear per class.</li>
+ *   <li>When applied to a {@link ElementType#METHOD}, the method must be a no-arg "getter" that
+ *       returns the wrapped value.</li>
+ *   <li>When applied to a {@link ElementType#FIELD}, the field holds the wrapped value directly.</li>
+ *   <li>The wrapped value's type must match the parameter of the class's
+ *       {@link JsonXmlCreator}-annotated constructor or factory method.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
+ *
+ * <p><b>Wrapper type with one meaningful value:</b></p>
  * <pre>{@code
- *
- * public class Amount {
+ * public final class CustomerId {
  *     @JsonXmlValue
- *     private BigDecimal value;
+ *     private final long value;
  *
- *     private String currency;  // This won't be serialized as the main value
+ *     @JsonXmlCreator
+ *     public CustomerId(long value) { this.value = value; }
  *
- *     public Amount(BigDecimal value, String currency) {
- *         this.value = value;
- *         this.currency = currency;
- *     }
- *
- *     // When serialized to JSON, only the 'value' field will be used
- *     // Instead of: {"value": 100.50, "currency": "USD"}
- *     // Result will be: 100.50
+ *     public long value() { return value; }
  * }
+ *
+ * // CustomerId(42)  ->  serialized as: 42
+ * //                 ->  NOT as: {"value": 42}
  * }</pre>
  *
- * @see JsonXmlField
+ * <p><b>Method-style value (e.g., to apply a transformation before serialization):</b></p>
+ * <pre>{@code
+ * public final class Amount {
+ *     private final BigDecimal raw;
+ *     private final String currency;
+ *
+ *     private Amount(BigDecimal raw, String currency) { this.raw = raw; this.currency = currency; }
+ *
+ *     @JsonXmlCreator
+ *     public static Amount parse(String s) {
+ *         String[] parts = s.split(" ");
+ *         return new Amount(new BigDecimal(parts[1]), parts[0]);
+ *     }
+ *
+ *     @JsonXmlValue
+ *     public String toWireFormat() {
+ *         return currency + " " + raw.toPlainString();
+ *     }
+ * }
+ * // Amount("USD", 19.99)  ->  "USD 19.99"
+ * }</pre>
+ *
  * @see JsonXmlCreator
+ * @see JsonXmlField
+ * @see com.landawn.abacus.type.SingleValueType
  */
 @Documented
 @Target({ ElementType.METHOD, ElementType.FIELD })

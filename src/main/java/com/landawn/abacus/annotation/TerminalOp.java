@@ -25,7 +25,16 @@ import java.lang.annotation.Target;
  * Terminal operations consume the stream or pipeline and produce a final result,
  * triggering the execution of any pending intermediate operations.
  *
- * <p>This annotation is used for documentation purposes and to indicate methods that:</p>
+ * <p>Within abacus this annotation is applied across the pipeline APIs —
+ * {@code com.landawn.abacus.util.Seq}, the various {@code *Stream} classes,
+ * {@code EntryStream}, and friends — on methods such as {@code toList}, {@code toSet},
+ * {@code toMap}, {@code collect}, {@code count}, {@code reduce}, {@code forEach},
+ * {@code findFirst}/{@code findAny}, {@code anyMatch}/{@code allMatch}/{@code noneMatch},
+ * {@code min}/{@code max}, and {@code toArray}. The annotation is a documentation marker
+ * (retention {@code CLASS}); it does not affect runtime behavior but lets readers, IDEs, and
+ * static analyzers identify the closing call of a pipeline at a glance.</p>
+ *
+ * <p>This annotation indicates methods that:</p>
  * <ul>
  *   <li>Consume the entire stream or pipeline.</li>
  *   <li>Produce a final result or side effect.</li>

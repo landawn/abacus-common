@@ -52,6 +52,11 @@ import java.lang.annotation.Target;
  *   <li>Some frameworks may perform runtime {@code null} checks based on this annotation.</li>
  * </ul>
  *
+ * <p><b>Framework usage:</b> abacus uses this marker on parameters of widely-used utilities such
+ * as {@code com.landawn.abacus.util.N}, {@code Beans}, and {@code CommonUtil}, and on the
+ * {@code requireNonNull}-style precondition methods in {@code com.landawn.abacus.parser.ParserUtil}.
+ * It pairs naturally with {@link MayReturnNull} on the return side of an API.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * public class UserService {

@@ -25,6 +25,11 @@ import java.lang.annotation.Target;
  * by external code or client applications. Elements marked as internal are implementation
  * details and are not part of the public API contract.
  *
+ * <p>Contrast with {@link Beta}: a {@code @Beta} element is part of the public API but is still
+ * stabilizing; an {@code @Internal} element is not part of the public API at all and will not
+ * follow public API stability rules. Retention is {@link RetentionPolicy#CLASS} so the marker
+ * survives in compiled bytecode for tooling but does not occupy runtime metadata.</p>
+ *
  * <p><b>Important considerations:</b></p>
  * <ul>
  *   <li>Internal APIs may change or be removed in any release without notice.</li>

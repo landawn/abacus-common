@@ -25,6 +25,17 @@ import java.lang.annotation.Target;
  * that can change between invocations or over time. This annotation serves as a warning that the
  * annotated element is not thread-safe and requires careful handling in concurrent environments.
  *
+ * <p>Within abacus the marker is applied extensively in the functional toolkits
+ * {@code com.landawn.abacus.util.Fn}, {@code Fnn}, {@code IntFunctions}, and on helpers such as
+ * {@code MergeResult} and {@code NoCachingNoUpdating}: any factory method that returns a
+ * function/predicate/consumer holding internal state (e.g., {@code distinctBy}, {@code limit},
+ * a rate-limited wrapper) is annotated {@code @Stateful}. The {@code Fn} class-level Javadoc
+ * calls out this convention explicitly and warns against using such functions in
+ * {@code parallelStream()} or sharing them across threads without external synchronization.</p>
+ *
+ * <p>The marker is also frequently combined with {@link SequentialOnly} on pipeline operations
+ * whose correctness depends on encounter-order processing.</p>
+ *
  * <p>Elements marked with {@code @Stateful} have the following characteristics:</p>
  * <ul>
  *   <li>They maintain internal state that affects their behavior.</li>

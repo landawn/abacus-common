@@ -22,16 +22,27 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Defines join relationships between entities for ORM mapping and data loading.
- * This annotation specifies how entities are connected through foreign key relationships,
- * enabling automatic loading of related data in one-to-one, one-to-many, and many-to-many associations.
+ * Declares a join relationship between entities for ORM mapping and lazy / eager loading of
+ * related data. This marker is read by the {@code abacus-jdbc} module's DAO/query layer when it
+ * fetches related rows for a property that itself is not a column on the owning table; the
+ * {@code abacus-core} library only ships the annotation as a runtime-retained marker and does
+ * not introspect it directly.
+ *
+ * <p>Supported cardinalities are inferred from the field type:</p>
+ * <ul>
+ *   <li>A scalar bean field — one-to-one.</li>
+ *   <li>A {@link java.util.Collection} (typically {@code List<T>}) — one-to-many.</li>
+ *   <li>A {@link java.util.Collection} with a join-table condition (two pairs) — many-to-many.</li>
+ * </ul>
  *
  * <p><b>Join condition format:</b></p>
- * <p>Each join condition is specified as {@code "sourceField=targetField"} where:</p>
+ * <p>Each entry in {@link #value()} is a string of the form {@code "sourceField=targetField"} where:</p>
  * <ul>
- *   <li>{@code sourceField}: Field name from the current entity</li>
- *   <li>{@code targetField}: Field name from the related entity or join table</li>
- *   <li>For join tables: use {@code "TableName.fieldName"} notation</li>
+ *   <li>{@code sourceField} — property name on the current (owning) entity, or
+ *       {@code "JoinTable.column"} when traversing a join table.</li>
+ *   <li>{@code targetField} — property name on the related entity, or {@code "JoinTable.column"}.</li>
+ *   <li>For many-to-many: supply two conditions — first owning-entity → join-table, then
+ *       join-table → related-entity.</li>
  * </ul>
  *
  * <p><b>Relationship types supported:</b></p>

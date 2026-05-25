@@ -25,13 +25,13 @@ import java.lang.annotation.Target;
  * Intermediate operations are typically lazy and return a new stream or processing pipeline
  * without consuming the source data until a terminal operation is called.
  *
- * <p>This annotation is used for documentation purposes and to indicate methods that:</p>
- * <ul>
- *   <li>Transform elements without consuming the entire stream.</li>
- *   <li>Return a new stream or processing pipeline.</li>
- *   <li>Can be chained with other intermediate operations.</li>
- *   <li>Are typically lazily evaluated.</li>
- * </ul>
+ * <p>Within abacus this annotation is applied extensively across the pipeline APIs —
+ * {@code com.landawn.abacus.util.Seq}, {@code Stream}, {@code IntStream},
+ * {@code LongStream}, {@code DoubleStream}, {@code EntryStream}, and friends — to mark methods
+ * such as {@code filter}, {@code map}, {@code flatMap}, {@code distinct}, {@code skip},
+ * {@code limit}, {@code peek}, {@code sorted}, {@code take/dropWhile}, and similar. It is a
+ * documentation marker (retention {@code CLASS}); the runtime does not branch on it, but IDEs and
+ * static-analysis tools can use it to identify pipeline-shape methods.</p>
  *
  * <p><b>Characteristics of intermediate operations:</b></p>
  * <ul>
@@ -43,14 +43,14 @@ import java.lang.annotation.Target;
  *
  * <p><b>Common intermediate operations include:</b></p>
  * <ul>
- *   <li>{@code filter()} - Selects elements matching a predicate.</li>
- *   <li>{@code map()} - Transforms each element.</li>
- *   <li>{@code flatMap()} - Transforms and flattens nested structures.</li>
- *   <li>{@code distinct()} - Removes duplicate elements.</li>
- *   <li>{@code sorted()} - Orders elements.</li>
- *   <li>{@code peek()} - Performs an action on each element without consuming.</li>
- *   <li>{@code limit()} - Truncates the stream.</li>
- *   <li>{@code skip()} - Discards initial elements.</li>
+ *   <li>{@code filter()} — Selects elements matching a predicate.</li>
+ *   <li>{@code map()} — Transforms each element.</li>
+ *   <li>{@code flatMap()} — Transforms and flattens nested structures.</li>
+ *   <li>{@code distinct()} — Removes duplicate elements.</li>
+ *   <li>{@code sorted()} — Orders elements (note: typically marked also with
+ *       {@link TerminalOpTriggered} when implemented by buffering).</li>
+ *   <li>{@code peek()} — Performs an action on each element without consuming.</li>
+ *   <li>{@code limit()} / {@code skip()} — Truncate or trim the stream.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
@@ -58,19 +58,26 @@ import java.lang.annotation.Target;
  * public class StreamProcessor<T> {
  *     @IntermediateOp
  *     public StreamProcessor<T> filter(Predicate<T> predicate) {
- *         // Returns new stream without processing elements
+ *         // Returns a new stage without consuming elements.
  *         return new FilteredStream<>(this, predicate);
  *     }
  *
  *     @IntermediateOp
  *     public <R> StreamProcessor<R> map(Function<T, R> mapper) {
- *         // Lazy transformation operation
+ *         // Lazy transformation — runs only when a terminal op is invoked.
  *         return new MappedStream<>(this, mapper);
  *     }
  * }
+ *
+ * // Real example from the abacus Seq API:
+ * //     Seq.of(users)
+ * //        .filter(User::isActive)   // @IntermediateOp
+ * //        .map(User::email)         // @IntermediateOp
+ * //        .toList();                // @TerminalOp
  * }</pre>
  *
  * @see TerminalOp
+ * @see TerminalOpTriggered
  * @see LazyEvaluation
  * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/Stream.html">java.util.Stream</a>
  */

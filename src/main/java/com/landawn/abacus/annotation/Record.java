@@ -21,54 +21,68 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Marks a class as a record-like entity, treating it as equivalent to a Java record for ORM
- * and reflection-based operations. This annotation is primarily used to identify classes
- * (for example, those backed by Lombok) that simulate the behavior of Java 14+ record types
- * when native record syntax is unavailable or impractical.
+ * Marks a class as a record-like entity, telling abacus introspection to treat it as if it were a
+ * Java 14+ {@link java.lang.Record} even when it does not extend {@link java.lang.Record} (for
+ * example, a Lombok {@code @Value} class compiled under Java 8 source level).
  *
- * <p>A class annotated with {@code @Record} is treated as a record class by framework utilities
- * such as {@code Beans}, enabling record-specific introspection and mapping behavior even when
- * the class does not extend {@link java.lang.Record}.</p>
- *
- * <p><b>Note:</b> This annotation is itself meta-annotated with {@link Test}, indicating that
- * the annotation API is at an experimental stage and may change. Despite this, it is consumed
- * by production framework code (for example, {@code Beans.isRecordClass(Class)}) to recognize
- * record-like classes that do not extend {@link java.lang.Record}.</p>
- *
- * <p><b>Primary use cases:</b></p>
+ * <p><b>How the framework consumes it:</b></p>
  * <ul>
- *   <li>Marking Lombok-generated classes (e.g., using {@code @Value} or {@code @Data} with final
- *       fields) that simulate Java records.</li>
- *   <li>Providing metadata for frameworks that distinguish record-like data classes from
- *       regular mutable beans.</li>
- *   <li>Enabling backward-compatible record semantics in codebases that cannot yet use Java 14+
- *       native records.</li>
+ *   <li>{@code com.landawn.abacus.util.Beans#isRecordClass(Class)} returns {@code true} for any
+ *       class annotated with {@code @Record}, in addition to actual {@link java.lang.Record}
+ *       subclasses. Many downstream helpers (bean introspection, copy/clone, property access)
+ *       branch on this method and apply record-style semantics (constructor-based instantiation,
+ *       canonical property order, no setters required).</li>
+ *   <li>{@code com.landawn.abacus.parser.AvroParser} and similar serializers also detect this
+ *       annotation to drive record-aware (de)serialization.</li>
  * </ul>
  *
- * <p><b>Implied semantics for annotated classes:</b></p>
+ * <p><b>Note:</b> The annotation is itself meta-annotated with {@link Test}, signaling that the
+ * marker is experimental and may change. Despite that, it is consumed by production framework
+ * code, so it is safe to apply where record-like introspection is needed.</p>
+ *
+ * <p><b>Implied contract for annotated classes:</b></p>
  * <ul>
- *   <li>Instances should be effectively immutable.</li>
- *   <li>All fields should be effectively final.</li>
- *   <li>Equality is based on field values, not object identity.</li>
- *   <li>String representation includes all field values.</li>
+ *   <li>Instances are effectively immutable.</li>
+ *   <li>All component fields are effectively final and exposed via canonical accessor methods.</li>
+ *   <li>Equality and {@code hashCode} are based on the component fields.</li>
+ *   <li>A canonical all-args constructor exists (matching declaration order of the components).</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
+ *
+ * <p><b>Lombok-backed record-like class on a pre-Java-14 codebase:</b></p>
  * <pre>{@code
  * @Record
- * @Value           // Lombok: generates all-args constructor, getters, equals, hashCode, toString
+ * @Value          // Lombok: all-args ctor, getters, equals/hashCode/toString from final fields.
  * public class PersonRecord {
  *     String name;
- *     int age;
+ *     int    age;
  *     String email;
  * }
  *
- * // This class is treated equivalently to a Java 14+ record:
+ * Beans.isRecordClass(PersonRecord.class);  // -> true (because of @Record)
+ *
+ * // Behaves like:
  * // public record PersonRecord(String name, int age, String email) {}
+ * }</pre>
+ *
+ * <p><b>Manually written record-like class:</b></p>
+ * <pre>{@code
+ * @Record
+ * public final class Point {
+ *     private final int x;
+ *     private final int y;
+ *
+ *     public Point(int x, int y) { this.x = x; this.y = y; }
+ *
+ *     public int x() { return x; }
+ *     public int y() { return y; }
+ * }
  * }</pre>
  *
  * @see Immutable
  * @see java.lang.Record
+ * @see com.landawn.abacus.util.Beans#isRecordClass(Class)
  */
 @Test
 @Documented

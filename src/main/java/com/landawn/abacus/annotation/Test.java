@@ -36,6 +36,11 @@ import java.lang.annotation.Target;
  * <p>This annotation helps maintain clear boundaries between production and test code,
  * making it easier to identify code that should not be used in production contexts.</p>
  *
+ * <p>It is also used inside abacus as a meta-annotation on other markers (e.g., {@link Record})
+ * to flag that the annotation API itself is still experimental and may change. Retention is
+ * {@link RetentionPolicy#CLASS} so the marker survives in bytecode for tooling without occupying
+ * runtime reflection metadata.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * public class UserService {

@@ -67,8 +67,11 @@ import java.lang.annotation.Target;
  * }
  * }</pre>
  *
- * <p>This annotation serves as documentation and can be used by static analysis tools
- * to verify immutability constraints and detect potential violations at compile time.</p>
+ * <p>This annotation has {@link RetentionPolicy#CLASS} retention: it serves as documentation
+ * and is consumed by static analysis tools (e.g., SpotBugs's {@code @ThreadSafe}/{@code Immutable}
+ * checks) to verify immutability constraints. The abacus framework itself applies it on many
+ * value-style classes — for example {@code com.landawn.abacus.util.Seid} and various stream
+ * support types — to signal "shareable across threads without external synchronization".</p>
  *
  * @see Mutable
  */

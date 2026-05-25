@@ -42,6 +42,12 @@ import java.lang.annotation.Target;
  *   <li>Better performance by skipping complex field comparisons</li>
  * </ul>
  *
+ * <p><b>Important caveat:</b> {@code @DiffIgnore} is consulted only when
+ * {@link com.landawn.abacus.util.Difference.BeanDifference#of(Object, Object)} compares
+ * <i>all</i> properties of the two beans. When an explicit {@code propNamesToCompare} collection
+ * is passed to {@code BeanDifference.of(bean1, bean2, propNamesToCompare)}, the annotation is
+ * ignored — the caller has stated which properties to compare, and that list wins.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * public class User {
@@ -50,22 +56,28 @@ import java.lang.annotation.Target;
  *     private String email;
  *
  *     @DiffIgnore
- *     private Timestamp lastModified;  // Changes on every update
+ *     private Timestamp lastModified;  // Changes on every update.
  *
  *     @DiffIgnore
- *     private Integer version;  // Optimistic locking field
+ *     private Integer version;         // Optimistic locking field.
  *
  *     @DiffIgnore
- *     private String sessionToken;  // Temporary runtime data
+ *     private String sessionToken;     // Transient runtime data.
  * }
  *
- * // Usage with Difference.BeanDifference:
- * User user1 = getUserFromDatabase();
- * User user2 = getUserAfterUpdate();
+ * User user1 = repository.findById(42L);
+ * User user2 = repository.findById(42L);   // Same row, re-loaded later.
+ * user2.setEmail("new@example.com");
  *
- * // Comparison will ignore lastModified, version, and sessionToken
- * // Fields annotated with @DiffIgnore are excluded from comparison
- * Difference.BeanDifference<?, ?, ?> diff = Difference.BeanDifference.of(user1, user2);
+ * // Compares every property except lastModified, version, sessionToken.
+ * BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff
+ *         = Difference.BeanDifference.of(user1, user2);
+ *
+ * diff.inCommon();        // -> {id=42, username=..., ...}
+ * diff.differentValues(); // -> {email=Pair.of("old@example.com", "new@example.com")}
+ *
+ * // Explicit property list: @DiffIgnore is NOT honored here.
+ * Difference.BeanDifference.of(user1, user2, List.of("email", "lastModified"));
  * }</pre>
  *
  * @see com.landawn.abacus.util.Difference.BeanDifference

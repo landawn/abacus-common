@@ -44,9 +44,13 @@ import java.lang.annotation.Target;
  *
  * <p><b>Important notes:</b></p>
  * <ul>
- *   <li>The field can still be modified in the Java object.</li>
- *   <li>Direct SQL updates can still modify the database column.</li>
- *   <li>Only affects ORM-generated update statements.</li>
+ *   <li>The field can still be modified on the Java object (the annotation does not enforce
+ *       immutability of the bean itself).</li>
+ *   <li>Direct SQL updates issued outside the ORM layer can still modify the column.</li>
+ *   <li>Affects only ORM-generated {@code UPDATE} statements; the column still participates in
+ *       {@code INSERT} and {@code SELECT}.</li>
+ *   <li>The marker is read by the {@code abacus-jdbc} module when generating SQL; the
+ *       {@code abacus-core} library only declares it as a runtime-retained marker.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>

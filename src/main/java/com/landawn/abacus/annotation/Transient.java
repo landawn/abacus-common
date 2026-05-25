@@ -22,25 +22,38 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Marks a field as transient, indicating it should be excluded from persistence operations.
- * Fields annotated with {@code @Transient} will be ignored during database operations such as
- * {@code INSERT}, {@code UPDATE}, and {@code SELECT} when working with entity objects.
+ * Marks a field as transient — i.e., excluded from persistence operations. The
+ * {@code @Transient} annotation and the Java {@code transient} field modifier are treated as
+ * equivalent by the framework's reflection layer ({@code com.landawn.abacus.parser.ParserUtil}),
+ * which sets {@code PropInfo.isTransient = true} for either signal. The property is then dropped
+ * from the {@code nonTransientSeriPropInfos} array used to drive serialization and persistence.
  *
- * <p>Common use cases for transient fields:</p>
+ * <p><b>Common use cases:</b></p>
  * <ul>
- *   <li>Calculated or derived values that should not be stored.</li>
- *   <li>Temporary state or cache data.</li>
- *   <li>Runtime-only metadata.</li>
- *   <li>Fields that are populated from other sources.</li>
- *   <li>Security-sensitive data that should not be persisted.</li>
+ *   <li>Calculated or derived values not stored in the database.</li>
+ *   <li>Temporary state or cache data populated at runtime.</li>
+ *   <li>Runtime-only metadata (e.g., loaded-from-cache flag).</li>
+ *   <li>Related entities loaded separately rather than as a column.</li>
+ *   <li>Security-sensitive values that must not be persisted.</li>
  * </ul>
  *
- * <p>Important notes:</p>
+ * <p><b>Interaction with JSON/XML serialization:</b></p>
  * <ul>
- *   <li>This annotation only affects persistence operations, not serialization.</li>
- *   <li>For serialization exclusion, use {@link JsonXmlField#ignore() JsonXmlField(ignore = true)}.</li>
- *   <li>Transient fields may still be included in {@link Object#toString()}, {@link Object#equals(Object)}, and {@link Object#hashCode()}.</li>
- *   <li>The field will still occupy memory in the object instance.</li>
+ *   <li>A transient property is excluded from serialization by default.</li>
+ *   <li>To include a transient field in JSON/XML output, the property must declare its exposure
+ *       direction explicitly via {@link JsonXmlField#direction() @JsonXmlField(direction = ...)};
+ *       otherwise the framework throws when registering the bean.</li>
+ *   <li>To exclude a non-transient field from serialization only, prefer
+ *       {@link JsonXmlField#ignore() @JsonXmlField(ignore = true)} rather than {@code @Transient}.</li>
+ * </ul>
+ *
+ * <p><b>Important notes:</b></p>
+ * <ul>
+ *   <li>{@code @Transient} fields still occupy memory in the Java object and may still appear in
+ *       {@link Object#toString()}, {@link Object#equals(Object)}, and {@link Object#hashCode()}
+ *       depending on the class's own implementation.</li>
+ *   <li>For "this is not a column" semantics that still allows the bean property to be visible
+ *       to other layers, see {@link NonColumn}.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
@@ -57,18 +70,21 @@ import java.lang.annotation.Target;
  *     private BigDecimal price;
  *
  *     @Transient
- *     private BigDecimal priceWithTax;  // Calculated field
+ *     private BigDecimal priceWithTax;   // Computed at runtime.
  *
  *     @Transient
- *     private boolean modified;  // Runtime state
+ *     private boolean modified;          // UI/runtime state.
  *
  *     @Transient
- *     private List<Review> reviews;  // Loaded separately
+ *     private List<Review> reviews;      // Loaded by a separate query.
  * }
  * }</pre>
  *
  * @see Column
  * @see Entity
+ * @see NonColumn
+ * @see JsonXmlField#ignore()
+ * @see JsonXmlField#direction()
  */
 @Documented
 @Target(value = { FIELD /* METHOD, */ })

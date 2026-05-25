@@ -21,45 +21,67 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks a method or constructor as the preferred creator for JSON/XML deserialization.
+ * Designates the constructor or static factory method that should be invoked when an object is
+ * reconstructed from a single serialized value (JSON, XML, or persistence). This is the abacus
+ * counterpart of Jackson's {@code @JsonCreator}.
  *
- * <p>This annotation indicates that the annotated method or constructor should be used
- * when deserializing objects from JSON or XML formats.</p>
+ * <p>It pairs with {@link JsonXmlValue}: a class that exposes one "wrapped" value via
+ * {@code @JsonXmlValue} (on a field or no-arg method) also needs a way to be rebuilt from that
+ * value during deserialization. The framework's {@code com.landawn.abacus.type.SingleValueType}
+ * scans for a single-arg constructor or single-arg static factory method annotated with
+ * {@code @JsonXmlCreator} and uses it to materialize instances from their wrapped value. If the
+ * matching {@code @JsonXmlCreator} cannot be found (or its parameter type does not match the
+ * {@code @JsonXmlValue} type), the type is rejected at registration time.</p>
  *
- * <p>When applied to a constructor, it designates that constructor as the primary
- * way to create instances during deserialization. When applied to a static factory method,
- * it indicates that method should be used instead of the default constructor.</p>
- *
- * <p>This annotation is particularly useful when:</p>
+ * <p><b>Placement rules:</b></p>
  * <ul>
- *   <li>A class has multiple constructors and you need to specify which one to use</li>
- *   <li>You want to use a static factory method instead of a constructor</li>
- *   <li>Special initialization logic is required during deserialization</li>
+ *   <li>On a {@link ElementType#CONSTRUCTOR}: that constructor (typically taking exactly the
+ *       wrapped value type) is used by the framework instead of the no-arg constructor.</li>
+ *   <li>On a static {@link ElementType#METHOD}: the method is used as a factory; it must be
+ *       {@code static} and return an instance of the enclosing class.</li>
+ *   <li>At most one creator should be marked per class.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
+ *
+ * <p><b>Constructor as creator (paired with {@link JsonXmlValue}):</b></p>
  * <pre>{@code
- * public class Person {
- *     private final String name;
- *     private final int age;
+ * public final class EmailAddress {
+ *     @JsonXmlValue
+ *     private final String value;
  *
- *     // This constructor will be used for JSON/XML deserialization
  *     @JsonXmlCreator
- *     public Person(String name, int age) {
- *         this.name = name;
- *         this.age = age;
+ *     public EmailAddress(String value) {
+ *         if (!value.contains("@")) {
+ *             throw new IllegalArgumentException("Invalid email: " + value);
+ *         }
+ *         this.value = value;
  *     }
+ * }
  *
- *     // Or use with a static factory method
+ * // Serializes to: "alice@example.com"
+ * // Deserializes by invoking the @JsonXmlCreator constructor.
+ * }</pre>
+ *
+ * <p><b>Static factory as creator:</b></p>
+ * <pre>{@code
+ * public final class Money {
+ *     @JsonXmlValue
+ *     private final String value;       // e.g. "USD 19.99"
+ *
+ *     private Money(String value) { this.value = value; }
+ *
  *     @JsonXmlCreator
- *     public static Person create(String name, int age) {
- *         return new Person(name, age);
+ *     public static Money parse(String value) {
+ *         // Custom parsing logic.
+ *         return new Money(value);
  *     }
  * }
  * }</pre>
  *
- * @see JsonXmlField
  * @see JsonXmlValue
+ * @see JsonXmlField
+ * @see com.landawn.abacus.type.SingleValueType
  */
 @Documented
 @Target({ ElementType.METHOD, ElementType.CONSTRUCTOR })

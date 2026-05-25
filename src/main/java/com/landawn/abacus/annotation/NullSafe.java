@@ -47,6 +47,12 @@ import java.lang.annotation.Target;
  *   <li>Implementing the Null Object pattern to represent absent values.</li>
  * </ul>
  *
+ * <p><b>Framework usage:</b> abacus applies this marker liberally on the array and collection
+ * helpers in {@code com.landawn.abacus.util.Array} and {@code CommonUtil}, where the convention
+ * is that a {@code null} input is treated as an empty input (e.g., {@code N.size(null) == 0},
+ * {@code Strings.length(null) == 0}). It is the converse of {@link NotNull}: {@code @NotNull}
+ * forbids {@code null}, {@code @NullSafe} explicitly tolerates it.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * public class StringUtils {

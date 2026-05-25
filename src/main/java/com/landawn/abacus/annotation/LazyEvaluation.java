@@ -25,6 +25,13 @@ import java.lang.annotation.Target;
  * Lazy evaluation defers computation until the result is actually needed,
  * which can improve performance by avoiding unnecessary calculations.
  *
+ * <p>Within abacus the marker is applied at type level on {@code com.landawn.abacus.util.Seq}
+ * and the various {@code Stream}/{@code EntryStream}/{@code *Stream} classes to advertise that
+ * the entire pipeline obeys lazy semantics — wiring up stages does no work until a method marked
+ * with {@link TerminalOp} (or {@link TerminalOpTriggered}) is invoked. At method level, it
+ * labels factory methods that hand back a lazy producer (a {@code Supplier}, {@code Stream},
+ * iterator, etc.) rather than a fully materialized value.</p>
+ *
  * <p>When applied to a method, it indicates that the method's computation
  * is deferred until the result is accessed. When applied to a type, it indicates
  * that the entire type or its operations follow lazy evaluation patterns.</p>

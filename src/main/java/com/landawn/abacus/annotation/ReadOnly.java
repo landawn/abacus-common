@@ -46,9 +46,13 @@ import java.lang.annotation.Target;
  *
  * <p><b>Important notes:</b></p>
  * <ul>
- *   <li>Different from {@link Transient} - read-only fields are still mapped to columns.</li>
+ *   <li>Different from {@link Transient} — read-only fields are still mapped to columns and are
+ *       still loaded by {@code SELECT}; only writes are suppressed.</li>
  *   <li>The annotation only affects persistence operations, not serialization.</li>
- *   <li>Database-level constraints (like triggers) can still modify these fields.</li>
+ *   <li>Database-level constraints (such as triggers) can still modify these fields server-side.</li>
+ *   <li>{@code @Id} combined with {@code @ReadOnly} is treated by the framework's reflection layer
+ *       ({@code com.landawn.abacus.parser.ParserUtil}) as equivalent to {@link ReadOnlyId} — the
+ *       property becomes part of the read-only ID set ({@code isMarkedAsReadOnlyId == true}).</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
@@ -66,21 +70,30 @@ import java.lang.annotation.Target;
  *
  *     @ReadOnly
  *     @Column(name = "created_time")
- *     private Timestamp createdTime;  // Set by database DEFAULT or trigger
+ *     private Timestamp createdTime;     // Set by database DEFAULT or trigger.
  *
  *     @ReadOnly
  *     @Column(name = "last_modified")
- *     private Timestamp lastModified;  // Set by database trigger
+ *     private Timestamp lastModified;    // Set by database trigger.
  *
  *     @ReadOnly
  *     @Column(name = "view_count")
- *     private Integer viewCount;  // Updated by stored procedure
+ *     private Integer viewCount;         // Updated by stored procedure.
+ * }
+ *
+ * // Equivalent to @ReadOnlyId for the id property:
+ * @Entity
+ * public class AuditEntry {
+ *     @Id @ReadOnly
+ *     private Long id;     // Read-only primary key (DB-generated).
+ *     ...
  * }
  * }</pre>
  *
  * @see Transient
  * @see NonUpdatable
  * @see Column
+ * @see ReadOnlyId
  */
 @Documented
 @Target(value = { FIELD /* METHOD, */ })

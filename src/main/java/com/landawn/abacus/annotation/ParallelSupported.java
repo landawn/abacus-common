@@ -21,13 +21,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that the annotated method or type supports parallel execution.
- * This annotation documents that the implementation is thread-safe and can be
- * executed concurrently without synchronization issues.
+ * Indicates that the annotated method or type supports parallel execution within an abacus
+ * pipeline. In the {@code com.landawn.abacus.util.Seq} and {@code *Stream} APIs, an operation
+ * marked {@code @ParallelSupported} can be applied to a parallelized pipeline (e.g., one created
+ * via {@code Seq.parallel(...)} or {@code Stream.parallel()}) and will produce the correct result
+ * regardless of how the runtime partitions the work.
  *
- * <p>When applied to a method, it indicates that the method can be safely called
- * from multiple threads simultaneously. When applied to a type, it indicates that
- * the entire type and its operations support parallel execution.</p>
+ * <p>For methods, this means the implementation has no shared mutable state of its own and any
+ * functional argument it accepts must itself be non-interfering. For types, every public method
+ * on the type carries the same guarantee. This is the converse of {@link SequentialOnly}.</p>
  *
  * <p>This annotation is particularly useful for:</p>
  * <ul>

@@ -22,37 +22,73 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that fields should be accessed via getter/setter methods rather than direct field access.
- * This annotation is primarily used in serialization/deserialization contexts and reflection-based
- * operations to ensure that field access goes through proper accessor methods, allowing for lazy
- * initialization, validation, or other custom logic defined in those methods.
+ * Forces property access on a bean to go through getter / setter methods rather than direct field
+ * reflection. This is consumed by the framework's reflection layer
+ * ({@code com.landawn.abacus.parser.ParserUtil}) when it builds the property metadata for a class:
+ * if the annotation is present on the class, or on the individual field/method, the property's
+ * {@code isFieldGettable} / {@code isFieldSettable} flags are set to {@code false} and all reads
+ * and writes are routed through the corresponding accessor methods, even when the field would
+ * otherwise be directly accessible.
  *
- * <p>When applied to a type (class or interface), all fields within that type will be accessed via
- * their corresponding getter/setter methods. When applied to a specific field or method, only that
- * element's access behavior is affected.</p>
- *
- * <p>This annotation is useful in scenarios where:</p>
+ * <p>This is useful when a getter/setter performs work that must not be bypassed, such as:</p>
  * <ul>
- *   <li>Fields have lazy initialization logic in their getters.</li>
- *   <li>Setters perform validation or transformation of incoming values.</li>
- *   <li>Direct field access would bypass important business logic.</li>
- *   <li>Compatibility with frameworks that require method-based access is needed.</li>
+ *   <li>Lazy initialization triggered on first read.</li>
+ *   <li>Validation, normalization, or coercion performed inside the setter.</li>
+ *   <li>Defensive copying of mutable values (collections, dates).</li>
+ *   <li>Wrapping/unwrapping of stored values (e.g., {@code Optional}, encrypted strings).</li>
+ *   <li>Interop with frameworks that mandate accessor-based property access.</li>
+ * </ul>
+ *
+ * <p><b>Scope of application:</b></p>
+ * <ul>
+ *   <li>On a {@link ElementType#TYPE TYPE}: all properties of the class are accessed via their
+ *       getter/setter methods.</li>
+ *   <li>On a {@link ElementType#FIELD FIELD} or {@link ElementType#METHOD METHOD}: only that
+ *       single property is forced to use accessor-based access.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
+ *
+ * <p><b>Class-level — every property uses its accessor:</b></p>
  * <pre>{@code
  * @AccessFieldByMethod
  * public class User {
  *     private String name;
+ *     private List<Role> roles;
  *
  *     public String getName() {
- *         return name != null ? name : "Anonymous";
+ *         // Normalization applied on every read.
+ *         return name == null ? "" : name.trim();
+ *     }
+ *
+ *     public List<Role> getRoles() {
+ *         // Defensive copy: callers cannot mutate the internal list.
+ *         return roles == null ? Collections.emptyList() : new ArrayList<>(roles);
  *     }
  * }
  * }</pre>
  *
- * @see JsonXmlField
+ * <p><b>Field-level — only a single property is routed through its setter:</b></p>
+ * <pre>{@code
+ * public class Order {
+ *     private Long id;
+ *
+ *     @AccessFieldByMethod
+ *     private BigDecimal total;
+ *
+ *     public void setTotal(BigDecimal total) {
+ *         // Validation that must run on every deserialized / programmatic write.
+ *         if (total != null && total.signum() < 0) {
+ *             throw new IllegalArgumentException("total must be >= 0");
+ *         }
+ *         this.total = total;
+ *     }
+ * }
+ * }</pre>
+ *
  * @see Column
+ * @see JsonXmlField
+ * @see Transient
  */
 @Documented
 @Target(value = { ElementType.TYPE, ElementType.METHOD, ElementType.FIELD })
@@ -60,9 +96,17 @@ import java.lang.annotation.Target;
 public @interface AccessFieldByMethod {
 
     /**
-     * Reserved for future use; currently has no effect on the framework's behavior.
-     * The presence of the {@code @AccessFieldByMethod} annotation alone is sufficient to
-     * indicate that field access should be performed via getter/setter methods.
+     * Reserved for future configuration use; currently has no effect on the framework's behavior.
+     * The mere presence of {@code @AccessFieldByMethod} is sufficient to switch the affected
+     * property (or all properties on the type) to accessor-based access. This element is kept on
+     * the annotation so that future extensions (e.g., naming the getter/setter pair explicitly)
+     * can be added without an incompatible API change.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * @AccessFieldByMethod              // Sufficient; equivalent to @AccessFieldByMethod("").
+     * public class User { ... }
+     * }</pre>
      *
      * @return the (currently unused) configuration value; defaults to an empty string
      */

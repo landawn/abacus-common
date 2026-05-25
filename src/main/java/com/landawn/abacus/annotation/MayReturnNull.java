@@ -42,6 +42,10 @@ import java.lang.annotation.Target;
  *   <li>Ensure calling code handles the {@code null} case appropriately.</li>
  * </ul>
  *
+ * <p><b>Retention:</b> {@link java.lang.annotation.RetentionPolicy#RUNTIME} — the marker is
+ * available via reflection, allowing IDEs and runtime validators to surface a warning when the
+ * return value is dereferenced without a null check.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * public class UserRepository {

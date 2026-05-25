@@ -65,9 +65,10 @@ import java.lang.annotation.Target;
  * }
  * }</pre>
  *
- * <p>This annotation serves as documentation and can be used by static analysis tools
- * to verify mutability contracts and detect potential issues with concurrent access
- * or inappropriate usage patterns.</p>
+ * <p>This annotation has {@link RetentionPolicy#CLASS} retention and serves as documentation;
+ * static analysis tools may use it to verify mutability contracts and flag inappropriate use
+ * such as caching a mutable instance in a thread-shared map without synchronization. It is the
+ * counterpart of {@link Immutable}.</p>
  *
  * @see Immutable
  */
