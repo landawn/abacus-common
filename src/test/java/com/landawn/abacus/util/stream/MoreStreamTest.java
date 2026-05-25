@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -29,7 +28,6 @@ import com.landawn.abacus.exception.TooManyElementsException;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.CharSummaryStatistics;
 import com.landawn.abacus.util.Fn;
-import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.Index;
 import com.landawn.abacus.util.IntFunctions;
 import com.landawn.abacus.util.IntIterator;
@@ -323,17 +321,6 @@ public class MoreStreamTest extends TestBase {
             IntStream.range(0, 10000).boxed().rotated(3).takeLast(10).parallel().forEach(Fn.println());
             IntStream.range(0, 10000).boxed().shuffled().takeLast(10).parallel().forEach(Fn.println());
         });
-    }
-
-    @Test
-    public void test_lines() {
-        final File file = IOUtil.listFiles(new File("./lib/"), true, true).get(0);
-
-        for (int i = 0; i < 1000000; i++) {
-            Stream.ofLines(file).filter(s -> !s.startsWith("aa")).skip(10);
-        }
-
-        N.println(Stream.ofLines(file).filter(s -> !s.startsWith("aa")).skip(10).count());
     }
 
     @Test
