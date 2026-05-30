@@ -32,6 +32,7 @@ import com.landawn.abacus.util.Strings;
 @SuppressWarnings("java:S2160")
 public final class PrimitiveCharListType extends AbstractPrimitiveListType<CharList> {
 
+    /** The type name constant for {@link CharList} type identification, equal to {@code "CharList"}. */
     public static final String CHAR_LIST = CharList.class.getSimpleName();
 
     private final Type<char[]> arrayType = Type.of(char[].class);
@@ -61,7 +62,7 @@ public final class PrimitiveCharListType extends AbstractPrimitiveListType<CharL
     /**
      * Returns the Type object for the char element type.
      *
-     * @return the Type object representing char elements
+     * @return the Type object representing Character/char elements
      */
     @Override
     public Type<Character> elementType() {

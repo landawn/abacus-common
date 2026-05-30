@@ -286,8 +286,7 @@ public class OptionalTypeTest extends TestBase {
         String fromOptionalType = optionalIntegerType.stringOf(opt);
         String fromElementType = elementType.stringOf(value);
 
-        assertEquals(fromElementType, fromOptionalType,
-                "OptionalType.stringOf must delegate to elementType.stringOf, not N.stringOf");
+        assertEquals(fromElementType, fromOptionalType, "OptionalType.stringOf must delegate to elementType.stringOf, not N.stringOf");
     }
 
     /**

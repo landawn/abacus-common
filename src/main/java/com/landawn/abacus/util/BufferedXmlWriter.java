@@ -119,10 +119,10 @@ public final class BufferedXmlWriter extends CharacterWriter {
 
     /**
      * Creates a new BufferedXmlWriter with an internal buffer.
-     * The content is stored in memory and can be retrieved using toString().
+     * The content is stored in memory and can be retrieved using {@link #toString()}.
      *
-     * <p>This constructor is package-private. Use factory methods or builder
-     * patterns to create instances.</p>
+     * <p>This constructor is package-private. Outside this package, obtain an
+     * instance from the pool via {@link Objectory#createBufferedXmlWriter()}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -140,8 +140,8 @@ public final class BufferedXmlWriter extends CharacterWriter {
      * Characters are encoded using the default character encoding.
      *
      * <p>The writer will automatically escape XML special characters as they
-     * are written to the output stream. The stream is not closed when the
-     * writer is closed; this is the caller's responsibility.</p>
+     * are written to the output stream. Closing this writer will also close
+     * the underlying {@code OutputStream}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -162,8 +162,7 @@ public final class BufferedXmlWriter extends CharacterWriter {
      * Creates a new BufferedXmlWriter that writes to the specified Writer.
      *
      * <p>The writer will automatically escape XML special characters as they
-     * are written. The underlying Writer is not closed when this writer
-     * is closed; this is the caller's responsibility.</p>
+     * are written. Closing this writer will also close the underlying {@code Writer}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

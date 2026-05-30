@@ -520,21 +520,21 @@ public final class HttpHeaders {
     }
 
     /**
-     * Creates a new empty HttpHeaders instance.
+     * Creates a new empty {@code HttpHeaders} instance.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpHeaders headers = HttpHeaders.create();
      * }</pre>
      *
-     * @return a new HttpHeaders instance
+     * @return a new empty {@code HttpHeaders} instance
      */
     public static HttpHeaders create() {
         return new HttpHeaders();
     }
 
     /**
-     * Creates a new HttpHeaders instance with a single header.
+     * Creates a new {@code HttpHeaders} instance with a single header.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -542,9 +542,9 @@ public final class HttpHeaders {
      * }</pre>
      *
      * @param name the header name
-     * @param value the header value (can be String, Collection, Date, Instant, or any object)
-     * @return a new HttpHeaders instance containing the specified header
-     * @throws IllegalArgumentException if name is {@code null}
+     * @param value the header value (can be a {@code String}, {@code Collection}, {@code Date}, {@code Instant}, or any object)
+     * @return a new {@code HttpHeaders} instance containing the specified header
+     * @throws IllegalArgumentException if {@code name} is {@code null}
      */
     public static HttpHeaders of(final String name, final Object value) throws IllegalArgumentException {
         N.checkArgNotNull(name, cs.name);
@@ -553,7 +553,7 @@ public final class HttpHeaders {
     }
 
     /**
-     * Creates a new HttpHeaders instance with two headers.
+     * Creates a new {@code HttpHeaders} instance with two headers.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -565,8 +565,8 @@ public final class HttpHeaders {
      * @param value1 the first header value
      * @param name2 the second header name
      * @param value2 the second header value
-     * @return a new HttpHeaders instance containing the specified headers
-     * @throws IllegalArgumentException if any name is {@code null}
+     * @return a new {@code HttpHeaders} instance containing the specified headers
+     * @throws IllegalArgumentException if {@code name1} or {@code name2} is {@code null}
      */
     public static HttpHeaders of(final String name1, final Object value1, final String name2, final Object value2) throws IllegalArgumentException {
         N.checkArgNotNull(name1, cs.name1);
@@ -576,7 +576,7 @@ public final class HttpHeaders {
     }
 
     /**
-     * Creates a new HttpHeaders instance with three headers.
+     * Creates a new {@code HttpHeaders} instance with three headers.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -591,8 +591,8 @@ public final class HttpHeaders {
      * @param value2 the second header value
      * @param name3 the third header name
      * @param value3 the third header value
-     * @return a new HttpHeaders instance containing the specified headers
-     * @throws IllegalArgumentException if any name is {@code null}
+     * @return a new {@code HttpHeaders} instance containing the specified headers
+     * @throws IllegalArgumentException if {@code name1}, {@code name2}, or {@code name3} is {@code null}
      */
     public static HttpHeaders of(final String name1, final Object value1, final String name2, final Object value2, final String name3, final Object value3)
             throws IllegalArgumentException {
@@ -628,7 +628,7 @@ public final class HttpHeaders {
     }
 
     /**
-     * Creates a new HttpHeaders instance with a copy of the provided headers map.
+     * Creates a new {@code HttpHeaders} instance with a copy of the provided headers map.
      * The headers are copied into a new map of the same type as the input.
      * Unlike {@link #of(Map)}, this method creates a copy rather than using the original map.
      *
@@ -642,8 +642,8 @@ public final class HttpHeaders {
      * }</pre>
      *
      * @param headers the map of header names to values to copy
-     * @return a new HttpHeaders instance with a copy of the headers
-     * @throws IllegalArgumentException if headers is {@code null}
+     * @return a new {@code HttpHeaders} instance with a copy of the headers
+     * @throws IllegalArgumentException if {@code headers} is {@code null}
      */
     public static HttpHeaders copyOf(final Map<String, ?> headers) throws IllegalArgumentException {
         N.checkArgNotNull(headers);
@@ -1054,7 +1054,7 @@ public final class HttpHeaders {
      * }</pre>
      *
      * @param name The header name
-     * @param value The header value (can be String, Collection, Date, Instant, or any object)
+     * @param value The header value (can be a {@code String}, {@code Collection}, {@code Date}, {@code Instant}, or any object)
      * @return This HttpHeaders instance for method chaining
      */
     public HttpHeaders set(final String name, final Object value) {

@@ -19,7 +19,7 @@ package com.landawn.abacus.type;
  * <p>
  * Atomic types represent thread-safe, mutable single-value containers from
  * {@code java.util.concurrent.atomic} (e.g., {@code AtomicInteger}, {@code AtomicLong},
- * {@code AtomicBoolean}, {@code AtomicReference}). Values are self-delimiting numeric or boolean
+ * {@code AtomicBoolean}). Values are self-delimiting numeric or boolean
  * quantities that do not require quoting in CSV format.
  * </p>
  *

@@ -947,7 +947,7 @@ public final class IntFunctions {
      *
      * <p>The {@code DisposableObjArray} is created lazily on the first {@code apply} call and reused
      * for all subsequent calls. Because the same array instance is reused, the returned function
-     * must not be saved, cached, or used in parallel streams.
+     * must not be saved, cached, or used in parallel streams.</p>
      *
      * @return a stateful {@code IntFunction} that, given a length, lazily creates and then reuses a
      *         {@code DisposableObjArray} of that length
@@ -976,13 +976,16 @@ public final class IntFunctions {
      *
      * <p>The {@code DisposableArray} is created lazily on the first {@code apply} call and reused
      * for all subsequent calls. Because the same array instance is reused, the returned function
-     * must not be saved, cached, or used in parallel streams.
+     * must not be saved, cached, or used in parallel streams.</p>
+     *
+     * <p>Note that {@code componentType} is not validated when this method is called; if it is
+     * {@code null}, a {@link NullPointerException} is thrown later by the first {@code apply} call
+     * when the backing array is created.</p>
      *
      * @param <T> the component type of the array
-     * @param componentType the {@code Class} object representing the component type of the array, must not be {@code null}
+     * @param componentType the {@code Class} object representing the component type of the array; must not be {@code null}
      * @return a stateful {@code IntFunction} that, given a length, lazily creates and then reuses a
      *         {@code DisposableArray} of that component type and length
-     * @throws NullPointerException if {@code componentType} is {@code null}
      */
     @Beta
     @SequentialOnly

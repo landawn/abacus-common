@@ -1415,7 +1415,8 @@ public class u { // NOSONAR
          *        to be returned
          * @return this {@code OptionalChar}, if a value is present, otherwise the
          *         {@code OptionalChar} produced by the supplying function
-         * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
+         * @throws NullPointerException if no value is present and {@code supplier} is
+         *         {@code null}, or if {@code supplier} returns {@code null}
          */
         public OptionalChar or(final Supplier<OptionalChar> supplier) {
             if (isPresent()) {
@@ -6598,7 +6599,7 @@ public class u { // NOSONAR
          * <ul>
          * <li>it is also an {@code Optional} and;</li>
          * <li>both instances have no value present or;</li>
-         * <li>the present values are "equal to" each other via {@code equals()}.</li>
+         * <li>the present values are "equal to" each other via {@code N.equals()}.</li>
          * </ul>
          *
          * @param obj an object to be tested for equality

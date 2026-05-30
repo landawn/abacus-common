@@ -33,6 +33,7 @@ import com.landawn.abacus.util.Strings;
 @SuppressWarnings("java:S2160")
 public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<long[]> {
 
+    /** The type name constant for the long array type, equal to {@code "long[]"}. */
     public static final String LONG_ARRAY = long[].class.getSimpleName();
 
     private final Type<Long> elementType;

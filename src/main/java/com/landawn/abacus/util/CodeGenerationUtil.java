@@ -390,8 +390,8 @@ public final class CodeGenerationUtil {
      *
      * @param entityClasses entity classes that contribute bean property names; must not be {@code null} or empty
      * @param propNameTableClassName top-level interface name to generate; must not be {@code null} or empty
-     * @param propNameTableClassPackageName package for generated source; if empty, uses the first
-     *        entity package
+     * @param propNameTableClassPackageName package for generated source; if {@code null} or empty,
+     *        uses the first entity's package
      * @param srcDir source root directory; if {@code null} or empty, source is not written
      * @return generated Java source for the standalone property-name table
      * @throws IllegalArgumentException if {@code entityClasses} is {@code null} or empty, or {@code propNameTableClassName} is {@code null} or empty
@@ -927,7 +927,7 @@ public final class CodeGenerationUtil {
      * Typical options include class/package output, property-name conversion, case-specific nested
      * interfaces, function-based constants, and per-class property-name lists.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
      *         .entityClasses(classes)
@@ -956,10 +956,10 @@ public final class CodeGenerationUtil {
         /** Top-level interface name for generated property constants. Required. */
         private String className;
 
-        /** Package for generated source; if {@code null}, uses the first entity package. */
+        /** Package for generated source; if {@code null} or empty, uses the first entity's package. */
         private String packageName;
 
-        /** Source root to write files into; if {@code null}, only returns generated source text. */
+        /** Source root to write files into; if {@code null} or empty, only the generated source text is returned. */
         private String srcDir;
 
         /** Optional interfaces that the generated top-level interface should extend. */

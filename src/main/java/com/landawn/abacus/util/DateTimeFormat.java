@@ -54,7 +54,7 @@ public enum DateTimeFormat {
      *   <li>Language and locale-independent representation</li>
      * </ul>
      *
-     * <p>Example value: {@code 1703503845000} (represents 2023-12-25 10:30:45 GMT)</p>
+     * <p>Example value: {@code 1703500245000} (represents 2023-12-25 10:30:45 GMT)</p>
      */
     LONG,
 

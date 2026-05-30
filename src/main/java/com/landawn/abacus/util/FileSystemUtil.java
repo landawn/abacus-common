@@ -152,8 +152,8 @@ final class FileSystemUtil {
      * @param path the path to get free space for, not {@code null}, not empty on Unix
      * @return the amount of free space in kilobytes
      * @throws IOException if an error occurs when finding the free space
-     * @throws IllegalArgumentException if the path is invalid
-     * @throws IllegalStateException if an error occurred in initialization or OS not supported
+     * @throws IllegalArgumentException if {@code path} is {@code null}, or is empty on a Unix-like system
+     * @throws IllegalStateException if an error occurred in initialization or the OS is not supported
      */
     public static long freeSpaceKb(final String path) throws IOException {
         return freeSpaceKb(path, -1);
@@ -182,8 +182,8 @@ final class FileSystemUtil {
      * @param timeout the timeout in milliseconds, or 0 or negative for no timeout
      * @return the amount of free space in kilobytes
      * @throws IOException if an error occurs when finding the free space
-     * @throws IllegalArgumentException if the path is invalid
-     * @throws IllegalStateException if an error occurred in initialization or OS not supported
+     * @throws IllegalArgumentException if {@code path} is {@code null}, or is empty on a Unix-like system
+     * @throws IllegalStateException if an error occurred in initialization or the OS is not supported
      */
     public static long freeSpaceKb(final String path, final long timeout) throws IOException {
         return INSTANCE.freeSpaceOS(path, OS, true, timeout);
@@ -205,7 +205,7 @@ final class FileSystemUtil {
      *
      * @return the amount of free space in the current directory in kilobytes
      * @throws IOException if an error occurs when finding the free space
-     * @throws IllegalStateException if an error occurred in initialization
+     * @throws IllegalStateException if an error occurred in initialization or the OS is not supported
      */
     public static long freeSpaceKb() throws IOException {
         return freeSpaceKb(-1);
@@ -228,7 +228,7 @@ final class FileSystemUtil {
      * @param timeout the timeout in milliseconds, or 0 or negative for no timeout
      * @return the amount of free space in the current directory in kilobytes
      * @throws IOException if an error occurs when finding the free space
-     * @throws IllegalStateException if an error occurred in initialization
+     * @throws IllegalStateException if an error occurred in initialization or the OS is not supported
      */
     public static long freeSpaceKb(final long timeout) throws IOException {
         return freeSpaceKb(new File(".").getAbsolutePath(), timeout);

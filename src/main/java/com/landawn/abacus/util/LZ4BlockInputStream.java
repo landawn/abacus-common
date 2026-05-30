@@ -123,12 +123,11 @@ public final class LZ4BlockInputStream extends InputStream {
     }
 
     /**
-     * Skips over and discards n bytes of decompressed data from this input stream.
-     * The skip method may skip fewer bytes than requested if the end of stream is reached.
-     * The actual number of bytes skipped is returned.
+     * Skips over and discards up to {@code n} bytes of decompressed data from this input stream.
+     * Fewer than {@code n} bytes may be skipped, for example because fewer bytes remain in the
+     * current decompressed block. The actual number of bytes skipped is returned.
      *
-     * <p>This method may skip more or fewer bytes than requested depending on the
-     * underlying implementation and the compressed data structure.</p>
+     * <p>This method never skips more than {@code n} bytes.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -136,8 +135,8 @@ public final class LZ4BlockInputStream extends InputStream {
      * }</pre>
      *
      * @param n the number of bytes to skip
-     * @return the actual number of bytes skipped
-     * @throws IllegalArgumentException if n is negative
+     * @return the actual number of bytes skipped, or -1 if the end of the stream has already been reached
+     * @throws IllegalArgumentException if {@code n} is negative
      * @throws IOException if an I/O error occurs
      */
     @Override
@@ -209,9 +208,9 @@ public final class LZ4BlockInputStream extends InputStream {
     }
 
     /**
-     * Closes this input stream and releases any system resources associated with the stream.
-     * Once the stream has been closed, further read(), available(), reset(), or skip()
-     * invocations will throw an IOException.
+     * Closes this input stream and releases any system resources associated with the stream,
+     * including the underlying input stream. Read operations attempted after the stream has
+     * been closed typically fail with an {@link IOException}.
      *
      * <p>Closing a previously closed stream has no effect.</p>
      *

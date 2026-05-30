@@ -167,8 +167,7 @@ public class AsciiStreamTypeTest extends TestBase {
             }
         };
 
-        IOException actual = org.junit.jupiter.api.Assertions.assertThrows(IOException.class,
-                () -> asciiStreamType.writeCharacter(writer, failing, null));
+        IOException actual = org.junit.jupiter.api.Assertions.assertThrows(IOException.class, () -> asciiStreamType.writeCharacter(writer, failing, null));
         org.junit.jupiter.api.Assertions.assertSame(expected, actual);
     }
 }

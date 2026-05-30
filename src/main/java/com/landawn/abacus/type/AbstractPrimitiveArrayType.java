@@ -83,8 +83,8 @@ public abstract class AbstractPrimitiveArrayType<T> extends AbstractArrayType<T>
     /**
      * Converts a primitive array to its string representation.
      * <p>
-     * Returns "null" if the array is {@code null}, otherwise delegates
-     * to {@code stringOf(T)} for the actual conversion.
+     * Returns {@code "null"} if the array is {@code null}, otherwise delegates
+     * to {@link #stringOf(Object)} for the actual conversion.
      * </p>
      *
      * @param x the primitive array

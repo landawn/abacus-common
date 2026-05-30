@@ -54,6 +54,7 @@ public final class BrotliInputStream extends InputStream {
      * }</pre>
      *
      * @param source the input stream containing Brotli-compressed data
+     * @throws IllegalArgumentException if {@code source} is {@code null}
      * @throws IOException if an I/O error occurs while initializing the decompressor
      */
     public BrotliInputStream(final InputStream source) throws IOException {
@@ -73,6 +74,7 @@ public final class BrotliInputStream extends InputStream {
      *
      * @param source the input stream containing Brotli-compressed data
      * @param byteReadBufferSize the size of the internal buffer for reading, in bytes
+     * @throws IllegalArgumentException if {@code byteReadBufferSize} is not positive, or if {@code source} is {@code null}
      * @throws IOException if an I/O error occurs while initializing the decompressor
      */
     public BrotliInputStream(final InputStream source, final int byteReadBufferSize) throws IOException {
@@ -177,14 +179,10 @@ public final class BrotliInputStream extends InputStream {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * if (brotliStream.available() > 0) {
-     *     // Data is available to read without blocking
-     *     byte[] data = new byte[brotliStream.available()];
-     *     brotliStream.read(data);
-     * }
+     * int n = brotliStream.available(); // always 0 with the current Brotli decoder
      * }</pre>
      *
-     * @return an estimate of the number of bytes that can be read without blocking, or 0
+     * @return always {@code 0}, because the underlying Brotli decoder does not override this method
      * @throws IOException if an I/O error occurs
      */
     @Override

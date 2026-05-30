@@ -37,9 +37,8 @@ import com.landawn.abacus.annotation.Beta;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * String original = "user-name";
- * String camelCase = NamingPolicy.CAMEL_CASE.convert(original);   // "userName"
- * String snakeCase = NamingPolicy.SNAKE_CASE.convert(original);   // "user_name"
+ * String camelCase = NamingPolicy.CAMEL_CASE.convert("user-name");   // "userName"
+ * String snakeCase = NamingPolicy.SNAKE_CASE.convert("userName");    // "user_name"
  * }</pre>
  *
  * @see Strings#toCamelCase(String)
@@ -163,9 +162,9 @@ public enum NamingPolicy {
     /**
      * Upper case with underscores naming policy (e.g., "MY_VARIABLE_NAME").
      *
-     * <p>This policy converts strings to UPPER_SNAKE_CASE format where all letters
-     * are uppercase and words are separated by underscores. This is commonly used
-     * for constants and configuration keys.</p>
+     * <p>This policy converts strings to SCREAMING_SNAKE_CASE format (also known as
+     * UPPER_SNAKE_CASE) where all letters are uppercase and words are separated by
+     * underscores. This is commonly used for constants and configuration keys.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -234,13 +233,17 @@ public enum NamingPolicy {
      * to convert the input string to the desired format. The exact transformation depends on
      * which naming policy constant is used (e.g., CAMEL_CASE, SCREAMING_SNAKE_CASE, etc.).</p>
      *
-     * <p>The method handles various input formats and intelligently detects word boundaries based on:
+     * <p>How word boundaries are detected depends on the target policy. The camel-case policies
+     * ({@link #CAMEL_CASE} and {@link #UPPER_CAMEL_CASE}) split the input on the following boundaries:</p>
      * <ul>
      *   <li>Underscores (_)</li>
      *   <li>Hyphens (-)</li>
      *   <li>Spaces</li>
-     *   <li>Case transitions (e.g., "camelCase" to "camel case")</li>
+     *   <li>Case transitions (e.g., "camelCase" is treated as the words "camel" and "case")</li>
      * </ul>
+     * <p>The {@link #SNAKE_CASE}, {@link #SCREAMING_SNAKE_CASE}, and {@link #KEBAB_CASE} policies
+     * insert their separator only at case transitions and preserve any existing underscores, hyphens,
+     * or spaces in the input. The {@link #NO_CHANGE} policy performs no transformation at all.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

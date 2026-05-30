@@ -404,7 +404,7 @@ public final class PropertiesUtil {
 
         if (index > -1) {
             folderPrefix = simpleConfigFileName.substring(0, index);
-            folderPrefix = folderPrefix.charAt(0) == '.' ? folderPrefix.substring(1) : folderPrefix;
+            folderPrefix = !folderPrefix.isEmpty() && folderPrefix.charAt(0) == '.' ? folderPrefix.substring(1) : folderPrefix;
             folderPrefix = folderPrefix.replace(".." + File.separatorChar, "");
 
             simpleConfigFileName = simpleConfigFileName.substring(index + 1);
@@ -509,7 +509,7 @@ public final class PropertiesUtil {
 
         if (index > -1) {
             folderPrefix = simpleConfigFileName.substring(0, index);
-            folderPrefix = folderPrefix.charAt(0) == '.' ? folderPrefix.substring(1) : folderPrefix;
+            folderPrefix = !folderPrefix.isEmpty() && folderPrefix.charAt(0) == '.' ? folderPrefix.substring(1) : folderPrefix;
 
             simpleConfigFileName = simpleConfigFileName.substring(index + 1);
         }
@@ -749,7 +749,7 @@ public final class PropertiesUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, Object> props = PropertiesUtil.loadFromXml(new File("config.xml"));
-     * String dbUrl = (String) props.get("database.url");
+     * String url = (String) props.get("url");
      * }</pre>
      *
      * @param source the XML file from which to load the properties.
@@ -782,7 +782,9 @@ public final class PropertiesUtil {
      *                    A background thread checks the file last modification time every second.
      * @return a Properties object containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs while reading the file
-     * @throws ParsingException if the XML cannot be parsed or has invalid structure
+     * @throws ParsingException if the XML cannot be parsed or has no document element
+     * @throws RuntimeException if the XML contains duplicated sibling property names (same node tag name under the same parent)
+     * @see #loadFromXml(File)
      */
     public static Properties<String, Object> loadFromXml(final File source, final boolean autoRefresh) {
         return loadFromXml(source, autoRefresh, Properties.class);
@@ -847,7 +849,7 @@ public final class PropertiesUtil {
      * MyProperties props = PropertiesUtil.loadFromXml(new File("config.xml"), MyProperties.class);
      * }</pre>
      *
-     * @param <T> the type of the target properties class.
+     * @param <T> the type of the target properties class, must extend Properties&lt;String, Object&gt;.
      * @param source the XML file from which to load the properties.
      * @param targetClass the class of the target properties.
      * @return an instance of the target properties class containing the loaded properties.
@@ -1198,12 +1200,12 @@ public final class PropertiesUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, Object> props = new Properties<>();
-     * props.put("database.url", "jdbc:mysql://localhost/mydb");
-     * props.put("database.user", "admin");
+     * props.put("url", "jdbc:mysql://localhost/mydb");
+     * props.put("user", "admin");
      * PropertiesUtil.storeToXml(props, "configuration", true, new File("config.xml"));
      * }</pre>
      *
-     * @param properties the properties to store.
+     * @param properties the properties to store. Each entry key becomes an XML element name nested under the root element.
      * @param rootElementName the name of the root element in the XML.
      * @param writeTypeInfo if {@code true}, type information will be written as attributes in the XML.
      *                      For example: {@code <port type="int">8080</port>} or {@code <enabled type="boolean">true</enabled>}.

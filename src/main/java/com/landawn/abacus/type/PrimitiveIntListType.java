@@ -32,6 +32,7 @@ import com.landawn.abacus.util.Strings;
 @SuppressWarnings("java:S2160")
 public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntList> {
 
+    /** The type name constant for {@link IntList} type identification, equal to {@code "IntList"}. */
     public static final String INT_LIST = IntList.class.getSimpleName();
 
     private final Type<int[]> arrayType = Type.of(int[].class);

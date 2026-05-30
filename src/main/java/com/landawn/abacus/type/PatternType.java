@@ -38,6 +38,7 @@ import com.landawn.abacus.util.Strings;
  */
 public class PatternType extends AbstractType<Pattern> {
 
+    /** The type name constant for Pattern type identification, equal to {@code "Pattern"}. */
     public static final String PATTERN = "Pattern";
 
     /**

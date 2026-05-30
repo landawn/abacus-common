@@ -7282,8 +7282,8 @@ public class RowDatasetTest extends TestBase {
         data.add(new ArrayList<>(Arrays.asList("a-b", "c-d")));
         final RowDataset ds = new RowDataset(cols, data);
 
-        assertThrows(IllegalArgumentException.class, () -> ds.divideColumn("val", new Tuple2<>("dup", "dup"),
-                (BiConsumer<Object, Pair<Object, Object>>) (v, p) -> {
+        assertThrows(IllegalArgumentException.class,
+                () -> ds.divideColumn("val", new Tuple2<>("dup", "dup"), (BiConsumer<Object, Pair<Object, Object>>) (v, p) -> {
                     final String[] parts = ((String) v).split("-");
                     p.set(parts[0], parts[1]);
                 }));
@@ -7320,8 +7320,8 @@ public class RowDatasetTest extends TestBase {
         data.add(new ArrayList<>(Arrays.asList("a-b", "c-d")));
         final RowDataset ds = new RowDataset(cols, data);
 
-        assertThrows(IllegalArgumentException.class, () -> ds.divideColumn("val", Arrays.asList("dup", "dup"),
-                (Function<Object, ? extends List<?>>) v -> Arrays.asList(((String) v).split("-"))));
+        assertThrows(IllegalArgumentException.class,
+                () -> ds.divideColumn("val", Arrays.asList("dup", "dup"), (Function<Object, ? extends List<?>>) v -> Arrays.asList(((String) v).split("-"))));
 
         assertEquals(2, ds.columnCount());
         assertTrue(ds.containsColumn("val"));
@@ -7335,12 +7335,11 @@ public class RowDatasetTest extends TestBase {
         data.add(new ArrayList<>(Arrays.asList("a-b", "c-d")));
         final RowDataset ds = new RowDataset(cols, data);
 
-        assertThrows(IllegalArgumentException.class,
-                () -> ds.divideColumn("val", Arrays.asList("dup", "dup"), (BiConsumer<Object, Object[]>) (v, out) -> {
-                    final String[] parts = ((String) v).split("-");
-                    out[0] = parts[0];
-                    out[1] = parts[1];
-                }));
+        assertThrows(IllegalArgumentException.class, () -> ds.divideColumn("val", Arrays.asList("dup", "dup"), (BiConsumer<Object, Object[]>) (v, out) -> {
+            final String[] parts = ((String) v).split("-");
+            out[0] = parts[0];
+            out[1] = parts[1];
+        }));
 
         assertEquals(2, ds.columnCount());
         assertTrue(ds.containsColumn("val"));

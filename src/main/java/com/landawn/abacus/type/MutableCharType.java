@@ -76,11 +76,14 @@ public class MutableCharType extends AbstractType<MutableChar> {
 
     /**
      * Parses a string to create a {@link MutableChar} object.
-     * The first character of the string is used as the value.
+     * A single-character string yields that character; a longer string is parsed as an
+     * integer and cast to the corresponding {@code char} (e.g. {@code "65"} yields {@code 'A'}).
      *
      * @param str the string to parse, may be {@code null} or empty
      * @return a {@code MutableChar} containing the parsed character,
      *         or {@code null} if the input is {@code null} or empty
+     * @throws NumberFormatException if the string has more than one character and cannot be parsed as an integer
+     * @throws IllegalArgumentException if the string represents an integer outside the valid char range [0, 65535]
      */
     @Override
     public MutableChar valueOf(final String str) {
@@ -162,7 +165,8 @@ public class MutableCharType extends AbstractType<MutableChar> {
     }
 
     /**
-     * Appends the character value of a {@link MutableChar} directly to an {@link Appendable}.
+     * Appends the character value of a {@link MutableChar} directly to an {@link Appendable}
+     * (unquoted, as a single character).
      * Writes the literal string {@code "null"} when {@code x} is {@code null}.
      *
      * @param appendable the target to write to

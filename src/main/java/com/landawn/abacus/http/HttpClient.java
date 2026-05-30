@@ -291,10 +291,9 @@ import com.landawn.abacus.util.URLEncodedUtil;
  *
  * <p><b>Static Factory Methods:</b>
  * <ul>
- *   <li><b>{@code create(String)}:</b> Create client with base URL</li>
- *   <li><b>{@code create(URL)}:</b> Create client with URL object</li>
- *   <li><b>{@code create(URI)}:</b> Create client with URI object</li>
- *   <li><b>{@code create(HttpSettings)}:</b> Create client with detailed configuration</li>
+ *   <li><b>{@code create(String, ...)}:</b> Create a client from a string base URL, with optional
+ *       max-connection, timeout, {@link HttpSettings}, shared connection counter, and {@link Executor} overloads</li>
+ *   <li><b>{@code create(URL, ...)}:</b> Create a client from a {@link URL} object, with the same set of optional overloads</li>
  * </ul>
  *
  * <p><b>Best Practices and Recommendations:</b>
@@ -758,7 +757,7 @@ public final class HttpClient {
      *
      * @param url The base URL for the HTTP client (as a java.net.URL object)
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if url is null
+     * @throws IllegalArgumentException if url is {@code null}
      */
     public static HttpClient create(final URL url) {
         return create(url, DEFAULT_MAX_CONNECTION);
@@ -1785,7 +1784,7 @@ public final class HttpClient {
      * @param httpMethod The HTTP method to use
      * @param settings Additional HTTP settings for the connection
      * @param doOutput Whether the connection will send a request body
-     * @param resultClass The expected result class (used for optimization)
+     * @param resultClass The expected result class; currently not used when configuring the connection
      * @return A configured HttpURLConnection ready for use
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -1809,7 +1808,7 @@ public final class HttpClient {
      * @param queryParameters Query parameters for GET/DELETE requests (can be String, Map, or Bean)
      * @param settings Additional HTTP settings for the connection
      * @param doOutput Whether the connection will send a request body
-     * @param resultClass The expected result class (used for optimization)
+     * @param resultClass The expected result class; currently not used when configuring the connection
      * @return A configured HttpURLConnection ready for use
      * @throws UncheckedIOException if an I/O error occurs
      */

@@ -34,7 +34,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 /**
- * Utility class for sending emails using JavaMail API.
+ * Utility class for sending emails using the JavaMail API.
  * Provides convenient methods for sending plain text and HTML emails with or without attachments.
  *
  * <p>This class supports SMTP authentication and can be configured with various mail server properties.</p>

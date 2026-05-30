@@ -108,7 +108,7 @@ public interface DoubleTriPredicate extends Throwables.DoubleTriPredicate<Runtim
      * DoubleTriPredicate combined = isPositive.and(sumLessThan100);
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate
+     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
      * @throws NullPointerException if {@code other} is null
      */
@@ -134,7 +134,7 @@ public interface DoubleTriPredicate extends Throwables.DoubleTriPredicate<Runtim
      * DoubleTriPredicate specialCase = allZero.or(allOne);
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate
+     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
      * @throws NullPointerException if {@code other} is null
      */

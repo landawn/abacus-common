@@ -33,7 +33,7 @@ import com.landawn.abacus.annotation.Beta;
  * <ul>
  * <li>{@link #empty()} - returns an empty immutable sorted map</li>
  * <li>{@link #of(Object, Object)} - creates maps with specific key-value pairs</li>
- * <li>{@link #copyOf(Map)} - creates a defensive copy from another sorted map</li>
+ * <li>{@link #copyOf(Map)} - creates a defensive copy from another map</li>
  * <li>{@link #wrap(SortedMap)} - wraps an existing sorted map (changes to the underlying map will be reflected)</li>
  * </ul>
  *
@@ -561,10 +561,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     /**
      * Returns a view of the portion of this map whose keys range from {@code fromKey},
      * inclusive, to {@code toKey}, exclusive. The returned map is backed by this map,
-     * so it remains immutable.
-     *
-     * <p>The returned map will throw an {@code IllegalArgumentException} on an attempt to
-     * insert a key outside its range.</p>
+     * so it is also immutable; any attempt to modify it throws {@link UnsupportedOperationException}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -668,7 +665,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     /**
      * Compares the specified object with this map for equality.
      * Returns {@code true} if the given object is also a map and the two maps represent
-     * the same mappings, as defined by {@link java.util.AbstractMap#equals(Object)}.
+     * the same mappings, as defined by the {@link java.util.Map#equals(Object)} contract.
      *
      * @param obj the object to be compared for equality with this map
      * @return {@code true} if the specified object is equal to this map
@@ -681,7 +678,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     /**
      * Returns the hash code value for this map.
      * The hash code is defined as the sum of the hash codes of each entry in the map,
-     * as defined by {@link java.util.AbstractMap#hashCode()}.
+     * as defined by the {@link java.util.Map#hashCode()} contract.
      *
      * @return the hash code value for this map
      */

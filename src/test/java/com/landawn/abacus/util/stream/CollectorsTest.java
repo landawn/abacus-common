@@ -906,12 +906,10 @@ public class CollectorsTest extends TestBase {
     @Test
     public void testOnlyOne_FirstElementNull_DetectsDuplicate() {
         // First element is null, second is non-null -> must throw, not silently return 5.
-        assertThrows(TooManyElementsException.class,
-                () -> Stream.of((Integer) null, 5).collect(Collectors.onlyOne()));
+        assertThrows(TooManyElementsException.class, () -> Stream.of((Integer) null, 5).collect(Collectors.onlyOne()));
 
         // Both null also counts as duplicate.
-        assertThrows(TooManyElementsException.class,
-                () -> Stream.of((Integer) null, (Integer) null).collect(Collectors.onlyOne()));
+        assertThrows(TooManyElementsException.class, () -> Stream.of((Integer) null, (Integer) null).collect(Collectors.onlyOne()));
 
         // A single null element returns empty Optional (matches first()/last() semantics).
         Optional<Integer> singleNull = Stream.<Integer> of((Integer) null).collect(Collectors.onlyOne());

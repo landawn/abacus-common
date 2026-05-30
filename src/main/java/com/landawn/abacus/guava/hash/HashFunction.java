@@ -143,7 +143,7 @@ public interface HashFunction {
 
     /**
      * Computes the hash code for a single integer value. This is a convenience method
-     * equivalent to {@code newHasher().putInt(input).hash()}.
+     * equivalent to {@code newHasher().put(input).hash()}.
      *
      * <p>The integer is interpreted in little-endian byte order. The implementation may
      * be optimized compared to using a Hasher.
@@ -160,7 +160,7 @@ public interface HashFunction {
 
     /**
      * Computes the hash code for a single long value. This is a convenience method
-     * equivalent to {@code newHasher().putLong(input).hash()}.
+     * equivalent to {@code newHasher().put(input).hash()}.
      *
      * <p>The long is interpreted in little-endian byte order. The implementation may
      * be optimized compared to using a Hasher.
@@ -177,7 +177,7 @@ public interface HashFunction {
 
     /**
      * Computes the hash code for a byte array. This is a convenience method equivalent
-     * to {@code newHasher().putBytes(input).hash()}.
+     * to {@code newHasher().put(input).hash()}.
      *
      * <p>This is one of the most commonly used methods, as many data types can be
      * converted to byte arrays. The implementation may be optimized compared to using
@@ -196,7 +196,7 @@ public interface HashFunction {
 
     /**
      * Computes the hash code for a portion of a byte array. This is a convenience method
-     * equivalent to {@code newHasher().putBytes(input, off, len).hash()}.
+     * equivalent to {@code newHasher().put(input, off, len).hash()}.
      *
      * <p>Only the bytes from {@code input[off]} through {@code input[off + len - 1]}
      * are hashed. This is useful when working with buffers or when only part of an
@@ -219,7 +219,7 @@ public interface HashFunction {
 
     /**
      * Computes the hash code for a character sequence without encoding. This is a
-     * convenience method equivalent to {@code newHasher().putUnencodedChars(input).hash()}.
+     * convenience method equivalent to {@code newHasher().put(input).hash()}.
      *
      * <p>Each character is hashed directly by hashing its low byte followed by its high
      * byte (little-endian order). No character encoding is performed, making this method
@@ -242,7 +242,7 @@ public interface HashFunction {
     /**
      * Computes the hash code for a character sequence using the specified character
      * encoding. This is a convenience method equivalent to
-     * {@code newHasher().putString(input, charset).hash()}.
+     * {@code newHasher().put(input, charset).hash()}.
      *
      * <p>The characters are first encoded to bytes using the specified charset, then
      * those bytes are hashed. This method is useful for cross-language compatibility
@@ -263,7 +263,7 @@ public interface HashFunction {
     /**
      * Computes the hash code for an arbitrary object using a {@link Funnel} to decompose
      * the object into primitive values. This is a convenience method equivalent to
-     * {@code newHasher().putObject(instance, funnel).hash()}.
+     * {@code newHasher().put(instance, funnel).hash()}.
      *
      * <p>The funnel defines how to extract data from the object and feed it to the hasher.
      * This approach ensures consistent hashing of complex objects.

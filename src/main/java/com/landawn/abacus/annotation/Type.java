@@ -83,7 +83,7 @@ public @interface Type {
 
     /**
      * Specifies the type name to use for type conversion.
-     * This should match a registered type name in the type factory.
+     * This should match a registered type name in the {@code TypeFactory}.
      *
      * <p>Common built-in type names include:</p>
      * <ul>

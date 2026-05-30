@@ -1862,8 +1862,9 @@ public final class CsvUtil {
      *        which is treated as always-true (no filtering)
      * @param targetType the Class of the target type, must not be {@code null}
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, or if
-     *         {@code targetType} is {@code null} or not a supported type
+     * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, if
+     *         {@code targetType} is {@code null} or not a supported type, or if any name in
+     *         {@code selectColumnNames} is not present in the CSV header
      * @throws UncheckedIOException if an I/O error occurs while reading the file
      * @see #stream(File, Class)
      * @see #stream(File, Collection, Class)
@@ -2001,8 +2002,9 @@ public final class CsvUtil {
      * @param closeReaderWhenStreamIsClosed {@code true} to close the reader when the stream is closed,
      *        {@code false} otherwise
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, or if
-     *         {@code targetType} is {@code null} or not a supported type
+     * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, if
+     *         {@code targetType} is {@code null} or not a supported type, or if any name in
+     *         {@code selectColumnNames} is not present in the CSV header
      * @throws UncheckedIOException if an I/O error occurs while reading
      * @see #stream(Reader, Class, boolean)
      * @see #stream(Reader, Collection, Class, boolean)
@@ -2675,7 +2677,8 @@ public final class CsvUtil {
      *                         {@code null} to include all columns
      * @param jsonFile the destination JSON file to create
      * @return the number of rows written to the JSON file
-     * @throws IllegalArgumentException if csvFile or jsonFile is {@code null}
+     * @throws IllegalArgumentException if csvFile or jsonFile is {@code null}, or if any name in
+     *         {@code selectColumnNames} is not present in the CSV header
      * @throws UncheckedIOException if an I/O error occurs during file operations
      * @see #csvToJson(File, File)
      * @see #csvToJson(File, Collection, File, Class)

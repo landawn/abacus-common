@@ -61,8 +61,10 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
-     * A singleton empty CharIterator instance that contains no elements.
-     * This iterator's hasNext() always returns false, and nextChar() always throws NoSuchElementException.
+     * A singleton empty {@code CharIterator} instance that contains no elements.
+     *
+     * <p>This iterator's {@link #hasNext()} always returns {@code false}, and {@link #nextChar()}
+     * always throws {@link NoSuchElementException}.</p>
      *
      * @see #empty()
      */

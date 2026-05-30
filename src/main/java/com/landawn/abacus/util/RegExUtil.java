@@ -63,10 +63,10 @@ import com.landawn.abacus.util.function.IntBiFunction;
  * <ul>
  *   <li><b>{@link #JAVA_IDENTIFIER_MATCHER}:</b> Matches valid Java identifiers (variables, methods, classes)</li>
  *   <li><b>{@link #NUMBER_FINDER}:</b> Extracts numeric values including integers and decimals</li>
- *   <li><b>{@link #EMAIL_ADDRESS_RFC_5322_MATCHER}:</b> Validates and extracts email addresses</li>
- *   <li><b>{@link #HTTP_URL_MATCHER}:</b> Matches HTTP/HTTPS URLs with optional protocols</li>
+ *   <li><b>{@link #EMAIL_ADDRESS_RFC_5322_MATCHER}:</b> Validates that an entire string is an email address</li>
+ *   <li><b>{@link #HTTP_URL_MATCHER}:</b> Validates that an entire string is an HTTP/HTTPS URL</li>
  *   <li><b>{@link #DATE_MATCHER}:</b> Recognizes ISO-style date formats (yyyy-MM-dd, yyyy/MM/dd, yyyy.MM.dd)</li>
- *   <li><b>{@link #WHITESPACE_MATCHER}:</b> Matches multiple consecutive whitespace characters</li>
+ *   <li><b>{@link #WHITESPACE_MATCHER}:</b> Matches a string consisting entirely of whitespace</li>
  *   <li><b>{@link #LINE_SEPARATOR}:</b> Platform-independent line ending detection</li>
  * </ul>
  *
@@ -96,7 +96,8 @@ import com.landawn.abacus.util.function.IntBiFunction;
  *
  * // Functional replacement with transformations
  * String uppercased = RegExUtil.replaceAll("hello world", "\\w+", String::toUpperCase);
- * String indexed = RegExUtil.replaceAll("a b c", "\\w", (match, index) -> match + index);
+ * // The IntBiFunction replacer receives the (start, end) indices of each match
+ * String indexed = RegExUtil.replaceAll("a b c", "\\w", (start, end) -> "[" + start + "]");
  * }</pre>
  *
  * <p><b>Advanced Usage Examples:</b></p>
@@ -152,7 +153,7 @@ import com.landawn.abacus.util.function.IntBiFunction;
  * <ul>
  *   <li><b>String Replacement:</b> Direct string substitution with literal replacements</li>
  *   <li><b>Function Replacement:</b> Transform matches using Function&lt;String, String&gt;</li>
- *   <li><b>Indexed Replacement:</b> Transform matches with access to match index via IntBiFunction</li>
+ *   <li><b>Indexed Replacement:</b> Transform matches with access to the match's start and end indices via IntBiFunction</li>
  *   <li><b>First/Last/All:</b> Control which occurrences are replaced</li>
  * </ul>
  *
@@ -166,8 +167,8 @@ import com.landawn.abacus.util.function.IntBiFunction;
  *
  * <p><b>Error Handling and Validation:</b>
  * <ul>
- *   <li><b>IllegalArgumentException:</b> Thrown for invalid regex patterns or null required parameters</li>
- *   <li><b>PatternSyntaxException:</b> Propagated from invalid regex compilation</li>
+ *   <li><b>IllegalArgumentException:</b> Thrown when a required {@code regex} is {@code null} or empty, or a required {@code Pattern} is {@code null}</li>
+ *   <li><b>PatternSyntaxException:</b> Propagated from compilation of a syntactically invalid regex</li>
  *   <li><b>Null Safety:</b> Null source strings return null or empty results as appropriate</li>
  *   <li><b>Parameter Validation:</b> Comprehensive checking of method parameters</li>
  * </ul>
@@ -229,8 +230,7 @@ import com.landawn.abacus.util.function.IntBiFunction;
  *         Pattern.compile("ERROR|FATAL", Pattern.CASE_INSENSITIVE);
  *
  *     public List<LogEntry> processLogFile(String logContent) {
- *         return RegExUtil.splitToLines(logContent)
- *             .stream()
+ *         return Arrays.stream(RegExUtil.splitToLines(logContent))
  *             .filter(line -> RegExUtil.find(line, ERROR_PATTERN))
  *             .map(this::parseLogEntry)
  *             .collect(Collectors.toList());
@@ -437,14 +437,15 @@ public final class RegExUtil {
      *   <li>{@code "+0.99"}</li>
      * </ul>
      *
-     * <p>Example non-matches:</p>
+     * <p>Examples that are not matched as a whole token:</p>
      * <ul>
-     *   <li>{@code "100."} (trailing dot with no fractional digits)</li>
-     *   <li>{@code ".25"} (no digit before the dot)</li>
+     *   <li>{@code "100."} (only {@code "100"} is matched; the trailing dot is excluded)</li>
+     *   <li>{@code ".25"} (only {@code "25"} is matched; there is no digit before the dot)</li>
      * </ul>
      *
-     * <p><strong>Note:</strong> This pattern does not match numbers like {@code .25} or {@code 100.}
-     * because a digit before the dot is required and the fractional part must have at least one digit after the dot.</p>
+     * <p><strong>Note:</strong> This pattern requires a digit before the dot and at least one digit after it,
+     * so the leading {@code .} of {@code .25} and the trailing {@code .} of {@code 100.} are never included
+     * in a match.</p>
      *
      * @see java.util.regex.Pattern
      */
@@ -1301,9 +1302,9 @@ public final class RegExUtil {
      * // Returns: true (null treated as empty string, matches .*)
      * }</pre>
      *
-     * <p><b>Note:</b> This method implicitly adds anchors (^ and $) to the pattern, so you don't
-     * need to include them in your regex. If you want to find a pattern anywhere in the string,
-     * use {@link #find(String, String)} instead.</p>
+     * <p><b>Note:</b> This method requires the entire input to match the pattern (as if it were
+     * anchored), so explicit {@code ^} and {@code $} anchors are unnecessary. If you want to find a
+     * pattern anywhere in the string, use {@link #find(String, String)} instead.</p>
      *
      * @param source the input text to match; may be {@code null} (treated as empty string)
      * @param regex the regular expression string to match against; must not be {@code null} or empty

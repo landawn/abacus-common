@@ -45,7 +45,7 @@ import java.util.Set;
  * <p>This class is backed by a {@code volatile} map reference and the underlying
  * map is a {@link LinkedHashMap} by default, so iteration order reflects insertion order.</p>
  *
- * @param <K> the type of keys maintained by this map. It must not be {@code null}.
+ * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values
  * @see Map
  * @see java.util.Properties
@@ -135,6 +135,8 @@ public class Properties<K, V> implements Map<K, V> {
      * @return the value associated with the specified property name, converted to the specified target type;
      *         if the property is not found or its value is {@code null}, returns the default value of {@code targetType}
      *         (e.g. {@code 0} for primitive numeric types, {@code false} for {@code boolean}, {@code null} for reference types)
+     * @throws IllegalArgumentException if the stored value cannot be converted to {@code targetType}
+     * @throws NumberFormatException if the stored value is a string that cannot be parsed to the target numeric type
      * @see #get(Object)
      * @see #getOrDefault(Object, Object)
      * @see #getOrDefault(Object, Object, Class)
@@ -200,6 +202,8 @@ public class Properties<K, V> implements Map<K, V> {
      * @param targetType the class of the type to which a found, non-{@code null} value should be converted
      * @return the value associated with the specified property name, converted to the specified target type;
      *         or {@code defaultValue} (returned as-is, without conversion) if the property is not found or its value is {@code null}
+     * @throws IllegalArgumentException if a found, non-{@code null} value cannot be converted to {@code targetType}
+     * @throws NumberFormatException if a found value is a string that cannot be parsed to the target numeric type
      * @see #get(Object)
      * @see #get(Object, Class)
      * @see #getOrDefault(Object, Object)

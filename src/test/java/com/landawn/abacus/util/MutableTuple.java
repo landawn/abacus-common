@@ -661,8 +661,7 @@ public abstract class MutableTuple {
             if (obj != null && obj.getClass().equals(MutableTuple4.class)) {
                 final MutableTuple4<?, ?, ?, ?> other = (MutableTuple4<?, ?, ?, ?>) obj;
 
-                return N.equals(this._1, other._1) && N.equals(this._2, other._2) && N.equals(this._3, other._3)
-                        && N.equals(this._4, other._4);
+                return N.equals(this._1, other._1) && N.equals(this._2, other._2) && N.equals(this._3, other._3) && N.equals(this._4, other._4);
             }
 
             return false;
@@ -781,8 +780,8 @@ public abstract class MutableTuple {
             if (obj != null && obj.getClass().equals(MutableTuple5.class)) {
                 final MutableTuple5<?, ?, ?, ?, ?> other = (MutableTuple5<?, ?, ?, ?, ?>) obj;
 
-                return N.equals(this._1, other._1) && N.equals(this._2, other._2) && N.equals(this._3, other._3)
-                        && N.equals(this._4, other._4) && N.equals(this._5, other._5);
+                return N.equals(this._1, other._1) && N.equals(this._2, other._2) && N.equals(this._3, other._3) && N.equals(this._4, other._4)
+                        && N.equals(this._5, other._5);
             }
 
             return false;
@@ -790,8 +789,7 @@ public abstract class MutableTuple {
 
         @Override
         public String toString() {
-            return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", "
-                    + N.toString(_5) + "]";
+            return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", " + N.toString(_5) + "]";
         }
     }
 
@@ -907,8 +905,8 @@ public abstract class MutableTuple {
             if (obj != null && obj.getClass().equals(MutableTuple6.class)) {
                 final MutableTuple6<?, ?, ?, ?, ?, ?> other = (MutableTuple6<?, ?, ?, ?, ?, ?>) obj;
 
-                return N.equals(this._1, other._1) && N.equals(this._2, other._2) && N.equals(this._3, other._3)
-                        && N.equals(this._4, other._4) && N.equals(this._5, other._5) && N.equals(this._6, other._6);
+                return N.equals(this._1, other._1) && N.equals(this._2, other._2) && N.equals(this._3, other._3) && N.equals(this._4, other._4)
+                        && N.equals(this._5, other._5) && N.equals(this._6, other._6);
             }
 
             return false;
@@ -916,8 +914,8 @@ public abstract class MutableTuple {
 
         @Override
         public String toString() {
-            return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", "
-                    + N.toString(_5) + ", " + N.toString(_6) + "]";
+            return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", " + N.toString(_5) + ", " + N.toString(_6)
+                    + "]";
         }
     }
 
@@ -1038,9 +1036,8 @@ public abstract class MutableTuple {
             if (obj != null && obj.getClass().equals(MutableTuple7.class)) {
                 final MutableTuple7<?, ?, ?, ?, ?, ?, ?> other = (MutableTuple7<?, ?, ?, ?, ?, ?, ?>) obj;
 
-                return N.equals(this._1, other._1) && N.equals(this._2, other._2) && N.equals(this._3, other._3)
-                        && N.equals(this._4, other._4) && N.equals(this._5, other._5) && N.equals(this._6, other._6)
-                        && N.equals(this._7, other._7);
+                return N.equals(this._1, other._1) && N.equals(this._2, other._2) && N.equals(this._3, other._3) && N.equals(this._4, other._4)
+                        && N.equals(this._5, other._5) && N.equals(this._6, other._6) && N.equals(this._7, other._7);
             }
 
             return false;
@@ -1048,8 +1045,8 @@ public abstract class MutableTuple {
 
         @Override
         public String toString() {
-            return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", "
-                    + N.toString(_5) + ", " + N.toString(_6) + ", " + N.toString(_7) + "]";
+            return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", " + N.toString(_5) + ", " + N.toString(_6)
+                    + ", " + N.toString(_7) + "]";
         }
     }
 
@@ -1175,9 +1172,8 @@ public abstract class MutableTuple {
             if (obj != null && obj.getClass().equals(MutableTuple8.class)) {
                 final MutableTuple8<?, ?, ?, ?, ?, ?, ?, ?> other = (MutableTuple8<?, ?, ?, ?, ?, ?, ?, ?>) obj;
 
-                return N.equals(this._1, other._1) && N.equals(this._2, other._2) && N.equals(this._3, other._3)
-                        && N.equals(this._4, other._4) && N.equals(this._5, other._5) && N.equals(this._6, other._6)
-                        && N.equals(this._7, other._7) && N.equals(this._8, other._8);
+                return N.equals(this._1, other._1) && N.equals(this._2, other._2) && N.equals(this._3, other._3) && N.equals(this._4, other._4)
+                        && N.equals(this._5, other._5) && N.equals(this._6, other._6) && N.equals(this._7, other._7) && N.equals(this._8, other._8);
             }
 
             return false;
@@ -1185,8 +1181,8 @@ public abstract class MutableTuple {
 
         @Override
         public String toString() {
-            return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", "
-                    + N.toString(_5) + ", " + N.toString(_6) + ", " + N.toString(_7) + ", " + N.toString(_8) + "]";
+            return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", " + N.toString(_5) + ", " + N.toString(_6)
+                    + ", " + N.toString(_7) + ", " + N.toString(_8) + "]";
         }
     }
 
@@ -1317,9 +1313,9 @@ public abstract class MutableTuple {
             if (obj != null && obj.getClass().equals(MutableTuple9.class)) {
                 final MutableTuple9<?, ?, ?, ?, ?, ?, ?, ?, ?> other = (MutableTuple9<?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
 
-                return N.equals(this._1, other._1) && N.equals(this._2, other._2) && N.equals(this._3, other._3)
-                        && N.equals(this._4, other._4) && N.equals(this._5, other._5) && N.equals(this._6, other._6)
-                        && N.equals(this._7, other._7) && N.equals(this._8, other._8) && N.equals(this._9, other._9);
+                return N.equals(this._1, other._1) && N.equals(this._2, other._2) && N.equals(this._3, other._3) && N.equals(this._4, other._4)
+                        && N.equals(this._5, other._5) && N.equals(this._6, other._6) && N.equals(this._7, other._7) && N.equals(this._8, other._8)
+                        && N.equals(this._9, other._9);
             }
 
             return false;
@@ -1327,9 +1323,8 @@ public abstract class MutableTuple {
 
         @Override
         public String toString() {
-            return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", "
-                    + N.toString(_5) + ", " + N.toString(_6) + ", " + N.toString(_7) + ", " + N.toString(_8) + ", "
-                    + N.toString(_9) + "]";
+            return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", " + N.toString(_5) + ", " + N.toString(_6)
+                    + ", " + N.toString(_7) + ", " + N.toString(_8) + ", " + N.toString(_9) + "]";
         }
     }
 }

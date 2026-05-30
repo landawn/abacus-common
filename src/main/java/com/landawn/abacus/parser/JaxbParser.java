@@ -119,7 +119,7 @@ final class JaxbParser extends AbstractXmlParser {
      *
      * @param obj the object to serialize (may be {@code null}; an empty result is written in that case)
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
-     * @return the XML string representation of the serialized object, or empty string if obj is null
+     * @return the XML string representation of the serialized object, or an empty string if {@code obj} is {@code null}
      * @throws ParsingException if ignoredPropNames is specified in config or if JAXB marshalling fails
      */
     @Override
@@ -157,7 +157,7 @@ final class JaxbParser extends AbstractXmlParser {
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the output file to write to (must not be {@code null})
      * @throws UncheckedIOException if an I/O error occurs during file writing
-     * @throws ParsingException if JAXB marshalling fails
+     * @throws ParsingException if {@code ignoredPropNames} is specified in {@code config}, or if JAXB marshalling fails
      */
     @Override
     public void serialize(final Object obj, final XmlSerConfig config, final File output) {
@@ -197,7 +197,7 @@ final class JaxbParser extends AbstractXmlParser {
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the output stream to write to (must not be {@code null})
      * @throws UncheckedIOException if an I/O error occurs during stream writing
-     * @throws ParsingException if JAXB marshalling fails
+     * @throws ParsingException if {@code ignoredPropNames} is specified in {@code config}, or if JAXB marshalling fails
      */
     @Override
     public void serialize(final Object obj, final XmlSerConfig config, final OutputStream output) {
@@ -233,7 +233,7 @@ final class JaxbParser extends AbstractXmlParser {
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the writer to write to (must not be {@code null})
      * @throws UncheckedIOException if an I/O error occurs during writing
-     * @throws ParsingException if JAXB marshalling fails
+     * @throws ParsingException if {@code ignoredPropNames} is specified in {@code config}, or if JAXB marshalling fails
      */
     @Override
     public void serialize(final Object obj, final XmlSerConfig config, final Writer output) {
@@ -361,11 +361,12 @@ final class JaxbParser extends AbstractXmlParser {
      *
      * @param <T> the type of the target object
      * @param source the file containing XML data to deserialize (must not be {@code null} and must exist)
-     * @param config the deserialization configuration (may be {@code null} for default behavior)
+     * @param config the deserialization configuration (may be {@code null} for default behavior);
+     *        note that {@code ignoredPropNames} is not supported by JAXB
      * @param targetClass the class of the object to create; must be properly annotated with JAXB annotations
      * @return the deserialized object instance
      * @throws UncheckedIOException if the file cannot be read
-     * @throws ParsingException if JAXB unmarshalling fails
+     * @throws ParsingException if {@code ignoredPropNames} is specified in {@code config}, or if JAXB unmarshalling fails
      */
     @Override
     public <T> T deserialize(final File source, final XmlDeserConfig config, final Class<? extends T> targetClass) {

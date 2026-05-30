@@ -50,6 +50,13 @@ public interface DoubleTriConsumer extends Throwables.DoubleTriConsumer<RuntimeE
      *   <li>Logging or recording three related measurements</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleTriConsumer pointPrinter = (x, y, z) ->
+     *     System.out.printf("Point: (%.2f, %.2f, %.2f)%n", x, y, z);
+     * pointPrinter.accept(1.0, 2.5, 3.7);   // Prints: Point: (1.00, 2.50, 3.70)
+     * }</pre>
+     *
      * @param a the first double argument
      * @param b the second double argument
      * @param c the third double argument

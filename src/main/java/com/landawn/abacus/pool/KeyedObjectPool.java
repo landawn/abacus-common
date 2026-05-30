@@ -84,13 +84,16 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
 
     /**
      * Associates the specified poolable element with the specified key in this pool.
-     * If the pool previously contained an element for the key, the old element is destroyed.
+     * If the pool previously contained an element for the key, the old element is removed and
+     * destroyed (with {@link Poolable.Caller#REMOVE_REPLACE_CLEAR}) <em>before</em> the new value
+     * is inserted; this happens even when the subsequent insertion of the new value fails.
      *
-     * <p>The put operation will fail if:</p>
+     * <p>The put operation returns {@code false} (does not insert) if:</p>
      * <ul>
-     *   <li>The pool is at capacity and auto-balancing is disabled</li>
-     *   <li>The object has already expired</li>
-     *   <li>The object would exceed memory constraints</li>
+     *   <li>The value has already expired</li>
+     *   <li>The pool is at capacity and either auto-balancing is disabled, or balancing did not free a slot</li>
+     *   <li>The value would exceed memory constraints (when a memory measure is configured) and balancing did not free enough memory</li>
+     *   <li>The memory measure returns a negative size or throws an exception</li>
      * </ul>
      *
      * @param key the key with which the specified value is to be associated, must not be {@code null}
@@ -136,9 +139,9 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
 
     /**
      * Returns the element associated with the specified key, or {@code null} if no mapping exists.
-     * The element's access time is updated to reflect this access.
+     * The element's activity print is updated (last access time and access count) to reflect this access.
      *
-     * <p>If the retrieved element has expired, it will be destroyed and {@code null} will be returned.
+     * <p>If the retrieved element has expired, it is removed from the pool, destroyed, and {@code null} is returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

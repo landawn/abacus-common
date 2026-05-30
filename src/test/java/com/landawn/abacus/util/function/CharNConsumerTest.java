@@ -149,7 +149,8 @@ public class CharNConsumerTest extends TestBase {
 
     @Test
     public void testAndThenNullThrowsImmediately() {
-        CharNConsumer instance = a -> {};
+        CharNConsumer instance = a -> {
+        };
         org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((CharNConsumer) null));
     }
 }

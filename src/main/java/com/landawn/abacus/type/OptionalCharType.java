@@ -125,7 +125,8 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      *
      * @param str the string to convert
      * @return an OptionalChar containing the parsed character value, or empty if the input is empty or null
-     * @throws IllegalArgumentException if the string cannot be parsed as a single character
+     * @throws IllegalArgumentException if the string has more than one character and either is not a valid integer
+     *         or represents an integer outside the valid {@code char} range
      */
     @Override
     public OptionalChar valueOf(final String str) {

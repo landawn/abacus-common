@@ -1010,7 +1010,8 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Calculates the deep hash code for a value of this type.
-     * Default implementation delegates to {@link #hashCode(Object)}.
+     * Default implementation computes the hash code via {@link N#hashCode(Object)},
+     * which for most non-array types matches {@link #hashCode(Object)}.
      *
      * @param x the value
      * @return the deep hash code
@@ -1035,7 +1036,8 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Checks deep equality between two values of this type.
-     * Default implementation delegates to {@link #equals(Object, Object)}.
+     * Default implementation compares the values via {@link N#equals(Object, Object)},
+     * which for most non-array types matches {@link #equals(Object, Object)}.
      *
      * @param x the first value
      * @param y the second value
@@ -1146,7 +1148,7 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Checks if a date string represents a {@code null} date/time.
-     * Returns {@code true} for empty strings or the literal "null".
+     * Returns {@code true} for {@code null} or empty strings, or the literal {@code "null"} (case-insensitive).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

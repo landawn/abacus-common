@@ -51,10 +51,12 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
     private final Function<String, T> creator;
 
     /**
-     * Constructs a NumberType with the specified type name.
-     * Uses the generic Number class as the type class.
+     * Constructs a {@link NumberType} with the specified type name and
+     * {@link Number}.class as the underlying type class. The discovered factory method
+     * or constructor will be looked up on {@link Number} itself, so this constructor is
+     * typically only used by subclasses that override the conversion methods.
      *
-     * @param typeName the name of the number type
+     * @param typeName the registered name of this number type
      */
     protected NumberType(final String typeName) {
         this(typeName, Number.class);
@@ -201,8 +203,8 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
      * Converts a string representation to an instance of the number type.
      * This method uses the discovered factory method or constructor to create instances.
      *
-     * @param str the string to convert
-     * @return an instance of the number type, or {@code null} if the input string is empty or null
+     * @param str the string to convert, may be {@code null} or empty
+     * @return an instance of the number type, or {@code null} if the input string is {@code null} or empty
      * @throws NumberFormatException if the string cannot be parsed as the target number type
      * @throws UnsupportedOperationException if no suitable factory method or constructor was found
      */
@@ -214,8 +216,8 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
     /**
      * Converts a number object to its string representation.
      *
-     * @param x the number object to convert
-     * @return the string representation using toString(), or {@code null} if the input is null
+     * @param x the number object to convert, may be {@code null}
+     * @return the string representation using {@code toString()}, or {@code null} if the input is {@code null}
      */
     @Override
     public String stringOf(final T x) {

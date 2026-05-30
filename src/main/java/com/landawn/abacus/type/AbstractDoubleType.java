@@ -192,7 +192,7 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
 
     /**
      * Appends the string representation of a {@code double} value to an {@code Appendable}.
-     * Writes "null" if the value is {@code null}, otherwise writes the numeric value
+     * Writes {@code "null"} if the value is {@code null}, otherwise writes the numeric value
      * using its {@code toString()} representation.
      *
      * @param appendable the {@code Appendable} to write to

@@ -72,7 +72,8 @@ import com.landawn.abacus.util.TypeReference;
  * <ul>
  *   <li>All Type instances are <b>immutable</b> and thread-safe</li>
  *   <li>Type operations preserve type safety through generic parameters</li>
- *   <li>Invalid conversions throw appropriate exceptions rather than returning null</li>
+ *   <li>{@code null} and empty input is generally tolerated (yielding {@code null} or the type's default value),
+ *       while malformed input typically throws an appropriate exception</li>
  *   <li>Use {@link TypeFactory} for obtaining Type instances</li>
  * </ul>
  *
@@ -1212,13 +1213,16 @@ public interface Type<T> {
     T valueOf(Object obj);
 
     /**
-     * Parses a character array to create a value of this type.
-     * Useful for efficient parsing without creating intermediate strings.
+     * Parses a region of a character array to create a value of this type.
+     * Useful for efficient parsing without creating intermediate strings; the default
+     * {@link AbstractType} implementation converts the region to a {@link String} and
+     * delegates to {@link #valueOf(String)}, but concrete types may parse directly.
      *
-     * @param cbuf the character array
-     * @param offset the starting position
-     * @param len the number of characters to parse
-     * @return the parsed value, or {@code null} if {@code cbuf} is {@code null} or {@code len} is {@code 0}
+     * @param cbuf the character array; if {@code null}, the result is {@code null}
+     * @param offset the starting position within {@code cbuf}
+     * @param len the number of characters to parse from {@code offset}
+     * @return the parsed value, or {@code null} when {@code cbuf} is {@code null}
+     *         (and typically also when {@code len == 0}, depending on the concrete implementation)
      */
     T valueOf(char[] cbuf, int offset, int len);
 

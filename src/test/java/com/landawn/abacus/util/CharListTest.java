@@ -3767,4 +3767,19 @@ public class CharListTest extends TestBase {
         assertEquals(15, a.size());
     }
 
+    @Test
+    public void test_forEach_removeIf_replaceIf_null_func() {
+        // Regression: a null functional argument must throw NullPointerException even on an
+        // EMPTY list (previously silently no-op'd; now matches IntList's fail-fast guard).
+        final CharList empty = new CharList();
+        assertThrows(NullPointerException.class, () -> empty.forEach((com.landawn.abacus.util.function.CharConsumer) null));
+        assertThrows(NullPointerException.class, () -> empty.removeIf((com.landawn.abacus.util.function.CharPredicate) null));
+        assertThrows(NullPointerException.class, () -> empty.replaceIf((com.landawn.abacus.util.function.CharPredicate) null, 'x'));
+
+        final CharList nonEmpty = CharList.of('a', 'b');
+        assertThrows(NullPointerException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.CharConsumer) null));
+        assertThrows(NullPointerException.class, () -> nonEmpty.removeIf((com.landawn.abacus.util.function.CharPredicate) null));
+        assertThrows(NullPointerException.class, () -> nonEmpty.replaceIf((com.landawn.abacus.util.function.CharPredicate) null, 'x'));
+    }
+
 }

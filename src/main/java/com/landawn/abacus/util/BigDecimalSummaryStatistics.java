@@ -95,7 +95,9 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * @param min the minimum value, may be {@code null} if no values were recorded
      * @param max the maximum value, may be {@code null} if no values were recorded
      * @param sum the sum of values; if {@code null}, it is treated as {@link BigDecimal#ZERO}
-     * @throws IllegalArgumentException if {@code count} is negative, or if {@code min} is greater than {@code max}
+     * @throws IllegalArgumentException if {@code count} is negative, or if {@code min} compares
+     *         greater than {@code max} (a non-{@code null} {@code min} with a {@code null} {@code max}
+     *         is also treated as greater)
      */
     public BigDecimalSummaryStatistics(final long count, final BigDecimal min, final BigDecimal max, final BigDecimal sum) {
         if (count < 0) {

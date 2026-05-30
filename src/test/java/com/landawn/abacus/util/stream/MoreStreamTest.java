@@ -1125,7 +1125,10 @@ public class MoreStreamTest extends TestBase {
         assertEquals("63, 66, 69, 68, 65",
                 Stream.zip(IntList.of(a).toList(), IntList.of(b).toList(), IntList.of(c).toList(), 10, 20, 30, (i, j, k) -> i + j + k).join(", "));
 
-        assertEquals("32, 34, 36", Stream.parallelZip(IntList.of(a).toList().iterator(), IntList.of(b).toList().iterator(), (i, j) -> i + j, 3).join(", "));
+        // parallelZip does NOT guarantee output order (results are emitted in zipFunction-completion order), so compare
+        // order-insensitively by sorting before joining. See Stream.parallelZip Javadoc.
+        assertEquals("32, 34, 36",
+                Stream.parallelZip(IntList.of(a).toList().iterator(), IntList.of(b).toList().iterator(), (i, j) -> i + j, 3).sorted().join(", "));
         assertEquals("32, 34, 36, 34", Stream.zip(IntList.of(a).toList().iterator(), IntList.of(b).toList().iterator(), 10, 20, (i, j) -> i + j).join(", "));
 
         assertEquals("63, 66, 69",

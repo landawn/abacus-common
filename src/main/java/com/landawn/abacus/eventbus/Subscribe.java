@@ -115,10 +115,10 @@ public @interface Subscribe {
     boolean strictEventType() default false;
 
     /**
-     * Indicates whether this subscriber should receive the most recent sticky event upon registration.
+     * Indicates whether this subscriber should receive previously posted sticky events upon registration.
      *
-     * <p>When {@code true}, if a sticky event matching this subscriber's type and event ID was previously posted,
-     * it will be immediately delivered to this subscriber upon registration.</p>
+     * <p>When {@code true}, every retained sticky event matching this subscriber's type and event ID is
+     * immediately delivered to this subscriber upon registration.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

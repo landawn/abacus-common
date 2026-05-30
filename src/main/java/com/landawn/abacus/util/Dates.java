@@ -189,7 +189,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  * <p><b>Error Handling:</b>
  * <ul>
  *   <li><b>Null Safety:</b> Most methods handle null inputs gracefully, returning null or appropriate defaults</li>
- *   <li><b>ParseException Handling:</b> Parsing methods catch exceptions and return null for invalid input</li>
+ *   <li><b>Parse Failure Handling:</b> Parsing methods return {@code null} for {@code null}, empty, or {@code "null"} input, and throw {@code IllegalArgumentException} when a non-empty string cannot be parsed</li>
  *   <li><b>IllegalArgumentException:</b> Thrown for invalid parameters that violate method contracts</li>
  *   <li><b>Logging:</b> Internal operations are logged for debugging and monitoring purposes</li>
  * </ul>
@@ -504,7 +504,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * String dtfFormatted = DTF.ISO_LOCAL_DATE_TIME.format(now);
      *
      * java.time.LocalDateTime localDateTime = java.time.LocalDateTime.now();
-     * String isoFormatted = Dates.format(localDateTime, Dates.ISO_LOCAL_DATE_TIME_FORMAT);
+     * String isoFormatted = DTF.ISO_LOCAL_DATE_TIME.format(localDateTime);
      * }</pre>
      *
      * @see DateTimeFormatter#ISO_LOCAL_DATE_TIME
@@ -529,7 +529,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * // Parse with offset
      * String utcStr = "2023-12-25T14:30:45Z";
-     * java.time.OffsetDateTime parsed = Dates.parseOffsetDateTime(utcStr);
+     * java.time.OffsetDateTime parsed = DTF.ISO_OFFSET_DATE_TIME.parseToOffsetDateTime(utcStr);
      * }</pre>
      *
      * @see DateTimeFormatter#ISO_OFFSET_DATE_TIME
@@ -555,7 +555,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * String dtfFormatted = DTF.ISO_8601_DATE_TIME.format(java.time.Instant.now());
      *
      * java.time.ZonedDateTime utcTime = java.time.ZonedDateTime.now(java.time.ZoneId.of("UTC"));
-     * String utcFormatted = Dates.format(utcTime, Dates.ISO_8601_DATE_TIME_FORMAT);
+     * String utcFormatted = DTF.ISO_8601_DATE_TIME.format(utcTime);
      * }</pre>
      */
     public static final String ISO_8601_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
@@ -5996,20 +5996,17 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Common Usage Patterns:</b>
      * <pre>{@code
-     * // Parsing different temporal types
-     * ZonedDateTime zdt = DTF.parseToZonedDateTime("2023-12-25T15:30:45-05:00[America/New_York]");
-     * OffsetDateTime odt = DTF.parseToOffsetDateTime("2023-12-25T15:30:45+05:30");
-     * LocalDateTime ldt = DTF.parseToLocalDateTime("2023-12-25T15:30:45");
-     * LocalDate ld = DTF.parseToLocalDate("2023-12-25");
-     * LocalTime lt = DTF.parseToLocalTime("15:30:45");
-     * Instant instant = DTF.parseToInstant("2023-12-25T20:30:45Z");
+     * // Parsing different temporal types (each parser is invoked on a DTF instance)
+     * ZonedDateTime zdt = DTF.ISO_ZONED_DATE_TIME.parseToZonedDateTime("2023-12-25T15:30:45-05:00[America/New_York]");
+     * OffsetDateTime odt = DTF.ISO_OFFSET_DATE_TIME.parseToOffsetDateTime("2023-12-25T15:30:45+05:30");
+     * LocalDateTime ldt = DTF.ISO_LOCAL_DATE_TIME.parseToLocalDateTime("2023-12-25T15:30:45");
+     * LocalDate ld = DTF.LOCAL_DATE.parseToLocalDate("2023-12-25");
+     * LocalTime lt = DTF.LOCAL_TIME.parseToLocalTime("15:30:45");
+     * Instant instant = DTF.ISO_8601_DATE_TIME.parseToInstant("2023-12-25T20:30:45Z");
      *
      * // Formatting temporal objects
-     * String formatted = DTF.format(ZonedDateTime.now());
-     * String custom = DTF.format(LocalDateTime.now(), "dd-MMM-yyyy HH:mm");
-     *
-     * // Custom format parsing
-     * LocalDate customDate = DTF.parseToLocalDate("25/12/2023", "dd/MM/yyyy");
+     * String formatted = DTF.ISO_ZONED_DATE_TIME.format(ZonedDateTime.now());
+     * String localFormatted = DTF.LOCAL_DATE_TIME.format(LocalDateTime.now());
      * }</pre>
      *
      * <p><b>Relationship to Enclosing Class:</b>
@@ -6079,7 +6076,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * String dateFormatted = DTF.LOCAL_DATE.format(javaDate);
          * }</pre>
          *
-         * @see #LOCAL_DATE_FORMAT
+         * @see Dates#LOCAL_DATE_FORMAT
          */
         public static final DTF LOCAL_DATE = new DTF(Dates.LOCAL_DATE_FORMAT);
 
@@ -6100,7 +6097,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * String timeFormatted = DTF.LOCAL_TIME.format(javaDate);
          * }</pre>
          *
-         * @see #LOCAL_TIME_FORMAT
+         * @see Dates#LOCAL_TIME_FORMAT
          */
         public static final DTF LOCAL_TIME = new DTF(Dates.LOCAL_TIME_FORMAT);
 
@@ -6121,7 +6118,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * String formatted = DTF.LOCAL_DATE_TIME.format(calendar);
          * }</pre>
          *
-         * @see #LOCAL_DATE_TIME_FORMAT
+         * @see Dates#LOCAL_DATE_TIME_FORMAT
          */
         public static final DTF LOCAL_DATE_TIME = new DTF(Dates.LOCAL_DATE_TIME_FORMAT);
 
@@ -6142,7 +6139,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * // Result: LocalDateTime representing December 25, 2023 at 14:25:30
          * }</pre>
          *
-         * @see #ISO_LOCAL_DATE_TIME_FORMAT
+         * @see Dates#ISO_LOCAL_DATE_TIME_FORMAT
          */
         public static final DTF ISO_LOCAL_DATE_TIME = new DTF(Dates.ISO_LOCAL_DATE_TIME_FORMAT);
 
@@ -6164,7 +6161,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * OffsetDateTime parsed = DTF.ISO_OFFSET_DATE_TIME.parseToOffsetDateTime(offsetStr);
          * }</pre>
          *
-         * @see #ISO_OFFSET_DATE_TIME_FORMAT
+         * @see Dates#ISO_OFFSET_DATE_TIME_FORMAT
          */
         public static final DTF ISO_OFFSET_DATE_TIME = new DTF(Dates.ISO_OFFSET_DATE_TIME_FORMAT);
 
@@ -6211,7 +6208,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * String formatted = DTF.ISO_8601_DATE_TIME.format(utcTime);
          * }</pre>
          *
-         * @see #ISO_8601_DATE_TIME_FORMAT
+         * @see Dates#ISO_8601_DATE_TIME_FORMAT
          */
         public static final DTF ISO_8601_DATE_TIME = new DTF(Dates.ISO_8601_DATE_TIME_FORMAT);
 
@@ -6235,7 +6232,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * String formatted = DTF.ISO_8601_TIMESTAMP.format(date);
          * }</pre>
          *
-         * @see #ISO_8601_TIMESTAMP_FORMAT
+         * @see Dates#ISO_8601_TIMESTAMP_FORMAT
          */
         public static final DTF ISO_8601_TIMESTAMP = new DTF(Dates.ISO_8601_TIMESTAMP_FORMAT);
 
@@ -6259,7 +6256,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * // Can be used directly in HTTP headers like Date or Expires
          * }</pre>
          *
-         * @see #RFC_1123_DATE_TIME_FORMAT
+         * @see Dates#RFC_1123_DATE_TIME_FORMAT
          */
         public static final DTF RFC_1123_DATE_TIME = new DTF(Dates.RFC_1123_DATE_TIME_FORMAT);
 
@@ -6471,7 +6468,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
                 default -> {
                     // return LocalDate.from(parseToTemporalAccessor(text));;
                     final Calendar cal = parseToCalendar(text);
-                    return LocalDate.ofInstant(cal.toInstant(), cal.getTimeZone().toZoneId());
+                    return cal == null ? null : LocalDate.ofInstant(cal.toInstant(), cal.getTimeZone().toZoneId());
                 }
             }
         }
@@ -6526,7 +6523,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
                 default -> {
                     // return LocalTime.from(parseToTemporalAccessor(text));
                     final Calendar cal = parseToCalendar(text);
-                    return LocalTime.ofInstant(cal.toInstant(), cal.getTimeZone().toZoneId());
+                    return cal == null ? null : LocalTime.ofInstant(cal.toInstant(), cal.getTimeZone().toZoneId());
                 }
             }
         }
@@ -6581,7 +6578,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
                 default -> {
                     // return LocalDateTime.from(parseToTemporalAccessor(text));
                     final Calendar cal = parseToCalendar(text);
-                    return LocalDateTime.ofInstant(cal.toInstant(), cal.getTimeZone().toZoneId());
+                    return cal == null ? null : LocalDateTime.ofInstant(cal.toInstant(), cal.getTimeZone().toZoneId());
                 }
             }
         }
@@ -6630,7 +6627,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
             } else {
                 // return OffsetDateTime.from(parseToTemporalAccessor(text));
                 final Calendar cal = parseToCalendar(text);
-                return OffsetDateTime.ofInstant(cal.toInstant(), cal.getTimeZone().toZoneId());
+                return cal == null ? null : OffsetDateTime.ofInstant(cal.toInstant(), cal.getTimeZone().toZoneId());
             }
         }
 
@@ -6678,7 +6675,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
             } else {
                 // return ZonedDateTime.from(parseToTemporalAccessor(text));
                 final Calendar cal = parseToCalendar(text);
-                return ZonedDateTime.ofInstant(cal.toInstant(), cal.getTimeZone().toZoneId());
+                return cal == null ? null : ZonedDateTime.ofInstant(cal.toInstant(), cal.getTimeZone().toZoneId());
             }
         }
 
@@ -6723,7 +6720,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
             } else if (this.format.equals(ISO_OFFSET_DATE_TIME_FORMAT)) {
                 return OffsetDateTime.parse(text, dateTimeFormatter).toInstant();
             } else {
-                return parseToTimestamp(text).toInstant();
+                final Timestamp ts = parseToTimestamp(text);
+                return ts == null ? null : ts.toInstant();
             }
         }
 

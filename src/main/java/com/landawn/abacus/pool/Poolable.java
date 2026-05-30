@@ -161,7 +161,8 @@ public interface Poolable {
 
         /**
          * The object is being removed to make space in the pool.
-         * This happens during vacate operations when the pool needs to free capacity.
+         * This happens during balancing/vacate operations (such as when the pool reaches capacity
+         * or {@link Pool#evict()} is invoked) and the pool needs to free capacity.
          */
         VACATE(2),
 
@@ -177,7 +178,10 @@ public interface Poolable {
 
         /**
          * The object could not be added to the pool.
-         * This happens when autoDestroyOnFailedToAdd is {@code true} and the add operation fails.
+         * This happens when the {@code autoDestroyOnFailedToAdd}/{@code autoDestroyOnFailedToPut}
+         * flag is {@code true} and the corresponding {@link ObjectPool#add(Poolable, boolean) add}
+         * or {@link KeyedObjectPool#put(Object, Poolable, boolean) put} operation fails (because
+         * the pool is full, the object is expired, memory limits were exceeded, etc.).
          */
         PUT_ADD_FAILURE(4),
 

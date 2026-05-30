@@ -62,8 +62,10 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     * A singleton empty ByteIterator instance that contains no elements.
-     * This iterator's hasNext() always returns false, and nextByte() always throws NoSuchElementException.
+     * A singleton empty {@code ByteIterator} instance that contains no elements.
+     *
+     * <p>This iterator's {@code hasNext()} always returns {@code false}, and {@code nextByte()}
+     * always throws {@code NoSuchElementException}.</p>
      *
      * @see #empty()
      */

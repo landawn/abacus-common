@@ -32,7 +32,7 @@ import com.landawn.abacus.util.N;
  * <ul>
  *   <li>{@link Number}: interpreted as milliseconds since the Unix epoch</li>
  *   <li>{@link java.util.Date}: the time instant is used to construct a new SQL Date</li>
- *   <li>{@link String}: parsed as a date string, or the special value {@code "sysTime"} for today's date</li>
+ *   <li>{@link String}: parsed as a date string, or the special value {@code "sysTime"} (or {@code "SYS_TIME"}) for today's date</li>
  *   <li>{@code char[]}: parsed as a timestamp (milliseconds) or date string</li>
  * </ul>
  *
@@ -101,13 +101,13 @@ public class DateType extends AbstractDateType<Date> {
     /**
      * Converts a string representation to a {@link java.sql.Date} instance.
      * <ul>
-     *   <li>{@code null} or empty string: returns {@code null}</li>
-     *   <li>{@code "sysTime"}: returns today's date (via {@link com.landawn.abacus.util.Dates#currentDate()})</li>
+     *   <li>{@code null}, empty string, or the literal {@code "null"} (case-insensitive): returns {@code null}</li>
+     *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive): returns today's date (via {@link com.landawn.abacus.util.Dates#currentDate()})</li>
      *   <li>All other values: parsed by {@link com.landawn.abacus.util.Dates#parseDate(String)}</li>
      * </ul>
      *
      * @param str the string to parse; may be {@code null} or empty
-     * @return a {@link java.sql.Date} parsed from {@code str}, or {@code null} if {@code str} is {@code null} or empty
+     * @return a {@link java.sql.Date} parsed from {@code str}, or {@code null} if {@code str} is {@code null}, empty, or the literal {@code "null"}
      */
     @Override
     public Date valueOf(final String str) {

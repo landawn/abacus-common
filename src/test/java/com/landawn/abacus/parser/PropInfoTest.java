@@ -16,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.annotation.AccessFieldByMethod;
 import com.landawn.abacus.annotation.Column;
 import com.landawn.abacus.annotation.Id;
 import com.landawn.abacus.annotation.JsonXmlConfig;
@@ -594,5 +595,67 @@ public class PropInfoTest extends TestBase {
     }
 
     // TODO: Remaining PropInfo gaps are low-level field-handle/object-array assignment branches that need synthetic BeanInfo wiring not exposed through normal property APIs.
+
+    // ------------------------------------------------------------------------------------------------------------
+    // Regression: @AccessFieldByMethod must force reads through the getter even on the non-ASM (base PropInfo) path.
+    // Previously the VarHandle flags (isFieldHandleGettable/Settable) were NOT gated on isAccessFieldByMethod, so
+    // getPropValue preferred the VarHandle and read the field directly, bypassing the mandated getter. The ASM path
+    // already honored the annotation (fieldAccessIndex == -1 when !isFieldGettable); this aligns the non-ASM path.
+    // The 3-arg BeanInfo constructor with isASMSupported=false forces the base PropInfo regardless of ASM presence.
+
+    @AccessFieldByMethod
+    public static class AccessByMethodBean {
+        private String value = "field";
+
+        public String getValue() {
+            return "getter:" + value;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+    }
+
+    // Same shape, but WITHOUT @AccessFieldByMethod, to confirm the fix is scoped to the annotation only.
+    public static class DirectFieldBean {
+        private String value = "field";
+
+        public String getValue() {
+            return "getter:" + value;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+    }
+
+    @Test
+    public void testGetPropValue_accessFieldByMethod_forcesGetter_nonAsm() {
+        // Force the non-ASM base PropInfo path.
+        ParserUtil.BeanInfo nonAsmBeanInfo = new ParserUtil.BeanInfo(AccessByMethodBean.class, AccessByMethodBean.class, false);
+        ParserUtil.PropInfo prop = nonAsmBeanInfo.getPropInfo("value");
+
+        // The getter transforms the raw field value; if the getter is bypassed (the bug) we'd get the raw "field".
+        Assertions.assertEquals("getter:field", prop.getPropValue(new AccessByMethodBean()));
+    }
+
+    @Test
+    public void testGetPropValue_accessFieldByMethod_forcesGetter_asm() {
+        // The ASM path (default) must honor @AccessFieldByMethod too.
+        ParserUtil.BeanInfo asmBeanInfo = ParserUtil.getBeanInfo(AccessByMethodBean.class);
+        ParserUtil.PropInfo prop = asmBeanInfo.getPropInfo("value");
+
+        Assertions.assertEquals("getter:field", prop.getPropValue(new AccessByMethodBean()));
+    }
+
+    @Test
+    public void testGetPropValue_withoutAnnotation_readsFieldDirectly_nonAsm() {
+        // Without @AccessFieldByMethod the fast direct-field read is expected (getter NOT applied);
+        // this confirms the fix only changes behavior for @AccessFieldByMethod properties.
+        ParserUtil.BeanInfo nonAsmBeanInfo = new ParserUtil.BeanInfo(DirectFieldBean.class, DirectFieldBean.class, false);
+        ParserUtil.PropInfo prop = nonAsmBeanInfo.getPropInfo("value");
+
+        Assertions.assertEquals("field", prop.getPropValue(new DirectFieldBean()));
+    }
 
 }

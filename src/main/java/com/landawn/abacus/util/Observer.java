@@ -191,8 +191,11 @@ public abstract class Observer<T> implements Immutable {
     }
 
     /**
-     * Creates an Observer from a BlockingQueue. The Observer will emit elements from the queue
-     * until it encounters the completion flag or the queue is empty.
+     * Creates an Observer from a BlockingQueue. When subscribed, the Observer blocks waiting
+     * for elements and emits each one until it encounters the completion flag (added via
+     * {@link #complete(BlockingQueue)}) or until emission is stopped by a downstream operator
+     * such as {@link #limit(long)}. An empty queue does not stop emission; the Observer waits
+     * indefinitely for the next element.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

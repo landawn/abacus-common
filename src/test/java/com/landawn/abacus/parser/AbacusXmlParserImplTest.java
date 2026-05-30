@@ -797,10 +797,8 @@ public class AbacusXmlParserImplTest extends TestBase {
 
         Person restored = parser.deserialize(xml, new XmlDeserConfig(), Person.class);
         assertNotNull(restored);
-        assertEquals(original.getName(), restored.getName(),
-                "name must survive the StAX round-trip; stale-sb bug would truncate it");
-        assertEquals(original.getAge(), restored.getAge(),
-                "age must survive the StAX round-trip");
+        assertEquals(original.getName(), restored.getName(), "name must survive the StAX round-trip; stale-sb bug would truncate it");
+        assertEquals(original.getAge(), restored.getAge(), "age must survive the StAX round-trip");
     }
 
     /**
@@ -813,24 +811,19 @@ public class AbacusXmlParserImplTest extends TestBase {
             return;
         }
         XmlParser parser = new AbacusXmlParserImpl(XmlParserType.StAX);
-        List<String> original = Arrays.asList(
-                "firstElement_withSomeLengthToExerciseSbAccumulation",
-                "secondElement_alsoWithSomeLengthToExerciseSbAccumulation",
+        List<String> original = Arrays.asList("firstElement_withSomeLengthToExerciseSbAccumulation", "secondElement_alsoWithSomeLengthToExerciseSbAccumulation",
                 "thirdElement");
 
-        String xml = parser.serialize(original,
-                new XmlSerConfig().setTagByPropertyName(true).setWriteTypeInfo(true));
+        String xml = parser.serialize(original, new XmlSerConfig().setTagByPropertyName(true).setWriteTypeInfo(true));
         assertNotNull(xml);
 
         @SuppressWarnings("unchecked")
-        List<String> restored = parser.deserialize(xml,
-                new XmlDeserConfig().setElementType(String.class), List.class);
+        List<String> restored = parser.deserialize(xml, new XmlDeserConfig().setElementType(String.class), List.class);
 
         assertNotNull(restored);
         assertEquals(original.size(), restored.size(), "Restored list must have same size");
         for (int i = 0; i < original.size(); i++) {
-            assertEquals(original.get(i), restored.get(i),
-                    "Element " + i + " must survive the StAX round-trip");
+            assertEquals(original.get(i), restored.get(i), "Element " + i + " must survive the StAX round-trip");
         }
     }
 

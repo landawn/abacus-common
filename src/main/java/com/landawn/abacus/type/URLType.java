@@ -127,7 +127,7 @@ public class URLType extends AbstractType<URL> {
      * }</pre>
      *
      * @param str the string to convert to a URL
-     * @return a URL instance created from the string, or {@code null} if the string is empty
+     * @return a URL instance created from the string, or {@code null} if the string is {@code null} or empty
      * @throws IllegalArgumentException if the string is not a valid URI (thrown by {@link URI#create(String)})
      * @throws RuntimeException if the URI cannot be converted to a URL (wraps {@link MalformedURLException})
      */

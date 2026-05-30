@@ -1853,7 +1853,6 @@ public class FilenameUtilTest extends TestBase {
 
     @Test
     public void testNormalize_NullByteRejected() {
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> FilenameUtil.normalize("foo bar"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> FilenameUtil.normalize("foo bar"));
     }
 }

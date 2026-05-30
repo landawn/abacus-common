@@ -42,7 +42,7 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
     private final Type<T> elementType;
 
     /**
-     * Package-private constructor for JdkOptionalType.
+     * Constructor for JdkOptionalType.
      * This constructor is called by the TypeFactory to create {@code JdkOptional<T>} type instances.
      *
      * @param parameterTypeName the name of the element type parameter
@@ -99,10 +99,10 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
     }
 
     /**
-     * Indicates whether this type is a generic type.
-     * JdkOptionalType is always a generic type as it wraps another type parameter.
+     * Indicates whether this type is a parameterized type.
+     * {@code JdkOptionalType} is always a parameterized type as it wraps another type parameter.
      *
-     * @return {@code true}, indicating this is a generic type
+     * @return {@code true}, indicating this is a parameterized type
      */
     @Override
     public boolean isParameterizedType() {

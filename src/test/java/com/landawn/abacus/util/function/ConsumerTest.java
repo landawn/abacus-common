@@ -120,7 +120,8 @@ public class ConsumerTest extends TestBase {
 
     @Test
     public void testAndThenNullThrowsImmediately() {
-        Consumer<String> instance = a -> {};
+        Consumer<String> instance = a -> {
+        };
         org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Consumer) null));
     }
 }

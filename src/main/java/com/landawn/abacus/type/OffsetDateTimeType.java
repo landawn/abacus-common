@@ -61,7 +61,7 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
     /**
      * Converts an {@link OffsetDateTime} object to its ISO-8601 timestamp string representation.
      * Uses a format equivalent to {@link java.time.format.DateTimeFormatter#ISO_OFFSET_DATE_TIME}
-     * (e.g., {@code "2011-12-03T10:15:30.000+01:00"}), preserving the OffsetDateTime's UTC offset.
+     * (e.g., {@code "2011-12-03T10:15:30+01:00"}), preserving the OffsetDateTime's UTC offset.
      *
      * @param x the OffsetDateTime object to convert
      * @return the ISO-8601 formatted string, or {@code null} if the input is null
@@ -91,11 +91,13 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
     /**
      * Converts a string representation to an {@link OffsetDateTime} object.
      * Supports multiple formats:
-     * - Epoch milliseconds as a numeric string
-     * - ISO-8601 date-time format (20 characters ending with 'Z')
-     * - ISO-8601 timestamp format (24 characters ending with 'Z')
-     * - Standard OffsetDateTime parse format
-     * - Special value "SYS_TIME" returns current system time
+     * <ul>
+     *   <li>Epoch milliseconds as a numeric string</li>
+     *   <li>ISO-8601 date-time format (20 characters ending with {@code 'Z'})</li>
+     *   <li>ISO-8601 timestamp format (24 characters ending with {@code 'Z'})</li>
+     *   <li>Standard {@link OffsetDateTime#parse(CharSequence)} format</li>
+     *   <li>Special value {@code "SYS_TIME"} returns the current system time</li>
+     * </ul>
      *
      * @param str the string to parse
      * @return the parsed OffsetDateTime, or {@code null} if the input is {@code null} or represents a {@code null} date-time

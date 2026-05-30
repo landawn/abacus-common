@@ -157,7 +157,8 @@ public class LongObjConsumerTest extends TestBase {
 
     @Test
     public void testAndThenNullThrowsImmediately() {
-        LongObjConsumer<String> instance = (a, b) -> {};
+        LongObjConsumer<String> instance = (a, b) -> {
+        };
         org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((LongObjConsumer) null));
     }
 }

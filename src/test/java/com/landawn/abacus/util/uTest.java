@@ -3577,7 +3577,10 @@ public class uTest extends TestBase {
     @DisplayName("orElseGet supplier MUST NOT be invoked when value is present")
     public void testOrElseGet_NotInvokedIfPresent() {
         AtomicBoolean called = new AtomicBoolean(false);
-        Supplier<String> s = () -> { called.set(true); return "fallback"; };
+        Supplier<String> s = () -> {
+            called.set(true);
+            return "fallback";
+        };
 
         Optional.of("v").orElseGet(s);
         assertFalse(called.get(), "Optional.orElseGet supplier invoked while value present");
@@ -3586,15 +3589,24 @@ public class uTest extends TestBase {
         assertFalse(called.get(), "Nullable.orElseGet supplier invoked while value present");
 
         AtomicBoolean intCalled = new AtomicBoolean(false);
-        OptionalInt.of(42).orElseGet(() -> { intCalled.set(true); return 0; });
+        OptionalInt.of(42).orElseGet(() -> {
+            intCalled.set(true);
+            return 0;
+        });
         assertFalse(intCalled.get(), "OptionalInt.orElseGet supplier invoked while value present");
 
         AtomicBoolean longCalled = new AtomicBoolean(false);
-        OptionalLong.of(42L).orElseGet(() -> { longCalled.set(true); return 0L; });
+        OptionalLong.of(42L).orElseGet(() -> {
+            longCalled.set(true);
+            return 0L;
+        });
         assertFalse(longCalled.get(), "OptionalLong.orElseGet supplier invoked while value present");
 
         AtomicBoolean dblCalled = new AtomicBoolean(false);
-        OptionalDouble.of(1.0).orElseGet(() -> { dblCalled.set(true); return 0.0; });
+        OptionalDouble.of(1.0).orElseGet(() -> {
+            dblCalled.set(true);
+            return 0.0;
+        });
         assertFalse(dblCalled.get(), "OptionalDouble.orElseGet supplier invoked while value present");
     }
 
@@ -3602,7 +3614,10 @@ public class uTest extends TestBase {
     @DisplayName("orElseThrow(supplier) MUST NOT invoke supplier when value is present")
     public void testOrElseThrowSupplier_NotInvokedIfPresent() {
         AtomicBoolean called = new AtomicBoolean(false);
-        Supplier<RuntimeException> exSup = () -> { called.set(true); return new RuntimeException(); };
+        Supplier<RuntimeException> exSup = () -> {
+            called.set(true);
+            return new RuntimeException();
+        };
 
         Optional.of("v").orElseThrow(exSup);
         assertFalse(called.get());
@@ -3619,13 +3634,19 @@ public class uTest extends TestBase {
     public void testOr_NotInvokedIfPresent() {
         AtomicBoolean called = new AtomicBoolean(false);
         Optional<String> opt = Optional.of("v");
-        Optional<String> result = opt.or(() -> { called.set(true); return Optional.of("other"); });
+        Optional<String> result = opt.or(() -> {
+            called.set(true);
+            return Optional.of("other");
+        });
         assertFalse(called.get());
         assertSame(opt, result);
 
         AtomicBoolean intCalled = new AtomicBoolean(false);
         OptionalInt iopt = OptionalInt.of(7);
-        OptionalInt iresult = iopt.or(() -> { intCalled.set(true); return OptionalInt.of(99); });
+        OptionalInt iresult = iopt.or(() -> {
+            intCalled.set(true);
+            return OptionalInt.of(99);
+        });
         assertFalse(intCalled.get());
         assertSame(iopt, iresult);
     }
@@ -3637,15 +3658,33 @@ public class uTest extends TestBase {
         AtomicBoolean filtered = new AtomicBoolean(false);
         AtomicBoolean flat = new AtomicBoolean(false);
 
-        Optional.<String> empty().map(s -> { mapped.set(true); return s; });
-        Optional.<String> empty().filter(s -> { filtered.set(true); return true; });
-        Optional.<String> empty().flatMap(s -> { flat.set(true); return Optional.of(s); });
+        Optional.<String> empty().map(s -> {
+            mapped.set(true);
+            return s;
+        });
+        Optional.<String> empty().filter(s -> {
+            filtered.set(true);
+            return true;
+        });
+        Optional.<String> empty().flatMap(s -> {
+            flat.set(true);
+            return Optional.of(s);
+        });
         assertFalse(mapped.get() || filtered.get() || flat.get());
 
         AtomicBoolean intCalled = new AtomicBoolean(false);
-        OptionalInt.empty().map(i -> { intCalled.set(true); return i; });
-        OptionalInt.empty().filter(i -> { intCalled.set(true); return true; });
-        OptionalInt.empty().flatMap(i -> { intCalled.set(true); return OptionalInt.of(i); });
+        OptionalInt.empty().map(i -> {
+            intCalled.set(true);
+            return i;
+        });
+        OptionalInt.empty().filter(i -> {
+            intCalled.set(true);
+            return true;
+        });
+        OptionalInt.empty().flatMap(i -> {
+            intCalled.set(true);
+            return OptionalInt.of(i);
+        });
         assertFalse(intCalled.get());
     }
 
@@ -3659,8 +3698,10 @@ public class uTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> OptionalDouble.of(1.0).ifPresent(null));
         assertThrows(IllegalArgumentException.class, () -> OptionalBoolean.of(true).ifPresent(null));
         assertThrows(IllegalArgumentException.class, () -> Nullable.of("v").ifPresent(null));
-        assertThrows(IllegalArgumentException.class, () -> Optional.of("v").ifPresentOrElse(null, () -> {}));
-        assertThrows(IllegalArgumentException.class, () -> Optional.of("v").ifPresentOrElse(s -> {}, null));
+        assertThrows(IllegalArgumentException.class, () -> Optional.of("v").ifPresentOrElse(null, () -> {
+        }));
+        assertThrows(IllegalArgumentException.class, () -> Optional.of("v").ifPresentOrElse(s -> {
+        }, null));
     }
 
     @Test

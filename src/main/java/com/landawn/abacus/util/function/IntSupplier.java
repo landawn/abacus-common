@@ -44,7 +44,7 @@ public interface IntSupplier extends Throwables.IntSupplier<RuntimeException>, j
     IntSupplier RANDOM = Util.RAND_INT::nextInt;
 
     /**
-     * Gets a result.
+     * Gets an int result.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

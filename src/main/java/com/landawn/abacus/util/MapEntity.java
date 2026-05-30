@@ -84,7 +84,7 @@ public final class MapEntity implements Serializable {
      * MapEntity product = new MapEntity("Product");
      * }</pre>
      *
-     * @param entityName the name of the entity
+     * @param entityName the name of the entity; if {@code null}, an empty string is used instead
      */
     public MapEntity(final String entityName) {
         this.entityName = entityName == null ? Strings.EMPTY : entityName;
@@ -103,6 +103,7 @@ public final class MapEntity implements Serializable {
      *
      * @param entityName the name of the entity
      * @param props the initial properties to set
+     * @throws NullPointerException if {@code props} is {@code null}
      */
     public MapEntity(final String entityName, final Map<String, Object> props) {
         this(entityName);
@@ -317,6 +318,10 @@ public final class MapEntity implements Serializable {
      * Returns a set of all property names that have been set in this entity.
      * The returned set contains simple property names (without entity name prefix).
      *
+     * <p>The returned set is backed by the internal map, so changes to the entity
+     * are reflected in the set, and removals from the set remove the corresponding
+     * properties from this entity.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MapEntity user = new MapEntity("User");
@@ -334,6 +339,10 @@ public final class MapEntity implements Serializable {
     /**
      * Returns a set view of all property entries in this entity.
      * Each entry contains a property name and its corresponding value.
+     *
+     * <p>The returned set is backed by the internal map, so changes to the entity
+     * are reflected in the set, and changes made through the set (such as removing
+     * entries) are reflected in this entity.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

@@ -807,7 +807,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Removes from this list all of its elements that are contained in the specified ShortList.
-     * Each occurrence of an element in the specified list will remove at most one occurrence from this list.
+     * This method compares elements by value, removing every occurrence of any value found in the
+     * specified list.
      *
      * @param c the ShortList containing elements to be removed from this list
      * @return {@code true} if this list changed as a result of the call
@@ -823,7 +824,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Removes from this list all of its elements that are contained in the specified array.
-     * Each occurrence of an element in the array will remove at most one occurrence from this list.
+     * This method compares elements by value, removing every occurrence of any value found in the
+     * specified array.
      *
      * @param a the array containing elements to be removed from this list
      * @return {@code true} if this list changed as a result of the call
@@ -856,6 +858,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return {@code true} if any elements were removed; {@code false} if the list was unchanged
      */
     public boolean removeIf(final ShortPredicate p) {
+        N.requireNonNull(p, cs.predicate);
+
         final ShortList tmp = new ShortList(size());
 
         for (int i = 0; i < size; i++) {
@@ -922,7 +926,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Retains only the elements in this list that are contained in the specified ShortList.
      * In other words, removes from this list all of its elements that are not contained in the
-     * specified list. Each occurrence is considered independently.
+     * specified list. Elements are compared by value.
+     *
+     * <p>If the specified list is {@code null} or empty, all elements are removed from this list.</p>
      *
      * @param c the ShortList containing elements to be retained in this list
      * @return {@code true} if this list changed as a result of the call
@@ -941,7 +947,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Retains only the elements in this list that are contained in the specified array.
      * In other words, removes from this list all of its elements that are not contained in the
-     * specified array. Each occurrence is considered independently.
+     * specified array. Elements are compared by value.
+     *
+     * <p>If the specified array is {@code null} or empty, all elements are removed from this list.</p>
      *
      * @param a the array containing elements to be retained in this list
      * @return {@code true} if this list changed as a result of the call
@@ -1125,6 +1133,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param replacement the ShortList whose elements will replace the specified range. Can be empty.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      *         (fromIndex &lt; 0 || toIndex &gt; size() || fromIndex &gt; toIndex)
+     * @throws OutOfMemoryError if the resulting size would exceed the maximum supported array size
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final ShortList replacement) throws IndexOutOfBoundsException {
@@ -1172,6 +1181,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param replacement the array whose elements will replace the specified range. Can be empty or {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      *         (fromIndex &lt; 0 || toIndex &gt; size() || fromIndex &gt; toIndex)
+     * @throws OutOfMemoryError if the resulting size would exceed the maximum supported array size
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final short[] replacement) throws IndexOutOfBoundsException {
@@ -1241,7 +1251,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * Replaces each element of this list with the result of applying the specified operator to that element.
      * The operator is applied to each element in order from first to last.
      *
-     * @param operator the operator to apply to each element
+     * @param operator the operator to apply to each element; must not be {@code null}
+     * @throws NullPointerException if {@code operator} is {@code null}
      * @see #replaceAll(short, short)
      * @see #replaceIf(ShortPredicate, short)
      */
@@ -1264,6 +1275,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @see #replaceAll(ShortUnaryOperator)
      */
     public boolean replaceIf(final ShortPredicate predicate, final short newValue) {
+        N.requireNonNull(predicate, cs.predicate);
+
         boolean result = false;
 
         for (int i = 0, len = size(); i < len; i++) {
@@ -1905,6 +1918,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param action the action to be performed for each element; must not be {@code null}
      */
     public void forEach(final ShortConsumer action) {
+        N.requireNonNull(action, cs.action);
+
         forEach(0, size, action);
     }
 

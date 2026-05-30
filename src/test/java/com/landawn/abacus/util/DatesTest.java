@@ -4507,4 +4507,17 @@ public class DatesTest extends TestBase {
         assertNotNull(cal);
         assertEquals(2023, cal.get(Calendar.YEAR));
     }
+
+    @Test
+    public void test_DTF_parseToX_nullLiteral_returnsNull() {
+        // Regression: the literal "null" must parse to null (like every other Dates parse method),
+        // not throw NPE, in the default (custom-format) branch of DTF.parseToX (#26-31).
+        org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.LOCAL_DATE_TIME.parseToLocalDate("null"));
+        org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.LOCAL_DATE_TIME.parseToLocalTime("null"));
+        org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.LOCAL_DATE.parseToLocalDateTime("null"));
+        org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.LOCAL_DATE_TIME.parseToOffsetDateTime("null"));
+        org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.LOCAL_DATE_TIME.parseToZonedDateTime("null"));
+        org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.LOCAL_DATE_TIME.parseToInstant("null"));
+    }
+
 }

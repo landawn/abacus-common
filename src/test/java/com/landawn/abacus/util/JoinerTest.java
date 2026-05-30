@@ -3642,8 +3642,7 @@ public class JoinerTest extends AbstractTest {
         String emoji = "😀"; // U+1F600 as UTF-16 surrogate pair
         int expected = emoji.getBytes(java.nio.charset.StandardCharsets.UTF_8).length; // 4
         assertEquals(4, expected, "Test precondition: emoji should be 4 bytes in UTF-8");
-        assertEquals(expected, Utf8.encodedLength(emoji),
-                "encodedLength must return 4 for a supplementary codepoint");
+        assertEquals(expected, Utf8.encodedLength(emoji), "encodedLength must return 4 for a supplementary codepoint");
     }
 
     @Test

@@ -36,6 +36,7 @@ import com.landawn.abacus.util.Tuple;
  * rebuilds a typed tuple from its deserialized element array. All other behavior
  * (serialization, deserialization with per-element type conversion, and JSON {@code [...]}
  * formatting) is implemented once here.
+ * </p>
  *
  * @param <T> the concrete {@link Tuple} subtype handled by this type
  */
@@ -128,7 +129,7 @@ abstract class AbstractTupleType<T extends Tuple<T>> extends AbstractType<T> {
      *
      * @param str the JSON array string to deserialize, may be {@code null} or empty
      * @return a new tuple instance, or {@code null} if {@code str} is {@code null} or empty
-     * @throws IllegalArgumentException if the parsed array has fewer elements than the tuple arity
+     * @throws IllegalArgumentException if the parsed array is {@code null} or has fewer elements than the tuple arity
      */
     @SuppressWarnings("unchecked")
     @Override

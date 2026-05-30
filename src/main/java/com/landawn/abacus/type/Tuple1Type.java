@@ -42,6 +42,13 @@ public class Tuple1Type<T1> extends AbstractTupleType<Tuple1<T1>> {
         super(getTypeName(t1TypeName, false), getTypeName(t1TypeName, true), (Class) Tuple1.class, List.of(TypeFactory.getType(t1TypeName)));
     }
 
+    /**
+     * Reconstructs a {@link Tuple1} from an already type-converted element array.
+     * The array is expected to contain exactly one element matching the tuple's parameter type.
+     *
+     * @param converted the array of converted element values (must be of length 1)
+     * @return a new {@code Tuple1} containing the single element
+     */
     @SuppressWarnings("unchecked")
     @Override
     protected Tuple1<T1> fromArray(final Object[] converted) {

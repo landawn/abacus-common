@@ -336,6 +336,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param a the array to be used as the backing array for this list; must not be {@code null}
      * @param size the number of elements from the array to be included in the list.
      *             Must be between 0 and a.length (inclusive).
+     * @throws NullPointerException if {@code a} is {@code null}
      * @throws IndexOutOfBoundsException if size is negative or greater than a.length
      */
     public ByteList(final byte[] a, final int size) throws IndexOutOfBoundsException {
@@ -852,6 +853,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @throws NullPointerException if {@code p} is {@code null}
      */
     public boolean removeIf(final BytePredicate p) {
+        N.requireNonNull(p, cs.predicate);
+
         final ByteList tmp = new ByteList(size());
 
         for (int i = 0; i < size; i++) {
@@ -1302,6 +1305,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @throws NullPointerException if {@code predicate} is {@code null}
      */
     public boolean replaceIf(final BytePredicate predicate, final byte newValue) {
+        N.requireNonNull(predicate, cs.predicate);
+
         boolean result = false;
 
         for (int i = 0, len = size(); i < len; i++) {
@@ -1394,7 +1399,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Returns {@code true} if this list contains all elements from the specified ByteList.
      * This method returns {@code true} if every element in the specified list
-     * is also present in this list. Duplicate elements are considered independently.
+     * is also present in this list. This is a membership check that ignores the number
+     * of occurrences, so a value present once in this list satisfies any number of
+     * occurrences of that value in the specified list.
      *
      * @param c the ByteList to check for containment. Can be {@code null}.
      * @return {@code true} if this list contains all elements from the specified list,
@@ -1431,7 +1438,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Returns {@code true} if this list contains all elements from the specified array.
      * This method returns {@code true} if every element in the specified array
-     * is also present in this list. Duplicate elements are considered independently.
+     * is also present in this list. This is a membership check that ignores the number
+     * of occurrences, so a value present once in this list satisfies any number of
+     * occurrences of that value in the specified array.
      *
      * @param a the array to check for containment. Can be {@code null}.
      * @return {@code true} if this list contains all elements from the specified array,
@@ -1927,6 +1936,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @throws NullPointerException if {@code action} is {@code null}
      */
     public void forEach(final ByteConsumer action) {
+        N.requireNonNull(action, cs.action);
+
         forEach(0, size, action);
     }
 
@@ -2244,8 +2255,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Rotates all elements in this list by the specified distance.
-     * After calling rotate(distance), the element at index i will be moved to
-     * index (i + distance) % size.
+     * After calling {@code rotate(distance)}, the element at index {@code i} will be moved to
+     * index {@code (i + distance) % size}.
      *
      * <p>Positive values of distance rotate elements towards higher indices (right rotation),
      * while negative values rotate towards lower indices (left rotation).

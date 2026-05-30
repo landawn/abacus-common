@@ -371,6 +371,9 @@ public final class Beans {
     // ...
     private static final String PROP_NAME_SEPARATOR = ".";
 
+    // Shared, stateless splitter for nested property paths (e.g. "address.city"); reused to avoid per-call allocation.
+    private static final Splitter PROP_NAME_SPLITTER = Splitter.with(PROP_NAME_SEPARATOR);
+
     // ...
     private static final String GET = "get";
 
@@ -398,6 +401,8 @@ public final class Beans {
     private static final Map<Class<?>, ImmutableMap<String, Field>> beanDeclaredPropFieldPool = new ObjectPool<>(POOL_SIZE);
 
     private static final Map<Class<?>, Map<String, Field>> beanPropFieldPool = new ObjectPool<>(POOL_SIZE);
+
+    private static final Map<Class<?>, Map<String, Field>> declaredFieldPool = new ObjectPool<>(POOL_SIZE);
 
     private static final Map<Class<?>, ImmutableMap<String, Method>> beanDeclaredPropGetMethodPool = new ObjectPool<>(POOL_SIZE);
 
@@ -615,10 +620,13 @@ public final class Beans {
             Method builderMethod = getBuilderMethod(cls);
 
             if (builderMethod == null) {
-                builderClass = Stream.of(cls.getDeclaredClasses())
-                        .filter(it -> getBuilderMethod(it) != null && getBuildMethod(it, cls) != null)
-                        .first()
-                        .orElseNull();
+                for (final Class<?> declaredClass : cls.getDeclaredClasses()) {
+                    if (getBuilderMethod(declaredClass) != null && getBuildMethod(declaredClass, cls) != null) {
+                        builderClass = declaredClass;
+
+                        break;
+                    }
+                }
 
                 if (builderClass != null) {
                     builderMethod = getBuilderMethod(builderClass);
@@ -780,9 +788,9 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Method customGetter = MyClass.class.getMethod("fetchName");
+     * Method customGetter = MyClass.class.getMethod("getFullName");
      * Beans.registerPropertyAccessor("name", customGetter);
-     * // Now fetchName() is recognized as the getter for property "name"
+     * // Now getFullName() is registered as the getter for property "name"
      * }</pre>
      *
      * @param propName the name of the property to associate with the method.
@@ -1019,9 +1027,10 @@ public final class Beans {
      * // Returns all properties except "password" and "ssn"
      * }</pre>
      *
-     * @param cls the class whose property names are to be retrieved.
+     * @param cls the class whose property names are to be retrieved; must not be {@code null}.
      * @param propNameToExclude the collection of property names to exclude from the result.
      * @return a list of property names for the specified class, excluding the specified property names.
+     * @throws IllegalArgumentException if {@code cls} is {@code null}.
      * @deprecated replaced by {@link #getPropNames(Class, Set)}
      * @see #getPropNames(Class, Set)
      */
@@ -1054,9 +1063,10 @@ public final class Beans {
      * // Returns ["id", "name", "email"] if User has those properties
      * }</pre>
      *
-     * @param cls the class whose property names are to be retrieved.
+     * @param cls the class whose property names are to be retrieved; must not be {@code null}.
      * @param propNameToExclude the set of property names to exclude from the result.
      * @return a list of property names for the specified class, excluding the specified property names.
+     * @throws IllegalArgumentException if {@code cls} is {@code null}.
      */
     public static List<String> getPropNames(final Class<?> cls, final Set<String> propNameToExclude) {
         N.checkArgNotNull(cls, cs.cls);
@@ -1186,7 +1196,7 @@ public final class Beans {
      * (e.g., {@link com.landawn.abacus.util.Difference.BeanDifference#of(Object, Object)}) for the specified class.
      *
      * <p>A property is excluded if it is annotated with {@link DiffIgnore} or an annotation
-     * whose simple name equals {@code "DiffIgnore"} or {@code "DifferenceIgnore"}.</p>
+     * whose simple name matches (ignoring case) {@code "DiffIgnore"} or {@code "DifferenceIgnore"}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1314,9 +1324,22 @@ public final class Beans {
 
         inputPropName = inputPropName.trim();
 
-        return inputPropName.equalsIgnoreCase(propNameByMethod) || inputPropName.replace(SK.UNDERSCORE, Strings.EMPTY).equalsIgnoreCase(propNameByMethod)
-                || inputPropName.equalsIgnoreCase(ClassUtil.getSimpleClassName(cls) + SK._PERIOD + propNameByMethod)
-                || (inputPropName.startsWith(GET) && inputPropName.length() > 3 && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
+        if (inputPropName.equalsIgnoreCase(propNameByMethod)) {
+            return true;
+        }
+
+        if (inputPropName.indexOf(SK._UNDERSCORE) >= 0 && inputPropName.replace(SK.UNDERSCORE, Strings.EMPTY).equalsIgnoreCase(propNameByMethod)) {
+            return true;
+        }
+
+        final String simpleClassName = ClassUtil.getSimpleClassName(cls);
+
+        if (inputPropName.length() == (simpleClassName.length() + 1 + propNameByMethod.length())
+                && inputPropName.equalsIgnoreCase(simpleClassName + SK._PERIOD + propNameByMethod)) {
+            return true;
+        }
+
+        return (inputPropName.startsWith(GET) && inputPropName.length() > 3 && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
                 || (inputPropName.startsWith(SET) && inputPropName.length() > 3 && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
                 || (inputPropName.startsWith(IS) && inputPropName.length() > 2 && inputPropName.substring(2).equalsIgnoreCase(propNameByMethod))
                 || (inputPropName.startsWith(HAS) && inputPropName.length() > 3 && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod));
@@ -1395,28 +1418,47 @@ public final class Beans {
                 }
 
                 final Map<String, String> staticFinalFields = getPublicStaticStringFields(clazz);
+                final Field[] declaredFields = clazz.getDeclaredFields();
+                final Method[] methods = clazz.getMethods();
 
-                final List<Tuple2<Field, Method>> fieldGetMethodList = new ArrayList<>();
+                final List<Tuple2<Field, Method>> fieldGetMethodList = new ArrayList<>(declaredFields.length);
 
                 // sort the methods by the order of declared fields
-                for (final Field field : clazz.getDeclaredFields()) {
-                    Stream.of(clazz.getMethods())
-                            .filter(method -> isFieldGetMethod(method, field))
-                            .sortedBy(method -> method.getName().length())
-                            .last()
-                            .ifPresentOrElse(method -> fieldGetMethodList.add(Tuple.of(field, method)), () -> {
-                                if (Modifier.isPublic(field.getModifiers()) && !Modifier.isStatic(field.getModifiers())
-                                        && !Modifier.isFinal(field.getModifiers())) {
-                                    fieldGetMethodList.add(Tuple.of(field, null));
-                                }
-                            });
+                for (final Field field : declaredFields) {
+                    Method fieldGetMethod = null;
+
+                    for (final Method method : methods) {
+                        if (isFieldGetMethod(method, field) && (fieldGetMethod == null || method.getName().length() >= fieldGetMethod.getName().length())) {
+                            fieldGetMethod = method;
+                        }
+                    }
+
+                    if (fieldGetMethod == null) {
+                        if (Modifier.isPublic(field.getModifiers()) && !Modifier.isStatic(field.getModifiers()) && !Modifier.isFinal(field.getModifiers())) {
+                            fieldGetMethodList.add(Tuple.of(field, null));
+                        }
+                    } else {
+                        fieldGetMethodList.add(Tuple.of(field, fieldGetMethod));
+                    }
                 }
 
                 if (noArgConstructor == null && clazz == cls) {
-                    final Class<?>[] args = fieldGetMethodList.stream()
-                            .filter(it -> it._2 != null)
-                            .map(it -> it._1.getType())
-                            .toArray(len -> new Class<?>[len]);
+                    int argCount = 0;
+
+                    for (final Tuple2<Field, Method> tp : fieldGetMethodList) {
+                        if (tp._2 != null) {
+                            argCount++;
+                        }
+                    }
+
+                    final Class<?>[] args = new Class<?>[argCount];
+                    int argIndex = 0;
+
+                    for (final Tuple2<Field, Method> tp : fieldGetMethodList) {
+                        if (tp._2 != null) {
+                            args[argIndex++] = tp._1.getType();
+                        }
+                    }
 
                     allArgsConstructor = ClassUtil.getDeclaredConstructor(cls, args);
 
@@ -1485,7 +1527,7 @@ public final class Beans {
                     }
                 }
 
-                for (final Method method : clazz.getMethods()) {
+                for (final Method method : methods) {
                     if (isGetMethod(method)) {
                         propName = getPropNameByMethod(method);
                         propName = (staticFinalFields.get(propName) != null) ? staticFinalFields.get(propName) : propName;
@@ -1591,8 +1633,9 @@ public final class Beans {
                 String propName = null;
 
                 final Map<String, Method> builderPropSetMethodMap = new LinkedHashMap<>();
+                final Method[] builderMethods = builderClass.getMethods();
 
-                for (final Method method : builderClass.getMethods()) {
+                for (final Method method : builderMethods) {
                     if (Modifier.isPublic(method.getModifiers()) && !Object.class.equals(method.getDeclaringClass()) && method.getParameterCount() == 1
                             && (void.class.equals(method.getReturnType()) || method.getReturnType().isAssignableFrom(builderClass))) {
                         propName = getPropNameByMethod(method);
@@ -1639,13 +1682,35 @@ public final class Beans {
      * @return the declared field with the specified name, or {@code null} if not found.
      */
     private static Field getDeclaredField(final Class<?> cls, final String fieldName) {
-        try {
-            return cls.getDeclaredField(fieldName);
-        } catch (NoSuchFieldException | SecurityException e) {
-            // ignore
+        Map<String, Field> fieldMap = declaredFieldPool.get(cls);
+
+        if (fieldMap == null) {
+            synchronized (declaredFieldPool) {
+                fieldMap = declaredFieldPool.get(cls);
+
+                if (fieldMap == null) {
+                    Field[] fields = null;
+
+                    try {
+                        fields = cls.getDeclaredFields();
+                    } catch (final SecurityException e) {
+                        // ignore
+                    }
+
+                    fieldMap = new ObjectPool<>(fields == null ? 0 : N.max(16, fields.length));
+
+                    if (fields != null) {
+                        for (final Field field : fields) {
+                            fieldMap.put(field.getName(), field);
+                        }
+                    }
+
+                    declaredFieldPool.put(cls, fieldMap);
+                }
+            }
         }
 
-        return null;
+        return fieldMap.get(fieldName);
     }
 
     private static <T> Map<String, String> getPublicStaticStringFields(final Class<T> cls) {
@@ -1685,8 +1750,9 @@ public final class Beans {
      *
      * @param cls the class from which the field is to be retrieved.
      * @param propName the name of the property whose backing field is to be retrieved.
-     * @return the field associated with the specified property name, or {@code null} if no matching field is found.
-     * @throws IllegalArgumentException if no property getter/setter or public field is found in the class.
+     * @return the field associated with the specified property name, or {@code null} if no matching field is found and the class is a bean class.
+     * @throws IllegalArgumentException if no matching field is found and the specified class is not a bean class
+     *         (i.e. it has no property getter/setter method or public field).
      */
     @MayReturnNull
     @SuppressWarnings("deprecation")
@@ -2047,7 +2113,7 @@ public final class Beans {
         if (inlinePropGetMethodQueue == null) {
             inlinePropGetMethodQueue = new ArrayList<>();
 
-            final String[] strs = Splitter.with(PROP_NAME_SEPARATOR).splitToArray(propName);
+            final String[] strs = PROP_NAME_SPLITTER.splitToArray(propName);
 
             if (strs.length > 1) {
                 Class<?> targetClass = cls;
@@ -3515,8 +3581,8 @@ public final class Beans {
      * // Note: address is converted to a Map, not kept as Address object
      * }</pre>
      *
-     * @param bean the bean to be converted into a Map.
-     * @return a Map representation of the provided bean.
+     * @param bean the bean to be converted into a Map; if {@code null}, an empty map is returned.
+     * @return a {@link java.util.LinkedHashMap} representation of the provided bean; never {@code null}.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> deepBeanToMap(final Object bean) {
@@ -3547,9 +3613,9 @@ public final class Beans {
      * }</pre>
      *
      * @param <M> the type of the Map to which the bean will be converted.
-     * @param bean the bean to be converted into a Map.
+     * @param bean the bean to be converted into a Map; if {@code null}, an empty map is returned.
      * @param mapSupplier a supplier function to create the Map instance.
-     * @return a Map representation of the provided bean.
+     * @return a Map of the specified type representing the provided bean; never {@code null}.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M deepBeanToMap(final Object bean, final IntFunction<? extends M> mapSupplier) {
@@ -3581,9 +3647,9 @@ public final class Beans {
      * // age is not included
      * }</pre>
      *
-     * @param bean the bean to be converted into a Map.
+     * @param bean the bean to be converted into a Map; if {@code null}, an empty map is returned.
      * @param selectPropNames a collection of property names to be included during the conversion process.
-     * @return a Map representation of the provided bean.
+     * @return a {@link java.util.LinkedHashMap} representation of the provided bean; never {@code null}.
      * @throws IllegalArgumentException if a selected property does not exist
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
@@ -3616,10 +3682,10 @@ public final class Beans {
      * }</pre>
      *
      * @param <M> the type of the Map to which the bean will be converted.
-     * @param bean the bean to be converted into a Map.
+     * @param bean the bean to be converted into a Map; if {@code null}, an empty map is returned.
      * @param selectPropNames a collection of property names to be included during the conversion process.
      * @param mapSupplier a supplier function to create the Map instance.
-     * @return a Map representation of the provided bean.
+     * @return a Map of the specified type representing the provided bean; never {@code null}.
      * @throws IllegalArgumentException if a selected property does not exist
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
@@ -3654,11 +3720,11 @@ public final class Beans {
      * }</pre>
      *
      * @param <M> the type of the Map to which the bean will be converted.
-     * @param bean the bean to be converted into a Map.
+     * @param bean the bean to be converted into a Map; if {@code null}, an empty map is returned.
      * @param selectPropNames a collection of property names to be included during the conversion process.
      * @param keyNamingPolicy the naming policy to be used for the keys in the resulting Map.
      * @param mapSupplier a supplier function to create the Map instance into which the bean properties will be put.
-     * @return a Map representation of the provided bean.
+     * @return a Map of the specified type representing the provided bean; never {@code null}.
      * @throws IllegalArgumentException if a selected property does not exist
      */
     public static <M extends Map<String, Object>> M deepBeanToMap(final Object bean, final Collection<String> selectPropNames,
@@ -3700,7 +3766,7 @@ public final class Beans {
      * }</pre>
      *
      * @param <M> the type of the output map.
-     * @param bean the bean to be converted into a Map.
+     * @param bean the bean to be converted into a Map; if {@code null}, the output map is not modified.
      * @param output the map into which the bean's properties will be put.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
@@ -3735,7 +3801,7 @@ public final class Beans {
      * }</pre>
      *
      * @param <M> the type of the output map.
-     * @param bean the bean to be converted into a Map.
+     * @param bean the bean to be converted into a Map; if {@code null}, the output map is not modified.
      * @param selectPropNames a collection of property names to be included during the conversion process.
      * @param output the map into which the bean's properties will be put.
      * @throws IllegalArgumentException if a selected property does not exist
@@ -3772,7 +3838,7 @@ public final class Beans {
      * }</pre>
      *
      * @param <M> the type of the output map.
-     * @param bean the bean to be converted into a Map.
+     * @param bean the bean to be converted into a Map; if {@code null}, the output map is not modified.
      * @param selectPropNames a collection of property names to be included during the conversion process.
      * @param keyNamingPolicy the naming policy to be used for the keys in the resulting Map.
      * @param output the map into which the bean's properties will be put.
@@ -3841,9 +3907,9 @@ public final class Beans {
      * // filtered: {name=Jane} (null properties excluded)
      * }</pre>
      *
-     * @param bean the bean object to be converted into a Map. Can be any Java object with getter/setter methods.
+     * @param bean the bean object to be converted into a Map; if {@code null}, an empty map is returned.
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values will not be included in the resulting Map.
-     * @return a Map representation of the bean where nested beans are recursively converted to Maps.
+     * @return a {@link java.util.LinkedHashMap} representation of the bean where nested beans are recursively converted to Maps; never {@code null}.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> deepBeanToMap(final Object bean, final boolean ignoreNullProperty) {
@@ -3864,10 +3930,10 @@ public final class Beans {
      * // result: {name=John, address={city=NYC}} (email and age excluded)
      * }</pre>
      *
-     * @param bean the bean object to be converted into a Map.
+     * @param bean the bean object to be converted into a Map; if {@code null}, an empty map is returned.
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values will not be included in the resulting Map.
      * @param ignoredPropNames a set of property names to be ignored during the conversion process. Can be {@code null}.
-     * @return a Map representation of the bean with specified properties excluded.
+     * @return a {@link java.util.LinkedHashMap} representation of the bean with specified properties excluded; never {@code null}.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> deepBeanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) {
@@ -3889,11 +3955,11 @@ public final class Beans {
      * }</pre>
      *
      * @param <M> the type of Map to be returned.
-     * @param bean the bean object to be converted into a Map.
+     * @param bean the bean object to be converted into a Map; if {@code null}, an empty map is returned.
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values will not be included in the resulting Map.
      * @param ignoredPropNames a set of property names to be ignored during the conversion process.
      * @param mapSupplier a function that creates a new Map instance. The function argument is the initial capacity.
-     * @return a Map of the specified type containing the bean properties.
+     * @return a Map of the specified type containing the bean properties; never {@code null}.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M deepBeanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
@@ -3922,11 +3988,11 @@ public final class Beans {
      * // upperCase: {FIRST_NAME=John, LAST_NAME=Doe}
      * }</pre>
      *
-     * @param bean the bean object to be converted into a Map.
+     * @param bean the bean object to be converted into a Map; if {@code null}, an empty map is returned.
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values will not be included in the resulting Map.
      * @param ignoredPropNames a set of property names to be ignored during the conversion process.
-     * @param keyNamingPolicy the naming policy to apply to the keys in the resulting Map. If {@code null}, defaults to CAMEL_CASE.
-     * @return a Map representation of the bean with keys transformed according to the naming policy.
+     * @param keyNamingPolicy the naming policy to apply to the keys in the resulting Map. If {@code null}, defaults to {@link NamingPolicy#CAMEL_CASE}.
+     * @return a {@link java.util.LinkedHashMap} representation of the bean with keys transformed according to the naming policy; never {@code null}.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> deepBeanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
@@ -3952,12 +4018,12 @@ public final class Beans {
      * }</pre>
      *
      * @param <M> the type of Map to be returned.
-     * @param bean the bean object to be converted into a Map.
+     * @param bean the bean object to be converted into a Map; if {@code null}, an empty map is returned.
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values will not be included in the resulting Map.
      * @param ignoredPropNames a set of property names to be ignored during the conversion process.
-     * @param keyNamingPolicy the naming policy to apply to the keys in the resulting Map.
+     * @param keyNamingPolicy the naming policy to apply to the keys in the resulting Map. If {@code null}, defaults to {@link NamingPolicy#CAMEL_CASE}.
      * @param mapSupplier a function that creates a new Map instance. The function argument is the initial capacity.
-     * @return a Map of the specified type with full customization applied.
+     * @return a Map of the specified type with full customization applied; never {@code null}.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M deepBeanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
@@ -5542,7 +5608,8 @@ public final class Beans {
      * @param propFilter a predicate receiving the property name and source value; returns {@code true} to
      *        merge the property into the target.
      * @return {@code targetBean} with matching properties merged.
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a property that passes
+     *         the filter has no matching property in the target bean.
      * @see BiPredicates#alwaysTrue()
      * @see Fn#identity()
      * @see Fn#selectFirst()
@@ -5583,7 +5650,8 @@ public final class Beans {
      * @param mergeFunc a binary operator that receives {@code (sourceValue, targetValue)} and returns
      *        the value to set on the target.
      * @return {@code targetBean} with filtered and merged properties applied.
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a property that passes
+     *         the filter has no matching property in the target bean.
      * @see BiPredicates#alwaysTrue()
      * @see Fn#identity()
      * @see Fn#selectFirst()
@@ -5623,7 +5691,8 @@ public final class Beans {
      * @param propNameConverter a function that converts each source property name to the corresponding
      *        target property name; use {@link Fn#identity()} to keep names unchanged.
      * @return {@code targetBean} with filtered and name-converted properties merged.
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a property that passes
+     *         the filter has no matching property in the target bean.
      * @see BiPredicates#alwaysTrue()
      * @see Fn#identity()
      * @see Fn#selectFirst()
@@ -5678,7 +5747,8 @@ public final class Beans {
      * @param mergeFunc a binary operator that receives {@code (sourceValue, targetValue)} and returns
      *        the value to set on the target; must not be {@code null}.
      * @return {@code targetBean} with filtered, name-converted, and merged properties applied.
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a property that passes
+     *         the filter has no matching property in the target bean.
      * @see BiPredicates#alwaysTrue()
      * @see Fn#identity()
      * @see Fn#selectFirst()
@@ -6353,8 +6423,9 @@ public final class Beans {
      * Compares the properties of two beans to determine if they are equal.
      *
      * <p>This method compares only the specified properties of the two bean objects.
-     * Properties are compared using their equals() method. If all specified properties
-     * are equal, the method returns {@code true}.</p>
+     * Property values are compared via {@link N#compare(Comparable, Comparable)} (i.e. using
+     * their natural ordering / {@code compareTo}); two values are considered equal when the
+     * comparison yields {@code 0}. If all specified properties are equal, the method returns {@code true}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

@@ -11428,4 +11428,411 @@ public class StreamTest extends AbstractTest {
         assertEquals(Arrays.asList(11, 22, 33), result);
     }
 
+    // ===== Additional coverage tests appended 2026-05-29 =====
+
+    // of(Iterable) where iterable is NOT a Collection -> goes through of(iterable.iterator()) branch (line 16366).
+    @Test
+    public void testOfIterable_NonCollection_uncovered() {
+        final List<Integer> backing = N.asList(1, 2, 3);
+        // anonymous Iterable that is not a Collection
+        final Iterable<Integer> iterable = backing::iterator;
+        assertEquals(N.asList(1, 2, 3), Stream.of(iterable).toList());
+    }
+
+    @Test
+    public void testOfIterable_Null_uncovered() {
+        final Iterable<Integer> iterable = null;
+        assertEquals(0, Stream.of(iterable).count());
+    }
+
+    @Test
+    public void testOfEnumeration_uncovered() {
+        final Vector<String> vector = new Vector<>(N.asList("a", "b", "c"));
+        assertEquals(N.asList("a", "b", "c"), Stream.of(vector.elements()).toList());
+    }
+
+    @Test
+    public void testOfEnumeration_Null_uncovered() {
+        final Enumeration<String> en = null;
+        assertEquals(0, Stream.of(en).count());
+    }
+
+    // of(char[], from, to): exercises count() (line 16650-16652) via terminal count().
+    @Test
+    public void testOfCharArrayRange_count_uncovered() {
+        final char[] a = { 'a', 'b', 'c', 'd', 'e' };
+        assertEquals(3, Stream.of(a, 1, 4).count());
+    }
+
+    // of(char[], from, to): exercises advance() (line 16656-16661) via skip().
+    @Test
+    public void testOfCharArrayRange_skipThenToArray_uncovered() {
+        final char[] a = { 'a', 'b', 'c', 'd', 'e' };
+        assertEquals(N.asList('d', 'e'), Stream.of(a, 1, 5).skip(2).toList());
+    }
+
+    // of(char[], from, to): exercises toArray() override (line 16665-16672).
+    @Test
+    public void testOfCharArrayRange_toArray_uncovered() {
+        final char[] a = { 'a', 'b', 'c', 'd', 'e' };
+        final Object[] arr = Stream.of(a, 1, 4).toArray();
+        assertArrayEquals(new Object[] { 'b', 'c', 'd' }, arr);
+    }
+
+    // of(byte[], from, to): count/advance/toArray.
+    @Test
+    public void testOfByteArrayRange_uncovered() {
+        final byte[] a = { 1, 2, 3, 4, 5 };
+        assertEquals(4, Stream.of(a, 1, 5).count());
+        assertEquals(N.asList((byte) 3, (byte) 4, (byte) 5), Stream.of(a, 1, 5).skip(1).toList());
+    }
+
+    // of(short[], from, to)
+    @Test
+    public void testOfShortArrayRange_uncovered() {
+        final short[] a = { 10, 20, 30, 40 };
+        assertEquals(2, Stream.of(a, 1, 3).count());
+        assertEquals(N.asList((short) 30, (short) 40), Stream.of(a, 1, 4).skip(1).toList());
+    }
+
+    // of(int[], from, to)
+    @Test
+    public void testOfIntArrayRange_uncovered() {
+        final int[] a = { 1, 2, 3, 4, 5, 6 };
+        assertEquals(4, Stream.of(a, 2, 6).count());
+        assertEquals(N.asList(4, 5, 6), Stream.of(a, 2, 6).skip(1).toList());
+        assertArrayEquals(new Object[] { 3, 4 }, Stream.of(a, 2, 4).toArray());
+    }
+
+    // of(long[], from, to)
+    @Test
+    public void testOfLongArrayRange_uncovered() {
+        final long[] a = { 1L, 2L, 3L, 4L };
+        assertEquals(3, Stream.of(a, 1, 4).count());
+        assertEquals(N.asList(3L, 4L), Stream.of(a, 1, 4).skip(1).toList());
+    }
+
+    // of(float[], from, to)
+    @Test
+    public void testOfFloatArrayRange_uncovered() {
+        final float[] a = { 1f, 2f, 3f, 4f };
+        assertEquals(3, Stream.of(a, 1, 4).count());
+        assertEquals(N.asList(3f, 4f), Stream.of(a, 1, 4).skip(1).toList());
+    }
+
+    // of(double[], from, to)
+    @Test
+    public void testOfDoubleArrayRange_uncovered() {
+        final double[] a = { 1d, 2d, 3d, 4d };
+        assertEquals(3, Stream.of(a, 1, 4).count());
+        assertEquals(N.asList(3d, 4d), Stream.of(a, 1, 4).skip(1).toList());
+    }
+
+    // of(boolean[], from, to)
+    @Test
+    public void testOfBooleanArrayRange_uncovered() {
+        final boolean[] a = { true, false, true, false };
+        assertEquals(3, Stream.of(a, 1, 4).count());
+        assertEquals(N.asList(true, false), Stream.of(a, 1, 4).skip(1).toList());
+    }
+
+    // of(Iterator, from, to): static factory exercising skip+limit composition (line 16419).
+    @Test
+    public void testOfIteratorRange_uncovered() {
+        final Iterator<Integer> it = N.asList(0, 1, 2, 3, 4, 5).iterator();
+        // package-private; reachable via Collection.of with subrange instead:
+        assertEquals(N.asList(1, 2, 3), Stream.of(N.asList(0, 1, 2, 3, 4, 5), 1, 4).toList());
+        assertTrue(it.hasNext());
+    }
+
+    // of(Collection, from, to) where subrange is full collection vs partial - covers line 16302/16304.
+    @Test
+    public void testOfCollectionRange_partial_uncovered() {
+        final List<String> list = N.asList("a", "b", "c", "d", "e");
+        assertEquals(N.asList("b", "c", "d"), Stream.of(list, 1, 4).toList());
+    }
+
+    @Test
+    public void testOfCollectionRange_emptyZeroZero_uncovered() {
+        final List<String> empty = new ArrayList<>();
+        assertEquals(0, Stream.of(empty, 0, 0).count());
+    }
+
+    // flatten(T[][], boolean) vertically=true (lines 18064-18111).
+    @Test
+    public void testFlatten2DVertically_uncovered() {
+        final Integer[][] a = { { 1, 2 }, { 3, 4 }, { 5, 6 } };
+        assertEquals(N.asList(1, 3, 5, 2, 4, 6), Stream.flatten(a, true).toList());
+    }
+
+    // flatten(T[][], boolean) vertically=true with single row -> of(a[0]) (line 18059).
+    @Test
+    public void testFlatten2DVertically_singleRow_uncovered() {
+        final Integer[][] a = { { 1, 2, 3 } };
+        assertEquals(N.asList(1, 2, 3), Stream.flatten(a, true).toList());
+    }
+
+    // flatten(T[][], boolean) vertically=true with all-empty rows -> empty (line 18071).
+    @Test
+    public void testFlatten2DVertically_allEmpty_uncovered() {
+        final Integer[][] a = { {}, {} };
+        assertEquals(0, Stream.flatten(a, true).count());
+    }
+
+    // flatten(T[][], valueForAlignment, vertically=true) (lines 18135-18188).
+    @Test
+    public void testFlatten2DWithAlignment_vertical_uncovered() {
+        final Integer[][] a = { { 1, 2, 3 }, { 4, 5 }, { 6 } };
+        // 3 rows x 3 cols, column-major with padding 0
+        assertEquals(N.asList(1, 4, 6, 2, 5, 0, 3, 0, 0), Stream.flatten(a, 0, true).toList());
+    }
+
+    // flatten(T[][], valueForAlignment, vertically=false) horizontal (lines 18189-18218).
+    @Test
+    public void testFlatten2DWithAlignment_horizontal_uncovered() {
+        final Integer[][] a = { { 1, 2, 3 }, { 4, 5 }, { 6 } };
+        assertEquals(N.asList(1, 2, 3, 4, 5, 0, 6, 0, 0), Stream.flatten(a, 0, false).toList());
+    }
+
+    // flatten(T[][], valueForAlignment, vertically) single row -> of(a[0]) (line 18139).
+    @Test
+    public void testFlatten2DWithAlignment_singleRow_uncovered() {
+        final Integer[][] a = { { 7, 8 } };
+        assertEquals(N.asList(7, 8), Stream.flatten(a, 0, false).toList());
+    }
+
+    // repeat: count() override (line 18301-18305).
+    @Test
+    public void testRepeat_count_uncovered() {
+        assertEquals(5, Stream.repeat("x", 5).count());
+    }
+
+    // repeat: advance() override via skip (line 18292-18298).
+    @Test
+    public void testRepeat_skip_uncovered() {
+        assertEquals(N.asList("x", "x"), Stream.repeat("x", 5).skip(3).toList());
+    }
+
+    // repeat: toArray() override (line 18308-18321).
+    @Test
+    public void testRepeat_toArray_uncovered() {
+        final Object[] arr = Stream.repeat("y", 3).toArray();
+        assertArrayEquals(new Object[] { "y", "y", "y" }, arr);
+    }
+
+    // iterate(BooleanSupplier, Supplier) (lines 18349-18374).
+    @Test
+    public void testIterate_BooleanSupplierSupplier_uncovered() {
+        final MutableInt counter = MutableInt.of(0);
+        final BooleanSupplier hasNext = () -> counter.value() < 4;
+        final Supplier<Integer> next = () -> counter.getAndIncrement();
+        assertEquals(N.asList(0, 1, 2, 3), Stream.iterate(hasNext, next).toList());
+    }
+
+    // iterate(init, BooleanSupplier, UnaryOperator) (lines 18398-18425).
+    @Test
+    public void testIterate_InitBooleanSupplierUnary_uncovered() {
+        final MutableInt remaining = MutableInt.of(5);
+        final BooleanSupplier hasNext = () -> remaining.getAndDecrement() > 0;
+        assertEquals(N.asList(1, 2, 4, 8, 16), Stream.iterate(1, hasNext, x -> x * 2).toList());
+    }
+
+    // iterate(init, Predicate, UnaryOperator) (lines 18448-18480).
+    @Test
+    public void testIterate_InitPredicateUnary_uncovered() {
+        assertEquals(N.asList(1, 3, 5, 7, 9), Stream.iterate(1, (Predicate<Integer>) x -> x < 10, x -> x + 2).toList());
+    }
+
+    @Test
+    public void testIterate_BooleanSupplierSupplier_NullArgs_uncovered() {
+        assertThrows(IllegalArgumentException.class, () -> Stream.iterate((BooleanSupplier) null, () -> 1));
+        assertThrows(IllegalArgumentException.class, () -> Stream.iterate(() -> true, (Supplier<Integer>) null));
+    }
+
+    // generate(Supplier) limited (line 18539).
+    @Test
+    public void testGenerate_limited_uncovered() {
+        final MutableInt c = MutableInt.of(0);
+        final Supplier<Integer> sup = () -> c.getAndIncrement();
+        assertEquals(N.asList(0, 1, 2), Stream.generate(sup).limit(3).toList());
+    }
+
+    @Test
+    public void testGenerate_NullSupplier_uncovered() {
+        assertThrows(IllegalArgumentException.class, () -> Stream.generate((Supplier<Integer>) null));
+    }
+
+    // splitByChunkCount sizeSmallerFirst=true advance() + count() (lines 17905-17941).
+    @Test
+    public void testSplitByChunkCount_sizeSmallerFirst_count_uncovered() {
+        // 7 elements into 3 chunks, smaller first
+        final long chunks = Stream.splitByChunkCount(7, 3, true, (from, to) -> to - from).count();
+        assertEquals(3, chunks);
+    }
+
+
+    @Test
+    public void testSplitByChunkCount_sizeBiggerFirst_skip_uncovered() {
+        // 7/3 bigger-first => [3,2,2]; skip 1 -> [2,2]
+        assertEquals(N.asList(2, 2), Stream.splitByChunkCount(7, 3, false, (from, to) -> to - from).skip(1).toList());
+    }
+
+    // concat(Iterable...) (lines 19227-19233).
+    @Test
+    public void testConcatIterablesVarargs_uncovered() {
+        final Iterable<Integer> i1 = N.asList(1, 2);
+        final Iterable<Integer> i2 = N.asList(3, 4);
+        assertEquals(N.asList(1, 2, 3, 4), Stream.concat(i1, i2).toList());
+    }
+
+    @Test
+    public void testConcatIterablesVarargs_empty_uncovered() {
+        @SuppressWarnings("unchecked")
+        final Iterable<Integer>[] empty = new Iterable[0];
+        assertEquals(0, Stream.concat(empty).count());
+    }
+
+    // concat(Iterator...) (lines 19259-19265).
+    @Test
+    public void testConcatIteratorsVarargs_uncovered() {
+        final Iterator<Integer> it1 = N.asList(1, 2, 3).iterator();
+        final Iterator<Integer> it2 = N.asList(4, 5).iterator();
+        assertEquals(N.asList(1, 2, 3, 4, 5), Stream.concat(it1, it2).toList());
+    }
+
+    @Test
+    public void testConcatIteratorsVarargs_empty_uncovered() {
+        @SuppressWarnings("unchecked")
+        final Iterator<Integer>[] empty = new Iterator[0];
+        assertEquals(0, Stream.concat(empty).count());
+    }
+
+    // merge(Collection<Stream>, nextSelector): size==1 (line 26370).
+    @Test
+    public void testMergeCollection_singleStream_uncovered() {
+        final List<Stream<Integer>> streams = N.asList(Stream.of(1, 2, 3));
+        assertEquals(N.asList(1, 2, 3), Stream.merge(streams, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
+    }
+
+    // merge(Collection<Stream>, nextSelector): size==2 (lines 26371-26373).
+    @Test
+    public void testMergeCollection_twoStreams_uncovered() {
+        final List<Stream<Integer>> streams = N.asList(Stream.of(1, 4, 7), Stream.of(2, 5, 8));
+        assertEquals(N.asList(1, 2, 4, 5, 7, 8),
+                Stream.merge(streams, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
+    }
+
+    // merge(Collection<Stream>, nextSelector): size>=3 iterative path (lines 26376-26383).
+    @Test
+    public void testMergeCollection_threeStreams_uncovered() {
+        final List<Stream<Integer>> streams = N.asList(Stream.of(1, 4, 7), Stream.of(2, 5, 8), Stream.of(3, 6, 9));
+        assertEquals(N.asList(1, 2, 3, 4, 5, 6, 7, 8, 9),
+                Stream.merge(streams, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
+    }
+
+    @Test
+    public void testMergeCollection_empty_uncovered() {
+        final List<Stream<Integer>> streams = new ArrayList<>();
+        assertEquals(0, Stream.merge(streams, (x, y) -> MergeResult.TAKE_FIRST).count());
+    }
+
+    // mergeIterables(Collection<Iterable>, nextSelector) (line 26412).
+    @Test
+    public void testMergeIterables_uncovered() {
+        final List<Iterable<Integer>> iterables = N.asList((Iterable<Integer>) N.asList(1, 4, 7), N.asList(2, 5, 8), N.asList(3, 6, 9));
+        assertEquals(N.asList(1, 2, 3, 4, 5, 6, 7, 8, 9),
+                Stream.mergeIterables(iterables, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
+    }
+
+    // mergeIterators(Collection<Iterator>, nextSelector): size==1 (line 26446).
+    @Test
+    public void testMergeIterators_single_uncovered() {
+        final List<Iterator<Integer>> iterators = N.asList(N.asList(1, 2, 3).iterator());
+        assertEquals(N.asList(1, 2, 3),
+                Stream.mergeIterators(iterators, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
+    }
+
+    // mergeIterators(Collection<Iterator>, nextSelector): size==2 (lines 26447-26449).
+    @Test
+    public void testMergeIterators_two_uncovered() {
+        final List<Iterator<Integer>> iterators = N.asList(N.asList(1, 3, 5).iterator(), N.asList(2, 4, 6).iterator());
+        assertEquals(N.asList(1, 2, 3, 4, 5, 6),
+                Stream.mergeIterators(iterators, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
+    }
+
+    // parallelZip(Iterable, Iterable, fn, 1) -> delegates to sequential zip (line 24956 -> 24993).
+    @Test
+    public void testParallelZipIterables_singleThreadFallback_uncovered() {
+        final List<Integer> a = N.asList(1, 2, 3);
+        final List<Integer> b = N.asList(10, 20, 30);
+        assertEquals(N.asList(11, 22, 33), Stream.parallelZip(a, b, (x, y) -> x + y, 1).toList());
+    }
+
+    // parallelZip(Iterator, Iterator, fn, 1) -> sequential zip (line 24993).
+    @Test
+    public void testParallelZipIterators_singleThreadFallback_uncovered() {
+        final Iterator<Integer> a = N.asList(1, 2, 3, 4).iterator();
+        final Iterator<Integer> b = N.asList(10, 20, 30).iterator();
+        assertEquals(N.asList(11, 22, 33), Stream.parallelZip(a, b, (x, y) -> x + y, 1).toList());
+    }
+
+    // parallelZip(Iterable, Iterable, valueForNoneA, valueForNoneB, fn, 1) -> sequential zip (line 25308 -> 25348).
+    @Test
+    public void testParallelZipIterablesWithDefaults_singleThreadFallback_uncovered() {
+        final List<Integer> a = N.asList(1, 2, 3);
+        final List<Integer> b = N.asList(10, 20);
+        assertEquals(N.asList(11, 22, 3), Stream.parallelZip(a, b, 0, 0, (x, y) -> x + y, 1).toList());
+    }
+
+    // parallelZip(Iterator, Iterator, valueForNoneA, valueForNoneB, fn, 1) -> sequential zip (line 25348).
+    @Test
+    public void testParallelZipIteratorsWithDefaults_singleThreadFallback_uncovered() {
+        final Iterator<Integer> a = N.asList(1, 2).iterator();
+        final Iterator<Integer> b = N.asList(10, 20, 30).iterator();
+        assertEquals(N.asList(11, 22, 30), Stream.parallelZip(a, b, 0, 0, (x, y) -> x + y, 1).toList());
+    }
+
+    @Test
+    public void testParallelZip_nonPositiveThreads_uncovered() {
+        assertThrows(IllegalArgumentException.class, () -> Stream.parallelZip(N.asList(1), N.asList(2), (x, y) -> x + y, 0));
+    }
+
+    // zipIterators(Collection<Iterator>, valuesForNone, fn): size mismatch throws (line 24882).
+    @Test
+    public void testZipIteratorsWithValuesForNone_sizeMismatch_uncovered() {
+        final List<Iterator<Integer>> iterators = N.asList(N.asList(1, 2).iterator(), N.asList(3, 4).iterator());
+        final List<Integer> wrongSize = N.asList(0); // size 1 != 2
+        final Function<List<Integer>, Integer> sumFn = list -> list.stream().mapToInt(Integer::intValue).sum();
+        assertThrows(IllegalArgumentException.class, () -> Stream.zipIterators(iterators, wrongSize, sumFn));
+    }
+
+    // zipIterators(Collection<Iterator>, valuesForNone, fn): empty -> empty (line 24876).
+    @Test
+    public void testZipIteratorsWithValuesForNone_empty_uncovered() {
+        final List<Iterator<Integer>> iterators = new ArrayList<>();
+        final List<Integer> none = new ArrayList<>();
+        final Function<List<Integer>, Integer> sumFn = list -> list.stream().mapToInt(Integer::intValue).sum();
+        assertEquals(0, Stream.zipIterators(iterators, none, sumFn).count());
+    }
+
+    // zipIterables(Collection<Iterable>, valuesForNone, fn) ragged padding (line 24841).
+    @Test
+    public void testZipIterablesWithValuesForNone_uncovered() {
+        final List<Iterable<Integer>> iterables = N.asList((Iterable<Integer>) N.asList(1, 2), N.asList(10, 20, 30), N.asList(100));
+        final List<Integer> defaults = N.asList(0, 0, 0);
+        final Function<List<Integer>, Integer> sumFn = list -> list.stream().mapToInt(Integer::intValue).sum();
+        assertEquals(N.asList(111, 22, 30), Stream.zipIterables(iterables, defaults, sumFn).toList());
+    }
+
+    // ofNullable(non-null) (around line 16179).
+    @Test
+    public void testOfNullable_nonNull_uncovered() {
+        assertEquals(N.asList("x"), Stream.ofNullable("x").toList());
+    }
+
+    @Test
+    public void testOfNullable_null_uncovered() {
+        assertEquals(0, Stream.ofNullable(null).count());
+    }
+
 }

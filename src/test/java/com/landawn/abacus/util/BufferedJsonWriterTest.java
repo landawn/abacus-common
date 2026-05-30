@@ -42,8 +42,7 @@ public class BufferedJsonWriterTest extends TestBase {
     @Test
     public void testReplacementChars_AllControls_AreEscaped() {
         for (int i = 0; i < 32; i++) {
-            assertTrue(BufferedJsonWriter.REPLACEMENT_CHARS[i] != null,
-                    "control char 0x" + Integer.toHexString(i) + " must be escaped");
+            assertTrue(BufferedJsonWriter.REPLACEMENT_CHARS[i] != null, "control char 0x" + Integer.toHexString(i) + " must be escaped");
         }
         assertTrue(BufferedJsonWriter.REPLACEMENT_CHARS[127] != null);
         assertEquals("\\u007f", new String(BufferedJsonWriter.REPLACEMENT_CHARS[127]));

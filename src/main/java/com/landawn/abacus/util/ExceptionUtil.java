@@ -220,7 +220,7 @@ public final class ExceptionUtil {
      *
      * @param e the exception to convert; must not be {@code null}
      * @param callInterrupt whether to call {@code Thread.currentThread().interrupt()} if the exception is an InterruptedException
-     * @return the converted runtime exception
+     * @return the converted runtime exception, or the original instance if it is already a {@code RuntimeException}
      * @throws NullPointerException if {@code e} is {@code null}
      * @see #toRuntimeException(Throwable, boolean, boolean)
      */
@@ -252,7 +252,7 @@ public final class ExceptionUtil {
 
     /**
      * Converts the specified Throwable to a RuntimeException with option to call Thread.interrupt().
-     * If it's an Error and throwIfItIsError is {@code false}, wraps it in RuntimeException.
+     * If it's an {@code Error}, it is wrapped in a RuntimeException rather than re-thrown.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -265,7 +265,7 @@ public final class ExceptionUtil {
      *
      * @param e the throwable to convert; must not be {@code null}
      * @param callInterrupt whether to call {@code Thread.currentThread().interrupt()} if the exception is an InterruptedException
-     * @return the converted runtime exception
+     * @return the converted runtime exception, or the original instance if it is already a {@code RuntimeException}
      * @throws NullPointerException if {@code e} is {@code null}
      * @see #toRuntimeException(Throwable, boolean, boolean)
      */
@@ -601,7 +601,7 @@ public final class ExceptionUtil {
     }
 
     /**
-     * Returns the first cause in the exception chain (the root cause).
+     * Returns the deepest (root) cause in the exception chain.
      * If there is no cause, returns the input throwable itself.
      *
      * <p><b>Usage Examples:</b></p>

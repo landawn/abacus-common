@@ -97,7 +97,7 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
     }
 
     /**
-     * Indicates whether this type represents a {@link ImmutableMap}.
+     * Indicates whether this type represents an {@link ImmutableMap}.
      *
      * @return {@code true}, always, because this handler is dedicated to {@link ImmutableMap} objects
      */

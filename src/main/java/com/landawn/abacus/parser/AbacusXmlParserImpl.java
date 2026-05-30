@@ -74,7 +74,7 @@ import com.landawn.abacus.util.XmlUtil;
  *
  * <p>Key features:</p>
  * <ul>
- *   <li>Multiple parser types (SAX, DOM, StAX) with automatic selection based on use case</li>
+ *   <li>Multiple parser types (SAX, DOM, StAX) selected via the constructor and used for deserialization</li>
  *   <li>Efficient handling of large XML documents through streaming</li>
  *   <li>Support for complex object graphs and collections</li>
  *   <li>Circular reference detection and handling</li>

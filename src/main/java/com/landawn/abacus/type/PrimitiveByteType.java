@@ -45,6 +45,7 @@ package com.landawn.abacus.type;
 @SuppressWarnings("java:S2160")
 public final class PrimitiveByteType extends AbstractByteType {
 
+    /** The type name constant for the primitive {@code byte} type, equal to {@code "byte"}. */
     public static final String BYTE = byte.class.getSimpleName();
 
     private static final Byte DEFAULT_VALUE = 0;

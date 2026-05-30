@@ -2700,4 +2700,19 @@ public class FloatListTest extends TestBase {
         }
     }
 
+    @Test
+    public void test_forEach_removeIf_replaceIf_null_func() {
+        // Regression: a null functional argument must throw NullPointerException even on an
+        // EMPTY list (previously silently no-op'd; now matches IntList's fail-fast guard).
+        final FloatList empty = new FloatList();
+        assertThrows(NullPointerException.class, () -> empty.forEach((com.landawn.abacus.util.function.FloatConsumer) null));
+        assertThrows(NullPointerException.class, () -> empty.removeIf((com.landawn.abacus.util.function.FloatPredicate) null));
+        assertThrows(NullPointerException.class, () -> empty.replaceIf((com.landawn.abacus.util.function.FloatPredicate) null, 0f));
+
+        final FloatList nonEmpty = FloatList.of(1f, 2f);
+        assertThrows(NullPointerException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.FloatConsumer) null));
+        assertThrows(NullPointerException.class, () -> nonEmpty.removeIf((com.landawn.abacus.util.function.FloatPredicate) null));
+        assertThrows(NullPointerException.class, () -> nonEmpty.replaceIf((com.landawn.abacus.util.function.FloatPredicate) null, 0f));
+    }
+
 }

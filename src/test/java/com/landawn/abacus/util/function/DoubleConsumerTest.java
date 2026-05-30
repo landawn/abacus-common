@@ -171,7 +171,8 @@ public class DoubleConsumerTest extends TestBase {
 
     @Test
     public void testAndThenNullThrowsImmediately() {
-        DoubleConsumer instance = a -> {};
+        DoubleConsumer instance = a -> {
+        };
         org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.DoubleConsumer) null));
     }
 }

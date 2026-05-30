@@ -239,8 +239,8 @@ public enum JavaVersion {
     /**
      * Java 23.
      * <p>
-     * Released in September 2024, introduced primitive types in patterns, switch expressions,
-     * and instanceof (preview), and module import declarations (preview).
+     * Released in September 2024, introduced primitive types in patterns, instanceof, and switch (preview),
+     * and module import declarations (preview).
      * </p>
      */
     JAVA_23(23.0f, "23"),
@@ -711,11 +711,14 @@ public enum JavaVersion {
      * </ul>
      *
      * <p>For dotted version strings, only the first two dot-separated components are used.
-     * Returns {@code -1} if the string cannot be parsed as a number.</p>
+     * Returns {@code -1} when the string contains a dot but does not have at least two
+     * dot-separated components.</p>
      *
      * @param value the version string to convert
-     * @return the float representation of the version, or {@code -1} if the string cannot be parsed
-     * @throws IllegalArgumentException if the numeric portion of the version string causes a {@link NumberFormatException}
+     * @return the float representation of the version, or {@code -1} if the string contains a dot
+     *         but cannot be split into at least two components
+     * @throws IllegalArgumentException if the numeric portion of the version string cannot be parsed,
+     *         wrapping the underlying {@link NumberFormatException}
      */
     private static float toFloatVersion(final String value) {
         try {

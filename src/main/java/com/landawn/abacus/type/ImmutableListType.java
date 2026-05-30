@@ -137,8 +137,8 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
     }
 
     /**
-     * Checks whether the elements of this immutable list type are serializable.
-     * The immutable list is considered serializable if its element type is serializable.
+     * Checks whether this immutable list type is directly serializable by the type system.
+     * The immutable list is considered serializable if the underlying {@code List} type is serializable.
      *
      * @return {@code true} if the underlying list type is serializable, {@code false} otherwise
      */
@@ -149,9 +149,9 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
 
     /**
      * Returns the serialization type category for this immutable list.
-     * Delegates to the underlying list type for serialization categorization.
      *
-     * @return SerializationType.SERIALIZABLE if elements are serializable, SerializationType.COLLECTION otherwise
+     * @return {@link SerializationType#SERIALIZABLE} if the underlying list type is serializable,
+     *         or {@link SerializationType#COLLECTION} otherwise
      */
     @Override
     public SerializationType serializationType() {

@@ -121,7 +121,7 @@ package com.landawn.abacus.util;
  * <ul>
  *   <li>Two Indexed instances are equal if they have the same index and equal values</li>
  *   <li>Null values are supported and two null values are considered equal</li>
- *   <li>Hash code is computed as: {@code index * 31 + (value == null ? 0 : value.hashCode())}</li>
+ *   <li>Hash code is computed as: {@code (int) (index * 31 + (value == null ? 0 : value.hashCode()))}</li>
  *   <li>The implementation satisfies the hash code contract for use in collections</li>
  * </ul>
  *
@@ -174,7 +174,7 @@ package com.landawn.abacus.util;
  *     ));
  * }</pre>
  *
- * @param <T> the type of the value being indexed, can be any type including null.
+ * @param <T> the type of the value being indexed; the value itself may be {@code null}.
  * @see AbstractIndexed
  * @see IndexedBoolean
  * @see IndexedByte
@@ -196,7 +196,8 @@ public final class Indexed<T> extends AbstractIndexed {
      * validate that the index is non-negative.
      *
      * <p>The constructor delegates index storage to the superclass {@link AbstractIndexed}
-     * and stores the value in this class. Both fields become effectively final after construction.</p>
+     * and stores the value in this class. Both fields are {@code final} and cannot be changed
+     * after construction.</p>
      *
      * @param index the index position; the factory methods enforce that this is non-negative.
      * @param value the value to be associated with the index; may be {@code null}.
@@ -272,9 +273,9 @@ public final class Indexed<T> extends AbstractIndexed {
      *     .mapToObj(i -> Indexed.of(i * i, i))
      *     .collect(Collectors.toList());
      *
-     * // Combining with int values (automatic widening)
-     * int position = 100;
-     * Indexed<String> item = Indexed.of("item", position);   // int automatically converts to long
+     * // Passing a long literal to select this overload explicitly
+     * long position = 100L;
+     * Indexed<String> item = Indexed.of("item", position);   // resolves to of(T, long)
      *
      * // Representing positions in distributed systems
      * long globalOffset = 10_000_000_000L;

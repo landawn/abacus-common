@@ -64,6 +64,14 @@ public interface ObjFloatConsumer<T> extends Throwables.ObjFloatConsumer<T, Runt
      * composed operation. If performing this operation throws an exception,
      * the {@code after} operation will not be performed.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ObjFloatConsumer<Statistics> sample = (s, v) -> s.addSample(v);
+     * ObjFloatConsumer<Statistics> log    = (s, v) -> System.out.println("sample=" + v);
+     * ObjFloatConsumer<Statistics> both   = sample.andThen(log);
+     * both.accept(stats, 1.5f);
+     * }</pre>
+     *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code ObjFloatConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation

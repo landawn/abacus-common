@@ -27,10 +27,12 @@ import com.landawn.abacus.util.Numbers;
 
 /**
  * Type handler for {@link java.time.LocalDate} values.
- * This class provides serialization and deserialization capabilities for LocalDate objects,
- * including conversion to/from strings and JDBC ResultSet/PreparedStatement operations.
+ * Provides serialization, deserialization, and JDBC integration for Java's {@code LocalDate} type,
+ * supporting conversions to and from strings and JDBC ResultSet/PreparedStatement operations.
  *
- * <p>The string format follows the ISO-8601 standard (yyyy-MM-dd).</p>
+ * <p>String representations follow the ISO-8601 standard ({@code yyyy-MM-dd}, e.g., {@code "2024-03-15"}).
+ * Database columns are read and written using JDBC's native {@code LocalDate} support with a
+ * {@link java.sql.Date} fallback for older drivers.</p>
  *
  * @see java.time.LocalDate
  * @see AbstractTemporalType

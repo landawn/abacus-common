@@ -480,7 +480,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param endExclusive the ending value (exclusive)
      * @param by the step value for incrementing. Must not be zero.
      * @return a new LongList containing the sequence of values
-     * @throws IllegalArgumentException if by is zero
+     * @throws IllegalArgumentException if {@code by} is zero, or if the resulting range overflows {@code int} capacity
      */
     public static LongList range(final long startInclusive, final long endExclusive, final long by) {
         return of(Array.range(startInclusive, endExclusive, by));
@@ -529,7 +529,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param endInclusive the ending value (inclusive)
      * @param by the step value for incrementing. Must not be zero.
      * @return a new LongList containing the sequence of values
-     * @throws IllegalArgumentException if by is zero
+     * @throws IllegalArgumentException if {@code by} is zero, or if the resulting range overflows {@code int} capacity
      */
     public static LongList rangeClosed(final long startInclusive, final long endInclusive, final long by) {
         return of(Array.rangeClosed(startInclusive, endInclusive, by));
@@ -713,7 +713,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param index the index at which to insert the first element from the specified list
      * @param c the LongList containing elements to be inserted into this list
      * @return {@code true} if this list changed as a result of the call
-     *         (returns {@code false} if the specified list is empty)
+     *         (returns {@code false} if {@code c} is {@code null} or empty)
      * @throws IndexOutOfBoundsException if the index is out of range
      *         ({@code index < 0 || index > size()})
      */
@@ -918,6 +918,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @throws NullPointerException if the specified predicate is {@code null}
      */
     public boolean removeIf(final LongPredicate p) {
+        N.requireNonNull(p, cs.predicate);
+
         final LongList tmp = new LongList(size());
 
         for (int i = 0; i < size; i++) {
@@ -1203,6 +1205,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param replacement the LongList whose elements will replace the specified range
      * @throws IndexOutOfBoundsException if {@code fromIndex} or {@code toIndex} is out of range
      *         ({@code fromIndex < 0 || toIndex > size() || fromIndex > toIndex})
+     * @throws OutOfMemoryError if the resulting size would exceed the maximum supported array size
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final LongList replacement) throws IndexOutOfBoundsException {
@@ -1252,6 +1255,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param replacement the array whose elements will replace the specified range
      * @throws IndexOutOfBoundsException if {@code fromIndex} or {@code toIndex} is out of range
      *         ({@code fromIndex < 0 || toIndex > size() || fromIndex > toIndex})
+     * @throws OutOfMemoryError if the resulting size would exceed the maximum supported array size
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final long[] replacement) throws IndexOutOfBoundsException {
@@ -1346,6 +1350,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @throws NullPointerException if the specified predicate is {@code null}
      */
     public boolean replaceIf(final LongPredicate predicate, final long newValue) {
+        N.requireNonNull(predicate, cs.predicate);
+
         boolean result = false;
 
         for (int i = 0, len = size(); i < len; i++) {
@@ -1647,6 +1653,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param b the list to compare against this list
      * @return a new LongList containing the elements that are present in this list but not in the specified list,
      *         considering the number of occurrences.
+     *         Returns a copy of this list if {@code b} is {@code null} or empty.
      * @see #difference(long[])
      * @see #symmetricDifference(LongList)
      * @see #intersection(LongList)
@@ -2035,6 +2042,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @throws NullPointerException if the specified action is {@code null}
      */
     public void forEach(final LongConsumer action) {
+        N.requireNonNull(action, cs.action);
+
         forEach(0, size, action);
     }
 

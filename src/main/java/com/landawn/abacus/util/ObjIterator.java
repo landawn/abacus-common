@@ -46,7 +46,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <ul>
  *   <li>Lazy evaluation of operations like map, filter, skip, and limit</li>
  *   <li>Convenient factory methods for creating iterators from various sources</li>
- *   <li>Additional utility methods like toList(), toSet(), etc.</li>
+ *   <li>Additional utility methods like toList(), toArray(), etc.</li>
  *   <li>Support for indexed iteration</li>
  * </ul>
  *
@@ -563,7 +563,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * of this iterator. If {@code n} is greater than or equal to the number of
      * remaining elements, the returned iterator will be empty. The skipping is
      * performed lazily on the first call to {@code hasNext()} or {@code next()}.
-     * If {@code n <= 0}, this iterator is returned unchanged.
+     * If {@code n == 0}, this iterator is returned unchanged.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

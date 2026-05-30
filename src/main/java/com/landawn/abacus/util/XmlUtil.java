@@ -554,7 +554,8 @@ public final class XmlUtil {
 
     /**
      * Creates a new instance of {@code DocumentBuilder} with default configuration.
-     * The parser is configured with the factory's default settings.
+     * The parser is created from the shared, security-hardened {@code DocumentBuilderFactory}
+     * (namespace-aware, with DTD and external-entity processing disabled to mitigate XXE).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

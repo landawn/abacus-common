@@ -32,6 +32,7 @@ import com.landawn.abacus.util.Strings;
 @SuppressWarnings("java:S2160")
 public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<DoubleList> {
 
+    /** The type name constant for {@link DoubleList} type identification, equal to {@code "DoubleList"}. */
     public static final String DOUBLE_LIST = DoubleList.class.getSimpleName();
 
     private final Type<double[]> arrayType = Type.of(double[].class);
@@ -61,7 +62,7 @@ public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<Dou
     /**
      * Returns the Type object for the double element type.
      *
-     * @return the Type object representing double elements
+     * @return the Type object representing Double/double elements
      */
     @Override
     public Type<Double> elementType() {

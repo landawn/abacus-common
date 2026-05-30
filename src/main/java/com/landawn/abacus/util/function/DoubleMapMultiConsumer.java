@@ -14,17 +14,23 @@
 package com.landawn.abacus.util.function;
 
 /**
- * Represents an operation that accepts a double-valued argument and a DoubleConsumer,
- * and returns no result. This functional interface is used to implement a one-to-many
- * transformation operation, similar to flatMap. The DoubleConsumer parameter can be
- * invoked multiple times to pass multiple values downstream.
+ * Represents an operation that accepts a {@code double}-valued argument and a
+ * {@link java.util.function.DoubleConsumer}, and returns no result. This functional interface
+ * is used to implement a one-to-many (multi-mapping) transformation, similar to
+ * {@code flatMap}. The {@code DoubleConsumer} parameter may be invoked zero or more times
+ * to push any number of {@code double} values downstream for each input value.
+ *
+ * <p>This interface is the primitive {@code double} specialization of the
+ * {@code mapMulti} pattern introduced in Java 16. It allows implementations to
+ * conditionally emit multiple output values from a single input — or emit none at all —
+ * without creating intermediate collections or streams.
  *
  * <p>This is a functional interface whose functional method is {@link #accept(double, java.util.function.DoubleConsumer)}.
- *
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.stream.DoubleStream.DoubleMapMultiConsumer
+ * @see java.util.stream.DoubleStream#mapMulti(java.util.stream.DoubleStream.DoubleMapMultiConsumer)
  */
 @FunctionalInterface
 public interface DoubleMapMultiConsumer extends java.util.stream.DoubleStream.DoubleMapMultiConsumer { //NOSONAR

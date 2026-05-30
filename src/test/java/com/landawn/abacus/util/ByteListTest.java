@@ -3760,4 +3760,19 @@ public class ByteListTest extends TestBase {
         assertNotNull(str);
     }
 
+    @Test
+    public void test_forEach_removeIf_replaceIf_null_func() {
+        // Regression: a null functional argument must throw NullPointerException even on an
+        // EMPTY list (previously silently no-op'd; now matches IntList's fail-fast guard).
+        final ByteList empty = new ByteList();
+        assertThrows(NullPointerException.class, () -> empty.forEach((com.landawn.abacus.util.function.ByteConsumer) null));
+        assertThrows(NullPointerException.class, () -> empty.removeIf((com.landawn.abacus.util.function.BytePredicate) null));
+        assertThrows(NullPointerException.class, () -> empty.replaceIf((com.landawn.abacus.util.function.BytePredicate) null, (byte) 0));
+
+        final ByteList nonEmpty = ByteList.of((byte) 1, (byte) 2);
+        assertThrows(NullPointerException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.ByteConsumer) null));
+        assertThrows(NullPointerException.class, () -> nonEmpty.removeIf((com.landawn.abacus.util.function.BytePredicate) null));
+        assertThrows(NullPointerException.class, () -> nonEmpty.replaceIf((com.landawn.abacus.util.function.BytePredicate) null, (byte) 0));
+    }
+
 }

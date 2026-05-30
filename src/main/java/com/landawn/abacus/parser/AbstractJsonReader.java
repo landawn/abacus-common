@@ -30,7 +30,7 @@ import com.landawn.abacus.util.Strings;
  * <ul>
  *   <li><strong>Character Event Mapping:</strong> Fast lookup tables for JSON structural characters</li>
  *   <li><strong>Numeric Constants:</strong> Pre-computed powers of ten for efficient number parsing</li>
- *   <li><strong>Special Value Constants:</strong> Interned string constants for {@code null}, true, and false</li>
+ *   <li><strong>Special Value Constants:</strong> Interned string constants for {@code null}, {@code true}, and {@code false}</li>
  *   <li><strong>Alphanumeric Support:</strong> Extended character mappings for various JSON tokens</li>
  * </ul>
  *

@@ -794,7 +794,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     /**
      * Returns a reverse order view of the mappings contained in this map.
      * The descending map is backed by this map, so it remains immutable.
-     * The returned map has an ordering equivalent to Collections.reverseOrder(comparator()).
+     * The returned map has an ordering equivalent to {@code Collections.reverseOrder(comparator())}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

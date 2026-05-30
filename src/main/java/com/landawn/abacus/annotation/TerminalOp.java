@@ -98,7 +98,7 @@ import java.lang.annotation.Target;
  *
  * @see IntermediateOp
  * @see TerminalOpTriggered
- * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/Stream.html">java.util.Stream</a>
+ * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/Stream.html">java.util.stream.Stream</a>
  */
 @Documented
 @Retention(value = RetentionPolicy.CLASS)

@@ -5670,8 +5670,7 @@ public class IteratorsTest extends TestBase {
 
     @Test
     public void testRepeatElementsToSize_EmptyCollection_NonZeroThrows() {
-        assertThrows(IllegalArgumentException.class,
-                () -> Iterators.repeatElementsToSize(Collections.<String> emptyList(), 5));
+        assertThrows(IllegalArgumentException.class, () -> Iterators.repeatElementsToSize(Collections.<String> emptyList(), 5));
     }
 
 }

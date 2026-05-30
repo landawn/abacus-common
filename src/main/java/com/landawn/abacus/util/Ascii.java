@@ -34,8 +34,9 @@ package com.landawn.abacus.util;
  *     // Character is ASCII
  * }
  *
- * // Use ASCII control characters
- * String tsvLine = "field1" + Ascii.HT + "field2" + Ascii.HT + "field3";
+ * // Use ASCII control characters (cast the byte constants to char when building text,
+ * // otherwise their numeric values would be appended instead of the characters)
+ * String tsvLine = "field1" + (char) Ascii.HT + "field2" + (char) Ascii.HT + "field3";
  * }</pre>
  *
  * @author Craig Berry
@@ -207,6 +208,10 @@ public final class Ascii {
      * processing or telecommunication systems, more especially switching devices "on" or "off." (If a
      * single "stop" control is required to interrupt or turn off ancillary devices, DC4 is the
      * preferred assignment.)
+     *
+     * <p>Also known as {@link #XOFF} in the context of software flow control.
+     *
+     * @see #XOFF
      */
     public static final byte DC3 = 19; // aka XOFF
 

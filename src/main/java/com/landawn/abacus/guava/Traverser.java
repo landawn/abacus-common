@@ -37,7 +37,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p>Three traversal orders are supported:
  * <ul>
- *   <li><b>Breadth-First</b>: Visits all nodes at depth n before visiting nodes at depth n+1</li>
+ *   <li><b>Breadth-First</b>: Visits all nodes at depth {@code n} before visiting nodes at depth {@code n+1}</li>
  *   <li><b>Depth-First Pre-Order</b>: Visits nodes as they are first encountered</li>
  *   <li><b>Depth-First Post-Order</b>: Visits nodes after all their descendants have been visited</li>
  * </ul>

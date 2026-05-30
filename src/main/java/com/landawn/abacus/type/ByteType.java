@@ -26,8 +26,8 @@ import com.landawn.abacus.util.Numbers;
  *
  * <p>Retrieval reads the column as a generic {@link Object} via
  * {@link java.sql.ResultSet#getObject(int)}: {@link Number} values are narrowed via
- * {@link Number#byteValue()}, and non-numeric values are parsed from their string form
- * using {@link com.landawn.abacus.util.Numbers#toByte(String)}.</p>
+ * {@link Number#byteValue()}, and any other (non-{@link Number}) value is parsed from its
+ * string form using {@link com.landawn.abacus.util.Numbers#toByte(String)}.</p>
  *
  * <p>String serialization and JDBC write operations are inherited from
  * {@link AbstractByteType}.</p>
@@ -74,8 +74,8 @@ public final class ByteType extends AbstractByteType {
     /**
      * Retrieves a {@link Byte} from a {@link java.sql.ResultSet} at the specified column index.
      * The column value is read via {@link java.sql.ResultSet#getObject(int)}: if the result is
-     * a {@link Number}, it is narrowed via {@link Number#byteValue()}; if it is a non-numeric object,
-     * its string representation is parsed using
+     * a {@link Number}, it is narrowed via {@link Number#byteValue()}; for any other (non-{@link Number})
+     * value, its string representation is parsed using
      * {@link com.landawn.abacus.util.Numbers#toByte(String)}.
      *
      * @param rs the {@code ResultSet} to read from
@@ -100,8 +100,8 @@ public final class ByteType extends AbstractByteType {
     /**
      * Retrieves a {@link Byte} from a {@link java.sql.ResultSet} using the specified column label.
      * The column value is read via {@link java.sql.ResultSet#getObject(String)}: if the result is
-     * a {@link Number}, it is narrowed via {@link Number#byteValue()}; if it is a non-numeric object,
-     * its string representation is parsed using
+     * a {@link Number}, it is narrowed via {@link Number#byteValue()}; for any other (non-{@link Number})
+     * value, its string representation is parsed using
      * {@link com.landawn.abacus.util.Numbers#toByte(String)}.
      *
      * @param rs the {@code ResultSet} to read from

@@ -192,7 +192,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   </tr>
  *   <tr>
  *     <td>Method Operations</td>
- *     <td>getDeclaredMethod(), invoke()</td>
+ *     <td>getDeclaredMethod(), invokeMethod()</td>
  *     <td>Method signature cache</td>
  *     <td>Dynamic method invocation</td>
  *   </tr>
@@ -896,7 +896,7 @@ public final class ClassUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Type type = MyClass.class.getGenericSuperclass();
+     * java.lang.reflect.Type type = MyClass.class.getGenericSuperclass();
      * String typeName = ClassUtil.getTypeName(type);
      * }</pre>
      *

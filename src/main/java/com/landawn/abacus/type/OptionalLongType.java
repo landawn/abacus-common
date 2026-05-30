@@ -211,7 +211,6 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalLong> type = TypeFactory.getType(OptionalLong.class);
-     * Connection connection = org.mockito.Mockito.mock(Connection.class);
      * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
      *
      * OptionalLong opt = OptionalLong.of(123456789L);
@@ -244,7 +243,6 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalLong> type = TypeFactory.getType(OptionalLong.class);
-     * Connection connection = org.mockito.Mockito.mock(Connection.class);
      * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
      *
      * OptionalLong opt = OptionalLong.of(987654321L);

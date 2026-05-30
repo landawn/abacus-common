@@ -6483,8 +6483,7 @@ public class IterablesTest extends AbstractTest {
 
     @Test
     public void testAverageBigInteger_SingleUseIterable() {
-        Iterable<BigInteger> single = singleUseIterable(
-                Arrays.asList(BigInteger.valueOf(10), BigInteger.valueOf(20), BigInteger.valueOf(30)));
+        Iterable<BigInteger> single = singleUseIterable(Arrays.asList(BigInteger.valueOf(10), BigInteger.valueOf(20), BigInteger.valueOf(30)));
         Optional<BigDecimal> result = Iterables.averageBigInteger(single);
         assertTrue(result.isPresent());
         assertEquals(0, new BigDecimal("20").compareTo(result.get()));
@@ -6492,8 +6491,7 @@ public class IterablesTest extends AbstractTest {
 
     @Test
     public void testAverageBigDecimal_SingleUseIterable() {
-        Iterable<BigDecimal> single = singleUseIterable(
-                Arrays.asList(new BigDecimal("1.5"), new BigDecimal("2.5"), new BigDecimal("3.5")));
+        Iterable<BigDecimal> single = singleUseIterable(Arrays.asList(new BigDecimal("1.5"), new BigDecimal("2.5"), new BigDecimal("3.5")));
         Optional<BigDecimal> result = Iterables.averageBigDecimal(single);
         assertTrue(result.isPresent());
         assertEquals(0, new BigDecimal("2.5").compareTo(result.get()));

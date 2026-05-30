@@ -33,6 +33,11 @@ public interface CharSupplier extends Throwables.CharSupplier<RuntimeException> 
     /**
      * A supplier that always returns the NUL character ({@code '\0'}, Unicode U+0000).
      * This is useful as a default value or for initialization purposes.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char nul = CharSupplier.ZERO.getAsChar();   // Returns '\0'
+     * }</pre>
      */
     CharSupplier ZERO = () -> 0;
     /**

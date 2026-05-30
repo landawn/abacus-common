@@ -52,25 +52,25 @@ package com.landawn.abacus.util;
  */
 public enum DayOfWeek {
 
-    /** Represents Sunday (integer value: 0) */
+    /** Represents Sunday (integer value: 0). */
     SUNDAY(0),
 
-    /** Represents Monday (integer value: 1) */
+    /** Represents Monday (integer value: 1). */
     MONDAY(1),
 
-    /** Represents Tuesday (integer value: 2) */
+    /** Represents Tuesday (integer value: 2). */
     TUESDAY(2),
 
-    /** Represents Wednesday (integer value: 3) */
+    /** Represents Wednesday (integer value: 3). */
     WEDNESDAY(3),
 
-    /** Represents Thursday (integer value: 4) */
+    /** Represents Thursday (integer value: 4). */
     THURSDAY(4),
 
-    /** Represents Friday (integer value: 5) */
+    /** Represents Friday (integer value: 5). */
     FRIDAY(5),
 
-    /** Represents Saturday (integer value: 6) */
+    /** Represents Saturday (integer value: 6). */
     SATURDAY(6);
 
     private final int intValue;

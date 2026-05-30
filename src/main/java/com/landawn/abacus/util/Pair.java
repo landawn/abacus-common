@@ -76,7 +76,8 @@ import com.landawn.abacus.util.u.Optional;
  *   </tr>
  *   <tr>
  *     <td>Functional/tuple API</td>
- *     <td>Minimal: {@code map}, {@code filter}, {@code accept} on the pair as a whole</td>
+ *     <td>Minimal: {@code map}, {@code filter}, {@code accept}, {@code forEach} (overloads accept
+ *         either the two elements or the pair as a whole)</td>
  *     <td>Rich: {@code accept(BiConsumer)}, {@code map(BiFunction)}, {@code filter(BiPredicate)},
  *         {@code reverse()}, {@code toArray()}, plus integration with the
  *         {@link Tuple} hierarchy</td>

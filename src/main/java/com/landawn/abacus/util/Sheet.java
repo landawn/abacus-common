@@ -691,7 +691,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param rowKey the key identifying the row
      * @param columnKey the key identifying the column
-     * @return {@code true} if the cell contains {@code null}, {@code false} otherwise
+     * @return {@code true} if the cell contains {@code null} or the Sheet has not been initialized with data, {@code false} otherwise
      * @throws IllegalArgumentException if the row key or column key does not exist in this Sheet
      * @see #isNull(int, int)
      * @see #isNull(Point)
@@ -1060,10 +1060,11 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * <p>Merges all values from the source Sheet into this Sheet using the specified merge function to resolve conflicts.</p>
+     * <p>Merges all values from the source Sheet into this Sheet, combining each pair of values with the specified merge function.</p>
      *
-     * <p>This method combines data from the source Sheet into this Sheet. When a cell in both sheets contains a value,
-     * the provided merge function determines how to combine them, taking the current value and source value as parameters.
+     * <p>This method combines data from the source Sheet into this Sheet. For every cell within the source Sheet's
+     * row and column key range, the provided merge function is applied with the current value from this Sheet and the
+     * value from the source Sheet (either of which may be {@code null}), and the result is stored in this Sheet.
      * The source Sheet must have row keys and column keys that are contained within this Sheet.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1096,8 +1097,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @param source the source Sheet from which to get the values
-     * @param mergeFunction the function to resolve conflicts when both sheets have a value for the same cell;
-     *        takes the current value from this sheet and the value from the source sheet as parameters
+     * @param mergeFunction the function used to combine the values; takes the current value from this Sheet and the
+     *        value from the source Sheet (either may be {@code null}) and returns the value to store
      * @throws IllegalStateException if this Sheet is frozen and cannot be modified
      * @throws IllegalArgumentException if the source Sheet contains row keys or column keys that are not present in this Sheet
      * @see #putAll(Sheet)
@@ -1393,14 +1394,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      */
     public ImmutableList<V> rowValues(final R rowKey) throws IllegalArgumentException {
         final int columnLength = columnCount();
-        final boolean wasInitialized = _isInitialized;
-        final int rowIndex;
+        final int rowIndex = _isInitialized ? getRowIndex(rowKey) : -1;
 
-        if (wasInitialized) {
-            rowIndex = getRowIndex(rowKey);
-        } else {
+        if (!_isInitialized) {
             checkRowKey(rowKey);
-            rowIndex = -1;
         }
 
         return new ImmutableList<>(new AbstractList<V>() {
@@ -1414,7 +1411,7 @@ public final class Sheet<R, C, V> implements Cloneable {
                     return null;
                 }
 
-                return _columnList.get(columnIndex).get(wasInitialized ? rowIndex : getRowIndex(rowKey));
+                return _columnList.get(columnIndex).get(rowIndex);
             }
 
             @Override
@@ -2002,9 +1999,9 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Retrieves all the values in the column identified by the specified column key.
      * <p>
-     * Returns an immutable list containing all values in the specified column, in the order
-     * corresponding to the row keys. The list may contain {@code null} values if cells
-     * in the column are empty.
+     * Returns an immutable list view backed by the specified column's values, in the order
+     * corresponding to the row keys. The view reflects subsequent changes made to the column
+     * through this Sheet. The list may contain {@code null} values if cells in the column are empty.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -5162,7 +5159,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Returns a stream of values from a range of columns in vertical order.
      * <p>
      * Creates a stream containing values from the specified column range [fromColumnIndex, toColumnIndex),
-     * ordered column by column. The toColumnIndex is exclusive. Includes {@code null} values from empty cells.
+     * ordered column by column. The toColumnIndex is exclusive. Includes {@code null} values from empty or uninitialized cells.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -5351,7 +5348,9 @@ public final class Sheet<R, C, V> implements Cloneable {
 
                     @Override
                     public long count() {
-                        return toIndex2 - cursor2; //NOSONAR
+                        final long ret = toIndex2 - cursor2; //NOSONAR
+                        cursor2 = toIndex2;
+                        return ret;
                     }
                 });
             }
@@ -5375,10 +5374,10 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * Returns a stream of column value streams.
+     * Returns a stream of column streams, where each inner stream contains the values of one column.
      * <p>
      * Creates a nested stream structure where the outer stream yields columns and each inner stream
-     * contains the values of that column ordered by rows. Useful for column-wise processing.
+     * contains the values of that column ordered by rows. Includes {@code null} values.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -5606,7 +5605,9 @@ public final class Sheet<R, C, V> implements Cloneable {
 
                     @Override
                     public long count() {
-                        return toIndex2 - cursor2; //NOSONAR
+                        final long ret = toIndex2 - cursor2; //NOSONAR
+                        cursor2 = toIndex2;
+                        return ret;
                     }
                 });
 
@@ -6179,7 +6180,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param <T> the type of the elements in the array
      * @param componentType the Class object representing the element type
      * @return a two-dimensional typed array with row-major ordering
-     * @throws ClassCastException if any value cannot be cast to the specified type
+     * @throws ArrayStoreException if any value is not assignable to the specified component type
      * @see #toArrayByRow()
      * @see #toArrayByColumn(Class)
      */
@@ -6267,7 +6268,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param <T> the type of the elements in the array
      * @param componentType the Class object representing the element type
      * @return a two-dimensional typed array with column-major ordering
-     * @throws ClassCastException if any value cannot be cast to the specified type
+     * @throws ArrayStoreException if any value is not assignable to the specified component type
      * @see #toArrayByColumn()
      * @see #toArrayByRow(Class)
      */

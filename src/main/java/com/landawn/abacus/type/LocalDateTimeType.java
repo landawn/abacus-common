@@ -70,16 +70,16 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
 
     /**
      * Converts a LocalDateTime object to its string representation.
-     * Uses {@code LocalDateTime.toString()}, which produces an ISO-8601 compatible string
-     * (e.g., {@code "2021-01-01T10:30:00"} or {@code "2021-01-01T10:30:00.123456789"} when
-     * sub-second precision is present).
+     * Uses {@code LocalDateTime.toString()}, which produces an ISO-8601 compatible string. The
+     * seconds field is omitted when zero (e.g., {@code "2021-01-01T10:30"}), and a fractional
+     * part is appended when sub-second precision is present (e.g., {@code "2021-01-01T10:30:00.123456789"}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<LocalDateTime> type = TypeFactory.getType(LocalDateTime.class);
-     * LocalDateTime dateTime = LocalDateTime.of(2021, 1, 1, 10, 30, 0);
+     * LocalDateTime dateTime = LocalDateTime.of(2021, 1, 1, 10, 30, 30);
      * String str = type.stringOf(dateTime);
-     * System.out.println(str);   // Outputs: 2021-01-01T10:30:00
+     * System.out.println(str);   // Outputs: 2021-01-01T10:30:30
      * }</pre>
      *
      * @param x the LocalDateTime object to convert; may be {@code null}

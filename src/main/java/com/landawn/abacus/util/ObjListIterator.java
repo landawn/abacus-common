@@ -41,7 +41,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>Index-aware iteration with nextIndex() and previousIndex()</li>
  *   <li>Lazy evaluation of operations like skip and limit</li>
  *   <li>Convenient factory methods for creating iterators from various sources</li>
- *   <li>Additional utility methods inherited from ObjIterator</li>
+ *   <li>Additional utility methods such as {@code toList()}, {@code toArray()}, and {@code stream()}, mirroring those of {@link ObjIterator}</li>
  * </ul>
  *
  * <p>Note: The {@code set()}, {@code add()}, and {@code remove()} operations

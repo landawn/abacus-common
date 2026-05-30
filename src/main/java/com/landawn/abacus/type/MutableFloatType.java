@@ -19,10 +19,12 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for {@link com.landawn.abacus.util.MutableFloat} objects, providing
- * serialization, deserialization, and database interaction capabilities for
- * mutable {@code float} wrapper objects. Values are serialized as the unwrapped
- * numeric float (identical to {@link FloatType}).
+ * Type handler for {@link com.landawn.abacus.util.MutableFloat} objects.
+ * <p>
+ * This class provides serialization, deserialization, and database operations for
+ * {@code MutableFloat} instances, which are mutable wrappers around primitive
+ * {@code float} values. Values are serialized as the unwrapped numeric float
+ * (identical to {@link FloatType}).
  *
  * @see com.landawn.abacus.util.MutableFloat
  * @see NumberType

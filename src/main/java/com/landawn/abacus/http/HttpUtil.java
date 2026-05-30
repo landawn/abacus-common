@@ -296,7 +296,8 @@ public final class HttpUtil {
 
     /**
      * Reads an HTTP header value from various object types.
-     * If the value is a Collection, joins multiple values with commas.
+     * If the value is a {@link Collection}, an empty collection yields an empty string, a single-element
+     * collection yields that element's string form, and multiple values are joined with commas.
      * Otherwise, converts the value to a string.
      *
      * <p><b>Usage Examples:</b></p>
@@ -792,10 +793,11 @@ public final class HttpUtil {
 
     /**
      * Gets the content type string for a ContentFormat.
-     * For example, ContentFormat.JSON returns "application/json".
+     * For example, {@link ContentFormat#JSON} returns {@code "application/json"}.
      *
      * @param contentFormat The content format
-     * @return The content type string, or an empty string "" if contentFormat is {@code null} or NONE
+     * @return The content type string, or an empty string {@code ""} if {@code contentFormat} is {@code null},
+     *         {@link ContentFormat#NONE}, or a format that has no associated content type
      */
     public static String getContentType(final ContentFormat contentFormat) {
         if (contentFormat == null || contentFormat == ContentFormat.NONE) {
@@ -807,10 +809,11 @@ public final class HttpUtil {
 
     /**
      * Gets the content encoding string for a ContentFormat.
-     * For example, ContentFormat.JSON_GZIP returns "gzip".
+     * For example, {@link ContentFormat#JSON_GZIP} returns {@code "gzip"}.
      *
      * @param contentFormat The content format
-     * @return The content encoding string, or an empty string "" if contentFormat is {@code null} or has no encoding
+     * @return The content encoding string, or an empty string {@code ""} if {@code contentFormat} is {@code null},
+     *         {@link ContentFormat#NONE}, or a format that uses no compression
      */
     public static String getContentEncoding(final ContentFormat contentFormat) {
         if (contentFormat == null || contentFormat == ContentFormat.NONE) {
@@ -933,11 +936,12 @@ public final class HttpUtil {
     /**
      * Gets the parser for a specific ContentFormat.
      * The parser is used for serialization and deserialization of request/response bodies.
+     * If {@code contentFormat} is {@code null}, the default JSON parser is returned.
      *
      * @param <SC> The serialization config type
      * @param <DC> The deserialization config type
      * @param contentFormat The content format
-     * @return The parser for the content format
+     * @return The parser for the content format, or the default JSON parser if {@code contentFormat} is {@code null}
      * @throws IllegalArgumentException if the content format is not supported
      */
     public static <SC extends SerializationConfig<?>, DC extends Deserialization<?>> Parser<SC, DC> getParser(final ContentFormat contentFormat) {
@@ -966,7 +970,8 @@ public final class HttpUtil {
      *
      * @param is The input stream to wrap
      * @param contentFormat The content format indicating compression
-     * @return The wrapped input stream, or the original stream if no decompression is needed
+     * @return The wrapped input stream, or the original stream if no decompression is needed.
+     *         Returns an empty stream if {@code is} is {@code null}.
      */
     public static InputStream wrapInputStream(final InputStream is, final ContentFormat contentFormat) {
         if (is == null) {

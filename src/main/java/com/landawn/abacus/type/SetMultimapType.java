@@ -97,7 +97,7 @@ public class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultima
      * }</pre>
      *
      * @param str the JSON string to parse
-     * @return the parsed SetMultimap, or {@code null} if the input string is {@code null} or empty
+     * @return the parsed SetMultimap, or {@code null} if the input string is {@code null}, empty, or blank
      * @throws IllegalArgumentException if the string cannot be parsed as a valid map structure
      */
     @SuppressWarnings("unchecked")

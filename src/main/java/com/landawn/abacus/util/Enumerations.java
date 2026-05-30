@@ -213,10 +213,13 @@ public final class Enumerations {
      * Enumeration<String> enum1 = Enumerations.create(iter);
      * }</pre>
      *
+     * <p>Note: The iterator is not validated when this method is called. If {@code iter} is
+     * {@code null}, a {@link NullPointerException} is thrown lazily on the first call to
+     * {@code hasMoreElements()} or {@code nextElement()} on the returned Enumeration.</p>
+     *
      * @param <T> the type of elements
-     * @param iter the iterator to wrap as an Enumeration; must not be {@code null}
+     * @param iter the iterator to wrap as an Enumeration; should not be {@code null}
      * @return an Enumeration that delegates to the specified Iterator
-     * @throws NullPointerException if {@code iter} is {@code null}
      * @see #create(Collection)
      */
     public static <T> Enumeration<T> create(final Iterator<? extends T> iter) {

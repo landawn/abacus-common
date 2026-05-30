@@ -4324,4 +4324,13 @@ public class ShortStreamTest extends TestBase {
         assertEquals(0, result.length);
     }
 
+    @Test
+    public void testAverage_largeStream_noOverflow() {
+        // Regression: average() must not throw when the short sum exceeds Integer.MAX_VALUE (#81).
+        final int n = 70_000;
+        final short[] arr = new short[n];
+        java.util.Arrays.fill(arr, (short) 32767);
+        org.junit.jupiter.api.Assertions.assertEquals(32767.0, com.landawn.abacus.util.stream.ShortStream.of(arr).average().getAsDouble(), 0.0001);
+    }
+
 }

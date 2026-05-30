@@ -280,11 +280,12 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
 
     /**
      * Converts an instance of type T to its string representation.
-     * Uses JSON value annotations or value extractors if available,
-     * otherwise falls back to toString().
+     * Uses JSON value annotations or value extractors if available; otherwise delegates to the
+     * value's runtime {@link Type} (falling back to {@link Object#toString()} when that runtime
+     * type resolves to a generic {@link ObjectType}).
      *
      * @param x the object to convert
-     * @return the string representation, or {@code null} if x is null
+     * @return the string representation, or {@code null} if {@code x} is {@code null}
      */
     @Override
     public String stringOf(final T x) {
@@ -313,10 +314,11 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
 
     /**
      * Creates an instance of type T from its string representation.
-     * Uses JSON creator annotations or factory methods if available.
+     * Uses the JSON creator method (paired with the JSON value type) if available, otherwise the
+     * auto-detected factory-method/constructor creator.
      *
      * @param str the string to parse
-     * @return an instance of type T, or the string itself if no converter is available
+     * @return an instance of type T, or the string itself (cast to {@code T}) if no creator is available
      */
     @Override
     public T valueOf(final String str) {

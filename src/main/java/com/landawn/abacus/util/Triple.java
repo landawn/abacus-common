@@ -501,7 +501,7 @@ public final class Triple<L, M, R> implements Mutable {
     * <p>The predicate is evaluated at most once. If it throws an exception, the left
     * element is not modified and the exception is propagated to the caller.</p>
     *
-    * <p><b>Usage examples:</b></p>
+    * <p><b>Usage Examples:</b></p>
     * <pre>{@code
     * Triple<String, Integer, Boolean> triple = Triple.of("old", 42, true);
     *
@@ -542,7 +542,7 @@ public final class Triple<L, M, R> implements Mutable {
     * <p>The predicate is evaluated at most once. If it throws an exception, the middle
     * element is not modified and the exception is propagated to the caller.</p>
     *
-    * <p><b>Usage examples:</b></p>
+    * <p><b>Usage Examples:</b></p>
     * <pre>{@code
     * Triple<String, Integer, Boolean> triple = Triple.of("text", 42, true);
     *
@@ -583,7 +583,7 @@ public final class Triple<L, M, R> implements Mutable {
     * <p>The predicate is evaluated at most once. If it throws an exception, the right
     * element is not modified and the exception is propagated to the caller.</p>
     *
-    * <p><b>Usage examples:</b></p>
+    * <p><b>Usage Examples:</b></p>
     * <pre>{@code
     * Triple<String, Integer, Boolean> triple = Triple.of("text", 42, true);
     *
@@ -630,7 +630,7 @@ public final class Triple<L, M, R> implements Mutable {
     * most once; if it throws an exception, no element is modified and the exception is propagated
     * to the caller.</p>
     *
-    * <p><b>Usage examples:</b></p>
+    * <p><b>Usage Examples:</b></p>
     * <pre>{@code
     * Triple<String, Integer, Boolean> triple = Triple.of("old", 42, true);
     *

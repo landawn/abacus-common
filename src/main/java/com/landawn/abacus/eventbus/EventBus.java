@@ -338,7 +338,7 @@ public class EventBus {
     /**
      * Registers a subscriber to receive events.
      * The subscriber must either implement the {@link Subscriber} interface or have methods annotated with {@link Subscribe}.
-     * Events will be delivered on the default thread mode.
+     * No registration-level thread mode override is applied, so each subscriber method is delivered events using the thread mode declared in its own {@link Subscribe} annotation (defaulting to {@link ThreadMode#DEFAULT}).
      * Lambda-based subscribers cannot be registered with this method; use
      * {@link #register(Subscriber, String)} or {@link #register(Subscriber, String, ThreadMode)} instead.
      *
@@ -396,7 +396,7 @@ public class EventBus {
      * }</pre>
      *
      * @param subscriber the subscriber to register
-     * @param threadMode the thread mode for event delivery, or {@code null} to use the default thread mode
+     * @param threadMode the thread mode override for event delivery, or {@code null} to use the thread mode declared in each subscriber method's {@link Subscribe} annotation
      * @return this {@code EventBus} instance for method chaining
      * @throws NullPointerException if {@code subscriber} is {@code null}
      * @throws IllegalArgumentException if the thread mode is not supported or no subscriber methods are found in the subscriber class
@@ -425,7 +425,7 @@ public class EventBus {
      *
      * @param subscriber the subscriber to register
      * @param eventId the event ID to filter events; must be non-empty for lambda-based subscribers; {@code null} for no filtering otherwise
-     * @param threadMode the thread mode for event delivery, or {@code null} to use the default thread mode
+     * @param threadMode the thread mode override for event delivery, or {@code null} to use the thread mode declared in each subscriber method's {@link Subscribe} annotation
      * @return this {@code EventBus} instance for method chaining
      * @throws NullPointerException if {@code subscriber} is {@code null}
      * @throws IllegalArgumentException if the thread mode is not supported or no subscriber methods are found in the subscriber class
@@ -655,7 +655,7 @@ public class EventBus {
      * @param <T> the type of events the subscriber will receive
      * @param subscriber the {@code Subscriber} implementation to register
      * @param eventId the event ID to filter events; must be non-empty when the subscriber is identified as a lambda subscriber
-     * @param threadMode the thread mode for event delivery, or {@code null} to use the default thread mode
+     * @param threadMode the thread mode override for event delivery, or {@code null} to use the thread mode declared in each subscriber method's {@link Subscribe} annotation
      * @return this {@code EventBus} instance for method chaining
      * @throws NullPointerException if {@code subscriber} is {@code null}
      * @throws IllegalArgumentException if the thread mode is not supported or no subscriber methods are found
@@ -832,7 +832,8 @@ public class EventBus {
 
     /**
      * Posts a sticky event with a specific event ID.
-     * The sticky event will be retained and delivered to matching future subscribers.
+     * The sticky event will be immediately delivered to current matching subscribers and retained for delivery to
+     * matching subscribers that register later with {@code sticky=true} in their {@link Subscribe} annotation.
      * Only one sticky event per event object is retained - posting the same object again will update its event ID.
      *
      * <p><b>Usage Examples:</b></p>
@@ -842,7 +843,7 @@ public class EventBus {
      * // Future subscribers for "appConfig" with sticky=true will receive this
      * }</pre>
      *
-     * @param eventId the event ID for filtering subscribers
+     * @param eventId the event ID to associate with the sticky event, or {@code null} (or empty) to retain it without a specific event ID
      * @param event the sticky event to post
      * @return this {@code EventBus} instance for method chaining
      * @throws NullPointerException if {@code event} is {@code null}
@@ -1181,7 +1182,7 @@ public class EventBus {
         final boolean strictEventType;
 
         /**
-         * If {@code true}, the subscriber should receive the most recent matching sticky event
+         * If {@code true}, the subscriber should receive every retained matching sticky event
          * immediately upon registration.
          */
         final boolean sticky;

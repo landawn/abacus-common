@@ -677,6 +677,8 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at {@code DEBUG} level using a {@link Supplier} for lazy evaluation.
      *
+     * <p>The supplier is only called if {@code DEBUG} level is enabled.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.debug(() -> "Complex object state: " + complexObject.debugString());
@@ -1005,6 +1007,8 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at {@code INFO} level using a {@link Supplier} for lazy evaluation.
      *
+     * <p>The supplier is only called if {@code INFO} level is enabled.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.info(() -> "Processed " + getProcessedCount() + " records");
@@ -1332,6 +1336,8 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Logs a message at {@code WARN} level using a {@link Supplier} for lazy evaluation.
+     *
+     * <p>The supplier is only called if {@code WARN} level is enabled.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1664,6 +1670,8 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Logs a message at {@code ERROR} level using a {@link Supplier} for lazy evaluation.
+     *
+     * <p>The supplier is only called if {@code ERROR} level is enabled.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

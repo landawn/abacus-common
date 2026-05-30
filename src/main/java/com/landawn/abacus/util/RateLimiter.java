@@ -289,7 +289,7 @@ public abstract class RateLimiter {
     abstract void doSetRate(double permitsPerSecond, long nowMicros);
 
     /**
-     * Returns the stable rate (as {@code permits per seconds}) with which this {@code RateLimiter} is
+     * Returns the stable rate (as {@code permits per second}) with which this {@code RateLimiter} is
      * configured. The initial value of this is the same as the {@code permitsPerSecond} argument
      * passed in the factory method that produced this {@code RateLimiter}, and it is only updated
      * after invocations to {@linkplain #setRate}.
@@ -673,7 +673,6 @@ public abstract class RateLimiter {
          * <li>The implementation should be efficient and non-blocking, as it is called frequently
          *     during rate limiter operations.</li>
          * </ul>
-         *
          *
          * @return the elapsed time in microseconds, must be monotonically increasing
          * @see #sleepMicrosUninterruptibly(long)

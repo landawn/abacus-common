@@ -664,11 +664,16 @@ public final class JsonMappers {
      *   <li>READ_UNKNOWN_ENUM_VALUES_AS_NULL - Convert unknown enum values to null</li>
      * </ul>
      *
+     * <p>Note that each supplied feature is <i>enabled</i>; this method cannot disable a feature.
+     * To disable a feature (or otherwise customize the configuration), use
+     * {@link #fromJson(String, Class, DeserializationConfig)} with a config built via
+     * {@link #createDeserializationConfig()}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Ignore unknown properties and use BigDecimal for floats
-     * String json = "{\"name\":\"John\",\"age\":30,\"unknown\":\"field\"}";
-     * Person person = JsonMappers.fromJson(json, Person.class,
+     * // Use BigDecimal for floating-point values
+     * String json = "{\"name\":\"John\",\"balance\":30.5}";
+     * Account account = JsonMappers.fromJson(json, Account.class,
      *     DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
      *
      * // Accept single value as array
@@ -1235,7 +1240,10 @@ public final class JsonMappers {
      * This method combines generic type support with custom deserialization control.
      *
      * <p>Use this method when deserializing generic types that require special
-     * handling, such as collections that should accept single values as arrays.</p>
+     * handling, such as collections that should accept single values as arrays.
+     * Each supplied feature is <i>enabled</i>; this method cannot disable a feature.
+     * To disable a feature, use {@link #fromJson(String, TypeReference, DeserializationConfig)}
+     * with a config built via {@link #createDeserializationConfig()}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

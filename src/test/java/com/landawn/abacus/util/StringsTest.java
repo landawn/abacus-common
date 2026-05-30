@@ -5643,6 +5643,22 @@ public class StringsTest extends AbstractTest {
     }
 
     @Test
+    public void testLastIndexOfIgnoreCase_WithDelimiter_respectsStartIndexBound() {
+        // Regression: the VALUE's position (not the leading delimiter's) must not exceed startIndexFromBack,
+        // matching the case-sensitive lastIndexOf(String,String,String,int) twin. The IgnoreCase variant
+        // previously omitted the "- delimiterLen" start-bound adjustment and wrongly returned a positive index.
+        assertEquals(-1, Strings.lastIndexOfIgnoreCase(",a", "a", ",", 0)); // "a" is at index 1, beyond bound 0
+        assertEquals(-1, Strings.lastIndexOfIgnoreCase("xy,z", "z", ",", 2)); // "z" is at index 3, beyond bound 2
+
+        // Parity with the case-sensitive twin for the same inputs.
+        assertEquals(Strings.lastIndexOf(",a", "a", ",", 0), Strings.lastIndexOfIgnoreCase(",a", "a", ",", 0));
+        assertEquals(Strings.lastIndexOf("xy,z", "z", ",", 2), Strings.lastIndexOfIgnoreCase("xy,z", "z", ",", 2));
+
+        // When the bound includes the value's position, the (case-insensitive) match is found.
+        assertEquals(1, Strings.lastIndexOfIgnoreCase(",A", "a", ",", 1));
+    }
+
+    @Test
     public void testLastIndexOfIgnoreCase_DelimiterSkipsEmbeddedToken() {
         assertEquals(10, Strings.lastIndexOfIgnoreCase("pineapple,APPLE", "apple", ","));
         assertEquals(0, Strings.lastIndexOfIgnoreCase("apple,pineapple", "apple", ",", 8));

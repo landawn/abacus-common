@@ -86,7 +86,8 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      *
      * @param <E> the type of elements in the collection
      * @param c the collection to be wrapped into an ImmutableCollection
-     * @return an ImmutableCollection that contains the elements of the given collection
+     * @return an ImmutableCollection that contains the elements of the given collection; an empty
+     *         ImmutableList if {@code c} is {@code null}, or {@code c} itself if it is already an ImmutableCollection
      */
     @Beta
     public static <E> ImmutableCollection<E> wrap(final Collection<? extends E> c) {

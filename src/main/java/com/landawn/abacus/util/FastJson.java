@@ -67,7 +67,7 @@ public final class FastJson {
      * <pre>{@code
      * Person person = new Person("John", 30);
      * String json = FastJson.toJson(person);
-     * // Result: {"name":"John","age":30}
+     * // Result: {"age":30,"name":"John"}
      * }</pre>
      *
      * @param obj the object to be converted to JSON string
@@ -88,8 +88,8 @@ public final class FastJson {
      * String json = FastJson.toJson(person, true);
      * // Result (pretty formatted):
      * // {
-     * //   "name": "John",
-     * //   "age": 30
+     * //   "age": 30,
+     * //   "name": "John"
      * // }
      * }</pre>
      *
@@ -119,7 +119,8 @@ public final class FastJson {
      *
      * @param obj the object to be converted to JSON string
      * @param features variable number of JSONWriter features to control serialization behavior
-     * @return the JSON string representation of the object with the specified features applied
+     * @return the JSON string representation of the object with the specified features applied,
+     *         or the literal string {@code "null"} if {@code obj} is {@code null}
      */
     public static String toJson(final Object obj, final JSONWriter.Feature... features) {
         return JSON.toJSONString(obj, features);
@@ -139,7 +140,8 @@ public final class FastJson {
      *
      * @param obj the object to be converted to JSON string
      * @param context the JSONWriter context containing serialization configuration
-     * @return the JSON string representation of the object using the specified context
+     * @return the JSON string representation of the object using the specified context,
+     *         or the literal string {@code "null"} if {@code obj} is {@code null}
      */
     public static String toJson(final Object obj, final JSONWriter.Context context) {
         return JSON.toJSONString(obj, context);

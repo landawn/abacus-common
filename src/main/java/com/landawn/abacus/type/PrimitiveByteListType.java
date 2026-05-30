@@ -36,6 +36,7 @@ import com.landawn.abacus.util.Strings;
 @SuppressWarnings("java:S2160")
 public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteList> {
 
+    /** The type name constant for {@link ByteList} type identification, equal to {@code "ByteList"}. */
     public static final String BYTE_LIST = ByteList.class.getSimpleName();
 
     private final Type<byte[]> arrayType = Type.of(byte[].class);

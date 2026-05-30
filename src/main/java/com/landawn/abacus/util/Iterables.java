@@ -2152,6 +2152,7 @@ public final class Iterables {
      * @param a the array of elements to evaluate.
      * @param k the position of the largest element to find (1-based index).
      * @return a {@code Nullable} containing the k-th largest value if the array is not {@code null} and has at least k elements, otherwise an empty {@code Nullable}.
+     * @throws IllegalArgumentException if {@code k <= 0} and the array is neither {@code null} nor empty.
      * @see N#kthLargest(Comparable[], int)
      */
     public static <T extends Comparable<? super T>> Nullable<T> kthLargest(final T[] a, final int k) {
@@ -2173,6 +2174,7 @@ public final class Iterables {
      * @param k the position of the largest element to find (1-based index).
      * @param cmp the comparator to determine the order of the elements.
      * @return a {@code Nullable} containing the k-th largest value if the array is not {@code null} and has at least k elements, otherwise an empty {@code Nullable}.
+     * @throws IllegalArgumentException if {@code k <= 0} and the array is neither {@code null} nor empty.
      * @see N#kthLargest(Object[], int, Comparator)
      */
     public static <T> Nullable<T> kthLargest(final T[] a, final int k, final Comparator<? super T> cmp) {
@@ -2193,6 +2195,7 @@ public final class Iterables {
      * @param c the collection of elements to evaluate.
      * @param k the position of the largest element to find (1-based index).
      * @return a {@code Nullable} containing the k-th largest value if the collection is not {@code null} and has at least k elements, otherwise an empty {@code Nullable}.
+     * @throws IllegalArgumentException if {@code k <= 0} and the collection is neither {@code null} nor empty.
      * @see N#kthLargest(Collection, int)
      */
     public static <T extends Comparable<? super T>> Nullable<T> kthLargest(final Collection<? extends T> c, final int k) {
@@ -2214,6 +2217,7 @@ public final class Iterables {
      * @param k the 1-based rank from the largest: {@code k=1} is the largest, {@code k=2} is the second-largest, and so on.
      * @param cmp the comparator used to determine the order of the collection's elements.
      * @return a {@code Nullable} containing the <i>k-th</i> largest element if it exists, otherwise an empty {@code Nullable}.
+     * @throws IllegalArgumentException if {@code k <= 0} and the collection is neither {@code null} nor empty.
      * @see N#kthLargest(Collection, int, Comparator)
      */
     public static <T> Nullable<T> kthLargest(final Collection<? extends T> c, final int k, final Comparator<? super T> cmp) {
@@ -3740,7 +3744,7 @@ public final class Iterables {
      * be at least as long as the source list. If it is longer, the remaining elements
      * in the destination list are unaffected.
      *
-     * This method runs in linear time.
+     * <p>This method runs in linear time.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

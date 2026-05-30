@@ -994,7 +994,7 @@ public final class HttpRequest {
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The file to write the response body to. Must not be {@code null}.
-     * @throws IllegalArgumentException if httpMethod is null
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during the request or file writing
      */
     @Beta
@@ -1022,7 +1022,7 @@ public final class HttpRequest {
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The output stream to write the response body to. Must not be {@code null}.
-     * @throws IllegalArgumentException if httpMethod is null
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during the request or stream writing
      */
     @Beta
@@ -1050,7 +1050,7 @@ public final class HttpRequest {
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The writer to write the response body to. Must not be {@code null}.
-     * @throws IllegalArgumentException if httpMethod is null
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during the request or writing
      */
     @Beta
@@ -1438,6 +1438,7 @@ public final class HttpRequest {
 
     /**
      * Executes an asynchronous HEAD request with the specified result class.
+     * HEAD responses have no body, so non-{@link HttpResponse} result classes will typically yield {@code null}.
      *
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
@@ -1515,7 +1516,7 @@ public final class HttpRequest {
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
-     * @throws IllegalArgumentException if httpMethod is null
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}
      */
     @Beta
     public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException {
@@ -1543,7 +1544,7 @@ public final class HttpRequest {
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
-     * @throws IllegalArgumentException if httpMethod is null
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}
      */
     @Beta
     public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass, final Executor executor)

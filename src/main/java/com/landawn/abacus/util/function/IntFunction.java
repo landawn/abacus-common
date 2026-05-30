@@ -35,7 +35,15 @@ import com.landawn.abacus.util.Throwables;
 @FunctionalInterface
 public interface IntFunction<R> extends Throwables.IntFunction<R, RuntimeException>, java.util.function.IntFunction<R> { //NOSONAR
     /**
-     * A function that boxes an {@code int} value into an {@link Integer}.
+     * A function that boxes a primitive {@code int} value into an {@link Integer} object.
+     * This is useful when you need to convert primitive int values to their object wrapper,
+     * for example when interoperating with APIs that expect {@code Object} or generic types.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<Integer> boxer = IntFunction.BOX;
+     * Integer boxed = boxer.apply(42);   // Returns Integer.valueOf(42)
+     * }</pre>
      */
     IntFunction<Integer> BOX = value -> value;
 

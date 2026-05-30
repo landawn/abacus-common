@@ -613,11 +613,12 @@ public class AsyncExecutor {
      * Checks whether all tasks have completed following shutdown.
      *
      * <p>Returns {@code true} if the executor has been shut down and all tasks have completed,
-     * or if the executor has never been initialized, or if the executor is not an ExecutorService.
-     * Returns {@code false} if the executor is still processing tasks.</p>
+     * or if the executor has never been initialized, or if the underlying executor is not an
+     * {@code ExecutorService}. Returns {@code false} if the executor is still processing tasks.</p>
      *
-     * <p>Note that {@code isTerminated()} will never return {@code true} unless either
-     * {@code shutdown()} or {@code shutdownNow()} was called first.</p>
+     * <p>Note that, for an initialized {@code ExecutorService}, this returns {@code true} only after
+     * {@link #shutdown()} (or {@link #shutdown(long, TimeUnit)}) has been called and all tasks have
+     * completed.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

@@ -43,6 +43,7 @@ package com.landawn.abacus.type;
 @SuppressWarnings("java:S2160")
 public final class PrimitiveLongType extends AbstractLongType {
 
+    /** The type name constant for the primitive {@code long} type, equal to {@code "long"}. */
     public static final String LONG = long.class.getSimpleName();
 
     private static final Long DEFAULT_VALUE = 0L;

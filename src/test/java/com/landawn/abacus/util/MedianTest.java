@@ -2122,4 +2122,62 @@ public class MedianTest extends TestBase {
         });
     }
 
+    // Coverage: len==2 descending branch (source[from] > source[from+1]) in the range overloads.
+    // The smaller value becomes the median (left); the larger goes into the Optional (right).
+
+    @Test
+    public void testMedianOfByteArrayWithRange_DescendingTwoElements() {
+        Pair<Byte, OptionalByte> result = Median.of(new byte[] { 3, 1 }, 0, 2);
+        assertEquals((byte) 1, result.left());
+        Assertions.assertTrue(result.right().isPresent());
+        assertEquals((byte) 3, result.right().get());
+    }
+
+    @Test
+    public void testMedianOfShortArrayWithRange_DescendingTwoElements() {
+        Pair<Short, OptionalShort> result = Median.of(new short[] { 3, 1 }, 0, 2);
+        assertEquals((short) 1, result.left());
+        Assertions.assertTrue(result.right().isPresent());
+        assertEquals((short) 3, result.right().get());
+    }
+
+    @Test
+    public void testMedianOfLongArrayWithRange_DescendingTwoElements() {
+        Pair<Long, OptionalLong> result = Median.of(new long[] { 3L, 1L }, 0, 2);
+        assertEquals(1L, result.left());
+        Assertions.assertTrue(result.right().isPresent());
+        assertEquals(3L, result.right().get());
+    }
+
+    @Test
+    public void testMedianOfFloatArrayWithRange_DescendingTwoElements() {
+        Pair<Float, OptionalFloat> result = Median.of(new float[] { 3f, 1f }, 0, 2);
+        assertEquals(1f, result.left());
+        Assertions.assertTrue(result.right().isPresent());
+        assertEquals(3f, result.right().get());
+    }
+
+    @Test
+    public void testMedianOfDoubleArrayWithRange_DescendingTwoElements() {
+        Pair<Double, OptionalDouble> result = Median.of(new double[] { 3d, 1d }, 0, 2);
+        assertEquals(1d, result.left());
+        Assertions.assertTrue(result.right().isPresent());
+        assertEquals(3d, result.right().get());
+    }
+
+    // Coverage: the comparator-based generic range overload, len==2 descending branch.
+    @Test
+    public void testMedianOfGenericArrayWithRangeAndComparator_DescendingTwoElements() {
+        Pair<Integer, Optional<Integer>> result = Median.of(new Integer[] { 3, 1 }, 0, 2, Comparator.naturalOrder());
+        assertEquals(1, result.left());
+        Assertions.assertTrue(result.right().isPresent());
+        assertEquals(3, result.right().get());
+    }
+
+    // Coverage: the int[] range overload rejects an empty array with IllegalArgumentException.
+    @Test
+    public void testMedianOfIntArrayWithRange_EmptyInput() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Median.of(new int[0], 0, 0));
+    }
+
 }

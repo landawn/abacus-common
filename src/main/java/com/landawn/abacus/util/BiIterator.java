@@ -422,12 +422,11 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @param <A> the first type of elements returned by this iterator
      * @param <B> the second type of elements returned by this iterator
      * @param fromIndex the starting index (inclusive), must be non-negative and not greater than {@code toIndex}
-     * @param toIndex the ending index (exclusive), must be non-negative
+     * @param toIndex the ending index (exclusive), must not be less than {@code fromIndex}
      * @param output an IntObjConsumer that accepts an index and a Pair to populate with values, must not be {@code null}
      * @return a BiIterator that generates elements for each index in the range [fromIndex, toIndex)
      * @throws IllegalArgumentException if {@code output} is {@code null}
-     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
-     *         {@code Integer.MAX_VALUE}, or {@code fromIndex} is greater than {@code toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative or {@code fromIndex} is greater than {@code toIndex}
      */
     public static <A, B> BiIterator<A, B> generate(final int fromIndex, final int toIndex, final IntObjConsumer<Pair<A, B>> output)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -1264,7 +1263,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @param <R> the type of elements in the resulting iterator
      * @param mapper the function to apply to each pair of elements, must not be {@code null}
      * @return an ObjIterator containing the results of applying the mapper to each pair
-     * @throws IllegalArgumentException if mapper is {@code null}
      */
     public abstract <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper);
 
@@ -1370,7 +1368,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      *
      * @param supplier a {@code Supplier} that creates new {@code List} instances used to collect the first and second elements, must not be {@code null}
      * @return a {@code Pair} containing two {@code List}s: the left list holds all first elements and the right list holds all second elements
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      */
     public Pair<List<A>, List<B>> toMultiList(@SuppressWarnings("rawtypes") final Supplier<? extends List> supplier) {
         final List<A> listA = supplier.get();
@@ -1397,7 +1394,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      *
      * @param supplier a {@code Supplier} that creates new {@code Set} instances used to collect the first and second elements, must not be {@code null}
      * @return a {@code Pair} containing two {@code Set}s: the left set holds all unique first elements and the right set holds all unique second elements
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      */
     public Pair<Set<A>, Set<B>> toMultiSet(@SuppressWarnings("rawtypes") final Supplier<? extends Set> supplier) {
         final Set<A> setA = supplier.get();

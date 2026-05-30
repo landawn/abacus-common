@@ -178,7 +178,7 @@ import java.time.temporal.TemporalUnit;
  * <p><b>Overflow Handling:</b>
  * <ul>
  *   <li><b>Long Range:</b> Operations may overflow if results exceed {@code Long.MAX_VALUE} or {@code Long.MIN_VALUE}</li>
- *   <li><b>No Automatic Checking:</b> Overflow behavior follows standard Java long arithmetic (wrapping)</li>
+ *   <li><b>Checked Arithmetic:</b> Factory and arithmetic methods detect overflow and throw {@link ArithmeticException} rather than silently wrapping</li>
  *   <li><b>Practical Limits:</b> ±292 million years is sufficient for virtually all real-world scenarios</li>
  *   <li><b>Defensive Programming:</b> Consider range validation for user inputs in extreme scenarios</li>
  * </ul>

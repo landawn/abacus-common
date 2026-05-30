@@ -123,7 +123,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * }</pre>
      *
      * @param str the string to convert to XMLGregorianCalendar
-     * @return an XMLGregorianCalendar instance, or {@code null} if the string is empty
+     * @return an XMLGregorianCalendar instance, or {@code null} if the string is {@code null} or empty
      * @throws IllegalArgumentException if the string cannot be parsed as a valid date/time
      */
     @Override
@@ -314,13 +314,14 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * This method handles different date/time formats based on the provided configuration:
      * </p>
      * <ul>
-     *   <li>LONG format: writes the epoch milliseconds</li>
-     *   <li>ISO_8601_DATE_TIME: writes in ISO 8601 date-time format</li>
-     *   <li>ISO_8601_TIMESTAMP: writes in ISO 8601 timestamp format</li>
-     *   <li>Default: uses the standard date format</li>
+     *   <li>{@code config} is {@code null} or its date-time format is {@code null}: uses the default date format</li>
+     *   <li>{@link DateTimeFormat#LONG LONG}: writes the epoch milliseconds</li>
+     *   <li>{@link DateTimeFormat#ISO_8601_DATE_TIME ISO_8601_DATE_TIME}: writes in ISO 8601 date-time format</li>
+     *   <li>{@link DateTimeFormat#ISO_8601_TIMESTAMP ISO_8601_TIMESTAMP}: writes in ISO 8601 timestamp format</li>
      * </ul>
      * <p>
-     * The output may be quoted based on the configuration settings.
+     * The output may be quoted based on the configuration settings (quoting is suppressed for the
+     * {@link DateTimeFormat#LONG LONG} format).
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -334,6 +335,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * @param x the XMLGregorianCalendar value to write
      * @param config the serialization configuration controlling format and quoting
      * @throws IOException if an I/O error occurs during the write operation
+     * @throws RuntimeException if the configured {@link DateTimeFormat} is not one of the supported formats
      */
     @SuppressWarnings("null")
     @Override

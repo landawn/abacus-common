@@ -162,7 +162,8 @@ public class ShortBiConsumerTest extends TestBase {
 
     @Test
     public void testAndThenNullThrowsImmediately() {
-        ShortBiConsumer instance = (a, b) -> {};
+        ShortBiConsumer instance = (a, b) -> {
+        };
         org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((ShortBiConsumer) null));
     }
 }

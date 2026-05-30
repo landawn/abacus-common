@@ -1246,7 +1246,7 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Updates the count of each element in this multiset based on the provided function.
      * The function receives each element and its current count, and returns the new count.
-     * If the function returns zero or negative, the element is removed.
+     * If the function returns {@code null} or a non-positive value, the element is removed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

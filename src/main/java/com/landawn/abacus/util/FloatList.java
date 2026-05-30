@@ -789,6 +789,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @throws NullPointerException if the specified predicate is {@code null}
      */
     public boolean removeIf(final FloatPredicate p) {
+        N.requireNonNull(p, cs.predicate);
+
         final FloatList tmp = new FloatList(size());
 
         for (int i = 0; i < size; i++) {
@@ -1195,6 +1197,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @throws NullPointerException if the specified predicate is {@code null}
      */
     public boolean replaceIf(final FloatPredicate predicate, final float newValue) {
+        N.requireNonNull(predicate, cs.predicate);
+
         boolean result = false;
 
         for (int i = 0, len = size(); i < len; i++) {
@@ -1451,7 +1455,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * // One occurrence of '5.0f' (minimum count in both sources)
      * }</pre>
      *
-     * @param b the array to find common elements with this list
+     * @param b the array to find common elements with this list. May be {@code null} or empty.
      * @return a new FloatList containing elements present in both this list and the specified array,
      *         considering the minimum number of occurrences in either source.
      *         Returns an empty list if the array is {@code null} or empty.
@@ -1486,9 +1490,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * // No elements remain because list4 has at least as many occurrences of each value as list3
      * }</pre>
      *
-     * @param b the list to compare against this list
+     * @param b the list to compare against this list. May be {@code null} or empty.
      * @return a new FloatList containing the elements that are present in this list but not in the specified list,
      *         considering the number of occurrences.
+     *         Returns a copy of this list if {@code b} is {@code null} or empty.
      * @see #difference(float[])
      * @see #symmetricDifference(FloatList)
      * @see #intersection(FloatList)
@@ -1530,7 +1535,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * // No elements remain because array2 has at least as many occurrences of each value as list2
      * }</pre>
      *
-     * @param b the array to compare against this list
+     * @param b the array to compare against this list. May be {@code null} or empty.
      * @return a new FloatList containing the elements that are present in this list but not in the specified array,
      *         considering the number of occurrences.
      *         Returns a copy of this list if {@code b} is {@code null} or empty.
@@ -1570,9 +1575,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * // - 4.0f appears only in list2, so it remains
      * }</pre>
      *
-     * @param b the list to compare with this list for symmetric difference
+     * @param b the list to compare with this list for symmetric difference. May be {@code null} or empty.
      * @return a new FloatList containing elements that are present in either this list or the specified list,
-     *         but not in both, considering the number of occurrences
+     *         but not in both, considering the number of occurrences.
+     *         Returns a copy of this list if {@code b} is {@code null} or empty, or a copy of {@code b} if this list is empty.
      * @see #symmetricDifference(float[])
      * @see #difference(FloatList)
      * @see #intersection(FloatList)
@@ -1630,9 +1636,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * // - 4.0f appears only in array, so it remains
      * }</pre>
      *
-     * @param b the array to compare with this list for symmetric difference
+     * @param b the array to compare with this list for symmetric difference. May be {@code null} or empty.
      * @return a new FloatList containing elements that are present in either this list or the specified array,
-     *         but not in both, considering the number of occurrences
+     *         but not in both, considering the number of occurrences.
+     *         Returns a copy of this list if {@code b} is {@code null} or empty, or a copy of {@code b} if this list is empty.
      * @see #symmetricDifference(FloatList)
      * @see #difference(float[])
      * @see #intersection(float[])
@@ -1835,6 +1842,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @throws NullPointerException if the specified action is {@code null}
      */
     public void forEach(final FloatConsumer action) {
+        N.requireNonNull(action, cs.action);
+
         forEach(0, size, action);
     }
 

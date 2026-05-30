@@ -66,9 +66,9 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
     }
 
     /**
-     * Constructs a new, empty identity hash set with the specified initial capacity.
-     * The actual initial capacity is the smallest power of two greater than or equal
-     * to the specified value.
+     * Constructs a new, empty identity hash set sized to hold approximately the specified
+     * number of elements. The given value is treated as the expected maximum size; the
+     * backing {@link IdentityHashMap} chooses an appropriate internal capacity from it.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

@@ -103,7 +103,7 @@ public final class Reflection<T> {
      * @param <T> the type of the class
      * @param clsName the fully qualified name of the class
      * @return a Reflection instance for the specified class
-     * @throws RuntimeException if the class with the given name cannot be located
+     * @throws IllegalArgumentException if the class with the given name cannot be located
      * @see ClassUtil#forName(String)
      */
     public static <T> Reflection<T> on(final String clsName) {
@@ -311,6 +311,7 @@ public final class Reflection<T> {
      * Invokes the specified method on the target instance with the given arguments without returning a result.
      * This is a convenience method for void methods or when the return value is not needed.
      * The method is selected based on its name and the types of the provided arguments.
+     * If ReflectASM is available, it will be used for better performance.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

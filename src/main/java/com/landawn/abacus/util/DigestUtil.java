@@ -47,7 +47,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * String hash = DigestUtil.md5Hex("Hello World");
  *
  * // Generate SHA-256 hash of a file
- * byte[] digest = DigestUtil.sha256(new File("document.pdf"));
+ * byte[] digest = DigestUtil.digest(DigestUtil.getSha256Digest(), new File("document.pdf"));
  * }</pre>
  *
  * <p><b>Attribution:</b>

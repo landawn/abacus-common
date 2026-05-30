@@ -40,7 +40,7 @@ public interface DoubleToFloatFunction {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleToFloatFunction toFloat = DoubleToFloatFunction.DEFAULT;
-     * float result = toFloat.applyAsFloat(3.14159);   // Returns 3.14159f
+     * float result = toFloat.applyAsFloat(3.14159);   // Returns (float) 3.14159 (precision may be reduced)
      *
      * DoubleToFloatFunction rounder = val -> Math.round(val * 100) / 100.0f;
      * float result2 = rounder.applyAsFloat(3.14159);   // Returns 3.14f

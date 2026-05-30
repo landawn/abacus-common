@@ -2706,8 +2706,7 @@ public class ContinuableFutureTest extends AbstractTest {
         // portion of the remaining delay was actually applied. With the pre-fix logic
         // (isDelayed flag set before the capped sleep), this get() returned almost
         // immediately and elapsedMillis would be ~0.
-        assertTrue(elapsedMillis >= delayMillis / 2,
-                "Remaining delay was not honored after a short timed get(); elapsedMillis=" + elapsedMillis);
+        assertTrue(elapsedMillis >= delayMillis / 2, "Remaining delay was not honored after a short timed get(); elapsedMillis=" + elapsedMillis);
     }
 
 }

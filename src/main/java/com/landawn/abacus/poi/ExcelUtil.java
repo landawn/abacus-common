@@ -80,7 +80,8 @@ import lombok.Data;
  * {@link #CELL_TO_STRING} (string-normalizing) functions, or via custom functions supplied
  * through {@link RowExtractors} and {@link RowMappers}.
  *
- * <p>Cell type mapping used by the default extractors:
+ * <p>Cell type mapping used by the type-preserving {@link #CELL_GETTER} (and the {@code DEFAULT}
+ * extractor/mapper based on it):
  * <ul>
  *   <li>STRING  → {@code String}</li>
  *   <li>NUMERIC → {@code Double}</li>
@@ -88,6 +89,8 @@ import lombok.Data;
  *   <li>FORMULA → formula text as {@code String} (not the evaluated result)</li>
  *   <li>BLANK / ERROR → empty {@code String}</li>
  * </ul>
+ * <p>{@link #CELL_TO_STRING} uses the same mapping except that NUMERIC and BOOLEAN cells are
+ * normalized to their {@code String} representation.
  *
  * <p>All {@code loadSheet()}, {@code readSheet()}, and {@code writeSheet()} methods manage their
  * own file resources internally. Streams returned by {@code streamSheet()} carry an
@@ -509,6 +512,7 @@ public final class ExcelUtil {
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows
      * @return a Stream of Row objects from the specified sheet that must be closed after use
      * @throws UncheckedException if an I/O error occurs while reading the file or if the file is not a valid Excel file
+     * @throws IllegalArgumentException if the sheet index is out of bounds
      */
     public static Stream<Row> streamSheet(final File excelFile, final int sheetIndex, final boolean skipFirstRow) {
         InputStream is = null;
@@ -951,7 +955,8 @@ public final class ExcelUtil {
      * @param excelFile the Excel file to read, must exist and be a valid Excel file
      * @param sheetIndex the zero-based index of the sheet to convert (0 for first sheet)
      * @param outputCsvFile the CSV file to write to (will be created or overwritten)
-     * @throws UncheckedException if an I/O error occurs during conversion or if the file is not a valid Excel file
+     * @throws UncheckedException if an I/O error occurs while reading the Excel file or if the file is not a valid Excel file
+     * @throws UncheckedIOException if an I/O error occurs while opening or writing the CSV output file
      * @throws IllegalArgumentException if the sheet index is out of bounds
      */
     public static void saveSheetAsCsv(final File excelFile, final int sheetIndex, final File outputCsvFile) {
@@ -985,7 +990,8 @@ public final class ExcelUtil {
      * @param excelFile the Excel file to read, must exist and be a valid Excel file
      * @param sheetName the name of the sheet to convert, case-sensitive
      * @param outputCsvFile the CSV file to write to (will be created or overwritten)
-     * @throws UncheckedException if an I/O error occurs or if the file is not a valid Excel file
+     * @throws UncheckedException if an I/O error occurs while reading the Excel file or if the file is not a valid Excel file
+     * @throws UncheckedIOException if an I/O error occurs while opening or writing the CSV output file
      * @throws IllegalArgumentException if the sheet name is not found in the workbook
      */
     public static void saveSheetAsCsv(final File excelFile, final String sheetName, final File outputCsvFile) {

@@ -163,8 +163,8 @@ public final class TypeAttrParser {
      * @return a {@code TypeAttrParser} instance containing the parsed components; the returned
      *         instance never has {@code null} type-parameter or constructor-parameter arrays
      * @throws NullPointerException if {@code attr} is {@code null}
-     * @throws StringIndexOutOfBoundsException if the string is malformed (e.g. unbalanced
-     *         angle brackets or parentheses)
+     * @throws StringIndexOutOfBoundsException if the string is malformed, for example an opening
+     *         parenthesis with no matching closing parenthesis
      * @see #getClassName()
      * @see #getTypeParameters()
      * @see #getParameters()
@@ -238,13 +238,15 @@ public final class TypeAttrParser {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Creates a HashMap with initial capacity 16 and load factor 0.75
-     * HashMap<String, Integer> map = TypeAttrParser.newInstance(null, "HashMap<String, Integer>(16, 0.75f)");
+     * // Resolves the class from the attribute string and invokes a constructor that accepts
+     * // the parsed parameters as String values (here a constructor taking a single String).
+     * MyType obj = TypeAttrParser.newInstance(null, "com.example.MyType(value)");
      * }</pre>
      *
      * <p>All parsed type parameters and constructor parameters are passed to the constructor
-     * as {@code String} values. If the class has no such parameters, the no-argument
-     * constructor is used.
+     * as {@code String} values, so a matching constructor must accept {@code String} (or, in the
+     * fallback signature, a trailing {@code String[]}) arguments. If the class has no such
+     * parameters, the no-argument constructor is used.
      *
      * @param <T> the type of object to create
      * @param cls the class to instantiate, or {@code null} to derive it from the class name

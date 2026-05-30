@@ -21,8 +21,8 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * are based solely on the key. This design provides significant performance improvements
  * in collections by avoiding expensive value comparisons.
  *
- * <p>It's designed for performance improvement by only hash/compare {@code key} in
- * {@code hashCode/equals} method. This makes it ideal for scenarios where you need
+ * <p>It's designed for performance improvement by only hashing and comparing the {@code key} in
+ * the {@code hashCode} and {@code equals} methods. This makes it ideal for scenarios where you need
  * to store key-value pairs in sets or as map keys, but only want to consider the
  * key for uniqueness.</p>
  *

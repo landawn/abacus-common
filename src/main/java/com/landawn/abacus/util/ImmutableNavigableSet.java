@@ -104,7 +104,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     //    }
 
     /**
-     * Returns an ImmutableNavigableSet containing a single element in sorted order.
+     * Returns an ImmutableNavigableSet containing a single element.
      * The element must implement {@link Comparable} to determine its natural ordering.
      *
      * @param <E> the type of element, must extend Comparable

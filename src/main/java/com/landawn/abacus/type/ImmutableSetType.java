@@ -138,8 +138,8 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
     }
 
     /**
-     * Checks whether the elements of this immutable set type are serializable.
-     * The immutable set is considered serializable if its element type is serializable.
+     * Checks whether this immutable set type is directly serializable by the type system.
+     * The immutable set is considered serializable if the underlying {@code Set} type is serializable.
      *
      * @return {@code true} if the underlying set type is serializable, {@code false} otherwise
      */
@@ -152,7 +152,8 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * Returns the serialization type category for this immutable set.
      * Delegates to the underlying set type for serialization categorization.
      *
-     * @return SerializationType.SERIALIZABLE if elements are serializable, SerializationType.COLLECTION otherwise
+     * @return {@link SerializationType#SERIALIZABLE} if the underlying set type is serializable,
+     *         or {@link SerializationType#COLLECTION} otherwise
      */
     @Override
     public SerializationType serializationType() {

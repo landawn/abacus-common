@@ -697,7 +697,9 @@ public final class Hashing {
      *
      * @param hashFunctions an iterable of hash functions to concatenate (must not be empty)
      * @return a hash function that concatenates the results of all input functions
-     * @throws IllegalArgumentException if {@code hashFunctions} is empty
+     * @throws IllegalArgumentException if {@code hashFunctions} is empty, or if any element is
+     *                                  {@code null} or is not a {@code HashFunction} obtained from
+     *                                  the factory methods of this class
      */
     public static HashFunction concatenating(final Iterable<HashFunction> hashFunctions) {
         final List<com.google.common.hash.HashFunction> guavaHashFunctions = new ArrayList<>();

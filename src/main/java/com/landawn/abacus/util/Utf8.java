@@ -202,7 +202,8 @@ public class Utf8 {
      * @param len the number of bytes to validate from the buffer
      * @return {@code true} if the specified byte range forms a valid UTF-8 sequence
      * @throws NullPointerException if {@code bytes} is {@code null}
-     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or
+     * @throws IllegalArgumentException if {@code len} is negative
+     * @throws IndexOutOfBoundsException if {@code off} is negative, or
      *         {@code off + len} is greater than {@code bytes.length}
      */
     public static boolean isWellFormed(final byte[] bytes, final int off, final int len) throws IndexOutOfBoundsException {

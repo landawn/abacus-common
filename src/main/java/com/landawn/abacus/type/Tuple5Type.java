@@ -53,6 +53,13 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractTupleType<Tuple5<T1,
                         TypeFactory.getType(t2TypeName), TypeFactory.getType(t3TypeName), TypeFactory.getType(t4TypeName), TypeFactory.getType(t5TypeName)));
     }
 
+    /**
+     * Reconstructs a {@link Tuple5} from an already type-converted element array.
+     * The array is expected to contain exactly five elements matching the tuple's parameter types.
+     *
+     * @param converted the array of converted element values (must be of length 5)
+     * @return a new {@code Tuple5} containing the five elements in order
+     */
     @SuppressWarnings("unchecked")
     @Override
     protected Tuple5<T1, T2, T3, T4, T5> fromArray(final Object[] converted) {

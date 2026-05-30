@@ -124,6 +124,9 @@ public final class ParserUtil {
 
     private static final char PROP_NAME_SEPARATOR = '.';
 
+    // Shared, stateless splitter for nested property paths (e.g. "address.city"); reused to avoid per-call allocation.
+    private static final Splitter PROP_NAME_SPLITTER = Splitter.with(PROP_NAME_SEPARATOR);
+
     // ...
     private static final String GET = "get";
 
@@ -139,6 +142,9 @@ public final class ParserUtil {
     private static final int POOL_SIZE = InternalUtil.POOL_SIZE;
 
     private static final int defaultNameIndex = NamingPolicy.CAMEL_CASE.ordinal();
+
+    // Cached once: NamingPolicy.values() clones its backing array on every call, and name tags are built per property.
+    private static final NamingPolicy[] NAMING_POLICIES = NamingPolicy.values();
 
     // ...
     private static final Map<java.lang.reflect.Type, BeanInfo> beanInfoPool = new ObjectPool<>(POOL_SIZE);
@@ -446,13 +452,14 @@ public final class ParserUtil {
      * @return an array of JSON name tags for all naming policies
      */
     static JsonNameTag[] getJsonNameTags(final String name) {
-        final JsonNameTag[] result = new JsonNameTag[NamingPolicy.values().length];
+        final NamingPolicy[] namingPolicies = NAMING_POLICIES;
+        final String[] names = new String[namingPolicies.length];
 
-        for (final NamingPolicy np : NamingPolicy.values()) {
-            result[np.ordinal()] = new JsonNameTag(convertName(name, np));
+        for (int i = 0, len = namingPolicies.length; i < len; i++) {
+            names[i] = convertName(name, namingPolicies[i]);
         }
 
-        return result;
+        return buildJsonNameTags(names);
     }
 
     /**
@@ -473,13 +480,14 @@ public final class ParserUtil {
      * @return an array of XML name tags for all naming policies
      */
     static XmlNameTag[] getXmlNameTags(final String name, final String typeName, final boolean isBean) {
-        final XmlNameTag[] result = new XmlNameTag[NamingPolicy.values().length];
+        final NamingPolicy[] namingPolicies = NAMING_POLICIES;
+        final String[] names = new String[namingPolicies.length];
 
-        for (final NamingPolicy np : NamingPolicy.values()) {
-            result[np.ordinal()] = new XmlNameTag(convertName(name, np), typeName, isBean);
+        for (int i = 0, len = namingPolicies.length; i < len; i++) {
+            names[i] = convertName(name, namingPolicies[i]);
         }
 
-        return result;
+        return buildXmlNameTags(names, typeName, isBean);
     }
 
     /**
@@ -537,13 +545,15 @@ public final class ParserUtil {
                     "JsonXmlFieldName name: \"" + jsonXmlFieldName + "\" must not start or end with any whitespace for field: " + field);
         }
 
-        final JsonNameTag[] result = new JsonNameTag[NamingPolicy.values().length];
+        final NamingPolicy[] namingPolicies = NAMING_POLICIES;
+        final String[] names = new String[namingPolicies.length];
+        final boolean hasCustomName = Strings.isNotEmpty(jsonXmlFieldName);
 
-        for (final NamingPolicy np : NamingPolicy.values()) {
-            result[np.ordinal()] = new JsonNameTag(Strings.isEmpty(jsonXmlFieldName) ? convertName(propName, np) : jsonXmlFieldName);
+        for (int i = 0, len = namingPolicies.length; i < len; i++) {
+            names[i] = hasCustomName ? jsonXmlFieldName : convertName(propName, namingPolicies[i]);
         }
 
-        return result;
+        return buildJsonNameTags(names);
     }
 
     /**
@@ -601,13 +611,15 @@ public final class ParserUtil {
                     "JsonXmlFieldName name: \"" + jsonXmlFieldName + "\" must not start or end with any whitespace for field: " + field);
         }
 
-        final XmlNameTag[] result = new XmlNameTag[NamingPolicy.values().length];
+        final NamingPolicy[] namingPolicies = NAMING_POLICIES;
+        final String[] names = new String[namingPolicies.length];
+        final boolean hasCustomName = Strings.isNotEmpty(jsonXmlFieldName);
 
-        for (final NamingPolicy np : NamingPolicy.values()) {
-            result[np.ordinal()] = new XmlNameTag(Strings.isEmpty(jsonXmlFieldName) ? convertName(propName, np) : jsonXmlFieldName, typeName, isBean);
+        for (int i = 0, len = namingPolicies.length; i < len; i++) {
+            names[i] = hasCustomName ? jsonXmlFieldName : convertName(propName, namingPolicies[i]);
         }
 
-        return result;
+        return buildXmlNameTags(names, typeName, isBean);
     }
 
     /**
@@ -669,6 +681,70 @@ public final class ParserUtil {
         }
 
         return alias;
+    }
+
+    /**
+     * Builds one {@link JsonNameTag} per naming policy from the already-resolved per-policy names,
+     * sharing a single tag instance whenever two policies resolve to the same name.
+     *
+     * <p>Many properties resolve to the same name under several policies (e.g. {@code "id"} is
+     * identical for camel/snake/kebab/no-change, and an annotation-supplied name is identical for
+     * all policies). Since {@link JsonNameTag} is immutable and the returned array is only ever
+     * indexed by {@link NamingPolicy#ordinal()} and read, sharing instances is behavior-preserving
+     * and avoids allocating duplicate tags and their backing {@code char[]} arrays.</p>
+     *
+     * @param names the converted name for each naming policy, indexed by ordinal
+     * @return the name tags, indexed by naming-policy ordinal
+     */
+    private static JsonNameTag[] buildJsonNameTags(final String[] names) {
+        final int len = names.length;
+        final JsonNameTag[] result = new JsonNameTag[len];
+
+        for (int i = 0; i < len; i++) {
+            JsonNameTag tag = null;
+
+            for (int j = 0; j < i; j++) {
+                if (names[j].equals(names[i])) {
+                    tag = result[j];
+                    break;
+                }
+            }
+
+            result[i] = tag != null ? tag : new JsonNameTag(names[i]);
+        }
+
+        return result;
+    }
+
+    /**
+     * Builds one {@link XmlNameTag} per naming policy from the already-resolved per-policy names,
+     * sharing a single tag instance whenever two policies resolve to the same name. See
+     * {@link #buildJsonNameTags(String[])} for the rationale. Within a single call {@code typeName}
+     * and {@code isBean} are constant, so equal names yield identical tags.
+     *
+     * @param names the converted name for each naming policy, indexed by ordinal
+     * @param typeName the type name for XML serialization
+     * @param isBean whether this represents a bean type
+     * @return the name tags, indexed by naming-policy ordinal
+     */
+    private static XmlNameTag[] buildXmlNameTags(final String[] names, final String typeName, final boolean isBean) {
+        final int len = names.length;
+        final XmlNameTag[] result = new XmlNameTag[len];
+
+        for (int i = 0; i < len; i++) {
+            XmlNameTag tag = null;
+
+            for (int j = 0; j < i; j++) {
+                if (names[j].equals(names[i])) {
+                    tag = result[j];
+                    break;
+                }
+            }
+
+            result[i] = tag != null ? tag : new XmlNameTag(names[i], typeName, isBean);
+        }
+
+        return result;
     }
 
     /**
@@ -1713,7 +1789,7 @@ public final class ParserUtil {
             if (propInfoQueue == null) {
                 propInfoQueue = new ArrayList<>();
 
-                final String[] strs = Splitter.with(PROP_NAME_SEPARATOR).splitToArray(propName);
+                final String[] strs = PROP_NAME_SPLITTER.splitToArray(propName);
 
                 if (strs.length > 1) {
                     Class<?> propClass = clazz;
@@ -1914,6 +1990,9 @@ public final class ParserUtil {
 
         /**
          * Creates a new instance of this bean class using the no-args constructor.
+         *
+         * <p>If no no-args constructor is available, the all-args constructor is invoked
+         * with default values for every argument.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2248,7 +2327,7 @@ public final class ParserUtil {
 
         /**
          * Indicates whether this property is marked as a read-only identifier.
-         * True if annotated with @ReadOnlyId or is an @Id with @ReadOnly.
+         * True if annotated with @ReadOnlyId, is an @Id with @ReadOnly, or listed in read-only id property names.
          */
         public final boolean isMarkedAsReadOnlyId;
 
@@ -2357,8 +2436,11 @@ public final class ParserUtil {
             this.isFieldGettable = field != null && !isAccessFieldByMethod && field.isAccessible();
             this.isFieldSettable = field != null && isFieldGettable && !Modifier.isFinal(field.getModifiers()) && !isByBuilder;
 
-            this.isFieldHandleGettable = fieldHandle != null && fieldHandle.isAccessModeSupported(AccessMode.GET);
-            this.isFieldHandleSettable = fieldHandle != null && fieldHandle.isAccessModeSupported(AccessMode.SET);
+            // Must honor @AccessFieldByMethod just like isFieldGettable/isFieldSettable above (and like the ASM
+            // path, where fieldAccessIndex is -1 when !isFieldGettable): otherwise getPropValue/setPropValue would
+            // prefer the VarHandle and read/write the field directly, bypassing the mandated getter/setter.
+            this.isFieldHandleGettable = !isAccessFieldByMethod && fieldHandle != null && fieldHandle.isAccessModeSupported(AccessMode.GET);
+            this.isFieldHandleSettable = !isAccessFieldByMethod && fieldHandle != null && fieldHandle.isAccessModeSupported(AccessMode.SET);
 
             isTransient = annotations.containsKey(Transient.class) || annotations.keySet().stream().anyMatch(it -> it.getSimpleName().equals("Transient"))
                     || (field != null && Modifier.isTransient(field.getModifiers()));
@@ -3002,8 +3084,9 @@ public final class ParserUtil {
          * }</pre>
          *
          * @param strValue the string value to parse
-         * @return the parsed value in the appropriate type
-         * @throws UnsupportedOperationException if date format is specified for unsupported types
+         * @return the parsed value in the appropriate type, or {@code null} if {@code strValue} is {@code null} and a number format is configured
+         * @throws UnsupportedOperationException if a date format is specified for an unsupported type
+         * @throws RuntimeException if a number format is specified and {@code strValue} cannot be parsed against it
          */
         public Object readPropValue(final String strValue) {
             if (hasFormat) {
@@ -3131,8 +3214,8 @@ public final class ParserUtil {
          * Gets the specified annotation from this property.
          *
          * <p>This method retrieves annotations from the field, getter method, or setter method.
-         * If the same annotation is present in multiple places, the precedence order is:
-         * field annotations, getter annotations, then setter annotations.</p>
+         * If the same annotation is present in multiple places, the value collected last wins,
+         * so the precedence order is: setter annotations, then getter annotations, then field annotations.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code

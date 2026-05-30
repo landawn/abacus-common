@@ -389,7 +389,8 @@ public final class Maps {
      * Creates a new entry (key-value pair) with the provided key and value.
      *
      * <p>This method generates a new entry using the provided key and value.
-     * The created entry is mutable, meaning that its key and value can be changed after creation.
+     * The created entry is mutable, meaning that its value can be changed after creation
+     * via {@link java.util.Map.Entry#setValue(Object)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2602,10 +2603,10 @@ public final class Maps {
      * Map<String, Object> map = new HashMap<>();
      * map.put("items", Arrays.asList("A", "B", "C"));
      *
-     * Optional<List<String>> items = Maps.getAs(map, "items", new TypeReference<List<String>>() {});
+     * Optional<List<String>> items = Maps.getAs(map, "items", new TypeReference<List<String>>() {}.type());
      * // items.isPresent() = true, items.get() = ["A", "B", "C"]
      *
-     * Optional<Set<Integer>> missing = Maps.getAs(map, "missing", new TypeReference<Set<Integer>>() {});
+     * Optional<Set<Integer>> missing = Maps.getAs(map, "missing", new TypeReference<Set<Integer>>() {}.type());
      * // missing.isPresent() = false
      * }</pre>
      *

@@ -32,14 +32,16 @@ import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for primitive char arrays (char[]).
+ * Type handler for primitive {@code char[]} arrays.
  * Provides functionality for serialization, deserialization, database operations,
- * and conversion between char arrays and their various representations including Clob objects.
- * Character elements are quoted in string representations to handle special characters properly.
+ * and conversion between char arrays and their various representations including {@link Clob} objects.
+ * The {@link #stringOf(char[])} representation single-quotes each element (for example {@code ['a', 'b', 'c']}),
+ * while {@link #appendTo(Appendable, char[])} and {@link #toString(char[])} emit the elements unquoted.
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<char[]> {
 
+    /** The type name constant for the char array type, equal to {@code "char[]"}. */
     public static final String CHAR_ARRAY = char[].class.getSimpleName();
 
     private final Type<Character> elementType;

@@ -468,7 +468,7 @@ public final class XmlMappers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String xml = "<Person><name>John</name><unknownField>value</unknownField></Person>";
+     * String xml = "<Person><name>John</name><age>30</age></Person>";
      * Person person = XmlMappers.fromXml(xml, Person.class,
      *     DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
      * }</pre>

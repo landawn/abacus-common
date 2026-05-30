@@ -1297,8 +1297,7 @@ public class OkHttpRequestTest extends TestBase {
     @Test
     public void testExecute_nullResultClassIsRejected() {
         // resultClass must not be null; passing null must throw immediately.
-        assertThrows(IllegalArgumentException.class,
-                () -> OkHttpRequest.url(baseUrl).execute(HttpMethod.GET, (Class<?>) null));
+        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url(baseUrl).execute(HttpMethod.GET, (Class<?>) null));
     }
 
     @Test
@@ -1313,8 +1312,7 @@ public class OkHttpRequestTest extends TestBase {
     public void testExecute_httpResponseClassIsRejected() {
         // HttpResponse (the abacus wrapper) is not allowed as a result type;
         // callers must use OkHttp's Response class directly.
-        assertThrows(IllegalArgumentException.class,
-                () -> OkHttpRequest.url(baseUrl).execute(HttpMethod.GET, com.landawn.abacus.http.HttpResponse.class));
+        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url(baseUrl).execute(HttpMethod.GET, com.landawn.abacus.http.HttpResponse.class));
     }
 
     @Test
@@ -1334,10 +1332,7 @@ public class OkHttpRequestTest extends TestBase {
         // When connectTimeout/readTimeout are set, an internal httpClientBuilder is used.
         // Verify the request still executes successfully (regression test).
         server.enqueue(new MockResponse().setBody("timeout-client body").setResponseCode(200));
-        final String result = OkHttpRequest.url(baseUrl)
-                .connectTimeout(5_000L)
-                .readTimeout(10_000L)
-                .get(String.class);
+        final String result = OkHttpRequest.url(baseUrl).connectTimeout(5_000L).readTimeout(10_000L).get(String.class);
         assertEquals("timeout-client body", result);
     }
 

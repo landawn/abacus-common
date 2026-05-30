@@ -87,8 +87,8 @@ public class ParsingException extends RuntimeException {
 
     /**
      * Constructs a new {@code ParsingException} with the specified detail message and token.
-     * This constructor is useful when you want to indicate the specific token or position
-     * where the parsing error occurred.
+     * The cause is not initialized. This constructor is useful when you want to indicate the
+     * specific token or position where the parsing error occurred.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

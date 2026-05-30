@@ -102,7 +102,7 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
     /**
      * Appends the string representation of a Joda {@code DateTime} value to an {@code Appendable}.
      * <p>
-     * Writes "null" if the value is {@code null}, otherwise writes the ISO 8601 timestamp format.
+     * Writes {@code "null"} if the value is {@code null}, otherwise writes the ISO 8601 timestamp format.
      * </p>
      *
      * @param appendable the {@code Appendable} to write to

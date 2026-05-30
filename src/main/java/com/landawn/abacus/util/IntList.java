@@ -348,6 +348,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * array will affect this list and vice versa.
      *
      * @param a the array whose elements are to be placed into this list. Must not be {@code null}.
+     * @throws NullPointerException if the specified array is {@code null}
      */
     public IntList(final int[] a) {
         this(N.requireNonNull(a), a.length);
@@ -1443,8 +1444,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
     /**
      * Returns {@code true} if this list contains all elements in the specified IntList.
-     * This method returns {@code true} if the specified list is a subset of this list
-     * (ignoring element order but considering duplicates).
+     * This method returns {@code true} if every distinct value in the specified list is also
+     * present in this list (ignoring both element order and the number of occurrences).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1488,8 +1489,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
     /**
      * Returns {@code true} if this list contains all elements in the specified array.
-     * This method returns {@code true} if all elements in the array are present in this list
-     * (ignoring element order but considering duplicates).
+     * This method returns {@code true} if every distinct value in the array is also present
+     * in this list (ignoring both element order and the number of occurrences).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1645,7 +1646,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * @param b the list whose elements are to be removed from this list
      * @return a new IntList containing elements present in this list but not in the specified list,
-     *         considering the number of occurrences
+     *         considering the number of occurrences. Returns a copy of this list if the specified list is empty.
      * @see #difference(int[])
      * @see #symmetricDifference(IntList)
      * @see #intersection(IntList)

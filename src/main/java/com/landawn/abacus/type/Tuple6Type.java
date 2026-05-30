@@ -57,6 +57,13 @@ public class Tuple6Type<T1, T2, T3, T4, T5, T6> extends AbstractTupleType<Tuple6
                         TypeFactory.getType(t5TypeName), TypeFactory.getType(t6TypeName)));
     }
 
+    /**
+     * Reconstructs a {@link Tuple6} from an already type-converted element array.
+     * The array is expected to contain exactly six elements matching the tuple's parameter types.
+     *
+     * @param converted the array of converted element values (must be of length 6)
+     * @return a new {@code Tuple6} containing the six elements in order
+     */
     @SuppressWarnings("unchecked")
     @Override
     protected Tuple6<T1, T2, T3, T4, T5, T6> fromArray(final Object[] converted) {

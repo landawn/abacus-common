@@ -79,7 +79,8 @@ public class FloatConsumerTest extends TestBase {
 
     @Test
     public void testAndThenNullThrowsImmediately() {
-        FloatConsumer instance = a -> {};
+        FloatConsumer instance = a -> {
+        };
         org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((FloatConsumer) null));
     }
 }

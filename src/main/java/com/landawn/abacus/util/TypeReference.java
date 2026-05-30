@@ -42,9 +42,10 @@ import com.landawn.abacus.type.TypeFactory;
  * List<String> list = jsonParser.parse(json, listType);
  * }</pre>
  *
- * <p>Note: This approach cannot capture types with wildcard parameters such as
- * {@code Class<?>} or {@code List<? extends CharSequence>}. Attempting to do so
- * will result in a runtime exception.
+ * <p>Note: The generic type parameter {@code T} must be concrete; it cannot itself be
+ * a bare type variable or wildcard, and a raw {@code new TypeReference() {}} without type
+ * information will fail. Type arguments nested inside {@code T}, such as the bounded
+ * wildcard in {@code List<? extends CharSequence>}, are captured and resolved without issue.
  *
  * <p>Common use cases include:
  * <ul>
@@ -210,7 +211,7 @@ public abstract class TypeReference<T> {
      * Type<List<Map<String, Integer>>> type = complexType.type();
      *
      * // Use with abacus framework operations
-     * String json = N.toJson(data, type);
+     * String json = N.toJson(data);
      * List<Map<String, Integer>> result = N.fromJson(json, type);
      *
      * // Or access type metadata

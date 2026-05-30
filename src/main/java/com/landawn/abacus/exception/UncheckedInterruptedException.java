@@ -71,7 +71,7 @@ public class UncheckedInterruptedException extends UncheckedException {
      * its message, stack trace, and any suppressed exceptions.</p>
      *
      * <p><strong>Note:</strong> Remember to restore the thread's interrupted status before throwing
-     * this exception if the interruption hasn't been fully handled:</p>
+     * this exception if the interruption hasn't been fully handled.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -98,7 +98,7 @@ public class UncheckedInterruptedException extends UncheckedException {
      * interruption occurred, while preserving all information from the original exception.</p>
      *
      * <p><strong>Note:</strong> Remember to restore the thread's interrupted status before throwing
-     * this exception if the interruption hasn't been fully handled:</p>
+     * this exception if the interruption hasn't been fully handled.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

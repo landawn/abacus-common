@@ -22,9 +22,9 @@ import java.util.List;
 import com.landawn.abacus.exception.ParsingException;
 
 /**
- * A very simple CSV parser released under a commercial-friendly license.
- * This parser is designed to handle the parsing of a single CSV line into fields,
- * with support for quoted values, escaped characters, and customizable delimiters.
+ * A very simple CSV parser that parses a single CSV line into fields.
+ * It supports quoted values, escaped characters, and customizable delimiters.
+ * This parser is released under a commercial-friendly license.
  *
  * <p>Key features:</p>
  * <ul>
@@ -431,6 +431,7 @@ public class CsvParser {
      * @param output the pre-allocated array to receive parsed field values; must not be {@code null}
      * @throws IllegalArgumentException if {@code output} is {@code null}
      * @throws ParsingException if the line contains an unterminated quoted field
+     * @throws ArrayIndexOutOfBoundsException if {@code output} is too small to hold all parsed fields
      */
     public void parseLineToArray(final String nextLine, final String[] output) throws ParsingException {
         N.checkArgNotNull(output, "output");
@@ -451,6 +452,7 @@ public class CsvParser {
      * @return the {@code List} of parsed field values when {@code output} is {@code null};
      *         {@code null} when {@code output} is provided; an empty list if {@code nextLine} is {@code null}
      * @throws ParsingException if the line contains an unterminated quoted field
+     * @throws ArrayIndexOutOfBoundsException if {@code output} is non-{@code null} and too small to hold all parsed fields
      */
     protected List<String> parseLine(final String nextLine, final String[] output) throws ParsingException {
         if (nextLine == null) {

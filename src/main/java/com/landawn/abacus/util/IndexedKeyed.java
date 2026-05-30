@@ -20,7 +20,7 @@ package com.landawn.abacus.util;
  * <p>This type extends {@link Keyed} and adds positional information. Equality and hash code are
  * based on {@code index} and {@code key} only; {@code val} is intentionally ignored.</p>
  *
- * <p><b>Usage example:</b></p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedKeyed<String, User> indexed = IndexedKeyed.of("user123", new User("John"), 0);
  * System.out.println(indexed.index()); // 0

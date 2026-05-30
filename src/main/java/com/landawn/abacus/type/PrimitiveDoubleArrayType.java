@@ -33,6 +33,7 @@ import com.landawn.abacus.util.Strings;
 @SuppressWarnings("java:S2160")
 public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<double[]> {
 
+    /** The type name constant for the double array type, equal to {@code "double[]"}. */
     public static final String DOUBLE_ARRAY = double[].class.getSimpleName();
 
     private final Type<Double> elementType;

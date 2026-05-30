@@ -27,7 +27,7 @@ import com.landawn.abacus.util.Numbers;
 public final class LongType extends AbstractLongType {
 
     /**
-     * The type name constant for Long type identification.
+     * The type name constant for Long type identification, equal to {@code "Long"}.
      */
     public static final String LONG = Long.class.getSimpleName();
 
@@ -40,9 +40,9 @@ public final class LongType extends AbstractLongType {
     }
 
     /**
-     * Returns the Class object representing the Long class.
+     * Returns the Class object representing the {@code Long} type.
      *
-     * @return the Class object for Long.class
+     * @return the Class object for {@code Long}
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override

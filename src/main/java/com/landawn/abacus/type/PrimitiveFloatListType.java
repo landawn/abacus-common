@@ -32,6 +32,7 @@ import com.landawn.abacus.util.Strings;
 @SuppressWarnings("java:S2160")
 public final class PrimitiveFloatListType extends AbstractPrimitiveListType<FloatList> {
 
+    /** The type name constant for {@link FloatList} type identification, equal to {@code "FloatList"}. */
     public static final String FLOAT_LIST = FloatList.class.getSimpleName();
 
     private final Type<float[]> arrayType = Type.of(float[].class);
@@ -66,7 +67,8 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
     }
 
     /**
-     * Returns the Type object for the float element type.
+     * Returns the Type instance for the element type of this list, which is primitive {@code float}.
+     * This method provides access to the Type representation of individual list elements.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -75,7 +77,7 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      * // Returns: Type instance for float
      * }</pre>
      *
-     * @return the Type object representing float elements
+     * @return the Type instance representing the {@code float} element type
      */
     @Override
     public Type<Float> elementType() {
@@ -185,7 +187,7 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      *
      * @param writer the CharacterWriter to write to
      * @param x the FloatList to write
-     * @param config the serialization configuration
+     * @param config the serialization configuration (passed through to the array type writer)
      * @throws IOException if an I/O error occurs
      */
     @Override

@@ -21,9 +21,8 @@ public class CollectorTest extends AbstractTest {
 
     @Test
     public void test_combine() {
-        List<Collector<? super String, ?, ?>> downstreams = N.toList(Collectors.summingInt(String::length),
-                Collectors.averagingDoubleOrEmpty(String::length), Collectors.toList(), Collectors.toSet(), Collectors.minMax(), Collectors.commonPrefix(),
-                Collectors.counting());
+        List<Collector<? super String, ?, ?>> downstreams = N.toList(Collectors.summingInt(String::length), Collectors.averagingDoubleOrEmpty(String::length),
+                Collectors.toList(), Collectors.toSet(), Collectors.minMax(), Collectors.commonPrefix(), Collectors.counting());
 
         var result = Stream.range(100, 200)
                 .map(String::valueOf)

@@ -158,6 +158,7 @@ public final class HttpSettings {
      * The read timeout is the time to wait for data to be available for reading.
      *
      * @return the read timeout in milliseconds, or 0 if not set
+     * @see #setReadTimeout(long)
      */
     public long getReadTimeout() {
         return readTimeout;
@@ -175,7 +176,7 @@ public final class HttpSettings {
      * settings.setReadTimeout(10000);   // 10 seconds
      * }</pre>
      *
-     * @param readTimeout the read timeout in milliseconds
+     * @param readTimeout the read timeout in milliseconds (0 = infinite)
      * @return this HttpSettings instance for method chaining
      */
     public HttpSettings setReadTimeout(final long readTimeout) {
@@ -364,9 +365,10 @@ public final class HttpSettings {
 
     /**
      * Gets the content format for request/response serialization.
-     * If not explicitly set, it will be determined from the Content-Type header.
+     * If no content format has been explicitly set (or it is {@link ContentFormat#NONE}) and headers
+     * are present, the format is derived from the {@code Content-Type} and {@code Content-Encoding} headers.
      *
-     * @return The content format, or {@code null} if not set
+     * @return the content format, or {@code null} if none was set and none could be derived from the headers
      */
     public ContentFormat getContentFormat() {
         if ((contentFormat == null || contentFormat == ContentFormat.NONE) && headers != null) {

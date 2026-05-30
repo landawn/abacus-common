@@ -3333,4 +3333,19 @@ public class BooleanListTest extends TestBase {
         assertEquals(20, a.size());
     }
 
+    @Test
+    public void test_forEach_removeIf_replaceIf_null_func() {
+        // Regression: a null functional argument must throw NullPointerException even on an
+        // EMPTY list (previously silently no-op'd; now matches IntList's fail-fast guard).
+        final BooleanList empty = new BooleanList();
+        assertThrows(NullPointerException.class, () -> empty.forEach((com.landawn.abacus.util.function.BooleanConsumer) null));
+        assertThrows(NullPointerException.class, () -> empty.removeIf((com.landawn.abacus.util.function.BooleanPredicate) null));
+        assertThrows(NullPointerException.class, () -> empty.replaceIf((com.landawn.abacus.util.function.BooleanPredicate) null, true));
+
+        final BooleanList nonEmpty = BooleanList.of(true, false);
+        assertThrows(NullPointerException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.BooleanConsumer) null));
+        assertThrows(NullPointerException.class, () -> nonEmpty.removeIf((com.landawn.abacus.util.function.BooleanPredicate) null));
+        assertThrows(NullPointerException.class, () -> nonEmpty.replaceIf((com.landawn.abacus.util.function.BooleanPredicate) null, true));
+    }
+
 }

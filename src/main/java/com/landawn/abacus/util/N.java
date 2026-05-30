@@ -8509,7 +8509,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new array with elements copied from the specified array and the specified element added at the end.
+     * Returns a new array with elements copied from the specified array and the specified elements added at the end.
      * <br />
      * The original array remains unchanged.
      *
@@ -8542,7 +8542,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new array with elements copied from the specified array and the specified element added at the end.
+     * Returns a new array with elements copied from the specified array and the specified elements added at the end.
      * <br />
      * The original array remains unchanged.
      *
@@ -9877,8 +9877,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the original boolean array
      * @param index the position of the element to be removed
      * @return a new boolean array containing the existing elements except the element at the specified index
-     * @throws IllegalArgumentException if one of the arguments violates the method contract
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IndexOutOfBoundsException if the specified index is out of range (index &lt; 0 || index &gt;= a.length)
      * @see #remove(boolean[], boolean)
      * @see #removeAt(boolean[], int...)
      */
@@ -9924,8 +9923,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the original char array
      * @param index the position of the element to be removed
      * @return a new char array containing the existing elements except the element at the specified index
-     * @throws IllegalArgumentException if one of the arguments violates the method contract
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IndexOutOfBoundsException if the specified index is out of range (index &lt; 0 || index &gt;= a.length)
      * @see #remove(char[], char)
      * @see #removeAt(char[], int...)
      */
@@ -9971,8 +9969,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the original byte array
      * @param index the position of the element to be removed
      * @return a new byte array containing the existing elements except the element at the specified index
-     * @throws IllegalArgumentException if one of the arguments violates the method contract
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IndexOutOfBoundsException if the specified index is out of range (index &lt; 0 || index &gt;= a.length)
      * @see #remove(byte[], byte)
      * @see #removeAt(byte[], int...)
      */
@@ -10018,8 +10015,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the original short array
      * @param index the position of the element to be removed
      * @return a new short array containing the existing elements except the element at the specified index
-     * @throws IllegalArgumentException if one of the arguments violates the method contract
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IndexOutOfBoundsException if the specified index is out of range (index &lt; 0 || index &gt;= a.length)
      * @see #remove(short[], short)
      * @see #removeAt(short[], int...)
      */
@@ -10803,6 +10799,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param indices the positions of the elements to be removed.
      * @return {@code true} if the list was modified as a result of the operation, {@code false} otherwise.
      * @throws IllegalArgumentException if the input list is {@code null}.
+     * @throws IndexOutOfBoundsException if any index is out of the range of the list.
      */
     @SuppressWarnings("rawtypes")
     public static boolean removeAt(@NotNull final List<?> list, final int... indices) throws IllegalArgumentException {
@@ -12992,7 +12989,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Removes duplicate elements from the given collection.
      *
      * @param c the collection from which duplicates should be removed.
-     * @param isSorted a boolean flag indicating whether the input array is sorted. If {@code true}, the algorithm will be faster
+     * @param isSorted a boolean flag indicating whether the input collection is sorted. If {@code true}, the algorithm will be faster
      * @return {@code true} if the collection changed as a result of this call, {@code false} otherwise.
      * @see #distinct(Iterable)
      * @see #distinctBy(Iterable, Function)
@@ -13372,7 +13369,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the initial index of the range to be deleted, inclusive
      * @param toIndex the final index of the range to be deleted, exclusive
      * @return a new array with the specified range of elements removed. An empty array is returned if the specified array is {@code null} or empty.
-     * @throws IllegalArgumentException if one of the arguments violates the method contract
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static String[] removeRange(final String[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException, IllegalArgumentException {
@@ -13412,8 +13408,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the input array from which a range of elements are to be deleted
      * @param fromIndex the initial index of the range to be deleted, inclusive
      * @param toIndex the final index of the range to be deleted, exclusive
-     * @return a new array with the specified range of elements removed
-     * @throws IllegalArgumentException if the array is {@code null} or the range is invalid
+     * @return a new array with the specified range of elements removed. {@code null} is returned if the specified array is {@code null}.
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      * @see #skipRange(Object[], int, int)
      */
@@ -13913,7 +13908,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * // result = {"apple", "kiwi", "lemon", "date", "elderberry"}
      * }</pre>
      *
-     * @throws IllegalArgumentException if one of the arguments violates the method contract
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static <T> T[] replaceRange(@NotNull final T[] a, final int fromIndex, final int toIndex, final T[] replacement)
@@ -14433,7 +14427,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * @param <T> the type of elements in the input array
-     * @param a the original array to be modified; may be {@code null}
+     * @param a the original array; may be {@code null}
      * @param startInclusive the initial index of the range to be skipped, inclusive
      * @param endExclusive the final index of the range to be skipped, exclusive
      * @return a new array with the specified range skipped; {@code null} if the input array is {@code null}.
@@ -14483,7 +14477,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * @param <T> the type of elements in the input collection
-     * @param c the original collection to be modified
+     * @param c the original collection
      * @param startInclusive the initial index of the range to be skipped, inclusive
      * @param endExclusive the final index of the range to be skipped, exclusive
      * @return a new list with the specified range skipped.
@@ -14512,13 +14506,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * // Returns HashSet containing ["apple", "date", "elderberry"]
      *
      * List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
-     * LinkedList<Integer> skipped = N.skipRange(numbers, 0, 2, LinkedList::new);
+     * LinkedList<Integer> skipped = N.skipRange(numbers, 0, 2, size -> new LinkedList<>());
      * // Returns LinkedList [3, 4, 5]
      * }</pre>
      *
      * @param <T> the type of elements in the input collection
      * @param <C> the type of the collection to be returned
-     * @param c the original collection to be modified
+     * @param c the original collection
      * @param startInclusive the initial index of the range to be skipped, inclusive
      * @param endExclusive the final index of the range to be skipped, exclusive
      * @param supplier a function that creates a new instance of the desired collection type
@@ -16311,6 +16305,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the elements in the array, which must extend Number.
      * @param a the array of numbers to be summed.
      * @return the sum of all elements in the array as an integer.
+     * @throws ArithmeticException if the result overflows an {@code int}
      * @see Iterables#sumInt(Iterable)
      */
     public static <T extends Number> int sumInt(final T[] a) {
@@ -16332,6 +16327,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the ending index (exclusive) of the range to be summed.
      * @return the sum of all elements within the specified range in the array as an integer.
      * @throws IndexOutOfBoundsException if the specified range is out of bounds for the given array.
+     * @throws ArithmeticException if the result overflows an {@code int}
      * @see Iterables#sumInt(Iterable)
      */
     public static <T extends Number> int sumInt(final T[] a, final int fromIndex, final int toIndex) {
@@ -16352,6 +16348,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array of elements to be summed.
      * @param func the function to convert each element to an integer.
      * @return the sum of all elements in the array as an integer.
+     * @throws ArithmeticException if the result overflows an {@code int}
      * @see Iterables#sumInt(Iterable, ToIntFunction)
      */
     public static <T> int sumInt(final T[] a, final ToIntFunction<? super T> func) throws IndexOutOfBoundsException {
@@ -16379,6 +16376,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param func the function to convert each element to an integer.
      * @return the sum of all elements within the specified range of the array as an integer.
      * @throws IndexOutOfBoundsException if the specified range is out of bounds.
+     * @throws ArithmeticException if the result overflows an {@code int}
      * @see Iterables#sumInt(Iterable, ToIntFunction)
      */
     public static <T> int sumInt(final T[] a, final int fromIndex, final int toIndex, final ToIntFunction<? super T> func) throws IndexOutOfBoundsException {
@@ -16412,6 +16410,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the ending index (exclusive) of the range to be summed.
      * @return the sum of all elements within the specified range in the collection as an integer.
      * @throws IndexOutOfBoundsException if the specified range is out of bounds for the given collection.
+     * @throws ArithmeticException if the result overflows an {@code int}
      * @see Iterables#sumInt(Iterable)
      */
     public static <T extends Number> int sumInt(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
@@ -16435,6 +16434,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param func the function to convert each element to an integer.
      * @return the sum of all elements within the specified range of the collection as an integer.
      * @throws IndexOutOfBoundsException if the specified range is out of bounds.
+     * @throws ArithmeticException if the result overflows an {@code int}
      * @see Iterables#sumInt(Iterable, ToIntFunction)
      */
     public static <T> int sumInt(final Collection<? extends T> c, final int fromIndex, final int toIndex, final ToIntFunction<? super T> func)
@@ -16485,6 +16485,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the elements in the iterable, which must extend Number.
      * @param c the iterable of elements to be summed.
      * @return the sum of all elements in the iterable as an integer.
+     * @throws ArithmeticException if the result overflows an {@code int}
      * @see Iterables#sumInt(Iterable)
      */
     public static <T extends Number> int sumInt(final Iterable<? extends T> c) {
@@ -16505,6 +16506,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c the iterable of elements to be summed.
      * @param func the function to convert each element to an integer.
      * @return the sum of all elements in the iterable as an integer.
+     * @throws ArithmeticException if the result overflows an {@code int}
      * @see Iterables#sumInt(Iterable, ToIntFunction)
      */
     public static <T> int sumInt(final Iterable<? extends T> c, final ToIntFunction<? super T> func) {
@@ -16517,7 +16519,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the elements in the iterable, which must extend Number.
      * @param c the iterable of numbers to be summed.
      * @return the sum of all elements in the iterable as a long.
-     * @see Iterables#sumLong(Iterable)
+     * @see Iterables#sumIntToLong(Iterable)
      */
     public static <T extends Number> long sumIntToLong(final Iterable<? extends T> c) {
         return sumIntToLong(c, Fn.numToInt());
@@ -17229,13 +17231,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Calculates the average of the elements in the given collection of numbers.
+     * Calculates the average of the elements within the specified range in the input collection of numbers.
      *
      * @param <T> the type of the elements in the collection, which must extend Number.
      * @param c the collection of numbers to calculate the average.
      * @param fromIndex the starting index (inclusive) of the range.
      * @param toIndex the ending index (exclusive) of the range.
-     * @return the average of the elements in the collection as a double.
+     * @return the average of the elements within the specified range as a double.
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
      * @see Iterables#averageLong(Collection, int, int)
      */
     public static <T extends Number> double averageLong(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
@@ -17377,13 +17380,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Calculates the average of the elements in the given collection of numbers.
+     * Calculates the average of the elements within the specified range in the input collection of numbers.
      *
      * @param <T> the type of the elements in the collection, which must extend Number.
      * @param c the collection of numbers to calculate the average.
      * @param fromIndex the starting index (inclusive) of the range.
      * @param toIndex the ending index (exclusive) of the range.
-     * @return the average of the elements in the collection as a double.
+     * @return the average of the elements within the specified range as a double.
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
      * @see Iterables#averageDouble(Collection, int, int)
      */
     public static <T extends Number> double averageDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
@@ -18544,6 +18548,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the smallest value within the specified range based on natural ordering
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @throws IllegalArgumentException if the collection is {@code null} or the range is empty
      * @see #min(Collection, int, int, Comparator)
      * @see #max(Collection, int, int)
@@ -19418,7 +19423,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * String[] words = {"apple", "pie", "zoo", "at"};
      * Pair<String, String> result = N.minMax(words, Comparator.comparing(String::length));
-     * // result.left is "at" (shortest), result.right is "apple" or "zoo" (longest)
+     * // result.left is "at" (shortest), result.right is "apple" (longest)
      *
      * // Case insensitive comparison
      * String[] words2 = {"Apple", "BANANA", "cherry"};
@@ -19490,7 +19495,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * List<String> words = Arrays.asList("apple", "pie", "zoo", "at");
      * Pair<String, String> result = N.minMax(words, Comparator.comparing(String::length));
-     * // result.left is "at" (shortest), result.right is "apple" or "zoo" (longest)
+     * // result.left is "at" (shortest), result.right is "apple" (longest)
      *
      * // Case insensitive comparison
      * List<String> words2 = Arrays.asList("Apple", "BANANA", "cherry");
@@ -20491,8 +20496,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * String[] words = {"zebra", "apple", "mango"};
      * String max = N.max(words, String.CASE_INSENSITIVE_ORDER);   // Returns "zebra"
      *
-     * // Custom comparator for length
-     * String longest = N.max(words, Comparator.comparing(String::length));   // Returns "zebra" or "apple"
+     * // Custom comparator for length (all have length 5; the first maximal element is kept)
+     * String longest = N.max(words, Comparator.comparing(String::length));   // Returns "zebra"
      *
      * // Reverse order
      * String min = N.max(words, Comparator.reverseOrder());   // Returns "apple"
@@ -20522,8 +20527,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * String[] words = {"apple", "zebra", "mango", "banana", "cherry"};
      * String max = N.max(words, 1, 4, String.CASE_INSENSITIVE_ORDER);   // Returns "zebra" (from index 1 to 3)
      *
-     * // Custom comparator for length
-     * String longest = N.max(words, 0, 3, Comparator.comparing(String::length));   // Returns "zebra" or "apple"
+     * // Custom comparator for length (indexes 0-2 all have length 5; the first maximal element is kept)
+     * String longest = N.max(words, 0, 3, Comparator.comparing(String::length));   // Returns "apple"
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -20603,8 +20608,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * List<String> words = Arrays.asList("apple", "zebra", "mango", "banana", "cherry");
      * String max = N.max(words, 1, 4, String.CASE_INSENSITIVE_ORDER);   // Returns "zebra" (from index 1 to 3)
      *
-     * // Custom comparator for length
-     * String longest = N.max(words, 0, 3, Comparator.comparing(String::length));   // Returns "zebra" or "apple"
+     * // Custom comparator for length (indexes 0-2 all have length 5; the first maximal element is kept)
+     * String longest = N.max(words, 0, 3, Comparator.comparing(String::length));   // Returns "apple"
      * }</pre>
      *
      * @param <T> the type of elements in the collection
@@ -20707,8 +20712,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Iterable<String> words = Arrays.asList("apple", "zebra", "mango");
      * String max = N.max(words, String.CASE_INSENSITIVE_ORDER);   // Returns "zebra"
      *
-     * // Custom comparator for length
-     * String longest = N.max(words, Comparator.comparing(String::length));   // Returns "zebra" or "apple"
+     * // Custom comparator for length (all have length 5; the first maximal element is kept)
+     * String longest = N.max(words, Comparator.comparing(String::length));   // Returns "apple"
      * }</pre>
      *
      * @param <T> the type of elements in the iterable
@@ -20765,9 +20770,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Iterator<String> words = Arrays.asList("apple", "zebra", "mango").iterator();
      * String max = N.max(words, String.CASE_INSENSITIVE_ORDER);   // Returns "zebra"
      *
-     * // Custom comparator for length
+     * // Custom comparator for length (all have length 5; the first maximal element is kept)
      * Iterator<String> words2 = Arrays.asList("apple", "zebra", "mango").iterator();
-     * String longest = N.max(words2, Comparator.comparing(String::length));   // Returns "zebra" or "apple"
+     * String longest = N.max(words2, Comparator.comparing(String::length));   // Returns "apple"
      * }</pre>
      *
      * @param <T> the type of elements in the iterator
@@ -22407,7 +22412,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param cmp the comparator to determine the order of the values
      * @return the median in the specified collection
      * @throws IllegalArgumentException if the collection is {@code null} or empty
-     * @throws IndexOutOfBoundsException if an index is out of bounds
      * @see #median(int[])
      * @see Iterables#median(Collection, Comparator)
      * @see Median#of(Collection)
@@ -23207,7 +23211,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * String[] words = {"elephant", "apple", "cherry", "banana", "date"};
      * String result = N.kthLargest(words, 1, 4, 2, Comparator.comparingInt(String::length));
-     * // Returns "banana" (second longest in range [1,4))
+     * // Returns "cherry" (second longest in range [1,4))
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -23316,7 +23320,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * List<String> words = Arrays.asList("elephant", "apple", "cherry", "banana", "date");
      * String result = N.kthLargest(words, 1, 4, 2, Comparator.comparingInt(String::length));
-     * // Returns "banana" (second longest in range [1,4))
+     * // Returns "cherry" (second longest in range [1,4))
      * }</pre>
      *
      * @param <T> the type of elements in the collection
@@ -24653,8 +24657,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Map<Percentage, Character> percentiles = N.percentilesOfSorted(grades);
      *
      * // Access specific percentiles
-     * char median = percentiles.get(Percentage.P50);   // 'B' or 'C'
-     * char p90 = percentiles.get(Percentage.P90);      // High grade threshold
+     * char median = percentiles.get(Percentage._50);   // 'B' or 'C'
+     * char p90 = percentiles.get(Percentage._90);      // High grade threshold
      * }</pre>
      *
      * @param sortedArray the sorted array of characters for which to calculate the percentiles
@@ -24697,8 +24701,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Map<Percentage, Byte> percentiles = N.percentilesOfSorted(scores);
      *
      * // Find percentile thresholds
-     * byte median = percentiles.get(Percentage.P50);   // Returns 60
-     * byte p90 = percentiles.get(Percentage.P90);      // Returns 100
+     * byte median = percentiles.get(Percentage._50);   // Returns 60
+     * byte p90 = percentiles.get(Percentage._90);      // Returns 100
      * }</pre>
      *
      * @param sortedArray the sorted array of bytes for which to calculate the percentiles
@@ -24741,9 +24745,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Map<Percentage, Short> percentiles = N.percentilesOfSorted(responseTimes);
      *
      * // Analyze response time distribution
-     * short p50 = percentiles.get(Percentage.P50);   // Median: 300ms
-     * short p95 = percentiles.get(Percentage.P95);   // 95th percentile
-     * short p99 = percentiles.get(Percentage.P99);   // 99th percentile for SLA
+     * short p50 = percentiles.get(Percentage._50);   // Median: 300ms
+     * short p95 = percentiles.get(Percentage._95);   // 95th percentile
+     * short p99 = percentiles.get(Percentage._99);   // 99th percentile for SLA
      * }</pre>
      *
      * @param sortedArray the sorted array of shorts for which to calculate the percentiles
@@ -24854,8 +24858,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Map<Percentage, Long> percentiles = N.percentilesOfSorted(timestamps);
      *
      * // Analyze timestamp distribution
-     * long median = percentiles.get(Percentage.P50);   // Middle timestamp
-     * long p99 = percentiles.get(Percentage.P99);      // 99th percentile latency
+     * long median = percentiles.get(Percentage._50);   // Middle timestamp
+     * long p99 = percentiles.get(Percentage._99);      // 99th percentile latency
      * }</pre>
      *
      * @param sortedArray the sorted array of longs for which to calculate the percentiles
@@ -24901,9 +24905,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Map<Percentage, Float> percentiles = N.percentilesOfSorted(prices);
      *
      * // Analyze price distribution
-     * float medianPrice = percentiles.get(Percentage.P50);   // Middle price point
-     * float p75 = percentiles.get(Percentage.P75);           // Upper quartile
-     * float p25 = percentiles.get(Percentage.P25);           // Lower quartile
+     * float medianPrice = percentiles.get(Percentage._50);   // Middle price point
+     * float p75 = percentiles.get(Percentage._75);           // Upper quartile
+     * float p25 = percentiles.get(Percentage._25);           // Lower quartile
      * }</pre>
      *
      * @param sortedArray the sorted array of floats for which to calculate the percentiles
@@ -24950,9 +24954,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Map<Percentage, Double> percentiles = N.percentilesOfSorted(measurements);
      *
      * // Statistical analysis
-     * double median = percentiles.get(Percentage.P50);    // 50th percentile (median)
-     * double p95 = percentiles.get(Percentage.P95);       // 95th percentile
-     * double p99_9 = percentiles.get(Percentage.P99_9);   // 99.9th percentile
+     * double median = percentiles.get(Percentage._50);    // 50th percentile (median)
+     * double p95 = percentiles.get(Percentage._95);       // 95th percentile
+     * double p99_9 = percentiles.get(Percentage._99_9);   // 99.9th percentile
      *
      * System.out.printf("Median: %.2f, P95: %.2f%n", median, p95);
      * }</pre>
@@ -24999,14 +25003,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Map<Percentage, String> percentiles = N.percentilesOfSorted(names);
      *
      * // Find percentile values in sorted data
-     * String median = percentiles.get(Percentage.P50);   // Middle name alphabetically
-     * String p75 = percentiles.get(Percentage.P75);      // Upper quartile
+     * String median = percentiles.get(Percentage._50);   // Middle name alphabetically
+     * String p75 = percentiles.get(Percentage._75);      // Upper quartile
      *
      * // With custom objects
      * Person[] people = {new Person("Alice", 25), new Person("Bob", 30)};
      * Arrays.sort(people, Comparator.comparing(Person::getAge));
      * Map<Percentage, Person> agePercentiles = N.percentilesOfSorted(people);
-     * Person medianAge = agePercentiles.get(Percentage.P50);
+     * Person medianAge = agePercentiles.get(Percentage._50);
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -25055,14 +25059,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Map<Percentage, Integer> percentiles = N.percentilesOfSorted(scores);
      *
      * // Analyze test score distribution
-     * int median = percentiles.get(Percentage.P50);      // 85 (median score)
-     * int p90 = percentiles.get(Percentage.P90);         // 100 (90th percentile)
-     * int p10 = percentiles.get(Percentage.P10);         // 65 (10th percentile)
+     * int median = percentiles.get(Percentage._50);      // 85 (median score)
+     * int p90 = percentiles.get(Percentage._90);         // 100 (90th percentile)
+     * int p10 = percentiles.get(Percentage._10);         // 65 (10th percentile)
      *
      * // Useful for SLA calculations
      * List<Double> latencies = getResponseLatencies();   // Pre-sorted
      * Map<Percentage, Double> latencyPercentiles = N.percentilesOfSorted(latencies);
-     * double sla = latencyPercentiles.get(Percentage.P99);   // 99th percentile for SLA
+     * double sla = latencyPercentiles.get(Percentage._99);   // 99th percentile for SLA
      * }</pre>
      *
      * @param <T> the type of elements in the list
@@ -30589,7 +30593,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * int[] numbers = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
      * int result = N.count(numbers, 3, 8, n -> n % 2 == 0);
-     * // Returns 2 (4 and 6 in range [3,8))
+     * // Returns 3 (4, 6 and 8 in range [3,8))
      * }</pre>
      *
      * @param a the array
@@ -30706,7 +30710,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * float[] numbers = {1.5f, 2.3f, 3.7f, 4.1f, 5.9f};
      * int result = N.count(numbers, 1, 4, n -> n > 3.0f);
-     * // Returns 1 (only 3.7f in range [1,4))
+     * // Returns 2 (3.7f and 4.1f in range [1,4))
      * }</pre>
      *
      * @param a the array
@@ -30764,7 +30768,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * double[] numbers = {1.5, 2.3, 3.7, 4.1, 5.9};
      * int result = N.count(numbers, 1, 4, n -> n > 3.0);
-     * // Returns 1 (only 3.7 in range [1,4))
+     * // Returns 2 (3.7 and 4.1 in range [1,4))
      * }</pre>
      *
      * @param a the array
@@ -32838,7 +32842,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * @param obj the object to serialize
-     * @return the JSON string representation (returns the string {@code "null"} if the object is {@code null})
+     * @return the JSON string representation (an empty string if the object is {@code null})
      * @see #toJson(Object, boolean)
      * @see #toJson(Object, JsonSerConfig)
      * @see #fromJson(String, Class)
@@ -32859,7 +32863,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param obj the object to serialize
      * @param prettyFormat {@code true} for formatted output with indentation
-     * @return the JSON string representation (returns the string {@code "null"} if the object is {@code null})
+     * @return the JSON string representation (an empty string if the object is {@code null})
      * @see #toJson(Object)
      * @see #toJson(Object, JsonSerConfig)
      */
@@ -32879,7 +32883,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param obj the object to serialize
      * @param config the serialization configuration
-     * @return the JSON string representation (returns the string {@code "null"} if the object is {@code null})
+     * @return the JSON string representation (an empty string if the object is {@code null})
      * @see #toJson(Object)
      * @see #toJson(Object, boolean)
      */
@@ -33837,11 +33841,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * String json = "{\"name\":\"Alice\",\"age\":25}";
      * String result = N.formatJson(json);
-     * // Returns formatted: {"name": "Alice", "age": 25}
+     * // Returns the JSON re-rendered with indentation and line breaks
      * }</pre>
      *
      * @param json the JSON string to format
-     * @return the formatted JSON string ({@code null} if input is {@code null})
+     * @return the formatted JSON string (an empty string if input is {@code null})
      * @see #formatJson(String, JsonSerConfig)
      * @see #toJson(Object, boolean)
      */
@@ -33861,7 +33865,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param json the JSON string to format
      * @param transferType the type for deserialization
-     * @return the formatted JSON string ({@code null} if input is {@code null})
+     * @return the formatted JSON string (an empty string if input is {@code null})
      * @see #formatJson(String, Type)
      * @see #formatJson(String)
      */
@@ -33881,7 +33885,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param json the JSON string to format
      * @param transferType the Type for deserialization (supports generics like {@code List<String>})
-     * @return the formatted JSON string ({@code null} if input is {@code null})
+     * @return the formatted JSON string (an empty string if input is {@code null})
      * @see #formatJson(String, Class)
      * @see TypeReference
      */
@@ -33902,7 +33906,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param json the JSON string to format
      * @param config the serialization configuration (pretty formatting enabled automatically if not set)
-     * @return the formatted JSON string ({@code null} if input is {@code null})
+     * @return the formatted JSON string (an empty string if input is {@code null})
      * @see #formatJson(String, JsonSerConfig, Class)
      * @see #formatJson(String)
      */
@@ -33924,7 +33928,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param json the JSON string to format
      * @param config the serialization configuration (pretty formatting enabled automatically if not set)
      * @param transferType the Type for deserialization (supports generics like {@code List<String>})
-     * @return the formatted JSON string ({@code null} if input is {@code null})
+     * @return the formatted JSON string (an empty string if input is {@code null})
      * @see #formatJson(String, JsonSerConfig, Class)
      * @see TypeReference
      */
@@ -33948,7 +33952,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param json the JSON string to format
      * @param config the serialization configuration (pretty formatting enabled automatically if not set)
      * @param transferType the type for deserialization
-     * @return the formatted JSON string ({@code null} if input is {@code null})
+     * @return the formatted JSON string (an empty string if input is {@code null})
      * @see #formatJson(String, JsonSerConfig, Type)
      * @see #formatJson(String, Class)
      */
@@ -33969,7 +33973,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * @param obj the object to serialize
-     * @return the XML string representation ({@code "null"} if object is {@code null})
+     * @return the XML string representation (an empty string if object is {@code null})
      * @see #toXml(Object, boolean)
      * @see #toXml(Object, XmlSerConfig)
      * @see #fromXml(String, Class)
@@ -33990,7 +33994,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param obj the object to serialize
      * @param prettyFormat {@code true} to format with indentation and line breaks
-     * @return the XML string representation ({@code "null"} if object is {@code null})
+     * @return the XML string representation (an empty string if object is {@code null})
      * @see #toXml(Object)
      * @see #toXml(Object, XmlSerConfig)
      */
@@ -34011,7 +34015,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param obj the object to serialize
      * @param config the XML serialization configuration
-     * @return the XML string representation ({@code "null"} if object is {@code null})
+     * @return the XML string representation (an empty string if object is {@code null})
      * @see #toXml(Object, boolean)
      * @see #fromXml(String, XmlDeserConfig, Class)
      */
@@ -34560,7 +34564,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * @param xml the XML string to format
-     * @return the formatted XML string ({@code null} if the input is {@code null})
+     * @return the formatted XML string (an empty string if the input is {@code null})
      * @see #formatXml(String, Class)
      * @see #toXml(Object, boolean)
      */
@@ -34580,7 +34584,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param xml the XML string to format
      * @param transferType the type for deserialization during formatting
-     * @return the formatted XML string ({@code null} if the input is {@code null})
+     * @return the formatted XML string (an empty string if the input is {@code null})
      * @see #formatXml(String, Type)
      * @see #formatXml(String)
      */
@@ -34600,7 +34604,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param xml the XML string to format
      * @param transferType the Type for deserialization during formatting with generic information
-     * @return the formatted XML string ({@code null} if the input is {@code null})
+     * @return the formatted XML string (an empty string if the input is {@code null})
      * @see #formatXml(String, Class)
      * @see TypeReference
      */
@@ -34621,7 +34625,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param xml the XML string to format
      * @param config the serialization configuration (pretty formatting enabled automatically if not set)
-     * @return the formatted XML string ({@code null} if the input is {@code null})
+     * @return the formatted XML string (an empty string if the input is {@code null})
      * @see #formatXml(String, XmlSerConfig, Class)
      * @see #formatXml(String)
      */
@@ -34643,7 +34647,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param xml the XML string to format
      * @param config the serialization configuration (pretty formatting enabled automatically if not set)
      * @param transferType the type for deserialization during formatting
-     * @return the formatted XML string ({@code null} if the input is {@code null})
+     * @return the formatted XML string (an empty string if the input is {@code null})
      * @see #formatXml(String, XmlSerConfig, Type)
      * @see #formatXml(String, Class)
      */
@@ -34667,7 +34671,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param xml the XML string to format
      * @param config the serialization configuration (pretty formatting enabled automatically if not set)
      * @param transferType the Type for deserialization during formatting with generic information
-     * @return the formatted XML string ({@code null} if the input is {@code null})
+     * @return the formatted XML string (an empty string if the input is {@code null})
      * @see #formatXml(String, XmlSerConfig, Class)
      * @see TypeReference
      */
@@ -34688,7 +34692,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * @param xml the XML string to convert
-     * @return the JSON string representation ({@code null} if the input is {@code null})
+     * @return the JSON string representation (an empty string if the input is {@code null})
      * @see #xmlToJson(String, Class)
      * @see #jsonToXml(String)
      */
@@ -34708,7 +34712,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param xml the XML string to convert
      * @param transferType the intermediate type for parsing during conversion (must be Bean or Map type)
-     * @return the JSON string representation ({@code null} if the input is {@code null})
+     * @return the JSON string representation (an empty string if the input is {@code null})
      * @see #xmlToJson(String)
      * @see #jsonToXml(String, Class)
      */
@@ -34727,7 +34731,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * @param json the JSON string to convert
-     * @return the XML string representation ({@code null} if the input is {@code null})
+     * @return the XML string representation (an empty string if the input is {@code null})
      * @see #jsonToXml(String, Class)
      * @see #xmlToJson(String)
      */
@@ -34747,7 +34751,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param json the JSON string to convert
      * @param transferType the intermediate type for parsing during conversion (must be Bean or Map type)
-     * @return the XML string representation ({@code null} if the input is {@code null})
+     * @return the XML string representation (an empty string if the input is {@code null})
      * @see #jsonToXml(String)
      * @see #xmlToJson(String, Class)
      */
@@ -35068,7 +35072,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * // Prints: Diana, Charlie
      * }</pre>
      *
-     * <p>Note: For {@link java.util.List} with {@link java.util.RandomAccess}, uses optimized indexed access; otherwise uses iterator-based access.
+     * <p>Note: For {@link java.util.List} with {@link java.util.RandomAccess}, uses optimized indexed access; otherwise uses iterator-based access.</p>
      *
      * @param <T> the type of elements in the collection
      * @param <E> the type of exception that the action may throw
@@ -35492,11 +35496,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String[] words = {"hello", "world"};
+     * String[] words = {"ab", "cd"};
      * N.forEach(words,
-     *     s -> N.asList(s.toCharArray()),
-     *     c -> N.asList((int)c),
-     *     (s, c, i) -> System.out.println(s + " " + c + " " + i));
+     *     s -> Arrays.asList(s.split("")),     // String -> Iterable<String> (characters)
+     *     c -> Arrays.asList(c, c.toUpperCase()), // String -> Iterable<String>
+     *     (s, c, u) -> System.out.println(s + " " + c + " " + u));
      * }</pre>
      *
      * @param <T> the type of the elements in the array
@@ -39439,7 +39443,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param timeout the maximum time to wait
      * @param unit the time unit of the timeout argument
      * @return the result of the command
-     * @throws IllegalArgumentException if cmd or unit is {@code null}
+     * @throws IllegalArgumentException if {@code unit} is {@code null}
      * @see #callUninterruptibly(Throwables.LongFunction, long)
      * @see #callUninterruptibly(Throwables.Callable)
      */
@@ -39487,7 +39491,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a {@code Nullable} containing the result, or empty if an exception occurs
      * @see #tryOrEmptyIfExceptionOccurred(Object, Throwables.Function)
      * @see #tryOrDefaultIfExceptionOccurred(Callable, Supplier)
-     * @see Try#call(Throwables.Function)
+     * @see Try#call(Callable)
      */
     @Beta
     public static <R> Nullable<R> tryOrEmptyIfExceptionOccurred(final Callable<R> cmd) {
@@ -39519,7 +39523,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a {@code Nullable} containing the result, or empty if an exception occurs
      * @see #tryOrEmptyIfExceptionOccurred(Callable)
      * @see #tryOrDefaultIfExceptionOccurred(Object, Throwables.Function, Supplier)
-     * @see Try#call(Throwables.Function)
+     * @see Try#call(Callable)
      */
     @Beta
     public static <T, R> Nullable<R> tryOrEmptyIfExceptionOccurred(final T init, final Throwables.Function<? super T, ? extends R, ? extends Exception> func) {
@@ -39550,7 +39554,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the result of the callable, or the result from the supplier on exception
      * @see #tryOrDefaultIfExceptionOccurred(Callable, Comparable)
      * @see #tryOrEmptyIfExceptionOccurred(Callable)
-     * @see Try#call(Throwables.Function, Supplier)
+     * @see Try#call(Callable, Supplier)
      */
     @Beta
     public static <R> R tryOrDefaultIfExceptionOccurred(final Callable<R> cmd, final Supplier<R> supplierForDefaultIfExceptionOccurred) {
@@ -39584,7 +39588,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the result of the callable, or the default value on exception
      * @see #tryOrDefaultIfExceptionOccurred(Callable, Supplier)
      * @see #tryOrEmptyIfExceptionOccurred(Callable)
-     * @see Try#call(Throwables.Function)
+     * @see Try#call(Callable, Comparable)
      */
     @Beta
     public static <R extends Comparable<? super R>> R tryOrDefaultIfExceptionOccurred(final Callable<R> cmd, final R defaultIfExceptionOccurred) {
@@ -39619,7 +39623,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the result of the function, or the result from the supplier on exception
      * @see #tryOrDefaultIfExceptionOccurred(Object, Throwables.Function, Comparable)
      * @see #tryOrEmptyIfExceptionOccurred(Object, Throwables.Function)
-     * @see Try#call(Throwables.Function, Supplier)
+     * @see Try#call(Callable, Supplier)
      */
     @Beta
     public static <T, R> R tryOrDefaultIfExceptionOccurred(final T init, final Throwables.Function<? super T, ? extends R, ? extends Exception> func,
@@ -39658,7 +39662,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the result of the function, or the default value on exception
      * @see #tryOrDefaultIfExceptionOccurred(Object, Throwables.Function, Supplier)
      * @see #tryOrEmptyIfExceptionOccurred(Object, Throwables.Function)
-     * @see Try#call(Throwables.Function)
+     * @see Try#call(Callable, Comparable)
      */
     @Beta
     public static <T, R extends Comparable<? super R>> R tryOrDefaultIfExceptionOccurred(final T init,

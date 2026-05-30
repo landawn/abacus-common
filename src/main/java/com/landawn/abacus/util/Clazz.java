@@ -64,7 +64,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  *   <li><b>Predefined Constants:</b> Common collection type combinations available as static constants</li>
  *   <li><b>Comprehensive Coverage:</b> Support for all major Java collection interfaces and implementations</li>
  *   <li><b>Performance Optimized:</b> Zero runtime overhead beyond normal Class object usage</li>
- *   <li><b>Null-Safe Design:</b> All methods properly handle parameter validation</li>
+ *   <li><b>Null-Safe Design:</b> Class parameters are used only for compile-time type inference and are ignored at runtime, so a {@code null} argument never causes a failure</li>
  *   <li><b>Framework Friendly:</b> Designed for use with serialization, ORM, and dependency injection frameworks</li>
  * </ul>
  *
@@ -215,7 +215,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  *   <li><b>No Runtime Exceptions:</b> All methods are guaranteed to succeed</li>
  *   <li><b>Compile-Time Safety:</b> Generic type constraints prevent most errors at compile time</li>
  *   <li><b>ClassCastException:</b> Potential only if returned Class is misused with incompatible types</li>
- *   <li><b>Parameter Validation:</b> Methods are designed to be null-safe where appropriate</li>
+ *   <li><b>Parameter Validation:</b> Class parameters are ignored at runtime; passing {@code null} is harmless</li>
  * </ul>
  *
  * <p><b>Use Cases and Applications:</b>

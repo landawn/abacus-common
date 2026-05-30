@@ -1477,4 +1477,11 @@ public class TypeFactoryTest extends TestBase {
             TypeFactory.registerType("String", TypeFactory.getType(String.class));
         });
     }
+
+    @Test
+    public void testGetType_SheetWithParameters_Throws() {
+        // Regression: Sheet type must reject constructor-style parameters like its siblings (#18).
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Sheet<String, Integer, Long>(foo)"));
+    }
+
 }

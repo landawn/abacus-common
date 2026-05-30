@@ -65,6 +65,13 @@ public class Tuple9Type<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends AbstractTupl
                         TypeFactory.getType(t9TypeName)));
     }
 
+    /**
+     * Reconstructs a {@link Tuple9} from an already type-converted element array.
+     * The array is expected to contain exactly nine elements matching the tuple's parameter types.
+     *
+     * @param converted the array of converted element values (must be of length 9)
+     * @return a new {@code Tuple9} containing the nine elements in order
+     */
     @SuppressWarnings({ "unchecked", "deprecation" })
     @Override
     protected Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> fromArray(final Object[] converted) {

@@ -63,15 +63,15 @@ public final class WebUtil {
      * <ul>
      *   <li>{@code -X, --request}: HTTP method (GET, POST, PUT, DELETE, etc.)</li>
      *   <li>{@code -H, --header}: HTTP headers (can be specified multiple times)</li>
-     *   <li>{@code -d, --data, --data-raw}: Request body data</li>
-     *   <li>{@code -I}: HEAD request (inferred method)</li>
+     *   <li>{@code -d, --data, --data-raw}: Request body data (also accepts the inline {@code -d=}, {@code --data=} and {@code --data-raw=} forms)</li>
+     *   <li>{@code -I, --head}: HEAD request (inferred method)</li>
      * </ul>
      *
      * <p>HTTP Method Detection:</p>
      * <ul>
      *   <li>If {@code -X} is specified, uses that method</li>
      *   <li>If {@code -d} is present without {@code -X}, defaults to POST</li>
-     *   <li>If {@code -I} is present without {@code -X}, defaults to HEAD</li>
+     *   <li>If {@code -I} (or {@code --head}) is present without {@code -X}, defaults to HEAD</li>
      *   <li>Otherwise defaults to GET</li>
      * </ul>
      *
@@ -222,9 +222,9 @@ public final class WebUtil {
      *
      * <p>Key differences from {@link #curlToHttpRequestCode(String)}:</p>
      * <ul>
-     *   <li>Creates {@code RequestBody} with {@code MediaType} when body is present</li>
-     *   <li>Automatically extracts {@code MediaType} from Content-Type header</li>
-     *   <li>Attaches body using {@code .body(requestBody)} instead of passing to method</li>
+     *   <li>Creates a {@code RequestBody} via {@code RequestBody.create(...)} with a {@code MediaType} when body is present</li>
+     *   <li>Automatically extracts the {@code MediaType} from the Content-Type header</li>
+     *   <li>Attaches the body using {@code .body(requestBody)} and invokes the HTTP method with no arguments (e.g. {@code .post()})</li>
      *   <li>Uses OkHttp-specific method calls ({@code .post()}, {@code .put()}, etc.)</li>
      * </ul>
      *
@@ -239,7 +239,7 @@ public final class WebUtil {
      * <ul>
      *   <li>If {@code -X} is specified, uses that method</li>
      *   <li>If {@code -d} is present without {@code -X}, defaults to POST</li>
-     *   <li>If {@code -I} is present without {@code -X}, defaults to HEAD</li>
+     *   <li>If {@code -I} (or {@code --head}) is present without {@code -X}, defaults to HEAD</li>
      *   <li>Otherwise defaults to GET</li>
      * </ul>
      *
@@ -560,9 +560,9 @@ public final class WebUtil {
      * //   -d '{"key":"value"}'
      * }</pre>
      *
-     * @param url the base URL for the HTTP request, must not be null
+     * @param url the base URL for the HTTP request, must not be {@code null}
      * @param logHandler consumer that receives the generated cURL command string
-     *                   for each request, must not be null
+     *                   for each request, must not be {@code null}
      * @return an OkHttpRequest configured with cURL logging interceptor
      * @see #createCurlLoggingOkHttpRequest(String, char, Consumer)
      * @see CurlInterceptor
@@ -610,11 +610,11 @@ public final class WebUtil {
      * //   -H "Content-Type: application/json"
      * }</pre>
      *
-     * @param url the base URL for the HTTP request, must not be null
+     * @param url the base URL for the HTTP request, must not be {@code null}
      * @param quoteChar the character to use for quoting in cURL commands,
      *                  typically single quote (') or double quote (")
      * @param logHandler consumer that receives the generated cURL command string
-     *                   for each request, must not be null
+     *                   for each request, must not be {@code null}
      * @return an OkHttpRequest configured with cURL logging interceptor using the
      *         specified quote character
      * @see #createCurlLoggingOkHttpRequest(String, Consumer)
@@ -639,7 +639,7 @@ public final class WebUtil {
      *   <li>URL enclosed in the specified quote character</li>
      *   <li>All headers using {@code -H} flags with proper quoting and escaping</li>
      *   <li>Request body using {@code -d} flag if body is not empty</li>
-     *   <li>Content-Type header if body is present but Content-Type header is missing</li>
+     *   <li>Content-Type header if body is present, no Content-Type header already exists, and {@code bodyContentType} is not empty</li>
      * </ul>
      *
      * <p>Special handling:</p>
@@ -670,8 +670,8 @@ public final class WebUtil {
      * System.out.println(curl);
      * }</pre>
      *
-     * @param httpMethod the HTTP method (e.g., "GET", "POST", "PUT", "DELETE"), must not be null
-     * @param url the target URL, must not be null
+     * @param httpMethod the HTTP method (e.g., "GET", "POST", "PUT", "DELETE"), must not be {@code null} or empty
+     * @param url the target URL, must not be {@code null} or empty
      * @param headers map of HTTP headers where values can be String or other types that
      *                {@link HttpUtil#readHttpHeaderValue(Object)} can handle (can be {@code null} or empty)
      * @param body the request body string (can be {@code null} or empty for requests without a body)
@@ -771,8 +771,10 @@ public final class WebUtil {
      *
      * @param requestBodyType the MIME type of the request body (e.g., "application/json",
      *                        "text/xml", "application/x-www-form-urlencoded"), can be {@code null} or empty
-     * @param httpHeaders the HttpHeaders object to conditionally update, must not be null
-     * @throws NullPointerException if {@code httpHeaders} is {@code null}
+     * @param httpHeaders the HttpHeaders object to conditionally update, must not be {@code null}
+     *                    when {@code requestBodyType} is not {@code null} or empty
+     * @throws NullPointerException if {@code httpHeaders} is {@code null} and {@code requestBodyType}
+     *                              is not {@code null} or empty
      * @see HttpHeaders#setContentType(String)
      * @see HttpHeaders#get(String)
      */

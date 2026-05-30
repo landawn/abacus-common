@@ -827,7 +827,7 @@ public final class Comparators {
     /**
      * Returns a comparator for {@link u.Optional} that considers empty optionals to be less than
      * present optionals. When both optionals are present, their values are compared using
-     * their natural ordering.
+     * their natural ordering. Null optionals are treated the same as empty optionals.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -878,7 +878,7 @@ public final class Comparators {
     /**
      * Returns a comparator for {@link u.Optional} that considers empty optionals to be greater than
      * present optionals. When both optionals are present, their values are compared using
-     * their natural ordering.
+     * their natural ordering. Null optionals are treated the same as empty optionals.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1582,9 +1582,9 @@ public final class Comparators {
      * for element-wise comparison. The arrays are compared lexicographically, with shorter
      * arrays considered less than longer arrays when all compared elements are equal.
      *
-     * <p>The comparison algorithm:</p>
+     * <p>The comparison algorithm (a {@code null} array is treated the same as an empty array):</p>
      * <ol>
-     *   <li>Empty arrays are considered less than non-empty arrays</li>
+     *   <li>Empty (or {@code null}) arrays are considered less than non-empty arrays; two empty/null arrays are equal</li>
      *   <li>Elements are compared in order using the provided comparator</li>
      *   <li>The first non-equal comparison determines the result</li>
      *   <li>If all compared elements are equal, the shorter array is considered less</li>

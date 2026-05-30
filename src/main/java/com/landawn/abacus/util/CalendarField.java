@@ -175,7 +175,7 @@ public enum CalendarField {
      * the corresponding CalendarField enum values. It uses an internal lookup map
      * for efficient conversion.</p>
      *
-     * <p>Supported field values include:
+     * <p>Supported field values include:</p>
      * <ul>
      *   <li>{@link Calendar#MILLISECOND} - maps to {@link #MILLISECOND}</li>
      *   <li>{@link Calendar#SECOND} - maps to {@link #SECOND}</li>
@@ -258,7 +258,7 @@ public enum CalendarField {
      *
      * <p>Each {@code CalendarField} constant's {@code value()} returns the integer of
      * the corresponding {@link Calendar} field constant (e.g., {@link #MONTH}.value()
-     * returns {@link Calendar#MONTH}).
+     * returns {@link Calendar#MONTH}).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

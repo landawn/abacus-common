@@ -167,7 +167,8 @@ public class BiConsumerTest extends TestBase {
 
     @Test
     public void testAndThenNullThrowsImmediately() {
-        BiConsumer<String, String> instance = (a, b) -> {};
+        BiConsumer<String, String> instance = (a, b) -> {
+        };
         org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.BiConsumer) null));
     }
 }

@@ -19,7 +19,7 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents a predicate (boolean-valued function) of two short-valued arguments.
- * This is the two-arity specialization of predicate for short values.
+ * This is the two-arity specialization of {@link java.util.function.Predicate} for {@code short} values.
  *
  * <p>This is a functional interface whose functional method is {@link #test(short, short)}.
  *

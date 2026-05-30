@@ -260,6 +260,15 @@ public class ImmutableMapTest extends TestBase {
     }
 
     @Test
+    public void testReplaceAll_EmptyMap_ThrowsUnsupported() {
+        // Regression: the inherited Map.replaceAll default iterates entrySet(), so on an EMPTY immutable map it
+        // would silently no-op instead of throwing — inconsistent with every other mutator (and with the existing
+        // non-empty testReplaceAll_ThrowsUnsupported). AbstractImmutableMap.replaceAll now blocks it unconditionally.
+        ImmutableMap<String, Integer> map = ImmutableMap.empty();
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> map.replaceAll((k, v) -> v + 1));
+    }
+
+    @Test
     public void testKeySet() {
         ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2, "c", 3);
         Set<String> keys = map.keySet();
@@ -416,11 +425,7 @@ public class ImmutableMapTest extends TestBase {
 
     @Test
     public void testBuilder() {
-        ImmutableMap<String, Integer> map = ImmutableMap.<String, Integer> builder()
-                .put("one", 1)
-                .put("two", 2)
-                .putAll(N.asMap("three", 3, "four", 4))
-                .build();
+        ImmutableMap<String, Integer> map = ImmutableMap.<String, Integer> builder().put("one", 1).put("two", 2).putAll(N.asMap("three", 3, "four", 4)).build();
 
         Assertions.assertEquals(4, map.size());
         Assertions.assertEquals(1, map.get("one"));

@@ -274,7 +274,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
      * long timeUntilExpiration = expirationTime - System.currentTimeMillis();
      * }</pre>
      *
-     * @return the expiration time in milliseconds since epoch, or Long.MAX_VALUE if it would overflow
+     * @return the expiration time in milliseconds since epoch, or {@code Long.MAX_VALUE} if {@code createdTime + liveTime} would overflow
      */
     public long getExpirationTime() {
         return ((Long.MAX_VALUE - createdTime) < liveTime) ? Long.MAX_VALUE : (createdTime + liveTime);
@@ -305,10 +305,14 @@ public final class ActivityPrint implements Cloneable, Serializable {
     }
 
     /**
-     * Creates and returns a copy of this ActivityPrint.
-     * The clone will have the same values for all fields.
+     * Creates and returns a shallow copy of this ActivityPrint. The clone has the same values
+     * for all fields (creation/access times, live/idle limits, and access count) as the source
+     * instance. Because {@code ActivityPrint} implements {@link Cloneable},
+     * {@link CloneNotSupportedException} is not expected to occur in practice; if it ever did,
+     * this method swallows it and returns {@code null}.
      *
-     * @return a clone of this ActivityPrint
+     * @return a clone of this ActivityPrint, or {@code null} if the underlying
+     *         {@link Object#clone()} call unexpectedly throws {@link CloneNotSupportedException}
      */
     @Override
     public Object clone() { //NOSONAR

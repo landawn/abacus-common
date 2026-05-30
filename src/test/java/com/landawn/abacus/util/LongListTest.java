@@ -2703,4 +2703,19 @@ public class LongListTest extends TestBase {
         assertEquals(Long.MAX_VALUE, max.getAsLong());
     }
 
+    @Test
+    public void test_forEach_removeIf_replaceIf_null_func() {
+        // Regression: a null functional argument must throw NullPointerException even on an
+        // EMPTY list (previously silently no-op'd; now matches IntList's fail-fast guard).
+        final LongList empty = new LongList();
+        assertThrows(NullPointerException.class, () -> empty.forEach((com.landawn.abacus.util.function.LongConsumer) null));
+        assertThrows(NullPointerException.class, () -> empty.removeIf((com.landawn.abacus.util.function.LongPredicate) null));
+        assertThrows(NullPointerException.class, () -> empty.replaceIf((com.landawn.abacus.util.function.LongPredicate) null, 0L));
+
+        final LongList nonEmpty = LongList.of(1L, 2L);
+        assertThrows(NullPointerException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.LongConsumer) null));
+        assertThrows(NullPointerException.class, () -> nonEmpty.removeIf((com.landawn.abacus.util.function.LongPredicate) null));
+        assertThrows(NullPointerException.class, () -> nonEmpty.replaceIf((com.landawn.abacus.util.function.LongPredicate) null, 0L));
+    }
+
 }

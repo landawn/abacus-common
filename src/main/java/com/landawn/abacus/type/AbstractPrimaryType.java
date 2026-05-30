@@ -63,14 +63,18 @@ public abstract class AbstractPrimaryType<T> extends AbstractType<T> {
     /**
      * Converts an object to this primary type.
      * <p>
-     * This method provides a generic way to convert any object to the primary type
-     * by first converting it to a string representation using the object's actual type,
-     * then parsing that string to create the primary type value.
-     * Returns the default value if the input object is {@code null}.
+     * This method provides a generic way to convert an object to the primary type:
      * </p>
+     * <ul>
+     *   <li>Returns the default value if the input object is {@code null}.</li>
+     *   <li>If the object is already a {@code String}, it is parsed directly via {@link #valueOf(String)}.</li>
+     *   <li>Otherwise the object is first converted to a string representation using the type
+     *       registered for the object's actual class, and that string is then parsed via
+     *       {@link #valueOf(String)} to create the primary type value.</li>
+     * </ul>
      *
-     * @param obj the object to convert
-     * @return the converted primary type value, or default value if input is {@code null}
+     * @param obj the object to convert, may be {@code null}
+     * @return the converted primary type value, or the default value if {@code obj} is {@code null}
      */
     @Override
     public T valueOf(final Object obj) {

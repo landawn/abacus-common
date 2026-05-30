@@ -8279,7 +8279,11 @@ public class IOUtilTest extends TestBase {
         File out = Files.createTempFile(tempFolder, "wl", ".txt").toFile();
         java.util.concurrent.atomic.AtomicBoolean closed = new java.util.concurrent.atomic.AtomicBoolean();
         try (Writer w = new java.io.OutputStreamWriter(new FileOutputStream(out), UTF_8) {
-            @Override public void close() throws IOException { closed.set(true); super.close(); }
+            @Override
+            public void close() throws IOException {
+                closed.set(true);
+                super.close();
+            }
         }) {
             IOUtil.writeLines(java.util.Arrays.asList("a", "b"), w);
             // Caller-supplied writer must still be usable after writeLines returns.
@@ -8302,7 +8306,11 @@ public class IOUtilTest extends TestBase {
         // non-BufferedReader in a pooled buffer that read-aheads then gets recycled,
         // which is incompatible with the "still advanceable" check below.
         try (Reader r = new java.io.BufferedReader(new java.io.InputStreamReader(new FileInputStream(f), UTF_8) {
-            @Override public void close() throws IOException { closed.set(true); super.close(); }
+            @Override
+            public void close() throws IOException {
+                closed.set(true);
+                super.close();
+            }
         })) {
             java.util.List<String> first = IOUtil.readLines(r, 0, 1);
             assertEquals(java.util.Collections.singletonList("x"), first);
@@ -8378,4 +8386,21 @@ public class IOUtilTest extends TestBase {
         System.arraycopy(Files.readAllBytes(p3.toPath()), 0, merged, 8, 2);
         assertArrayEquals(data, merged);
     }
+
+    @Test
+    public void test_write_charArray_negativeOffsetOrCount_throws() throws Exception {
+        // Regression: char[] write variants must validate offset/count like their byte[]/Writer siblings (#34-37).
+        final char[] chars = { 'a', 'b', 'c' };
+        final java.io.File f = new java.io.File("./tmp_abacus_write_neg_test.txt");
+        try {
+            org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> IOUtil.write(chars, -1, 0, f));
+            org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> IOUtil.write(chars, 0, -1, f));
+            final java.io.ByteArrayOutputStream os = new java.io.ByteArrayOutputStream();
+            org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> IOUtil.write(chars, -1, 0, os));
+            org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> IOUtil.write(chars, 0, -1, os));
+        } finally {
+            f.delete();
+        }
+    }
+
 }

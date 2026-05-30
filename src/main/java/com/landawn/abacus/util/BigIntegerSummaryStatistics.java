@@ -250,7 +250,7 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
      * stats.accept(new BigInteger("10"));
      * stats.accept(new BigInteger("20"));
      * stats.accept(new BigInteger("30"));
-     * BigDecimal avg = stats.getAverage();   // Returns 2E+1 (i.e., 20 with DECIMAL128 precision)
+     * BigDecimal avg = stats.getAverage();   // Returns 20
      * }</pre>
      *
      * @return the arithmetic mean of values as a {@link BigDecimal} with {@link java.math.MathContext#DECIMAL128} precision,
@@ -271,7 +271,7 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
      *
      * <p>Example output:</p>
      * <pre>{@code
-     * {min=10, max=30, count=3, sum=60, average=20.00000000000000000000000000000000}
+     * {min=10, max=30, count=3, sum=60, average=20}
      * }</pre>
      *
      * @return a string representation of this summary statistics

@@ -44,6 +44,7 @@ package com.landawn.abacus.type;
 @SuppressWarnings("java:S2160")
 public final class PrimitiveShortType extends AbstractShortType {
 
+    /** The type name constant for the primitive {@code short} type, equal to {@code "short"}. */
     public static final String SHORT = short.class.getSimpleName();
 
     private static final Short DEFAULT_VALUE = 0;

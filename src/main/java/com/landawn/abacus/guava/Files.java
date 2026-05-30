@@ -807,7 +807,7 @@ public abstract class Files { //NOSONAR
      * @param path the path whose parent directories should be created.
      * @param attrs an optional list of file attributes to set atomically when creating the directories.
      * @throws IOException if an I/O error occurs, or if any necessary but nonexistent parent
-     *     directories of the specified file could not be created.
+     *     directories of the specified path could not be created.
      */
     public static void createParentDirectories(final Path path, final FileAttribute<?>... attrs) throws IOException {
         com.google.common.io.MoreFiles.createParentDirectories(path, attrs);
@@ -1431,7 +1431,7 @@ public abstract class Files { //NOSONAR
     }
 
     /**
-     * Reads all bytes from a file into a string using the given character set. The method ensures
+     * Reads all content from a file into a string using the given character set. The method ensures
      * that the file is closed when all bytes have been read or an I/O error, or other runtime
      * exception, is thrown.
      *

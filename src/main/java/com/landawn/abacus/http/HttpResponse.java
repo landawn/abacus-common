@@ -212,8 +212,8 @@ public class HttpResponse {
 
     /**
      * Deserializes the response body to the specified type.
-     * The deserialization method is determined by the {@code Content-Type} header of the response.
-     * Supported types include:
+     * The deserialization method is determined by the content format of the response
+     * (derived from the {@code Content-Type} header). Supported types include:
      * <ul>
      *   <li>{@code String.class} - returns the body decoded with the response charset
      *       (derived from the {@code Content-Type} header, defaulting to UTF-8 if absent)</li>

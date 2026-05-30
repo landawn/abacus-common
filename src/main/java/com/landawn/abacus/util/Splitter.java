@@ -1791,7 +1791,8 @@ public final class Splitter {
          * }</pre>
          *
          * @param source the CharSequence to split into a map; may be {@code null}.
-         * @return a LinkedHashMap containing the parsed key-value pairs.
+         * @return a LinkedHashMap containing the parsed key-value pairs; returns an empty map if source is {@code null}.
+         * @throws IllegalArgumentException if any entry string cannot be properly parsed into a key-value pair.
          * @see #split(CharSequence, Supplier)
          * @see #split(CharSequence, Class, Class)
          * @see #splitToImmutableMap(CharSequence)
@@ -1968,8 +1969,11 @@ public final class Splitter {
          * them to the provided output map. This method is useful for appending
          * parsed entries to an existing map.
          *
-         * <p>Each entry must contain exactly one key-value delimiter. Entries with
-         * no delimiter or more than one delimiter will cause an IllegalArgumentException.</p>
+         * <p>Each entry must contain at least one key-value delimiter; an entry with no
+         * key-value delimiter causes an {@link IllegalArgumentException}. Because the
+         * key-value splitting is limited to two parts, if an entry contains more than one
+         * key-value delimiter, the first occurrence separates the key from the value and the
+         * value retains the remaining text (including any further delimiters).</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2246,7 +2250,10 @@ public final class Splitter {
          * }</pre>
          *
          * @param source the CharSequence to split into entries; may be {@code null}
-         * @return an EntryStream containing the parsed key-value pairs
+         * @return an EntryStream containing the parsed key-value pairs; returns an empty EntryStream if source is {@code null}
+         * @throws IllegalArgumentException if any entry string cannot be properly
+         *         parsed into a key-value pair during iteration
+         * @see #splitToStream(CharSequence)
          */
         public EntryStream<String, String> splitToEntryStream(final CharSequence source) {
             //noinspection resource

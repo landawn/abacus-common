@@ -1018,10 +1018,11 @@ final class XmlParserImpl extends AbstractXmlParser {
 
     /**
      * Checks if an array can be serialized as JSON.
-     * Arrays containing only serializable types can be serialized as JSON for efficiency.
+     * An array can be serialized as JSON for efficiency if its component type is serializable,
+     * or if every non-{@code null} element is itself serializable.
      *
      * @param a the array to check
-     * @return {@code true} if the array can be serialized as JSON
+     * @return {@code true} if the array can be serialized as JSON; {@code false} otherwise
      */
     protected boolean isSerializableByJson(final Object[] a) {
         if (Type.of(a.getClass().getComponentType()).isSerializable()) {
@@ -1039,10 +1040,10 @@ final class XmlParserImpl extends AbstractXmlParser {
 
     /**
      * Checks if a collection can be serialized as JSON.
-     * Collections containing only serializable types can be serialized as JSON for efficiency.
+     * A collection can be serialized as JSON for efficiency if every non-{@code null} element is serializable.
      *
      * @param c the collection to check
-     * @return {@code true} if the collection can be serialized as JSON
+     * @return {@code true} if the collection can be serialized as JSON; {@code false} otherwise
      */
     protected boolean isSerializableByJson(final Collection<?> c) {
         for (final Object e : c) {
@@ -2283,7 +2284,7 @@ final class XmlParserImpl extends AbstractXmlParser {
 
                                                 xmlReader.next();
                                             } else {
-                                                c.add(readByStreamParser(xmlReader, defaultXmlDeserConfig, null, propType, propEleType));
+                                                c.add(readByStreamParser(xmlReader, configToUse, null, propType, propEleType));
                                             }
                                         } while (xmlReader.hasNext() && xmlReader.next() == XMLStreamConstants.START_ELEMENT);
 

@@ -282,9 +282,7 @@ public class PrefixSearchTableTest extends TestBase {
      */
     @Test
     public void testGet_caseSensitiveKeys() {
-        PrefixSearchTable<String, String> table = PrefixSearchTable.<String, String> builder()
-                .add(Arrays.asList("Foo", "Bar"), "match")
-                .build();
+        PrefixSearchTable<String, String> table = PrefixSearchTable.<String, String> builder().add(Arrays.asList("Foo", "Bar"), "match").build();
         assertEquals("match", table.get(Arrays.asList("Foo", "Bar")).get());
         // Different case must not match - equals on String is case-sensitive
         assertTrue(table.get(Arrays.asList("foo", "bar")).isEmpty());

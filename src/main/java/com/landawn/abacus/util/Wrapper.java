@@ -400,7 +400,7 @@ public abstract class Wrapper<T> implements Immutable {
         @SuppressWarnings("rawtypes")
         static final Wrapper WRAPPER_FOR_NULL_ARRAY = new ArrayWrapper<>(null);
 
-        /** Pool of pre-allocated wrappers for zero-length arrays, keyed by component type. */
+        /** Pool of cached wrappers for zero-length arrays, keyed by component type and populated lazily. */
         @SuppressWarnings("rawtypes")
         static final Map<Object, Wrapper> WRAPPER_POOL = new ConcurrentHashMap<>();
 

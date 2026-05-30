@@ -31,7 +31,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
 
 /**
  * Utility class for escaping and unescaping {@code String}s for
- * Java, JavaScript, HTML, and XML contexts.
+ * Java, JavaScript (EcmaScript), JSON, HTML, XML, and CSV contexts.
  *
  * <p>This class is thread-safe as all methods are stateless.</p>
  *
@@ -45,7 +45,7 @@ public final class EscapeUtil {
     /**
      * {@code \u000a} linefeed LF ('\n').
      *
-     * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-3.html#jls-3.10.6">JLF: Escape Sequences
+     * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-3.html#jls-3.10.6">JLS: Escape Sequences
      *      for Character and String Literals</a>
      */
     static final char LF = '\n';
@@ -53,7 +53,7 @@ public final class EscapeUtil {
     /**
      * {@code \u000d} carriage return CR ('\r').
      *
-     * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-3.html#jls-3.10.6">JLF: Escape Sequences
+     * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-3.html#jls-3.10.6">JLS: Escape Sequences
      *      for Character and String Literals</a>
      */
     static final char CR = '\r';
@@ -642,21 +642,28 @@ public final class EscapeUtil {
      * Unescapes a CSV column value by removing surrounding double quotes and unescaping internal
      * double quotes according to RFC 4180 rules.
      *
-     * <p>If the input is enclosed in double quotes, the quotes are stripped and any escaped double quotes
-     * (represented as {@code ""}) within the value are converted back to single double quotes ({@code "}).</p>
+     * <p>If the input is enclosed in double quotes <i>and</i> the quoted content contains at least one CSV
+     * special character (comma, double quote, CR, or LF), the surrounding quotes are stripped and any
+     * escaped double quotes (represented as {@code ""}) within the value are converted back to single
+     * double quotes ({@code "}).</p>
      *
-     * <p>If the input is not enclosed in double quotes, it is returned unchanged.</p>
+     * <p>If the input is not enclosed in double quotes, it is returned unchanged. Likewise, a value that is
+     * enclosed in double quotes but whose content contains no CSV special character is returned unchanged
+     * (with its surrounding quotes intact), e.g. {@code unescapeCsv("\"simple\"")} returns {@code "simple"}
+     * including the quotes.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EscapeUtil.unescapeCsv("simple")               = "simple"
+     * EscapeUtil.unescapeCsv("\"simple\"")           = "\"simple\""
      * EscapeUtil.unescapeCsv("\"hello,world\"")      = "hello,world"
      * EscapeUtil.unescapeCsv("\"say \"\"hi\"\"\"")   = "say \"hi\""
      * EscapeUtil.unescapeCsv(null)                   = null
      * }</pre>
      *
      * @param input the input CSV column String, which may be null
-     * @return the unescaped CSV string with quotes removed and internal quotes unescaped,
+     * @return the unescaped CSV string with surrounding quotes removed and internal quotes unescaped when
+     *         the quoted content contains a CSV special character; otherwise the input unchanged,
      *         or {@code null} if {@code null} input
      * @see <a href="https://tools.ietf.org/html/rfc4180">RFC 4180</a>
      * @see <a href="http://en.wikipedia.org/wiki/Comma-separated_values">CSV on Wikipedia</a>

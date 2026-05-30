@@ -31,7 +31,7 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
     public static final String OPTIONAL_INT = "JdkOptionalInt";
 
     /**
-     * Package-private constructor for JdkOptionalIntType.
+     * Constructor for JdkOptionalIntType.
      * This constructor is called by the TypeFactory to create OptionalInt type instances.
      */
     protected JdkOptionalIntType() {

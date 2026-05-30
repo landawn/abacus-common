@@ -2068,7 +2068,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * the key is removed from the Multimap.</p>
      *
      * <p>If the key is not already associated with a value in the Multimap, this method associates the key with the new value returned by the remapping function.
-     * If the remapping function returns {@code null} or an empty collection, the key is removed.</p>
+     * In that case, if the remapping function returns {@code null} or an empty collection, no entry is created.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2318,7 +2318,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param <VV> the collection type for values in the inverted Multimap
      * @param <M> the specific Multimap type to create
      * @param multimapSupplier factory function that creates the target Multimap type,
-     *                         receives the size of this Multimap as a hint
+     *                         receives this Multimap's total value count as a capacity hint
      * @return a new inverted Multimap with keys and values swapped
      * @see #copy()
      */

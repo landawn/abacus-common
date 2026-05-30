@@ -104,12 +104,12 @@ public final class Retry<T> {
      * Creates a new instance of {@code Retry<T>} with the specified retry times, retry interval, and result/exception-based retry condition.
      *
      * <p>This factory method is designed for operations that return a value of type {@code T}. The retry logic
-     * will be triggered when:
+     * will be triggered when:</p>
      * <ul>
      *   <li>An exception is thrown and the {@code retryCondition} bi-predicate evaluates to {@code true} for {@code null} result and the exception.</li>
      *   <li>A result is returned but the {@code retryCondition} bi-predicate evaluates to {@code true} for the result and {@code null} exception.</li>
      * </ul>
-     * This allows retrying based on both exceptional outcomes and unsatisfactory results.
+     * <p>This allows retrying based on both exceptional outcomes and unsatisfactory results.</p>
      *
      * <p>Between retry attempts, the thread will sleep for the specified interval. If {@code retryIntervalInMillis} is 0,
      * retries will be executed immediately without delay.</p>

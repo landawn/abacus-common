@@ -1939,4 +1939,13 @@ public class PropertiesUtilTest extends TestBase {
         String content = new String(bytes, StandardCharsets.UTF_8);
         assertTrue(content.contains("public class Utf8Config"));
     }
+
+    @Test
+    public void testFindFileInDir_leadingSeparator_noStringIndexOutOfBounds() {
+        // Regression: a config name starting with a path separator must not throw
+        // StringIndexOutOfBoundsException on the empty folder prefix (#45/#46).
+        org.junit.jupiter.api.Assertions
+                .assertDoesNotThrow(() -> PropertiesUtil.findFileInDir("/nonexistent_abacus_test.properties", new java.io.File("."), false));
+    }
+
 }

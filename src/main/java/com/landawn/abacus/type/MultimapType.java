@@ -29,9 +29,9 @@ import com.landawn.abacus.util.SetMultimap;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for Multimap objects with generic key, element, and collection value types.
- * A Multimap is a map where each key can be associated with multiple values stored in a Collection.
- * This class handles serialization and deserialization of Multimap instances.
+ * Type handler for {@link Multimap} objects with generic key, element, and collection value types.
+ * A {@code Multimap} is a map where each key can be associated with multiple values stored in a {@link Collection}.
+ * This class handles serialization and deserialization of {@code Multimap} instances.
  *
  * @param <K> the key type
  * @param <E> the element type (individual values in the collection)
@@ -183,9 +183,10 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      * Parses a JSON string to create a {@link Multimap} object.
      * The JSON must be an object where each key maps to an array of values,
      * e.g. {@code {"colors":["red","blue"],"sizes":["large"]}}.
-     * The concrete implementation returned ({@link com.landawn.abacus.util.SetMultimap SetMultimap}
-     * or {@link com.landawn.abacus.util.ListMultimap ListMultimap}) is chosen based on
-     * whether the configured value collection type is a {@link java.util.Set}.
+     * A {@link java.util.Set}-backed multimap is returned when the declared multimap class is a
+     * {@link com.landawn.abacus.util.SetMultimap SetMultimap} or its value collection type is a
+     * {@link java.util.Set}; otherwise a {@link com.landawn.abacus.util.ListMultimap ListMultimap}-backed
+     * multimap is returned. In both cases the result preserves insertion order (a linked implementation).
      *
      * @param str the JSON string to parse; may be {@code null} or blank
      * @return the parsed {@code Multimap} object, or {@code null} if the input is {@code null} or blank

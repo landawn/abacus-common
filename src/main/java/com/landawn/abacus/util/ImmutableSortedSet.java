@@ -372,14 +372,15 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     * This method is deprecated and will throw an UnsupportedOperationException if used.
-     * Use {@link #wrap(SortedSet)} for SortedSet or {@link ImmutableSet#wrap(Set)} for regular Sets.
+     * This method is deprecated and always throws an {@link UnsupportedOperationException}.
+     * Use {@link #wrap(SortedSet)} for a {@code SortedSet} or {@link ImmutableSet#wrap(Set)} for a regular {@code Set}.
      *
      * @param <E> the type of elements
      * @param set the set parameter (ignored)
      * @return never returns normally
      * @throws UnsupportedOperationException always
-     * @deprecated throws {@code UnsupportedOperationException}
+     * @deprecated this overload is not supported and always throws {@code UnsupportedOperationException};
+     *             use {@link #wrap(SortedSet)} for a {@code SortedSet} or {@link ImmutableSet#wrap(Set)} for a regular {@code Set}
      */
     @Deprecated
     public static <E> ImmutableSet<E> wrap(final Set<? extends E> set) throws UnsupportedOperationException {

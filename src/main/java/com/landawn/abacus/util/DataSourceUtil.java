@@ -670,6 +670,7 @@ public final class DataSourceUtil {
      * @param stmt the Statement containing the batch commands to execute; must not be {@code null}
      * @return an array of update counts containing one element for each command in the batch;
      *         the elements are ordered according to the order in which commands were added to the batch
+     * @throws NullPointerException if {@code stmt} is {@code null}
      * @throws SQLException if a database access error occurs or the driver does not support batch statements
      * @see Statement#executeBatch()
      */

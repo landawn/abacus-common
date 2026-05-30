@@ -422,7 +422,7 @@ public final class Stopwatch {
      *
      * @param unit the time unit to abbreviate
      * @return the abbreviated string representation of the time unit
-     * @throws AssertionError if the unit is not one of the standard TimeUnit values
+     * @throws AssertionError if {@code unit} is not handled by the {@code switch} (unreachable for the standard {@link TimeUnit} values)
      */
     private static String abbreviate(final TimeUnit unit) {
         switch (unit) {

@@ -81,7 +81,7 @@ public final class ParserFactory {
     private static final boolean isKryoParserAvailable;
 
     static {
-        // initial N to avoid below error if 'ParserFactory' is called before N initialized.
+        // initialize N to avoid below error if 'ParserFactory' is called before N initialized.
         //    java.lang.NoClassDefFoundError: Could not initialize class com.landawn.abacus.parser.JsonParserImpl
         //    at com.landawn.abacus.parser.ParserFactory.createJsonParser(ParserFactory.java:188)
         //    at com.landawn.abacus.util.MongoDBExecutor.<clinit>(MongoDBExecutor.java:92)

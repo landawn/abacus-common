@@ -115,7 +115,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
     /**
      * Returns the default value for {@code Nullable} type, which is an empty {@code Nullable}.
      *
-     * @return {@code Nullable}.empty()
+     * @return {@code Nullable.empty()}
      */
     @Override
     public Nullable<T> defaultValue() {

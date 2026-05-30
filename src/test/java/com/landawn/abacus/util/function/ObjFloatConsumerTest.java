@@ -129,7 +129,8 @@ public class ObjFloatConsumerTest extends TestBase {
 
     @Test
     public void testAndThenNullThrowsImmediately() {
-        ObjFloatConsumer<String> instance = (a, b) -> {};
+        ObjFloatConsumer<String> instance = (a, b) -> {
+        };
         org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((ObjFloatConsumer) null));
     }
 }

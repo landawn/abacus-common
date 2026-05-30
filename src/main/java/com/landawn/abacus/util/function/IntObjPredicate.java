@@ -18,7 +18,7 @@ import java.util.Objects;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Represents a predicate (boolean-valued function) of an {@code int}-valued and an object-valued argument.
+ * Represents a predicate (boolean-valued function) of an {@code int}-valued argument and an object-valued argument.
  * This is the {@code (int, reference)} specialization of {@link java.util.function.BiPredicate}.
  *
  * <p>The parameter order follows the {@code IntObj*} convention: the {@code int} argument comes

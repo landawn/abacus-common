@@ -1992,4 +1992,17 @@ public class ProfilerTest extends AbstractTest {
         assertEquals(0, failed.size());
     }
 
+    @Test
+    public void testWriteXmlResult_includesTenthPercentile() {
+        // Regression: XML output must include the <_0.1> percentile like the text/HTML outputs (#44).
+        final Profiler.MultiLoopsStatistics stats = Profiler.run(1, 20, 1, "xmlPercentileTest", () -> {
+        });
+        final java.io.StringWriter sw = new java.io.StringWriter();
+        stats.writeXmlResult(sw);
+        final String output = sw.toString();
+        org.junit.jupiter.api.Assertions.assertTrue(output.contains("<_0.01>"));
+        org.junit.jupiter.api.Assertions.assertTrue(output.contains("<_0.1>"));
+        org.junit.jupiter.api.Assertions.assertTrue(output.contains("<_0.2>"));
+    }
+
 }

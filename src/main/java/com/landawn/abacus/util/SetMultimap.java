@@ -660,7 +660,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *
      * @param <K> the type of the keys in the map
      * @param <E> the type of the elements in the set
-     * @param <V> the type of the set extending Set&lt;E&gt;
+     * @param <V> the type of the value set, which must extend {@code Set<E>}
      * @param map the map to be wrapped into a SetMultimap; must not be {@code null} and must not contain {@code null} or empty values
      * @return a SetMultimap instance backed by the provided map
      * @throws IllegalArgumentException if the provided map is {@code null} or contains a {@code null} or empty value
@@ -688,8 +688,8 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Map<String, TreeSet<Integer>> map = new HashMap<>();
      * SetMultimap<String, Integer> multimap =
      *     SetMultimap.wrap(map, TreeSet::new);
-     * multimap.put("a", 3);
-     * multimap.put("a", 1);   // Creates TreeSet, values will be sorted
+     * multimap.put("a", 3);   // Creates a TreeSet for key "a"
+     * multimap.put("a", 1);   // Added to the same TreeSet; values will be sorted
      * }</pre>
      *
      * @param <K> the type of the keys in the map

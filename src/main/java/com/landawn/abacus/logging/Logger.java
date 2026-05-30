@@ -76,9 +76,9 @@ import java.util.function.Supplier;
 public interface Logger {
 
     /**
-     * Case-insensitive String constant used to retrieve the name of the root logger.
+     * The name of the root logger.
      *
-     * <p>This constant can be used with {@link LoggerFactory#getLogger(String)} to obtain
+     * <p>This constant can be passed to {@link LoggerFactory#getLogger(String)} to obtain
      * the root logger instance.</p>
      *
      * <p><b>Usage Examples:</b></p>

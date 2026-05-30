@@ -110,7 +110,7 @@ public class XMLType<T> extends AbstractType<T> {
      * </p>
      *
      * @param str the XML string to deserialize
-     * @return an object of type T deserialized from the XML string, or {@code null} if the string is empty
+     * @return an object of type {@code T} deserialized from the XML string, or {@code null} if the string is {@code null} or empty
      * @throws RuntimeException if the XML parsing fails or the XML doesn't match the target type
      */
     @Override

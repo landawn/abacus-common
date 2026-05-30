@@ -67,22 +67,23 @@ public interface Callable<R> extends java.util.concurrent.Callable<R>, Throwable
     }
 
     /**
-     * Converts this Callable to a Throwables.Callable with a specified exception type.
+     * Converts this Callable to a {@link Throwables.Callable} with a specified exception type.
      * This method performs an unchecked cast and is useful when you need to adapt this Callable
-     * to a context that expects a different exception type.
+     * to a context that expects a different declared checked-exception type.
      *
      * <p>Note: Since this is an unchecked cast, ensure that the actual implementation
-     * only throws RuntimeException or its subclasses.
+     * only throws RuntimeException or its subclasses; the declared checked-exception type
+     * {@code E} will never actually be thrown by the returned Callable.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Callable<String> task = () -> "result";
-     * var throwableTask = task.toThrowable();
-     * // Can now be used in contexts that handle IOException
+     * Throwables.Callable<String, IOException> throwableTask = task.toThrowable();
+     * // Can now be used in contexts that declare IOException, even though none will be thrown
      * }</pre>
      *
      * @param <E> the type of exception that the returned Callable is declared to throw
-     * @return a Throwables.Callable that is functionally equivalent to this Callable
+     * @return a {@link Throwables.Callable} that is functionally equivalent to this Callable
      */
     default <E extends Throwable> Throwables.Callable<R, E> toThrowable() {
         return (Throwables.Callable<R, E>) this;

@@ -33,6 +33,7 @@ import com.landawn.abacus.util.Strings;
 @SuppressWarnings("java:S2160")
 public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<boolean[]> {
 
+    /** The type name constant for the boolean array type, equal to {@code "boolean[]"}. */
     public static final String BOOLEAN_ARRAY = boolean[].class.getSimpleName();
 
     private final Type<Boolean> elementType;
@@ -106,7 +107,8 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
      * Returns {@code null} if input is {@code null}, empty, or blank, or an empty array if input is {@code "[]"}.
      *
      * @param str the string to parse
-     * @return the parsed boolean array, or {@code null} if input is {@code null}, empty, or blank
+     * @return the parsed boolean array; {@code null} if input is {@code null}, empty, or blank;
+     *         or an empty array if input is {@code "[]"}
      */
     @Override
     public boolean[] valueOf(final String str) {

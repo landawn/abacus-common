@@ -1007,7 +1007,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
         /**
          * Compares the specified object with this reversed list for equality.
          * Returns {@code true} if the given object is also a {@link java.util.List} of the same size
-         * and contains the same elements in the same (reversed) order.
+         * and contains the same elements in the same order as this list's (reversed) iteration order.
          *
          * @param obj the object to be compared for equality with this list
          * @return {@code true} if the specified object is equal to this list

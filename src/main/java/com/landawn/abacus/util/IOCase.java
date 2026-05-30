@@ -301,7 +301,9 @@ public enum IOCase {
      * }</pre>
      *
      * @param str the string to check, not null
-     * @param strStartIndex the index in str to start matching from
+     * @param strStartIndex the index in str to start matching from; an out-of-range index
+     *                      (negative, or beyond the end of {@code str}) results in {@code false}
+     *                      rather than an exception
      * @param search the string to match against, not null
      * @return {@code true} if the region matches according to the case rule
      * @throws IllegalArgumentException if either string is null

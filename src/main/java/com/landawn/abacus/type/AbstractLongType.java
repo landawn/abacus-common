@@ -97,6 +97,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * @param obj the object to convert, may be {@code null}
      * @return the {@code Long} value representing milliseconds for date/time types, or parsed value for others,
      *         or the default value if {@code obj} is {@code null}
+     * @throws NumberFormatException if a non-date/time object's string representation cannot be parsed as a {@code long}
      */
     @Override
     public Long valueOf(final Object obj) {
@@ -255,7 +256,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
 
     /**
      * Appends the string representation of a {@code long} value to an {@code Appendable}.
-     * Writes "null" if the value is {@code null}, otherwise writes the numeric value.
+     * Writes {@code "null"} if the value is {@code null}, otherwise writes the numeric value.
      *
      * @param appendable the {@code Appendable} to write to
      * @param x the {@code Number} value to append as {@code long}

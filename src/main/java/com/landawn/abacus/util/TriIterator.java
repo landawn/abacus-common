@@ -1240,7 +1240,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param <R> the type of elements in the resulting ObjIterator
      * @param mapper the function to apply to each triple of elements, must not be {@code null}
      * @return an {@code ObjIterator} containing the elements produced by applying {@code mapper} to each triple
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     public abstract <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper);
 
@@ -1265,7 +1264,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param <R> the type of elements in the resulting Stream
      * @param mapper the function to apply to each triple of elements, must not be {@code null}
      * @return a {@code Stream} containing the elements produced by applying {@code mapper} to each triple
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #map(TriFunction)
      */
     public <R> Stream<R> stream(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper) {

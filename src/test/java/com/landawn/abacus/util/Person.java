@@ -79,7 +79,7 @@ public abstract class Person {
 
     @Override
     public String toString() {
-        return "{" + "firstName=" + N.toString(firstName) + ", " + "middleName=" + N.toString(middleName) + ", " + "lastName="
-                + N.toString(lastName) + ", " + "birthDate=" + N.toString(birthDate) + "}";
+        return "{" + "firstName=" + N.toString(firstName) + ", " + "middleName=" + N.toString(middleName) + ", " + "lastName=" + N.toString(lastName) + ", "
+                + "birthDate=" + N.toString(birthDate) + "}";
     }
 }

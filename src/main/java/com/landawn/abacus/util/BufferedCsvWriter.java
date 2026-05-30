@@ -25,11 +25,10 @@ import java.io.Writer;
  * <p>The writer handles the following CSV escaping rules:</p>
  * <ul>
  *   <li>Double quotes ({@code "}) are escaped as {@code ""} or {@code \"} depending on configuration</li>
- *   <li>Backslashes ({@code \}) are escaped as {@code \\} so that the {@link CsvParser} (which always
- *       treats {@code \} as an escape character inside quoted fields) can restore them correctly on
- *       round-trip; tabs, newlines, carriage returns, backspaces, and form-feeds are passed through
- *       literally (they are part of the quoted field's value per RFC 4180)</li>
- *   <li>Control characters (U+0000 through U+001F, except those listed above, plus U+007F) are escaped as Unicode escapes</li>
+ *   <li>Backslashes ({@code \}), tabs, newlines, carriage returns, backspaces, and form-feeds are passed
+ *       through literally (they are part of the quoted field's value per RFC 4180)</li>
+ *   <li>Control characters (U+0000 through U+001F, except those listed above, plus U+007F) are escaped as
+ *       <code>&#92;uXXXX</code> Unicode escapes (e.g. {@code \u0000})</li>
  *   <li>Special Unicode line separators (U+2028, U+2029) are escaped as {@code \u2028} and {@code \u2029}</li>
  * </ul>
  *
@@ -75,8 +74,10 @@ public final class BufferedCsvWriter extends CharacterWriter {
      */
     /**
      * Standard CSV character replacement mappings (RFC 4180 double-quote escaping).
-     * Double quotes are escaped as {@code ""} and backslashes are escaped as {@code \\};
-     * other special characters are passed through literally.
+     * Double quotes are escaped as {@code ""}, while backslashes, tabs, newlines, carriage returns,
+     * backspaces, and form-feeds are passed through literally; other control characters (U+0000 through
+     * U+001F and U+007F) and the line/paragraph separators (U+2028, U+2029) are escaped as
+     * <code>&#92;uXXXX</code> sequences.
      */
     static final char[][] REPLACEMENT_CHARS;
 

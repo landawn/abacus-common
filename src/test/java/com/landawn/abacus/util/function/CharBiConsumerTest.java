@@ -110,7 +110,8 @@ public class CharBiConsumerTest extends TestBase {
 
     @Test
     public void testAndThenNullThrowsImmediately() {
-        CharBiConsumer instance = (a, b) -> {};
+        CharBiConsumer instance = (a, b) -> {
+        };
         org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((CharBiConsumer) null));
     }
 }

@@ -1596,8 +1596,7 @@ public class XmlMappersTest extends TestBase {
 
         synchronized (pool) {
             for (XmlMapper m : pool) {
-                Assertions.assertNotSame(sharedDefault, m,
-                        "The shared defaultXmlMapper must never be placed into the mapper pool");
+                Assertions.assertNotSame(sharedDefault, m, "The shared defaultXmlMapper must never be placed into the mapper pool");
             }
         }
     }

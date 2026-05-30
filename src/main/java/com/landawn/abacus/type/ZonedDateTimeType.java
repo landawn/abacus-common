@@ -112,18 +112,20 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
     /**
      * Converts a ZonedDateTime instance to its string representation.
      * <p>
-     * This method formats the ZonedDateTime using the ISO 8601 timestamp format with timezone information.
+     * This method formats the ZonedDateTime using a format equivalent to
+     * {@link java.time.format.DateTimeFormatter#ISO_OFFSET_DATE_TIME}, including the UTC offset
+     * (for example {@code "2023-10-15T10:30:00+01:00"}, or with a {@code 'Z'} suffix when the offset is UTC).
      * If the input is {@code null}, this method returns {@code null}.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ZonedDateTime zdt = ZonedDateTime.now();
-     * String str = type.stringOf(zdt);   // Returns "2023-10-15T10:30:00.123Z"
+     * String str = type.stringOf(zdt);   // e.g. "2023-10-15T10:30:00+01:00"
      * }</pre>
      *
      * @param x the ZonedDateTime instance to convert to string
-     * @return the ISO 8601 timestamp string representation, or {@code null} if the input is null
+     * @return the ISO 8601 string representation, or {@code null} if the input is null
      */
     @Override
     public String stringOf(final ZonedDateTime x) {
@@ -165,7 +167,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * This method handles several input formats:
      * </p>
      * <ul>
-     *   <li>null or empty string returns null</li>
+     *   <li>{@code null}, empty string, or the literal "null" returns {@code null}</li>
      *   <li>"SYS_TIME" returns the current ZonedDateTime</li>
      *   <li>Numeric strings are interpreted as epoch milliseconds</li>
      *   <li>ISO 8601 date-time strings with 'Z' suffix (20 chars) are parsed as ISO date-time</li>
@@ -180,7 +182,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * }</pre>
      *
      * @param str the string to convert to ZonedDateTime
-     * @return a ZonedDateTime instance, or {@code null} if the string is empty
+     * @return a ZonedDateTime instance, or {@code null} if the string is {@code null}, empty, or the literal "null"
      * @throws DateTimeParseException if the string cannot be parsed as a valid date/time
      */
     @Override

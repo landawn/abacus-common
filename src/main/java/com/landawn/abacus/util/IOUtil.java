@@ -3651,7 +3651,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param value the float value to be written.
-     * @param output the Writer where the float string representation is to be written, must not be {@code null}.
+     * @param output the Writer where the float's string representation is to be written, must not be {@code null}.
      * @throws IOException if an I/O error occurs.
      */
     public static void write(final float value, final Writer output) throws IOException {
@@ -3669,7 +3669,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param value the double value to be written.
-     * @param output the Writer where the double string representation is to be written, must not be {@code null}.
+     * @param output the Writer where the double's string representation is to be written, must not be {@code null}.
      * @throws IOException if an I/O error occurs.
      */
     public static void write(final double value, final Writer output) throws IOException {
@@ -3941,6 +3941,9 @@ public final class IOUtil {
      * @see #charsToBytes(char[], int, int, Charset)
      */
     public static void write(final char[] chars, final int offset, final int count, final File output) throws IOException {
+        N.checkArgNotNegative(offset, cs.offset);
+        N.checkArgNotNegative(count, cs.count);
+
         if (count == 0 && N.len(chars) >= offset) {
             createNewFileIfNotExists(output);
             return;
@@ -3969,6 +3972,9 @@ public final class IOUtil {
      * @see #charsToBytes(char[], int, int, Charset)
      */
     public static void write(final char[] chars, final int offset, final int count, final Charset charset, final File output) throws IOException {
+        N.checkArgNotNegative(offset, cs.offset);
+        N.checkArgNotNegative(count, cs.count);
+
         if (count == 0 && N.len(chars) >= offset) {
             createNewFileIfNotExists(output);
             return;
@@ -4043,6 +4049,9 @@ public final class IOUtil {
      * @see #charsToBytes(char[], int, int, Charset)
      */
     public static void write(final char[] chars, final int offset, final int count, final OutputStream output) throws IOException {
+        N.checkArgNotNegative(offset, cs.offset);
+        N.checkArgNotNegative(count, cs.count);
+
         if (count == 0 && N.len(chars) >= offset) {
             return;
         }
@@ -4070,6 +4079,9 @@ public final class IOUtil {
      * @see #charsToBytes(char[], int, int, Charset)
      */
     public static void write(final char[] chars, final int offset, final int count, final Charset charset, final OutputStream output) throws IOException {
+        N.checkArgNotNegative(offset, cs.offset);
+        N.checkArgNotNegative(count, cs.count);
+
         if (count == 0 && N.len(chars) >= offset) {
             return;
         }
@@ -4967,7 +4979,7 @@ public final class IOUtil {
      * @param output the Writer to write to.
      * @param flush  if {@code true}, the output Writer is flushed after writing.
      * @return the total number of characters written to the Writer.
-     * @throws IllegalArgumentException if the source Reader is {@code null} or if the count is negative.
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if {@code source} or {@code output} is {@code null}.
      * @throws IOException              if an I/O error occurs.
      */
     public static long write(final Reader source, final long offset, final long count, final Writer output, final boolean flush)
@@ -5193,7 +5205,7 @@ public final class IOUtil {
      * Appends the content of the CharSequence to the target file.
      *
      * @param cs         the CharSequence to append to the file.
-     * @param charset    the Charset to be used to encode the character array into a sequence of bytes.
+     * @param charset    the Charset to be used to encode the CharSequence into a sequence of bytes.
      * @param targetFile the file to which the CharSequence will be appended, must not be {@code null}.
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
@@ -5492,6 +5504,7 @@ public final class IOUtil {
      * @param src    the source channel from which bytes are to be read.
      * @param output the target channel to which bytes are to be written.
      * @return the number of bytes transferred.
+     * @throws IllegalArgumentException if {@code src} or {@code output} is {@code null}.
      * @throws IOException if an I/O error occurs during the transfer.
      */
     public static long transfer(final ReadableByteChannel src, final WritableByteChannel output) throws IOException {
@@ -5642,7 +5655,7 @@ public final class IOUtil {
      *
      * @param file the file to be mapped into memory.
      * @return a MappedByteBuffer that represents the content of the file.
-     * @throws IllegalArgumentException if the provided file is {@code null}.
+     * @throws IllegalArgumentException if the provided file is {@code null} or does not exist.
      * @throws IOException              if an I/O error occurs during the operation.
      * @see FileChannel#map(MapMode, long, long)
      */
@@ -6545,7 +6558,7 @@ public final class IOUtil {
      * @param charset the charset to be used.
      * @return a new BufferedReader instance.
      * @throws UncheckedIOException if an I/O error occurs.
-     * @see #newInputStreamReader(InputStream, Charset)
+     * @see #newFileReader(File, Charset)
      * @see java.io.BufferedReader#BufferedReader(Reader)
      */
     public static java.io.BufferedReader newBufferedReader(final File file, final Charset charset) throws UncheckedIOException {
@@ -7072,7 +7085,7 @@ public final class IOUtil {
     }
 
     /**
-     * Closes the provided {@code URLConnection} if it's a {@code HttpURLConnection} by disconnection.
+     * Closes the provided {@code URLConnection} by calling {@link HttpURLConnection#disconnect()} if it is an {@code HttpURLConnection}; otherwise does nothing.
      *
      * @param conn the connection to close.
      */
@@ -7277,6 +7290,7 @@ public final class IOUtil {
      *
      * @param srcFile the source file or directory to be copied. It must not be {@code null}.
      * @param destDir the destination directory where the source file or directory will be copied to. It must not be {@code null}.
+     * @throws IllegalArgumentException if {@code destDir} is {@code null} or exists but is not a directory, or if the destination directory is inside or the same as the source directory.
      * @throws IOException if an I/O error occurs.
      */
     public static void copyToDirectory(final File srcFile, final File destDir) throws IOException {
@@ -7285,7 +7299,8 @@ public final class IOUtil {
 
     /**
      * Copies the specified source file or directory to the specified destination directory.
-     * if the source is a directory, all its contents will be copied into the destination directory.
+     * If the source is a directory, it is recreated (by its own name) inside the destination directory,
+     * along with all of its contents.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7298,6 +7313,7 @@ public final class IOUtil {
      * @param srcFile          the source file or directory to be copied. It must not be {@code null}.
      * @param destDir          the destination directory where the source file or directory will be copied to. It must not be {@code null}.
      * @param preserveFileDate if {@code true}, the last modified date of the file will be preserved in the copied file.
+     * @throws IllegalArgumentException if {@code destDir} is {@code null} or exists but is not a directory, or if the destination directory is inside or the same as the source directory.
      * @throws IOException if an I/O error occurs.
      */
     public static void copyToDirectory(final File srcFile, final File destDir, final boolean preserveFileDate) throws IOException {
@@ -7306,13 +7322,15 @@ public final class IOUtil {
 
     /**
      * Copies the specified source file or directory to the specified destination directory.
-     * if the source is a directory, all its contents will be copied into the destination directory.
+     * If the source is a directory, it is recreated (by its own name) inside the destination directory,
+     * along with all of its contents.
      *
      * @param <E>              the type of the exception that may be thrown by the filter.
      * @param srcFile          the source file or directory to be copied. It must not be {@code null}.
      * @param destDir          the destination directory where the source file or directory will be copied to. It must not be {@code null}.
      * @param preserveFileDate if {@code true}, the last modified date of the file will be preserved in the copied file.
-     * @param filter           a BiPredicate that takes the source and destination files as arguments and returns a boolean. if the predicate returns {@code true}, the file is copied; if it returns {@code false}, the file is not copied.
+     * @param filter           a BiPredicate that takes the source directory and the file being evaluated as arguments and returns a boolean. if the predicate returns {@code true}, the file is copied; if it returns {@code false}, the file is not copied.
+     * @throws IllegalArgumentException if {@code filter} is {@code null}, if {@code destDir} is {@code null} or exists but is not a directory, or if the destination directory is inside or the same as the source directory.
      * @throws IOException if an I/O error occurs.
      * @throws E                    if the filter throws an exception.
      */
@@ -7526,7 +7544,8 @@ public final class IOUtil {
      *
      * @param srcDir  the source directory to copy from, must not be {@code null}.
      * @param destDir the destination directory to copy to, must not be {@code null}.
-     * @throws IOException if an I/O error occurs or if the source directory does not exist.
+     * @throws IllegalArgumentException if {@code srcDir} exists but is not a directory, or if {@code destDir} is {@code null} or exists but is not a directory.
+     * @throws IOException if an I/O error occurs, or if the source directory is {@code null} or does not exist.
      */
     public static void copyDirectory(final File srcDir, final File destDir) throws IOException {
         checkDirectoryExists(srcDir);
@@ -7847,8 +7866,8 @@ public final class IOUtil {
      *
      * @param srcFile the source file or directory to be moved.
      * @param destDir the destination directory where the file or directory will be moved to.
-     * @throws IOException if an I/O error occurs during the move operation, such as if the source doesn't exist
-     *         or the destination cannot be written to.
+     * @throws IllegalArgumentException if the source file does not exist, or if {@code destDir} exists but is not a directory.
+     * @throws IOException if an I/O error occurs during the move operation, such as if the destination cannot be created or written to.
      * @see #move(File, File, CopyOption...)
      * @see java.nio.file.Files#move(Path, Path, CopyOption...)
      */
@@ -7863,7 +7882,8 @@ public final class IOUtil {
      * @param srcFile the source file to be moved.
      * @param destDir the target directory where the file will be moved to.
      * @param options optional arguments that specify how the move should be done.
-     * @throws IOException if an I/O error occurs.
+     * @throws IllegalArgumentException if the source file does not exist, or if {@code destDir} exists but is not a directory.
+     * @throws IOException if an I/O error occurs, including failure to create the destination directory.
      */
     public static void move(final File srcFile, final File destDir, final CopyOption... options) throws IOException {
         if (!srcFile.exists()) {
@@ -8054,7 +8074,7 @@ public final class IOUtil {
      * Deletes all subfiles and subdirectories from the specified directory.
      * <p>
      * This method removes all files and directories contained within the specified directory,
-     * but leaves the directory itself intact. if the directory does not exist or is actually
+     * but leaves the directory itself intact. If the directory does not exist or is actually
      * a file, the method returns {@code false} without performing any operations.
      * <p>
      * This operation is recursive - subdirectories and all their contents will be deleted.
@@ -8115,6 +8135,7 @@ public final class IOUtil {
      * @return {@code true} if all matching files and directories were deleted successfully;
      *         {@code false} if the directory does not exist or is actually a file,
      *         or some files could not be deleted or if the operation failed.
+     * @throws IllegalArgumentException if {@code filter} is {@code null}.
      * @throws E if the filter throws an exception during evaluation.
      * @see File#delete()
      * @see Files#delete(Path)
@@ -8165,7 +8186,7 @@ public final class IOUtil {
      * Cleans a directory by deleting all subfiles and subdirectories within it.
      * <p>
      * This method removes all files and directories contained within the specified directory,
-     * but leaves the directory itself intact. if the directory does not exist or is actually
+     * but leaves the directory itself intact. If the directory does not exist or is actually
      * a file, the method returns {@code false} without performing any operations.
      * <p>
      * This operation is recursive - subdirectories and all their contents will be deleted.
@@ -8223,7 +8244,7 @@ public final class IOUtil {
      * <p>
      * This method attempts to create a new file at the path specified by the input File
      * object, but only if a file or directory doesn't already exist at that location.
-     * if the parent directory doesn't exist, the method will attempt to create it before
+     * If the parent directory doesn't exist, the method will attempt to create it before
      * creating the file.
      *
      * <p><b>Usage Examples:</b></p>
@@ -8257,7 +8278,7 @@ public final class IOUtil {
      * <p>
      * This method attempts to create the directory named by the given {@code File} object.
      * If a directory with this name already exists, the method returns {@code false}.
-     * if the directory does not exist, it is created. This method does not create parent
+     * If the directory does not exist, it is created. This method does not create parent
      * directories. Use {@link #mkdirsIfNotExists(File)} to create parent directories as well.
      *
      * <p><b>Usage Examples:</b></p>
@@ -8290,7 +8311,7 @@ public final class IOUtil {
      * <p>
      * This method attempts to create the directory named by the given {@code File} object,
      * including any necessary but nonexistent parent directories. If a directory with this
-     * name already exists, the method returns {@code false}. if the directory does not exist,
+     * name already exists, the method returns {@code false}. If the directory does not exist,
      * it and all necessary parent directories are created.
      * <p>
      * Unlike {@link #mkdirIfNotExists(File)}, this method will create parent directories
@@ -8556,7 +8577,7 @@ public final class IOUtil {
      * @param file the file or directory whose size is to be calculated, must not be {@code null}.
      * @param considerNonExistingFileAsEmpty if {@code true}, the size of non-existing file is considered as 0.
      * @return the total size in bytes. For directories, this is the recursive sum of all files within it.
-     * @throws FileNotFoundException if the file does not exist and considerNonExistingFileAsEmpty is {@code false}.
+     * @throws FileNotFoundException if the file is {@code null} or does not exist and {@code considerNonExistingFileAsEmpty} is {@code false}.
      */
     public static long sizeOf(final File file, final boolean considerNonExistingFileAsEmpty) throws FileNotFoundException {
         if ((file == null || !file.exists()) && considerNonExistingFileAsEmpty) {
@@ -8589,7 +8610,8 @@ public final class IOUtil {
      *
      * @param directory directory to inspect, must not be {@code null}.
      * @return size of directory in bytes, 0 if directory is security restricted, a negative number when the real total is greater than {@link Long#MAX_VALUE}.
-     * @throws FileNotFoundException if the directory is {@code null} or it's not an existing directory.
+     * @throws FileNotFoundException if the directory is {@code null} or does not exist.
+     * @throws IllegalArgumentException if the path exists but is not a directory.
      * @see #sizeOfDirectoryAsBigInteger(File)
      */
     public static long sizeOfDirectory(final File directory) throws FileNotFoundException {
@@ -8609,7 +8631,8 @@ public final class IOUtil {
      * @param directory the directory whose size is to be calculated, must not be {@code null}.
      * @param considerNonExistingDirectoryAsEmpty if {@code true}, the size of non-existing directory is considered as 0.
      * @return the total size in bytes of all files within the directory and its subdirectories.
-     * @throws FileNotFoundException if the directory does not exist and {@code considerNonExistingDirectoryAsEmpty} is {@code false}.
+     * @throws FileNotFoundException if the directory is {@code null} or does not exist and {@code considerNonExistingDirectoryAsEmpty} is {@code false}.
+     * @throws IllegalArgumentException if the path exists but is not a directory.
      */
     public static long sizeOfDirectory(final File directory, final boolean considerNonExistingDirectoryAsEmpty) throws FileNotFoundException {
         if ((directory == null || !directory.exists()) && considerNonExistingDirectoryAsEmpty) {
@@ -8661,7 +8684,7 @@ public final class IOUtil {
      *
      * @param file the file or directory whose size is to be calculated, must not be {@code null}.
      * @return the total size as a BigInteger. For directories, this is the recursive sum of all files within it.
-     * @throws FileNotFoundException if the file does not exist.
+     * @throws FileNotFoundException if the file is {@code null} or does not exist.
      * @see #sizeOf(File)
      * @see #sizeOfDirectoryAsBigInteger(File)
      */
@@ -8775,7 +8798,7 @@ public final class IOUtil {
     }
 
     /**
-     * Compresses the specified source file and writes the compressed data to the target file using the ZIP compression algorithm.
+     * Compresses the specified source file or directory and writes the compressed data to the target file using the ZIP compression algorithm.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -8802,9 +8825,9 @@ public final class IOUtil {
     }
 
     /**
-     * Compresses the specified source files and writes the compressed data to the target file using the ZIP compression algorithm.
+     * Compresses the specified source files or directories and writes the compressed data to the target file using the ZIP compression algorithm.
      *
-     * @param sourceFiles the collection of files to be compressed. Each must be a valid file.
+     * @param sourceFiles the collection of files or directories to be compressed. Each must be a valid file or directory.
      * @param targetFile  the file to which the compressed data will be written. This must be a valid file.
      * @throws UncheckedIOException if an I/O error occurs.
      */
@@ -8924,8 +8947,9 @@ public final class IOUtil {
      * }</pre>
      *
      * @param srcZipFile the source ZIP file to be unzipped. This must be a valid ZIP file.
-     * @param targetDir  the directory to which the contents of the ZIP file will be extracted. This must be a valid directory.
-     * @throws IOException if an I/O error occurs during the unzip process.
+     * @param targetDir  the directory to which the contents of the ZIP file will be extracted. It is created if it does not exist.
+     * @throws IllegalArgumentException if {@code srcZipFile} is a directory, or if {@code targetDir} is {@code null} or is an existing file.
+     * @throws IOException if {@code srcZipFile} does not exist, a ZIP entry would be extracted outside {@code targetDir}, or another I/O error occurs during the unzip process.
      */
     public static void unzip(final File srcZipFile, final File targetDir) throws IOException {
         checkFileExists(srcZipFile);
@@ -9077,10 +9101,10 @@ public final class IOUtil {
      *
      * @param file the source file to split; must exist and be readable.
      * @param countOfParts the number of parts to split the file into; must be greater than 0.
-     * @param destDir the directory where the split parts will be saved; must exist and be writable.
-     * @throws IllegalArgumentException if {@code file} is {@code null} or {@code countOfParts} is less than 1.
-     * @throws FileNotFoundException if the source file does not exist.
-     * @throws IOException if there are issues with file validation or writing the parts.
+     * @param destDir the directory where the split parts will be saved; it is created if it does not exist and must be writable.
+     * @throws IllegalArgumentException if {@code file} is {@code null}, {@code countOfParts} is less than 1, or {@code destDir} is {@code null} or is an existing file.
+     * @throws FileNotFoundException if the source file does not exist or is not readable.
+     * @throws IOException if the destination directory cannot be created or written to, or another I/O error occurs.
      * @see #split(File, int)
      * @see #splitBySize(File, long)
      * @see #splitBySize(File, long, File)
@@ -9136,11 +9160,12 @@ public final class IOUtil {
      * IOUtil.splitBySize(sourceFile, 10240);
      * }</pre>
      *
-     * @param file the source file to split; must exist and be readable.
+     * @param file the source file to split; must not be {@code null}, must exist and be readable.
      * @param sizeOfPart the maximum size in bytes for each part (except possibly the last part); must be positive.
-     * @throws IllegalArgumentException if {@code file} is {@code null} or {@code sizeOfPart} is not positive.
-     * @throws FileNotFoundException if the source file does not exist.
-     * @throws IOException if there are issues with file validation.
+     * @throws NullPointerException if {@code file} is {@code null}.
+     * @throws IllegalArgumentException if {@code sizeOfPart} is not positive.
+     * @throws FileNotFoundException if {@code file} does not exist or is not readable.
+     * @throws IOException if there are issues with file validation or writing the parts.
      * @see #splitBySize(File, long, File)
      * @see #split(File, int, File)
      * @see #split(File, int)
@@ -9186,10 +9211,10 @@ public final class IOUtil {
      *
      * @param file the source file to split; must exist and be readable.
      * @param sizeOfPart the maximum size in bytes for each part (except possibly the last part); must be positive.
-     * @param destDir the destination directory where split parts will be saved; must exist and be writable.
-     * @throws IllegalArgumentException if {@code file} or {@code destDir} is {@code null}, or {@code sizeOfPart} is not positive.
-     * @throws FileNotFoundException if the source file does not exist or the destination directory is invalid.
-     * @throws IOException if there are issues with file validation or directory access.
+     * @param destDir the destination directory where split parts will be saved; it is created if it does not exist and must be writable.
+     * @throws IllegalArgumentException if {@code destDir} is {@code null} or is an existing file, or if {@code sizeOfPart} is not positive.
+     * @throws FileNotFoundException if {@code file} is {@code null}, does not exist, or is not readable.
+     * @throws IOException if the destination directory cannot be created or written to, or another I/O error occurs.
      * @see #splitBySize(File, long)
      * @see #split(File, int, File)
      * @see #split(File, int)
@@ -9540,8 +9565,8 @@ public final class IOUtil {
 
     /**
      * Lists all files in the specified parent directory.
-     * if the recursive parameter is set to {@code true}, it will list files in all subdirectories as well.
-     * if the excludeDirectory parameter is set to {@code true}, it will exclude directories from the list.
+     * If the {@code recursively} parameter is set to {@code true}, it will list files in all subdirectories as well.
+     * If the {@code excludeDirectory} parameter is set to {@code true}, it will exclude directories from the list.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9566,7 +9591,7 @@ public final class IOUtil {
 
     /**
      * Lists all files in the specified parent directory.
-     * if the recursive parameter is set to {@code true}, it will list files in all subdirectories as well.
+     * If the {@code recursively} parameter is set to {@code true}, it will list files in all subdirectories as well.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9579,10 +9604,11 @@ public final class IOUtil {
      * }</pre>
      *
      * @param <E>         the type of the exception that may be thrown by the filter.
-     * @param parentPath  the parent directory where the listing will start. It must not be {@code null}.
+     * @param parentPath  the parent directory where the listing will start. if it is {@code null} or does not exist, an empty list is returned.
      * @param recursively if {@code true}, files in all subdirectories of the parent directory will be listed.
      * @param filter      a BiPredicate that takes the parent directory and a file as arguments and returns a boolean. if the predicate returns {@code true}, the file is listed; if it returns {@code false}, the file is not listed.
      * @return a list of files in the specified directory and possibly its subdirectories.
+     * @throws IllegalArgumentException if {@code filter} is {@code null}.
      * @throws E if the filter throws an exception.
      * @see Stream#listFiles(File, boolean, boolean)
      * @see Fn#isFile()
@@ -9639,7 +9665,7 @@ public final class IOUtil {
 
     /**
      * Lists all directories in the specified parent directory.
-     * if the recursive parameter is set to {@code true}, it will list directories in all subdirectories as well.
+     * If the {@code recursively} parameter is set to {@code true}, it will list directories in all subdirectories as well.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9687,8 +9713,8 @@ public final class IOUtil {
 
     /**
      * Returns a {@link Stream} of files and directories in the specified parent directory.
-     * if the recursive parameter is set to {@code true}, it will include files in all subdirectories as well.
-     * if the excludeDirectory parameter is set to {@code true}, it will exclude directories from the stream.
+     * If the {@code recursively} parameter is set to {@code true}, it will include files in all subdirectories as well.
+     * If the {@code excludeDirectory} parameter is set to {@code true}, it will exclude directories from the stream.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9818,7 +9844,8 @@ public final class IOUtil {
      * Converts a collection of URLs into a list of corresponding File objects.
      *
      * @param urls the collection of URLs to be converted, must not be {@code null}.
-     * @return a list of File objects corresponding to the input URLs.
+     * @return a list of File objects corresponding to the input URLs; an empty list if {@code urls} is empty.
+     * @throws NullPointerException if {@code urls} is {@code null}.
      * @throws IllegalArgumentException if any URL in the collection is {@code null} or is not a file URL.
      */
     public static List<File> toFiles(final Collection<URL> urls) throws UncheckedIOException {
@@ -9869,8 +9896,9 @@ public final class IOUtil {
      * URL[] urls = IOUtil.toUrls(files);
      * }</pre>
      *
-     * @param files the array of File objects to be converted.
-     * @return an array of URL objects corresponding to the input File objects.
+     * @param files the array of File objects to be converted, must not be {@code null}.
+     * @return an array of URL objects corresponding to the input File objects; an empty array if {@code files} is empty.
+     * @throws NullPointerException if {@code files} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs during the conversion.
      * @see File#toURI()
      * @see URI#toURL()
@@ -9904,8 +9932,9 @@ public final class IOUtil {
      * List<URL> urls = IOUtil.toUrls(files);
      * }</pre>
      *
-     * @param files the collection of File objects to be converted.
-     * @return a list of URL objects corresponding to the input File objects.
+     * @param files the collection of File objects to be converted, must not be {@code null}.
+     * @return a list of URL objects corresponding to the input File objects; an empty list if {@code files} is empty.
+     * @throws NullPointerException if {@code files} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs during the conversion.
      * @see File#toURI()
      * @see URI#toURL()

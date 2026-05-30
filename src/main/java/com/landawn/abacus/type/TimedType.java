@@ -123,8 +123,8 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
      * Expects a JSON array format: [timestamp, value].
      *
      * @param str the string to parse
-     * @return a Timed object containing the parsed timestamp and value, or {@code null} if str is empty
-     * @throws IllegalArgumentException if the parsed array has fewer than 2 elements
+     * @return a Timed object containing the parsed timestamp and value, or {@code null} if {@code str} is {@code null} or empty
+     * @throws IllegalArgumentException if the parsed array is {@code null} or has fewer than 2 elements
      */
     @SuppressWarnings("unchecked")
     @Override

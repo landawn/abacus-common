@@ -2590,7 +2590,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *         Returns an empty sequence if either iterator is {@code null} or empty
      * @throws NullPointerException if zipFunction is {@code null}
      * @see #zip(Iterable, Iterable, Throwables.BiFunction)
-     * @see Iterators#zip(Iterable, Iterable, BiFunction)
+     * @see Iterators#zip(Iterator, Iterator, BiFunction)
      */
     public static <A, B, T, E extends Exception> Seq<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
             final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
@@ -4602,7 +4602,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a sequence consisting of the results of applying the given function to each adjacent pair of elements in this sequence.
-     * For sequences with an odd number of elements, the last element will be paired with {@code null}.
+     * If the sequence contains only a single element, that element is paired with {@code null}.
      *
      * <p>This is an intermediate operation that creates a sliding window of size 2 with step 1.</p>
      *
@@ -4742,7 +4742,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a sequence consisting of the results of applying the given function to each adjacent triple of elements in this sequence.
-     * For sequences with a number of elements not divisible by 3, the last elements will be paired with {@code null} values.
+     * If the sequence contains fewer than three elements, the missing trailing elements of the final triple are passed as {@code null}.
      *
      * <p>This is an intermediate operation that creates a sliding window of size 3 with step 1.</p>
      *
@@ -6962,7 +6962,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             public long count() throws E {
                 iter.count();
 
-                return 2 - cursor; //NOSONAR
+                final long ret = 2 - cursor; //NOSONAR
+                cursor = 2;
+                return ret;
             }
 
             @Override
@@ -7105,7 +7107,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             public long count() throws E {
                 iter.count();
 
-                return 2 - cursor; //NOSONAR
+                final long ret = 2 - cursor; //NOSONAR
+                cursor = 2;
+                return ret;
             }
 
             @Override
@@ -8834,7 +8838,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Delays each element in this {@code Seq} by the given {@link Duration} except the first element.
+     * Delays each element in this {@code Seq} by the given {@link java.time.Duration} except the first element.
      * The delay is applied before emitting each element after the first one.
      * This method is useful for simulating time-based processing or avoiding overwhelming downstream systems.
      *
@@ -8844,7 +8848,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param duration the duration to delay each element
      * @return a new {@code Seq} with each element delayed by the specified duration
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the duration is null
      * @see #rateLimited(double)
      */
     @IntermediateOp
@@ -10907,7 +10910,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *         corresponding elements at those percentiles, or an empty {@code Optional} if the sequence is empty
      * @throws IllegalStateException if the sequence has already been operated upon or closed
      * @throws E if an exception occurs during iteration
-     * @see N#percentilesOfSorted(int[])
+     * @see N#percentilesOfSorted(Object[])
      */
     public Optional<Map<Percentage, T>> percentiles() throws IllegalStateException, E {
         assertNotClosed();
@@ -10947,7 +10950,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalStateException if the sequence has already been operated upon or closed
      * @throws IllegalArgumentException if the specified comparator is {@code null}
      * @throws E if an exception occurs during iteration
-     * @see N#percentilesOfSorted(int[])
+     * @see N#percentilesOfSorted(Object[])
      */
     @TerminalOp
     public Optional<Map<Percentage, T>> percentiles(final Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException, E {
@@ -13307,7 +13310,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <br />
      * <br />
      * To avoid eager loading by terminal operations invoked within the transfer function,
-     * use {@code Seq.defer(Supplier)} to create a lazily-evaluated sequence. For example:
+     * use {@code Seq.defer(Supplier)} to create a lazily-evaluated sequence.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

@@ -82,7 +82,7 @@ public abstract class AbstractShortType extends NumberType<Number> {
      *   <li>Valid numeric strings are parsed to {@code Short} values.</li>
      * </ul>
      *
-     * @param str the string to convert, may be {@code null}
+     * @param str the string to convert, may be {@code null} or empty
      * @return the {@code Short} value, or the default value if {@code str} is empty or {@code null}
      * @throws NumberFormatException if the string cannot be parsed as a {@code short}
      */

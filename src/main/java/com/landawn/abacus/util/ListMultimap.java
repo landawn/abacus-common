@@ -107,7 +107,7 @@ import com.landawn.abacus.annotation.Internal;
  *   <li>{@link #fromMap(Map)} - From existing Map</li>
  *   <li>{@link #fromCollection(Collection, Function)} - Grouping by key extractor</li>
  *   <li>{@link #fromCollection(Collection, Function, Function)} - Key and value extractors</li>
- *   <li>{@link #merge(Map, Map)} - Concatenating multiple maps</li>
+ *   <li>{@link #merge(Map, Map)} - Concatenating two maps</li>
  *   <li>{@link #wrap(Map)} - Wrapping existing Map&lt;K, List&lt;E&gt;&gt;</li>
  *   <li>{@link N#newListMultimap()} - Empty instance with default backing</li>
  * </ul>
@@ -169,7 +169,7 @@ import com.landawn.abacus.annotation.Internal;
  */
 public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     /**
-     * Constructs a new instance of ListMultimap with the default initial capacity.
+     * Constructs a new instance of ListMultimap backed by a {@link HashMap} with {@link ArrayList} value collections.
      */
     ListMultimap() {
         this(HashMap.class, ArrayList.class);

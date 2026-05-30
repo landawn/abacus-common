@@ -123,7 +123,9 @@ public final class JsonUtil {
      * <p>If {@code bean} is a {@link Map} instance, it is passed directly to the
      * {@link JSONObject} constructor. Otherwise, the object is first converted to a
      * {@link Map} via {@code Beans.deepBeanToMap(bean, true)}, which recursively
-     * resolves nested bean properties, collections, and maps.
+     * resolves nested bean properties, collections, and maps. The second argument
+     * ({@code ignoreNullProperty == true}) means properties whose value is {@code null}
+     * are omitted from the resulting {@link JSONObject}.
      *
      * <p><b>Usage example:</b>
      * <pre>{@code

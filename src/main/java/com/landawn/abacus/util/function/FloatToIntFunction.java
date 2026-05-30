@@ -33,9 +33,10 @@ public interface FloatToIntFunction {
      * A default function that converts a float value to int through narrowing primitive conversion (casting).
      * This truncates the decimal portion and may result in overflow if the float value exceeds int range.
      *
-     * <p>Note: For float values outside the int range [-2^31, 2^31-1], the result is undefined
-     * due to overflow. Special float values (NaN, positive/negative infinity) are converted to 0 or
-     * Integer.MAX_VALUE/Integer.MIN_VALUE respectively.</p>
+     * <p>Note: For float values outside the int range [-2^31, 2^31-1], the result is clamped to
+     * {@code Integer.MAX_VALUE} or {@code Integer.MIN_VALUE}. Special float values are converted as
+     * follows: NaN becomes 0, while positive and negative infinity become {@code Integer.MAX_VALUE}
+     * and {@code Integer.MIN_VALUE} respectively.</p>
      */
     FloatToIntFunction DEFAULT = value -> (int) value;
 

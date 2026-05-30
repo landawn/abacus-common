@@ -43,6 +43,7 @@ package com.landawn.abacus.type;
 @SuppressWarnings("java:S2160")
 public final class PrimitiveIntType extends AbstractIntegerType {
 
+    /** The type name constant for the primitive {@code int} type, equal to {@code "int"}. */
     public static final String INT = int.class.getSimpleName();
 
     private static final Integer DEFAULT_VALUE = 0;

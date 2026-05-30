@@ -101,12 +101,12 @@ public final class InternalUtil {
     /**
      * Attempts to get the internal array backing an ArrayList without copying.
      *
-     * <p>This method uses reflection to access the internal elementData field of ArrayList
-     * for performance optimization. If reflection fails or the collection is not an ArrayList,
-     * returns {@code null}.</p>
+     * <p>This method uses reflection to access the internal {@code elementData} field of {@link ArrayList}
+     * for performance optimization. It returns {@code null} if {@code c} is {@code null}, is not an
+     * {@code ArrayList} instance (subclasses are not accepted), or if the reflective access fails.</p>
      *
-     * @param c the collection to get the internal array from
-     * @return the internal array if accessible, {@code null} otherwise
+     * @param c the collection to get the internal array from; may be {@code null}
+     * @return the internal backing array if accessible, {@code null} otherwise
      * @deprecated DO NOT call the methods defined in this class. It's for internal use only.
      */
     @Deprecated

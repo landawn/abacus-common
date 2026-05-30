@@ -159,13 +159,15 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  *   <li><b>Type Conversion:</b> Automatic conversion of primitive and wrapper types</li>
  * </ul>
  *
- * <p><b>Naming Policy Integration:</b>
+ * <p><b>Naming Policy Integration:</b> the supported policies are the values of the
+ * {@link NamingPolicy} enum:
  * <ul>
  *   <li><b>CAMEL_CASE:</b> Convert property names to camelCase format</li>
+ *   <li><b>UPPER_CAMEL_CASE:</b> Convert to UpperCamelCase (Pascal case) format</li>
  *   <li><b>SNAKE_CASE:</b> Convert to snake_case format</li>
+ *   <li><b>SCREAMING_SNAKE_CASE:</b> Convert to SCREAMING_SNAKE_CASE format</li>
  *   <li><b>KEBAB_CASE:</b> Convert to kebab-case format</li>
  *   <li><b>NO_CHANGE:</b> Preserve original property names</li>
- *   <li><b>Custom Policies:</b> Support for user-defined naming transformations</li>
  * </ul>
  *
  * <p><b>URL Component Encoding:</b>
@@ -832,7 +834,7 @@ public final class URLEncodedUtil {
      *
      * @param content the string to encode; {@code null} is written as the literal text {@code "null"}.
      * @param charset the charset used to convert characters to bytes before percent-encoding;
-     *                must not be {@code null}.
+     *                if {@code null}, defaults to the platform default charset.
      * @param output the {@code Appendable} to which the encoded content is appended.
      * @throws IOException if an I/O error occurs while appending to the output.
      */
@@ -1147,7 +1149,7 @@ public final class URLEncodedUtil {
      * @param targetType the class of the bean or Map to create and populate; must not be {@code null}.
      * @return an instance of type T populated with the decoded parameter values;
      *         returns an empty instance if {@code urlQuery} is {@code null} or empty.
-     * @throws IllegalArgumentException if {@code targetType} is {@code null} or not a supported bean/Map type.
+     * @throws IllegalArgumentException if {@code targetType} is neither a {@code Map} type nor a supported bean class.
      * @see #decode(String, Charset, Class)
      */
     public static <T> T decode(final String urlQuery, final Class<? extends T> targetType) {
@@ -1183,7 +1185,7 @@ public final class URLEncodedUtil {
      * @param targetType the class of the bean or Map to create and populate; must not be {@code null}.
      * @return an instance of type T populated with the decoded parameter values;
      *         returns an empty instance if {@code urlQuery} is {@code null} or empty.
-     * @throws IllegalArgumentException if {@code targetType} is {@code null} or not a supported bean/Map type.
+     * @throws IllegalArgumentException if {@code targetType} is neither a {@code Map} type nor a supported bean class.
      * @see #decode(String, Class)
      */
     @SuppressWarnings("rawtypes")

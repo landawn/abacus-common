@@ -271,7 +271,7 @@ public class HolderType<T> extends AbstractType<Holder<T>> {
 
     /**
      * Appends the string representation of a {@link Holder} to an Appendable.
-     * If the Holder is {@code null} or holds a {@code null} value, appends the NULL_STRING constant.
+     * If the Holder is {@code null} or holds a {@code null} value, appends the {@code NULL_STRING} constant.
      * Otherwise, delegates to the actual type handler of the contained value.
      *
      * @param appendable the Appendable to write to
@@ -290,7 +290,7 @@ public class HolderType<T> extends AbstractType<Holder<T>> {
 
     /**
      * Writes the character representation of a {@link Holder} to a CharacterWriter.
-     * If the Holder is {@code null} or holds a {@code null} value, writes the NULL_CHAR_ARRAY.
+     * If the Holder is {@code null} or holds a {@code null} value, writes the {@code NULL_CHAR_ARRAY}.
      * Otherwise, delegates to the actual type handler of the contained value.
      * This method is typically used for JSON/XML serialization.
      *

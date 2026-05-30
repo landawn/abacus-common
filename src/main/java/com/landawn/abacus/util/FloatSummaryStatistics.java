@@ -188,7 +188,9 @@ public class FloatSummaryStatistics implements FloatConsumer {
 
     /**
      * Returns the count of values recorded.
-     * This represents the number of times {@link #accept(float)} has been called.
+     * This includes values added via {@link #accept(float)}, values supplied through the
+     * {@link #FloatSummaryStatistics(long, float, float, double)} constructor, and counts
+     * merged in via {@link #combine(FloatSummaryStatistics)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

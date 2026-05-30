@@ -51,7 +51,8 @@ public class LongConsumerTest extends TestBase {
 
     @Test
     public void testAndThenNullThrowsImmediately() {
-        LongConsumer instance = a -> {};
+        LongConsumer instance = a -> {
+        };
         org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.LongConsumer) null));
     }
 }

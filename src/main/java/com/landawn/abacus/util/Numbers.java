@@ -1382,8 +1382,8 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.format(12.105, "0.00");     // returns "12.10"
-     * Numbers.format(12.105, "#.##");     // returns "12.1"
+     * Numbers.format(12.105, "0.00");     // returns "12.11"
+     * Numbers.format(12.105, "#.##");     // returns "12.11"
      * Numbers.format(0.121, "0.00%");     // returns "12.10%"
      * Numbers.format(0.121, "#.##%");     // returns "12.1%"
      * Numbers.format(0.12156, "0.00%");   // returns "12.16%"
@@ -1423,8 +1423,8 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.format(12.105, "0.00");     // returns "12.10"
-     * Numbers.format(12.105, "#.##");     // returns "12.1"
+     * Numbers.format(12.105, "0.00");     // returns "12.11"
+     * Numbers.format(12.105, "#.##");     // returns "12.11"
      * Numbers.format(null, "0.00");       // returns "0.00"
      * Numbers.format(0.121, "#.##%");     // returns "12.1%"
      * Numbers.format(0.12156, "#.##%");   // returns "12.16%"
@@ -1819,7 +1819,8 @@ public final class Numbers {
      *
      * @param obj the object to convert. This can be any instance of Object.
      * @return the byte representation of the provided object, or {@code 0} if the object is {@code null}.
-     * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a byte.
+     * @throws NumberFormatException if the object is a Number whose value is outside the byte range,
+     *         or if the object is not a Number and its string representation cannot be parsed as a byte.
      * @see #toByte(String)
      * @see #toByte(String, byte)
      * @see #toByte(Object, byte)
@@ -1899,7 +1900,8 @@ public final class Numbers {
      * @param obj the object to convert. This can be any instance of Object.
      * @param defaultValue the default value to return if the object is {@code null}.
      * @return the byte representation of the provided object, or the default value if the object is {@code null}.
-     * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a byte.
+     * @throws NumberFormatException if the object is a Number whose value is outside the byte range,
+     *         or if the object is not a Number and its string representation cannot be parsed as a byte.
      * @see #toByte(String)
      * @see #toByte(String, byte)
      * @see #toByte(Object)
@@ -1972,7 +1974,8 @@ public final class Numbers {
      *
      * @param obj the object to convert. This can be any instance of Object.
      * @return the short representation of the provided object, or {@code 0} if the object is {@code null}.
-     * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a short.
+     * @throws NumberFormatException if the object is a Number whose value is outside the short range,
+     *         or if the object is not a Number and its string representation cannot be parsed as a short.
      * @see #toShort(String)
      * @see #toShort(String, short)
      * @see #toShort(Object, short)
@@ -2052,7 +2055,8 @@ public final class Numbers {
      * @param obj the object to convert. This can be any instance of Object.
      * @param defaultValue the default value to return if the object is {@code null}.
      * @return the short representation of the provided object, or the default value if the object is {@code null}.
-     * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a short.
+     * @throws NumberFormatException if the object is a Number whose value is outside the short range,
+     *         or if the object is not a Number and its string representation cannot be parsed as a short.
      * @see #toShort(String)
      * @see #toShort(String, short)
      * @see #toShort(Object)
@@ -2125,7 +2129,8 @@ public final class Numbers {
      *
      * @param obj the object to convert. This can be any instance of Object.
      * @return the integer representation of the provided object, or {@code 0} if the object is {@code null}.
-     * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as an integer.
+     * @throws NumberFormatException if the object is a Number whose value is outside the int range,
+     *         or if the object is not a Number and its string representation cannot be parsed as an integer.
      * @see #toInt(String)
      * @see #toInt(String, int)
      * @see #toInt(Object, int)
@@ -2201,7 +2206,8 @@ public final class Numbers {
      * @param obj the object to convert. This can be any instance of Object.
      * @param defaultValue the default value to return if the object is {@code null}.
      * @return the integer representation of the provided object, or the default value if the object is {@code null}.
-     * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as an integer.
+     * @throws NumberFormatException if the object is a Number whose value is outside the int range,
+     *         or if the object is not a Number and its string representation cannot be parsed as an integer.
      * @see #toInt(String)
      * @see #toInt(String, int)
      * @see #toInt(Object)
@@ -2274,7 +2280,8 @@ public final class Numbers {
      *
      * @param obj the object to convert. This can be any instance of Object.
      * @return the long representation of the provided object, or {@code 0L} if the object is {@code null}.
-     * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a long.
+     * @throws NumberFormatException if the object is a {@code BigInteger} or {@code BigDecimal} whose value is outside the long range,
+     *         or if the object is not a Number and its string representation cannot be parsed as a long.
      * @see #toLong(String)
      * @see #toLong(String, long)
      * @see #toLong(Object, long)
@@ -2362,7 +2369,8 @@ public final class Numbers {
      * @param obj the object to convert. This can be any instance of Object.
      * @param defaultValue the default value to return if the object is {@code null}.
      * @return the long representation of the provided object, or the default value if the object is {@code null}.
-     * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a long.
+     * @throws NumberFormatException if the object is a {@code BigInteger} or {@code BigDecimal} whose value is outside the long range,
+     *         or if the object is not a Number and its string representation cannot be parsed as a long.
      * @see #toLong(String)
      * @see #toLong(String, long)
      * @see #toLong(Object)
@@ -2791,7 +2799,7 @@ public final class Numbers {
      * <pre>{@code
      * Numbers.toScaledBigDecimal(123.456f, 2, RoundingMode.HALF_UP);   // returns 123.46
      * Numbers.toScaledBigDecimal(123.456f, 1, RoundingMode.DOWN);      // returns 123.4
-     * Numbers.toScaledBigDecimal(123.456f, 3, RoundingMode.UP);        // returns 123.456
+     * Numbers.toScaledBigDecimal(123.456f, 3, RoundingMode.UP);        // returns 123.457
      * Numbers.toScaledBigDecimal(null, 2, RoundingMode.HALF_EVEN);     // returns BigDecimal.ZERO
      * }</pre>
      *
@@ -3348,7 +3356,11 @@ public final class Numbers {
             switch (lastChar) {
                 case 'l':
                 case 'L':
-                    if (dec == null && exp == null && (!numeric.isEmpty() && numeric.charAt(0) == '-' && isDigits(numeric.substring(1)) || isDigits(numeric))) {
+                    // Accept a leading '+' as well as '-' (createLong/createBigInteger both parse a leading '+'),
+                    // otherwise "+7L" throws here even though isConvertibleToNumber("+7L") returns true.
+                    if (dec == null && exp == null
+                            && (!numeric.isEmpty() && (numeric.charAt(0) == '-' || numeric.charAt(0) == '+') && isDigits(numeric.substring(1))
+                                    || isDigits(numeric))) {
                         try {
                             return createLong(numeric);
                         } catch (final NumberFormatException ignored) {
@@ -3507,7 +3519,7 @@ public final class Numbers {
     /**
      * Utility method for {@link #createNumber(java.lang.String)}.
      *
-     * <p>Returns {@code true} if s is {@code null} or empty.</p>
+     * <p>Returns {@code true} if {@code str} is {@code null}, empty, or contains only {@code '0'} characters.</p>
      *
      * @param str the String to check
      * @return {@code true} if {@code str} is {@code null}, empty, or contains only '0' characters; {@code false} otherwise
@@ -3934,7 +3946,7 @@ public final class Numbers {
      * }</pre>
      *
      * @param n the number to test for primality; must be &gt;= 0
-     * @return {@code true} if n is prime, {@code false} otherwise (including for n &lt; 2)
+     * @return {@code true} if n is prime, {@code false} otherwise (0 and 1 return {@code false})
      * @throws IllegalArgumentException if {@code n} is negative
      * @see BigInteger#isProbablePrime(int)
      */
@@ -4350,6 +4362,8 @@ public final class Numbers {
      * @return the base-2 logarithm of the specified value, rounded to an int
      * @throws IllegalArgumentException if {@code x <= 0.0}, {@code x} is NaN, or {@code x} is
      *     infinite
+     * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
+     *     is not a power of two
      * @see #log2(int, RoundingMode)
      * @see #log2(long, RoundingMode)
      * @see #log2(double)
@@ -4857,7 +4871,7 @@ public final class Numbers {
 
     /**
      * Returns the smallest power of two greater than or equal to {@code x}.  This is equivalent to
-     * {@code Numbers.checkedPow(2, Numbers.log2(x, CEILING))}.
+     * {@code Numbers.powExact(2, Numbers.log2(x, CEILING))}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4884,8 +4898,8 @@ public final class Numbers {
     /**
      * Returns the smallest power of two greater than or equal to the given BigInteger value.
      *
-     * <p>This method computes the ceiling of x to the nearest power of two. For example, if x is 100,
-     * the result will be 128 (2^7). This is equivalent to 2^(Numbers.ceiling(Numbers.log2(x))).</p>
+     * <p>This method rounds x up to the nearest power of two. For example, if x is 100,
+     * the result will be 128 (2^7). This is equivalent to {@code 2^log2(x, RoundingMode.CEILING)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4907,7 +4921,7 @@ public final class Numbers {
 
     /**
      * Returns the largest power of two less than or equal to {@code x}.  This is equivalent to
-     * {@code Numbers.checkedPow(2, Numbers.log2(x, FLOOR))}.
+     * {@code Numbers.powExact(2, Numbers.log2(x, FLOOR))}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4932,8 +4946,8 @@ public final class Numbers {
     /**
      * Returns the largest power of two less than or equal to the given BigInteger value.
      *
-     * <p>This method computes the floor of x to the nearest power of two. For example, if x is 100,
-     * the result will be 64 (2^6). This is equivalent to 2^(Numbers.floor(Numbers.log2(x))).</p>
+     * <p>This method rounds x down to the nearest power of two. For example, if x is 100,
+     * the result will be 64 (2^6). This is equivalent to {@code 2^log2(x, RoundingMode.FLOOR)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7254,10 +7268,10 @@ public final class Numbers {
      * }</pre>
      *
      * @param x the float value to be rounded
-     * @param scale the number of decimal places to round to, must be non-negative
-     * @param roundingMode the rounding mode to use
+     * @param scale the number of decimal places to round to; a negative scale rounds to the
+     *     corresponding power of ten (as in {@link BigDecimal#setScale(int, RoundingMode)})
+     * @param roundingMode the rounding mode to use; if {@code null}, {@link RoundingMode#HALF_UP} is used
      * @return the rounded float value
-     * @throws IllegalArgumentException if the scale is negative
      * @see #round(float, int)
      * @see #round(double, int, RoundingMode)
      * @see BigDecimal#setScale(int, RoundingMode)
@@ -7282,10 +7296,10 @@ public final class Numbers {
      * }</pre>
      *
      * @param x the double value to be rounded
-     * @param scale the number of decimal places to round to, must be non-negative
-     * @param roundingMode the rounding mode to use
+     * @param scale the number of decimal places to round to; a negative scale rounds to the
+     *     corresponding power of ten (as in {@link BigDecimal#setScale(int, RoundingMode)})
+     * @param roundingMode the rounding mode to use; if {@code null}, {@link RoundingMode#HALF_UP} is used
      * @return the rounded double value
-     * @throws IllegalArgumentException if the scale is negative
      * @see #round(double, int)
      * @see #round(float, int, RoundingMode)
      * @see BigDecimal#setScale(int, RoundingMode)
@@ -7344,7 +7358,7 @@ public final class Numbers {
      * Numbers.round(3.14159f, "#.##")   = 3.14f
      * Numbers.round(3.1f, "0.00")       = 3.1f
      * Numbers.round(123.456f, "#.#")    = 123.5f
-     * Numbers.round(2.5f, "#")          = 3.0f
+     * Numbers.round(2.5f, "#")          = 2.0f   // DecimalFormat rounds half to even by default
      * }</pre>
      *
      * @param x the float value to be rounded
@@ -7375,7 +7389,7 @@ public final class Numbers {
      * Numbers.round(3.14159, "#.##")   = 3.14
      * Numbers.round(3.1, "0.00")       = 3.1
      * Numbers.round(123.456, "#.#")    = 123.5
-     * Numbers.round(2.5, "#")          = 3.0
+     * Numbers.round(2.5, "#")          = 2.0   // DecimalFormat rounds half to even by default
      * }</pre>
      *
      * @param x the double value to be rounded

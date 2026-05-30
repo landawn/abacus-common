@@ -61,6 +61,13 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractTupleTyp
                         TypeFactory.getType(t5TypeName), TypeFactory.getType(t6TypeName), TypeFactory.getType(t7TypeName), TypeFactory.getType(t8TypeName)));
     }
 
+    /**
+     * Reconstructs a {@link Tuple8} from an already type-converted element array.
+     * The array is expected to contain exactly eight elements matching the tuple's parameter types.
+     *
+     * @param converted the array of converted element values (must be of length 8)
+     * @return a new {@code Tuple8} containing the eight elements in order
+     */
     @SuppressWarnings({ "unchecked", "deprecation" })
     @Override
     protected Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> fromArray(final Object[] converted) {

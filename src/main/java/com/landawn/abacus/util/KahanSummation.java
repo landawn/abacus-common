@@ -87,10 +87,10 @@ public final class KahanSummation { // NOSONAR
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * KahanSummation sum = new KahanSummation();
-     * sum.add(1e20);
-     * sum.add(1.0);
-     * sum.add(-1e20);
-     * // Result will be 1.0 (correct), not 0.0 (which simple summation might give)
+     * for (int i = 0; i < 10; i++) {
+     *     sum.add(0.1);
+     * }
+     * // sum.sum() returns 1.0 (correct), whereas naive summation yields 0.9999999999999999
      * }</pre>
      *
      * @param value the value to add to the summation

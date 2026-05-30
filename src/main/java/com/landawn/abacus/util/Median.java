@@ -191,7 +191,9 @@ import com.landawn.abacus.util.u.OptionalShort;
  * <ul>
  *   <li><b>Floating-Point Precision:</b> Preserves original precision without intermediate calculations</li>
  *   <li><b>Overflow Protection:</b> No arithmetic operations that could cause overflow</li>
- *   <li><b>NaN Handling:</b> Follows standard floating-point comparison rules for NaN values</li>
+ *   <li><b>NaN Handling:</b> For {@code float} and {@code double} inputs, comparisons use {@link Float#compare(float, float)} /
+ *       {@link Double#compare(double, double)}, which impose a total ordering in which {@code NaN} sorts greater than all
+ *       other values and {@code 0.0} sorts greater than {@code -0.0}</li>
  *   <li><b>Infinity Support:</b> Properly handles positive and negative infinity values</li>
  * </ul>
  *
@@ -845,8 +847,8 @@ public final class Median {
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method uses an efficient priority queue-based
      * algorithm that processes the array in O(n log n) time by maintaining a bounded min-heap of size (length/2 + 1).
-     * This implementation handles floating-point values correctly, including proper handling of NaN values
-     * according to IEEE 754 floating-point standards.</p>
+     * Elements are compared using {@link Float#compare(float, float)}, which imposes a total ordering in which
+     * {@code NaN} is considered greater than all other values and {@code 0.0f} is considered greater than {@code -0.0f}.</p>
      *
      * <p>For arrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -881,8 +883,8 @@ public final class Median {
      * <p>The median represents the middle value(s) when the subarray elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method operates on a contiguous subarray defined
      * by the range [fromIndex, toIndex) and efficiently computes the median using a bounded priority queue.
-     * This implementation handles floating-point values correctly, including proper handling of NaN values
-     * according to IEEE 754 floating-point standards.</p>
+     * Elements are compared using {@link Float#compare(float, float)}, which imposes a total ordering in which
+     * {@code NaN} is considered greater than all other values and {@code 0.0f} is considered greater than {@code -0.0f}.</p>
      *
      * <p>For subarrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -959,8 +961,9 @@ public final class Median {
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method uses an efficient priority queue-based
      * algorithm that processes the array in O(n log n) time by maintaining a bounded min-heap of size (length/2 + 1).
-     * This implementation handles double-precision floating-point values with full IEEE 754 compliance,
-     * including proper treatment of special values like NaN and infinity.</p>
+     * Elements are compared using {@link Double#compare(double, double)}, which imposes a total ordering in which
+     * {@code NaN} is considered greater than all other values (including positive infinity) and {@code 0.0d} is
+     * considered greater than {@code -0.0d}.</p>
      *
      * <p>For arrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -996,8 +999,9 @@ public final class Median {
      * <p>The median represents the middle value(s) when the subarray elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method operates on a contiguous subarray defined
      * by the range [fromIndex, toIndex) and efficiently computes the median using a bounded priority queue.
-     * This implementation handles double-precision floating-point values with full IEEE 754 compliance,
-     * including proper treatment of special values like NaN and infinity.</p>
+     * Elements are compared using {@link Double#compare(double, double)}, which imposes a total ordering in which
+     * {@code NaN} is considered greater than all other values (including positive infinity) and {@code 0.0d} is
+     * considered greater than {@code -0.0d}.</p>
      *
      * <p>For subarrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>

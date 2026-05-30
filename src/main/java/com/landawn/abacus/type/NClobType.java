@@ -44,10 +44,11 @@ public class NClobType extends AbstractType<NClob> {
     }
 
     /**
-     * Package-private constructor for NClobType for a specific NClob implementation class.
-     * This constructor allows handling of custom NClob implementations.
+     * Package-private constructor for {@code NClobType} bound to a specific {@link NClob}
+     * implementation class. Allows handling of custom {@link NClob} subclasses while still
+     * registering under the {@code "NClob"} type name.
      *
-     * @param clazz the specific NClob class or subclass to handle
+     * @param clazz the specific {@link NClob} class or subclass to handle; must not be {@code null}
      */
     NClobType(Class<? extends NClob> clazz) {
         super(NCLOB);
@@ -57,7 +58,7 @@ public class NClobType extends AbstractType<NClob> {
     /**
      * Returns the Java class type that this type handler manages.
      *
-     * @return the {@link NClob} class object
+     * @return the configured {@link NClob} class (or {@link NClob} subclass) this handler was created for
      */
     @Override
     public Class<NClob> javaType() {

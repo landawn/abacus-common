@@ -48,6 +48,13 @@ public class Tuple3Type<T1, T2, T3> extends AbstractTupleType<Tuple3<T1, T2, T3>
                 List.of(TypeFactory.getType(t1TypeName), TypeFactory.getType(t2TypeName), TypeFactory.getType(t3TypeName)));
     }
 
+    /**
+     * Reconstructs a {@link Tuple3} from an already type-converted element array.
+     * The array is expected to contain exactly three elements matching the tuple's parameter types.
+     *
+     * @param converted the array of converted element values (must be of length 3)
+     * @return a new {@code Tuple3} containing the three elements in order
+     */
     @SuppressWarnings("unchecked")
     @Override
     protected Tuple3<T1, T2, T3> fromArray(final Object[] converted) {

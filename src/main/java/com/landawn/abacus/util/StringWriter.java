@@ -72,6 +72,7 @@ public final class StringWriter extends AppendableWriter {
      * }</pre>
      *
      * @param initialSize the initial capacity of the internal StringBuilder
+     * @throws NegativeArraySizeException if {@code initialSize} is negative
      * @see #StringWriter()
      * @see #StringWriter(StringBuilder)
      */
@@ -92,7 +93,8 @@ public final class StringWriter extends AppendableWriter {
      * // sb now contains "Existing content. New content."
      * }</pre>
      *
-     * @param sb the StringBuilder to use as the internal buffer
+     * @param sb the StringBuilder to use as the internal buffer; must not be {@code null}
+     * @throws IllegalArgumentException if {@code sb} is {@code null}
      * @see #stringBuilder()
      */
     public StringWriter(final StringBuilder sb) {
@@ -172,8 +174,8 @@ public final class StringWriter extends AppendableWriter {
      * }</pre>
      *
      * @param csq the character sequence from which a subsequence is appended, may be {@code null}
-     * @param start the index of the first character to append (inclusive)
-     * @param end the index of the last character to append (exclusive)
+     * @param start the index of the first character in the subsequence (inclusive)
+     * @param end the index of the character following the last character in the subsequence (exclusive)
      * @return this StringWriter instance for method chaining
      * @throws IndexOutOfBoundsException if {@code start} or {@code end} are negative,
      *         {@code start} is greater than {@code end}, or {@code end} is greater than
@@ -214,7 +216,8 @@ public final class StringWriter extends AppendableWriter {
      * writer.write(chars);
      * }</pre>
      *
-     * @param cbuf the character array to write
+     * @param cbuf the character array to write; must not be {@code null}
+     * @throws NullPointerException if {@code cbuf} is {@code null}
      */
     @Override
     public void write(final char[] cbuf) {
@@ -273,7 +276,7 @@ public final class StringWriter extends AppendableWriter {
      * @param str the string containing data to write
      * @param off the index of the first character to write
      * @param len the number of characters to write
-     * @throws StringIndexOutOfBoundsException if {@code off} is negative, {@code len} is negative,
+     * @throws IndexOutOfBoundsException if {@code off} is negative, {@code len} is negative,
      *         or {@code off + len} is greater than {@code str.length()}
      */
     @Override

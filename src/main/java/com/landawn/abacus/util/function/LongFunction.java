@@ -33,9 +33,15 @@ import com.landawn.abacus.util.Throwables;
 @FunctionalInterface
 public interface LongFunction<R> extends Throwables.LongFunction<R, RuntimeException>, java.util.function.LongFunction<R> { //NOSONAR
     /**
-     * A function that boxes a primitive long value into a Long object.
+     * A function that boxes a primitive {@code long} value into a {@link Long} object.
      * This is useful when you need to convert primitive long values to their
      * wrapper type for use with APIs that require objects.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongFunction<Long> boxer = LongFunction.BOX;
+     * Long boxed = boxer.apply(42L);   // Returns Long.valueOf(42L)
+     * }</pre>
      */
     LongFunction<Long> BOX = value -> value;
 

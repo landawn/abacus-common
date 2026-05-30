@@ -19,7 +19,7 @@ package com.landawn.abacus.util;
  * {@link com.landawn.abacus.eventbus.EventBus}. The mode controls whether subscriber
  * methods are invoked on the posting thread or dispatched to a background thread pool.
  *
- * <p><b>Usage Example:</b></p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Deliver events on the posting thread (default)
  * @Subscribe(threadMode = ThreadMode.DEFAULT)

@@ -162,7 +162,8 @@ public class BiObjIntConsumerTest extends TestBase {
 
     @Test
     public void testAndThenNullThrowsImmediately() {
-        BiObjIntConsumer<String, String> instance = (a, b, c) -> {};
+        BiObjIntConsumer<String, String> instance = (a, b, c) -> {
+        };
         org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((BiObjIntConsumer) null));
     }
 }

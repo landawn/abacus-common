@@ -234,7 +234,7 @@ class JsonStringReader extends AbstractJsonReader {
      * </ul>
      *
      * @param nextTokenValueType the expected type of the next token value
-     * @return the token identifier, or -1 if no next token is found
+     * @return the token identifier, or {@code -1} if no next token is found
      * @throws UncheckedIOException if an I/O error occurs during reading
      */
     @Override
@@ -728,8 +728,8 @@ class JsonStringReader extends AbstractJsonReader {
 
     /**
      * Unescapes the character identified by the character or characters that immediately follow a backslash. The
-     * backslash '\' should have already been read. This supports both unicode escapes "u000A" and two-character escapes
-     * "\n".
+     * backslash {@code '\'} should have already been read. This supports both unicode escapes ({@code \\u000A}) and
+     * two-character escapes ({@code \\n}).
      *
      * @return the unescaped character
      * @throws ParsingException if the escape sequence is incomplete or malformed, including

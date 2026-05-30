@@ -390,7 +390,11 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
     /**
      * Writes an object using Kryo output.
      * This method performs the actual Kryo serialization, either writing just the object
-     * or both the class information and the object, depending on the configuration.
+     * or both the class information and the object.
+     *
+     * <p>Both the class and the object are written (via {@code writeClassAndObject}) when {@code obj} is
+     * {@code null} or when {@code config.isWriteClass()} returns {@code true}; otherwise only the object is
+     * written (via {@code writeObject}).</p>
      *
      * <p><b>Note:</b> This is a protected method intended for internal use and subclass extension.
      * External callers should use the public {@link #serialize} methods instead.</p>
@@ -403,8 +407,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * }</pre>
      *
      * @param obj the object to write (may be {@code null})
-     * @param config the serialization configuration (may be {@code null} for defaults). If {@code config.isWriteClass()}
-     *               returns {@code true}, both class and object are written; otherwise only the object is written.
+     * @param config the serialization configuration (may be {@code null} for defaults)
      * @param output the Kryo output to write to
      */
     protected void write(final Object obj, final KryoSerConfig config, final Output output) {
@@ -467,6 +470,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetClass the class of the object to create (must not be {@code null})
      * @return the deserialized object instance
+     * @throws IllegalArgumentException if {@code source} is {@code null}
      */
     @Override
     public <T> T deserialize(final String source, final KryoDeserConfig config, final Class<? extends T> targetClass) {

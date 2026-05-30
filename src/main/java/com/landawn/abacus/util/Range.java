@@ -809,8 +809,8 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * is also contained in this range, respecting bound types.
      *
      * <p>For a closed endpoint in the other range, this range must contain that endpoint value.
-     * For an open endpoint in the other range, this range's corresponding endpoint must extend
-     * strictly beyond the other's endpoint.</p>
+     * For an open endpoint in the other range, this range's corresponding endpoint may share the
+     * same value (since the other range excludes that boundary value) or extend beyond it.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

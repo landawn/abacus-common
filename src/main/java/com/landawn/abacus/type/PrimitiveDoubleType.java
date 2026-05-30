@@ -44,6 +44,7 @@ package com.landawn.abacus.type;
 @SuppressWarnings("java:S2160")
 public final class PrimitiveDoubleType extends AbstractDoubleType {
 
+    /** The type name constant for the primitive {@code double} type, equal to {@code "double"}. */
     public static final String DOUBLE = double.class.getSimpleName();
 
     private static final Double DEFAULT_VALUE = 0d;

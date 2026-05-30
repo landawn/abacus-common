@@ -152,6 +152,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * @param obj the object to serialize (may be {@code null}; serializes nothing in that case)
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the output file to write to (must not be {@code null})
+     * @throws IllegalArgumentException if schema is not specified for non-SpecificRecord objects
      * @throws UncheckedIOException if an I/O error occurs during file writing
      */
     @Override
@@ -406,6 +407,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the type of the object to create (must not be {@code null})
      * @return the deserialized object instance
+     * @throws IllegalArgumentException if schema is not specified for non-SpecificRecord types
      * @throws UncheckedIOException if an I/O error occurs or the file doesn't exist
      */
     @Override
@@ -438,6 +440,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetClass the class of the object to create (must not be {@code null})
      * @return the deserialized object instance
+     * @throws IllegalArgumentException if schema is not specified for non-SpecificRecord types
      * @throws UncheckedIOException if an I/O error occurs or the file doesn't exist
      */
     @Override

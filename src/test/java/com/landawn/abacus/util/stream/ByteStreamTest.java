@@ -4298,4 +4298,13 @@ public class ByteStreamTest extends TestBase {
         assertEquals("[1, 2, 3]", result);
     }
 
+    @Test
+    public void testAverage_largeStream_noOverflow() {
+        // Regression: average() must not throw when the byte sum exceeds Integer.MAX_VALUE (#63).
+        final int n = 17_000_000;
+        final byte[] arr = new byte[n];
+        java.util.Arrays.fill(arr, (byte) 127);
+        org.junit.jupiter.api.Assertions.assertEquals(127.0, com.landawn.abacus.util.stream.ByteStream.of(arr).average().getAsDouble(), 0.0001);
+    }
+
 }

@@ -908,6 +908,7 @@ public final class OkHttpRequest {
      * @param content the file containing the request body content
      * @param contentType the media type of the content, or {@code null} to use default
      * @return this OkHttpRequest instance for method chaining
+     * @see RequestBody#create(MediaType, File)
      */
     public OkHttpRequest body(final File content, final MediaType contentType) {
         body = RequestBody.create(content, contentType);

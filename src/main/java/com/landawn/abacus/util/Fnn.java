@@ -122,7 +122,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Method Categories:</b>
  * <ul>
- *   <li><b>Memoization:</b> {@code memoize()}, {@code memoizeWithExpiration()}, {@code memoizeByKey()}</li>
+ *   <li><b>Memoization:</b> {@code memoize(Supplier)}, {@code memoize(Function)}, {@code memoizeWithExpiration()}</li>
  *   <li><b>Standard Functional:</b> {@code identity()}, {@code alwaysTrue()}, {@code alwaysFalse()}</li>
  *   <li><b>Interface Conversion:</b> {@code pp()}, {@code cc()}, {@code ff()} for Predicate/Consumer/Function</li>
  *   <li><b>Synchronization:</b> {@code sp()}, {@code sc()}, {@code sf()} for synchronized variants</li>
@@ -963,11 +963,12 @@ public final class Fnn {
     /**
      * Returns a {@code Throwables.Consumer} that sleeps for the specified number of milliseconds.
      * The consumer ignores its input and calls {@link N#sleep(long)}. If the sleeping thread is
-     * interrupted, the interrupt flag is restored.
+     * interrupted, the interrupt flag is restored and a {@link RuntimeException} is thrown.
+     * A zero or negative {@code millis} results in no sleep.
      *
      * @param <T> the type of the input to the consumer
      * @param <E> the type of exception that may be thrown
-     * @param millis the number of milliseconds to sleep; must not be negative
+     * @param millis the number of milliseconds to sleep; zero or negative results in no sleep
      * @return a Consumer that sleeps for {@code millis} milliseconds on each invocation
      * @see N#sleep(long)
      * @see #sleepUninterruptibly(long)
@@ -980,10 +981,11 @@ public final class Fnn {
      * Returns a {@code Throwables.Consumer} that sleeps uninterruptibly for the specified number of milliseconds.
      * The consumer ignores its input and calls {@link N#sleepUninterruptibly(long)}.
      * Unlike {@link #sleep(long)}, interruptions are suppressed and the sleep continues for the full duration.
+     * A zero or negative {@code millis} results in no sleep.
      *
      * @param <T> the type of the input to the consumer
      * @param <E> the type of exception that may be thrown
-     * @param millis the number of milliseconds to sleep; must not be negative
+     * @param millis the number of milliseconds to sleep; zero or negative results in no sleep
      * @return a Consumer that sleeps uninterruptibly for {@code millis} milliseconds on each invocation
      * @see N#sleepUninterruptibly(long)
      * @see #sleep(long)

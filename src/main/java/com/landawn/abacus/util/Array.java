@@ -3795,7 +3795,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <ul>
      *   <li>If both arrays have a row at that index, the rows are concatenated together</li>
      *   <li>If only one array has a row at that index, that row is used in the result</li>
-     *   <li>If neither array has a row at that index (both are null), the result row is an empty array</li>
+     *   <li>If neither array has a row at that index (both are null), the result row is {@code null}</li>
      * </ul>
      *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
@@ -3858,7 +3858,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <ul>
      *   <li>If both arrays have a layer at that index, the layers are concatenated using the two-dimensional concat2D method</li>
      *   <li>If only one array has a layer at that index, that layer is used in the result</li>
-     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty two-dimensional array</li>
+     *   <li>If neither array has a layer at that index (both are null), the result layer is {@code null}</li>
      * </ul>
      *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
@@ -5045,7 +5045,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts an array of Integer objects into an array of primitive integers.
-     * If a {@code null} value is encountered in the input array, it is replaced with the default value (int) 0.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code 0}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5101,7 +5101,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * int[] empty = Array.unbox(objects, 2, 2, 0);     // returns empty int array
      * }</pre>
      *
-     * @param a the array of Integer objects to be converted.
+     * @param a the array of Integer objects to be converted. May be {@code null}.
      * @param fromIndex the starting index (inclusive) in the array to be converted.
      * @param toIndex the ending index (exclusive) in the array to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -5190,7 +5190,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * long[] empty = Array.unbox(objects, 2, 2, 0L);     // returns empty long array
      * }</pre>
      *
-     * @param a the array of Long objects to be converted.
+     * @param a the array of Long objects to be converted. May be {@code null}.
      * @param fromIndex the starting index (inclusive) in the array to be converted.
      * @param toIndex the ending index (exclusive) in the array to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.

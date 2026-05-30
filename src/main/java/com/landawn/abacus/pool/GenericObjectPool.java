@@ -59,7 +59,7 @@ import com.landawn.abacus.util.Objectory;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create a pool with capacity 50, 5-minute eviction delay
- * GenericObjectPool<MyResource> pool = new GenericObjectPool<>(
+ * ObjectPool<MyResource> pool = PoolFactory.createObjectPool(
  *     50, 300000, EvictionPolicy.LAST_ACCESS_TIME
  * );
  *
@@ -742,7 +742,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
     /**
      * Removes all objects from the pool.
-     * All removed objects are destroyed with the REMOVE_REPLACE_CLEAR reason.
+     * All removed objects are destroyed with the {@link Caller#REMOVE_REPLACE_CLEAR} reason.
      *
      * @throws IllegalStateException if the pool has been closed
      */
@@ -802,8 +802,9 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Returns the hash code value for this pool.
-     * The hash code is based on the internal pool structure.
+     * Returns the hash code value for this pool. The hash code is computed from a snapshot
+     * of the pooled elements taken under the pool lock, in their current LIFO order, and uses
+     * {@link java.util.List#hashCode()} semantics on that snapshot.
      *
      * @return a hash code value for this pool
      */
@@ -837,10 +838,12 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Returns a string representation of this pool.
-     * The string representation consists of the string representation of the internal pool.
+     * Returns a string representation of this pool that summarizes its configuration
+     * (capacity, eviction delay, eviction policy, auto-balance, balance factor, memory limit,
+     * configured memory measure) and current total data size. The actual pooled elements are
+     * <em>not</em> included in the output.
      *
-     * @return a string representation of this pool
+     * @return a string representation of this pool's configuration and total data size
      */
     @Override
     public String toString() {

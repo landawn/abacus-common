@@ -993,10 +993,8 @@ public class StreamTest extends AbstractTest {
 
         N.println(c);
 
-        Dataset ds1 = N.newDataset(N.toList("c1", "c2"),
-                N.toList(N.toList(1, 1), N.toList(2, 2), N.toList(3, 3), N.toList(2, 2)));
-        Dataset ds2 = N.newDataset(N.toList("c1", "c2"),
-                N.toList(N.toList(2, 2), N.toList(3, 3), N.toList(2, 2)));
+        Dataset ds1 = N.newDataset(N.toList("c1", "c2"), N.toList(N.toList(1, 1), N.toList(2, 2), N.toList(3, 3), N.toList(2, 2)));
+        Dataset ds2 = N.newDataset(N.toList("c1", "c2"), N.toList(N.toList(2, 2), N.toList(3, 3), N.toList(2, 2)));
         Dataset ds3 = ds1.intersectAll(ds2);
         ds3.println();
 
@@ -1006,10 +1004,8 @@ public class StreamTest extends AbstractTest {
 
         N.println(Strings.repeat('=', 80));
 
-        ds1 = N.newDataset(N.toList("c1", "c2"),
-                N.toList(N.toList(1, 1), N.toList(2, 2), N.toList(3, 3), N.toList(2, 2)));
-        ds2 = N.newDataset(N.toList("c1", "c2"),
-                N.toList(N.toList(2, 2), N.toList(3, 3), N.toList(2, 2)));
+        ds1 = N.newDataset(N.toList("c1", "c2"), N.toList(N.toList(1, 1), N.toList(2, 2), N.toList(3, 3), N.toList(2, 2)));
+        ds2 = N.newDataset(N.toList("c1", "c2"), N.toList(N.toList(2, 2), N.toList(3, 3), N.toList(2, 2)));
         ds3 = N.intersection(ds1, ds2);
         ds3.println();
 
@@ -1019,10 +1015,8 @@ public class StreamTest extends AbstractTest {
 
         N.println(Strings.repeat('=', 80));
 
-        ds1 = N.newDataset(N.toList("c1", "c2"),
-                N.toList(N.toList(1, 1), N.toList(2, 2), N.toList(3, 3), N.toList(2, 2)));
-        ds2 = N.newDataset(N.toList("c1", "c2"),
-                N.toList(N.toList(2, 2), N.toList(3, 3), N.toList(2, 2)));
+        ds1 = N.newDataset(N.toList("c1", "c2"), N.toList(N.toList(1, 1), N.toList(2, 2), N.toList(3, 3), N.toList(2, 2)));
+        ds2 = N.newDataset(N.toList("c1", "c2"), N.toList(N.toList(2, 2), N.toList(3, 3), N.toList(2, 2)));
         ds3 = ds1.intersect(ds2);
         ds3.println();
 
@@ -1429,8 +1423,7 @@ public class StreamTest extends AbstractTest {
     @Test
     public void test_join() {
         final List<String[]> a = N.toList(N.asArray("a", "1"), N.asArray("b", "2"), N.asArray("c", "3"));
-        final List<String[]> b = N.toList(N.asArray("3", "d"), N.asArray("2", "e"), N.asArray("2", "f"),
-                N.asArray("4", "f"));
+        final List<String[]> b = N.toList(N.asArray("3", "d"), N.asArray("2", "e"), N.asArray("2", "f"), N.asArray("4", "f"));
 
         Stream.of(a).innerJoin(b, (BiPredicate<String[], String[]>) (t, u) -> N.equals(t[1], u[0])).println();
 
@@ -1451,8 +1444,7 @@ public class StreamTest extends AbstractTest {
     @Test
     public void test_join_2() {
         final List<String[]> a = N.toList(N.asArray("a", "1"), N.asArray("b", "2"), N.asArray("c", "3"));
-        final List<String[]> b = N.toList(N.asArray("3", "d"), N.asArray("2", "e"), N.asArray("2", "f"),
-                N.asArray("4", "f"));
+        final List<String[]> b = N.toList(N.asArray("3", "d"), N.asArray("2", "e"), N.asArray("2", "f"), N.asArray("4", "f"));
 
         Stream.of(a).innerJoin(b, (Function<String[], String>) t -> t[1], (Function<String[], String>) t -> t[0]).println();
 

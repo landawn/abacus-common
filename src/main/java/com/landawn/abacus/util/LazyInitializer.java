@@ -53,8 +53,8 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
     }
 
     /**
-     * Creates a new LazyInitializer instance with the specified supplier.
-     * If the supplier is already a LazyInitializer, it is returned as-is to avoid double wrapping.
+     * Creates a new {@code LazyInitializer} instance with the specified supplier.
+     * If the supplier is already a {@code LazyInitializer}, it is returned as-is to avoid double wrapping.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

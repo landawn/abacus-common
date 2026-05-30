@@ -1649,7 +1649,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Map<String, Double> prices1 = Map.of("apple", 1.99, "gold", 1850.50);
-         * Map<String, Double> prices2 = Map.of("apple", 2.01, "gold", 1851.00);
+         * Map<String, Double> prices2 = Map.of("apple", 2.15, "gold", 1851.00);
          *
          * // Different tolerance for different items
          * TriPredicate<String, Double, Double> priceEqual = (key, v1, v2) -> {
@@ -1662,7 +1662,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // common: {"gold": 1850.50} (within $5 tolerance)
          * // onlyOnLeft: {}
          * // onlyOnRight: {}
-         * // differentValues: {"apple": Pair.of(1.99, 2.01)} (exceeds $0.10 tolerance)
+         * // differentValues: {"apple": Pair.of(1.99, 2.15)} (exceeds $0.10 tolerance)
          * }</pre>
          *
          * @param <CK> the common key type shared by both maps
@@ -2297,8 +2297,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Only properties in {@code propNamesToCompare} are examined</li>
          *   <li>Properties with {@code null} values in both beans ARE included in the common properties</li>
          *   <li>{@code @DiffIgnore} annotations are ignored when specific properties are requested</li>
-         *   <li>If a specified property doesn't exist in the first bean, it is skipped entirely; if it
-         *       exists in the first bean but not the second, it is reported as a left-only property</li>
+         *   <li>If a specified property exists in the first bean but not the second, it is reported as a
+         *       left-only property; if it exists in the second bean but not the first, it is reported as a
+         *       right-only property; if it exists in neither bean, it is omitted entirely</li>
          * </ul>
          *
          * <p><b>Usage Examples:</b></p>
@@ -2717,8 +2718,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * <p>The comparison process:
          * <ol>
          *   <li>Each bean is identified using the {@code idExtractor} function</li>
-         *   <li>Beans with matching identifiers are compared using {@link #of(Object, Object)}</li>
-         *   <li>All properties are compared (except those marked with {@code @DiffIgnore})</li>
+         *   <li>Beans with matching identifiers are tested for equality; a pair found to be unequal is
+         *       then detailed property by property via {@link #of(Object, Object)}</li>
+         *   <li>All properties are considered (except those marked with {@code @DiffIgnore})</li>
          *   <li>Results are categorized into common, left-only, right-only, and different beans</li>
          * </ol>
          *

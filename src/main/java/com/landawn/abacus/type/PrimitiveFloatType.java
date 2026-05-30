@@ -44,6 +44,7 @@ package com.landawn.abacus.type;
 @SuppressWarnings("java:S2160")
 public final class PrimitiveFloatType extends AbstractFloatType {
 
+    /** The type name constant for the primitive {@code float} type, equal to {@code "float"}. */
     public static final String FLOAT = float.class.getSimpleName();
 
     private static final Float DEFAULT_VALUE = 0f;

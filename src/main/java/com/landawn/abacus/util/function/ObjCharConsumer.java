@@ -55,6 +55,12 @@ public interface ObjCharConsumer<T> extends Throwables.ObjCharConsumer<T, Runtim
      * Performs this operation on the given arguments.
      * This method is expected to operate via side-effects.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ObjCharConsumer<StringBuilder> appendChar = (sb, ch) -> sb.append(ch);
+     * appendChar.accept(new StringBuilder("Hi"), '!');
+     * }</pre>
+     *
      * @param t the object input argument
      * @param value the char input argument
      */
@@ -68,6 +74,14 @@ public interface ObjCharConsumer<T> extends Throwables.ObjCharConsumer<T, Runtim
      * operation throws an exception, it is relayed to the caller of the
      * composed operation. If performing this operation throws an exception,
      * the {@code after} operation will not be performed.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ObjCharConsumer<StringBuilder> append = (sb, ch) -> sb.append(ch);
+     * ObjCharConsumer<StringBuilder> nl     = (sb, ch) -> sb.append('\n');
+     * ObjCharConsumer<StringBuilder> both   = append.andThen(nl);
+     * both.accept(new StringBuilder(), 'X');
+     * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code ObjCharConsumer} that performs in sequence this

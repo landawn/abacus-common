@@ -26,8 +26,10 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * digest encoded as Base64 text. It supports any algorithm available through the
  * active Java security providers.
  *
- * <p>This class is immutable. Hashing operations are synchronized because
- * {@link MessageDigest} instances are not thread-safe.</p>
+ * <p>The configured algorithm is fixed for the lifetime of an instance. Hashing is
+ * synchronized on the instance because the shared {@link MessageDigest} is reused and is
+ * not thread-safe; a single {@code Password} instance may therefore be shared across
+ * threads.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -117,7 +119,9 @@ public final class Password {
     /**
      * Verifies whether a plain-text password matches a previously hashed password.
      * This method hashes {@code plainPassword} with the configured algorithm and compares
-     * the resulting Base64 text against {@code encryptedPassword}.
+     * the resulting Base64 text against {@code encryptedPassword}. The non-null comparison
+     * is performed with {@link MessageDigest#isEqual(byte[], byte[])}, which runs in constant
+     * time with respect to the number of matching bytes.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

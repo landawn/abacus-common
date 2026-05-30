@@ -801,8 +801,8 @@ public final class FilenameUtil {
      * }</pre>
      *
      * @param filename the filename to query, {@code null} returns {@code null}
-     * @return the name of the file without the path, or an empty string if none exists,
-     *         or {@code null} if the filename is {@code null}
+     * @return the name of the file without the path, an empty string if the filename ends
+     *         with a separator (no name part), or {@code null} if the filename is {@code null}
      * @throws IllegalArgumentException if the supplied filename contains a {@code null} byte
      */
     @MayReturnNull
@@ -845,7 +845,8 @@ public final class FilenameUtil {
      * }</pre>
      *
      * @param filename the filename to query, {@code null} returns {@code null}
-     * @return the name of the file without path or extension, or {@code null} if the filename is {@code null}
+     * @return the name of the file without path or extension, an empty string if the filename
+     *         ends with a separator (no name part), or {@code null} if the filename is {@code null}
      * @throws IllegalArgumentException if the supplied filename contains a {@code null} byte
      * @see #getName(String)
      * @see #getExtension(String)
@@ -1183,7 +1184,7 @@ public final class FilenameUtil {
      *
      * @param filename the filename to match on, {@code null} returns {@code true} only if wildcardMatcher is also {@code null}
      * @param wildcardMatcher the wildcard string to match against, {@code null} returns {@code true} only if filename is also {@code null}
-     * @return {@code true} if the filename matches the wildcard string
+     * @return {@code true} if the filename matches the wildcard string; two {@code null} values are considered a match
      * @see IOCase#SENSITIVE
      */
     public static boolean wildcardMatch(final String filename, final String wildcardMatcher) {
@@ -1206,7 +1207,7 @@ public final class FilenameUtil {
      *
      * @param filename the filename to match on, {@code null} returns {@code true} only if wildcardMatcher is also {@code null}
      * @param wildcardMatcher the wildcard string to match against, {@code null} returns {@code true} only if filename is also {@code null}
-     * @return {@code true} if the filename matches the wildcard string
+     * @return {@code true} if the filename matches the wildcard string; two {@code null} values are considered a match
      * @see IOCase#SYSTEM
      */
     public static boolean wildcardMatchOnSystem(final String filename, final String wildcardMatcher) {

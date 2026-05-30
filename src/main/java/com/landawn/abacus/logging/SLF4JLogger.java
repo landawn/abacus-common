@@ -33,8 +33,8 @@ import org.slf4j.spi.LocationAwareLogger;
  * <p>Key features:</p>
  * <ul>
  *   <li>Direct delegation to SLF4J logger methods</li>
- *   <li>Support for LocationAwareLogger for accurate caller information</li>
- *   <li>Throws RuntimeException if SLF4J is not properly initialized</li>
+ *   <li>Support for {@link LocationAwareLogger} for accurate caller information</li>
+ *   <li>Throws {@link RuntimeException} if SLF4J is not properly initialized</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
@@ -60,11 +60,11 @@ class SLF4JLogger extends AbstractLogger {
     /**
      * Constructs a SLF4JLogger with the specified name.
      *
-     * <p>This constructor obtains a SLF4J logger instance from the SLF4J LoggerFactory.
-     * If SLF4J is not properly initialized (i.e., using NOPLoggerFactory), a RuntimeException
-     * is thrown.</p>
+     * <p>This constructor obtains a SLF4J logger instance from the SLF4J {@code LoggerFactory}.
+     * If SLF4J is not properly initialized (i.e., using {@link NOPLoggerFactory}), a
+     * {@link RuntimeException} is thrown.</p>
      *
-     * <p>If the obtained logger implements LocationAwareLogger, it will be used for
+     * <p>If the obtained logger implements {@link LocationAwareLogger}, it will be used for
      * logging at all levels to provide accurate caller location information.</p>
      *
      * <p><b>Note:</b> The enclosing class is package-private, so this constructor cannot be invoked
@@ -303,7 +303,7 @@ class SLF4JLogger extends AbstractLogger {
     /**
      * Logs a message at WARN level.
      *
-     * <p>If the underlying logger supports location awareness (LocationAwareLogger),
+     * <p>If the underlying logger supports location awareness ({@link LocationAwareLogger}),
      * it is used to provide accurate caller location information. Otherwise, delegates
      * directly to the standard SLF4J logger.</p>
      *
@@ -326,7 +326,7 @@ class SLF4JLogger extends AbstractLogger {
     /**
      * Logs a message at WARN level with an exception.
      *
-     * <p>If the underlying logger supports location awareness (LocationAwareLogger),
+     * <p>If the underlying logger supports location awareness ({@link LocationAwareLogger}),
      * it is used to provide accurate caller location information. Otherwise, delegates
      * directly to the standard SLF4J logger.</p>
      *
@@ -363,7 +363,7 @@ class SLF4JLogger extends AbstractLogger {
     /**
      * Logs a message at ERROR level.
      *
-     * <p>If the underlying logger supports location awareness (LocationAwareLogger),
+     * <p>If the underlying logger supports location awareness ({@link LocationAwareLogger}),
      * it is used to provide accurate caller location information. Otherwise, delegates
      * directly to the standard SLF4J logger.</p>
      *
@@ -386,7 +386,7 @@ class SLF4JLogger extends AbstractLogger {
     /**
      * Logs a message at ERROR level with an exception.
      *
-     * <p>If the underlying logger supports location awareness (LocationAwareLogger),
+     * <p>If the underlying logger supports location awareness ({@link LocationAwareLogger}),
      * it is used to provide accurate caller location information. Otherwise, delegates
      * directly to the standard SLF4J logger.</p>
      *

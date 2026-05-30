@@ -501,8 +501,8 @@ public final class HttpRequest {
      *     .get();
      * }</pre>
      *
-     * @param headers A map containing header names and values
-     * @return This HttpRequest instance for method chaining
+     * @param headers a map containing header names and values
+     * @return this HttpRequest instance for method chaining
      * @see HttpHeaders
      * @see HttpHeaders.Names
      * @see HttpHeaders.Values
@@ -586,8 +586,8 @@ public final class HttpRequest {
      *     .get();
      * }</pre>
      *
-     * @param queryParams A map containing query parameter names and values
-     * @return This HttpRequest instance for method chaining
+     * @param queryParams a map containing query parameter names and values
+     * @return this HttpRequest instance for method chaining
      */
     public HttpRequest query(final Map<String, ?> queryParams) {
         query = queryParams;
@@ -704,8 +704,8 @@ public final class HttpRequest {
      *     .post();
      * }</pre>
      *
-     * @param formBodyByMap A map containing form field names and values
-     * @return This HttpRequest instance for method chaining
+     * @param formBodyByMap a map containing form field names and values
+     * @return this HttpRequest instance for method chaining
      */
     public HttpRequest formBody(final Map<?, ?> formBodyByMap) {
         setContentType(HttpHeaders.Values.APPLICATION_URL_ENCODED);
@@ -1795,6 +1795,7 @@ public final class HttpRequest {
      *
      * @param httpMethod the HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
      * @return a CompletableFuture that will complete with the HTTP response
+     * @throws IllegalArgumentException if httpMethod is null
      */
     @Beta
     public CompletableFuture<HttpResponse<String>> asyncExecute(final HttpMethod httpMethod) {

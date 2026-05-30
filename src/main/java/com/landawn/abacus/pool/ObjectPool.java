@@ -36,7 +36,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *   <li>Thread-safe add and take operations</li>
  *   <li>Optional timeout support for blocking operations</li>
  *   <li>Automatic destruction of objects that fail to be added</li>
- *   <li>Memory-based capacity constraints via MemoryMeasure</li>
+ *   <li>Memory-based capacity constraints via {@link MemoryMeasure}</li>
  * </ul>
  *
  * <p><b>API Design Note:</b> ObjectPool follows {@link java.util.concurrent.BlockingQueue} naming

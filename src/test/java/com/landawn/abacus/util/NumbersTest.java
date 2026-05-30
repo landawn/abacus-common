@@ -660,6 +660,22 @@ public class NumbersTest extends TestBase {
         assertThrows(ArithmeticException.class, () -> Numbers.convert(hugeDecimal.negate(), double.class));
     }
 
+    // Coverage: convert(BigInteger, int.class) overflow branch (value beyond Integer range).
+    @Test
+    public void testConvert_OverflowToInt_FromBigInteger() {
+        assertThrows(ArithmeticException.class, () -> Numbers.convert(BigInteger.valueOf(3000000000L), int.class));
+        assertThrows(ArithmeticException.class, () -> Numbers.convert(BigInteger.valueOf(-3000000000L), int.class));
+        assertEquals(Integer.valueOf(100), Numbers.convert(BigInteger.valueOf(100), int.class));
+    }
+
+    // Coverage: convert(BigDecimal, long.class) overflow branch (value beyond Long range).
+    @Test
+    public void testConvert_OverflowToLong_FromBigDecimal() {
+        assertThrows(ArithmeticException.class, () -> Numbers.convert(new BigDecimal("100000000000000000000"), long.class));
+        assertThrows(ArithmeticException.class, () -> Numbers.convert(new BigDecimal("-100000000000000000000"), long.class));
+        assertEquals(Long.valueOf(100L), Numbers.convert(new BigDecimal("100"), long.class));
+    }
+
     @Test
     public void test_format() {
         {
@@ -1217,6 +1233,32 @@ public class NumbersTest extends TestBase {
 
         assertFalse(isConvertibleToNumber(""));
         assertFalse(isParsable(""));
+    }
+
+    @Test
+    public void testCreateNumber_leadingPlusWithLongSuffix() {
+        // Regression: createNumber(String) must return a value for every input where isConvertibleToNumber
+        // returns true. "+7L" (leading '+' with an L/l suffix) previously threw NumberFormatException even
+        // though isConvertibleToNumber("+7L") returns true; the L-suffix branch only handled a leading '-'.
+        assertTrue(isConvertibleToNumber("+7L"));
+
+        Number plusL = createNumber("+7L");
+        assertTrue(plusL instanceof Long);
+        assertEquals(7L, plusL.longValue());
+
+        Number plusLowerL = createNumber("+7l");
+        assertTrue(plusLowerL instanceof Long);
+        assertEquals(7L, plusLowerL.longValue());
+
+        // The '-' form already worked and must continue to.
+        Number minusL = createNumber("-7L");
+        assertTrue(minusL instanceof Long);
+        assertEquals(-7L, minusL.longValue());
+
+        // Values too big for long fall back to BigInteger and must also accept the leading '+'.
+        Number bigPlus = createNumber("+9999999999999999999L");
+        assertTrue(bigPlus instanceof java.math.BigInteger);
+        assertEquals(new java.math.BigInteger("9999999999999999999"), bigPlus);
     }
 
     @Test
@@ -6492,17 +6534,14 @@ public class NumbersTest extends TestBase {
     public void testRoundFloat_LargeValueBeyondLongRange() {
         // 1e20f > 2^63: the old code returned 9.223372E18f (Long.MAX_VALUE narrowed to float)
         float large = 1e20f;
-        Assertions.assertEquals(large, Numbers.round(large, 0), 0.0f,
-                "round(1e20f, 0) must return 1e20f, not the saturated long value");
+        Assertions.assertEquals(large, Numbers.round(large, 0), 0.0f, "round(1e20f, 0) must return 1e20f, not the saturated long value");
 
         float negLarge = -1e20f;
-        Assertions.assertEquals(negLarge, Numbers.round(negLarge, 0), 0.0f,
-                "round(-1e20f, 0) must return -1e20f, not the saturated long value");
+        Assertions.assertEquals(negLarge, Numbers.round(negLarge, 0), 0.0f, "round(-1e20f, 0) must return -1e20f, not the saturated long value");
 
         // Boundary: largest float exactly equal to 2^63 (Float.MAX_VALUE > 2^63)
         float twoTo63 = 0x1p63f; // = 9.223372E18f, exactly 2^63 as a float
-        Assertions.assertEquals(twoTo63, Numbers.round(twoTo63, 0), 0.0f,
-                "round(2^63 as float, 0) must return the value unchanged");
+        Assertions.assertEquals(twoTo63, Numbers.round(twoTo63, 0), 0.0f, "round(2^63 as float, 0) must return the value unchanged");
 
         // Normal values well within long range must still round correctly
         Assertions.assertEquals(3.0f, Numbers.round(3.4f, 0), 0.0f);
@@ -6519,17 +6558,14 @@ public class NumbersTest extends TestBase {
     public void testRoundDouble_LargeValueBeyondLongRange() {
         // 1e20 > 2^63: the old code returned 9.223372036854776E18 (Long.MAX_VALUE as double)
         double large = 1e20;
-        Assertions.assertEquals(large, Numbers.round(large, 0), 0.0,
-                "round(1e20, 0) must return 1e20, not the saturated long value");
+        Assertions.assertEquals(large, Numbers.round(large, 0), 0.0, "round(1e20, 0) must return 1e20, not the saturated long value");
 
         double negLarge = -1e20;
-        Assertions.assertEquals(negLarge, Numbers.round(negLarge, 0), 0.0,
-                "round(-1e20, 0) must return -1e20, not the saturated long value");
+        Assertions.assertEquals(negLarge, Numbers.round(negLarge, 0), 0.0, "round(-1e20, 0) must return -1e20, not the saturated long value");
 
         // Boundary: value exactly at 2^63
         double twoTo63 = 0x1p63; // = 9.223372036854776E18, exactly 2^63
-        Assertions.assertEquals(twoTo63, Numbers.round(twoTo63, 0), 0.0,
-                "round(2^63 as double, 0) must return the value unchanged");
+        Assertions.assertEquals(twoTo63, Numbers.round(twoTo63, 0), 0.0, "round(2^63 as double, 0) must return the value unchanged");
 
         // Normal values well within long range must still round correctly
         Assertions.assertEquals(3.0, Numbers.round(3.4, 0), 0.0);

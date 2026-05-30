@@ -37,7 +37,7 @@ import com.landawn.abacus.annotation.Beta;
  * <p>This class provides several static factory methods for creating instances:
  * <ul>
  *   <li>{@link #empty()} - returns an empty set</li>
- *   <li>{@link #of(Object)} (and arity-overloads up to ten elements) - creates sets with specific elements</li>
+ *   <li>{@link #of(Object)} (and arity-overloads up to nine elements) - creates sets with specific elements</li>
  *   <li>{@link #copyOf(Object[])} / {@link #copyOf(Collection)} - creates a defensive copy from an array or collection</li>
  *   <li>{@link #wrap(Set)} - wraps an existing set (changes to the underlying set will be reflected)</li>
  *   <li>{@link #builder()} - provides a builder for constructing sets incrementally</li>
@@ -540,9 +540,9 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * }</pre>
      *
      * @param <E> the type of elements to be maintained by the set.
-     * @param holder the set to be used as the backing storage for the Builder; must not be {@code null}
+     * @param holder the set to be used as the backing storage for the Builder; should not be {@code null},
+     *        otherwise subsequent {@code add}/{@code addAll}/{@code build} calls will fail with a {@link NullPointerException}
      * @return a new Builder instance that will use the provided set.
-     * @throws NullPointerException if {@code holder} is {@code null}
      */
     public static <E> Builder<E> builder(final Set<E> holder) {
         return new Builder<>(holder);

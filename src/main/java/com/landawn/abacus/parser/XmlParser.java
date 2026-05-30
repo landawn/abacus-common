@@ -93,7 +93,7 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * @param source the DOM node containing the XML data to deserialize (must not be {@code null})
      * @param targetType the Type descriptor of the object to create (must not be {@code null})
      * @return the deserialized object of type {@code T}
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws com.landawn.abacus.exception.ParsingException if the XML structure does not match the target type
      */
     <T> T deserialize(Node source, Type<? extends T> targetType);
 
@@ -119,7 +119,7 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * @param source the DOM node containing the XML data to deserialize (must not be {@code null})
      * @param targetType the class of the object to create (must not be {@code null})
      * @return the deserialized object of type {@code T}
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws com.landawn.abacus.exception.ParsingException if the XML structure does not match the target type
      */
     <T> T deserialize(Node source, Class<? extends T> targetType);
 
@@ -150,7 +150,7 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the Type descriptor of the object to create (must not be {@code null})
      * @return the deserialized object of type {@code T}
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws com.landawn.abacus.exception.ParsingException if the XML structure does not match the target type
      */
     <T> T deserialize(Node source, XmlDeserConfig config, Type<? extends T> targetType);
 
@@ -180,7 +180,7 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the class of the object to create (must not be {@code null})
      * @return the deserialized object of type {@code T}
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws com.landawn.abacus.exception.ParsingException if the XML structure does not match the target type
      */
     <T> T deserialize(Node source, XmlDeserConfig config, Class<? extends T> targetType);
 
@@ -206,8 +206,9 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * @param source the file containing XML data to deserialize (must not be {@code null})
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param nodeTypes mapping of XML element names to their corresponding types (must not be {@code null})
-     * @return the deserialized object of type {@code T}, or {@code null} if the file is empty
-     * @throws IllegalArgumentException if source or nodeTypes is {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs while reading the file
+     * @throws com.landawn.abacus.exception.ParsingException if no matching type is found in {@code nodeTypes} or the XML is malformed
      */
     <T> T deserialize(File source, XmlDeserConfig config, Map<String, Type<?>> nodeTypes);
 
@@ -233,8 +234,9 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * @param source the input stream containing XML data to deserialize (must not be {@code null})
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param nodeTypes mapping of XML element names to their corresponding types (must not be {@code null})
-     * @return the deserialized object of type {@code T}, or {@code null} if the input stream is empty
-     * @throws IllegalArgumentException if source or nodeTypes is {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs while reading the stream
+     * @throws com.landawn.abacus.exception.ParsingException if no matching type is found in {@code nodeTypes} or the XML is malformed
      */
     <T> T deserialize(InputStream source, XmlDeserConfig config, Map<String, Type<?>> nodeTypes);
 
@@ -263,8 +265,9 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * @param source the reader containing XML data to deserialize (must not be {@code null})
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param nodeTypes mapping of XML element names to their corresponding types (must not be {@code null})
-     * @return the deserialized object of type {@code T}, or {@code null} if the reader is empty
-     * @throws IllegalArgumentException if source or nodeTypes is {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs while reading
+     * @throws com.landawn.abacus.exception.ParsingException if no matching type is found in {@code nodeTypes} or the XML is malformed
      */
     <T> T deserialize(Reader source, XmlDeserConfig config, Map<String, Type<?>> nodeTypes);
 
@@ -272,12 +275,12 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * Deserializes an XML DOM node using node class mappings for dynamic type resolution.
      *
      * <p>This method enables polymorphic deserialization from DOM nodes by mapping XML element names
-     * to types. The target class is determined by matching the node name or its <i>name</i> attribute
-     * to the provided class mappings. This is particularly useful when working with pre-parsed DOM trees
+     * to types. The target class is determined by matching the node's <i>name</i> attribute or its tag
+     * name to the provided class mappings. This is particularly useful when working with pre-parsed DOM trees
      * containing heterogeneous elements.
      *
-     * <p>The parser first attempts to match the node's tag name against the nodeTypes map. If no match
-     * is found and the node has a <i>name</i> attribute, it will attempt to match using that attribute value.
+     * <p>The parser first attempts to match the node's <i>name</i> attribute against the {@code nodeTypes} map.
+     * If the node has no <i>name</i> attribute (or it is empty), it falls back to matching the node's tag name.
      * This provides flexibility in XML structure design.
      *
      * <p><b>Usage Examples:</b></p>
@@ -299,8 +302,8 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * @param source the DOM node containing XML data to deserialize (must not be {@code null})
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param nodeTypes mapping of XML element names to their corresponding types (must not be {@code null})
-     * @return the deserialized object of type {@code T}, or {@code null} if the node is empty
-     * @throws IllegalArgumentException if source or nodeTypes is {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws com.landawn.abacus.exception.ParsingException if no matching type is found in {@code nodeTypes} or the XML structure is invalid
      */
     <T> T deserialize(Node source, XmlDeserConfig config, Map<String, Type<?>> nodeTypes);
 }

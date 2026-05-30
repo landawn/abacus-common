@@ -19,7 +19,7 @@ import com.landawn.abacus.util.u.OptionalBoolean;
 /**
  * Type handler for {@link OptionalBoolean} objects from the {@code com.landawn.abacus.util.u} package,
  * providing serialization, deserialization, and database interaction capabilities for optional boolean values.
- * Note: this handles the abacus-specific {@code OptionalBoolean}, not {@code java.util.OptionalInt} or similar JDK types.
+ * Note: this handles the abacus-specific {@code OptionalBoolean}, which has no direct JDK equivalent.
  * This handler manages the conversion between database boolean values and {@link OptionalBoolean} wrapper objects.
  */
 public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {

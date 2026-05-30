@@ -1548,8 +1548,7 @@ public class PrimitiveListTest extends AbstractTest {
 
         arrayList.add(1, (short) 6);
         N.println(arrayList);
-        assertTrue(N.equals(Array.of((short) 1, (short) 6, (short) 4, (short) 5),
-                N.copyOfRange(arrayList.internalArray(), 0, arrayList.size())));
+        assertTrue(N.equals(Array.of((short) 1, (short) 6, (short) 4, (short) 5), N.copyOfRange(arrayList.internalArray(), 0, arrayList.size())));
 
         arrayList.addAll(arrayList);
 
@@ -1594,8 +1593,7 @@ public class PrimitiveListTest extends AbstractTest {
         arrayList.add(0, (short) 4);
 
         arrayList.sort();
-        assertTrue(N.equals(Array.of((short) 1, (short) 2, (short) 3, (short) 4),
-                N.copyOfRange(arrayList.internalArray(), 0, arrayList.size())));
+        assertTrue(N.equals(Array.of((short) 1, (short) 2, (short) 3, (short) 4), N.copyOfRange(arrayList.internalArray(), 0, arrayList.size())));
 
         arrayList.remove((short) 3);
         N.println(N.copyOfRange(arrayList.internalArray(), 0, arrayList.size()));

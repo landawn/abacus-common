@@ -46,11 +46,9 @@ public class BufferedCsvWriterTest extends TestBase {
         for (int i = 0; i < 32; i++) {
             char c = (char) i;
             if (c == '\r' || c == '\n' || c == '\t' || c == '\b' || c == '\f') {
-                assertNull(BufferedCsvWriter.REPLACEMENT_CHARS[c],
-                        "char 0x" + Integer.toHexString(i) + " must be left literal");
+                assertNull(BufferedCsvWriter.REPLACEMENT_CHARS[c], "char 0x" + Integer.toHexString(i) + " must be left literal");
             } else {
-                assertTrue(BufferedCsvWriter.REPLACEMENT_CHARS[c] != null,
-                        "char 0x" + Integer.toHexString(i) + " must be escaped");
+                assertTrue(BufferedCsvWriter.REPLACEMENT_CHARS[c] != null, "char 0x" + Integer.toHexString(i) + " must be escaped");
             }
         }
     }

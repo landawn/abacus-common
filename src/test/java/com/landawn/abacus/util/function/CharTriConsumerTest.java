@@ -110,7 +110,8 @@ public class CharTriConsumerTest extends TestBase {
 
     @Test
     public void testAndThenNullThrowsImmediately() {
-        CharTriConsumer instance = (a, b, c) -> {};
+        CharTriConsumer instance = (a, b, c) -> {
+        };
         org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((CharTriConsumer) null));
     }
 }

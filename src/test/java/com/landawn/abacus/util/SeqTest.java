@@ -3317,8 +3317,7 @@ public class SeqTest extends AbstractTest {
 
         Seq<Integer, Exception> seqActual = Seq.of(1, 2, 3, 2, 1).dropWhile(x -> x < 3, dropped::add);
         assertEquals(Arrays.asList(3, 2, 1), drainWithException(seqActual));
-        assertEquals(N.toList(1, 2), dropped,
-                "Action should be called on the first element not satisfying the drop condition, based on current impl.");
+        assertEquals(N.toList(1, 2), dropped, "Action should be called on the first element not satisfying the drop condition, based on current impl.");
     }
 
     @Test
@@ -10552,9 +10551,7 @@ public class SeqTest extends AbstractTest {
     public void test_cast() {
         assertDoesNotThrow(() -> {
             Seq.<String, SQLException> of("a", "b").transform(s -> s.map(String::length));
-            Seq.of(N.toList("a", "b"), SQLException.class)
-                    .cast()
-                    .peek(it -> IOUtils.readLines(new FileInputStream(new File("./test.txt")), Charsets.DEFAULT));
+            Seq.of(N.toList("a", "b"), SQLException.class).cast().peek(it -> IOUtils.readLines(new FileInputStream(new File("./test.txt")), Charsets.DEFAULT));
         });
     }
 
@@ -11683,8 +11680,7 @@ public class SeqTest extends AbstractTest {
 
     @Test
     public void testReview_toMap_duplicateKey_withMergeFunction() throws Exception {
-        Map<Object, Integer> result = Seq.of("a", "b", "a")
-                .toMap(java.util.function.Function.identity()::apply, s -> 1, Integer::sum);
+        Map<Object, Integer> result = Seq.of("a", "b", "a").toMap(java.util.function.Function.identity()::apply, s -> 1, Integer::sum);
         assertEquals(Integer.valueOf(2), result.get("a"));
         assertEquals(Integer.valueOf(1), result.get("b"));
     }
@@ -11793,17 +11789,13 @@ public class SeqTest extends AbstractTest {
 
     @Test
     public void testReview_zipWith_stopsAtShortest() throws Exception {
-        List<String> r = Seq.of(1, 2, 3, 4, 5)
-                .zipWith(Arrays.asList("a", "b", "c"), (i, s) -> i + s)
-                .toList();
+        List<String> r = Seq.of(1, 2, 3, 4, 5).zipWith(Arrays.asList("a", "b", "c"), (i, s) -> i + s).toList();
         assertEquals(Arrays.asList("1a", "2b", "3c"), r);
     }
 
     @Test
     public void testReview_zipWithDefaults_padsToLongest() throws Exception {
-        List<String> r = Seq.of(1, 2)
-                .zipWith(Arrays.asList("a", "b", "c"), 0, "?", (i, s) -> i + s)
-                .toList();
+        List<String> r = Seq.of(1, 2).zipWith(Arrays.asList("a", "b", "c"), 0, "?", (i, s) -> i + s).toList();
         assertEquals(Arrays.asList("1a", "2b", "0c"), r);
     }
 
@@ -11905,7 +11897,8 @@ public class SeqTest extends AbstractTest {
     public void testReview_forEachPropagatesException() {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
         Exception thrown = assertThrows(Exception.class, () -> seq.forEach(n -> {
-            if (n == 2) throw new IllegalStateException("boom");
+            if (n == 2)
+                throw new IllegalStateException("boom");
         }));
         assertTrue(thrown instanceof IllegalStateException);
     }
@@ -11915,7 +11908,9 @@ public class SeqTest extends AbstractTest {
         AtomicBoolean closed = new AtomicBoolean();
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3).onClose(() -> closed.set(true));
         try {
-            seq.forEach(n -> { throw new RuntimeException("x"); });
+            seq.forEach(n -> {
+                throw new RuntimeException("x");
+            });
         } catch (Exception ignore) {
             // expected
         }

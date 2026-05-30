@@ -79,6 +79,12 @@ public interface ByteBiPredicate extends Throwables.ByteBiPredicate<RuntimeExcep
     /**
      * Returns a predicate that represents the logical negation of this predicate.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteBiPredicate equal = (a, b) -> a == b;
+     * ByteBiPredicate notEqual = equal.negate();
+     * }</pre>
+     *
      * @return a predicate that represents the logical negation of this predicate
      */
     default ByteBiPredicate negate() {
@@ -92,6 +98,13 @@ public interface ByteBiPredicate extends Throwables.ByteBiPredicate<RuntimeExcep
      *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteBiPredicate bothPositive = (a, b) -> a > 0 && b > 0;
+     * ByteBiPredicate sumUnder100 = (a, b) -> (a + b) < 100;
+     * ByteBiPredicate combined = bothPositive.and(sumUnder100);
+     * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
@@ -109,6 +122,13 @@ public interface ByteBiPredicate extends Throwables.ByteBiPredicate<RuntimeExcep
      *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteBiPredicate eitherZero = (a, b) -> a == 0 || b == 0;
+     * ByteBiPredicate eitherNegative = (a, b) -> a < 0 || b < 0;
+     * ByteBiPredicate combined = eitherZero.or(eitherNegative);
+     * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate

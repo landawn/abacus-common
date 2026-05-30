@@ -33,6 +33,7 @@ import com.landawn.abacus.util.Strings;
 @SuppressWarnings("java:S2160")
 public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<float[]> {
 
+    /** The type name constant for the float array type, equal to {@code "float[]"}. */
     public static final String FLOAT_ARRAY = float[].class.getSimpleName();
 
     private final Type<Float> elementType;

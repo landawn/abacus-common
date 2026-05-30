@@ -3351,6 +3351,7 @@ public class Builder<T> {
      * @param right the second float to compare
      * @param tolerance the acceptable difference between the two floats
      * @return a new ComparisonBuilder for method chaining
+     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
      */
     public static ComparisonBuilder compare(final float left, final float right, final float tolerance) {
         return new ComparisonBuilder().compare(left, right, tolerance);
@@ -3390,6 +3391,7 @@ public class Builder<T> {
      * @param right the second double to compare
      * @param tolerance the acceptable difference between the two doubles
      * @return a new ComparisonBuilder for method chaining
+     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
      */
     public static ComparisonBuilder compare(final double left, final double right, final double tolerance) {
         return new ComparisonBuilder().compare(left, right, tolerance);
@@ -3430,6 +3432,7 @@ public class Builder<T> {
      * @param right the second object to compare
      * @param predicate the predicate to check equality, must not be {@code null}
      * @return a new EquivalenceBuilder for method chaining
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     public static <T> EquivalenceBuilder equals(final T left, final T right, final BiPredicate<? super T, ? super T> predicate) {
         return new EquivalenceBuilder().equals(left, right, predicate);
@@ -3577,6 +3580,7 @@ public class Builder<T> {
      * @param right the second float to compare
      * @param tolerance the acceptable difference between the two floats
      * @return a new EquivalenceBuilder for method chaining
+     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
      */
     public static EquivalenceBuilder equals(final float left, final float right, final float tolerance) {
         return new EquivalenceBuilder().equals(left, right, tolerance);
@@ -3616,6 +3620,7 @@ public class Builder<T> {
      * @param right the second double to compare
      * @param tolerance the acceptable difference between the two doubles
      * @return a new EquivalenceBuilder for method chaining
+     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
      */
     public static EquivalenceBuilder equals(final double left, final double right, final double tolerance) {
         return new EquivalenceBuilder().equals(left, right, tolerance);
@@ -4189,6 +4194,7 @@ public class Builder<T> {
          * @param right the second float to compare
          * @param tolerance the maximum difference allowed for the values to be considered equal
          * @return this ComparisonBuilder instance for method chaining
+         * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
          */
         public ComparisonBuilder compare(final float left, final float right, final float tolerance) {
             if (result == 0) {
@@ -4247,6 +4253,7 @@ public class Builder<T> {
          * @param right the second double to compare
          * @param tolerance the maximum difference allowed for the values to be considered equal
          * @return this ComparisonBuilder instance for method chaining
+         * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
          */
         public ComparisonBuilder compare(final double left, final double right, final double tolerance) {
             if (result == 0) {

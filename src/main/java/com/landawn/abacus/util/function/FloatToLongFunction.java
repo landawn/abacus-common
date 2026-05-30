@@ -33,9 +33,10 @@ public interface FloatToLongFunction {
      * A default function that converts a float value to long through narrowing primitive conversion (casting).
      * This truncates the decimal portion and may result in precision loss for large float values.
      *
-     * <p>Note: For float values outside the long range [-2^63, 2^63-1], the result is undefined
-     * due to overflow. Special float values (NaN, positive/negative infinity) are converted to 0 or
-     * Long.MAX_VALUE/Long.MIN_VALUE respectively.</p>
+     * <p>Note: For float values outside the long range [-2^63, 2^63-1], the result is clamped to
+     * {@code Long.MAX_VALUE} or {@code Long.MIN_VALUE}. Special float values are converted as
+     * follows: NaN becomes 0, while positive and negative infinity become {@code Long.MAX_VALUE}
+     * and {@code Long.MIN_VALUE} respectively.</p>
      */
     FloatToLongFunction DEFAULT = value -> (long) value;
 

@@ -3213,4 +3213,19 @@ public class DoubleListTest extends TestBase {
         assertEquals(Double.POSITIVE_INFINITY, max.getAsDouble(), DELTA);
     }
 
+    @Test
+    public void test_forEach_removeIf_replaceIf_null_func() {
+        // Regression: a null functional argument must throw NullPointerException even on an
+        // EMPTY list (previously silently no-op'd; now matches IntList's fail-fast guard).
+        final DoubleList empty = new DoubleList();
+        assertThrows(NullPointerException.class, () -> empty.forEach((com.landawn.abacus.util.function.DoubleConsumer) null));
+        assertThrows(NullPointerException.class, () -> empty.removeIf((com.landawn.abacus.util.function.DoublePredicate) null));
+        assertThrows(NullPointerException.class, () -> empty.replaceIf((com.landawn.abacus.util.function.DoublePredicate) null, 0d));
+
+        final DoubleList nonEmpty = DoubleList.of(1d, 2d);
+        assertThrows(NullPointerException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.DoubleConsumer) null));
+        assertThrows(NullPointerException.class, () -> nonEmpty.removeIf((com.landawn.abacus.util.function.DoublePredicate) null));
+        assertThrows(NullPointerException.class, () -> nonEmpty.replaceIf((com.landawn.abacus.util.function.DoublePredicate) null, 0d));
+    }
+
 }

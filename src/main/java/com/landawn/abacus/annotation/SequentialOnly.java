@@ -24,9 +24,10 @@ import java.lang.annotation.Target;
  * Indicates that the annotated method or type must run sequentially and is NOT safe to use on a
  * parallelized abacus pipeline. The {@code com.landawn.abacus.util.Seq} and {@code *Stream}
  * APIs use this marker on operations whose correctness depends on encounter-order processing or
- * on mutable state that cannot be safely shared across partitions (for example, a stateful
- * predicate from {@link Stateful} {@code Fn.distinctBy(...)} or a {@code peek} that mutates an
- * external accumulator). It is the converse of {@link ParallelSupported}.
+ * on mutable state that cannot be safely shared across partitions (for example, a
+ * {@link Stateful} predicate such as the one returned by {@code Fn.distinctBy(...)}, or a
+ * {@code peek} that mutates an external accumulator). It is the converse of
+ * {@link ParallelSupported}.
  *
  * <p>This annotation is used to mark:</p>
  * <ul>

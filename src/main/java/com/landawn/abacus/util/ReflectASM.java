@@ -279,11 +279,13 @@ final class ReflectASM<T> {
      * Object priceObj = ReflectASM.on(product).get("price");
      * }</pre>
      *
+     * <p>Note: this method operates on the wrapped instance. If this {@code ReflectASM} was created
+     * from a class via {@link #on(Class)} or {@link #on(String)} without calling {@link #newInstance()},
+     * the wrapped instance is {@code null} and a {@code NullPointerException} will be thrown.</p>
+     *
      * @param <V> the expected type of the field value
      * @param fieldName the name of the field to access; must not be {@code null}
      * @return the value of the field, cast to type {@code V}
-     * @throws IllegalStateException if this {@code ReflectASM} was created from a class (not an
-     *         instance) and {@link #newInstance()} has not been called
      * @throws RuntimeException if the field does not exist or cannot be accessed (e.g., it is
      *         private or static)
      * @throws ClassCastException if the actual field type cannot be cast to {@code V}
@@ -327,11 +329,13 @@ final class ReflectASM<T> {
      *     .instance();
      * }</pre>
      *
+     * <p>Note: this method operates on the wrapped instance. If this {@code ReflectASM} was created
+     * from a class via {@link #on(Class)} or {@link #on(String)} without calling {@link #newInstance()},
+     * the wrapped instance is {@code null} and a {@code NullPointerException} will be thrown.</p>
+     *
      * @param fieldName the name of the field to set; must not be {@code null}
      * @param value the value to assign to the field; may be {@code null} for reference-type fields
      * @return this {@code ReflectASM} instance for method chaining
-     * @throws IllegalStateException if this {@code ReflectASM} was created from a class (not an
-     *         instance) and {@link #newInstance()} has not been called
      * @throws RuntimeException if the field does not exist, is final, is static, or cannot
      *         otherwise be accessed
      */
@@ -378,12 +382,14 @@ final class ReflectASM<T> {
      * String result = ReflectASM.on(calc).invoke("toString");
      * }</pre>
      *
+     * <p>Note: this method operates on the wrapped instance. If this {@code ReflectASM} was created
+     * from a class via {@link #on(Class)} or {@link #on(String)} without calling {@link #newInstance()},
+     * the wrapped instance is {@code null} and a {@code NullPointerException} will be thrown.</p>
+     *
      * @param <V> the expected return type of the method
      * @param methodName the name of the method to invoke; must not be {@code null}
      * @param args the arguments to pass to the method; may be omitted for no-argument methods
      * @return the return value of the method cast to {@code V}, or {@code null} for {@code void} methods
-     * @throws IllegalStateException if this {@code ReflectASM} was created from a class (not an
-     *         instance) and {@link #newInstance()} has not been called
      * @throws RuntimeException if the method does not exist, is not public, or throws an exception
      *         during invocation
      * @throws ClassCastException if the actual return type cannot be cast to {@code V}
@@ -429,11 +435,13 @@ final class ReflectASM<T> {
      * ReflectASM.on(service).call("process", jsonData);
      * }</pre>
      *
+     * <p>Note: this method operates on the wrapped instance. If this {@code ReflectASM} was created
+     * from a class via {@link #on(Class)} or {@link #on(String)} without calling {@link #newInstance()},
+     * the wrapped instance is {@code null} and a {@code NullPointerException} will be thrown.</p>
+     *
      * @param methodName the name of the method to invoke; must not be {@code null}
      * @param args the arguments to pass to the method; may be omitted for no-argument methods
      * @return this {@code ReflectASM} instance for method chaining
-     * @throws IllegalStateException if this {@code ReflectASM} was created from a class (not an
-     *         instance) and {@link #newInstance()} has not been called
      * @throws RuntimeException if the method does not exist, is not public, or throws an exception
      *         during invocation
      */

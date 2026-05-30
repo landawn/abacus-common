@@ -38,7 +38,7 @@ import java.lang.annotation.Target;
  * </ul>
  *
  * <p><b>For composite primary keys:</b></p>
- * <p>When applied to a type, or when the value array contains multiple column names,
+ * <p>When applied to a type, or when the value array contains multiple property names,
  * it defines a composite primary key consisting of multiple fields.</p>
  *
  * <p><b>Best practices:</b></p>
@@ -60,7 +60,7 @@ import java.lang.annotation.Target;
  *
  * // Composite primary key
  * @Entity
- * @Id({"company_id", "employee_id"})
+ * @Id({"companyId", "employeeId"})
  * public class Employee {
  *     private Long companyId;
  *     private Long employeeId;
@@ -96,7 +96,7 @@ public @interface Id {
      * private Long id;
      *
      * // Type-level composite primary key.
-     * @Id({"dept_id", "emp_id"})
+     * @Id({"deptId", "empId"})
      * public class Employee { }
      * }</pre>
      *

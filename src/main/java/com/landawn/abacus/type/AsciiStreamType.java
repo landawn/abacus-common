@@ -119,7 +119,7 @@ public class AsciiStreamType extends InputStreamType {
 
     /**
      * Sets an ASCII {@link java.io.InputStream} parameter on a {@link java.sql.PreparedStatement} at the given position,
-     * with an explicit byte-length hint that the JDBC driver may use for optimization.
+     * reading at most {@code sqlTypeOrLength} bytes from the stream.
      * Delegates to {@link java.sql.PreparedStatement#setAsciiStream(int, java.io.InputStream, int)}.
      *
      * @param stmt the {@code PreparedStatement} on which to set the parameter
@@ -135,7 +135,7 @@ public class AsciiStreamType extends InputStreamType {
 
     /**
      * Sets a named ASCII {@link java.io.InputStream} parameter on a {@link java.sql.CallableStatement},
-     * with an explicit byte-length hint that the JDBC driver may use for optimization.
+     * reading at most {@code sqlTypeOrLength} bytes from the stream.
      * Delegates to {@link java.sql.CallableStatement#setAsciiStream(String, java.io.InputStream, int)}.
      *
      * @param stmt the {@code CallableStatement} on which to set the parameter

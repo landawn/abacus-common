@@ -121,7 +121,7 @@ public class URIType extends AbstractType<URI> {
      * }</pre>
      *
      * @param str the string to convert to a URI
-     * @return a URI instance created from the string, or {@code null} if the string is empty
+     * @return a URI instance created from the string, or {@code null} if the string is {@code null} or empty
      * @throws IllegalArgumentException if the string violates RFC 2396 URI syntax rules
      */
     @Override

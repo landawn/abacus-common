@@ -5895,10 +5895,7 @@ public class EntryStreamTest extends TestBase {
         map.put("z", 30);
 
         // Use Iterator-based source so the internal _map field is null and parallel dispatch is exercised.
-        List<String> keys = EntryStream.<String, Integer> of(map.entrySet().iterator())
-                .parallel()
-                .keys()
-                .toList();
+        List<String> keys = EntryStream.<String, Integer> of(map.entrySet().iterator()).parallel().keys().toList();
         Set<String> keySet = new HashSet<>(keys);
         assertEquals(new HashSet<>(Arrays.asList("x", "y", "z")), keySet);
     }
@@ -5921,10 +5918,7 @@ public class EntryStreamTest extends TestBase {
         map.put("y", 20);
         map.put("z", 30);
 
-        List<Integer> values = EntryStream.<String, Integer> of(map.entrySet().iterator())
-                .parallel()
-                .values()
-                .toList();
+        List<Integer> values = EntryStream.<String, Integer> of(map.entrySet().iterator()).parallel().values().toList();
         Set<Integer> valueSet = new HashSet<>(values);
         assertEquals(new HashSet<>(Arrays.asList(10, 20, 30)), valueSet);
     }

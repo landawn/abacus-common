@@ -315,7 +315,7 @@ public enum Percentage {
      * double calculation = 1000 * Percentage._10.doubleValue();   // Returns 100.0
      * }</pre>
      *
-     * @return the decimal value of this percentage
+     * @return the decimal value of this percentage.
      */
     public double doubleValue() {
         return val;
@@ -325,7 +325,7 @@ public enum Percentage {
      * Returns the string representation of this percentage.
      * The format includes the percentage sign, e.g., "95%" or "0.01%".
      *
-     * @return the string representation of this percentage
+     * @return the string representation of this percentage.
      */
     @Override
     public String toString() {

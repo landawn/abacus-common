@@ -91,14 +91,26 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
 
     protected static final Type<?> defaultValueType = objType;
 
+    /** The fallback serialization configuration used when a per-call {@code config} argument is {@code null}. */
     protected final XmlSerConfig defaultXmlSerConfig;
 
+    /** The fallback deserialization configuration used when a per-call {@code config} argument is {@code null}. */
     protected final XmlDeserConfig defaultXmlDeserConfig;
 
+    /**
+     * Constructs an {@code AbstractXmlParser} with default serialization and deserialization configurations.
+     */
     protected AbstractXmlParser() {
         this(null, null);
     }
 
+    /**
+     * Constructs an {@code AbstractXmlParser} with the given serialization and deserialization configurations.
+     * When either argument is {@code null}, a new default configuration is used in its place.
+     *
+     * @param xsc the XML serialization configuration, or {@code null} to use a new default configuration
+     * @param xdc the XML deserialization configuration, or {@code null} to use a new default configuration
+     */
     protected AbstractXmlParser(final XmlSerConfig xsc, final XmlDeserConfig xdc) {
         defaultXmlSerConfig = xsc != null ? xsc : new XmlSerConfig();
         defaultXmlDeserConfig = xdc != null ? xdc : new XmlDeserConfig();
@@ -271,7 +283,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @param propInfo property metadata including format information, or null
      * @param propNode the XML node containing the property value
      * @return the converted property value, or {@code null} if the node indicates a {@code null} value
-     * @throws ParsingException if the property cannot be parsed or type is null
+     * @throws ParsingException if {@code propType} is {@code null} (and the node does not indicate a {@code null} value)
      */
     protected Object getPropValue(final String propName, final Type<?> propType, final PropInfo propInfo, final Node propNode) {
         final String txtValue = XmlUtil.getTextContent(propNode);
@@ -299,10 +311,24 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
         }
     }
 
+    /**
+     * Returns the effective serialization configuration, falling back to the default configuration
+     * supplied at construction time when {@code config} is {@code null}.
+     *
+     * @param config the requested serialization configuration, possibly {@code null}
+     * @return {@code config} if non-{@code null}, otherwise the parser's default XML serialization configuration
+     */
     protected XmlSerConfig check(XmlSerConfig config) {
         return config == null ? defaultXmlSerConfig : config;
     }
 
+    /**
+     * Returns the effective deserialization configuration, falling back to the default configuration
+     * supplied at construction time when {@code config} is {@code null}.
+     *
+     * @param config the requested deserialization configuration, possibly {@code null}
+     * @return {@code config} if non-{@code null}, otherwise the parser's default XML deserialization configuration
+     */
     protected XmlDeserConfig check(XmlDeserConfig config) {
         return config == null ? defaultXmlDeserConfig : config;
     }

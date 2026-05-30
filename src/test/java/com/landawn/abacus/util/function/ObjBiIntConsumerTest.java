@@ -142,7 +142,8 @@ public class ObjBiIntConsumerTest extends TestBase {
 
     @Test
     public void testAndThenNullThrowsImmediately() {
-        ObjBiIntConsumer<String> instance = (a, b, c) -> {};
+        ObjBiIntConsumer<String> instance = (a, b, c) -> {
+        };
         org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((ObjBiIntConsumer) null));
     }
 }

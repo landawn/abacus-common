@@ -203,7 +203,7 @@ public enum UnifiedStatus {
 
     /**
      * Rejected status (code: 36).
-     * Indicates formal approval has been rejected.
+     * Indicates a request for formal approval has been denied.
      */
     REJECTED(36),
 

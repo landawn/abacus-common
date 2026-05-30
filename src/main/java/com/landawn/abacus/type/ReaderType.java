@@ -235,8 +235,8 @@ public class ReaderType extends AbstractType<Reader> {
      * <pre>{@code
      * Type<Reader> type = TypeFactory.getType(Reader.class);
      *
-     * // From String
-     * Reader reader1 = type.valueOf("Hello");
+     * // From an arbitrary object (converted to its string representation first)
+     * Reader reader1 = type.valueOf((Object) "Hello");
      * System.out.println(IOUtil.readAllToString(reader1));   // Output: Hello
      *
      * // From Clob (assuming clob is a valid SQL Clob object)
@@ -470,7 +470,8 @@ public class ReaderType extends AbstractType<Reader> {
      * @param writer the CharacterWriter to write to
      * @param x the Reader whose content should be written
      * @param config the serialization configuration that determines string quotation
-     * @throws IOException if an I/O error occurs during the write operation
+     * @throws IOException if an I/O error occurs while writing to the {@code writer}
+     * @throws UncheckedIOException if an I/O error occurs while reading from the Reader
      */
     @Override
     public void writeCharacter(final CharacterWriter writer, final Reader x, final JsonXmlSerConfig<?> config) throws IOException {

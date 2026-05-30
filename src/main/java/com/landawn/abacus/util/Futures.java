@@ -823,7 +823,7 @@ public final class Futures {
      *                         of Future objects and returns the composed result. Must not be {@code null}.
      * @return a ContinuableFuture that completes when all input futures complete, with a result
      *         computed by the provided zip function.
-     * @throws IllegalArgumentException if the collection is {@code null} or empty.
+     * @throws IllegalArgumentException if the collection is {@code null} or empty, or if {@code zipFunctionForGet} is {@code null}.
      * @throws RuntimeException if the zip function throws an exception other than InterruptedException or ExecutionException.
      * @see #compose(Collection, Throwables.Function, Throwables.Function)
      * @see #combine(Collection, Throwables.Function)

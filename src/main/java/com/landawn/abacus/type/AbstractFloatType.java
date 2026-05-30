@@ -192,7 +192,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
 
     /**
      * Appends the string representation of a {@code float} value to an {@code Appendable}.
-     * Writes "null" if the value is {@code null}, otherwise writes the numeric value
+     * Writes {@code "null"} if the value is {@code null}, otherwise writes the numeric value
      * using its {@code toString()} representation.
      *
      * @param appendable the {@code Appendable} to write to

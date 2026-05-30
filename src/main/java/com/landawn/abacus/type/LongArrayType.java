@@ -40,7 +40,7 @@ public final class LongArrayType extends ObjectArrayType<Long> {
     /**
      * Converts a Long array to its string representation.
      * The array is formatted as a comma-separated list of values enclosed in square brackets.
-     * Null values in the array are represented as "null".
+     * {@code null} elements in the array are represented as the literal string {@code "null"}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -63,8 +63,8 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * }</pre>
      *
      * @param x The Long array to convert
-     * @return The string representation of the array in format "[value1, value2, ...]",
-     *         or {@code null} if the input array is {@code null}, or "[]" if the array is empty
+     * @return the string representation of the array in the format {@code "[value1, value2, ...]"},
+     *         or {@code null} if the input array is {@code null}, or {@code "[]"} if the array is empty
      */
     @Override
     public String stringOf(final Long[] x) {
@@ -140,7 +140,8 @@ public final class LongArrayType extends ObjectArrayType<Long> {
     /**
      * Appends the string representation of a Long array to an Appendable.
      * The array is formatted as a comma-separated list of values enclosed in square brackets.
-     * Null array is represented as "null", {@code null} elements are represented as "null".
+     * A {@code null} array is represented as the literal string {@code "null"}, and each
+     * {@code null} element is also represented as the literal string {@code "null"}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

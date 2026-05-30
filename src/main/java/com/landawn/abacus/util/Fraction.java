@@ -476,7 +476,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * @param denominator the denominator of the fractional part, must be positive
      * @return a new fraction instance
      * @throws ArithmeticException if the denominator is zero, if the denominator is negative,
-     *         if the numerator is negative, or if the resulting numerator exceeds {@code Integer.MAX_VALUE}
+     *         if the numerator is negative, or if the resulting numerator would overflow the range of an {@code int}
      * @see #of(int, int, int, boolean)
      */
     public static Fraction of(final int whole, final int numerator, final int denominator) {
@@ -632,7 +632,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * @param str the string to parse, must not be {@code null}
      * @return a new fraction instance
      * @throws IllegalArgumentException if {@code str} is {@code null}
-     * @throws NumberFormatException if the string is not in a recognised format, or if
+     * @throws NumberFormatException if the string is not in a recognized format, or if
      *         an integer component is out of range, or if the decimal form cannot be parsed
      */
     public static Fraction of(String str) {

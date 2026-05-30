@@ -262,8 +262,8 @@ class JdkLogger extends AbstractLogger {
     /**
      * Logs a message at the specified level.
      *
-     * <p>This method creates a {@link LogRecord} and fills in caller information before
-     * delegating to the JDK logger.</p>
+     * <p>Delegates to {@link #log(String, Level, String, Throwable)} using {@link #SELF} as the
+     * caller fully qualified class name and no {@code Throwable}.</p>
      *
      * @param level the logging level
      * @param msg the message to log
@@ -275,8 +275,8 @@ class JdkLogger extends AbstractLogger {
     /**
      * Logs a message at the specified level with an exception.
      *
-     * <p>This method creates a {@link LogRecord} and fills in caller information before
-     * delegating to the JDK logger.</p>
+     * <p>Delegates to {@link #log(String, Level, String, Throwable)} using {@link #SELF} as the
+     * caller fully qualified class name.</p>
      *
      * @param level the logging level
      * @param msg the message to log
@@ -319,12 +319,16 @@ class JdkLogger extends AbstractLogger {
      *
      * <p>The algorithm:</p>
      * <ol>
-     *   <li>Find the index of the logging framework class in the stack</li>
-     *   <li>Skip all logging framework frames</li>
-     *   <li>Use the first non-framework frame as the caller</li>
+     *   <li>Find the first stack frame whose class name equals {@code callerFQCN} or {@link #SUPER}</li>
+     *   <li>From that point, skip all consecutive {@code callerFQCN} and {@code SUPER} frames</li>
+     *   <li>Use the first remaining (non-framework) frame as the caller</li>
      * </ol>
      *
-     * @param callerFQCN the fully qualified class name to search for in the stack
+     * <p>If no framework frame or no subsequent caller frame is found, the {@code LogRecord} is left
+     * unmodified.</p>
+     *
+     * @param callerFQCN the fully qualified class name to search for in the stack; frames matching this
+     *                   name or {@link #SUPER} are treated as logging framework frames and skipped
      * @param logRecord the {@code LogRecord} to update with caller information
      */
     private static void fillCallerData(final String callerFQCN, final LogRecord logRecord) {

@@ -1391,8 +1391,7 @@ public class EventBusTest extends TestBase {
         Assertions.assertTrue(done.await(10, TimeUnit.SECONDS));
 
         // Each of the THREAD_COUNT post() calls must deliver exactly once.
-        Assertions.assertEquals(THREAD_COUNT, deliveryCount.get(),
-                "Each concurrent post() must deliver to the subscriber exactly once");
+        Assertions.assertEquals(THREAD_COUNT, deliveryCount.get(), "Each concurrent post() must deliver to the subscriber exactly once");
 
         eventBus.unregister(subscriber);
     }
@@ -1444,8 +1443,7 @@ public class EventBusTest extends TestBase {
         start.countDown();
         Assertions.assertTrue(done.await(10, TimeUnit.SECONDS));
 
-        Assertions.assertEquals(THREAD_COUNT, deliveryCount.get(),
-                "Each concurrent post(eventId, event) must deliver to the subscriber exactly once");
+        Assertions.assertEquals(THREAD_COUNT, deliveryCount.get(), "Each concurrent post(eventId, event) must deliver to the subscriber exactly once");
 
         eventBus.unregister(subscriber);
     }
@@ -1479,8 +1477,7 @@ public class EventBusTest extends TestBase {
         // The very next post must reach lateSubscriber.
         eventBus.post("after register");
 
-        Assertions.assertEquals(1, deliveryCount.get(),
-                "Subscriber registered after cache warm-up must receive subsequent events");
+        Assertions.assertEquals(1, deliveryCount.get(), "Subscriber registered after cache warm-up must receive subsequent events");
 
         eventBus.unregister(warmupSubscriber);
         eventBus.unregister(lateSubscriber);

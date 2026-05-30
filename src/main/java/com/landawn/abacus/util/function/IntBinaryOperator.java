@@ -39,7 +39,7 @@ public interface IntBinaryOperator extends Throwables.IntBinaryOperator<RuntimeE
     /**
      * Applies this operator to the given {@code int}-valued operands and produces an {@code int}-valued result.
      *
-     * <p>This method performs an operation on two int operands of the same type and returns an int result.
+     * <p>This method performs an operation on two int operands and returns an int result.
      * Common use cases include:
      * <ul>
      *   <li>Arithmetic operations (addition, subtraction, multiplication, division)</li>

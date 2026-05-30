@@ -84,14 +84,26 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
         }
     }
 
+    /** The fallback serialization configuration used when a per-call {@code config} argument is {@code null}. */
     protected final JsonSerConfig defaultJsonSerConfig;
 
+    /** The fallback deserialization configuration used when a per-call {@code config} argument is {@code null}. */
     protected final JsonDeserConfig defaultJsonDeserConfig;
 
+    /**
+     * Constructs an {@code AbstractJsonParser} with default serialization and deserialization configurations.
+     */
     protected AbstractJsonParser() {
         this(null, null);
     }
 
+    /**
+     * Constructs an {@code AbstractJsonParser} with the given serialization and deserialization configurations.
+     * When either argument is {@code null}, a new default configuration is used in its place.
+     *
+     * @param jsc the JSON serialization configuration, or {@code null} to use a new default configuration
+     * @param jdc the JSON deserialization configuration, or {@code null} to use a new default configuration
+     */
     protected AbstractJsonParser(final JsonSerConfig jsc, final JsonDeserConfig jdc) {
         defaultJsonSerConfig = jsc != null ? jsc : new JsonSerConfig();
         defaultJsonDeserConfig = jdc != null ? jdc : new JsonDeserConfig();
@@ -372,7 +384,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @param toIndex the ending index of the substring, exclusive
      * @param config the deserialization configuration to use, or {@code null} to use default configuration
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
-     * @return an instance of the target object populated with data from the JSON substring; if the substring is
+     * @return an instance of the target type populated with data from the JSON substring; if the substring is
      *         empty the target type's default value (or an empty value) is returned
      * @throws UncheckedIOException if an I/O error occurs during deserialization
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
@@ -493,10 +505,24 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
         return stream(reader, closeReaderWhenStreamIsClosed, null, elementType);
     }
 
+    /**
+     * Returns the effective serialization configuration, falling back to the default configuration
+     * supplied at construction time when {@code config} is {@code null}.
+     *
+     * @param config the requested serialization configuration, possibly {@code null}
+     * @return {@code config} if non-{@code null}, otherwise the parser's default JSON serialization configuration
+     */
     protected JsonSerConfig check(JsonSerConfig config) {
         return config == null ? defaultJsonSerConfig : config;
     }
 
+    /**
+     * Returns the effective deserialization configuration, falling back to the default configuration
+     * supplied at construction time when {@code config} is {@code null}.
+     *
+     * @param config the requested deserialization configuration, possibly {@code null}
+     * @return {@code config} if non-{@code null}, otherwise the parser's default JSON deserialization configuration
+     */
     protected JsonDeserConfig check(JsonDeserConfig config) {
         return config == null ? defaultJsonDeserConfig : config;
     }

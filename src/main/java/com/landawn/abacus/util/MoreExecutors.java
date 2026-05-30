@@ -199,7 +199,7 @@ public final class MoreExecutors {
      * @param service the executor service to shut down on JVM exit
      * @param terminationTimeout the maximum time to wait for the executor to terminate
      * @param timeUnit the time unit for the termination timeout
-     * @throws IllegalArgumentException if service or timeUnit is null
+     * @throws IllegalArgumentException if {@code service} or {@code timeUnit} is {@code null}
      */
     public static void addDelayedShutdownHook(final ExecutorService service, final long terminationTimeout, final TimeUnit timeUnit)
             throws IllegalArgumentException {
@@ -263,6 +263,7 @@ public final class MoreExecutors {
      * @param name the desired name for the thread
      * @param runnable the runnable to execute in the thread
      * @return a new thread configured with the given name and runnable
+     * @throws IllegalArgumentException if {@code name} or {@code runnable} is {@code null}
      */
     static Thread newThread(final String name, final Runnable runnable) {
         N.checkArgNotNull(name);

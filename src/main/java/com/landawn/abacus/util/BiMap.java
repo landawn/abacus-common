@@ -204,7 +204,7 @@ import com.landawn.abacus.annotation.Internal;
  * <p><b>Best Practices:</b>
  * <ul>
  *   <li>Use appropriate underlying map types based on ordering requirements</li>
- *   <li>Consider using Builder pattern for compile-time validation</li>
+ *   <li>Consider using Builder pattern for fluent construction with validation</li>
  *   <li>Cache inverted views when frequent reverse lookups are needed</li>
  *   <li>Use {@code forcePut()} when conflict resolution behavior is clear</li>
  *   <li>Prefer independent copies via {@code copy()} for sharing between components</li>
@@ -284,6 +284,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * }</pre>
      *
      * @param initialCapacity the initial capacity of the BiMap
+     * @throws IllegalArgumentException if {@code initialCapacity} is negative
      */
     public BiMap(final int initialCapacity) {
         this(initialCapacity, DEFAULT_LOAD_FACTOR);
@@ -299,6 +300,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * @param initialCapacity the initial capacity of the BiMap
      * @param loadFactor the load factor of the BiMap
+     * @throws IllegalArgumentException if {@code initialCapacity} is negative
      */
     @SuppressWarnings("deprecation")
     public BiMap(final int initialCapacity, final float loadFactor) {

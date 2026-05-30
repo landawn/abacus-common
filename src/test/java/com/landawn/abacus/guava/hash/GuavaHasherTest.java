@@ -1105,8 +1105,7 @@ public class GuavaHasherTest extends TestBase {
         // Bug fix: constructor must validate that gHasher is non-null.
         // Previously the field was assigned without any null guard, causing a
         // NullPointerException only later when a put/hash method was invoked.
-        assertThrows(NullPointerException.class, () -> GuavaHasher.wrap(null),
-                "GuavaHasher.wrap(null) must throw NullPointerException immediately");
+        assertThrows(NullPointerException.class, () -> GuavaHasher.wrap(null), "GuavaHasher.wrap(null) must throw NullPointerException immediately");
     }
 
     @Test

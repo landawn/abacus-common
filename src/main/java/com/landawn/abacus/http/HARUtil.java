@@ -233,6 +233,7 @@ public final class HARUtil {
      * @param har the HAR file containing captured HTTP requests.
      * @param targetUrl the exact URL to match in the HAR file.
      * @return the response body as a string.
+     * @throws IllegalArgumentException if the HAR content contains no entries under {@code log.entries}.
      * @throws java.util.NoSuchElementException if no entry in the HAR file matches {@code targetUrl}.
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
@@ -259,6 +260,7 @@ public final class HARUtil {
      * @param har the HAR file containing captured HTTP requests.
      * @param filterForTargetUrl predicate to test URLs; the first matching URL's request will be sent.
      * @return the response body as a string.
+     * @throws IllegalArgumentException if the HAR content contains no entries under {@code log.entries}.
      * @throws java.util.NoSuchElementException if no entry in the HAR file matches {@code filterForTargetUrl}.
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
@@ -483,7 +485,7 @@ public final class HARUtil {
      * @param requestEntry the HAR request entry map containing request details.
      * @param responseClass the class to deserialize the response into.
      * @return the response deserialized into the specified type.
-     * @throws IllegalArgumentException if the request entry has no {@code method} field, or the value is not a recognized {@link HttpMethod}.
+     * @throws IllegalArgumentException if the request entry has no {@code method} field, or its value is not a recognized {@link HttpMethod}.
      * @throws com.landawn.abacus.exception.UncheckedIOException if the HTTP request execution fails with an I/O error.
      */
     public static <T> T sendRequestByRequestEntry(final Map<String, Object> requestEntry, final Class<T> responseClass) {
@@ -605,7 +607,7 @@ public final class HARUtil {
      *
      * @param requestEntry the HAR request entry map.
      * @return the HTTP method enum value ({@code GET}, {@code POST}, {@code PUT}, {@code DELETE}, etc.).
-     * @throws IllegalArgumentException if the method value from the request entry is not a valid {@code HttpMethod}.
+     * @throws IllegalArgumentException if the request entry has no {@code method} field, or its value is not a recognized {@link HttpMethod}.
      */
     public static HttpMethod getHttpMethodByRequestEntry(final Map<String, Object> requestEntry) {
         final Object method = requestEntry.get("method");

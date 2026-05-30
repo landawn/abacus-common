@@ -201,8 +201,7 @@ public class NStringTest extends AbstractParserTest {
     public void test_11() {
         assertTrue(N.equals(Array.of('a', 'b', 'c', '1', '2', '3'), N.concat(Array.of('a'), Array.of('b', 'c'), Array.of('1', '2', '3'))));
 
-        assertTrue(N.equals(N.asArray("a", "b", "c", "1", "2", "3"),
-                N.concat(N.asArray("a"), N.asArray("b", "c"), N.asArray("1", "2", "3"))));
+        assertTrue(N.equals(N.asArray("a", "b", "c", "1", "2", "3"), N.concat(N.asArray("a"), N.asArray("b", "c"), N.asArray("1", "2", "3"))));
     }
 
     @Test
@@ -211,8 +210,7 @@ public class NStringTest extends AbstractParserTest {
         String json = N.toJson(map);
         N.println(json);
         assertEquals(map, N.fromJson(json,
-                JsonDeserConfig.create().setMapKeyType(N.typeOf("Map<String, Double>")).setMapValueType(N.typeOf("Map<Double, String>")),
-                Map.class));
+                JsonDeserConfig.create().setMapKeyType(N.typeOf("Map<String, Double>")).setMapValueType(N.typeOf("Map<Double, String>")), Map.class));
 
         final List<Map<String, Double>> list = N.toList(N.asMap("abc", 123D));
         json = N.toJson(list);

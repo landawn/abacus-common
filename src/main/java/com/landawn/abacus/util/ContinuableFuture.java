@@ -775,8 +775,8 @@ public class ContinuableFuture<T> implements Future<T> {
      *     System.err.println("Failed: " + result.getException());
      * }
      *
-     * // Or use functional style
-     * String value = result.orElse("default value");
+     * // Or supply a fallback value to use if the computation failed
+     * String value = result.orElseIfFailure("default value");
      * }</pre>
      *
      * @return a {@code Result} object containing either the computed result or the exception.
@@ -803,12 +803,14 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * Result<Data, Exception> result = future.getAsResult(10, TimeUnit.SECONDS);
      *
-     * Data data = result.orElseGet(() -> {
-     *     if (result.getException() instanceof TimeoutException) {
-     *         return getCachedData();   // Fallback on timeout
-     *     }
-     *     return getDefaultData();
-     * });
+     * Data data;
+     * if (result.isFailure()) {
+     *     data = (result.getException() instanceof TimeoutException)
+     *         ? getCachedData()   // Fallback on timeout
+     *         : getDefaultData();
+     * } else {
+     *     data = result.orElseThrow();
+     * }
      * }</pre>
      *
      * @param timeout the maximum time to wait.
@@ -1767,12 +1769,15 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Executes the provided BiConsumer action asynchronously after either this ContinuableFuture or the other ContinuableFuture completes
-     * (successfully or exceptionally). The BiConsumer receives both the result (if successful)
-     * and the exception (if failed) from whichever future completes first.
+     * Executes the provided BiConsumer action asynchronously after either this ContinuableFuture or the other ContinuableFuture completes.
+     * The BiConsumer receives the result and the exception. If at least one future completes successfully,
+     * it receives {@code (firstSuccessfulResult, null)}; only if both futures fail does it receive
+     * {@code (null, exception)} with the failure of the first future to complete.
      *
-     * <p>This method is useful for triggering an action as soon as any of the futures completes,
-     * regardless of which one finishes first or whether it succeeds or fails.
+     * <p>Unlike the {@link #runAsyncAfterEither(ContinuableFuture, Throwables.Consumer) Consumer} and
+     * {@link #runAsyncAfterEither(ContinuableFuture, Throwables.BiFunction) BiFunction} overloads (which react to
+     * the first future to complete, whether it succeeds or fails), this overload waits for the first
+     * <i>successful</i> completion and only surfaces an exception when neither future succeeds.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

@@ -5474,11 +5474,9 @@ public class BeansTest extends TestBase {
         // SimpleBean has exactly 3 properties: name, age, active.
         // Passing a set with 7 entries (more than 3) previously computed a negative
         // initial capacity for ArrayList (3 - 7 == -4), causing IllegalArgumentException.
-        Set<String> oversizedExclude = new HashSet<>(
-                Arrays.asList("name", "age", "active", "x1", "x2", "x3", "x4"));
+        Set<String> oversizedExclude = new HashSet<>(Arrays.asList("name", "age", "active", "x1", "x2", "x3", "x4"));
 
-        List<String> result = assertDoesNotThrow(
-                () -> Beans.getPropNames(SimpleBean.class, oversizedExclude));
+        List<String> result = assertDoesNotThrow(() -> Beans.getPropNames(SimpleBean.class, oversizedExclude));
 
         assertNotNull(result);
         assertTrue(result.isEmpty(), "All props are excluded so result should be empty");

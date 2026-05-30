@@ -128,7 +128,8 @@ public class IntBiConsumerTest extends TestBase {
 
     @Test
     public void testAndThenNullThrowsImmediately() {
-        IntBiConsumer instance = (a, b) -> {};
+        IntBiConsumer instance = (a, b) -> {
+        };
         org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((IntBiConsumer) null));
     }
 }

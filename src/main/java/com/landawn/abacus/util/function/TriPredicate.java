@@ -21,9 +21,9 @@ import com.landawn.abacus.util.Throwables;
  * Represents a predicate (boolean-valued function) of three arguments. This is
  * the three-arity specialization of {@link java.util.function.Predicate}.
  *
- * <p>This interface extends the Throwables.TriPredicate, providing compatibility
+ * <p>This interface extends {@code Throwables.TriPredicate}, providing compatibility
  * with the abacus-common framework's error handling mechanisms while limiting thrown exceptions
- * to RuntimeException.
+ * to {@code RuntimeException}.
  *
  * <p>This is a functional interface whose functional method is {@link #test(Object, Object, Object)}.
  *

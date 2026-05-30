@@ -58,7 +58,7 @@ public class MillisCalendarType extends CalendarType {
      * and converted to a {@code Calendar} instance.
      * SQL {@code NULL} (detected via {@link ResultSet#wasNull()}) is returned as {@code null}.
      *
-     * @param rs the {@code ResultSet} containing the query results
+     * @param rs the {@code ResultSet} containing the data
      * @param columnIndex the 1-based index of the column to retrieve
      * @return a {@code Calendar} created from the stored millisecond value,
      *         or {@code null} if the column value is SQL {@code NULL}
@@ -77,7 +77,7 @@ public class MillisCalendarType extends CalendarType {
      * and converted to a {@code Calendar} instance.
      * SQL {@code NULL} (detected via {@link ResultSet#wasNull()}) is returned as {@code null}.
      *
-     * @param rs the {@code ResultSet} containing the query results
+     * @param rs the {@code ResultSet} containing the data
      * @param columnName the label of the column to retrieve (as specified in the SQL AS clause)
      * @return a {@code Calendar} created from the stored millisecond value,
      *         or {@code null} if the column value is SQL {@code NULL}

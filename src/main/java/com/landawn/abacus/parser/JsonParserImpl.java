@@ -3712,7 +3712,8 @@ final class JsonParserImpl extends AbstractJsonParser {
                             break;
 
                         case END_BRACE:
-                            if (isKey && key != null /* check for empty JSON text {} */) {
+                            if (isKey && key != null /* check for empty JSON text {} */
+                                    || (isKey && key == null && jr.hasText()) /* check for invalid JSON text: {abc} */) {
                                 throw new ParsingException(getErrorMsg(jr, token), token);
                             } else {
                                 if (jr.hasText()) {
@@ -4470,8 +4471,9 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param elementType the type of elements to deserialize; must not be {@code null}
      * @return a Stream of deserialized elements; never {@code null}
      * @throws IllegalArgumentException if the element type is not supported for streaming
+     * @throws UnsupportedOperationException if the root of the JSON is not an array
      * @throws UncheckedIOException if an I/O error occurs during parsing
-     * @throws ParsingException if the JSON structure is invalid or not an array
+     * @throws ParsingException if the JSON structure is invalid
      */
     @Override
     public <T> Stream<T> stream(final String source, final JsonDeserConfig config, final Type<? extends T> elementType) {
@@ -4525,8 +4527,9 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param elementType the type of elements to deserialize; must not be {@code null}
      * @return a Stream of deserialized elements; never {@code null}
      * @throws IllegalArgumentException if the element type is not supported for streaming
+     * @throws UnsupportedOperationException if the root of the JSON is not an array
      * @throws UncheckedIOException if an I/O error occurs during file reading or parsing
-     * @throws ParsingException if the JSON structure is invalid or not an array
+     * @throws ParsingException if the JSON structure is invalid
      */
     @Override
     public <T> Stream<T> stream(final File source, final JsonDeserConfig config, final Type<? extends T> elementType) {
@@ -4573,8 +4576,9 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param elementType the type of elements to deserialize; must not be {@code null}
      * @return a Stream of deserialized elements; never {@code null}
      * @throws IllegalArgumentException if the element type is not supported for streaming
+     * @throws UnsupportedOperationException if the root of the JSON is not an array
      * @throws UncheckedIOException if an I/O error occurs during stream reading or parsing
-     * @throws ParsingException if the JSON structure is invalid or not an array
+     * @throws ParsingException if the JSON structure is invalid
      */
     @Override
     public <T> Stream<T> stream(final InputStream source, final boolean closeInputStreamWhenStreamIsClosed, final JsonDeserConfig config,
@@ -4613,8 +4617,9 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param elementType the type of elements to deserialize; must not be {@code null}
      * @return a Stream of deserialized elements; never {@code null}
      * @throws IllegalArgumentException if the source is {@code null} or the element type is not supported for streaming
+     * @throws UnsupportedOperationException if the root of the JSON is not an array
      * @throws UncheckedIOException if an I/O error occurs during reading or parsing
-     * @throws ParsingException if the JSON structure is invalid or not an array
+     * @throws ParsingException if the JSON structure is invalid
      */
     @Override
     public <T> Stream<T> stream(final Reader source, final boolean closeReaderWhenStreamIsClosed, final JsonDeserConfig config,

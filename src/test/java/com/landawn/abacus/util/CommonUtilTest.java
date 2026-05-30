@@ -492,8 +492,7 @@ public class CommonUtilTest extends TestBase {
         IllegalArgumentException ex1 = assertThrows(IllegalArgumentException.class, () -> N.checkArgNotNull(null, "testObject"));
         assertEquals("'testObject' cannot be null", ex1.getMessage());
 
-        IllegalArgumentException ex2 = assertThrows(IllegalArgumentException.class,
-                () -> N.checkArgNotNull(null, "Custom error message for null object"));
+        IllegalArgumentException ex2 = assertThrows(IllegalArgumentException.class, () -> N.checkArgNotNull(null, "Custom error message for null object"));
         assertEquals("Custom error message for null object", ex2.getMessage());
     }
 
@@ -1666,8 +1665,7 @@ public class CommonUtilTest extends TestBase {
     @Test
     public void testCheckArgNotNegative_Short_WithFullErrorMessage_ThrowsIllegalArgument() {
         // "value must not be negative" is >9 chars with space -> isArgNameOnly=false -> else branch (L1694)
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> N.checkArgNotNegative((short) -1, "value must not be negative"));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> N.checkArgNotNegative((short) -1, "value must not be negative"));
         assertEquals("value must not be negative", ex.getMessage());
     }
 
@@ -1681,24 +1679,21 @@ public class CommonUtilTest extends TestBase {
     @Test
     public void testCheckArgNotNegative_Long_WithFullErrorMessage_ThrowsIllegalArgument() {
         // else branch at L1754
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> N.checkArgNotNegative(-1L, "long value must not be negative"));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> N.checkArgNotNegative(-1L, "long value must not be negative"));
         assertEquals("long value must not be negative", ex.getMessage());
     }
 
     @Test
     public void testCheckArgNotNegative_Float_WithFullErrorMessage_ThrowsIllegalArgument() {
         // else branch at L1783
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> N.checkArgNotNegative(-1.0f, "float value must not be negative"));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> N.checkArgNotNegative(-1.0f, "float value must not be negative"));
         assertEquals("float value must not be negative", ex.getMessage());
     }
 
     @Test
     public void testCheckArgNotNegative_Double_WithFullErrorMessage_ThrowsIllegalArgument() {
         // else branch at L1812
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> N.checkArgNotNegative(-1.0, "double value must not be negative"));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> N.checkArgNotNegative(-1.0, "double value must not be negative"));
         assertEquals("double value must not be negative", ex.getMessage());
     }
 
@@ -1924,8 +1919,7 @@ public class CommonUtilTest extends TestBase {
     @Test
     public void testCheckArgPositive_Short_WithFullErrorMessage_ThrowsIllegalArgument() {
         // else branch at L1870
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> N.checkArgPositive((short) 0, "short value must be positive"));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> N.checkArgPositive((short) 0, "short value must be positive"));
         assertEquals("short value must be positive", ex.getMessage());
     }
 
@@ -2009,8 +2003,7 @@ public class CommonUtilTest extends TestBase {
 
     @Test
     public void checkElementNotNull_arrayWithMessage_invalid() {
-        IllegalArgumentException ex1 = assertThrows(IllegalArgumentException.class,
-                () -> N.checkElementNotNull(new String[] { "a", null }, "myArray"));
+        IllegalArgumentException ex1 = assertThrows(IllegalArgumentException.class, () -> N.checkElementNotNull(new String[] { "a", null }, "myArray"));
         assertEquals("null element is found in myArray", ex1.getMessage());
 
         IllegalArgumentException ex2 = assertThrows(IllegalArgumentException.class,
@@ -2199,8 +2192,7 @@ public class CommonUtilTest extends TestBase {
         IllegalArgumentException ex1 = assertThrows(IllegalArgumentException.class, () -> N.checkKeyNotNull(mapWithNullKey, "myMap"));
         assertEquals("null key is found in myMap", ex1.getMessage());
 
-        IllegalArgumentException ex2 = assertThrows(IllegalArgumentException.class,
-                () -> N.checkKeyNotNull(mapWithNullKey, "Custom error for null key"));
+        IllegalArgumentException ex2 = assertThrows(IllegalArgumentException.class, () -> N.checkKeyNotNull(mapWithNullKey, "Custom error for null key"));
         assertEquals("Custom error for null key", ex2.getMessage());
     }
 
@@ -2311,8 +2303,7 @@ public class CommonUtilTest extends TestBase {
         IllegalArgumentException ex1 = assertThrows(IllegalArgumentException.class, () -> N.checkValueNotNull(mapWithNullValue, "myMap"));
         assertEquals("null value is found in myMap", ex1.getMessage());
 
-        IllegalArgumentException ex2 = assertThrows(IllegalArgumentException.class,
-                () -> N.checkValueNotNull(mapWithNullValue, "Custom error for null value"));
+        IllegalArgumentException ex2 = assertThrows(IllegalArgumentException.class, () -> N.checkValueNotNull(mapWithNullValue, "Custom error for null value"));
         assertEquals("Custom error for null value", ex2.getMessage());
     }
 
@@ -10917,8 +10908,8 @@ public class CommonUtilTest extends TestBase {
         Map<String, Object> properties = new LinkedHashMap<>();
         properties.put("source", "beanRows");
 
-        Dataset dataset = N.newDataset(Arrays.asList("name", "age", "missing"),
-                Arrays.asList(new DatasetRowBean("Tom", 10), new DatasetRowBean("Jerry", 12)), properties);
+        Dataset dataset = N.newDataset(Arrays.asList("name", "age", "missing"), Arrays.asList(new DatasetRowBean("Tom", 10), new DatasetRowBean("Jerry", 12)),
+                properties);
 
         assertEquals(2, dataset.size());
         assertEquals(Arrays.asList("name", "age", "missing"), dataset.columnNames());
@@ -21353,8 +21344,7 @@ public class CommonUtilTest extends TestBase {
         assertEquals(0, N.indexOfSubList(N.emptyList(), N.emptyList()));
         assertEquals(0, Index.ofSubList(N.emptyList(), N.emptyList()).orElseThrow());
         assertEquals(0, Index.ofSubList(N.emptyList(), 0, N.emptyList()).orElseThrow());
-        assertEquals(Collections.indexOfSubList(N.emptyList(), N.emptyList()),
-                N.indexOfSubList(N.emptyList(), N.emptyList()));
+        assertEquals(Collections.indexOfSubList(N.emptyList(), N.emptyList()), N.indexOfSubList(N.emptyList(), N.emptyList()));
     }
 
     @Test
@@ -21709,8 +21699,7 @@ public class CommonUtilTest extends TestBase {
         assertEquals(0, N.lastIndexOfSubList(N.emptyList(), N.emptyList()));
         assertEquals(0, Index.lastOfSubList(N.emptyList(), N.emptyList()).orElseThrow());
         assertEquals(0, Index.lastOfSubList(N.emptyList(), 0, N.emptyList()).orElseThrow());
-        assertEquals(Collections.lastIndexOfSubList(N.emptyList(), N.emptyList()),
-                N.lastIndexOfSubList(N.emptyList(), N.emptyList()));
+        assertEquals(Collections.lastIndexOfSubList(N.emptyList(), N.emptyList()), N.lastIndexOfSubList(N.emptyList(), N.emptyList()));
     }
 
     @Test
@@ -22347,6 +22336,508 @@ public class CommonUtilTest extends TestBase {
 
         // long[] unsigned: -1L > 1L unsigned
         assertTrue(N.compareUnsigned(new long[] { -1L }, 0, new long[] { 1L }, 0, 1) > 0);
+    }
+
+    // ==================== Additional coverage tests (appended) ====================
+
+    // Package-private toString(StringBuilder, <primitive>[]) — null and empty branches for short/int/long/float/double.
+    @Test
+    public void testToString_StringBuilder_ShortArray_Null_uncovered() {
+        StringBuilder sb = new StringBuilder();
+        CommonUtil.toString(sb, (short[]) null);
+        assertEquals("null", sb.toString());
+    }
+
+    @Test
+    public void testToString_StringBuilder_ShortArray_Empty_uncovered() {
+        StringBuilder sb = new StringBuilder();
+        CommonUtil.toString(sb, new short[0]);
+        assertEquals("[]", sb.toString());
+    }
+
+    @Test
+    public void testToString_StringBuilder_ShortArray_NonEmpty_uncovered() {
+        StringBuilder sb = new StringBuilder();
+        CommonUtil.toString(sb, new short[] { 1, 2, 3 });
+        assertEquals("[1, 2, 3]", sb.toString());
+    }
+
+    @Test
+    public void testToString_StringBuilder_IntArray_Null_uncovered() {
+        StringBuilder sb = new StringBuilder();
+        CommonUtil.toString(sb, (int[]) null);
+        assertEquals("null", sb.toString());
+    }
+
+    @Test
+    public void testToString_StringBuilder_IntArray_Empty_uncovered() {
+        StringBuilder sb = new StringBuilder();
+        CommonUtil.toString(sb, new int[0]);
+        assertEquals("[]", sb.toString());
+    }
+
+    @Test
+    public void testToString_StringBuilder_IntArray_NonEmpty_uncovered() {
+        StringBuilder sb = new StringBuilder();
+        CommonUtil.toString(sb, new int[] { 10, 20 });
+        assertEquals("[10, 20]", sb.toString());
+    }
+
+    @Test
+    public void testToString_StringBuilder_LongArray_Null_uncovered() {
+        StringBuilder sb = new StringBuilder();
+        CommonUtil.toString(sb, (long[]) null);
+        assertEquals("null", sb.toString());
+    }
+
+    @Test
+    public void testToString_StringBuilder_LongArray_Empty_uncovered() {
+        StringBuilder sb = new StringBuilder();
+        CommonUtil.toString(sb, new long[0]);
+        assertEquals("[]", sb.toString());
+    }
+
+    @Test
+    public void testToString_StringBuilder_LongArray_NonEmpty_uncovered() {
+        StringBuilder sb = new StringBuilder();
+        CommonUtil.toString(sb, new long[] { 100L, 200L });
+        assertEquals("[100, 200]", sb.toString());
+    }
+
+    @Test
+    public void testToString_StringBuilder_FloatArray_Null_uncovered() {
+        StringBuilder sb = new StringBuilder();
+        CommonUtil.toString(sb, (float[]) null);
+        assertEquals("null", sb.toString());
+    }
+
+    @Test
+    public void testToString_StringBuilder_FloatArray_Empty_uncovered() {
+        StringBuilder sb = new StringBuilder();
+        CommonUtil.toString(sb, new float[0]);
+        assertEquals("[]", sb.toString());
+    }
+
+    @Test
+    public void testToString_StringBuilder_FloatArray_NonEmpty_uncovered() {
+        StringBuilder sb = new StringBuilder();
+        CommonUtil.toString(sb, new float[] { 1.0f, 2.0f });
+        assertEquals("[1.0, 2.0]", sb.toString());
+    }
+
+    @Test
+    public void testToString_StringBuilder_DoubleArray_Null_uncovered() {
+        StringBuilder sb = new StringBuilder();
+        CommonUtil.toString(sb, (double[]) null);
+        assertEquals("null", sb.toString());
+    }
+
+    @Test
+    public void testToString_StringBuilder_DoubleArray_Empty_uncovered() {
+        StringBuilder sb = new StringBuilder();
+        CommonUtil.toString(sb, new double[0]);
+        assertEquals("[]", sb.toString());
+    }
+
+    @Test
+    public void testToString_StringBuilder_DoubleArray_NonEmpty_uncovered() {
+        StringBuilder sb = new StringBuilder();
+        CommonUtil.toString(sb, new double[] { 1.5d, 2.5d });
+        assertEquals("[1.5, 2.5]", sb.toString());
+    }
+
+    // unmodifiable* with an already-unmodifiable (Immutable) input returns the SAME instance (skips re-wrapping).
+    @Test
+    public void testUnmodifiableSortedSet_AlreadyUnmodifiable_ReturnsSameInstance() {
+        SortedSet<String> base = new TreeSet<>(Arrays.asList("a", "b", "c"));
+        SortedSet<String> already = Collections.unmodifiableSortedSet(base);
+        assertSame(already, CommonUtil.unmodifiableSortedSet(already));
+    }
+
+    @Test
+    public void testUnmodifiableNavigableSet_AlreadyUnmodifiable_ReturnsSameInstance() {
+        NavigableSet<String> base = new TreeSet<>(Arrays.asList("a", "b", "c"));
+        NavigableSet<String> already = Collections.unmodifiableNavigableSet(base);
+        assertSame(already, CommonUtil.unmodifiableNavigableSet(already));
+    }
+
+    @Test
+    public void testUnmodifiableMap_AlreadyUnmodifiable_ReturnsSameInstance() {
+        Map<String, Integer> base = new HashMap<>();
+        base.put("a", 1);
+        Map<String, Integer> already = Collections.unmodifiableMap(base);
+        assertSame(already, CommonUtil.unmodifiableMap(already));
+    }
+
+    @Test
+    public void testUnmodifiableSortedMap_AlreadyUnmodifiable_ReturnsSameInstance() {
+        SortedMap<String, Integer> base = new TreeMap<>();
+        base.put("a", 1);
+        SortedMap<String, Integer> already = Collections.unmodifiableSortedMap(base);
+        assertSame(already, CommonUtil.unmodifiableSortedMap(already));
+    }
+
+    @Test
+    public void testUnmodifiableNavigableMap_AlreadyUnmodifiable_ReturnsSameInstance() {
+        NavigableMap<String, Integer> base = new TreeMap<>();
+        base.put("a", 1);
+        NavigableMap<String, Integer> already = Collections.unmodifiableNavigableMap(base);
+        assertSame(already, CommonUtil.unmodifiableNavigableMap(already));
+    }
+
+    // toArray(Collection) and toArray(Collection, a) empty-collection branches.
+    @Test
+    public void testToArray_Collection_Empty_uncovered() {
+        Object[] result = CommonUtil.toArray(new ArrayList<String>());
+        assertEquals(0, result.length);
+        assertSame(result, CommonUtil.toArray((Collection<?>) null));
+    }
+
+    @Test
+    public void testToArray_Collection_Array_EmptyCollection_NullsFirstSlot() {
+        // Empty collection: existing array's first slot is set to null, same array returned.
+        String[] a = { "x", "y" };
+        String[] result = CommonUtil.toArray(new ArrayList<String>(), a);
+        assertSame(a, result);
+        assertNull(result[0]);
+    }
+
+    @Test
+    public void testToArray_Collection_IntFunction_Empty_uncovered() {
+        String[] result = CommonUtil.toArray(new ArrayList<String>(), String[]::new);
+        assertEquals(0, result.length);
+    }
+
+    // toArray(Collection, from, to, a) — non-List path that sets the trailing slot to null when a is oversized.
+    @Test
+    public void testToArray_Collection_Range_Array_NonList_NullTail() {
+        LinkedHashSet<String> set = new LinkedHashSet<>(Arrays.asList("a", "b", "c", "d", "e"));
+        String[] a = new String[5]; // larger than the requested range (3)
+        String[] result = CommonUtil.toArray(set, 1, 4, a);
+        // res holds the slice
+        assertEquals("b", result[0]);
+        assertEquals("c", result[1]);
+        assertEquals("d", result[2]);
+        // trailing slot in original array nulled out
+        assertNull(a[3]);
+    }
+
+    @Test
+    public void testToArray_Collection_Range_Array_EmptyCollection() {
+        String[] a = { "x", "y" };
+        String[] result = CommonUtil.toArray(new ArrayList<String>(), 0, 0, a);
+        assertSame(a, result);
+        assertNull(result[0]);
+    }
+
+    // toCharArray(Collection, from, to, defaultForNull) — non-RandomAccess path with a null element.
+    @Test
+    public void testToCharArray_Collection_Range_NonRandomAccess_WithNull() {
+        LinkedList<Character> list = new LinkedList<>(Arrays.asList('a', 'b', null, 'd', 'e'));
+        char[] result = CommonUtil.toCharArray(list, 1, 4, 'X');
+        assertArrayEquals(new char[] { 'b', 'X', 'd' }, result);
+    }
+
+    @Test
+    public void testToCharArray_Collection_Range_NonRandomAccess_Empty() {
+        LinkedList<Character> list = new LinkedList<>(Arrays.asList('a', 'b', 'c'));
+        char[] result = CommonUtil.toCharArray(list, 2, 2, 'X');
+        assertEquals(0, result.length);
+    }
+
+    // newDataset(columnNames, rows): bean rows where a column name is missing -> null cell.
+    @Test
+    public void testNewDataset_ColumnNames_BeanRows_MissingProp_NullCell() {
+        List<DatasetRowBean> rows = Arrays.asList(new DatasetRowBean("Tom", 10), new DatasetRowBean("Jerry", 12));
+        Dataset ds = CommonUtil.newDataset(Arrays.asList("name", "age", "missing"), rows);
+        assertEquals(3, ds.columnCount());
+        assertEquals(2, ds.size());
+        assertNull(ds.get(0, ds.getColumnIndex("missing")));
+        assertEquals("Tom", ds.get(0, ds.getColumnIndex("name")));
+    }
+
+    // newDataset(columnNames, rows): array row whose length mismatches column count -> IllegalArgumentException.
+    @Test
+    public void testNewDataset_ColumnNames_ArrayRow_LengthMismatch_Throws() {
+        List<String> cols = Arrays.asList("a", "b");
+        List<Object> rows = new ArrayList<>();
+        rows.add(new Object[] { 1, 2, 3 }); // single row that is an Object[] of wrong length
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.newDataset(cols, rows));
+    }
+
+    // newDataset(columnNames, rows): collection row whose size mismatches column count -> IllegalArgumentException.
+    @Test
+    public void testNewDataset_ColumnNames_CollectionRow_SizeMismatch_Throws() {
+        List<String> cols = Arrays.asList("a", "b");
+        List<List<Object>> rows = Arrays.asList(Arrays.<Object> asList(1, 2, 3));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.newDataset(cols, rows));
+    }
+
+    // newDataset(columnNames, rows): single column, scalar (non-array/collection/map/bean) row -> single-column case.
+    @Test
+    public void testNewDataset_ColumnNames_SingleColumn_ScalarRows() {
+        Dataset ds = CommonUtil.newDataset(Arrays.asList("val"), Arrays.asList("x", "y", "z"));
+        assertEquals(1, ds.columnCount());
+        assertEquals(3, ds.size());
+        assertEquals("y", ds.get(1, 0));
+    }
+
+    // newDataset(columnNames, rows): multi-column with an unsupported scalar row -> IllegalArgumentException.
+    @Test
+    public void testNewDataset_ColumnNames_UnsupportedRowType_Throws() {
+        List<String> cols = Arrays.asList("a", "b");
+        List<Object> rows = Arrays.asList((Object) "unsupportedScalar");
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.newDataset(cols, rows));
+    }
+
+    // newDataset(columnNames, rows): null row produces a full row of nulls.
+    @Test
+    public void testNewDataset_ColumnNames_NullRow_AllNullCells() {
+        List<String> cols = Arrays.asList("a", "b");
+        List<Object> rows = new ArrayList<>();
+        rows.add(null);
+        rows.add(new Object[] { 1, 2 });
+        Dataset ds = CommonUtil.newDataset(cols, rows);
+        assertEquals(2, ds.size());
+        assertNull(ds.get(0, 0));
+        assertNull(ds.get(0, 1));
+        assertEquals(1, (int) ds.get(1, 0));
+    }
+
+    // newDataset(rows): auto-derive columns from bean rows.
+    @Test
+    public void testNewDataset_Rows_BeanAutoColumns() {
+        List<DatasetRowBean> rows = Arrays.asList(new DatasetRowBean("Tom", 10), new DatasetRowBean("Jerry", 12));
+        Dataset ds = CommonUtil.newDataset(rows);
+        assertEquals(2, ds.size());
+        assertTrue(ds.columnNames().contains("name"));
+        assertTrue(ds.columnNames().contains("age"));
+    }
+
+    // newDataset(rows): first element null -> IllegalArgumentException.
+    @Test
+    public void testNewDataset_Rows_FirstElementNull_Throws() {
+        List<Object> rows = new ArrayList<>();
+        rows.add(null);
+        rows.add("something");
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.newDataset(rows));
+    }
+
+    // newDataset(rows): unsupported row type (scalar) -> IllegalArgumentException.
+    @Test
+    public void testNewDataset_Rows_UnsupportedType_Throws() {
+        List<Object> rows = Arrays.asList((Object) "scalar");
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.newDataset(rows));
+    }
+
+    // newDataset(keyColumnName, valueColumnName, map): non-empty map populates two columns.
+    @Test
+    public void testNewDataset_KeyValueColumns_NonEmptyMap() {
+        Map<String, Integer> m = new LinkedHashMap<>();
+        m.put("Alice", 95);
+        m.put("Bob", 87);
+        Dataset ds = CommonUtil.newDataset("Name", "Score", m);
+        assertEquals(2, ds.size());
+        assertEquals(2, ds.columnCount());
+        assertEquals("Alice", ds.get(0, ds.getColumnIndex("Name")));
+        assertEquals(95, (int) ds.get(0, ds.getColumnIndex("Score")));
+    }
+
+    // newDataset(Map<String, Collection>): ragged columns are right-padded with null.
+    @Test
+    public void testNewDataset_MapOfCollections_RaggedPadding() {
+        Map<String, List<Object>> data = new LinkedHashMap<>();
+        data.put("Name", Arrays.<Object> asList("Alice", "Bob", "Charlie"));
+        data.put("City", Arrays.<Object> asList("NYC", "LA")); // shorter
+        Dataset ds = CommonUtil.newDataset(data);
+        assertEquals(3, ds.size());
+        assertEquals(2, ds.columnCount());
+        assertNull(ds.get(2, ds.getColumnIndex("City")));
+        assertEquals("Charlie", ds.get(2, ds.getColumnIndex("Name")));
+    }
+
+    // newSetMultimap(Map): seeds the multimap from a map's entries.
+    @Test
+    public void testNewSetMultimap_FromMap() {
+        Map<String, Integer> m = new LinkedHashMap<>();
+        m.put("a", 1);
+        m.put("b", 2);
+        SetMultimap<String, Integer> mm = CommonUtil.newSetMultimap(m);
+        assertEquals(2, mm.size());
+        assertTrue(mm.get("a").contains(1));
+        assertTrue(mm.get("b").contains(2));
+    }
+
+    // newSetMultimap(collection, keyExtractor): groups elements by extracted key.
+    @Test
+    public void testNewSetMultimap_FromCollection_KeyExtractor() {
+        List<String> words = Arrays.asList("apple", "avocado", "banana");
+        SetMultimap<Character, String> mm = CommonUtil.newSetMultimap(words, w -> w.charAt(0));
+        assertEquals(2, mm.get('a').size());
+        assertTrue(mm.get('b').contains("banana"));
+    }
+
+    // newSetMultimap(collection, keyExtractor, valueExtractor): groups extracted values by extracted key.
+    @Test
+    public void testNewSetMultimap_FromCollection_KeyAndValueExtractor() {
+        List<String> words = Arrays.asList("apple", "avocado", "banana");
+        SetMultimap<Character, Integer> mm = CommonUtil.newSetMultimap(words, w -> w.charAt(0), String::length);
+        assertTrue(mm.get('a').contains(5)); // "apple"
+        assertTrue(mm.get('a').contains(7)); // "avocado"
+        assertTrue(mm.get('b').contains(6)); // "banana"
+    }
+
+    // hashCodeEverything(bean): recurses through bean properties.
+    @Test
+    public void testHashCodeEverything_Bean_uncovered() {
+        DatasetRowBean b1 = new DatasetRowBean("Tom", 10);
+        DatasetRowBean b2 = new DatasetRowBean("Tom", 10);
+        DatasetRowBean b3 = new DatasetRowBean("Jerry", 12);
+        assertEquals(N.hashCodeEverything(b1), N.hashCodeEverything(b2));
+        assertNotEquals(N.hashCodeEverything(b1), N.hashCodeEverything(b3));
+    }
+
+    // findLastIndex(Collection, Predicate): non-RandomAccess, non-Deque collection -> toArray fall-through path.
+    @Test
+    public void testFindLastIndex_Collection_LinkedHashSet_ToArrayPath() {
+        LinkedHashSet<String> set = new LinkedHashSet<>(Arrays.asList("a", "b", "c", "d"));
+        OptionalInt result = N.findLastIndex(set, s -> s.equals("c"));
+        assertTrue(result.isPresent());
+        assertEquals(2, result.getAsInt());
+    }
+
+    @Test
+    public void testFindLastIndex_Collection_LinkedHashSet_NoMatch() {
+        LinkedHashSet<String> set = new LinkedHashSet<>(Arrays.asList("a", "b", "c"));
+        OptionalInt result = N.findLastIndex(set, s -> s.equals("z"));
+        assertFalse(result.isPresent());
+    }
+
+    // lastNonNull(Iterable): non-Deque, non-list iterable -> delegates to iterator path.
+    @Test
+    public void testLastNonNull_Iterable_LinkedHashSet_uncovered() {
+        LinkedHashSet<String> set = new LinkedHashSet<>(Arrays.asList("a", "b", "c"));
+        com.landawn.abacus.util.u.Optional<String> result = N.lastNonNull(set);
+        assertTrue(result.isPresent());
+        assertEquals("c", result.get());
+    }
+
+    // convert: Clob -> String and Clob -> char[] (closes the clob via free()).
+    @Test
+    public void testConvert_ClobToString_uncovered() {
+        StubClob clob = new StubClob("hello world");
+        String result = N.convert(clob, String.class);
+        assertEquals("hello world", result);
+        assertTrue(clob.freed, "clob should be freed after conversion");
+    }
+
+    @Test
+    public void testConvert_ClobToCharArray_uncovered() {
+        StubClob clob = new StubClob("abc");
+        char[] result = N.convert(clob, char[].class);
+        assertArrayEquals(new char[] { 'a', 'b', 'c' }, result);
+        assertTrue(clob.freed, "clob should be freed after conversion");
+    }
+
+    // convert: Map -> Map copy path (same instance type recreated, contents preserved).
+    @Test
+    public void testConvert_MapToMap_CopyPath_uncovered() {
+        Map<String, Integer> src = new LinkedHashMap<>();
+        src.put("a", 1);
+        src.put("b", 2);
+        @SuppressWarnings("unchecked")
+        Map<String, Integer> result = N.convert(src, (Class<Map<String, Integer>>) (Class<?>) TreeMap.class);
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals(1, (int) result.get("a"));
+        assertTrue(result instanceof TreeMap);
+    }
+
+    // convert: Collection -> Collection copy path.
+    @Test
+    public void testConvert_CollectionToCollection_CopyPath_uncovered() {
+        List<Integer> src = Arrays.asList(1, 2, 3, 2);
+        @SuppressWarnings("unchecked")
+        Set<Integer> result = N.convert(src, (Class<Set<Integer>>) (Class<?>) LinkedHashSet.class);
+        assertNotNull(result);
+        assertEquals(3, result.size());
+        assertTrue(result.contains(1));
+        assertTrue(result instanceof LinkedHashSet);
+    }
+
+    // Minimal Clob stub backed by a String; only the methods exercised by convert(...) are implemented.
+    private static final class StubClob implements java.sql.Clob {
+        private final String data;
+        boolean freed = false;
+
+        StubClob(String data) {
+            this.data = data;
+        }
+
+        @Override
+        public long length() {
+            return data.length();
+        }
+
+        @Override
+        public String getSubString(long pos, int length) {
+            return data.substring((int) (pos - 1), (int) (pos - 1) + length);
+        }
+
+        @Override
+        public Reader getCharacterStream() {
+            return new StringReader(data);
+        }
+
+        @Override
+        public InputStream getAsciiStream() {
+            return new ByteArrayInputStream(data.getBytes());
+        }
+
+        @Override
+        public long position(String searchstr, long start) {
+            return data.indexOf(searchstr, (int) (start - 1)) + 1;
+        }
+
+        @Override
+        public long position(java.sql.Clob searchstr, long start) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public int setString(long pos, String str) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public int setString(long pos, String str, int offset, int len) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public OutputStream setAsciiStream(long pos) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public java.io.Writer setCharacterStream(long pos) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void truncate(long len) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void free() {
+            freed = true;
+        }
+
+        @Override
+        public Reader getCharacterStream(long pos, long length) {
+            return new StringReader(data.substring((int) (pos - 1), (int) (pos - 1 + length)));
+        }
     }
 
 }

@@ -187,7 +187,8 @@ public class NConsumerTest extends TestBase {
 
     @Test
     public void testAndThenNullThrowsImmediately() {
-        NConsumer<String> instance = a -> {};
+        NConsumer<String> instance = a -> {
+        };
         org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((NConsumer) null));
     }
 }

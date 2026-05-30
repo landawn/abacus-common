@@ -43,8 +43,10 @@ package com.landawn.abacus.type;
  */
 public final class PrimitiveBooleanType extends AbstractBooleanType {
 
+    /** The primary type name constant for the primitive {@code boolean} type, equal to {@code "boolean"}. */
     public static final String BOOLEAN = boolean.class.getSimpleName();
 
+    /** The alternate alias type name constant for the primitive {@code boolean} type, equal to {@code "bool"}. */
     public static final String BOOL = "bool";
 
     /**

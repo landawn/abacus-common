@@ -3195,4 +3195,19 @@ public class ShortListTest extends TestBase {
         assertEquals(OptionalShort.of(Short.MAX_VALUE), list.max());
     }
 
+    @Test
+    public void test_forEach_removeIf_replaceIf_null_func() {
+        // Regression: a null functional argument must throw NullPointerException even on an
+        // EMPTY list (previously silently no-op'd; now matches IntList's fail-fast guard).
+        final ShortList empty = new ShortList();
+        assertThrows(NullPointerException.class, () -> empty.forEach((com.landawn.abacus.util.function.ShortConsumer) null));
+        assertThrows(NullPointerException.class, () -> empty.removeIf((com.landawn.abacus.util.function.ShortPredicate) null));
+        assertThrows(NullPointerException.class, () -> empty.replaceIf((com.landawn.abacus.util.function.ShortPredicate) null, (short) 0));
+
+        final ShortList nonEmpty = ShortList.of((short) 1, (short) 2);
+        assertThrows(NullPointerException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.ShortConsumer) null));
+        assertThrows(NullPointerException.class, () -> nonEmpty.removeIf((com.landawn.abacus.util.function.ShortPredicate) null));
+        assertThrows(NullPointerException.class, () -> nonEmpty.replaceIf((com.landawn.abacus.util.function.ShortPredicate) null, (short) 0));
+    }
+
 }

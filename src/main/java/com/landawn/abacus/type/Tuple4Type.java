@@ -51,6 +51,13 @@ public class Tuple4Type<T1, T2, T3, T4> extends AbstractTupleType<Tuple4<T1, T2,
                 List.of(TypeFactory.getType(t1TypeName), TypeFactory.getType(t2TypeName), TypeFactory.getType(t3TypeName), TypeFactory.getType(t4TypeName)));
     }
 
+    /**
+     * Reconstructs a {@link Tuple4} from an already type-converted element array.
+     * The array is expected to contain exactly four elements matching the tuple's parameter types.
+     *
+     * @param converted the array of converted element values (must be of length 4)
+     * @return a new {@code Tuple4} containing the four elements in order
+     */
     @SuppressWarnings("unchecked")
     @Override
     protected Tuple4<T1, T2, T3, T4> fromArray(final Object[] converted) {

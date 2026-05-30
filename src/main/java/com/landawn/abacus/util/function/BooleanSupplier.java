@@ -44,7 +44,7 @@ public interface BooleanSupplier extends Throwables.BooleanSupplier<RuntimeExcep
     BooleanSupplier RANDOM = Util.RAND_BOOLEAN::nextBoolean;
 
     /**
-     * Gets a result.
+     * Gets a boolean result.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

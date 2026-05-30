@@ -67,11 +67,12 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      *   <li>{@link Number}: interpreted as milliseconds since the epoch</li>
      *   <li>{@link java.util.Date}: converted directly to {@code GregorianCalendar}</li>
      *   <li>{@link java.util.Calendar}: converted to {@code GregorianCalendar} preserving the time</li>
-     *   <li>Other types: converted to string and then parsed</li>
+     *   <li>{@code null}: returns {@code null}</li>
+     *   <li>Other types: converted to their string representation and then parsed</li>
      * </ul>
      *
-     * @param obj the object to convert to {@code GregorianCalendar}
-     * @return a {@code GregorianCalendar} instance, or {@code null} if the input is {@code null}
+     * @param obj the object to convert to {@code GregorianCalendar}; may be {@code null}
+     * @return a {@code GregorianCalendar} instance, or {@code null} if {@code obj} is {@code null}
      */
     @Override
     public GregorianCalendar valueOf(final Object obj) {
@@ -96,8 +97,8 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      *   <li>Date/time strings: parsed according to standard date formats</li>
      * </ul>
      *
-     * @param str the string to parse into a {@code GregorianCalendar}
-     * @return the parsed {@code GregorianCalendar} instance, or {@code null} if the input is {@code null} or empty
+     * @param str the string to parse into a {@code GregorianCalendar}; may be {@code null} or empty
+     * @return the parsed {@code GregorianCalendar} instance, or {@code null} if {@code str} is {@code null} or empty
      */
     @Override
     public GregorianCalendar valueOf(final String str) {
@@ -111,10 +112,10 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      * milliseconds since the epoch. Otherwise, the characters are converted to a string and
      * parsed using standard date parsing.
      *
-     * @param cbuf the character array containing the date/time representation
+     * @param cbuf the character array containing the date/time representation; may be {@code null}
      * @param offset the start offset in the character array
      * @param len the number of characters to parse
-     * @return the parsed {@code GregorianCalendar} instance, or {@code null} if the input is {@code null} or empty
+     * @return the parsed {@code GregorianCalendar} instance, or {@code null} if {@code cbuf} is {@code null} or {@code len} is {@code 0}
      */
     @Override
     public GregorianCalendar valueOf(final char[] cbuf, final int offset, final int len) {
@@ -140,7 +141,7 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      *
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the 1-based index of the column to read
-     * @return the {@code GregorianCalendar} value from the column, or {@code null} if the column value is SQL NULL
+     * @return the {@code GregorianCalendar} value from the column, or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
@@ -156,7 +157,7 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      *
      * @param rs the {@code ResultSet} to read from
      * @param columnName the label of the column to read
-     * @return the {@code GregorianCalendar} value from the column, or {@code null} if the column value is SQL NULL
+     * @return the {@code GregorianCalendar} value from the column, or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
     @Override

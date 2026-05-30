@@ -32,6 +32,7 @@ import com.landawn.abacus.util.Strings;
 @SuppressWarnings("java:S2160")
 public final class PrimitiveShortListType extends AbstractPrimitiveListType<ShortList> {
 
+    /** The type name constant for {@link ShortList} type identification, equal to {@code "ShortList"}. */
     public static final String SHORT_LIST = ShortList.class.getSimpleName();
 
     private final Type<short[]> arrayType = Type.of(short[].class);
@@ -199,12 +200,12 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * <pre>{@code
      * Type<ShortList> type = TypeFactory.getType(ShortList.class);
      * ShortList list = ShortList.of((short) 100, (short) 200, (short) 300);
-     * CharacterWriter writer = new CharacterWriter();
+     * BufferedJsonWriter writer = new BufferedJsonWriter();
      * JsonXmlSerConfig<?> config = new JsonXmlSerConfig<>();
      * type.writeCharacter(writer, list, config);
      * System.out.println(writer.toString());   // Output: [100, 200, 300]
      *
-     * CharacterWriter nullWriter = new CharacterWriter();
+     * BufferedJsonWriter nullWriter = new BufferedJsonWriter();
      * type.writeCharacter(nullWriter, null, config);
      * System.out.println(nullWriter.toString());   // Output: null
      * }</pre>

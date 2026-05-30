@@ -763,8 +763,7 @@ public class WebUtilTest extends TestBase {
             final String result = WebUtil.curlToHttpRequestCode(curl);
 
             assertNotNull(result);
-            assertTrue(result.contains(".execute(HttpMethod.OPTIONS)"),
-                    "Expected OPTIONS handling regardless of default locale, but got:\n" + result);
+            assertTrue(result.contains(".execute(HttpMethod.OPTIONS)"), "Expected OPTIONS handling regardless of default locale, but got:\n" + result);
         } finally {
             java.util.Locale.setDefault(prev);
         }
@@ -781,8 +780,7 @@ public class WebUtilTest extends TestBase {
             final String result = WebUtil.curlToOkHttpRequestCode(curl);
 
             assertNotNull(result);
-            assertTrue(result.contains(".execute(HttpMethod.OPTIONS)"),
-                    "Expected OPTIONS handling regardless of default locale, but got:\n" + result);
+            assertTrue(result.contains(".execute(HttpMethod.OPTIONS)"), "Expected OPTIONS handling regardless of default locale, but got:\n" + result);
         } finally {
             java.util.Locale.setDefault(prev);
         }

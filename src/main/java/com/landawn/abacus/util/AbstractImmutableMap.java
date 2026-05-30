@@ -62,7 +62,7 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
     }
 
     /**
-     * Returns the value to which the specified key is mapped, or the defaultValue if this map
+     * Returns the value to which the specified key is mapped, or {@code defaultValue} if this map
      * contains no mapping for the key. This method distinguishes between a key that is mapped
      * to {@code null} and a key that is not present in the map.
      *
@@ -88,14 +88,14 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
     }
 
     /**
-     * This operation is not supported by ImmutableMap.
-     * Attempting to call this method will always throw an UnsupportedOperationException.
+     * This operation is not supported by this immutable map.
+     * Attempting to call this method will always throw an {@link UnsupportedOperationException}.
      *
      * @param k ignored.
      * @param v ignored.
      * @return never returns normally.
      * @throws UnsupportedOperationException always.
-     * @deprecated ImmutableMap does not support modification operations.
+     * @deprecated this immutable map does not support modification operations.
      */
     @Deprecated
     @Override
@@ -104,13 +104,13 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
     }
 
     /**
-     * This operation is not supported by ImmutableMap.
-     * Attempting to call this method will always throw an UnsupportedOperationException.
+     * This operation is not supported by this immutable map.
+     * Attempting to call this method will always throw an {@link UnsupportedOperationException}.
      *
      * @param o ignored.
      * @return never returns normally.
      * @throws UnsupportedOperationException always.
-     * @deprecated ImmutableMap does not support modification operations.
+     * @deprecated this immutable map does not support modification operations.
      */
     @Deprecated
     @Override
@@ -119,12 +119,12 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
     }
 
     /**
-     * This operation is not supported by ImmutableMap.
-     * Attempting to call this method will always throw an UnsupportedOperationException.
+     * This operation is not supported by this immutable map.
+     * Attempting to call this method will always throw an {@link UnsupportedOperationException}.
      *
      * @param map ignored.
      * @throws UnsupportedOperationException always.
-     * @deprecated ImmutableMap does not support modification operations.
+     * @deprecated this immutable map does not support modification operations.
      */
     @Deprecated
     @Override
@@ -133,14 +133,14 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
     }
 
     /**
-     * This operation is not supported by ImmutableMap.
-     * Attempting to call this method will always throw an UnsupportedOperationException.
+     * This operation is not supported by this immutable map.
+     * Attempting to call this method will always throw an {@link UnsupportedOperationException}.
      *
      * @param key ignored.
      * @param value ignored.
      * @return never returns normally.
      * @throws UnsupportedOperationException always.
-     * @deprecated ImmutableMap does not support modification operations.
+     * @deprecated this immutable map does not support modification operations.
      */
     @Deprecated
     @Override
@@ -149,14 +149,14 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
     }
 
     /**
-     * This operation is not supported by ImmutableMap.
-     * Attempting to call this method will always throw an UnsupportedOperationException.
+     * This operation is not supported by this immutable map.
+     * Attempting to call this method will always throw an {@link UnsupportedOperationException}.
      *
      * @param key ignored.
      * @param value ignored.
      * @return never returns normally.
      * @throws UnsupportedOperationException always.
-     * @deprecated ImmutableMap does not support modification operations.
+     * @deprecated this immutable map does not support modification operations.
      */
     @Deprecated
     @Override
@@ -165,15 +165,15 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
     }
 
     /**
-     * This operation is not supported by ImmutableMap.
-     * Attempting to call this method will always throw an UnsupportedOperationException.
+     * This operation is not supported by this immutable map.
+     * Attempting to call this method will always throw an {@link UnsupportedOperationException}.
      *
      * @param key ignored.
      * @param oldValue ignored.
      * @param newValue ignored.
      * @return never returns normally.
      * @throws UnsupportedOperationException always.
-     * @deprecated ImmutableMap does not support modification operations.
+     * @deprecated this immutable map does not support modification operations.
      */
     @Deprecated
     @Override
@@ -182,14 +182,14 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
     }
 
     /**
-     * This operation is not supported by ImmutableMap.
-     * Attempting to call this method will always throw an UnsupportedOperationException.
+     * This operation is not supported by this immutable map.
+     * Attempting to call this method will always throw an {@link UnsupportedOperationException}.
      *
      * @param key ignored.
      * @param value ignored.
      * @return never returns normally.
      * @throws UnsupportedOperationException always.
-     * @deprecated ImmutableMap does not support modification operations.
+     * @deprecated this immutable map does not support modification operations.
      */
     @Deprecated
     @Override
@@ -198,14 +198,14 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
     }
 
     /**
-     * This operation is not supported by ImmutableMap.
-     * Attempting to call this method will always throw an UnsupportedOperationException.
+     * This operation is not supported by this immutable map.
+     * Attempting to call this method will always throw an {@link UnsupportedOperationException}.
      *
      * @param key ignored.
      * @param mappingFunction ignored.
      * @return never returns normally.
      * @throws UnsupportedOperationException always.
-     * @deprecated ImmutableMap does not support modification operations.
+     * @deprecated this immutable map does not support modification operations.
      */
     @Deprecated
     @Override
@@ -214,14 +214,14 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
     }
 
     /**
-     * This operation is not supported by ImmutableMap.
-     * Attempting to call this method will always throw an UnsupportedOperationException.
+     * This operation is not supported by this immutable map.
+     * Attempting to call this method will always throw an {@link UnsupportedOperationException}.
      *
      * @param key ignored.
      * @param remappingFunction ignored.
      * @return never returns normally.
      * @throws UnsupportedOperationException always.
-     * @deprecated ImmutableMap does not support modification operations.
+     * @deprecated this immutable map does not support modification operations.
      */
     @Deprecated
     @Override
@@ -230,14 +230,14 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
     }
 
     /**
-     * This operation is not supported by ImmutableMap.
-     * Attempting to call this method will always throw an UnsupportedOperationException.
+     * This operation is not supported by this immutable map.
+     * Attempting to call this method will always throw an {@link UnsupportedOperationException}.
      *
      * @param key ignored.
      * @param remappingFunction ignored.
      * @return never returns normally.
      * @throws UnsupportedOperationException always.
-     * @deprecated ImmutableMap does not support modification operations.
+     * @deprecated this immutable map does not support modification operations.
      */
     @Deprecated
     @Override
@@ -246,15 +246,15 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
     }
 
     /**
-     * This operation is not supported by ImmutableMap.
-     * Attempting to call this method will always throw an UnsupportedOperationException.
+     * This operation is not supported by this immutable map.
+     * Attempting to call this method will always throw an {@link UnsupportedOperationException}.
      *
      * @param key ignored.
      * @param value ignored.
      * @param remappingFunction ignored.
      * @return never returns normally.
      * @throws UnsupportedOperationException always.
-     * @deprecated ImmutableMap does not support modification operations.
+     * @deprecated this immutable map does not support modification operations.
      */
     @Deprecated
     @Override
@@ -264,11 +264,28 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
     }
 
     /**
-     * This operation is not supported by ImmutableMap.
-     * Attempting to call this method will always throw an UnsupportedOperationException.
+     * This operation is not supported by this immutable map.
+     * Attempting to call this method will always throw an {@link UnsupportedOperationException}.
+     *
+     * @param function ignored.
+     * @throws UnsupportedOperationException always.
+     * @deprecated this immutable map does not support modification operations.
+     */
+    @Deprecated
+    @Override
+    public final void replaceAll(final BiFunction<? super K, ? super V, ? extends V> function) throws UnsupportedOperationException {
+        // Without this override the inherited Map.replaceAll default iterates entrySet()/setValue(); on an EMPTY
+        // immutable map it would silently no-op instead of throwing, inconsistent with every other mutator here
+        // (and with ImmutableList.replaceAll). Block it unconditionally.
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * This operation is not supported by this immutable map.
+     * Attempting to call this method will always throw an {@link UnsupportedOperationException}.
      *
      * @throws UnsupportedOperationException always.
-     * @deprecated ImmutableMap does not support modification operations.
+     * @deprecated this immutable map does not support modification operations.
      */
     @Deprecated
     @Override
@@ -364,7 +381,7 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
 
     /**
      * Returns an unmodifiable {@link Set} view of the keys contained in this map.
-     * The set is backed by the map, so it reflects the current state of the map.
+     * Since this map is immutable, the returned view is constant.
      * Attempts to modify the returned set will result in an {@link UnsupportedOperationException}.
      * The iteration order of the set matches the iteration order of the underlying map.
      *
@@ -386,7 +403,7 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
 
     /**
      * Returns an unmodifiable {@link Collection} view of the values contained in this map.
-     * The collection is backed by the map, so it reflects the current state of the map.
+     * Since this map is immutable, the returned view is constant.
      * Attempts to modify the returned collection will result in an {@link UnsupportedOperationException}.
      * The iteration order of the collection matches the iteration order of the underlying map.
      *
@@ -408,7 +425,7 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
 
     /**
      * Returns an unmodifiable {@link Set} view of the mappings contained in this map.
-     * The set is backed by the map, so it reflects the current state of the map.
+     * Since this map is immutable, the returned view is constant.
      * Each element in the returned set is an immutable {@link Map.Entry}.
      * Attempts to modify the returned set or its entries will result in an {@link UnsupportedOperationException}.
      * The iteration order of the set matches the iteration order of the underlying map.

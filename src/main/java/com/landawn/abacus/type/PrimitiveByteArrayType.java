@@ -43,6 +43,7 @@ import com.landawn.abacus.util.Strings;
 @SuppressWarnings("java:S2160")
 public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byte[]> {
 
+    /** The type name constant for the byte array type, equal to {@code "byte[]"}. */
     public static final String BYTE_ARRAY = byte[].class.getSimpleName();
 
     private final Type<Byte> elementType;
@@ -126,7 +127,8 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * Returns {@code null} if input is {@code null}, empty, or blank, or an empty array if input is {@code "[]"}.
      *
      * @param str the string to parse
-     * @return the parsed byte array, or {@code null} if input is {@code null}, empty, or blank
+     * @return the parsed byte array; {@code null} if input is {@code null}, empty, or blank;
+     *         or an empty array if input is {@code "[]"}
      */
     @Override
     public byte[] valueOf(final String str) {

@@ -353,7 +353,9 @@ public class Seid implements EntityId {
 
     /**
      * Gets the value of the specified property as an int.
-     * Performs automatic conversion if the stored value is not an int.
+     * If the stored value is a {@link Number}, its {@code intValue()} is returned;
+     * otherwise the value is converted via type-conversion. Returns {@code 0} if
+     * the property is absent or its value is {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -362,7 +364,7 @@ public class Seid implements EntityId {
      * }</pre>
      *
      * @param propName the property name
-     * @return the property value as an int
+     * @return the property value as an int, or {@code 0} if the property is absent or {@code null}
      */
     @Override
     public int getInt(final String propName) {
@@ -372,7 +374,9 @@ public class Seid implements EntityId {
 
     /**
      * Gets the value of the specified property as a long.
-     * Performs automatic conversion if the stored value is not a long.
+     * If the stored value is a {@link Number}, its {@code longValue()} is returned;
+     * otherwise the value is converted via type-conversion. Returns {@code 0L} if
+     * the property is absent or its value is {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -381,7 +385,7 @@ public class Seid implements EntityId {
      * }</pre>
      *
      * @param propName the property name
-     * @return the property value as a long
+     * @return the property value as a long, or {@code 0L} if the property is absent or {@code null}
      */
     @Override
     public long getLong(final String propName) {
@@ -391,7 +395,10 @@ public class Seid implements EntityId {
 
     /**
      * Gets the value of the specified property, converting it to the target type if necessary.
-     * Returns the default value for the target type if the property value is {@code null}.
+     * If the property is absent or its value is {@code null}, the target type's default value
+     * is returned: {@code 0} for primitive types such as {@code int.class}, {@code false} for
+     * {@code boolean.class}, and {@code null} for reference types including wrapper types such
+     * as {@code Integer.class}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -402,7 +409,8 @@ public class Seid implements EntityId {
      * @param <T> the target type
      * @param propName the property name
      * @param targetType the class of the target type
-     * @return the property value converted to the target type
+     * @return the property value converted to the target type, or the target type's default value
+     *         (which is {@code null} for reference types) if the property is absent or its value is {@code null}
      */
     @Override
     public <T> T get(final String propName, final Class<? extends T> targetType) {

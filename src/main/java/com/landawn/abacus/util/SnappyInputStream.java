@@ -203,11 +203,10 @@ public final class SnappyInputStream extends InputStream {
 
     /**
      * Tests if this input stream supports the {@code mark} and {@code reset} methods.
-     * The {@code markSupported} method of {@code SnappyInputStream} returns the result
-     * of calling {@code markSupported} on the underlying Snappy input stream.
+     * The underlying Xerial Snappy input stream does not support mark/reset, so this
+     * method returns {@code false}.
      *
-     * @return {@code true} if this stream instance supports the mark and reset methods;
-     *         {@code false} otherwise
+     * @return {@code false}, because the underlying Snappy input stream does not support mark/reset
      * @see #mark(int)
      * @see #reset()
      */

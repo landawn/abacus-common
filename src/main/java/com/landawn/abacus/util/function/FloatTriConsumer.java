@@ -21,7 +21,7 @@ import com.landawn.abacus.util.Throwables;
  * Represents an operation that accepts three float-valued arguments and returns no result.
  * This is a functional interface whose functional method is {@link #accept(float, float, float)}.
  *
- * <p>This is a primitive type specialization of consumer for three {@code float} arguments.
+ * <p>This is the three-arity specialization of {@link FloatConsumer}.
  * Unlike most other functional interfaces, {@code FloatTriConsumer} is expected to operate via side-effects.</p>
  *
  *

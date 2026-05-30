@@ -96,7 +96,8 @@ public class BooleanTriConsumerTest extends TestBase {
 
     @Test
     public void testAndThenNullThrowsImmediately() {
-        BooleanTriConsumer instance = (a, b, c) -> {};
+        BooleanTriConsumer instance = (a, b, c) -> {
+        };
         org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((BooleanTriConsumer) null));
     }
 }

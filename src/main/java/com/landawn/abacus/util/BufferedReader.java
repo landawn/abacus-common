@@ -135,8 +135,10 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * Reads a single character from the input.
      *
      * <p>This method returns the character as an integer value, or -1 if
-     * the end of the stream has been reached. Line terminators are processed
-     * according to the reader's configuration.</p>
+     * the end of the stream has been reached. When reading from an underlying
+     * {@link Reader}, a {@code '\n'} immediately following a {@code '\r'} that was
+     * consumed by a previous {@link #readLine()} call is skipped; otherwise line
+     * terminators are returned verbatim.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -254,9 +256,10 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * @param off offset at which to start storing characters
      * @param len maximum number of characters to read
      * @return the number of characters read, or -1 if the end of the stream
-     *         has been reached
+     *         has been reached. Returns 0 if {@code len} is 0
      * @throws IOException if an I/O error occurs
-     * @throws IndexOutOfBoundsException if the parameters are invalid
+     * @throws IndexOutOfBoundsException if {@code off} is negative, {@code len} is
+     *         negative, or {@code len} is greater than {@code cbuf.length - off}
      */
     @Override
     public int read(final char[] cbuf, final int off, final int len) throws IOException {
@@ -578,8 +581,8 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
     /**
      * Closes the stream and releases any system resources associated with it.
      *
-     * <p>Once the stream has been closed, further read(), ready(), or skip()
-     * invocations will throw an IOException. Closing a previously closed
+     * <p>Once the stream has been closed, further read(), readLine(), ready(), or
+     * skip() invocations will throw an IOException. Closing a previously closed
      * stream has no effect.</p>
      *
      * <p><b>Usage Examples:</b></p>

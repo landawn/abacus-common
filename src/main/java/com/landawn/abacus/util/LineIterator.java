@@ -207,8 +207,6 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * When you have finished with the iterator, you should close it to free internal resources.
      * This can be done by calling {@link #close()} or by using try-with-resources.
      * Note that closing the iterator will also close the underlying input stream.
-     * <p>
-     * The recommended usage pattern with try-with-resources:
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

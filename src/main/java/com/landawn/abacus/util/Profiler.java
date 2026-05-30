@@ -59,7 +59,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  *   <li><b>Multi-Threaded Performance Testing:</b> Configurable concurrent execution with customizable thread pools</li>
  *   <li><b>Comprehensive Statistical Analysis:</b> Min, max, average, median, percentile, and distribution metrics</li>
  *   <li><b>Multiple Test Rounds:</b> Support for warm-up rounds and multiple test iterations for accuracy</li>
- *   <li><b>Flexible Execution Models:</b> Support for Runnable, Callable, and reflection-based method invocation</li>
+ *   <li><b>Flexible Execution Models:</b> Support for {@link Throwables.Runnable} and reflection-based method invocation</li>
  *   <li><b>Advanced Reporting:</b> Multiple output formats including console, HTML, and XML</li>
  *   <li><b>Execution Control:</b> Profiler suspension, debugging hooks, and conditional execution</li>
  *   <li><b>Memory Management:</b> Optimized memory usage patterns for large-scale performance testing</li>
@@ -1993,9 +1993,9 @@ public final class Profiler {
          * as {@link #printResult()}, enabling direct writing to files, network sockets, or any other
          * byte-oriented output destination.
          *
-         * <p>This is a convenience method that wraps the OutputStream in a PrintWriter and delegates to
-         * {@link #writeResult(Writer)}. All performance metrics, statistical data, and error information
-         * are written in the same tabular text format as console output.
+         * <p>This is a convenience method that wraps the OutputStream in a PrintWriter and produces the
+         * same output as {@link #writeResult(Writer)}. All performance metrics, statistical data, and error
+         * information are written in the same tabular text format as console output.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2097,7 +2097,6 @@ public final class Profiler {
          * @param output the Writer to which performance results will be written. Must not be {@code null}.
          *               The Writer will be flushed but NOT closed by this method. All timing data,
          *               statistics, and error information will be written in formatted text
-         * @throws NullPointerException if {@code output} is {@code null}
          * @see #printResult() for writing to standard output console
          * @see #writeResult(OutputStream) for byte-stream based output
          * @see #writeHtmlResult(Writer) for HTML-formatted output
@@ -2192,9 +2191,9 @@ public final class Profiler {
          * tables and formatted markup. This method provides byte-stream based HTML output, enabling direct
          * writing to files, network streams, or any other byte-oriented output destination.
          *
-         * <p>This is a convenience method that wraps the OutputStream in a PrintWriter and delegates to
-         * {@link #writeHtmlResult(Writer)}. All performance statistics are rendered as HTML tables with
-         * proper formatting suitable for web browsers and HTML-based reporting systems.
+         * <p>This is a convenience method that wraps the OutputStream in a PrintWriter and produces the
+         * same output as {@link #writeHtmlResult(Writer)}. All performance statistics are rendered as HTML
+         * tables with proper formatting suitable for web browsers and HTML-based reporting systems.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2307,7 +2306,6 @@ public final class Profiler {
          * @param output the Writer to which HTML-formatted performance results will be written.
          *               Must not be {@code null}. The Writer will be flushed but NOT closed by this method.
          *               All statistics are rendered as HTML tables and formatted text
-         * @throws NullPointerException if {@code output} is {@code null}
          * @see #writeHtmlResult(OutputStream) for byte-stream based HTML output
          * @see #writeResult(Writer) for plain text formatted output
          * @see #writeXmlResult(Writer) for machine-readable XML output
@@ -2406,9 +2404,9 @@ public final class Profiler {
          * byte-stream based XML output, enabling direct writing to files, network streams, or any other
          * byte-oriented output destination.
          *
-         * <p>This is a convenience method that wraps the OutputStream in a PrintWriter and delegates to
-         * {@link #writeXmlResult(Writer)}. All performance metrics are rendered as well-formed XML elements
-         * in a hierarchical structure suitable for parsing and automated processing.
+         * <p>This is a convenience method that wraps the OutputStream in a PrintWriter and produces the
+         * same output as {@link #writeXmlResult(Writer)}. All performance metrics are rendered as well-formed
+         * XML elements in a hierarchical structure suitable for parsing and automated processing.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2557,7 +2555,6 @@ public final class Profiler {
          * @param output the Writer to which XML-formatted performance results will be written.
          *               Must not be {@code null}. The Writer will be flushed but NOT closed by this method.
          *               All statistics are rendered as well-formed XML elements
-         * @throws NullPointerException if {@code output} is {@code null}
          * @see #writeXmlResult(OutputStream) for byte-stream based XML output
          * @see #writeResult(Writer) for plain text formatted output
          * @see #writeHtmlResult(Writer) for HTML-formatted output
@@ -2598,6 +2595,7 @@ public final class Profiler {
                 output.println(
                         "<_0.001>" + elapsedTimeFormat.get().format(methodStatisticsList.get((int) (size * 0.001)).getElapsedTimeInMillis()) + "</_0.001>");
                 output.println("<_0.01>" + elapsedTimeFormat.get().format(methodStatisticsList.get((int) (size * 0.01)).getElapsedTimeInMillis()) + "</_0.01>");
+                output.println("<_0.1>" + elapsedTimeFormat.get().format(methodStatisticsList.get((int) (size * 0.1)).getElapsedTimeInMillis()) + "</_0.1>");
                 output.println("<_0.2>" + elapsedTimeFormat.get().format(methodStatisticsList.get((int) (size * 0.2)).getElapsedTimeInMillis()) + "</_0.2>");
                 output.println("<_0.5>" + elapsedTimeFormat.get().format(methodStatisticsList.get((int) (size * 0.5)).getElapsedTimeInMillis()) + "</_0.5>");
                 output.println("<_0.8>" + elapsedTimeFormat.get().format(methodStatisticsList.get((int) (size * 0.8)).getElapsedTimeInMillis()) + "</_0.8>");

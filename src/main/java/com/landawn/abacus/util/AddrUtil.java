@@ -81,11 +81,9 @@ public final class AddrUtil {
      * // Returns: ["server1:8080", "server2:8080"]
      * }</pre>
      *
-     * @param servers the string containing server addresses separated by whitespace or commas;
-     *                must not be {@code null}
+     * @param servers the string containing server addresses separated by whitespace or commas
      * @return a non-empty list of trimmed server address strings
-     * @throws NullPointerException if {@code servers} is {@code null}
-     * @throws IllegalArgumentException if {@code servers} results in an empty list after splitting and trimming
+     * @throws IllegalArgumentException if {@code servers} is {@code null}, empty, or results in an empty list after splitting and trimming
      */
     public static List<String> getServerList(final String servers) {
         final List<String> serverList = URL_SPLITTER.split(servers);

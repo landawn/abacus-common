@@ -33,6 +33,7 @@ import com.landawn.abacus.util.Strings;
 @SuppressWarnings("java:S2160")
 public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<short[]> {
 
+    /** The type name constant for the short array type, equal to {@code "short[]"}. */
     public static final String SHORT_ARRAY = short[].class.getSimpleName();
 
     private final Type<Short> elementType;
@@ -231,12 +232,12 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * <pre>{@code
      * Type<short[]> type = TypeFactory.getType(short[].class);
      * short[] array = {100, 200, 300};
-     * CharacterWriter writer = new CharacterWriter();
+     * BufferedJsonWriter writer = new BufferedJsonWriter();
      * JsonXmlSerConfig<?> config = new JsonXmlSerConfig<>();
      * type.writeCharacter(writer, array, config);
      * System.out.println(writer.toString());   // Output: [100, 200, 300]
      *
-     * CharacterWriter nullWriter = new CharacterWriter();
+     * BufferedJsonWriter nullWriter = new BufferedJsonWriter();
      * type.writeCharacter(nullWriter, null, config);
      * System.out.println(nullWriter.toString());   // Output: null
      * }</pre>

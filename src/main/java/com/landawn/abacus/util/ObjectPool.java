@@ -63,8 +63,8 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * {@link AbstractMap} and does <i>not</i> override those default methods. As a result,
  * default {@link Map} methods inherited from {@code AbstractMap} (such as
  * {@link Map#computeIfAbsent}, {@link Map#merge}, {@link Map#compute}) are <i>not</i>
- * guaranteed to be atomic on this class. For atomic compound operations, obtain the
- * backing map via a different API or use explicit external synchronization.</p>
+ * guaranteed to be atomic on this class. For atomic compound operations, use a
+ * {@link ConcurrentHashMap} directly or apply explicit external synchronization.</p>
  *
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values
@@ -84,6 +84,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      * when the approximate number of entries is known in advance.
      *
      * @param capacity the initial capacity hint; used to size the underlying hash table
+     * @throws IllegalArgumentException if {@code capacity} is negative
      */
     public ObjectPool(final int capacity) {
         this.map = new ConcurrentHashMap<>(capacity);

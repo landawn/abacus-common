@@ -30,11 +30,11 @@ import com.landawn.abacus.util.Throwables;
 @FunctionalInterface
 public interface DoubleSupplier extends Throwables.DoubleSupplier<RuntimeException>, java.util.function.DoubleSupplier { //NOSONAR
     /**
-     * A {@code DoubleSupplier} which always returns zero.
+     * A {@code DoubleSupplier} which always returns {@code 0.0d}.
      */
     DoubleSupplier ZERO = () -> 0;
     /**
-     * A {@code DoubleSupplier} which returns a random double value between 0.0 (inclusive) and 1.0 (exclusive).
+     * A {@code DoubleSupplier} which returns a random double value between {@code 0.0d} (inclusive) and {@code 1.0d} (exclusive).
      * Each invocation returns a new pseudorandom value.
      */
     DoubleSupplier RANDOM = Util.RAND_DOUBLE::nextDouble;

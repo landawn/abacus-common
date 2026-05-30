@@ -44,6 +44,7 @@ package com.landawn.abacus.type;
 @SuppressWarnings("java:S2160")
 public final class PrimitiveCharType extends AbstractCharacterType {
 
+    /** The type name constant for the primitive {@code char} type, equal to {@code "char"}. */
     public static final String CHAR = char.class.getSimpleName();
 
     private static final Character DEFAULT_VALUE = 0;

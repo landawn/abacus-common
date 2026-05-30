@@ -583,9 +583,9 @@ public final class If {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList numbers = IntList.of(1, 2, 3);
-     * If.isEmpty(numbers).then(() -> System.out.println("Empty"));           // does nothing
-     * If.isEmpty(null).then(() -> System.out.println("Empty"));              // prints "Empty"
-     * If.isEmpty(IntList.empty()).then(() -> System.out.println("Empty"));   // prints "Empty"
+     * If.isEmpty(numbers).then(() -> System.out.println("Empty"));        // does nothing
+     * If.isEmpty(null).then(() -> System.out.println("Empty"));           // prints "Empty"
+     * If.isEmpty(IntList.of()).then(() -> System.out.println("Empty"));   // prints "Empty"
      * }</pre>
      *
      * @param list the PrimitiveList to check (can be {@code null})
@@ -604,9 +604,9 @@ public final class If {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> words = Multiset.of("apple", "banana", "apple");
-     * If.isEmpty(words).then(() -> System.out.println("Empty"));              // does nothing
-     * If.isEmpty(null).then(() -> System.out.println("Empty"));               // prints "Empty"
-     * If.isEmpty(Multiset.empty()).then(() -> System.out.println("Empty"));   // prints "Empty"
+     * If.isEmpty(words).then(() -> System.out.println("Empty"));           // does nothing
+     * If.isEmpty(null).then(() -> System.out.println("Empty"));            // prints "Empty"
+     * If.isEmpty(Multiset.of()).then(() -> System.out.println("Empty"));   // prints "Empty"
      * }</pre>
      *
      * @param s the Multiset to check (can be {@code null})
@@ -623,10 +623,10 @@ public final class If {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Multimap<String, Integer> map = Multimap.of("a", 1, "a", 2, "b", 3);
-     * If.isEmpty(map).then(() -> System.out.println("Empty"));                // does nothing
-     * If.isEmpty(null).then(() -> System.out.println("Empty"));               // prints "Empty"
-     * If.isEmpty(Multimap.empty()).then(() -> System.out.println("Empty"));   // prints "Empty"
+     * ListMultimap<String, Integer> map = ListMultimap.of("a", 1, "a", 2, "b", 3);
+     * If.isEmpty(map).then(() -> System.out.println("Empty"));                  // does nothing
+     * If.isEmpty(null).then(() -> System.out.println("Empty"));                 // prints "Empty"
+     * If.isEmpty(N.newListMultimap()).then(() -> System.out.println("Empty"));  // prints "Empty"
      * }</pre>
      *
      * @param m the Multimap to check (can be {@code null})
@@ -883,9 +883,9 @@ public final class If {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList numbers = IntList.of(1, 2, 3);
-     * If.notEmpty(numbers).then(() -> System.out.println("Has data"));           // prints "Has data"
-     * If.notEmpty(null).then(() -> System.out.println("Has data"));              // does nothing
-     * If.notEmpty(IntList.empty()).then(() -> System.out.println("Has data"));   // does nothing
+     * If.notEmpty(numbers).then(() -> System.out.println("Has data"));        // prints "Has data"
+     * If.notEmpty(null).then(() -> System.out.println("Has data"));           // does nothing
+     * If.notEmpty(IntList.of()).then(() -> System.out.println("Has data"));   // does nothing
      * }</pre>
      *
      * @param list the PrimitiveList to check (can be {@code null})
@@ -904,9 +904,9 @@ public final class If {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> words = Multiset.of("apple", "banana", "apple");
-     * If.notEmpty(words).then(() -> System.out.println("Has data"));              // prints "Has data"
-     * If.notEmpty(null).then(() -> System.out.println("Has data"));               // does nothing
-     * If.notEmpty(Multiset.empty()).then(() -> System.out.println("Has data"));   // does nothing
+     * If.notEmpty(words).then(() -> System.out.println("Has data"));           // prints "Has data"
+     * If.notEmpty(null).then(() -> System.out.println("Has data"));            // does nothing
+     * If.notEmpty(Multiset.of()).then(() -> System.out.println("Has data"));   // does nothing
      * }</pre>
      *
      * @param s the Multiset to check (can be {@code null})
@@ -923,10 +923,10 @@ public final class If {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Multimap<String, Integer> map = Multimap.of("a", 1, "a", 2, "b", 3);
-     * If.notEmpty(map).then(() -> System.out.println("Has data"));                // prints "Has data"
-     * If.notEmpty(null).then(() -> System.out.println("Has data"));               // does nothing
-     * If.notEmpty(Multimap.empty()).then(() -> System.out.println("Has data"));   // does nothing
+     * ListMultimap<String, Integer> map = ListMultimap.of("a", 1, "a", 2, "b", 3);
+     * If.notEmpty(map).then(() -> System.out.println("Has data"));                  // prints "Has data"
+     * If.notEmpty(null).then(() -> System.out.println("Has data"));                 // does nothing
+     * If.notEmpty(N.newListMultimap()).then(() -> System.out.println("Has data"));  // does nothing
      * }</pre>
      *
      * @param m the Multimap to check (can be {@code null})

@@ -24,7 +24,7 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.stream.DoubleStream;
 
 /**
- * A specialized iterator for primitive double values that extends ImmutableIterator.
+ * A specialized iterator for primitive double values that extends {@code ImmutableIterator<Double>}.
  * This class provides efficient iteration over double values without boxing overhead.
  *
  * <p>DoubleIterator is particularly useful when working with large collections of primitive
@@ -329,7 +329,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * Returns the next element as a boxed Double.
+     * Returns the next element as a boxed {@link Double}.
      * This method is deprecated; use {@link #nextDouble()} instead for better performance.
      *
      * @return the next double value as a {@code Double} object
@@ -567,7 +567,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * Converts this iterator to a DoubleStream.
+     * Converts this iterator to a {@link DoubleStream}.
      *
      * <p><b>Note:</b> The returned stream is backed by this iterator. Consuming the stream
      * will consume the iterator, and vice versa. After the stream is consumed, this iterator
@@ -581,7 +581,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * // sum is 7.5
      * }</pre>
      *
-     * @return a DoubleStream backed by this iterator
+     * @return a {@link DoubleStream} backed by this iterator
      */
     public DoubleStream stream() {
         return DoubleStream.of(this);

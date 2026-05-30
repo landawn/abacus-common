@@ -3275,6 +3275,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param collector the downstream collector
      * @return a collector which returns the collected result, or throws if no elements
      *         were collected
+     * @throws IllegalArgumentException if collector is null
      * @throws NoSuchElementException if no elements are collected
      */
     @Beta
@@ -3308,6 +3309,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param exceptionSupplier supplier for the exception to throw if no elements are collected
      * @return a collector which returns the collected result, or throws if no elements
      *         were collected
+     * @throws IllegalArgumentException if collector is null
      */
     @Beta
     public static <T, A, R> Collector<T, A, R> collectingOrElseThrowIfEmpty(final Collector<T, A, R> collector,
@@ -3326,8 +3328,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * {@code Object.equals()}. For ordered streams, the first element with each distinct
      * key is preserved.</p>
      *
-     * <p>This operation is equivalent to {@code stream.distinct(keyMapper).toList()},
-     * but may work faster as it's implemented as a single collector.</p>
+     * <p>This operation is equivalent to mapping elements to their keys, deduplicating,
+     * then collecting the corresponding elements to a list, but is implemented as a
+     * single collector pass.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -8157,6 +8160,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param keyMapper a mapping function to produce keys
      * @param valueMapper a mapping function to produce values
      * @return a {@code Collector} which collects elements into an unmodifiable {@code Map}
+     * @throws IllegalStateException if duplicate keys are encountered
      * @see java.util.stream.Collectors#toUnmodifiableMap(Function, Function)
      */
     public static <T, K, U> Collector<T, ?, Map<K, U>> toUnmodifiableMap(final Function<? super T, ? extends K> keyMapper,
@@ -8224,6 +8228,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param keyMapper a mapping function to produce keys
      * @param valueMapper a mapping function to produce values
      * @return a {@code Collector} which collects elements into a {@code LinkedHashMap}
+     * @throws IllegalStateException if duplicate keys are encountered
      * @see #toMap(Function, Function)
      */
     public static <T, K, V> Collector<T, ?, Map<K, V>> toLinkedHashMap(final Function<? super T, ? extends K> keyMapper,
@@ -8488,6 +8493,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapFactory a supplier providing a new empty {@code BiMap}
      *                   into which the results will be inserted
      * @return a {@code Collector} which collects elements into a {@code BiMap}
+     * @throws IllegalStateException if duplicate keys or values are encountered
      */
     public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final Supplier<BiMap<K, V>> mapFactory) {
@@ -9117,7 +9123,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *     .collect(Collectors.flatmappingKeyToMultimap(
      *         Document::getTags,
      *         Function.identity(),
-     *         Suppliers.ofLinkedSetMultimap()
+     *         Suppliers.ofSetMultimap()
      *     ));
      * }</pre>
      *
@@ -10239,7 +10245,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          *     .collect(MoreCollectors.combine(
          *         Collectors.counting(),
          *         Collectors.summingInt(i -> i),
-         *         Collectors.maxBy(Integer::compare)
+         *         Collectors.maxBy(i -> i)
          *     ));
          * }</pre>
          *
@@ -10281,7 +10287,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          *         .collect(MoreCollectors.combine(
          *             Collectors.counting(),
          *             Collectors.summingInt(i -> i),
-         *             Collectors.maxBy(Integer::compare),
+         *             Collectors.maxBy(i -> i),
          *             Collectors.averagingInt(i -> i)
          *         ));
          * }</pre>
@@ -10326,8 +10332,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          *         .collect(MoreCollectors.combine(
          *             Collectors.counting(),
          *             Collectors.summingInt(i -> i),
-         *             Collectors.minBy(Integer::compare),
-         *             Collectors.maxBy(Integer::compare),
+         *             Collectors.minBy(i -> i),
+         *             Collectors.maxBy(i -> i),
          *             Collectors.averagingInt(i -> i)
          *         ));
          * }</pre>
@@ -10386,8 +10392,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          *             Collectors.counting(),
          *             Collectors.summingDouble(Product::getPrice),
          *             Collectors.averagingDouble(Product::getRating),
-         *             Collectors.minBy(Comparator.comparing(Product::getPrice)),
-         *             Collectors.maxBy(Comparator.comparing(Product::getRating)),
+         *             Collectors.minBy(Product::getPrice),
+         *             Collectors.maxBy(Product::getRating),
          *             Collectors.mapping(Product::getName, Collectors.toList())
          *         ));
          * }</pre>
@@ -10452,10 +10458,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          *             Collectors.summingDouble(Order::getTotal),
          *             Collectors.averagingDouble(Order::getTotal),
          *             Collectors.collectingAndThen(
-         *                 Collectors.mapping(Order::getDate, Collectors.minBy(LocalDate::compareTo)),
+         *                 Collectors.mapping(Order::getDate, Collectors.minBy(Function.identity())),
          *                 opt -> opt.orElse(null)),
          *             Collectors.collectingAndThen(
-         *                 Collectors.mapping(Order::getDate, Collectors.maxBy(LocalDate::compareTo)),
+         *                 Collectors.mapping(Order::getDate, Collectors.maxBy(Function.identity())),
          *                 opt -> opt.orElse(null)),
          *             Collectors.groupingBy(Order::getStatus, Collectors.counting()),
          *             Collectors.mapping(Order::getCustomerId, Collectors.toSet())

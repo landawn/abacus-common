@@ -88,15 +88,16 @@ public interface Consumer<T> extends Throwables.Consumer<T, RuntimeException>, j
     }
 
     /**
-     * Converts this Consumer to a Throwables.Consumer with a specified exception type.
+     * Converts this Consumer to a {@link Throwables.Consumer} with a specified exception type.
      * This method performs an unchecked cast and is useful when you need to adapt this Consumer
      * to a context that expects a different exception type.
      *
      * <p>Note: Since this is an unchecked cast, ensure that the actual implementation
-     * only throws RuntimeException or its subclasses.
+     * only throws RuntimeException or its subclasses; the declared checked-exception type
+     * {@code E} will never actually be thrown by the returned consumer.
      *
      * @param <E> the type of exception that the returned Consumer is declared to throw
-     * @return a Throwables.Consumer that is functionally equivalent to this Consumer
+     * @return a {@link Throwables.Consumer} that is functionally equivalent to this Consumer
      */
     default <E extends Throwable> Throwables.Consumer<T, E> toThrowable() {
         return (Throwables.Consumer<T, E>) this;

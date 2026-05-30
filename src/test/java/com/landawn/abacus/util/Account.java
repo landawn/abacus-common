@@ -230,10 +230,9 @@ public class Account implements ExtendDirtyBasicPNL.AccountPNL {
         }
 
         if (obj instanceof Account other) {
-            if (N.equals(id, other.id) && N.equals(gui, other.gui) && N.equals(emailAddress, other.emailAddress)
-                    && N.equals(firstName, other.firstName) && N.equals(middleName, other.middleName)
-                    && N.equals(lastName, other.lastName) && N.equals(birthDate, other.birthDate) && N.equals(status, other.status)
-                    && N.equals(lastUpdateTime, other.lastUpdateTime) && N.equals(createdTime, other.createdTime)
+            if (N.equals(id, other.id) && N.equals(gui, other.gui) && N.equals(emailAddress, other.emailAddress) && N.equals(firstName, other.firstName)
+                    && N.equals(middleName, other.middleName) && N.equals(lastName, other.lastName) && N.equals(birthDate, other.birthDate)
+                    && N.equals(status, other.status) && N.equals(lastUpdateTime, other.lastUpdateTime) && N.equals(createdTime, other.createdTime)
                     && N.equals(contact, other.contact) && N.equals(devices, other.devices)) {
 
                 return true;
@@ -245,11 +244,10 @@ public class Account implements ExtendDirtyBasicPNL.AccountPNL {
 
     @Override
     public String toString() {
-        return "{" + "id=" + N.toString(id) + ", " + "gui=" + N.toString(gui) + ", " + "emailAddress=" + N.toString(emailAddress)
-                + ", " + "firstName=" + N.toString(firstName) + ", " + "middleName=" + N.toString(middleName) + ", " + "lastName="
-                + N.toString(lastName) + ", " + "birthDate=" + N.toString(birthDate) + ", " + "status=" + N.toString(status) + ", "
-                + "lastUpdateTime=" + N.toString(lastUpdateTime) + ", " + "createdTime=" + N.toString(createdTime) + ", " + "contact="
-                + N.toString(contact) + ", " + "devices=" + N.toString(devices) + "}";
+        return "{" + "id=" + N.toString(id) + ", " + "gui=" + N.toString(gui) + ", " + "emailAddress=" + N.toString(emailAddress) + ", " + "firstName="
+                + N.toString(firstName) + ", " + "middleName=" + N.toString(middleName) + ", " + "lastName=" + N.toString(lastName) + ", " + "birthDate="
+                + N.toString(birthDate) + ", " + "status=" + N.toString(status) + ", " + "lastUpdateTime=" + N.toString(lastUpdateTime) + ", " + "createdTime="
+                + N.toString(createdTime) + ", " + "contact=" + N.toString(contact) + ", " + "devices=" + N.toString(devices) + "}";
     }
 
     public interface x {

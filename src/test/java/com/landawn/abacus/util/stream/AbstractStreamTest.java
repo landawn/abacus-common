@@ -4615,4 +4615,13 @@ public class AbstractStreamTest extends TestBase {
         assertEquals(Arrays.asList(1, 2, 3, 4), result.toList());
     }
 
+    @Test
+    public void test_persistToCsv_invalidHeader_throwsIAE() throws java.io.IOException {
+        // Regression: a header not matching a bean property must throw IllegalArgumentException
+        // instead of NullPointerException (#62).
+        final java.io.StringWriter writer = new java.io.StringWriter();
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> com.landawn.abacus.util.stream.Stream.of(new TestPerson(1, "Alice")).persistToCsv(java.util.List.of("id", "nonexistent"), writer));
+    }
+
 }

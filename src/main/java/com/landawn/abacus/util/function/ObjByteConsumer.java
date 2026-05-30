@@ -83,6 +83,14 @@ public interface ObjByteConsumer<T> extends Throwables.ObjByteConsumer<T, Runtim
      * composed operation. If performing this operation throws an exception,
      * the {@code after} operation will not be performed.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ObjByteConsumer<byte[]> write = (arr, v) -> arr[0] = v;
+     * ObjByteConsumer<byte[]> log   = (arr, v) -> System.out.println("Wrote " + v);
+     * ObjByteConsumer<byte[]> writeAndLog = write.andThen(log);
+     * writeAndLog.accept(new byte[1], (byte) 9);
+     * }</pre>
+     *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code ObjByteConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation

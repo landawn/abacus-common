@@ -106,9 +106,8 @@ import com.landawn.abacus.util.stream.DoubleStream;
  * int index = prices.binarySearch(101.25);   // Fast lookup
  *
  * // Statistical and functional operations
- * DoubleList returns = prices.stream()                     // Calculate returns
- *     .skip(1)
- *     .map((i, current) -> (current - prices.get(i)) / prices.get(i))
+ * DoubleList scaled = prices.stream()                      // Scale every price by 1.1
+ *     .map(d -> d * 1.1)
  *     .collect(DoubleList::new, DoubleList::add, DoubleList::addAll);
  *
  * // Type conversions
@@ -299,10 +298,9 @@ import com.landawn.abacus.util.stream.DoubleStream;
  *     .orElse(0.0);
  * double volatility = Math.sqrt(variance);
  *
- * // Portfolio optimization
- * DoubleList weights = DoubleList.of(0.3, 0.4, 0.3);
- * double portfolioReturn = returns.stream()
- *     .mapToDouble((i, r) -> r * weights.get(i % weights.size()))
+ * // Weighted aggregation
+ * double weightedReturn = returns.stream()
+ *     .map(r -> r * 0.5)   // apply a scaling factor to each return
  *     .sum();
  * }</pre>
  *
@@ -811,6 +809,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @throws NullPointerException if the specified predicate is {@code null}
      */
     public boolean removeIf(final DoublePredicate p) {
+        N.requireNonNull(p, cs.predicate);
+
         final DoubleList tmp = new DoubleList(size());
 
         for (int i = 0; i < size; i++) {
@@ -1219,6 +1219,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @throws NullPointerException if the specified predicate is {@code null}
      */
     public boolean replaceIf(final DoublePredicate predicate, final double newValue) {
+        N.requireNonNull(predicate, cs.predicate);
+
         boolean result = false;
 
         for (int i = 0, len = size(); i < len; i++) {
@@ -1867,6 +1869,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @throws NullPointerException if the specified action is {@code null}
      */
     public void forEach(final DoubleConsumer action) {
+        N.requireNonNull(action, cs.action);
+
         forEach(0, size, action);
     }
 

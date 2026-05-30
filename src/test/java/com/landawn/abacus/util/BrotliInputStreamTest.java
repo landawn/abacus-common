@@ -34,10 +34,8 @@ public class BrotliInputStreamTest extends TestBase {
     @Test
     public void testConstructorRejectsZeroOrNegativeBufferSize() {
         // Underlying lib enforces buffer size > 0 with IllegalArgumentException
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> new BrotliInputStream(new ByteArrayInputStream(new byte[0]), 0));
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> new BrotliInputStream(new ByteArrayInputStream(new byte[0]), -1));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new BrotliInputStream(new ByteArrayInputStream(new byte[0]), 0));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new BrotliInputStream(new ByteArrayInputStream(new byte[0]), -1));
     }
 
     @Test

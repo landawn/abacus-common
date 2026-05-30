@@ -32,6 +32,7 @@ import com.landawn.abacus.util.Strings;
 @SuppressWarnings("java:S2160")
 public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongList> {
 
+    /** The type name constant for {@link LongList} type identification, equal to {@code "LongList"}. */
     public static final String LONG_LIST = LongList.class.getSimpleName();
 
     private final Type<long[]> arrayType = Type.of(long[].class);

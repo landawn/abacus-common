@@ -33,6 +33,7 @@ import com.landawn.abacus.util.Strings;
 @SuppressWarnings("java:S2160")
 public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[]> {
 
+    /** The type name constant for the int array type, equal to {@code "int[]"}. */
     public static final String INT_ARRAY = int[].class.getSimpleName();
 
     private final Type<Integer> elementType;

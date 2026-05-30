@@ -89,6 +89,8 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
+     * The returned predicate will return {@code true} when this predicate returns {@code false},
+     * and vice versa.
      *
      * @return a predicate that represents the logical negation of this predicate
      */
@@ -131,10 +133,12 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
 
     /**
      * Returns the specified {@code DoublePredicate} instance.
-     * This method exists primarily for API consistency.
+     * This method is useful for type inference or when you need to explicitly cast a lambda expression
+     * to {@code DoublePredicate} (for example, to make the {@code negate}/{@code and}/{@code or}
+     * default methods available on a bare lambda).
      *
      * @param predicate the predicate to return
-     * @return the specified predicate
+     * @return the same predicate instance
      */
     static DoublePredicate of(final DoublePredicate predicate) {
         return predicate;

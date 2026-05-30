@@ -101,8 +101,8 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * <p>
      * Special handling:
      * <ul>
-     *   <li>If str is {@code null} or empty, returns null</li>
-     *   <li>If str represents the system-time marker (e.g. {@code "SYS_TIME"}), returns the current timestamp</li>
+     *   <li>If str is {@code null}, empty, or the literal {@code "null"}, returns {@code null}</li>
+     *   <li>If str represents the system-time marker {@code "SYS_TIME"} (case-insensitive, also accepted as {@code "sysTime"}), returns the current timestamp</li>
      *   <li>Otherwise, parses the string using the configured date format</li>
      * </ul>
      *
@@ -115,7 +115,7 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * }</pre>
      *
      * @param str the string to parse
-     * @return a Timestamp parsed from the string, or {@code null} if str is empty
+     * @return a Timestamp parsed from the string, or {@code null} if {@code str} is {@code null}, empty, or the literal {@code "null"}
      */
     @Override
     public Timestamp valueOf(final String str) {

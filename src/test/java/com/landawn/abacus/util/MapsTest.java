@@ -961,16 +961,13 @@ public class MapsTest extends AbstractTest {
         map = N.asMap("key1", N.toList(N.toLinkedHashSet("val1", N.asMap("key2", "val22"))));
         assertEquals("val22", Maps.getByPath(map, "key1[0][1].key2"));
 
-        map = N.asMap("key1",
-                N.toList(N.toLinkedHashSet("val1", N.asMap("key2", N.toList("val22", N.asMap("key3", "val33"))))));
+        map = N.asMap("key1", N.toList(N.toLinkedHashSet("val1", N.asMap("key2", N.toList("val22", N.asMap("key3", "val33"))))));
         assertEquals("val33", Maps.getByPath(map, "key1[0][1].key2[1].key3"));
 
-        map = N.asMap("key1",
-                N.toList(N.toLinkedHashSet("val1", N.asMap("key2", N.toList("val22", N.asMap("key3", "val33"))))));
+        map = N.asMap("key1", N.toList(N.toLinkedHashSet("val1", N.asMap("key2", N.toList("val22", N.asMap("key3", "val33"))))));
         assertNull(Maps.getByPath(map, "key1[0][2].key2[1].key3"));
 
-        map = N.asMap("key1",
-                N.toList(N.toLinkedHashSet("val1", N.asMap("key2", N.toList("val22", N.asMap("key3", "val33"))))));
+        map = N.asMap("key1", N.toList(N.toLinkedHashSet("val1", N.asMap("key2", N.toList("val22", N.asMap("key3", "val33"))))));
         assertNull(Maps.getByPath(map, "key1[0][1].key22[1].key3"));
 
         map = N.asMap("key1", N.asMap("key2", null));

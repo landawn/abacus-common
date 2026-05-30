@@ -86,6 +86,14 @@ public interface ObjBooleanConsumer<T> extends Throwables.ObjBooleanConsumer<T, 
      * composed operation. If performing this operation throws an exception,
      * the {@code after} operation will not be performed.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ObjBooleanConsumer<StringBuilder> mark = (sb, b) -> sb.append(b ? 'Y' : 'N');
+     * ObjBooleanConsumer<StringBuilder> nl   = (sb, b) -> sb.append('\n');
+     * ObjBooleanConsumer<StringBuilder> markln = mark.andThen(nl);
+     * markln.accept(new StringBuilder(), true);
+     * }</pre>
+     *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code ObjBooleanConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation

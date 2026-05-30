@@ -103,6 +103,7 @@ public class DurationType extends AbstractType<Duration> {
      *
      * @param str the millisecond count as a string; may be {@code null} or empty
      * @return the corresponding {@link Duration}, or {@code null} if {@code str} is {@code null} or empty
+     * @throws NumberFormatException if {@code str} is non-empty but does not contain a parsable {@code long}
      */
     @Override
     public Duration valueOf(final String str) {

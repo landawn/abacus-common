@@ -84,8 +84,8 @@ import com.landawn.abacus.util.stream.CharStream;
  *
  * // String integration
  * CharList fromString = CharList.of("Hello World".toCharArray());   // Convert from string
- * String result = buffer.toString();   // Convert to string: "Hello"
- * char[] charArray = buffer.toArray();   // Convert to char array
+ * String result = buffer.toString();   // Bracketed form: "[H, e, l, l, o]"
+ * char[] charArray = buffer.toArray();   // Convert to char array: ['H', 'e', 'l', 'l', 'o']
  *
  * // Text manipulation operations
  * buffer.add(' ');   // Append space
@@ -117,7 +117,7 @@ import com.landawn.abacus.util.stream.CharStream;
  * builder.addAll("The quick ".toCharArray());
  * builder.addAll("brown fox ".toCharArray());
  * builder.addAll("jumps over".toCharArray());
- * String sentence = builder.toString();   // "The quick brown fox jumps over"
+ * String sentence = builder.toString();   // Bracketed form: "[T, h, e,  , q, u, i, c, k, ...]"
  * }</pre>
  *
  * <p><b>Performance Characteristics:</b>
@@ -365,7 +365,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * The CharList instance uses the specified array as its backing array without copying.
      * Changes to the array will be reflected in the list and vice versa.
      *
-     * @param a the array whose elements are to be used as the backing array for this list
+     * @param a the array whose elements are to be used as the backing array for this list; must not be {@code null}
+     * @throws NullPointerException if the specified array is {@code null}
      */
     public CharList(final char[] a) {
         this(N.requireNonNull(a), a.length);
@@ -912,6 +913,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @throws NullPointerException if {@code p} is {@code null}
      */
     public boolean removeIf(final CharPredicate p) {
+        N.requireNonNull(p, cs.predicate);
+
         final CharList tmp = new CharList(size());
 
         for (int i = 0; i < size; i++) {
@@ -1295,6 +1298,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * Replaces each element of this list with the result of applying the operator to that element.
      *
      * @param operator the operator to apply to each element; must not be {@code null}
+     * @throws NullPointerException if {@code operator} is {@code null}
      */
     public void replaceAll(final CharUnaryOperator operator) {
         N.requireNonNull(operator, "operator");
@@ -1312,6 +1316,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return {@code true} if any elements were replaced
      */
     public boolean replaceIf(final CharPredicate predicate, final char newValue) {
+        N.requireNonNull(predicate, cs.predicate);
+
         boolean result = false;
 
         for (int i = 0, len = size(); i < len; i++) {
@@ -1827,8 +1833,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Returns the minimum element in the specified range of this list.
      *
-     * @param fromIndex the index of the first element (inclusive) to be included in the search
-     * @param toIndex the index of the last element (exclusive) to be included in the search
+     * @param fromIndex the starting index (inclusive) of the range to search
+     * @param toIndex the ending index (exclusive) of the range to search
      * @return an OptionalChar containing the minimum element in the specified range,
      *         or an empty OptionalChar if the range is empty
      * @throws IndexOutOfBoundsException if the range is out of bounds
@@ -1851,8 +1857,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Returns the maximum element in the specified range of this list.
      *
-     * @param fromIndex the index of the first element (inclusive) to be included in the search
-     * @param toIndex the index of the last element (exclusive) to be included in the search
+     * @param fromIndex the starting index (inclusive) of the range to search
+     * @param toIndex the ending index (exclusive) of the range to search
      * @return an OptionalChar containing the maximum element in the specified range,
      *         or an empty OptionalChar if the range is empty
      * @throws IndexOutOfBoundsException if the range is out of bounds
@@ -1901,6 +1907,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @throws NullPointerException if {@code action} is {@code null}
      */
     public void forEach(final CharConsumer action) {
+        N.requireNonNull(action, cs.action);
+
         forEach(0, size, action);
     }
 

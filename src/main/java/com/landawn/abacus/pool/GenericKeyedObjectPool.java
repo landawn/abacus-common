@@ -434,10 +434,13 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
     /**
      * Removes and returns the element associated with the specified key.
-     * The element's activity print is updated to reflect this access.
+     * The element's activity print is updated (last access time and access count)
+     * to reflect this access.
      *
      * <p>Unlike {@link #get(Object)}, this method removes the element from the pool,
-     * so it will not be available for future requests unless re-added.</p>
+     * so it will not be available for future requests unless re-added. The pool does
+     * <em>not</em> invoke {@link Poolable#destroy(Caller)} on the returned element; the
+     * caller takes ownership and is responsible for destroying it when no longer needed.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -795,10 +798,12 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Returns a string representation of this pool.
-     * The string representation consists of the string representation of the internal pool map.
+     * Returns a string representation of this pool that summarizes its configuration
+     * (capacity, eviction delay, eviction policy, auto-balance, balance factor, memory limit,
+     * configured memory measure) and current total data size. The actual pooled entries are
+     * <em>not</em> included in the output.
      *
-     * @return a string representation of this pool
+     * @return a string representation of this pool's configuration and total data size
      */
     @Override
     public String toString() {

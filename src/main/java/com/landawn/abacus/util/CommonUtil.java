@@ -1618,9 +1618,8 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified charSequence argument is not {@code null}, empty, or blank (whitespace only), and throws {@code IllegalArgumentException} if it is.
      *
-     * <p>A string is considered blank if it contains only whitespace characters as defined by {@link Character#isWhitespace(char)}.
-     *
-     * <p><b>Note:</b> The method name intentionally retains {@code OrEmptyOrBlank} to preserve its ordering in auto-complete lists.</p>
+     * <p>A string is considered blank if it is {@code null}, empty, or contains only whitespace characters
+     * as defined by {@link Character#isWhitespace(char)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3205,7 +3204,7 @@ sealed class CommonUtil permits N {
      * }</pre>
      *
      * @param expression a boolean expression
-     * @param errorMessage the name of the argument or an error message to be used in the exception
+     * @param errorMessage the error message to be used in the exception, converted to a string via {@link String#valueOf(Object)}
      * @throws IllegalStateException if {@code expression} is false
      */
     public static void checkState(final boolean expression, final Object errorMessage) throws IllegalStateException {
@@ -7898,7 +7897,7 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * anyNull("a", null);         // returns true
      * anyNull("a", "b");          // returns false
-     * anyNull((Object[]) null);   // returns false (empty array check)
+     * anyNull((Object[]) null);   // returns false (null/empty array)
      * }</pre>
      *
      * @param a the array of objects to check
@@ -9803,7 +9802,7 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type to return the default value for
      * @param cls the class type for which the default value is to be returned.
-     * @return the default value of the given class type. For example, for an Integer class type, it will return 0.
+     * @return the default value of the given class type. For example, for the primitive {@code int} class type, it will return 0; for a wrapper class type such as {@code Integer}, it will return {@code null}.
      * @throws IllegalArgumentException if the specified class type is {@code null}.
      */
     @SuppressWarnings("unchecked")
@@ -9823,7 +9822,7 @@ sealed class CommonUtil permits N {
      * @param <T> the type to return the default value for
      * @param cls the class type for which the default value is to be returned.
      * @param nonNullForPrimitiveWrapper if {@code true}, it will return {@code non-null} value for primitive wrapper types, otherwise it will return {@code null}.
-     * @return the default value of the given class type. For example, for an Integer class type, it will return 0.
+     * @return the default value of the given class type. For example, for an Integer class type, it will return 0 if {@code nonNullForPrimitiveWrapper} is {@code true}, otherwise {@code null}.
      * @throws IllegalArgumentException if the specified class type is {@code null}.
      */
     @SuppressWarnings("unchecked")
@@ -10450,7 +10449,7 @@ sealed class CommonUtil permits N {
     /**
      * Casts the given object to the specified target type if possible.
      * If the object is {@code null} or cannot be assigned to the target type, an empty {@code Nullable} is returned.
-     * Note that {@code null} can be assigned to any Object type except primitive types: boolean/char/byte/short/int/long/double.
+     * Note that {@code null} can be assigned to any Object type except primitive types: boolean/char/byte/short/int/long/float/double.
      *
      * @param <T> the type of the target object after casting.
      * @param val the object to be casted, may be {@code null}
@@ -10470,7 +10469,7 @@ sealed class CommonUtil permits N {
     /**
      * Casts the given object to the specified target type if possible using the provided Type instance.
      * If the object is {@code null} or cannot be assigned to the target type, an empty {@code Nullable} is returned.
-     * Note that {@code null} can be assigned to any Object type except primitive types: boolean/char/byte/short/int/long/double.
+     * Note that {@code null} can be assigned to any Object type except primitive types: boolean/char/byte/short/int/long/float/double.
      *
      * @param <T> the type of the target object after casting.
      * @param val the object to be casted, may be {@code null}
@@ -11653,7 +11652,7 @@ sealed class CommonUtil permits N {
      * @param componentType the class of the component type of the array
      * @param dimensions the dimensions of the new array
      * @return a new array of the specified component type and dimensions
-     * @throws IllegalArgumentException if the specified component type is {@code null} or if the dimensions are invalid
+     * @throws IllegalArgumentException if the dimensions are invalid (e.g. the number of dimensions is 0 or greater than 255), or if the component type is {@code Void.TYPE}
      * @throws NegativeArraySizeException if any of the specified dimensions are negative
      * @see java.lang.reflect.Array#newInstance(Class, int...)
      */
@@ -11987,7 +11986,7 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type of elements in the multiset
      * @param mapSupplier the supplier that provides the map to be used to store element/occurrence pairs
-     * @return a new instance of a Multiset with the specified value map type
+     * @return a new instance of a Multiset backed by the map provided by the specified supplier
      */
     public static <T> Multiset<T> newMultiset(final Supplier<? extends Map<T, ?>> mapSupplier) {
         return new Multiset<>(mapSupplier);
@@ -15475,7 +15474,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts a float array to a Set of Float objects, which is NOT backed with the input array.
+     * Converts a float array to a modifiable Set, which is NOT backed with the input array.
      *
      * @param a the float array to be converted
      * @return a modifiable Set of Float objects containing the values from the float array
@@ -16573,7 +16572,7 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * Iterator<String> iter = N.toList("Alice", "Bob", "Charlie").iterator();
      * Map<Integer, String> lengthToName = N.toMap(iter, String::length);
-     * // Result: {5="Charlie", 3="Bob"} (later values overwrite earlier for same key)
+     * // Result: {5="Alice", 3="Bob", 7="Charlie"} (later values overwrite earlier for same key)
      * }</pre>
      *
      * @param <T> the type of elements in the Iterator
@@ -16608,7 +16607,7 @@ sealed class CommonUtil permits N {
      * List<String> words = N.toList("apple", "banana", "cherry");
      * Iterator<String> iter = words.iterator();
      * Map<Integer, String> lengthToWord = N.toMap(iter, String::length, s -> s.toUpperCase());
-     * // Result: {5="APPLE" or "CHERRY", 6="BANANA"} (later values overwrite earlier for same key)
+     * // Result: {5="APPLE", 6="CHERRY"} (for key 6, "CHERRY" overwrites the earlier "BANANA")
      *
      * // Null iterator returns empty map
      * Map<Integer, String> empty = N.toMap(null, String::length, String::toUpperCase);
@@ -17824,7 +17823,7 @@ sealed class CommonUtil permits N {
      * @return an unmodifiable {@code ImmutableList} containing the values from the array
      * @see #toList(Object[])
      * @see ImmutableList#copyOf(Object[])
-     * @deprecated use {@link ImmutableList#copyOf(Object...)} instead.
+     * @deprecated use {@link ImmutableList#copyOf(Object[])} instead.
      */
     @Deprecated
     @SafeVarargs
@@ -20104,7 +20103,7 @@ sealed class CommonUtil permits N {
      *
      * @param bean1 the first bean to compare, must not be null
      * @param bean2 the second bean to compare, must not be null
-     * @param propNamesToCompare the collection of property names to compare, which may be null
+     * @param propNamesToCompare the collection of property names to compare, must not be null
      * @return a negative integer, zero, or a positive integer as the first bean is less than, equal to, or greater than the second bean
      * @throws IllegalArgumentException if any of the arguments are null
      * @deprecated Use {@link Beans#compareByProps(Object, Object, Collection)} instead
@@ -20297,9 +20296,9 @@ sealed class CommonUtil permits N {
      * Checks if the given value is greater than the minimum value and less than the maximum value. ({@code null} is considered as the smallest value in natural order).
      *
      * @param <T> the type of the objects being compared, which must be comparable
-     * @param value the value to check, must not be null
-     * @param min the minimum value, must not be null
-     * @param max the maximum value, must not be null
+     * @param value the value to check, may be {@code null}
+     * @param min the minimum value, may be {@code null}
+     * @param max the maximum value, may be {@code null}
      * @return {@code true} if the value is greater than the minimum and less than the maximum, {@code false} otherwise
      */
     public static <T extends Comparable<? super T>> boolean gtAndLt(final T value, final T min, final T max) {
@@ -20334,9 +20333,9 @@ sealed class CommonUtil permits N {
      * Checks if the given value is greater than or equal to the minimum value and less than the maximum value. ({@code null} is considered as the smallest value in natural order).
      *
      * @param <T> the type of the objects being compared, which must be comparable
-     * @param value the value to check, must not be null
-     * @param min the minimum value, must not be null
-     * @param max the maximum value, must not be null
+     * @param value the value to check, may be {@code null}
+     * @param min the minimum value, may be {@code null}
+     * @param max the maximum value, may be {@code null}
      * @return {@code true} if the value is greater than or equal to the minimum and less than the maximum, {@code false} otherwise
      */
     public static <T extends Comparable<? super T>> boolean geAndLt(final T value, final T min, final T max) {
@@ -20371,9 +20370,9 @@ sealed class CommonUtil permits N {
      * Checks if the given value is greater than or equal to the minimum value and less than or equal to the maximum value. ({@code null} is considered as the smallest value in natural order).
      *
      * @param <T> the type of the objects being compared, which must be comparable
-     * @param value the value to check, must not be null
-     * @param min the minimum value, must not be null
-     * @param max the maximum value, must not be null
+     * @param value the value to check, may be {@code null}
+     * @param min the minimum value, may be {@code null}
+     * @param max the maximum value, may be {@code null}
      * @return {@code true} if the value is greater than or equal to the minimum and less than or equal to the maximum, {@code false} otherwise
      */
     public static <T extends Comparable<? super T>> boolean geAndLe(final T value, final T min, final T max) {
@@ -20408,9 +20407,9 @@ sealed class CommonUtil permits N {
      * Checks if the given value is greater than the minimum value and less than or equal to the maximum value. ({@code null} is considered as the smallest value in natural order).
      *
      * @param <T> the type of the objects being compared, which must be comparable
-     * @param value the value to check, must not be null
-     * @param min the minimum value, must not be null
-     * @param max the maximum value, must not be null
+     * @param value the value to check, may be {@code null}
+     * @param min the minimum value, may be {@code null}
+     * @param max the maximum value, may be {@code null}
      * @return {@code true} if the value is greater than the minimum and less than or equal to the maximum, {@code false} otherwise
      */
     public static <T extends Comparable<? super T>> boolean gtAndLe(final T value, final T min, final T max) {
@@ -20448,9 +20447,9 @@ sealed class CommonUtil permits N {
      * <p><b>Implementation Note:</b> it is equivalent to {@link #geAndLe(Comparable, Comparable, Comparable)}.</p>
      *
      * @param <T> the type of the objects being compared
-     * @param value the value to check, must not be null
-     * @param min the minimum value, must not be null
-     * @param max the maximum value, must not be null
+     * @param value the value to check, may be {@code null}
+     * @param min the minimum value, may be {@code null}
+     * @param max the maximum value, may be {@code null}
      * @return {@code true} if the value is between the minimum and maximum values, inclusive; {@code false} otherwise
      * @deprecated Use {@link #geAndLe(Comparable, Comparable, Comparable)} instead.
      */
@@ -21070,9 +21069,9 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList(null, "first", "second");
-     * String result = Iterables.firstNonNullOrDefault(list, "default");   // returns "first"
+     * String result = N.firstNonNullOrDefault(list, "default");   // returns "first"
      * List<String> empty = Arrays.asList();
-     * String result2 = Iterables.firstNonNullOrDefault(empty, "default");   // returns "default"
+     * String result2 = N.firstNonNullOrDefault(empty, "default");   // returns "default"
      * }</pre>
      *
      * @param <T> the type of the elements in the iterable.
@@ -21105,7 +21104,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList(null, "first", "second");
-     * String result = Iterables.firstNonNullOrDefault(list.iterator(), "default");   // returns "first"
+     * String result = N.firstNonNullOrDefault(list.iterator(), "default");   // returns "first"
      * }</pre>
      *
      * @param <T> the type of the elements in the iterator.
@@ -21308,13 +21307,13 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("first", "second", null);
-     * String result = Iterables.lastNonNullOrDefault(list, "default");   // returns "second"
+     * String result = N.lastNonNullOrDefault(list, "default");   // returns "second"
      *
      * List<String> empty = Arrays.asList();
-     * String result2 = Iterables.lastNonNullOrDefault(empty, "default");   // returns "default"
+     * String result2 = N.lastNonNullOrDefault(empty, "default");   // returns "default"
      *
      * List<String> allNulls = Arrays.asList(null, null);
-     * String result3 = Iterables.lastNonNullOrDefault(allNulls, "default");   // returns "default"
+     * String result3 = N.lastNonNullOrDefault(allNulls, "default");   // returns "default"
      * }</pre>
      *
      * @param <T> the type of the elements in the iterable.
@@ -21339,10 +21338,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("first", "second", null);
-     * String result = Iterables.lastNonNullOrDefault(list.iterator(), "default");   // returns "second"
+     * String result = N.lastNonNullOrDefault(list.iterator(), "default");   // returns "second"
      *
      * Iterator<String> emptyIter = Collections.emptyIterator();
-     * String result2 = Iterables.lastNonNullOrDefault(emptyIter, "default");   // returns "default"
+     * String result2 = N.lastNonNullOrDefault(emptyIter, "default");   // returns "default"
      * }</pre>
      *
      * @param <T> the type of the elements in the iterator.
@@ -21585,8 +21584,9 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type of CharSequence elements
      * @param css the iterable of CharSequence elements to search through
-     * @param defaultValue the value to return if no non-empty element is found or if the iterable is empty/null
+     * @param defaultValue the value to return if no non-empty element is found or if the iterable is empty/null; must not be empty
      * @return the first non-empty element, or {@code defaultValue} if none exists
+     * @throws IllegalArgumentException if {@code defaultValue} is null or empty
      */
     public static <T extends CharSequence> T firstNonEmptyOrDefault(final Iterable<? extends T> css, T defaultValue) {
         checkArgNotEmpty(defaultValue, cs.defaultValue);
@@ -21720,8 +21720,9 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type of CharSequence elements
      * @param css the iterable of CharSequence elements to search through
-     * @param defaultValue the value to return if no non-blank element is found or if the iterable is empty/null
+     * @param defaultValue the value to return if no non-blank element is found or if the iterable is empty/null; must not be blank
      * @return the first non-blank element, or {@code defaultValue} if none exists
+     * @throws IllegalArgumentException if {@code defaultValue} is null, empty, or blank
      */
     public static <T extends CharSequence> T firstNonBlankOrDefault(final Iterable<? extends T> css, T defaultValue) {
         checkArgNotBlank(defaultValue, cs.defaultValue);
@@ -22815,7 +22816,7 @@ sealed class CommonUtil permits N {
      * boolean[] a = {true, false, true, false};
      * boolean[] b = {true, true, true, true};
      * N.mismatch(a, 0, b, 0, 4);   // returns 1 (relative index)
-     * N.mismatch(a, 2, b, 2, 2);   // returns -1 (identical in range)
+     * N.mismatch(a, 2, b, 2, 1);   // returns -1 (identical in range)
      * }</pre>
      *
      * @param a the first boolean array
@@ -26463,8 +26464,8 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the elements in the collection
      * @param c the collection whose elements are to be repeated
      * @param size the target size of the resulting list
-     * @return a list containing the repeated elements
-     * @throws IllegalArgumentException if the specified collection is {@code null} or empty, or the specified size is negative
+     * @return a list containing the repeated elements; an empty list if {@code size == 0}
+     * @throws IllegalArgumentException if the specified collection is {@code null} or empty while {@code size > 0}, or if the specified size is negative
      * @see Iterators#cycleToSize(Collection, long)
      */
     public static <T> List<T> cycleToSize(final Collection<? extends T> c, final int size) throws IllegalArgumentException {
@@ -27057,13 +27058,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a new Object array containing a copy of the original array,
+     * Returns a new array, with the same runtime component type as the original, containing a copy of the original array,
      * truncated or padded with {@code null} (if necessary) so the copy has the specified length.
      *
      * @param <T> the type of the elements in the array
      * @param original the array to be copied
      * @param newLength the length of the copy to be returned
-     * @return a new Object array containing a copy of the original array
+     * @return a new array containing a copy of the original array
      * @throws IllegalArgumentException if the specified new length is negative
      * @see Arrays#copyOf(Object[], int)
      */
@@ -27133,7 +27134,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @param step the interval between elements to be copied
      * @return a new boolean array containing the specified range from the original array
-     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
+     * @throws IndexOutOfBoundsException if the resolved range end points fall outside {@code [0, original.length]} (note that for a negative {@code step}, {@code fromIndex} may legally be greater than {@code toIndex})
      * @throws IllegalArgumentException  if step is zero
      * @see #copyOfRange(int[], int, int, int)
      */
@@ -27195,7 +27196,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @param step the interval between elements to be copied
      * @return a new char array containing the specified range from the original array
-     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
+     * @throws IndexOutOfBoundsException if the resolved range end points fall outside {@code [0, original.length]} (note that for a negative {@code step}, {@code fromIndex} may legally be greater than {@code toIndex})
      * @throws IllegalArgumentException  if step is zero
      * @see #copyOfRange(int[], int, int, int)
      */
@@ -27257,7 +27258,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @param step the interval between elements to be copied
      * @return a new byte array containing the specified range from the original array
-     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
+     * @throws IndexOutOfBoundsException if the resolved range end points fall outside {@code [0, original.length]} (note that for a negative {@code step}, {@code fromIndex} may legally be greater than {@code toIndex})
      * @throws IllegalArgumentException  if step is zero
      * @see #copyOfRange(int[], int, int, int)
      */
@@ -27319,7 +27320,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @param step the interval between elements to be copied
      * @return a new short array containing the specified range from the original array
-     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
+     * @throws IndexOutOfBoundsException if the resolved range end points fall outside {@code [0, original.length]} (note that for a negative {@code step}, {@code fromIndex} may legally be greater than {@code toIndex})
      * @throws IllegalArgumentException  if step is zero
      * @see #copyOfRange(int[], int, int, int)
      */
@@ -27456,7 +27457,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @param step the interval between elements to be copied
      * @return a new long array containing the specified range from the original array
-     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
+     * @throws IndexOutOfBoundsException if the resolved range end points fall outside {@code [0, original.length]} (note that for a negative {@code step}, {@code fromIndex} may legally be greater than {@code toIndex})
      * @throws IllegalArgumentException  if step is zero
      * @see #copyOfRange(int[], int, int, int)
      */
@@ -27518,7 +27519,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @param step the interval between elements to be copied
      * @return a new float array containing the specified range from the original array
-     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
+     * @throws IndexOutOfBoundsException if the resolved range end points fall outside {@code [0, original.length]} (note that for a negative {@code step}, {@code fromIndex} may legally be greater than {@code toIndex})
      * @throws IllegalArgumentException  if step is zero
      * @see #copyOfRange(int[], int, int, int)
      */
@@ -27580,7 +27581,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @param step the interval between elements to be copied
      * @return a new double array containing the specified range from the original array
-     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
+     * @throws IndexOutOfBoundsException if the resolved range end points fall outside {@code [0, original.length]} (note that for a negative {@code step}, {@code fromIndex} may legally be greater than {@code toIndex})
      * @throws IllegalArgumentException  if step is zero
      * @see #copyOfRange(int[], int, int, int)
      */
@@ -27611,13 +27612,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a new Object array containing a copy of the specified range of the original array.
+     * Returns a new array, with the same runtime component type as the original, containing a copy of the specified range of the original array.
      *
      * @param <T> the type of the elements in the array
      * @param original the array from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
      * @param toIndex the final index of the range to be copied, exclusive
-     * @return a new Object array containing the specified range from the original array
+     * @return a new array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @see Arrays#copyOfRange(Object[], int, int)
      */
@@ -27632,7 +27633,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a new Object array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
+     * Returns a new array, with the same runtime component type as the original, containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
      * If step is negative, the elements will be copied in reverse order.
      *
      * @param <T> the type of the elements in the array
@@ -27640,8 +27641,8 @@ sealed class CommonUtil permits N {
      * @param fromIndex the initial index of the range to be copied, inclusive
      * @param toIndex the final index of the range to be copied, exclusive
      * @param step the interval between elements to be copied
-     * @return a new Object array containing the specified range from the original array
-     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
+     * @return a new array containing the specified range from the original array
+     * @throws IndexOutOfBoundsException if the resolved range end points fall outside {@code [0, original.length]} (note that for a negative {@code step}, {@code fromIndex} may legally be greater than {@code toIndex})
      * @throws IllegalArgumentException  if step is zero
      * @see #copyOfRange(int[], int, int, int)
      */
@@ -27681,7 +27682,7 @@ sealed class CommonUtil permits N {
      * @param step the interval between elements to be copied
      * @param newType the class of the new array
      * @return a new array containing the specified range from the original array
-     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
+     * @throws IndexOutOfBoundsException if the resolved range end points fall outside {@code [0, original.length]} (note that for a negative {@code step}, {@code fromIndex} may legally be greater than {@code toIndex})
      * @throws IllegalArgumentException  if step is zero
      * @see #copyOfRange(int[], int, int, int)
      */
@@ -27740,7 +27741,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @param step the interval between elements to be copied
      * @return a new list containing the specified range from the original list
-     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, toIndex is greater than the size of list
+     * @throws IndexOutOfBoundsException if the resolved range end points fall outside {@code [0, c.size()]} (note that for a negative {@code step}, {@code fromIndex} may legally be greater than {@code toIndex})
      * @throws IllegalArgumentException  if step is zero
      * @see #copyOfRange(int[], int, int, int)
      */
@@ -27814,7 +27815,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the ending index, exclusive
      * @param step the interval between characters to be copied
      * @return the specified substring
-     * @throws IndexOutOfBoundsException if the <i>fromIndex</i> is negative, <i>toIndex</i> is greater than the length of the string, or <i>fromIndex</i> is greater than <i>toIndex</i>
+     * @throws IndexOutOfBoundsException if the resolved range end points fall outside {@code [0, str.length()]} (note that for a negative {@code step}, {@code fromIndex} may legally be greater than {@code toIndex})
      * @throws IllegalArgumentException  if step is zero
      * @see #copyOfRange(int[], int, int, int)
      */
@@ -30014,9 +30015,10 @@ sealed class CommonUtil permits N {
      * // Result: array sorted in ascending order using parallel processing
      * }</pre>
      *
-     * @param a the array to be sorted
+     * @param a the array to be sorted - if {@code null} or empty, the method returns immediately without effect
      * @see Arrays#parallelSort(int[])
      * @see Arrays#parallelSort(int[], int, int)
+     * @see #parallelSort(int[], int, int)
      */
     public static void parallelSort(final int[] a) {
         if (isEmpty(a)) {
@@ -30028,13 +30030,21 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified range of the array into ascending numerical order using multiple threads.
+     * <p>The array is sorted in place, modifying the original array. The range to be sorted is
+     * half-open: {@code [fromIndex, toIndex)}, meaning it includes the element at {@code fromIndex}
+     * but excludes the element at {@code toIndex}.
      *
-     * @param a the array to be sorted
-     * @param fromIndex the index of the first element (inclusive) to be sorted
-     * @param toIndex the index of the last element (exclusive) to be sorted
-     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of range
+     * <p><b>Implementation Note:</b> For ranges smaller than {@code DOUBLE_PIPE_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
+     * or when only one CPU core is available, this method uses {@link Arrays#sort(int[], int, int)} for single-threaded sorting.
+     * Otherwise, it uses {@link Arrays#parallelSort(int[], int, int)} for parallel execution.
+     *
+     * @param a the array to be sorted - may be {@code null} (in which case the method returns immediately)
+     * @param fromIndex the index of the first element (inclusive) to be sorted - must be non-negative and not greater than {@code toIndex}
+     * @param toIndex the index of the last element (exclusive) to be sorted - must be non-negative and not greater than {@code a.length}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > a.length}, or {@code fromIndex > toIndex}
      * @see Arrays#parallelSort(int[])
      * @see Arrays#parallelSort(int[], int, int)
+     * @see #parallelSort(int[])
      */
     public static void parallelSort(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);

@@ -129,6 +129,7 @@ public class TypeType extends AbstractType<Type> {
      *
      * @param str the type name string to convert to a {@code Type} instance
      * @return the {@code Type} instance corresponding to the type name, or {@code null} if the string is {@code null} or empty
+     * @throws IllegalArgumentException if the type name format is invalid
      */
     @Override
     public Type valueOf(final String str) {

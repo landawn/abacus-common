@@ -606,7 +606,8 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * Performs the given action for each remaining element, boxing each {@code boolean} to a {@link Boolean}.
      * This method is deprecated because it causes boxing overhead.
      *
-     * @param action the action to be performed for each element
+     * @param action the action to be performed for each element; must not be {@code null}
+     * @throws NullPointerException if {@code action} is {@code null}
      * @deprecated use {@link #foreachRemaining(Throwables.BooleanConsumer)} instead to avoid boxing overhead
      */
     @Deprecated

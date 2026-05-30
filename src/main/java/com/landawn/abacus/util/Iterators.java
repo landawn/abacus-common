@@ -2325,10 +2325,10 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the iterators.
-     * @param c the collection of iterators to be merged.
+     * @param c the collection of iterators to be merged, or {@code null}/empty which results in an empty iterator.
      * @param nextSelector a {@code BiFunction} that determines the order of elements in the resulting iterator.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
-     * @return an {@code ObjIterator} that will iterate over the elements of the provided iterators in the order determined by {@code nextSelector}.
+     * @return an {@code ObjIterator} that will iterate over the elements of the provided iterators in the order determined by {@code nextSelector}, or an empty iterator if {@code c} is {@code null} or empty.
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      */
     public static <T> ObjIterator<T> merge(final Collection<? extends Iterator<? extends T>> c,
@@ -2396,10 +2396,10 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the {@code Iterable} objects.
-     * @param iterables the collection of {@code Iterable} objects to be merged.
+     * @param iterables the collection of {@code Iterable} objects to be merged, or {@code null}/empty which results in an empty iterator.
      * @param nextSelector a {@code BiFunction} that determines the order of elements in the resulting iterator.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
-     * @return an {@code ObjIterator} that will iterate over the elements of the provided {@code Iterable} objects in the order determined by {@code nextSelector}.
+     * @return an {@code ObjIterator} that will iterate over the elements of the provided {@code Iterable} objects in the order determined by {@code nextSelector}, or an empty iterator if {@code iterables} is {@code null} or empty.
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      */
     public static <T> ObjIterator<T> mergeIterables(final Collection<? extends Iterable<? extends T>> iterables,
@@ -3403,7 +3403,7 @@ public final class Iterators {
      * ObjIterator<String> distinct = Iterators.distinctBy(words, s -> s.charAt(0));
      * // Yields: "apple", "banana" (distinct by first character)
      *
-     * Iterator<String> names = Arrays.asList("Alice", "Andrew", "Bob", "Anna").iterator();
+     * Iterator<String> names = Arrays.asList("Alice", "Bobby", "Bob", "Eve").iterator();
      * ObjIterator<String> distinctByLength = Iterators.distinctBy(names, String::length);
      * // Yields: "Alice", "Bob" (distinct by length)
      * }</pre>

@@ -51,6 +51,14 @@ public interface ByteUnaryOperator extends Throwables.ByteUnaryOperator<RuntimeE
      * and then applies this operator to the result. If evaluation of either operator throws
      * an exception, it is relayed to the caller of the composed operator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteUnaryOperator doubler = v -> (byte) (v * 2);
+     * ByteUnaryOperator increment = v -> (byte) (v + 1);
+     * ByteUnaryOperator incrementThenDouble = doubler.compose(increment);
+     * byte result = incrementThenDouble.applyAsByte((byte) 3);   // Returns 8 ((3+1)*2)
+     * }</pre>
+     *
      * @param before the operator to apply before this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies the {@code before} operator and then
      *         applies this operator
@@ -68,6 +76,14 @@ public interface ByteUnaryOperator extends Throwables.ByteUnaryOperator<RuntimeE
      * applies the {@code after} operator to the result. If evaluation of either operator
      * throws an exception, it is relayed to the caller of the composed operator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteUnaryOperator doubler = v -> (byte) (v * 2);
+     * ByteUnaryOperator increment = v -> (byte) (v + 1);
+     * ByteUnaryOperator doubleThenIncrement = doubler.andThen(increment);
+     * byte result = doubleThenIncrement.applyAsByte((byte) 3);   // Returns 7 ((3*2)+1)
+     * }</pre>
+     *
      * @param after the operator to apply after this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies this operator and then applies the
      *         {@code after} operator
@@ -83,6 +99,12 @@ public interface ByteUnaryOperator extends Throwables.ByteUnaryOperator<RuntimeE
     /**
      * Returns a unary operator that always returns its input argument.
      * This is the identity function for byte values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteUnaryOperator id = ByteUnaryOperator.identity();
+     * byte result = id.applyAsByte((byte) 42);   // Returns 42
+     * }</pre>
      *
      * @return a unary operator that always returns its input argument
      */

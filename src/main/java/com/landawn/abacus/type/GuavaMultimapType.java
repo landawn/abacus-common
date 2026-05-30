@@ -65,7 +65,7 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      *
      * @param typeClass the concrete or abstract Multimap class to handle
      * @param keyTypeName the name of the key type parameter
-     * @param valueTypeName the name of the value element type parameter
+     * @param valueTypeName the name of the value type parameter
      */
     GuavaMultimapType(final Class<T> typeClass, final String keyTypeName, final String valueTypeName) {
         super(getTypeName(typeClass, keyTypeName, valueTypeName, false));

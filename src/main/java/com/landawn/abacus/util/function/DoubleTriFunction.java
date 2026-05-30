@@ -51,6 +51,12 @@ public interface DoubleTriFunction<R> extends Throwables.DoubleTriFunction<R, Ru
      *   <li>Creating objects from three double values</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleTriFunction<Double> volume = (l, w, h) -> l * w * h;
+     * Double v = volume.apply(2.0, 3.0, 4.0);   // Returns 24.0
+     * }</pre>
+     *
      * @param a the first double argument
      * @param b the second double argument
      * @param c the third double argument

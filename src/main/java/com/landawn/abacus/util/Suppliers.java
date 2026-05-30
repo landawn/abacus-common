@@ -76,7 +76,7 @@ import com.landawn.abacus.util.function.Supplier;
  *   <li>Suppliers for all major collection types (ArrayList, LinkedList, HashSet, TreeSet, etc.)</li>
  *   <li>Suppliers for various map implementations (HashMap, TreeMap, ConcurrentHashMap, etc.)</li>
  *   <li>Suppliers for primitive arrays and specialized list types</li>
- *   <li>UUID and GUID generators</li>
+ *   <li>UUID generators (with or without hyphens)</li>
  *   <li>Exception instance suppliers</li>
  *   <li>Custom supplier registration for non-standard types</li>
  * </ul>
@@ -96,7 +96,7 @@ import com.landawn.abacus.util.function.Supplier;
  * Map<String, Object> map = mapSupplier.get();
  *
  * // Generate UUIDs
- * Supplier<String> uuidSupplier = Suppliers.ofUUID();
+ * Supplier<String> uuidSupplier = Suppliers.ofUuid();
  * String uuid = uuidSupplier.get();
  *
  * // Dynamic collection type creation
@@ -1125,7 +1125,7 @@ public final class Suppliers {
      * <p>This method provides suppliers for various Collection implementations including List, Set, Queue,
      * and their subtypes. The method uses a cache to avoid creating duplicate suppliers for the same type.</p>
      *
-     * <p>Supported types include:
+     * <p>Supported types include:</p>
      * <ul>
      *   <li>{@code Collection}, {@code List}, {@code ArrayList}, {@code AbstractCollection}, {@code AbstractList} - returns ArrayList supplier</li>
      *   <li>{@code LinkedList} - returns LinkedList supplier</li>
@@ -1221,7 +1221,7 @@ public final class Suppliers {
      * <p>This method provides suppliers for various Map implementations including HashMap, LinkedHashMap,
      * TreeMap, and concurrent maps. The method uses a cache to avoid creating duplicate suppliers for the same type.</p>
      *
-     * <p>Supported types include:
+     * <p>Supported types include:</p>
      * <ul>
      *   <li>{@code Map}, {@code HashMap}, {@code AbstractMap}, {@code EnumMap} - returns HashMap supplier</li>
      *   <li>{@code ConcurrentMap} - returns ConcurrentHashMap supplier</li>

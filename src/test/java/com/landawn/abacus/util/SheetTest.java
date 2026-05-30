@@ -1317,7 +1317,7 @@ public class SheetTest extends AbstractTest {
         assertNull(row.get(2));
 
         uninitSheet.set("row1", "col2", 20);
-        assertEquals(Integer.valueOf(20), row.get(1));
+        assertThrows(IndexOutOfBoundsException.class, () -> row.get(1));
     }
 
     @Test
@@ -6172,8 +6172,7 @@ public class SheetTest extends AbstractTest {
         // moveRow() sets _rowKeyIndexMap = null while the sheet stays initialized.
         // Before the fix, addRow() relied on init() (a no-op when already initialized)
         // and threw NullPointerException because the index map was still null.
-        Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1", "r2"), Arrays.asList("c1"),
-                new Integer[][] { { 1 }, { 2 } });
+        Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1", "r2"), Arrays.asList("c1"), new Integer[][] { { 1 }, { 2 } });
 
         s.moveRow("r1", 1);
         assertEquals(Arrays.asList("r2", "r1"), new ArrayList<>(s.rowKeySet()));
@@ -6191,8 +6190,7 @@ public class SheetTest extends AbstractTest {
     public void testAddColumnAfterMoveColumn_indexMapResetRegression() {
         // moveColumn() sets _columnKeyIndexMap = null while the sheet stays initialized.
         // Before the fix, addColumn() threw NullPointerException for the same reason.
-        Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1"), Arrays.asList("c1", "c2"),
-                new Integer[][] { { 10, 20 } });
+        Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1"), Arrays.asList("c1", "c2"), new Integer[][] { { 10, 20 } });
 
         s.moveColumn("c1", 1);
         assertEquals(Arrays.asList("c2", "c1"), new ArrayList<>(s.columnKeySet()));
@@ -6208,8 +6206,7 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testAddRowAtIndexAfterMoveRow_indexMapResetRegression() {
-        Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1", "r2", "r3"), Arrays.asList("c1"),
-                new Integer[][] { { 1 }, { 2 }, { 3 } });
+        Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1", "r2", "r3"), Arrays.asList("c1"), new Integer[][] { { 1 }, { 2 }, { 3 } });
 
         s.moveRow("r3", 0); // resets _rowKeyIndexMap to null; order -> r3, r1, r2
 
@@ -6221,4 +6218,37 @@ public class SheetTest extends AbstractTest {
         assertEquals(Integer.valueOf(1), s.get("r1", "c1"));
         assertEquals(Integer.valueOf(2), s.get("r2", "c1"));
     }
+
+    @Test
+    public void testRowValues_afterMoveRow_reflectsCurrentPosition() {
+        // Regression: the lazy rowValues view must reflect the row's CURRENT position after a
+        // structural change, not a stale captured index (#51).
+        final Sheet<String, String, Integer> s = Sheet.rows(java.util.Arrays.asList("R1", "R2", "R3"), java.util.Arrays.asList("C1"),
+                new Integer[][] { { 1 }, { 2 }, { 3 } });
+        final com.landawn.abacus.util.ImmutableList<Integer> r2 = s.rowValues("R2");
+        org.junit.jupiter.api.Assertions.assertEquals(2, r2.get(0).intValue());
+        s.moveRow("R2", 2);
+        org.junit.jupiter.api.Assertions.assertEquals(3, r2.get(0).intValue());
+    }
+
+    @Test
+    public void testInnerRowStreamCount_drainsIterator() {
+        // Regression: the per-row inner stream's iterator must be exhausted after count()
+        // (cursor advanced), matching the outer iterator (#52/#53).
+        final Sheet<String, String, Integer> sheet = Sheet.rows(java.util.Arrays.asList("R1", "R2"), java.util.Arrays.asList("C1", "C2", "C3"),
+                new Integer[][] { { 1, 2, 3 }, { 4, 5, 6 } });
+
+        final java.util.List<com.landawn.abacus.util.stream.Stream<Integer>> inner = sheet.rowStreams().toList();
+        final com.landawn.abacus.util.stream.ObjIteratorEx<Integer> it = (com.landawn.abacus.util.stream.ObjIteratorEx<Integer>) inner.get(0).iterator();
+        org.junit.jupiter.api.Assertions.assertEquals(3L, it.count());
+        org.junit.jupiter.api.Assertions.assertFalse(it.hasNext());
+
+        final java.util.List<com.landawn.abacus.util.Pair<String, com.landawn.abacus.util.stream.Stream<Integer>>> rows = sheet.rows().toList();
+        final com.landawn.abacus.util.stream.ObjIteratorEx<Integer> it2 = (com.landawn.abacus.util.stream.ObjIteratorEx<Integer>) rows.get(0)
+                .right()
+                .iterator();
+        org.junit.jupiter.api.Assertions.assertEquals(3L, it2.count());
+        org.junit.jupiter.api.Assertions.assertFalse(it2.hasNext());
+    }
+
 }

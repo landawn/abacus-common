@@ -43,10 +43,18 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
     protected SerializationConfig() {
     }
 
+    /**
+     * Default exclusion strategy: {@code null}, meaning no caller-supplied exclusion is set so the
+     * effective exclusion is taken from {@code @JsonXmlConfig} or falls back to {@link Exclusion#NULL}.
+     * Must not be initialized to {@link Exclusion#NULL} or {@link Exclusion#DEFAULT}; doing so would
+     * prevent bean-level annotations from being honored.
+     */
     protected static final Exclusion defaultExclusion = null; // Keep it null for default behavior. Do not set it to Exclusion.NULL or Exclusion.DEFAULT.
 
+    /** Default date/time serialization format ({@link DateTimeFormat#LONG} — epoch milliseconds). */
     protected static final DateTimeFormat defaultDateTimeFormat = DateTimeFormat.LONG;
 
+    /** Default value for {@link #isSkipTransientField()} ({@code true}). */
     protected static final boolean defaultSkipTransientField = true;
 
     Exclusion exclusion = defaultExclusion;

@@ -557,7 +557,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      *
      * <p>Comparison rules:</p>
      * <ul>
-     * <li>NaN is considered equal to NaN and greater than all other float values</li>
+     * <li>NaN is considered equal to NaN and greater than all other float values, including positive infinity</li>
      * <li>Positive zero ({@code +0.0f}) is considered greater than negative zero ({@code -0.0f})</li>
      * <li>All other comparisons follow natural numeric ordering</li>
      * </ul>

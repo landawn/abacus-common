@@ -81,7 +81,7 @@ public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<Runt
      * double result = composed.applyAsDouble(5);   // Result: 16.0
      * }</pre>
      *
-     * @param before the operator to apply before this operator is applied
+     * @param before the operator to apply before this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies the {@code before} operator and then applies this operator
      * @throws NullPointerException if {@code before} is null
      *
@@ -111,7 +111,7 @@ public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<Runt
      * double result = composed.applyAsDouble(5);   // Result: 13.0
      * }</pre>
      *
-     * @param after the operator to apply after this operator is applied
+     * @param after the operator to apply after this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies this operator and then applies the {@code after} operator
      * @throws NullPointerException if {@code after} is null
      *

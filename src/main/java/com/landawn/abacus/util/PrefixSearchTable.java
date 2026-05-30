@@ -91,9 +91,10 @@ public final class PrefixSearchTable<K, V> {
      * @return a lazy {@code EntryStream} pairing each matched prefix of {@code compoundKey}
      *         (as an unmodifiable {@code List}) with its mapped value, in ascending order of
      *         prefix length; empty if no non-empty prefix is present
-     * @throws IllegalArgumentException if {@code compoundKey} is empty
-     * @throws NullPointerException if {@code compoundKey} is {@code null} or any traversed key
-     *         element is {@code null}
+     * @throws IllegalArgumentException if {@code compoundKey} is empty (thrown eagerly by this method)
+     * @throws NullPointerException if {@code compoundKey} is {@code null} (thrown eagerly by this
+     *         method); or, while the returned stream is being consumed, if any traversed key element
+     *         is {@code null}
      * @see #get(List)
      */
     public EntryStream<List<K>, V> getAll(List<? extends K> compoundKey) {
@@ -215,11 +216,13 @@ public final class PrefixSearchTable<K, V> {
          * Adds all mappings from {@code mappings} into this builder.
          * Each entry's key becomes the compound key and its value becomes the associated value.
          *
-         * @param mappings the mappings to add; {@code null} keys or values are not permitted
+         * <p>A {@code null} or empty {@code mappings} map is treated as a no-op; no entry is added.
+         *
+         * @param mappings the mappings to add; an empty compound key, or a {@code null} compound key
+         *     element or value within an entry, is not permitted
          * @return this builder
          * @throws IllegalArgumentException if any compound key is empty or conflicts with an existing mapping
-         * @throws NullPointerException if {@code mappings} is {@code null}, or any compound key element
-         *     or value is {@code null}
+         * @throws NullPointerException if any compound key element or value within an entry is {@code null}
          */
         public Builder<K, V> addAll(Map<? extends List<? extends K>, ? extends V> mappings) {
             EntryStream.of(mappings).forEach(this::add);
@@ -261,8 +264,9 @@ public final class PrefixSearchTable<K, V> {
             }
 
             /**
-             * Sets the value carried by this node to {@code value} if it's not already set. Return false
-             * if the value has already been set to a different value.
+             * Sets the value carried by this node to {@code value} if it is not already set.
+             * Returns {@code false} if the value has already been set to a value that is not equal
+             * to {@code value}; otherwise returns {@code true}.
              */
             boolean set(V value) {
                 if (this.value == null) {

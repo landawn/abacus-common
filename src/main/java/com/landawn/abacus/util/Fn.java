@@ -4994,8 +4994,8 @@ public final class Fn {
      * Predicate<Integer> containsErrorBetween =
      *     Fn.p(text, 0, (str, start, end) -> str.substring(start, end).contains("error"));
      *
-     * boolean result = containsErrorBetween.test(5);     // Returns true
-     * boolean result2 = containsErrorBetween.test(14);   // Returns false
+     * boolean result = containsErrorBetween.test(5);     // Returns true ("error")
+     * boolean result2 = containsErrorBetween.test(4);    // Returns false ("erro")
      * }</pre>
      *
      * @param <A> the type of the first fixed argument to the tri-predicate
@@ -5055,8 +5055,8 @@ public final class Fn {
      * BiPredicate<Integer, Integer> containsErrorBetween =
      *     Fn.p(text, (str, start, end) -> str.substring(start, end).contains("error"));
      *
-     * boolean result = containsErrorBetween.test(0, 5);     // Returns true
-     * boolean result2 = containsErrorBetween.test(6, 14);   // Returns false
+     * boolean result = containsErrorBetween.test(0, 5);     // Returns true ("error")
+     * boolean result2 = containsErrorBetween.test(6, 13);   // Returns false ("message")
      * }</pre>
      *
      * @param <A> the type of the fixed first argument to the tri-predicate
@@ -6549,7 +6549,7 @@ public final class Fn {
      * @return a bi-function that executes the bi-consumer and returns null
      * @throws IllegalArgumentException if the action is null
      * @see #c2f(java.util.function.BiConsumer, Object)
-     * @see #f2c(java.util.function.Function)
+     * @see #f2c(java.util.function.BiFunction)
      */
     @Beta
     public static <T, U> BiFunction<T, U, Void> c2f(final java.util.function.BiConsumer<? super T, ? super U> action) throws IllegalArgumentException {
@@ -6574,7 +6574,7 @@ public final class Fn {
      * @param valueToReturn the value to return after the bi-consumer executes
      * @return a bi-function that executes the bi-consumer and returns the specified value
      * @throws IllegalArgumentException if the action is null
-     * @see #c2f(java.util.function.Consumer)
+     * @see #c2f(java.util.function.BiConsumer)
      * @see #f2c(java.util.function.BiFunction)
      */
     @Beta
@@ -8283,7 +8283,7 @@ public final class Fn {
          * This method is deprecated, use ofMergeToFirst() instead.
          *
          * @return a BinaryOperator that merges the second Joiner into the first and returns the first
-         * @deprecated replaced by {@code #ofMergeToFirst}
+         * @deprecated replaced by {@code #ofMergeToFirst()}
          */
         @Deprecated
         public static BinaryOperator<Joiner> ofMerge() {

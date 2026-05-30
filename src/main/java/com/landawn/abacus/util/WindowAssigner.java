@@ -42,15 +42,17 @@ public abstract class WindowAssigner {
     }
 
     /**
-     * Processes the input iterator and returns a new iterator that groups elements into windows.
+     * Processes the input iterator and returns a new iterator whose elements have been
+     * assigned to windows according to this assigner's strategy.
      * This method is called internally by the Stream API to apply windowing logic.
      *
-     * <p>Implementations should define how elements from the input iterator are grouped
-     * into windows and returned as batches through the output iterator.</p>
+     * <p>Implementations should define how elements from the input iterator are assigned
+     * to windows and exposed through the returned iterator. Both the input and the returned
+     * iterator carry elements of the same type {@code T}.</p>
      *
      * @param <T> the type of elements in the stream
      * @param iter the input iterator containing the stream elements
-     * @return an iterator that produces windows (groups) of elements
+     * @return a new iterator over elements of type {@code T} reflecting the applied windowing
      */
     abstract <T> ObjIterator<T> process(ObjIterator<T> iter);
 }

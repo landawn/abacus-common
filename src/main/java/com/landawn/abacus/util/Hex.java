@@ -168,6 +168,7 @@ public final class Hex {
      * @param data a byte array to convert to hexadecimal characters; must not be {@code null}.
      * @param toDigits the output digit alphabet to use; typically {@code DIGITS_LOWER} or {@code DIGITS_UPPER}.
      * @return a char array containing hexadecimal characters; exactly twice the length of {@code data}.
+     * @throws NullPointerException if {@code data} is {@code null}.
      */
     static char[] encode(final byte[] data, final char[] toDigits) {
         final int l = data.length;

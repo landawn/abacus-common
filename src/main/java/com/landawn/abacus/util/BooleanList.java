@@ -92,7 +92,7 @@ import com.landawn.abacus.util.stream.Stream;
  * BooleanList set1 = BooleanList.of(true, false, true);
  * BooleanList set2 = BooleanList.of(false, true, true);
  * BooleanList and = set1.intersection(set2);   // Logical AND operation
- * BooleanList or = set1.symmetricDifference(set2);   // Logical XOR operation
+ * BooleanList xor = set1.symmetricDifference(set2);   // Logical XOR operation
  *
  * // Bulk operations
  * boolean[] array = {true, true, false, true};
@@ -320,6 +320,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * will affect the original array and vice versa.</p>
      *
      * @param a the array to be used as the element array for this list; must not be {@code null}
+     * @throws NullPointerException if the specified array is {@code null}
      */
     public BooleanList(final boolean[] a) {
         this(N.requireNonNull(a), a.length);
@@ -807,6 +808,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return {@code true} if any elements were removed; {@code false} otherwise
      */
     public boolean removeIf(final BooleanPredicate p) {
+        N.requireNonNull(p, cs.predicate);
+
         final BooleanList tmp = new BooleanList(size());
 
         for (int i = 0; i < size; i++) {
@@ -1258,6 +1261,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * }</pre>
      *
      * @param operator the operator to apply to each element; must not be {@code null}
+     * @throws NullPointerException if {@code operator} is {@code null}
      */
     public void replaceAll(final BooleanUnaryOperator operator) {
         N.requireNonNull(operator, "operator");
@@ -1285,6 +1289,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return {@code true} if at least one element was replaced; {@code false} otherwise
      */
     public boolean replaceIf(final BooleanPredicate predicate, final boolean newValue) {
+        N.requireNonNull(predicate, cs.predicate);
+
         boolean result = false;
 
         for (int i = 0, len = size(); i < len; i++) {
@@ -1806,6 +1812,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param action the action to be performed for each element; must not be {@code null}
      */
     public void forEach(final BooleanConsumer action) {
+        N.requireNonNull(action, cs.action);
+
         forEach(0, size, action);
     }
 
@@ -2267,7 +2275,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Returns a Multiset containing all elements from specified range converted to their boxed type.
+     * Returns a Multiset containing all elements from the specified range converted to their boxed type.
      * The type of Multiset returned is determined by the provided supplier function.
      * A Multiset is a collection that allows duplicate elements and provides occurrence counting.
      *

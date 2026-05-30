@@ -223,8 +223,7 @@ public class ClobAsciiStreamTypeTest extends TestBase {
             }
         };
 
-        IOException thrown = Assertions.assertThrows(IOException.class,
-                () -> type.writeCharacter(mockWriter, failingStream, null));
+        IOException thrown = Assertions.assertThrows(IOException.class, () -> type.writeCharacter(mockWriter, failingStream, null));
         assertEquals(expected, thrown);
     }
 

@@ -67,8 +67,8 @@ public enum EnumType {
      *
      * <p>Unlike {@link #ORDINAL}, the code value is explicitly assigned by the enum author
      * and is stable across reordering, making it safer for long-lived persisted data.
-     * The enum must expose an accessible {@code int code()} (or equivalent) method for
-     * the framework to read and write the code value.</p>
+     * The enum must expose a public {@code int code()} method for the framework to read
+     * and write the code value; otherwise type resolution fails with a runtime exception.</p>
      */
     CODE
 }

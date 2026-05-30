@@ -54,6 +54,7 @@ import com.landawn.abacus.util.Password;
 @SuppressWarnings("java:S2160")
 public class PasswordType extends AbstractStringType {
 
+    /** The type name constant for Password type identification, equal to {@code "Password"}. */
     public static final String PASSWORD = "Password";
 
     private static final String DEFAULT_ALGORITHM = "SHA-256";

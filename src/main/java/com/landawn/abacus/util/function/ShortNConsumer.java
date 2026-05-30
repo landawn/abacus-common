@@ -77,7 +77,7 @@ public interface ShortNConsumer {
      * combined.accept((short) 1, (short) 2, (short) 3);   // Logs count then sum
      * }</pre>
      *
-     * @param after the operation to perform after this operation
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code ShortNConsumer} that performs in sequence this operation followed by the {@code after} operation
      * @throws NullPointerException if {@code after} is null
      */

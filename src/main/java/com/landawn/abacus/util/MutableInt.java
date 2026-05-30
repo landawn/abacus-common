@@ -179,7 +179,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     }
 
     /**
-     * Sets the value to newValue if the predicate evaluates to {@code true} for the current value.
+     * Sets the value to the new value if the predicate evaluates to {@code true} when testing the current value.
      * If the predicate returns {@code false}, the value remains unchanged.
      *
      * <p><b>Usage Examples:</b></p>

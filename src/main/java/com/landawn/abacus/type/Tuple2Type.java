@@ -46,6 +46,13 @@ public class Tuple2Type<T1, T2> extends AbstractTupleType<Tuple2<T1, T2>> {
                 List.of(TypeFactory.getType(t1TypeName), TypeFactory.getType(t2TypeName)));
     }
 
+    /**
+     * Reconstructs a {@link Tuple2} from an already type-converted element array.
+     * The array is expected to contain exactly two elements matching the tuple's parameter types.
+     *
+     * @param converted the array of converted element values (must be of length 2)
+     * @return a new {@code Tuple2} containing the two elements in order
+     */
     @SuppressWarnings("unchecked")
     @Override
     protected Tuple2<T1, T2> fromArray(final Object[] converted) {

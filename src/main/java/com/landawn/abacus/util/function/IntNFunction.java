@@ -19,7 +19,7 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents a function that accepts a variable number of {@code int}-valued arguments and produces a result.
- * This is the n-arity specialization of {@link IntFunction}.
+ * This is the N-arity specialization of {@link IntFunction}.
  *
  * <p>This is a functional interface whose functional method is {@link #apply(int...)}.
  *

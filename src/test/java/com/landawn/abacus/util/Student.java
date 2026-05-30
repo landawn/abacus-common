@@ -88,10 +88,9 @@ public class Student extends Person implements Serializable, Cloneable {
         }
 
         if (obj instanceof Student other) {
-            if (N.equals(list, other.list) && N.equals(map, other.map) && N.equals(map1, other.map1)
-                    && N.equals(map2, other.map2) && N.equals(getFirstName(), other.getFirstName())
-                    && N.equals(getMiddleName(), other.getMiddleName()) && N.equals(getLastName(), other.getLastName())
-                    && N.equals(getBirthDate(), other.getBirthDate())) {
+            if (N.equals(list, other.list) && N.equals(map, other.map) && N.equals(map1, other.map1) && N.equals(map2, other.map2)
+                    && N.equals(getFirstName(), other.getFirstName()) && N.equals(getMiddleName(), other.getMiddleName())
+                    && N.equals(getLastName(), other.getLastName()) && N.equals(getBirthDate(), other.getBirthDate())) {
 
                 return true;
             }
@@ -103,7 +102,7 @@ public class Student extends Person implements Serializable, Cloneable {
     @Override
     public String toString() {
         return "{" + "firstName=" + N.toString(getFirstName()) + ", " + "middleName=" + N.toString(getMiddleName()) + ", " + "lastName="
-                + N.toString(getLastName()) + ", " + "birthDate=" + N.toString(getBirthDate()) + ", " + "map=" + N.toString(map)
-                + ", " + "map1=" + N.toString(map1) + ", " + "map2=" + N.toString(map2) + ", " + "}";
+                + N.toString(getLastName()) + ", " + "birthDate=" + N.toString(getBirthDate()) + ", " + "map=" + N.toString(map) + ", " + "map1="
+                + N.toString(map1) + ", " + "map2=" + N.toString(map2) + ", " + "}";
     }
 }

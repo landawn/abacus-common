@@ -603,7 +603,7 @@ public final class Throwables {
     /**
      * An iterator that can throw checked exceptions during iteration.
      * This iterator provides hasNext(), next(), and other iteration methods that can throw exceptions of type E.
-     * It extends AutoCloseable to support try-with-resources and implements Immutable to prevent modification.
+     * It implements AutoCloseable to support try-with-resources and implements Immutable to prevent modification.
      *
      * @param <T> the type of elements in the iterator
      * @param <E> the type of exception that may be thrown

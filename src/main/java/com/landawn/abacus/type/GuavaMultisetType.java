@@ -199,9 +199,11 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      *
      * @param typeClass the multiset class
      * @param parameterTypeName the name of the element type
-     * @param isDeclaringName {@code true} to use canonical class names (declaring name),
-     *        {@code false} to use simple type names
-     * @return the formatted type name (e.g., {@code "Multiset<String>"})
+     * @param isDeclaringName {@code true} to build the declaring name using the element type's
+     *        declaring name; {@code false} to build the registered name using the element type's
+     *        full name. In both cases the multiset class itself is rendered with its canonical class name.
+     * @return the formatted type name
+     *         (e.g., {@code "com.google.common.collect.HashMultiset<java.lang.String>"})
      */
     protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {

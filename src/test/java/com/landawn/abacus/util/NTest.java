@@ -3247,8 +3247,7 @@ public class NTest extends AbstractParserTest {
         {
             final boolean[] a = { true, false, true };
             assertTrue(N.deepEquals(N.toList(Array.of(true, false), Array.of(true)).toArray(new Object[0]), N.split(a, 2).toArray()));
-            assertTrue(
-                    N.deepEquals(N.toList(Array.of(true), Array.of(false), Array.of(true)).toArray(new Object[0]), N.split(a, 1).toArray()));
+            assertTrue(N.deepEquals(N.toList(Array.of(true), Array.of(false), Array.of(true)).toArray(new Object[0]), N.split(a, 1).toArray()));
         }
 
         {
@@ -3259,18 +3258,14 @@ public class NTest extends AbstractParserTest {
 
         {
             final byte[] a = { 1, 2, 3 };
-            assertTrue(
-                    N.deepEquals(N.toList(Array.of((byte) 1, (byte) 2), Array.of((byte) 3)).toArray(new Object[0]), N.split(a, 2).toArray()));
-            assertTrue(N.deepEquals(N.toList(Array.of((byte) 1), Array.of((byte) 2), Array.of((byte) 3)).toArray(new Object[0]),
-                    N.split(a, 1).toArray()));
+            assertTrue(N.deepEquals(N.toList(Array.of((byte) 1, (byte) 2), Array.of((byte) 3)).toArray(new Object[0]), N.split(a, 2).toArray()));
+            assertTrue(N.deepEquals(N.toList(Array.of((byte) 1), Array.of((byte) 2), Array.of((byte) 3)).toArray(new Object[0]), N.split(a, 1).toArray()));
         }
 
         {
             final short[] a = { 1, 2, 3 };
-            assertTrue(N.deepEquals(N.toList(Array.of((short) 1, (short) 2), Array.of((short) 3)).toArray(new Object[0]),
-                    N.split(a, 2).toArray()));
-            assertTrue(N.deepEquals(N.toList(Array.of((short) 1), Array.of((short) 2), Array.of((short) 3)).toArray(new Object[0]),
-                    N.split(a, 1).toArray()));
+            assertTrue(N.deepEquals(N.toList(Array.of((short) 1, (short) 2), Array.of((short) 3)).toArray(new Object[0]), N.split(a, 2).toArray()));
+            assertTrue(N.deepEquals(N.toList(Array.of((short) 1), Array.of((short) 2), Array.of((short) 3)).toArray(new Object[0]), N.split(a, 1).toArray()));
         }
 
         {
@@ -3281,54 +3276,40 @@ public class NTest extends AbstractParserTest {
 
         {
             final long[] a = { 1, 2, 3 };
-            assertTrue(
-                    N.deepEquals(N.toList(Array.of((long) 1, (long) 2), Array.of((long) 3)).toArray(new Object[0]), N.split(a, 2).toArray()));
-            assertTrue(N.deepEquals(N.toList(Array.of((long) 1), Array.of((long) 2), Array.of((long) 3)).toArray(new Object[0]),
-                    N.split(a, 1).toArray()));
+            assertTrue(N.deepEquals(N.toList(Array.of((long) 1, (long) 2), Array.of((long) 3)).toArray(new Object[0]), N.split(a, 2).toArray()));
+            assertTrue(N.deepEquals(N.toList(Array.of((long) 1), Array.of((long) 2), Array.of((long) 3)).toArray(new Object[0]), N.split(a, 1).toArray()));
         }
 
         {
             final float[] a = { 1, 2, 3 };
-            assertTrue(N.deepEquals(N.toList(Array.of((float) 1, (float) 2), Array.of((float) 3)).toArray(new Object[0]),
-                    N.split(a, 2).toArray()));
-            assertTrue(N.deepEquals(N.toList(Array.of((float) 1), Array.of((float) 2), Array.of((float) 3)).toArray(new Object[0]),
-                    N.split(a, 1).toArray()));
+            assertTrue(N.deepEquals(N.toList(Array.of((float) 1, (float) 2), Array.of((float) 3)).toArray(new Object[0]), N.split(a, 2).toArray()));
+            assertTrue(N.deepEquals(N.toList(Array.of((float) 1), Array.of((float) 2), Array.of((float) 3)).toArray(new Object[0]), N.split(a, 1).toArray()));
         }
 
         {
             final double[] a = { 1, 2, 3 };
-            assertTrue(N.deepEquals(N.toList(Array.of((double) 1, (double) 2), Array.of((double) 3)).toArray(new Object[0]),
-                    N.split(a, 2).toArray()));
-            assertTrue(N.deepEquals(N.toList(Array.of((double) 1), Array.of((double) 2), Array.of((double) 3)).toArray(new Object[0]),
-                    N.split(a, 1).toArray()));
+            assertTrue(N.deepEquals(N.toList(Array.of((double) 1, (double) 2), Array.of((double) 3)).toArray(new Object[0]), N.split(a, 2).toArray()));
+            assertTrue(
+                    N.deepEquals(N.toList(Array.of((double) 1), Array.of((double) 2), Array.of((double) 3)).toArray(new Object[0]), N.split(a, 1).toArray()));
         }
 
         {
             final String[] a = { "1", "2", "3" };
-            assertTrue(N.deepEquals(N.toList(N.asArray("1", "2"), N.asArray("3")).toArray(new Object[0]),
-                    N.split(a, 2).toArray()));
-            assertTrue(
-                    N.deepEquals(N.toList(N.asArray("1"), N.asArray("2"), N.asArray("3")).toArray(new Object[0]),
-                            N.split(a, 1).toArray()));
+            assertTrue(N.deepEquals(N.toList(N.asArray("1", "2"), N.asArray("3")).toArray(new Object[0]), N.split(a, 2).toArray()));
+            assertTrue(N.deepEquals(N.toList(N.asArray("1"), N.asArray("2"), N.asArray("3")).toArray(new Object[0]), N.split(a, 1).toArray()));
         }
 
         {
             final String[] a = { "1", "2", "3" };
-            assertTrue(N.deepEquals(N.toList(N.asArray("1", "2"), N.asArray("3")).toArray(new Object[0]),
-                    N.split(a, 2).toArray()));
-            assertTrue(
-                    N.deepEquals(N.toList(N.asArray("1"), N.asArray("2"), N.asArray("3")).toArray(new Object[0]),
-                            N.split(a, 1).toArray()));
+            assertTrue(N.deepEquals(N.toList(N.asArray("1", "2"), N.asArray("3")).toArray(new Object[0]), N.split(a, 2).toArray()));
+            assertTrue(N.deepEquals(N.toList(N.asArray("1"), N.asArray("2"), N.asArray("3")).toArray(new Object[0]), N.split(a, 1).toArray()));
             assertTrue(N.deepEquals(N.toList((Object) N.asArray("1", "2", "3")).toArray(new Object[0]), N.split(a, 3).toArray()));
         }
 
         {
             final String[] a = { "1", "2", "3" };
-            assertTrue(N.deepEquals(N.toList(N.asArray("1", "2"), N.asArray("3")).toArray(new Object[0]),
-                    N.split(a, 2).toArray()));
-            assertTrue(
-                    N.deepEquals(N.toList(N.asArray("1"), N.asArray("2"), N.asArray("3")).toArray(new Object[0]),
-                            N.split(a, 1).toArray()));
+            assertTrue(N.deepEquals(N.toList(N.asArray("1", "2"), N.asArray("3")).toArray(new Object[0]), N.split(a, 2).toArray()));
+            assertTrue(N.deepEquals(N.toList(N.asArray("1"), N.asArray("2"), N.asArray("3")).toArray(new Object[0]), N.split(a, 1).toArray()));
             final Object tmp = N.asArray("1", "2", "3");
             assertTrue(N.deepEquals(N.toList(tmp).toArray(), N.split(a, 3).toArray()));
             assertTrue(N.deepEquals(N.toList(tmp).toArray(), N.split(a, 4).toArray()));
@@ -3338,8 +3319,7 @@ public class NTest extends AbstractParserTest {
             final List<String> a = N.toList("1", "2", "3");
             final List<List<String>> b = N.split(a, 2);
             assertTrue(N.deepEquals(N.toList(N.toList("1", "2"), N.toList("3")).toArray(new Object[0]), b.toArray()));
-            assertTrue(N.deepEquals(N.toList(N.toList("1"), N.toList("2"), N.toList("3")).toArray(new Object[0]),
-                    N.split(a, 1).toArray()));
+            assertTrue(N.deepEquals(N.toList(N.toList("1"), N.toList("2"), N.toList("3")).toArray(new Object[0]), N.split(a, 1).toArray()));
         }
 
     }
@@ -27574,7 +27554,7 @@ public class NTest extends AbstractParserTest {
     public void testPercentageRangeWithStepIncludesFloatingPointValues() {
         // range(_5, _50, _5) must contain every multiple of 5% from 5 to 45 (exclusive of 50)
         ImmutableSet<Percentage> result = Percentage.range(Percentage._5, Percentage._50, Percentage._5);
-        assertTrue(result.contains(Percentage._5),  "range should contain _5");
+        assertTrue(result.contains(Percentage._5), "range should contain _5");
         assertTrue(result.contains(Percentage._10), "range should contain _10");
         assertTrue(result.contains(Percentage._15), "range should contain _15");
         assertTrue(result.contains(Percentage._20), "range should contain _20");
@@ -27719,5 +27699,450 @@ public class NTest extends AbstractParserTest {
         Integer[] emptyObj = new Integer[0];
         N.shuffle(emptyObj);
         assertEquals(0, emptyObj.length);
+    }
+
+    // ============================================================
+    // Coverage-targeted tests appended 2026-05-29 (uncovered overloads/branches)
+    // ============================================================
+
+    // --- concat(X[], X[]) one-empty-side clone branches ---
+
+    @org.junit.jupiter.api.Test
+    public void testConcatBoolean_OneEmpty_uncovered() {
+        boolean[] a = { true, false };
+        // b empty -> returns clone of a
+        boolean[] r1 = N.concat(a, new boolean[0]);
+        assertArrayEquals(a, r1);
+        assertNotSame(a, r1);
+        // a empty -> returns clone of b
+        boolean[] r2 = N.concat(new boolean[0], a);
+        assertArrayEquals(a, r2);
+        assertNotSame(a, r2);
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testConcatCharVarargs_SingleNonEmpty_uncovered() {
+        char[] a = { 'a', 'b', 'c' };
+        char[] r = N.concat(new char[][] { a });
+        assertArrayEquals(a, r);
+        assertNotSame(a, r);
+        // single empty element -> EMPTY_CHAR_ARRAY
+        assertArrayEquals(new char[0], N.concat(new char[][] { new char[0] }));
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testConcatBooleanVarargs_MultipleWithEmpties_uncovered() {
+        boolean[] r = N.concat(new boolean[] { true }, new boolean[0], new boolean[] { false, true });
+        assertArrayEquals(new boolean[] { true, false, true }, r);
+        // empty varargs -> empty
+        assertArrayEquals(new boolean[0], N.concat(new boolean[0][]));
+    }
+
+    // --- removeAt(X[], int...) variadic ---
+
+    @org.junit.jupiter.api.Test
+    public void testRemoveAtIntVarargs_MultipleSorted_uncovered() {
+        int[] a = { 10, 20, 30, 40, 50 };
+        // unsorted + duplicate index 1 -> still removes indices 1 and 3 once
+        int[] r = N.removeAt(a, 3, 1, 1);
+        assertArrayEquals(new int[] { 10, 30, 50 }, r);
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testRemoveAtIntVarargs_SingleIndex_uncovered() {
+        int[] a = { 10, 20, 30 };
+        assertArrayEquals(new int[] { 10, 30 }, N.removeAt(a, 1));
+        long[] la = { 1L, 2L, 3L };
+        assertArrayEquals(new long[] { 1L, 3L }, N.removeAt(la, new int[] { 1 }));
+        byte[] ba = { 1, 2, 3 };
+        assertArrayEquals(new byte[] { 1, 3 }, N.removeAt(ba, new int[] { 1 }));
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testRemoveAtIntVarargs_OutOfBounds_uncovered() {
+        int[] a = { 10, 20, 30 };
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt(a, 0, 5));
+        short[] sa = { 1, 2, 3 };
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt(sa, -1, 1));
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testRemoveAtGenericVarargs_uncovered() {
+        String[] a = { "A", "B", "C", "D", "E" };
+        String[] r = N.removeAt(a, 1, 3);
+        assertArrayEquals(new String[] { "A", "C", "E" }, r);
+        // single index path
+        assertArrayEquals(new String[] { "B", "C", "D", "E" }, N.removeAt(a, 0));
+        // empty indices -> clone
+        String[] r2 = N.removeAt(a, new int[0]);
+        assertArrayEquals(a, r2);
+        assertNotSame(a, r2);
+    }
+
+    // --- removeAll(X[], X...) with multiple values ---
+
+    @org.junit.jupiter.api.Test
+    public void testRemoveAllIntVarargs_MultipleValues_uncovered() {
+        int[] a = { 1, 2, 3, 2, 4, 3, 5 };
+        assertArrayEquals(new int[] { 1, 4, 5 }, N.removeAll(a, 2, 3));
+        // single value path delegates to removeAllOccurrences
+        assertArrayEquals(new int[] { 1, 3, 4, 3, 5 }, N.removeAll(a, 2));
+        // empty values -> clone
+        int[] r = N.removeAll(a, new int[0]);
+        assertArrayEquals(a, r);
+        assertNotSame(a, r);
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testRemoveAllShortLongFloatDoubleVarargs_uncovered() {
+        short[] sa = { 1, 2, 3, 2, 4, 3, 5 };
+        assertArrayEquals(new short[] { 1, 4, 5 }, N.removeAll(sa, (short) 2, (short) 3));
+        long[] la = { 100L, 200L, 300L, 200L, 400L };
+        assertArrayEquals(new long[] { 100L, 400L }, N.removeAll(la, 200L, 300L));
+        float[] fa = { 1f, 2.5f, 3f, 2.5f, 4.5f };
+        assertArrayEquals(new float[] { 1f, 4.5f }, N.removeAll(fa, 2.5f, 3f), 0f);
+        double[] da = { 1d, 2.5d, 3d, 2.5d, 4.5d };
+        assertArrayEquals(new double[] { 1d, 4.5d }, N.removeAll(da, 2.5d, 3d), 0d);
+    }
+
+    // --- removeAll(Collection, Iterable) HashSet & Iterator branches ---
+
+    @org.junit.jupiter.api.Test
+    public void testRemoveAllCollection_HashSetSourceIterable_uncovered() {
+        // HashSet source + non-Set Iterable hits the element-by-element branch
+        Set<Integer> c = new HashSet<>(Arrays.asList(1, 2, 3, 4, 5));
+        boolean changed = N.removeAll(c, Arrays.asList(2, 4));
+        assertTrue(changed);
+        assertEquals(new HashSet<>(Arrays.asList(1, 3, 5)), c);
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testRemoveAllCollection_IteratorOnSet_uncovered() {
+        Set<String> c = new HashSet<>(Arrays.asList("x", "y", "z"));
+        boolean changed = N.removeAll(c, Arrays.asList("x", "z").iterator());
+        assertTrue(changed);
+        assertEquals(new HashSet<>(Arrays.asList("y")), c);
+        // removing nothing existing -> not changed
+        Set<String> c2 = new HashSet<>(Arrays.asList("a", "b"));
+        assertFalse(N.removeAll(c2, Arrays.asList("q").iterator()));
+    }
+
+    // --- insertAll empty-array / empty-elements clone branches ---
+
+    @org.junit.jupiter.api.Test
+    public void testInsertAllChar_EmptyArrayAtZero_uncovered() {
+        char[] r = N.insertAll(new char[0], 0, 'x', 'y');
+        assertArrayEquals(new char[] { 'x', 'y' }, r);
+        // empty elements -> clone of a
+        char[] a = { 'a', 'b' };
+        char[] r2 = N.insertAll(a, 1, new char[0]);
+        assertArrayEquals(a, r2);
+        assertNotSame(a, r2);
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testInsertAllByteShort_EmptyArrayAtZero_uncovered() {
+        assertArrayEquals(new byte[] { 3, 4 }, N.insertAll(new byte[0], 0, (byte) 3, (byte) 4));
+        assertArrayEquals(new short[] { 5, 6 }, N.insertAll(new short[0], 0, (short) 5, (short) 6));
+    }
+
+    // --- difference / symmetricDifference array clone branches (empty b) ---
+
+    @org.junit.jupiter.api.Test
+    public void testDifferencePrimitiveArrays_EmptyB_ClonesA_uncovered() {
+        short[] sa = { 1, 2, 3 };
+        short[] sr = N.difference(sa, new short[0]);
+        assertArrayEquals(sa, sr);
+        assertNotSame(sa, sr);
+        byte[] ba = { 1, 2 };
+        assertArrayEquals(ba, N.difference(ba, new byte[0]));
+        long[] la = { 1L, 2L };
+        assertArrayEquals(la, N.difference(la, new long[0]));
+        float[] fa = { 1f, 2f };
+        assertArrayEquals(fa, N.difference(fa, new float[0]), 0f);
+        double[] da = { 1d, 2d };
+        assertArrayEquals(da, N.difference(da, new double[0]), 0d);
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testSymmetricDifferencePrimitiveArrays_OneEmpty_uncovered() {
+        short[] sa = { 1, 2, 3 };
+        assertArrayEquals(sa, N.symmetricDifference(sa, new short[0]));
+        assertArrayEquals(sa, N.symmetricDifference(new short[0], sa));
+        int[] ia = { 1, 2 };
+        assertArrayEquals(ia, N.symmetricDifference(ia, new int[0]));
+        assertArrayEquals(ia, N.symmetricDifference(new int[0], ia));
+    }
+
+    // --- min/max range + iterable + NULL-comparator null short-circuit ---
+
+    @org.junit.jupiter.api.Test
+    public void testMinArrayRange_uncovered() {
+        Integer[] a = { 10, 5, 8, 3, 15 };
+        assertEquals(Integer.valueOf(5), N.min(a, 0, 3, Comparator.naturalOrder()));
+        assertEquals(Integer.valueOf(15), N.max(a, 0, 5, Comparator.naturalOrder()));
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testMinCollectionRange_NonRandomAccess_uncovered() {
+        // LinkedList forces the iterator branch
+        List<Integer> c = new LinkedList<>(Arrays.asList(10, 5, 8, 3, 15));
+        assertEquals(Integer.valueOf(5), N.min(c, 0, 3));
+        assertEquals(Integer.valueOf(15), N.max(c, 0, 5));
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testMinIterable_NonCollection_uncovered() {
+        // An Iterable that is NOT a Collection forces the iterateNonEmpty path
+        Iterable<Integer> it = () -> Arrays.asList(7, 2, 9, 1).iterator();
+        assertEquals(Integer.valueOf(1), N.min(it, Comparator.naturalOrder()));
+        assertEquals(Integer.valueOf(9), N.max(it, Comparator.naturalOrder()));
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testMinIterator_NullMinComparator_ReturnsNull_uncovered() {
+        // NULL_FIRST comparator (nulls min) + a null element -> early null return
+        List<String> data = Arrays.asList("b", null, "a");
+        assertNull(N.min(data.iterator(), Comparators.nullsFirst()));
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testMaxIterator_NullMaxComparator_ReturnsNull_uncovered() {
+        List<String> data = Arrays.asList("b", null, "a");
+        assertNull(N.max(data.iterator(), Comparators.nullsLast()));
+    }
+
+    // --- median(a, b, c, cmp) branches & median(X[], from, to) ---
+
+    @org.junit.jupiter.api.Test
+    public void testMedianThreeWithComparator_AllBranches_uncovered() {
+        Comparator<Integer> c = Comparator.naturalOrder();
+        // ab<=0, bc<=0 -> b
+        assertEquals(Integer.valueOf(2), N.median(1, 2, 3, c));
+        // ab<=0, bc>0, a<=c -> c ; here a=1,b=3,c=2 -> ab<=0, bc>0(3>2), a<=c(1<=2) -> c=2
+        assertEquals(Integer.valueOf(2), N.median(1, 3, 2, c));
+        // ab<=0, bc>0, a>c -> a ; a=2,b=3,c=1 -> ab<=0, bc>0, a>c(2>1) -> a=2
+        assertEquals(Integer.valueOf(2), N.median(2, 3, 1, c));
+        // ab>0, bc>=0 -> b ; a=3,b=2,c=1 -> ab>0, bc>=0 -> b=2
+        assertEquals(Integer.valueOf(2), N.median(3, 2, 1, c));
+        // ab>0, bc<0, a<=c -> a ; a=2,b=1,c=3 -> ab>0, bc<0, a<=c(2<=3) -> a=2
+        assertEquals(Integer.valueOf(2), N.median(2, 1, 3, c));
+        // ab>0, bc<0, a>c -> c ; a=3,b=1,c=2 -> ab>0, bc<0, a>c(3>2) -> c=2
+        assertEquals(Integer.valueOf(2), N.median(3, 1, 2, c));
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testMedianCharRange_uncovered() {
+        char[] a = { 'a', 'z', 'm', 'b', 'x' };
+        assertEquals('m', N.median(a, 1, 4));
+        // 2-element range -> min
+        assertEquals('b', N.median(new char[] { 'm', 'b' }, 0, 2));
+        // single element
+        assertEquals('q', N.median(new char[] { 'q' }, 0, 1));
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testMedianArrayRange_EmptyThrows_uncovered() {
+        assertThrows(IllegalArgumentException.class, () -> N.median(new char[0], 0, 0));
+        assertThrows(IllegalArgumentException.class, () -> N.median(new int[0], 0, 0));
+        assertThrows(IllegalArgumentException.class, () -> N.median(new long[0], 0, 0));
+        assertThrows(IllegalArgumentException.class, () -> N.median(new double[0], 0, 0));
+    }
+
+    // --- top(long[], from, to, n) ---
+
+    @org.junit.jupiter.api.Test
+    public void testTopLongRange_uncovered() {
+        long[] a = { 5000L, 1000L, 3000L, 2000L, 4000L };
+        long[] r = N.top(a, 1, 4, 2);
+        Arrays.sort(r);
+        assertArrayEquals(new long[] { 2000L, 3000L }, r);
+        // n >= range size -> copyOfRange
+        long[] full = N.top(a, 1, 4, 10);
+        Arrays.sort(full);
+        assertArrayEquals(new long[] { 1000L, 2000L, 3000L }, full);
+        // n == 0 -> empty
+        assertArrayEquals(new long[0], N.top(a, 0, a.length, 0));
+    }
+
+    // --- zip(a, b, valueForNoneA, valueForNoneB, fn, Class) ---
+
+    @org.junit.jupiter.api.Test
+    public void testZipWithDefaults_BShorter_uncovered() {
+        Integer[] a = { 1, 2, 3, 4 };
+        Integer[] b = { 10, 20 };
+        Integer[] r = N.zip(a, b, 100, 200, (x, y) -> x + y, Integer.class);
+        assertArrayEquals(new Integer[] { 11, 22, 203, 204 }, r);
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testZipWithDefaults_AShorter_uncovered() {
+        Integer[] a = { 1, 2 };
+        Integer[] b = { 10, 20, 30, 40 };
+        Integer[] r = N.zip(a, b, 100, 200, (x, y) -> x + y, Integer.class);
+        assertArrayEquals(new Integer[] { 11, 22, 130, 140 }, r);
+    }
+
+    // --- merge(Collection<Iterable>, nextSelector, supplier) ---
+
+    @org.junit.jupiter.api.Test
+    public void testMergeCollectionOfIterablesWithSupplier_TwoSorted_uncovered() {
+        List<Iterable<Integer>> lists = new ArrayList<>();
+        lists.add(Arrays.asList(1, 3, 5));
+        lists.add(Arrays.asList(2, 4, 6));
+        List<Integer> merged = N.merge(lists, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND,
+                IntFunctions.ofList());
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), merged);
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testMergeCollectionOfIterablesWithSupplier_OneNull_uncovered() {
+        List<Iterable<Integer>> lists = new ArrayList<>();
+        lists.add(Arrays.asList(1, 2, 3));
+        lists.add(null);
+        List<Integer> merged = N.merge(lists, (x, y) -> MergeResult.TAKE_FIRST, IntFunctions.ofList());
+        assertEquals(Arrays.asList(1, 2, 3), merged);
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testMergeCollectionOfIterablesWithSupplier_ThreePlus_uncovered() {
+        List<Iterable<Integer>> lists = new ArrayList<>();
+        lists.add(Arrays.asList(1, 4, 7));
+        lists.add(Arrays.asList(2, 5, 8));
+        lists.add(Arrays.asList(3, 6, 9));
+        List<Integer> merged = N.merge(lists, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND,
+                IntFunctions.ofList());
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9), merged);
+    }
+
+    // --- concat(Collection<Iterable>, supplier) with non-Collection iterable ---
+
+    @org.junit.jupiter.api.Test
+    public void testConcatCollectionOfIterablesWithSupplier_NonCollectionIterable_uncovered() {
+        Iterable<Integer> raw = () -> Arrays.asList(3, 4).iterator();
+        List<Iterable<? extends Integer>> input = new ArrayList<>();
+        input.add(Arrays.asList(1, 2));
+        input.add(raw);
+        List<Integer> r = N.concat(input, IntFunctions.ofList());
+        assertEquals(Arrays.asList(1, 2, 3, 4), r);
+    }
+
+    // --- forEach(a, b[, c], action) empty short-circuit guards ---
+
+    @org.junit.jupiter.api.Test
+    public void testForEachTwoArrays_EmptyGuard_uncovered() {
+        AtomicInteger count = new AtomicInteger();
+        N.forEach(new String[0], new Integer[] { 1 }, (x, y) -> count.incrementAndGet());
+        assertEquals(0, count.get());
+        N.forEach(new String[] { "a", "b", "c" }, new Integer[] { 1, 2 }, (x, y) -> count.incrementAndGet());
+        assertEquals(2, count.get());
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testForEachTwoIterables_EmptyGuard_uncovered() {
+        AtomicInteger count = new AtomicInteger();
+        N.forEach(Collections.<String> emptyList(), Arrays.asList(1), (x, y) -> count.incrementAndGet());
+        assertEquals(0, count.get());
+        N.forEach(Arrays.asList("a", "b", "c"), Arrays.asList(1, 2), (x, y) -> count.incrementAndGet());
+        assertEquals(2, count.get());
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testForEachThreeArrays_uncovered() {
+        AtomicInteger count = new AtomicInteger();
+        N.forEach(new String[0], new Integer[] { 1 }, new Long[] { 1L }, (x, y, z) -> count.incrementAndGet());
+        assertEquals(0, count.get());
+        N.forEach(new String[] { "a", "b", "c" }, new Integer[] { 1, 2 }, new Long[] { 1L, 2L, 3L },
+                (x, y, z) -> count.incrementAndGet());
+        assertEquals(2, count.get());
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testForEachThreeIterables_EmptyGuard_uncovered() {
+        AtomicInteger count = new AtomicInteger();
+        N.forEach(Collections.<String> emptyList(), Arrays.asList(1), Arrays.asList(1L),
+                (x, y, z) -> count.incrementAndGet());
+        assertEquals(0, count.get());
+        N.forEach(Arrays.asList("a", "b"), Arrays.asList(1, 2, 3), Arrays.asList(1L, 2L),
+                (x, y, z) -> count.incrementAndGet());
+        assertEquals(2, count.get());
+    }
+
+    // --- callByBatch / runByBatch overloads ---
+
+    @org.junit.jupiter.api.Test
+    public void testCallByBatchArray_uncovered() {
+        String[] items = { "A", "B", "C", "D", "E" };
+        List<Integer> sizes = N.callByBatch(items, 2, List::size);
+        assertEquals(Arrays.asList(2, 2, 1), sizes);
+        // empty array -> empty result
+        assertEquals(new ArrayList<>(), N.callByBatch(new String[0], 2, List::size));
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testCallByBatchIterable_NonList_uncovered() {
+        // A non-List iterable forces the iterator-based branch
+        Iterable<String> it = () -> Arrays.asList("A", "B", "C", "D", "E").iterator();
+        List<Integer> sizes = N.callByBatch(it, 2, List::size);
+        assertEquals(Arrays.asList(2, 2, 1), sizes);
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testRunByBatchArray_uncovered() {
+        String[] items = { "A", "B", "C", "D", "E" };
+        List<Integer> batchSizes = new ArrayList<>();
+        N.runByBatch(items, 2, batch -> batchSizes.add(batch.size()));
+        assertEquals(Arrays.asList(2, 2, 1), batchSizes);
+        // empty array -> no-op
+        List<Integer> none = new ArrayList<>();
+        N.runByBatch(new String[0], 2, batch -> none.add(batch.size()));
+        assertEquals(new ArrayList<>(), none);
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testRunByBatchIterable_NonList_uncovered() {
+        Iterable<String> it = () -> Arrays.asList("A", "B", "C", "D", "E").iterator();
+        List<Integer> batchSizes = new ArrayList<>();
+        N.runByBatch(it, 2, batch -> batchSizes.add(batch.size()));
+        assertEquals(Arrays.asList(2, 2, 1), batchSizes);
+    }
+
+    // --- excludeAllToSet plain-HashSet-source result branch ---
+
+    @org.junit.jupiter.api.Test
+    public void testExcludeAllToSet_HashSetSource_UsesHashSetResult_uncovered() {
+        // Plain HashSet source (not List / not LinkedHashSet) hits the newHashSet result branch
+        Set<Integer> c = new HashSet<>(Arrays.asList(1, 2, 3, 4, 5, 6));
+        Set<Integer> result = N.excludeAllToSet(c, Arrays.asList(2, 4, 6));
+        assertEquals(new HashSet<>(Arrays.asList(1, 3, 5)), result);
+    }
+
+    // --- replaceAll(List, oldVal, newVal) & updateAll(List, op) ListIterator branch (non-RandomAccess, size>=11) ---
+
+    @org.junit.jupiter.api.Test
+    public void testReplaceAllList_LinkedListIteratorBranch_uncovered() {
+        // LinkedList of size >= REPLACE_ALL_THRESHOLD(11) forces the ListIterator branch
+        List<Integer> list = new LinkedList<>(Arrays.asList(1, 0, 2, 0, 3, 0, 4, 0, 5, 0, 6, 0));
+        int replaced = N.replaceAll(list, 0, -1);
+        assertEquals(6, replaced);
+        assertEquals(Arrays.asList(1, -1, 2, -1, 3, -1, 4, -1, 5, -1, 6, -1), list);
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testReplaceAllList_LinkedListIteratorBranch_NullOldVal_uncovered() {
+        List<String> list = new LinkedList<>(
+                Arrays.asList("a", null, "b", null, "c", null, "d", null, "e", null, "f", null));
+        int replaced = N.replaceAll(list, null, "x");
+        assertEquals(6, replaced);
+        assertEquals("x", list.get(1));
+        assertEquals("a", list.get(0));
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testUpdateAllList_LinkedListIteratorBranch_uncovered() {
+        List<Integer> list = new LinkedList<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12));
+        N.updateAll(list, x -> x * 10);
+        assertEquals(120, list.get(11).intValue());
+        assertEquals(10, list.get(0).intValue());
     }
 }

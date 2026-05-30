@@ -18,8 +18,13 @@ import java.util.Objects;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * A functional interface that represents an operation that accepts an object-valued and a
- * short-valued argument, and returns no result. This is a specialization of BiConsumer.
+ * A functional interface that represents an operation that accepts an object-valued argument
+ * and a short-valued argument, and returns no result. This is a specialization of BiConsumer
+ * for the case where the second argument is a primitive short.
+ *
+ * <p>This interface is the short primitive specialization of {@link ObjIntConsumer}.
+ * Unlike the JDK which only provides specializations for int, long, and double primitives,
+ * this interface extends support to short primitives for better type safety and performance.
  *
  * <p>This is a functional interface whose functional method is {@link #accept(Object, short)}.
  *
@@ -27,6 +32,8 @@ import com.landawn.abacus.util.Throwables;
  *
  * @param <T> the type of the object argument to the operation
  * @see java.util.function.BiConsumer
+ * @see ObjIntConsumer
+ * @see ObjLongConsumer
  */
 @FunctionalInterface
 public interface ObjShortConsumer<T> extends Throwables.ObjShortConsumer<T, RuntimeException> { //NOSONAR
@@ -63,6 +70,14 @@ public interface ObjShortConsumer<T> extends Throwables.ObjShortConsumer<T, Runt
      * operation throws an exception, it is relayed to the caller of the
      * composed operation. If performing this operation throws an exception,
      * the {@code after} operation will not be performed.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ObjShortConsumer<List<Short>> add = (list, v) -> list.add(v);
+     * ObjShortConsumer<List<Short>> log = (list, v) -> System.out.println("Added " + v);
+     * ObjShortConsumer<List<Short>> combined = add.andThen(log);
+     * combined.accept(new ArrayList<>(), (short) 7);
+     * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code ObjShortConsumer} that performs in sequence this

@@ -77,7 +77,7 @@ import java.lang.annotation.Target;
  *         return currency + " " + raw.toPlainString();
  *     }
  * }
- * // Amount("USD", 19.99)  ->  "USD 19.99"
+ * // Amount(19.99, "USD")  ->  "USD 19.99"
  * }</pre>
  *
  * @see JsonXmlCreator

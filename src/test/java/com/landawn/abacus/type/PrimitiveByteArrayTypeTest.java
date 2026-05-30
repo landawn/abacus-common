@@ -177,8 +177,7 @@ public class PrimitiveByteArrayTypeTest extends TestBase {
         when(blob.getBytes(1, 5)).thenThrow(getBytesException);
         org.mockito.Mockito.doThrow(freeException).when(blob).free();
 
-        com.landawn.abacus.exception.UncheckedSQLException thrown = assertThrows(
-                com.landawn.abacus.exception.UncheckedSQLException.class,
+        com.landawn.abacus.exception.UncheckedSQLException thrown = assertThrows(com.landawn.abacus.exception.UncheckedSQLException.class,
                 () -> type.valueOf(blob));
 
         // The primary exception should wrap getBytesException

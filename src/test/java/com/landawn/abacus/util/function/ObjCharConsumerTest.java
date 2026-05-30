@@ -116,7 +116,8 @@ public class ObjCharConsumerTest extends TestBase {
 
     @Test
     public void testAndThenNullThrowsImmediately() {
-        ObjCharConsumer<String> instance = (a, b) -> {};
+        ObjCharConsumer<String> instance = (a, b) -> {
+        };
         org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((ObjCharConsumer) null));
     }
 }

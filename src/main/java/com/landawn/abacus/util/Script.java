@@ -20,7 +20,7 @@ package com.landawn.abacus.util;
  * <p>This class is currently under development and does not contain any implemented functionality.
  * It is intended to provide script execution capabilities in future releases.
  *
- * <p>The class is declared {@code final} to prevent subclassing. The {@code //NOSONAR} annotation
+ * <p>The class is declared {@code final} to prevent subclassing. The {@code //NOSONAR} comment
  * suppresses SonarQube warnings about the otherwise-empty class body.
  */
 // TODO Design to be done.

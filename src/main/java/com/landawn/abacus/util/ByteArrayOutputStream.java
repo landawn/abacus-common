@@ -21,8 +21,8 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 
 /**
- * A high-performance implementation of ByteArrayOutputStream that provides direct access
- * to the internal byte array buffer for efficiency.
+ * A high-performance, in-memory {@link OutputStream} that buffers written bytes and provides
+ * direct access to the internal byte array buffer for efficiency.
  *
  * <p>This class is similar to {@link java.io.ByteArrayOutputStream} but provides
  * additional methods for performance optimization, such as direct access to the
@@ -324,6 +324,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      *
      * @param charset the charset to use for decoding
      * @return a String decoded from the buffer contents
+     * @throws NullPointerException if {@code charset} is {@code null}
      */
     public String toString(final Charset charset) {
         return new String(buf, 0, count, charset);

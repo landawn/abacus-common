@@ -258,7 +258,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * are valid list elements.</p>
      *
      * @return the internal array backing this list
-     * @deprecated should call {@link #toArray()} instead
+     * @deprecated use {@link #toArray()} instead, which returns a safe copy
      */
     @Deprecated
     @Beta
@@ -1587,7 +1587,9 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      *
      * @param minCapacity the minimum capacity required
      * @param curLen the current length of the internal array
-     * @return the new capacity to use, which will be at least minCapacity and at most MAX_ARRAY_SIZE
+     * @return the new capacity to use, which is at least {@code minCapacity}; the growth-based value
+     *         is capped at {@code MAX_ARRAY_SIZE}, though the returned value can exceed it when
+     *         {@code minCapacity} itself is larger than {@code MAX_ARRAY_SIZE}
      */
     protected int calNewCapacity(final int minCapacity, final int curLen) {
         int newCapacity = (int) (curLen * 1.75);

@@ -206,7 +206,7 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
 
     /**
      * Appends the string representation of an {@code int} value to an {@code Appendable}.
-     * Writes "null" if the value is {@code null}, otherwise writes the numeric value.
+     * Writes {@code "null"} if the value is {@code null}, otherwise writes the numeric value.
      *
      * @param appendable the {@code Appendable} to write to
      * @param x the {@code Number} value to append as {@code int}

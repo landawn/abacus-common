@@ -492,9 +492,10 @@ abstract class SmoothRateLimiter extends RateLimiter {
     abstract long storedPermitsToWaitTime(double storedPermits, double permitsToTake);
 
     /**
-     * Returns the number of microseconds during cooldown that we have to wait to get a new permit.
+     * Returns the number of microseconds during cooldown that we have to wait to accumulate a single
+     * permit, i.e. the cooldown interval in microseconds per permit.
      *
-     * @return the cooldown interval in microseconds
+     * @return the cooldown interval in microseconds per permit
      */
     abstract double coolDownIntervalMicros();
 

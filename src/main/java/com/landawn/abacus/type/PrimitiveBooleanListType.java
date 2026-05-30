@@ -32,6 +32,7 @@ import com.landawn.abacus.util.Strings;
 @SuppressWarnings("java:S2160")
 public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<BooleanList> {
 
+    /** The type name constant for {@link BooleanList} type identification, equal to {@code "BooleanList"}. */
     public static final String BOOLEAN_LIST = BooleanList.class.getSimpleName();
 
     private final Type<boolean[]> arrayType = Type.of(boolean[].class);

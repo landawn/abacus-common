@@ -103,7 +103,7 @@ public class TimeType extends AbstractDateType<Time> {
      * }</pre>
      *
      * @param str the string to parse
-     * @return a Time object, or {@code null} if str is empty
+     * @return a Time object, or {@code null} if {@code str} is {@code null}, empty, or the literal {@code "null"}
      */
     @Override
     public Time valueOf(final String str) {

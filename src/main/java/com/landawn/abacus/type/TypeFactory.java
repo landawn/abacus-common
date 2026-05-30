@@ -797,6 +797,10 @@ public final class TypeFactory {
                                 "Incorrect type parameters: " + typeName + ". Sheet Type can only have zero or Three type parameters.");
                     }
 
+                    if (parameters.length > 0) {
+                        throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Sheet Type can only have zero parameter.");
+                    }
+
                     if (typeParameters.length == 3) {
                         type = new SheetType(typeParameters[0], typeParameters[1], typeParameters[2]);
                     } else {
@@ -1249,7 +1253,7 @@ public final class TypeFactory {
      * @param <T> the Java type represented by the requested {@code Type} object
      * @param cls the Class object for which to retrieve the Type
      * @return the Type object corresponding to the specified class
-     * @throws IllegalArgumentException if cls is null
+     * @throws IllegalArgumentException if {@code cls} is {@code null}
      * @see #getType(String)
      * @see #getType(java.lang.reflect.Type)
      */
@@ -1352,7 +1356,7 @@ public final class TypeFactory {
      *   <li>Collection types: "Set&lt;String&gt;", "List&lt;Person&gt;", "ImmutableList&lt;String&gt;"</li>
      *   <li>Map types: "Map&lt;String,Person&gt;", "Multimap&lt;String,Integer&gt;"</li>
      *   <li>Tuple types: "Pair&lt;String,Integer&gt;", "Triple&lt;String,Integer,Boolean&gt;"</li>
-     *   <li>Enum with parameters: "Color(true)" - for case-insensitive enum parsing</li>
+     *   <li>Enum with parameters: "Color(NAME)", "Color(ORDINAL)", "Color(CODE)" - selects the enum representation strategy</li>
      * </ul>
      * <p>
      * The method caches Type objects for reuse. If the type pool size reaches multiples of 100,
@@ -1393,7 +1397,7 @@ public final class TypeFactory {
      * @param targetClass the class for which to register the custom type
      * @param toStringFunc the function to convert an object of type T to a String, receives the object and a JsonParser
      * @param fromStringFunc the function to convert a String to an object of type T, receives the string and a JsonParser
-     * @throws IllegalArgumentException if targetClass, toStringFunc, or fromStringFunc is null
+     * @throws IllegalArgumentException if {@code targetClass}, {@code toStringFunc}, or {@code fromStringFunc} is {@code null}, or if a type is already registered for {@code targetClass}
      * @see #registerType(Class, Function, Function)
      * @see #registerType(Class, Type)
      */
@@ -1441,7 +1445,7 @@ public final class TypeFactory {
      * @param cls the class for which to register the custom type
      * @param toStringFunc the function to convert an object of type T to a String
      * @param fromStringFunc the function to convert a String to an object of type T
-     * @throws IllegalArgumentException if cls, toStringFunc, or fromStringFunc is null
+     * @throws IllegalArgumentException if {@code cls}, {@code toStringFunc}, or {@code fromStringFunc} is {@code null}, or if a type is already registered for {@code cls}
      * @see #registerType(Class, BiFunction, BiFunction)
      * @see #registerType(Class, Type)
      */
@@ -1491,7 +1495,7 @@ public final class TypeFactory {
      * @param <T> the Java type handled by the custom type registration
      * @param cls the class for which to register the type
      * @param type the Type implementation to register for the class
-     * @throws IllegalArgumentException if cls or type is {@code null}, or if a type is already registered for the class
+     * @throws IllegalArgumentException if {@code cls} or {@code type} is {@code null}, if a type is already registered for the class, or if a type with the same name (as returned by {@link Type#name()}) already exists
      * @see #registerType(String, Type)
      * @see #getType(Class)
      */

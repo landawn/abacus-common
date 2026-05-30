@@ -25,7 +25,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.SK;
 
 /**
- * A stream-based JSON reader that reads from {@link Reader}/{@link java.io.InputStream} sources.
+ * A stream-based JSON reader that reads from a {@link Reader} source.
  * Extends {@link JsonStringReader} to support reading JSON data from character streams by
  * incrementally refilling the read buffer as input is consumed.
  *

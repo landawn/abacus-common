@@ -57,22 +57,22 @@ package com.landawn.abacus.util;
  */
 public enum AccountStatus {
 
-    /** Default initial state of an account (value: 0) */
+    /** Default initial state of an account (value: 0). */
     BLANK(0),
 
-    /** Account is active and fully functional (value: 1) */
+    /** Account is active and fully functional (value: 1). */
     ACTIVE(1),
 
-    /** Account is temporarily disabled (value: 2) */
+    /** Account is temporarily disabled (value: 2). */
     SUSPENDED(2),
 
-    /** Account is no longer in active use but retained for historical purposes (value: 3) */
+    /** Account is no longer in active use but retained for historical purposes (value: 3). */
     RETIRED(3),
 
-    /** Account has been formally closed (value: 4) */
+    /** Account has been formally closed (value: 4). */
     CLOSED(4),
 
-    /** Account has been deleted from the system (value: 5) */
+    /** Account has been deleted from the system (value: 5). */
     DELETED(5);
 
     private final int code;

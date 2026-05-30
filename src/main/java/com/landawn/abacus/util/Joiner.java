@@ -2248,7 +2248,7 @@ public final class Joiner implements Closeable {
      * }</pre>
      *
      * @param key the key to append
-     * @param value the Object value to append
+     * @param value the Object value to append; {@code null} is rendered using the configured null text
      * @return this Joiner instance for method chaining
      */
     public Joiner appendEntry(final String key, final Object value) {
@@ -2493,10 +2493,10 @@ public final class Joiner implements Closeable {
      * @param <K> the type of keys in the map
      * @param <V> the type of values in the map
      * @param m the Map to append entries from
-     * @param keyExtractor the function to transform keys before appending
-     * @param valueExtractor the function to transform values before appending
+     * @param keyExtractor the function to transform keys before appending; must not be {@code null}
+     * @param valueExtractor the function to transform values before appending; must not be {@code null}
      * @return this Joiner instance for method chaining
-     * @throws IllegalArgumentException if keyExtractor or valueExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} or {@code valueExtractor} is {@code null}
      */
     public <K, V> Joiner appendEntries(final Map<K, V> m, final Function<? super K, ?> keyExtractor, final Function<? super V, ?> valueExtractor)
             throws IllegalArgumentException {
@@ -2536,7 +2536,7 @@ public final class Joiner implements Closeable {
      * Appends all properties of a bean object to the joiner.
      * Each property is appended as a key-value pair using the property name as the key
      * and the property value as the value, separated by the configured key-value separator.
-     * Properties with {@code null} values are included (rendered using the configured null text).
+     * Properties with {@code null} values are skipped.
      * If {@code bean} is {@code null}, this Joiner is returned unchanged.
      * The bean's class must be a valid JavaBean with getter/setter methods defined.
      *

@@ -59,7 +59,8 @@ public class InstantType extends AbstractTemporalType<Instant> {
 
     /**
      * Serializes an {@link Instant} to its ISO-8601 timestamp string representation.
-     * Uses millisecond precision and UTC timezone (e.g., {@code "2023-12-25T10:30:45.123Z"}).
+     * Uses a format equivalent to {@link java.time.format.DateTimeFormatter#ISO_OFFSET_DATE_TIME}
+     * with the UTC zone, so the result ends in {@code 'Z'} (e.g., {@code "2023-12-25T10:30:45.123Z"}).
      *
      * @param x the {@link Instant} to serialize; may be {@code null}
      * @return the ISO-8601 timestamp string, or {@code null} if {@code x} is {@code null}

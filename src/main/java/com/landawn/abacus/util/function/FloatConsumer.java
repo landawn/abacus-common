@@ -58,7 +58,7 @@ public interface FloatConsumer extends Throwables.FloatConsumer<RuntimeException
      * combined.accept(5.5f);   // Logs then validates
      * }</pre>
      *
-     * @param after the operation to perform after this operation
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code FloatConsumer} that performs in sequence this operation followed by the {@code after} operation
      * @throws NullPointerException if {@code after} is null
      */

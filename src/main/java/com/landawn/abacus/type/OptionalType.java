@@ -114,7 +114,7 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
 
     /**
      * Indicates whether this type is a parameterized type.
-     * OptionalType is always parameterized as it is parameterized with a type T.
+     * {@code OptionalType} is always parameterized, as it is parameterized with an element type {@code T}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -162,7 +162,7 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
      * }</pre>
      *
      * @param x the Optional object to convert
-     * @return the string representation of the contained value, or {@code null} if empty
+     * @return the string representation of the contained value, or {@code null} if {@code x} is {@code null} or empty
      */
     @Override
     public String stringOf(final Optional<T> x) {
@@ -186,7 +186,7 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
      * }</pre>
      *
      * @param str the string to convert
-     * @return an Optional containing the parsed value, or empty Optional if input is null
+     * @return an Optional containing the parsed value, or an empty Optional if the input is {@code null} or the element type parses it to {@code null}
      */
     @Override
     public Optional<T> valueOf(final String str) {
@@ -200,15 +200,12 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Optional<String>> type = TypeFactory.getType("Optional<String>");
-     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
-     * stmt.setInt(1, 123);
-     * try (ResultSet rs = stmt.executeQuery()) {
-     *     if (rs.next()) {
-     *         Optional<String> name = type.get(rs, 1);
-     *         if (name.isPresent()) {
-     *             System.out.println("Name: " + name.get());
-     *         }
-     *     }
+     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
+     *
+     * // Column 1 contains the value "hello"
+     * Optional<String> name = type.get(rs, 1);
+     * if (name.isPresent()) {
+     *     System.out.println("Name: " + name.get());
      * }
      * }</pre>
      *

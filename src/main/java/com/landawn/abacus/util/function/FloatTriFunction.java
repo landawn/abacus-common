@@ -64,6 +64,13 @@ public interface FloatTriFunction<R> extends Throwables.FloatTriFunction<R, Runt
      * either function throws an exception, it is relayed to the caller of the
      * composed function.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatTriFunction<Float> sum = (a, b, c) -> a + b + c;
+     * FloatTriFunction<String> sumAsString = sum.andThen(f -> String.format("%.2f", f));
+     * String result = sumAsString.apply(1.0f, 2.0f, 3.0f);   // "6.00"
+     * }</pre>
+     *
      * @param <V> the type of output of the {@code after} function, and of the
      *           composed function
      * @param after the function to apply after this function is applied

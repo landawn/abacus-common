@@ -846,8 +846,7 @@ public class JsonStringReaderTest extends TestBase {
         reader.nextToken(); // START_DOUBLE_QUOTE
         ParsingException ex = assertThrows(ParsingException.class, () -> reader.nextToken());
         assertTrue(ex.getMessage().contains("'Z'"), "Expected message to contain readable char 'Z' but was: " + ex.getMessage());
-        assertFalse(ex.getMessage().contains("'" + (int) 'Z' + "'"),
-                "Message should not contain integer code point: " + ex.getMessage());
+        assertFalse(ex.getMessage().contains("'" + (int) 'Z' + "'"), "Message should not contain integer code point: " + ex.getMessage());
     }
 
 }

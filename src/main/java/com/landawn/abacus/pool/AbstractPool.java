@@ -150,7 +150,8 @@ public abstract class AbstractPool implements Pool {
     final long maxMemorySize;
 
     /**
-     * Policy used to determine which objects to evict when the pool is full.
+     * Policy that determines the order in which objects are selected for removal during
+     * balancing/vacate operations when the pool needs to free capacity.
      */
     final EvictionPolicy evictionPolicy;
 
@@ -327,7 +328,8 @@ public abstract class AbstractPool implements Pool {
 
     /**
      * Checks whether this pool has been closed.
-     * Once closed, a pool cannot be reopened and all operations will throw IllegalStateException.
+     * Once closed, a pool cannot be reopened and operations that require the pool to be open
+     * will throw {@link IllegalStateException}.
      *
      * @return {@code true} if the pool has been closed, {@code false} otherwise
      */

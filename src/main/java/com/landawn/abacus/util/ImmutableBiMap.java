@@ -504,7 +504,8 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      * of this map becomes a key, and each key becomes the corresponding value.
      *
      * <p>The returned map is also an {@code ImmutableBiMap} and is backed by the
-     * same underlying {@code BiMap} as this instance. Calling {@code inverse()}
+     * inverse view of the same underlying {@code BiMap} as this instance, so it
+     * shares the same storage and requires no copying. Calling {@code inverse()}
      * multiple times returns the same cached instance.</p>
      *
      * <p><b>Usage example:</b></p>
@@ -614,6 +615,8 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
          * @param key   the key with which the specified value is to be associated
          * @param value the value to be associated with the specified key
          * @return this builder instance, for method chaining
+         * @throws IllegalArgumentException if {@code key} or {@code value} is {@code null},
+         *         or if {@code value} is already bound to a different key in the map being built
          */
         public Builder<K, V> put(final K key, final V value) {
             map.put(key, value);

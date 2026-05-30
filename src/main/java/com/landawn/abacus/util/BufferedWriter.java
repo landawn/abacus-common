@@ -641,8 +641,11 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
     }
 
     /**
-     * Flushes the internal buffer to the underlying writer.
-     * This method is called automatically when the buffer is full.
+     * Writes the contents of the transient flush buffer ({@link #_cbuf}) to the
+     * underlying {@link #out} writer and resets the buffer position. This is a no-op
+     * in internal buffer mode (when {@link #value} is non-{@code null}) and when the
+     * flush buffer is empty. It is invoked automatically when the flush buffer becomes
+     * full or cannot accommodate the next write.
      *
      * @throws IOException if an I/O error occurs
      */
@@ -661,9 +664,11 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
     /**
      * Flushes the stream.
      *
-     * <p>If the stream has saved any characters from the write() methods in a buffer,
-     * write them immediately to their destination. Then, if that destination is another
-     * stream, flush it.</p>
+     * <p>In external writer mode, any characters saved in the flush buffer are written
+     * immediately to the underlying {@link #out} writer, and that writer is then flushed.
+     * In internal buffer mode (created via {@link #BufferedWriter()}) there is no
+     * underlying destination, so the accumulated content is retained and this method only
+     * releases the transient flush buffer.</p>
      *
      * @throws IOException if an I/O error occurs
      */

@@ -943,8 +943,9 @@ public class TryTest extends TestBase {
         RuntimeException closeEx = new RuntimeException("close-failure");
         ThrowOnClose closeable = new ThrowOnClose(closeEx);
 
-        RuntimeException thrown = assertThrows(RuntimeException.class,
-                () -> Try.with(closeable).run(c -> { throw bodyEx; }));
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> Try.with(closeable).run(c -> {
+            throw bodyEx;
+        }));
 
         assertTrue(closeable.closeCalled, "close() must run even when the body throws");
         // ExceptionUtil.toRuntimeException may wrap; the body exception (or the wrap of it)
@@ -968,7 +969,8 @@ public class TryTest extends TestBase {
     public void test_with_run_finalActionRunsOnSuccess() {
         AtomicBoolean ran = new AtomicBoolean(false);
         TestCloseable c = new TestCloseable();
-        Try.with(c, () -> ran.set(true)).run(x -> { /* no-op */ });
+        Try.with(c, () -> ran.set(true)).run(x -> {
+            /* no-op */ });
         assertTrue(c.isClosed());
         assertTrue(ran.get());
     }
@@ -977,8 +979,9 @@ public class TryTest extends TestBase {
     public void test_with_run_finalActionRunsAfterBodyException() {
         AtomicBoolean ran = new AtomicBoolean(false);
         TestCloseable c = new TestCloseable();
-        assertThrows(RuntimeException.class,
-                () -> Try.with(c, () -> ran.set(true)).run(x -> { throw new RuntimeException("boom"); }));
+        assertThrows(RuntimeException.class, () -> Try.with(c, () -> ran.set(true)).run(x -> {
+            throw new RuntimeException("boom");
+        }));
         assertTrue(c.isClosed(), "resource still closed when body throws");
         assertTrue(ran.get(), "finalAction must run in finally even when body throws");
     }
@@ -986,7 +989,9 @@ public class TryTest extends TestBase {
     @Test
     public void test_with_supplier_run_supplierExceptionPropagates() {
         // If the supplier throws, the failure must be propagated as a RuntimeException.
-        Throwables.Supplier<AutoCloseable, Exception> supplier = () -> { throw new java.io.IOException("supplier-fail"); };
+        Throwables.Supplier<AutoCloseable, Exception> supplier = () -> {
+            throw new java.io.IOException("supplier-fail");
+        };
         assertThrows(RuntimeException.class, () -> Try.with(supplier).run(c -> fail("must not reach body")));
     }
 }

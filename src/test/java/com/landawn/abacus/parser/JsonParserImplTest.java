@@ -1487,4 +1487,410 @@ public class JsonParserImplTest extends TestBase {
         assertEquals(entity, parsed);
     }
 
+    @Test
+    public void testDeserializeDataset_invalidJsonText_throws() {
+        // Regression: malformed row JSON (bare unquoted text) must be rejected by readDataset,
+        // mirroring readMap's validation (#6).
+        Assertions.assertThrows(com.landawn.abacus.exception.ParsingException.class, () -> parser.deserialize("[{abc}]", Dataset.class));
+    }
+
+    // ----- Pair / Triple / Tuple deserialization (list2PairTripleConverterMap) -----
+
+    @Test
+    public void testDeserialize_Pair() {
+        Type<com.landawn.abacus.util.Pair<String, Integer>> type = Type
+                .of(new TypeReference<com.landawn.abacus.util.Pair<String, Integer>>() {
+                }.javaType());
+
+        com.landawn.abacus.util.Pair<String, Integer> result = parser.deserialize("[\"a\", 1]", null, type);
+        assertEquals("a", result.left());
+        assertEquals(Integer.valueOf(1), result.right());
+    }
+
+    @Test
+    public void testDeserialize_Triple() {
+        Type<com.landawn.abacus.util.Triple<String, Integer, Boolean>> type = Type
+                .of(new TypeReference<com.landawn.abacus.util.Triple<String, Integer, Boolean>>() {
+                }.javaType());
+
+        com.landawn.abacus.util.Triple<String, Integer, Boolean> result = parser.deserialize("[\"a\", 1, true]", null, type);
+        assertEquals("a", result.left());
+        assertEquals(Integer.valueOf(1), result.middle());
+        assertEquals(Boolean.TRUE, result.right());
+    }
+
+    @Test
+    public void testDeserialize_Tuple2() {
+        Type<com.landawn.abacus.util.Tuple.Tuple2<String, Integer>> type = Type
+                .of(new TypeReference<com.landawn.abacus.util.Tuple.Tuple2<String, Integer>>() {
+                }.javaType());
+
+        com.landawn.abacus.util.Tuple.Tuple2<String, Integer> result = parser.deserialize("[\"x\", 5]", null, type);
+        assertEquals("x", result._1);
+        assertEquals(Integer.valueOf(5), result._2);
+    }
+
+    @Test
+    public void testDeserialize_Tuple3() {
+        Type<com.landawn.abacus.util.Tuple.Tuple3<String, Integer, Boolean>> type = Type
+                .of(new TypeReference<com.landawn.abacus.util.Tuple.Tuple3<String, Integer, Boolean>>() {
+                }.javaType());
+
+        com.landawn.abacus.util.Tuple.Tuple3<String, Integer, Boolean> result = parser.deserialize("[\"x\", 5, false]", null, type);
+        assertEquals("x", result._1);
+        assertEquals(Integer.valueOf(5), result._2);
+        assertEquals(Boolean.FALSE, result._3);
+    }
+
+    @Test
+    public void testDeserialize_Tuple1() {
+        Type<com.landawn.abacus.util.Tuple.Tuple1<String>> type = Type.of(new TypeReference<com.landawn.abacus.util.Tuple.Tuple1<String>>() {
+        }.javaType());
+
+        com.landawn.abacus.util.Tuple.Tuple1<String> result = parser.deserialize("[\"only\"]", null, type);
+        assertEquals("only", result._1);
+    }
+
+    @Test
+    public void testDeserialize_Tuple4() {
+        Type<com.landawn.abacus.util.Tuple.Tuple4<Integer, Integer, Integer, Integer>> type = Type
+                .of(new TypeReference<com.landawn.abacus.util.Tuple.Tuple4<Integer, Integer, Integer, Integer>>() {
+                }.javaType());
+
+        com.landawn.abacus.util.Tuple.Tuple4<Integer, Integer, Integer, Integer> result = parser.deserialize("[1, 2, 3, 4]", null, type);
+        assertEquals(Integer.valueOf(1), result._1);
+        assertEquals(Integer.valueOf(2), result._2);
+        assertEquals(Integer.valueOf(3), result._3);
+        assertEquals(Integer.valueOf(4), result._4);
+    }
+
+    @Test
+    public void testDeserialize_Tuple5() {
+        Type<com.landawn.abacus.util.Tuple.Tuple5<Integer, Integer, Integer, Integer, Integer>> type = Type
+                .of(new TypeReference<com.landawn.abacus.util.Tuple.Tuple5<Integer, Integer, Integer, Integer, Integer>>() {
+                }.javaType());
+
+        com.landawn.abacus.util.Tuple.Tuple5<Integer, Integer, Integer, Integer, Integer> result = parser.deserialize("[1, 2, 3, 4, 5]", null, type);
+        assertEquals(Integer.valueOf(5), result._5);
+    }
+
+    @Test
+    public void testDeserialize_Tuple6() {
+        Type<com.landawn.abacus.util.Tuple.Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>> type = Type
+                .of(new TypeReference<com.landawn.abacus.util.Tuple.Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>>() {
+                }.javaType());
+
+        com.landawn.abacus.util.Tuple.Tuple6<Integer, Integer, Integer, Integer, Integer, Integer> result = parser.deserialize("[1, 2, 3, 4, 5, 6]", null,
+                type);
+        assertEquals(Integer.valueOf(6), result._6);
+    }
+
+    @Test
+    public void testDeserialize_Tuple7() {
+        Type<com.landawn.abacus.util.Tuple.Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>> type = Type
+                .of(new TypeReference<com.landawn.abacus.util.Tuple.Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>>() {
+                }.javaType());
+
+        com.landawn.abacus.util.Tuple.Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer> result = parser
+                .deserialize("[1, 2, 3, 4, 5, 6, 7]", null, type);
+        assertEquals(Integer.valueOf(7), result._7);
+    }
+
+    @Test
+    public void testDeserialize_Tuple8() {
+        Type<com.landawn.abacus.util.Tuple.Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> type = Type
+                .of(new TypeReference<com.landawn.abacus.util.Tuple.Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>>() {
+                }.javaType());
+
+        com.landawn.abacus.util.Tuple.Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> result = parser
+                .deserialize("[1, 2, 3, 4, 5, 6, 7, 8]", null, type);
+        assertEquals(Integer.valueOf(8), result._8);
+    }
+
+    @Test
+    public void testDeserialize_Tuple9() {
+        Type<com.landawn.abacus.util.Tuple.Tuple9<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> type = Type.of(
+                new TypeReference<com.landawn.abacus.util.Tuple.Tuple9<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>>() {
+                }.javaType());
+
+        com.landawn.abacus.util.Tuple.Tuple9<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> result = parser
+                .deserialize("[1, 2, 3, 4, 5, 6, 7, 8, 9]", null, type);
+        assertEquals(Integer.valueOf(9), result._9);
+    }
+
+    // ----- Map.Entry conversion (map2TargetTypeConverterMap) -----
+
+    @Test
+    public void testDeserialize_MapEntry() {
+        Type<Map.Entry<String, Integer>> type = Type.of(new TypeReference<Map.Entry<String, Integer>>() {
+        }.javaType());
+
+        Map.Entry<String, Integer> result = parser.deserialize("{\"key\":42}", null, type);
+        assertEquals("key", result.getKey());
+        assertEquals(Integer.valueOf(42), result.getValue());
+    }
+
+    @Test
+    public void testDeserialize_SimpleImmutableEntry() {
+        Type<java.util.AbstractMap.SimpleImmutableEntry<String, Integer>> type = Type
+                .of(new TypeReference<java.util.AbstractMap.SimpleImmutableEntry<String, Integer>>() {
+                }.javaType());
+
+        java.util.AbstractMap.SimpleImmutableEntry<String, Integer> result = parser.deserialize("{\"k\":7}", null, type);
+        assertEquals("k", result.getKey());
+        assertEquals(Integer.valueOf(7), result.getValue());
+    }
+
+    @Test
+    public void testDeserialize_SimpleEntry() {
+        // SimpleEntry is not special-cased by the if/else chain in readBracedValueBody; it falls
+        // through Map.Entry.isAssignableFrom and yields a generic Map.Entry (not a SimpleEntry).
+        Type<Map.Entry<String, Integer>> type = Type.of(new TypeReference<Map.Entry<String, Integer>>() {
+        }.javaType());
+
+        Map.Entry<String, Integer> result = parser.deserialize("{\"m\":9}", null, type);
+        assertTrue(result instanceof Map.Entry);
+        assertEquals("m", result.getKey());
+        assertEquals(Integer.valueOf(9), result.getValue());
+    }
+
+    // ----- Object.class root dispatch to List / Map -----
+
+    @Test
+    public void testDeserialize_ObjectClass_BracketRoot() {
+        Object listResult = parser.deserialize("[1, 2, 3]", null, Object.class);
+        assertTrue(listResult instanceof List);
+        assertEquals(Arrays.asList(1, 2, 3), listResult);
+    }
+
+    // ----- Serialization config: wrapRootValue / bracketRootValue / writeNullToEmpty -----
+
+    @Test
+    public void testSerialize_WrapRootValue() {
+        JsonSerConfig config = JsonSerConfig.create().setWrapRootValue(true).setQuotePropName(true);
+
+        Person person = new Person("Wrapped", 1);
+        String json = parser.serialize(person, config);
+
+        assertTrue(json.contains("\"Person\""));
+        assertTrue(json.contains("\"name\""));
+        assertTrue(json.contains("\"Wrapped\""));
+    }
+
+    @Test
+    public void testSerialize_WrapRootValue_PrettyFormat() {
+        JsonSerConfig config = JsonSerConfig.create().setWrapRootValue(true).setPrettyFormat(true).setQuotePropName(true);
+
+        Person person = new Person("WrappedPretty", 2);
+        String json = parser.serialize(person, config);
+
+        assertTrue(json.contains("\n"));
+        assertTrue(json.contains("\"Person\""));
+        assertTrue(json.contains("\"WrappedPretty\""));
+    }
+
+    @Test
+    public void testSerialize_WrapRootValue_NoQuotePropName() {
+        JsonSerConfig config = JsonSerConfig.create().setWrapRootValue(true).setQuotePropName(false);
+
+        Person person = new Person("NoQuote", 3);
+        String json = parser.serialize(person, config);
+
+        assertTrue(json.contains("Person"));
+        assertTrue(json.contains("NoQuote"));
+    }
+
+    @Test
+    public void testSerialize_BracketRootValueFalse_Collection() {
+        JsonSerConfig config = JsonSerConfig.create().setBracketRootValue(false);
+
+        List<Integer> list = Arrays.asList(1, 2, 3);
+        String json = parser.serialize(list, config);
+
+        // Without the enclosing brackets the elements are written inline.
+        assertEquals("1, 2, 3", json);
+    }
+
+    @Test
+    public void testSerialize_BracketRootValueFalse_ObjectArray() {
+        JsonSerConfig config = JsonSerConfig.create().setBracketRootValue(false);
+
+        String[] array = { "a", "b" };
+        String json = parser.serialize(array, config);
+
+        assertEquals("\"a\", \"b\"", json);
+    }
+
+    @Test
+    public void testSerialize_BracketRootValueFalse_PrimitiveArray() {
+        JsonSerConfig config = JsonSerConfig.create().setBracketRootValue(false);
+
+        int[] array = { 1, 2, 3 };
+        String json = parser.serialize(array, config);
+
+        assertEquals("1, 2, 3", json);
+    }
+
+    // writeNullToEmpty covers collection/map/charSequence/other null-value rendering
+    @Test
+    public void testSerialize_WriteNullToEmpty_BeanProperties() {
+        // Exclusion.NONE keeps null properties so the writeNullToEmpty branch is exercised.
+        JsonSerConfig config = JsonSerConfig.create().setWriteNullToEmpty(true).setExclusion(Exclusion.NONE);
+
+        TestBean bean = new TestBean();
+        bean.setName(null);
+        bean.setTags(null);
+        bean.setMetadata(null);
+
+        String json = parser.serialize(bean, config);
+
+        // null String -> "", null collection -> [], null map -> {}
+        assertTrue(json.contains("\"name\": \"\""));
+        assertTrue(json.contains("\"tags\": []"));
+        assertTrue(json.contains("\"metadata\": {}"));
+    }
+
+    @Test
+    public void testSerialize_WriteDatasetByRow() {
+        List<String> columnNames = Arrays.asList("col1", "col2");
+        List<List<Object>> columnList = new ArrayList<>();
+        columnList.add(Arrays.asList("a", "b"));
+        columnList.add(Arrays.asList(1, 2));
+
+        Dataset ds = N.newDataset(columnNames, columnList);
+        JsonSerConfig config = JsonSerConfig.create().setWriteDatasetByRow(true);
+
+        String json = parser.serialize(ds, config);
+        assertNotNull(json);
+
+        Dataset ds2 = parser.deserialize(json, null, Dataset.class);
+        assertEquals(ds, ds2);
+    }
+
+    // ----- Map with null key, quoteMapKey=false (writes bare null) -----
+
+    @Test
+    public void testSerialize_MapNullKey_NoQuoteMapKey() {
+        JsonSerConfig config = JsonSerConfig.create().setQuoteMapKey(false);
+
+        Map<String, Object> map = new HashMap<>();
+        map.put(null, "value");
+
+        String json = parser.serialize(map, config);
+        assertTrue(json.contains("null"));
+        assertTrue(json.contains("value"));
+    }
+
+    // ----- Simple serializable value to File / OutputStream (fast IOUtil.write path) -----
+
+    @Test
+    public void testSerialize_SimpleValue_ToFile() throws IOException {
+        File file = tempDir.resolve("simple.json").toFile();
+        parser.serialize(Integer.valueOf(123), null, file);
+
+        Assertions.assertTrue(file.exists());
+        assertEquals("123", new String(Files.readAllBytes(file.toPath())));
+    }
+
+    @Test
+    public void testSerialize_SimpleValue_ToOutputStream() throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        parser.serialize(Integer.valueOf(456), null, baos);
+
+        assertEquals("456", baos.toString());
+    }
+
+    @Test
+    public void testSerialize_SimpleStringValue_ToFile() throws IOException {
+        File file = tempDir.resolve("simpleStr.json").toFile();
+        parser.serialize("hello", null, file);
+
+        Assertions.assertTrue(file.exists());
+        assertEquals("hello", new String(Files.readAllBytes(file.toPath())));
+    }
+
+    // ----- JSON nesting depth guard (defends against stack-overflow DoS) -----
+
+    @Test
+    public void testDeserialize_NestingDepthExceeded() {
+        // Build deeply nested arrays exceeding MAX_NESTING_DEPTH (1000).
+        int depth = 1100;
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < depth; i++) {
+            sb.append('[');
+        }
+        for (int i = 0; i < depth; i++) {
+            sb.append(']');
+        }
+
+        ParsingException exception = Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(sb.toString(), null, List.class));
+        assertTrue(exception.getMessage().contains("nesting depth exceeded"));
+    }
+
+    @Test
+    public void testDeserialize_NestingDepthExceeded_Braces() {
+        int depth = 1100;
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < depth; i++) {
+            sb.append("{\"a\":");
+        }
+        sb.append("1");
+        for (int i = 0; i < depth; i++) {
+            sb.append('}');
+        }
+
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(sb.toString(), null, Map.class));
+    }
+
+    // ----- Error message branches via invalid token positions -----
+
+    @Test
+    public void testDeserialize_InvalidColonInArray() {
+        // A colon inside an array (not allowed) should trigger a ParsingException.
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[1:2]", null, List.class));
+    }
+
+    @Test
+    public void testDeserialize_InvalidCommaAsPropNameInBean() {
+        // Leading comma where a property name is expected in a bean.
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("{,\"name\":\"x\"}", null, Person.class));
+    }
+
+    @Test
+    public void testDeserialize_UnknownPropertyInBean_Throws() {
+        // ignoreUnmatchedProperty defaults to true; disable it so unmatched props throw "Unknown property".
+        JsonDeserConfig config = JsonDeserConfig.create().setIgnoreUnmatchedProperty(false);
+        ParsingException exception = Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("{\"nope\":1}", config, Person.class));
+        assertTrue(exception.getMessage().contains("Unknown property"));
+    }
+
+    @Test
+    public void testDeserialize_UnwrappedArrayMismatch_Throws() {
+        // Object expected to be wrapped but text ends with bracket mismatch.
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[1,2}", null, List.class));
+    }
+
+    // ----- readNullToEmpty for collection/array/map/charSequence target types -----
+
+    @Test
+    public void testDeserialize_ReadNullToEmpty_VariousTypes() {
+        JsonDeserConfig config = JsonDeserConfig.create().setReadNullToEmpty(true);
+
+        int[] arr = parser.deserialize((String) null, config, int[].class);
+        assertNotNull(arr);
+        assertEquals(0, arr.length);
+
+        Set<String> set = parser.deserialize((String) null, config, Set.class);
+        assertNotNull(set);
+        assertTrue(set.isEmpty());
+    }
+
+    // ----- Stream over unsupported (non Collection/Array) JSON top-level -----
+
+    @Test
+    public void testStream_UnsupportedNonArray_Throws() {
+        // A bean-typed stream over object JSON: only Collection/Array JSON supported by stream methods.
+        Assertions.assertThrows(Exception.class, () -> parser.stream("{\"a\":1}", null, Type.of(StringBuilder.class)).toList());
+    }
+
 }

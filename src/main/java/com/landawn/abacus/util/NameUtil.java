@@ -95,7 +95,8 @@ public final class NameUtil {
      *
      * <p>If the string is not already in the cache, it will be added (if space permits)
      * and then returned. This ensures that frequently used strings share the same
-     * reference, reducing memory usage.</p>
+     * reference, reducing memory usage. If {@code str} is {@code null}, {@code null}
+     * is returned.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -103,8 +104,8 @@ public final class NameUtil {
      * // All subsequent calls with "firstName" will return the same reference
      * }</pre>
      *
-     * @param str the string to retrieve from cache or add to cache
-     * @return the cached version of the string
+     * @param str the string to retrieve from cache or add to cache; may be {@code null}
+     * @return the cached version of the string, or {@code null} if {@code str} is {@code null}
      */
     public static String getCachedName(final String str) {
         String cachedString = cachedNamePool.get(str);
@@ -119,9 +120,11 @@ public final class NameUtil {
     /**
      * Caches the specified name string in the internal pool.
      *
-     * <p>This method interns the string and adds it to the cache pool if there's
-     * available space. The force parameter determines whether to bypass the
-     * duplicate check.</p>
+     * <p>When there is available space in the pool (and, depending on {@code force},
+     * the name is not already present), the string is interned via
+     * {@link String#intern()} and added to the cache pool. If the pool is already full,
+     * the name is returned unchanged without being interned or cached. The {@code force}
+     * parameter determines whether to bypass the duplicate check.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -153,9 +156,12 @@ public final class NameUtil {
     /**
      * Checks if the specified name is a canonical name relative to the given parent name.
      *
-     * <p>A name is considered canonical relative to a parent if it starts with the
-     * parent name followed by a period. This is useful for validating hierarchical
-     * naming structures.</p>
+     * <p>A name is considered canonical relative to a parent if {@code parentName} is
+     * exactly its immediate (direct) parent; that is, the name equals
+     * {@code parentName + "." + simpleName} where {@code simpleName} contains no further
+     * dots. It is not enough for the name to merely start with {@code parentName + "."};
+     * the parent of the name (as computed by {@link #getParentName(String)}) must equal
+     * {@code parentName}. This is useful for validating hierarchical naming structures.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -165,11 +171,16 @@ public final class NameUtil {
      *
      * isCanonical = NameUtil.isCanonicalName("com.example", "com.other.Class");
      * // Returns false
+     *
+     * isCanonical = NameUtil.isCanonicalName("com.example", "com.example.Person.firstName");
+     * // Returns false (parentName is not the immediate parent)
      * }</pre>
      *
      * @param parentName the parent name to check against
      * @param name the name to verify as canonical
-     * @return {@code true} if the name starts with parentName + ".", {@code false} otherwise
+     * @return {@code true} if {@code parentName} is the immediate parent of {@code name}
+     *         (i.e. {@code name} starts with {@code parentName + "."} and the remainder
+     *         contains no further dots); {@code false} otherwise
      */
     public static boolean isCanonicalName(final String parentName, final String name) {
         return name.length() > parentName.length() && name.charAt(parentName.length()) == '.' && parentName.equals(getParentName(name));

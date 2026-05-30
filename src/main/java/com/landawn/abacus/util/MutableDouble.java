@@ -455,7 +455,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableDouble num = MutableDouble.of(42.123456789);
-     * float floatVal = num.floatValue();   // returns 42.123456f (with precision loss)
+     * float floatVal = num.floatValue();   // returns 42.123455f (with precision loss)
      * }</pre>
      *
      * @return the numeric value represented by this object after conversion to type float

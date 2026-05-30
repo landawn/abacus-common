@@ -87,7 +87,7 @@ final class Util {
     static final Random RAND_DOUBLE = new SecureRandom();
     /**
      * Modulo value for generating random char values.
-     * Equals to Character.MAX_VALUE + 1 (65536).
+     * Equal to Character.MAX_VALUE + 1 (65536).
      * Used to ensure random char generation stays within valid char range.
      */
     static final int CHAR_MOD = Character.MAX_VALUE + 1;

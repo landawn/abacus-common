@@ -61,7 +61,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
 
     /**
      * The maximum character code that can be checked in the replacement table.
-     * This is typically replacementsForChars.length - 1.
+     * This is always {@code replacementsForChars.length - 1}.
      */
     protected final int lengthOfReplacementsForChars;
 
@@ -287,7 +287,9 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
 
     /**
      * Converts a character code to an XML numeric character reference of the form
-     * {@code &#xXXXX;} using lowercase hexadecimal digits.
+     * {@code &#x...;} using lowercase hexadecimal digits.
+     * The hexadecimal digits are not zero-padded, so the result has a variable length
+     * (e.g., {@code &#x1f;} rather than {@code &#x001f;}).
      * Used for encoding control and non-printable characters in XML output.
      *
      * <p><b>Usage Examples:</b></p>
@@ -297,14 +299,14 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * }</pre>
      *
      * @param ch the character code to convert
-     * @return the XML numeric character reference for the given code point
+     * @return the XML numeric character reference for the given code
      */
     static String getHexString(final int ch) {
         return "&#x" + Integer.toHexString(ch) + ";";
     }
 
     /**
-     * Converts a character to its JSON Unicode escape sequence of the form {@code \\uXXXX}.
+     * Converts a character to its JSON Unicode escape sequence of the form <code>&#92;uXXXX</code>.
      *
      * <p>The result is always a six-character {@code String}: a backslash, the letter
      * {@code u}, and four lowercase hexadecimal digits zero-padded to a width of four.

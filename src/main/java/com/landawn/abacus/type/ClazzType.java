@@ -108,7 +108,7 @@ public class ClazzType extends AbstractType<Class> {
      *
      * @param str the class name to resolve; may be {@code null} or empty
      * @return the resolved {@link Class} object, or {@code null} if {@code str} is {@code null} or empty
-     * @throws RuntimeException if the class cannot be found or loaded
+     * @throws IllegalArgumentException if the class cannot be found or loaded
      */
     @Override
     public Class valueOf(final String str) {
